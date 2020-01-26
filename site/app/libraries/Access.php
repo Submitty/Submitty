@@ -108,11 +108,9 @@ class Access {
         $this->core = $core;
 
         // TODO: these are new actions that should be audited
-        //$this->permissions["grading.electronic.view_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_COMPONENT_PEER_STUDENT | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.view_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_COMPONENT_PEER_STUDENT | self::CHECK_PEER_ASSIGNMENT_STUDENT;
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
-
         $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.status.warnings"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
@@ -489,7 +487,7 @@ class Access {
             }
 
             if (self::checkBits($checks, self::CHECK_COMPONENT_PEER_STUDENT) && $group === User::GROUP_STUDENT) {
-                //Make sure a component allows students to access it via peer grading: THIS SHOULD BE return false but this causes an error when a peer is grading
+                //Make sure a component allows students to access it via peer grading
                 if (!$component->isPeer()) {
                     return false;
                 }
@@ -621,7 +619,6 @@ class Access {
      * @return bool
      */
     public function isGradedGradeableInPeerAssignment($graded_gradeable, User $user) {
-        //THIS SHOULD BE return false, need to investigate
         if ($graded_gradeable === null) {
             return false;
         }
@@ -631,8 +628,11 @@ class Access {
             return false;
         }
         else {
-            return true;
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
+            if(!in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade)){
+                var_dump($graded_gradeable->getSubmitter()->getId());
+                var_dump($user_ids_to_grade);
+            }
             return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
     }
