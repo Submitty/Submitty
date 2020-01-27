@@ -333,4 +333,50 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         ];
         $this->assertEquals($expected, $response->json_response->json);
     }
+
+    public function testUpdateConfigFile() {
+        $this->setUpConfig();
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        $_POST['name'] = 'default_hw_late_days';
+        $_POST['entry'] = '2';
+        $controller = new ConfigurationController($core);
+        $response = $controller->updateConfiguration();
+        $this->assertNull($response->web_response);
+        $this->assertNull($response->redirect_response);
+        $expected = [
+            'status' => 'success',
+            'data' => null
+        ];
+        $this->assertEquals($expected, $response->json_response->json);
+    }
+
+    public function testUpdateConfigNonWriteable() {
+        $this->setUpConfig();
+        $core = new Core();
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        chmod($this->course_config, 0400);
+        try {
+            $core->setConfig($config);
+            $_POST['name'] = 'default_hw_late_days';
+            $_POST['entry'] = '2';
+            $controller = new ConfigurationController($core);
+            $response = $controller->updateConfiguration();
+            $this->assertNull($response->web_response);
+            $this->assertNull($response->redirect_response);
+            $expected = [
+                'status' => 'fail',
+                'message' => 'Could not save config file'
+            ];
+            $this->assertEquals($expected, $response->json_response->json);
+        }
+        finally {
+            chmod($this->course_config, 0600);
+        }
+    }
 }

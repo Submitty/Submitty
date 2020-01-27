@@ -4,6 +4,7 @@ namespace app\models\gradeable;
 
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\libraries\NumberUtils;
 
 /**
  * Class Mark
@@ -118,7 +119,7 @@ class Mark extends AbstractModel {
      */
     public function setPoints($points) {
         if (is_numeric($points)) {
-            $this->points = $this->getComponent()->getGradeable()->roundPointValue($points);
+            $this->points = NumberUtils::roundPointValue($points, $this->getComponent()->getGradeable()->getPrecision());
         }
         else {
             throw new \InvalidArgumentException('Mark points must be a number!');

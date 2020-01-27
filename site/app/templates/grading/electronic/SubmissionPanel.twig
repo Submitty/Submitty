@@ -69,7 +69,7 @@
             <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30; display: none">No changes</strong>
             <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
             <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
-            <a onclick='collapseFile()'><i class="fas fa-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
+            <a onclick='collapseFile()' aria-label="Collapse File"><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
             {% include "grading/electronic/PDFAnnotationBar.twig" %}
             <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
         </div>
@@ -228,9 +228,9 @@
             <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-            <a onclick='expandFile("{{ dir }}", "{{ path }}")'><i class="fas fa-share" aria-hidden="true" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path }}", "{{ title }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            <a onclick='expandFile("{{ dir }}", "{{ path }}")' aria-label="Show file in full panel"><i class="fas fa-share" title="Show file in full panel"></i></a>
+            <a onclick='downloadFile("{{ path }}", "{{ title }}")' aria-label="Download the file"><i class="fas fa-download" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
