@@ -89,8 +89,11 @@ class TaGradedGradeable extends AbstractModel {
             }
         }
         else {
+            // Grab the total peer score for each component here rather than computing on the site.
+            $details["peer_scores"] = array();
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
+                $details["peer_scores"][$container->getComponent()->getId()] = $container->getTotalScore();
                 $details['graded_components'][$container->getComponent()->getId()] = $container->toArray();
                 $graded_components = array_merge($graded_components, $container->getGradedComponents());
             }

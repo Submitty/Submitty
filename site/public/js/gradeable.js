@@ -11,6 +11,7 @@ DECIMAL_PRECISION = 2;
 function loadTemplates() {
     let templates = [
         {id: 'GradingGradeable', href: '/templates/grading/GradingGradeable.twig'},
+        {id: 'PeerGradeable', href: '/templates/grading/PeerGradeable.twig'},
         {id: 'EditGradeable', href: '/templates/grading/EditGradeable.twig'},
         {id: 'Gradeable', href: "/templates/grading/Gradeable.twig"},
         {id: 'GradingComponent', href: "/templates/grading/GradingComponent.twig"},
@@ -134,6 +135,51 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
         'can_verify_graders': canVerifyGraders,
         'grader_id': grader_id,
         'display_version': displayVersion
+    });
+}
+
+/**
+ * Asynchronously render a peer gradeable using the passed data
+ * Note: Call 'loadTemplates' first
+ * @param {string} grader_id
+ * @param {Object} gradeable
+ * @param {Object} graded_gradeable
+ * @param {boolean} grading_disabled
+ * @param {boolean} canVerifyGraders
+ * @param {int} displayVersion
+ * @returns {Promise<string>} the html for the peer gradeable
+ */
+
+function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
+    if (graded_gradeable.graded_components === undefined) {
+        graded_gradeable.graded_components = {};
+    }
+
+    var peer_details = {};
+    // Group together some useful data for rendering:
+    gradeable.components.forEach(function(component) {
+        // The peer details for a specific component (who has graded it and what marks have they chosen.)
+        peer_details[component.id] = {
+            "graders" : [],
+            "marks_assigned" : {}
+        }
+        graded_gradeable.graded_components[component.id].forEach(function(graded_component){
+            peer_details[component.id]["graders"].push(graded_component.grader_id);
+            peer_details[component.id]["marks_assigned"][graded_component.grader_id] = graded_component.mark_ids;
+        });
+    });
+
+    // TODO: i don't think this is async
+    return Twig.twig({ref: "PeerGradeable"}).render({
+        'gradeable': gradeable,
+        'graded_gradeable': graded_gradeable,
+        'edit_marks_enabled': false,
+        'grading_disabled': grading_disabled,
+        'decimal_precision': DECIMAL_PRECISION,
+        'can_verify_graders': canVerifyGraders,
+        'grader_id': grader_id,
+        'display_version': displayVersion,
+        'peer_details' : peer_details
     });
 }
 

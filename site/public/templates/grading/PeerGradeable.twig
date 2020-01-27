@@ -1,0 +1,40 @@
+{% extends "Gradeable.twig" %}
+
+{% block header_content %}
+    <span id="anon-id" data-anon_id="{{ graded_gradeable.anon_id }}" hidden></span>
+    <input id="point_precision_id" value="{{ gradeable.precision }}" hidden/>
+    <span id="gradeable-scores-id"
+          data-auto_grading_earned="{{ graded_gradeable.auto_grading_earned }}"
+          data-auto_grading_total="{{ graded_gradeable.auto_grading_total }}" hidden></span>
+{% endblock %}
+
+{% block components_block %}
+    {% for component in gradeable.components %}
+        {% if component.peer %}
+            <div class="component-container">
+                {% set graded_component = graded_gradeable.graded_components[component.id] %}
+                {% include "PeerComponent.twig" with {
+                    'precision': gradeable.precision,
+                    'show_mark_list': false,
+                    'peer_details' : peer_details[component.id],
+                } %}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+
+{% block footer_content %}
+{# No General Comment #}
+
+{# Total Box #}
+    <div id="total-score-container">
+        {% include "TotalScoreBox.twig" with {
+            'auto_grading_earned': graded_gradeable.auto_grading_earned,
+            'auto_grading_total': graded_gradeable.auto_grading_total,
+            'ta_grading_earned': graded_gradeable.ta_grading_earned,
+            'ta_grading_total': graded_gradeable.ta_grading_total,
+            'decimal_precision': decimal_precision
+        } only %}
+    </div>
+{# /Total Box #}
+{% endblock %}
