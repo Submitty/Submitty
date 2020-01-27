@@ -621,14 +621,14 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxAddComponent(gradeable_id, peer) {
-    console.log("peer is " + peer);
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildCourseUrl(['gradeable', gradeable_id, 'components', peer, 'new']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
+                'peer' : peer
             },
             success: function (response) {
                 if (response.status !== 'success') {
