@@ -119,7 +119,7 @@
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
             </div>
         </span>
-        <br>
+        <br style="margin-right:1rem;">
 
         {% if attachment_script %}
             {# To be executed at last attachment box #}
@@ -156,7 +156,7 @@
             </script>
         {% endif %}
     {% endif %}
-    <span class="inline-block right-zero position-absolute">
+    <span class="inline-block right-zero">
         {% if show_anon %}
             <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
         {% endif %}
