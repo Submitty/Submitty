@@ -720,13 +720,13 @@ HTML;
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $peer, $sort, $direction, $from);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
-        if($peer && $this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        if($gradeable->isPeerGrading() && $this->core->getAccess()->canI("grading.electronic.peer_panel")) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPeerPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {

@@ -24,7 +24,9 @@
         {% if not peer %}
             <button title="Show/Hide Student Information (Press S)" class="invisible-btn" onclick="toggleInfo(); updateCookies();"> <i class="fas fa-user icon-header" ></i> </button>
         {% endif %}
+        {% if peer %}
         <button title="Show/Hide Peer Information (Press P)" class="invisible-btn" onclick="togglePeer(); updateCookies();"> <i class="fas fa-users icon-header" ></i> </button>
+        {% endif %}
         {% if discussion_based %}
             <button title="Show/Hide Discussion Posts" class="invisible-btn" onclick="toggleDiscussion(); updateCookies();"> <i class="fas fa-comment-alt icon-header" ></i> </button>
         {% endif %}
