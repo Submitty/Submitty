@@ -216,7 +216,7 @@ function deleteFiles(part) {
         previous_files[part-1] = [];
     }
     var dropzone = document.getElementById("file-upload-table-" + part);
-    var labels = dropzone.getElementsByClassName("label");
+    var labels = dropzone.getElementsByClassName("file-label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
     }
