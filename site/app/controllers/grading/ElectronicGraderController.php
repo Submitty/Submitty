@@ -1080,10 +1080,8 @@ class ElectronicGraderController extends AbstractController {
 
         // checks if user has permission
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
-        var_dump($graded_gradeable->getSubmitter()->getUser()->getId());
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
-            var_dump($graded_gradeable->getSubmitter()->getUser()->getId());
             return;
         }
 

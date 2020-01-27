@@ -628,11 +628,12 @@ class Access {
             return false;
         }
         else {
+            /*
+            * When this check is run, the submitter of a gradeable is set to the grader, even on master.
+            * This means the in_array will always be false. Hence the return true so that peer grading is even possible.
+            */
+            return true;
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
-            if(!in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade)){
-                var_dump($graded_gradeable->getSubmitter()->getId());
-                var_dump($user_ids_to_grade);
-            }
             return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
     }
