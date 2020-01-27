@@ -13,11 +13,6 @@
     </span>
     {% endif %}
 
-    {% if show_editcat and core.getUser().accessGrading() %}
-        <span class="position-absolute right-zero inline-block">
-          <a class="btn btn-primary btn-sm" href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
-        </span>
-    {% endif %}
 </div>
 <br/>
 {% if show_post %}
