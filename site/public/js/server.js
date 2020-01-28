@@ -1834,17 +1834,21 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
+        localStorage.sidebar = true;
         $("aside").toggleClass("collapsed", true);
     }
     else{
+        localStorage.sidebar = false;
         $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
@@ -1873,13 +1877,13 @@ $(document).ready(function() {
     if (localStorage.sidebar !== "") {
         //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
         $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
+        $("#submitty-body").show();//Once the sidebar is set the page can be unhidden
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
     $(document.body).resize(function() {
         checkSidebarCollapse();
     });
-    checkSidebarCollapse();
 });
 
 function checkBulkProgress(gradeable_id){

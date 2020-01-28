@@ -73,7 +73,7 @@ class TestSubmission(BaseTestCase):
         self.accept_alerts(2)
 
         # wait until there are no more files in the submission box before moving on to make sure files are submitted properly
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='{}' and count(label[@class='mylabel'])=0]".format(target_id))))
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//table[@id='{}' and count(tr[@class='file-label'])=0]".format('file-upload-table-'+target_id[-1]))))
 
         # make sure the submission count has increased
         self.assertEqual(submission_count+1, self.get_submission_count())
