@@ -621,14 +621,14 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxAddComponent(gradeable_id, peer) {
-    console.log("peer is " + peer);
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildCourseUrl(['gradeable', gradeable_id, 'components', peer, 'new']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
+                'peer' : peer
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -2536,6 +2536,7 @@ function scrollToComponent(component_id) {
 function closeComponentInstructorEdit(component_id, saveChanges) {
     let sequence = Promise.resolve();
     let component = getComponentFromDOM(component_id);
+    let countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
     if (saveChanges) {
         sequence = sequence
             .then(function () {
@@ -2550,10 +2551,10 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
                     component.marks[0].title = mark_title;
                     $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Extra Credit Awarded";
                 }
-                else{
-                    let mark_title = "No Credit Awarded";
+                else if (countUp) {
+                    let mark_title = "No Credit";
                     component.marks[0].title = mark_title;
-                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Credit Awarded";
+                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Credit";
 
                 }
                 return saveMarkList(component_id);
