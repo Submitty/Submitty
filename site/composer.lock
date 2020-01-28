@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bd20e9361cedc6e65d29db2267a3c476",
+    "content-hash": "b74f603357d4cb55ebf0d11ca6fd9533",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1165,16 +1165,16 @@
     "packages-dev": [
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
-            "version": "v0.6.0",
+            "version": "v0.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Dealerdirect/phpcodesniffer-composer-installer.git",
-                "reference": "6589501ebe29091bd46f4c29ca72dce25cca2984"
+                "reference": "2a57571bf26833442fe71503c60368b0aad8844d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/6589501ebe29091bd46f4c29ca72dce25cca2984",
-                "reference": "6589501ebe29091bd46f4c29ca72dce25cca2984",
+                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/2a57571bf26833442fe71503c60368b0aad8844d",
+                "reference": "2a57571bf26833442fe71503c60368b0aad8844d",
                 "shasum": ""
             },
             "require": {
@@ -1227,7 +1227,7 @@
                 "stylecheck",
                 "tests"
             ],
-            "time": "2020-01-19T15:35:03+00:00"
+            "time": "2020-01-27T00:00:56+00:00"
         },
         {
             "name": "doctrine/instantiator",
