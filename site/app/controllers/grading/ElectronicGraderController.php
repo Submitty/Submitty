@@ -329,7 +329,6 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($peer) {
                 $sections['stu_grad'] = array(
-                    #'total_components' => $num_components * $peer_grade_set,
                     'total_components' => $num_components,
                     'graded_components' => $my_grading,
                     'graders' => array()
