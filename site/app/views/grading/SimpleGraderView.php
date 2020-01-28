@@ -93,7 +93,7 @@ class SimpleGraderView extends AbstractView {
             "component_ids" => $component_ids,
             "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
             "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']),
-            "instruction_urls" => [$gradeable->getInstructionsUrl(), $gradeable->getTaInstructions()]
+            "gradeable_url" => $gradeable->getInstructionsUrl()
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [
