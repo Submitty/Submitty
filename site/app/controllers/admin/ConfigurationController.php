@@ -151,7 +151,6 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name === 'queue_enabled') {
             $entry = $entry === "true" ? true : false;
-            $this->core->getQueries()->genQueueSettings();
         }
         elseif ($name === 'upload_message') {
             $entry = nl2br($entry);

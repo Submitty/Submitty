@@ -1221,23 +1221,31 @@ CREATE UNIQUE INDEX gradeable_team_unique ON regrade_requests(team_id, g_id) WHE
 ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
 ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
 
+-- End Forum Key relationships
+
+-- office hours queue
+
 CREATE TABLE IF NOT EXISTS queue(
-  entry_id serial PRIMARY KEY,
-  user_id VARCHAR(20) NOT NULL REFERENCES users(user_id),
-  name VARCHAR (20) NOT NULL,
+  entry_id SERIAL PRIMARY KEY,
+  current_state TEXT NOT NULL,
+  removal_type TEXT,
+  queue_code TEXT NOT NULL,
+  user_id TEXT NOT NULL REFERENCES users(user_id),
+  name TEXT NOT NULL,
   time_in TIMESTAMP NOT NULL,
-  time_helped TIMESTAMP,
+  time_help_start TIMESTAMP,
   time_out TIMESTAMP,
-  removed_by VARCHAR (20) REFERENCES users(user_id),
-  status SMALLINT NOT NULL
+  added_by TEXT NOT NULL REFERENCES users(user_id),
+  help_started_by TEXT REFERENCES users(user_id),
+  removed_by TEXT REFERENCES users(user_id)
 );
 CREATE TABLE IF NOT EXISTS queue_settings(
   id serial PRIMARY KEY,
   open boolean NOT NULL,
-  code VARCHAR (20) NOT NULL
+  code text NOT NULL
 );
 
--- End Forum Key relationships
+-- end office hours queue
 
 --
 -- PostgreSQL database dump complete

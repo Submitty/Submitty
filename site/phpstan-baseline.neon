@@ -21,11 +21,6 @@ parameters:
 			path: app/controllers/NotificationController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\)\\: Unexpected token \"\\\\n    \\*\", expected type at offset 16$#"
-			count: 8
-			path: app/controllers/OfficeHoursQueueController.php
-
-		-
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$gradeable$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
@@ -601,11 +596,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Comparison operation \"\\=\\=\" between array and 0 results in an error\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$type\\)\\: Unexpected token \"\\$type\", expected type at offset 153$#"
 			count: 1
 			path: app/libraries/response/JsonResponse.php
@@ -1039,16 +1029,6 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$recipients$#"
 			count: 1
 			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
-			count: 1
-			path: app/models/OfficeHoursQueueInstructor.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
-			count: 1
-			path: app/models/OfficeHoursQueueStudent.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected type at offset 67$#"
