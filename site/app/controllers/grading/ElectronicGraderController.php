@@ -1209,7 +1209,7 @@ class ElectronicGraderController extends AbstractController {
 
         // Passing null returns grading for all graders.
         $grading_done_by = ($all_peers ? null : $grader);
-        $response_data = $ta_graded_gradeable->toArray($grading_done_by);;
+        $response_data = $ta_graded_gradeable->toArray($grading_done_by);
 
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();

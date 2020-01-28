@@ -214,7 +214,7 @@ class GradedComponentContainer extends AbstractModel {
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
             // If there is a grader, we are only computing their total score rather than the total score for all peers.
-            if($grader !== null && $graded_component->getGrader()->getId() !== $grader->getId()) {
+            if ($grader !== null && $graded_component->getGrader()->getId() !== $grader->getId()) {
                 continue;
             }
             $points_earned += $graded_component->getTotalScore();
