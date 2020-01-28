@@ -37,7 +37,7 @@ Required inputs:
             <table id="peer-grading-table" class="mobile-table">
                 <thead>
                     <tr> 
-                        {% for grader in peer_details.graders %}
+                        {% for grader in peer_details.graders | sort %}
                             <th class="peer-table-header">
                                 {{ grader }}
                             </th class="peer-table-header">
@@ -49,7 +49,7 @@ Required inputs:
                 <tbody>
                     {% for mark in component.marks %}
                         <tr>
-                        {% for grader in peer_details.graders %}
+                        {% for grader in peer_details.graders | sort %}
                             <td class="peer-table-data">
                                 {% if mark.id in peer_details.marks_assigned[grader] %}
                                     <div class="col-no-gutters indicator">
