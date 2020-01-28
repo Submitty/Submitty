@@ -54,12 +54,12 @@
                         {{ notification.getNotifyTime() }}
                     </div>
                     {% if not notification.isSeen() %}
-                        <a class="notification-seen black-btn" href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen">
-                            <i class="far fa-envelope-open" aria-hidden="true"></i>
+                        <a class="notification-seen black-btn" href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen" aria-label="Mark as seen">
+                            <i class="far fa-envelope-open"></i>
                         </a>
                     {% endif %}
                 </div>
             {% endfor %}
-        {% endif %}     
+        {% endif %}
     </div>
 </div>

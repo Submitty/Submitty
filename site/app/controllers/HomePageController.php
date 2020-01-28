@@ -78,10 +78,11 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @param $user_id
-     * @param $as_instructor
      * @Route("/api/courses", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
+     *
+     * @param string|null $user_id
+     * @param bool|string $as_instructor
      * @return Response
      */
     public function getCourses($user_id = null, $as_instructor = false) {
