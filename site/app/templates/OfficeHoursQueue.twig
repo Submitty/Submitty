@@ -363,7 +363,7 @@
     {% endif %}
 
     setInterval(function(){
-      $.get( "http://192.168.56.111/s20/sample/office_hours_queue/checkUpdates", function( data ) {
+      $.get( "{{base_url}}/checkUpdates", function( data ) {
           if(lastQueueEdit < JSON.parse(data)['data']){
             location.reload();
           }
