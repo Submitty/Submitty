@@ -224,6 +224,8 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
   	mkdir -p ${SUBMITTY_DATA_DIR}/logs/vcs_generation
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
 fi
 # ------------------------------------------------------------------------
 
@@ -257,7 +259,12 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
 	chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
+    chown  -R postgres:${DAEMON_GROUP}                ${SUBMITTY_DATA_DIR}/logs/psql
+    # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
+    chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
+    chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
 fi
+
 # Set permissions of all files in the logs directories
 find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
 # Set permissions of all logs subdirectires
@@ -784,7 +791,7 @@ if [ "${WORKER}" == 0 ]; then
         rainbow_total=$((rainbow_total+1))
         set +e
         python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
-        
+
         if [[ $? -ne 0 ]]; then
             echo -e "\n[ FAILED ] sample test\n"
         else

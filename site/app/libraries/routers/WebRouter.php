@@ -211,9 +211,17 @@ class WebRouter {
     private function loginRedirectCheck($logged_in) {
         if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
+
+            $query_obj = $this->request->query->all();
+            $filtered_query_obj = array_filter($query_obj, function ($k) {
+                return $k !== "url";
+            }, ARRAY_FILTER_USE_KEY);
+
+            $query_string = empty($filtered_query_obj) ? null : '?' . http_build_query($filtered_query_obj);
+
             return Response::RedirectOnlyResponse(
                 new RedirectResponse(
-                    $this->core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url)
+                    $this->core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url . $query_string)
                 )
             );
         }

@@ -7,6 +7,7 @@ use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
+use app\libraries\NumberUtils;
 
 /**
  * Class Component
@@ -295,7 +296,7 @@ class Component extends AbstractModel {
 
         // Round after validation because of potential floating point weirdness
         foreach (self::point_properties as $property) {
-            $this->$property = $this->getGradeable()->roundPointValue($points[$property]);
+            $this->$property = NumberUtils::roundPointValue($points[$property], $this->getGradeable()->getPrecision());
         }
         $this->modified = true;
     }
