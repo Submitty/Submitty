@@ -401,12 +401,12 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             ->expects($this->exactly(4))
             ->method('addNewCategory')
             ->withConsecutive(
-                 [$this->equalTo('General Questions')],
-                 [$this->equalTo('Homework Help')],
-                 [$this->equalTo('Quizzes')],
-                 [$this->equalTo('Tests')],
-             )
-            ->will($this->onConsecutiveCalls(0,1,2,3));
+                [$this->equalTo('General Questions')],
+                [$this->equalTo('Homework Help')],
+                [$this->equalTo('Quizzes')],
+                [$this->equalTo('Tests')]
+            )
+            ->will($this->onConsecutiveCalls(0, 1, 2, 3));
 
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
