@@ -13,11 +13,6 @@
     </span>
     {% endif %}
 
-    {% if show_editcat and core.getUser().accessGrading() %}
-        <span class="position-absolute right-zero inline-block">
-          <a class="btn btn-primary btn-sm" href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
-        </span>
-    {% endif %}
 </div>
 <br/>
 {% if show_post %}
@@ -81,7 +76,8 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}" ></textarea>
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}"
+        onkeydown="submitNearestForm(event,$(this))"></textarea>
     </div>
 <br/>
 {% endif %}
@@ -120,9 +116,10 @@
                 <label id="file_input_label" class="btn btn-default" tabindex="0">Upload Attachment</label>
                 <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
+                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
             </div>
         </span>
-        <br>
+        <br style="margin-right:1rem;">
 
         {% if attachment_script %}
             {# To be executed at last attachment box #}
@@ -159,7 +156,7 @@
             </script>
         {% endif %}
     {% endif %}
-    <span class="inline-block right-zero position-absolute">
+    <span class="inline-block right-zero">
         {% if show_anon %}
             <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
         {% endif %}
@@ -192,10 +189,20 @@
 </div>
 <br>
 </div>
-<script>
+<script type="text/javascript">
     $(function(){
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
         });
     });
+
+    function submitNearestForm(e, textarea){
+        if ((e.keyCode == 10 || e.keyCode == 13) && (e.metaKey || e.ctrlKey)) {//ctrl+enter keys pressed
+            var theForm = textarea.closest('form');
+            if(theForm.hasClass('dirty')){
+                theForm.trigger('reinitialize.areYouSure');
+                theForm.submit();
+            }
+        }
+    }
 </script>

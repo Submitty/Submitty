@@ -747,9 +747,6 @@ void formatPreActions(nlohmann::json &whole_config) {
   }
 }
 
-
-
-
 void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
@@ -807,6 +804,10 @@ void InflateTestcases(nlohmann::json &whole_config){
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
 
+  if(!whole_config["timestamped_stdout"].is_boolean()){
+    whole_config["timestamped_stdout"] = false;
+  }
+
   int testcase_num = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
       nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
@@ -826,6 +827,11 @@ bool validShowValue(const nlohmann::json& v) {
 void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config) {
   //move to load_json
   General_Helper(single_testcase);
+
+  if(!single_testcase["timestamped_stdout"].is_boolean()){
+    single_testcase["timestamped_stdout"] = whole_config["timestamped_stdout"];
+  }
+
   if (single_testcase.value("type","Execution") == "FileCheck") {
     FileCheck_Helper(single_testcase);
   } else if (single_testcase.value("type","Execution") == "Compilation") {

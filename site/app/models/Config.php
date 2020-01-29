@@ -85,8 +85,8 @@ class Config extends AbstractModel {
     /** @property @var string path to the json file that contains all the course specific settings */
     protected $course_json_path;
 
-    /** @property @var array */
-    protected $course_json;
+    /** @prop @var array */
+    protected $course_json = array();
 
     /**
     * Indicates whether a course config has been successfully loaded.
@@ -502,8 +502,8 @@ class Config extends AbstractModel {
         return $this->submitty_log_path;
     }
 
-    public function saveCourseJson($save) {
-        FileUtils::writeJsonFile($this->course_json_path, array_merge($this->course_json, $save));
+    public function saveCourseJson($save): bool {
+        return FileUtils::writeJsonFile($this->course_json_path, array_merge($this->course_json, $save));
     }
 
     public function wrapperEnabled() {

@@ -273,15 +273,29 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
--- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
--- table users.  NOTE: INSERT should not trigger this function as function
--- sync_courses_users will also sync users -- but only on INSERT.
+-- TRIGGER function to sync users data on UPDATE of user_record in table users.
+-- NOTE: INSERT should not trigger this function as function sync_courses_users
+-- will also sync users -- but only on INSERT.
 $$
 DECLARE
     course_row RECORD;
     db_conn VARCHAR;
     query_string TEXT;
+    preferred_name_change_details TEXT;
 BEGIN
+    -- Check for changes in users.user_preferred_firstname and users.user_preferred_lastname.
+    IF coalesce(OLD.user_preferred_firstname, '') <> coalesce(NEW.user_preferred_firstname, '') THEN
+        preferred_name_change_details := format('PREFERRED_FIRSTNAME OLD: "%s" NEW: "%s" ', OLD.user_preferred_firstname, NEW.user_preferred_firstname);
+    END IF;
+    IF coalesce(OLD.user_preferred_lastname, '') <> coalesce(NEW.user_preferred_lastname, '') THEN
+        preferred_name_change_details := format('%sPREFERRED_LASTNAME OLD: "%s" NEW: "%s"', preferred_name_change_details, OLD.user_preferred_lastname, NEW.user_preferred_lastname);
+    END IF;
+    -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
+    IF preferred_name_change_details IS NOT NULL THEN
+        preferred_name_change_details := format('USER_ID: "%s" %s', NEW.user_id, preferred_name_change_details);
+        RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
+    END IF;
+    -- Propagate UPDATE to course DBs
     FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
         RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
         db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
@@ -297,6 +311,7 @@ BEGIN
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE FUNCTION sync_insert_registration_section() RETURNS trigger AS $$
 -- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.

@@ -67,8 +67,8 @@ $( document ).ready(function() {
                             <p style="text-align:center">
                                 {# download icon if student can download files #}
                                 {% if can_download %}
-                                    <button class = 'btn btn-default' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")'> Download
-                                        <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></button>
+                                    <button class = 'btn btn-default' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
+                                        <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
                                 <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')">View Popup <i class="fas fa-window-restore"></i></a>
                             </p>
@@ -79,8 +79,8 @@ $( document ).ready(function() {
                         {% if can_download and files|length > 1 %}
                             <hr>
                             <p style="text-align:center">
-                                Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'> Download Zip
-                                    <i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></button>
+                                Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
+                                    <i class="fas fa-download" title="Download zip of all files"></i></button>
                             </p>
                         {% endif %}
                     </div>
@@ -117,7 +117,7 @@ $( document ).ready(function() {
 
         {# Manual total #}
         <div class="box">
-            <div class="box-title" 
+            <div class="box-title"
                 {% if graded_score >= graded_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
                 {% endif %}>
@@ -187,8 +187,8 @@ $( document ).ready(function() {
             <div class="box">
                 <div class="box-title"
                     {% if total_score >= total_max %}
-                        onclick="addConfetti();" 
-                        style="padding-top: 15px; padding-bottom: 15px; cursor:pointer;" 
+                        onclick="addConfetti();"
+                        style="padding-top: 15px; padding-bottom: 15px; cursor:pointer;"
                     {% else %}
                         style="padding-top: 15px; padding-bottom: 15px;"
                     {% endif %}

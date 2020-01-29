@@ -2,25 +2,25 @@
     <a href="{{ thread.link }}" class="thread_box_link" data="{{ thread.thread_id }}">
         <div class="{{ thread.class }}">
             {% if thread.pinned %}
-                <i class="fas fa-star thread-announcement" title = "Announcement" aria-hidden="true"></i>
+                <i class="fas fa-star thread-announcement" title = "Announcement" aria-label="Announcement"></i>
             {% endif %}
             {% if thread.favorite %}
-                <i class="fas fa-thumbtack thread-favorite" title="Pinned as my favorite" aria-hidden="true"></i>
+                <i class="fas fa-thumbtack thread-favorite" title="Pinned as my favorite" aria-label="Pinned as my favorite"></i>
             {% endif %}
             {% if thread.merged_thread_id != -1 %}
-                <i class="fas fa-link thread-merged" title="Thread Merged" aria-hidden="true"></i>
+                <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
             {% endif %}
 
             {% if thread.status != 0 %}
-                <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status" title="{{ thread.tooltip }}" aria-hidden="true"></i>
+                <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status" title="{{ thread.tooltip }}" aria-label="{{ thread.tooltip }}"></i>
             {% endif %}
 
             {% if thread.is_locked %}
-                <i class="fas fa-lock thread-locked" title="Locked" aria-hidden="true"></i>
+                <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
             {% endif %}
 
             <span class="thread-list-item">{% if thread.current_user_posted %}
-                    <i class="fas fa-comments" title="You have contributed"></i>
+                    <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
                 {% endif %}
                 {{ thread.title }}</span>
             <span class="thread-content">{{ thread.content }}</span>

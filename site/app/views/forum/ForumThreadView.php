@@ -258,6 +258,7 @@ class ForumThreadView extends AbstractView {
         if (!$threadExists) {
             $button_params["show_threads"] = false;
             $button_params["thread_exists"] = false;
+            $button_params["show_more"] = false;
         }
         else {
             $more_data = array(
