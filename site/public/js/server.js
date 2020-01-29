@@ -1837,11 +1837,11 @@ function checkSidebarCollapse() {
     $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
-        localStorage.sidebar = true;
+        localStorage.setItem('sidebar', 'true');
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        localStorage.sidebar = false;
+        localStorage.setItem('sidebar', 'false');
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1852,7 +1852,7 @@ function toggleSidebar() {
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
-    localStorage.sidebar = !shown;
+    localStorage.setItem('sidebar', (!shown).toString());
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1874,10 +1874,10 @@ $(document).ready(function() {
     });
 
     //Remember sidebar preference
-    if (localStorage.sidebar !== "") {
-        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
-        $("#submitty-body").show();//Once the sidebar is set the page can be unhidden
+    if (localStorage.getItem('sidebar') !== "") {
+        $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
+        //Once the sidebar is set the page can be unhidden
+        $("#submitty-body").show();
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
