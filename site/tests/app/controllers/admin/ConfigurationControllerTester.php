@@ -410,7 +410,12 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
 
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
+        $expected = [
+            'status' => 'success',
+            'data' => null
+        ];
         $this->assertNotNull($response->json_response);
+        $this->assertEquals($expected, $response->json_response->json);
     }
 
     public function testUpdateConfigurationEnableForumWithCategories() {
@@ -428,23 +433,17 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             ->expects($this->once())
             ->method('getCategories')
             ->with()
-            ->willReturn(['General Questions', 'Homework Help', 'Quizzes', 'Tests']);
+            ->willReturn(['Category']);
         $queries
             ->expects($this->exactly(0))
             ->method('addNewCategory');
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
-        $this->assertNotNull($response->json_response);
-        $_POST['name'] = 'default_hw_late_days';
-        $_POST['entry'] = '2';
-        $controller = new ConfigurationController($core);
-        $response = $controller->updateConfiguration();
-        $this->assertNull($response->web_response);
-        $this->assertNull($response->redirect_response);
         $expected = [
             'status' => 'success',
             'data' => null
         ];
+        $this->assertNotNull($response->json_response);
         $this->assertEquals($expected, $response->json_response->json);
     }
 }

@@ -191,9 +191,7 @@ class ConfigurationController extends AbstractController {
             // Only create default categories when the forum is first enabled
             if (empty($rows)) {
                 foreach ($categories as $category) {
-                    if (!ForumUtils::isValidCategories($rows, -1, array($category))) {
                         $this->core->getQueries()->addNewCategory($category);
-                    }
                 }
             }
         }
