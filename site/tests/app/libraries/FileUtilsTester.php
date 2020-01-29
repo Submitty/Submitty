@@ -249,14 +249,42 @@ STRING;
         $this->assertStringEqualsFile(FileUtils::joinPaths($this->path, 'test.json'), '"aa"');
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testWriteJsonFileFailEncode() {
-        $this->getFunctionMock("app\\libraries", "json_encode")
-            ->expects($this->once())
-            ->willReturn(false);
-        $this->assertFalse(FileUtils::writeJsonFile(FileUtils::joinPaths($this->path, 'test.json'), 'aa'));
+        $data = ['a' => 1, 'b' => tmpfile()];
+        $this->assertFalse(FileUtils::writeJsonFile(FileUtils::joinPaths($this->path, 'test.json'), $data));
+    }
+
+    public function testWriteJsonFileNonWritable() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test.json');
+        touch($file);
+        try {
+            chmod($file, 0400);
+            $this->assertFalse(FileUtils::writeJsonFile($file, 'aa'));
+        }
+        finally {
+            chmod($file, 0660);
+        }
+    }
+
+    public function testWriteFile() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test_file');
+        $this->assertTrue(FileUtils::writeFile($file, "test"));
+        $this->assertStringEqualsFile($file, "test");
+    }
+
+    public function testWriteFileNonWritableFile() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test_file');
+        touch($file);
+        try {
+            chmod($file, 0400);
+            $this->assertFalse(FileUtils::writeFile($file, "test"));
+        }
+        finally {
+            chmod($file, 0660);
+        }
     }
 
     public function testGetZipSize() {

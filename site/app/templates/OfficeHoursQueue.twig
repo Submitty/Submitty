@@ -1,0 +1,447 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+<div class="content">
+  <h1>
+    Office Hours Queue
+  </h1>
+  {% if not viewer.isGrader() %}
+    {% if viewer.inQueue() == 0 %}
+      {% if viewer.getQueueNumberAheadOfYou() == 1 %}
+        <p>There is currently
+          {{viewer.getQueueNumberAheadOfYou()}}
+          person in a queue</p>
+      {% else %}
+        <p>There are currently
+          {{viewer.getQueueNumberAheadOfYou()}}
+          people in a queue</p>
+      {% endif %}
+      <br>
+      <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <label for="name_box">Your Name:</label>
+        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem" required>
+        <br>
+        <label for="code_box">Code:</label>
+        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+        <br>
+        <input type="submit" value="Join" class="btn btn-primary">
+      </form>
+    {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+      {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
+        <p>There is currently
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
+          person ahead of you in the queue</p>
+      {% else %}
+        <p>There are currently
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
+          people ahead of you in the queue</p>
+      {% endif %}
+      <p>You are currently in:
+        <b>{{viewer.getCurrentQueueCode()}}</b>
+      </p>
+      <form method="post" id="remove" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+        <input type="submit" value="Leave Queue" class="btn btn-danger">
+      </form>
+    {% else %}
+      <p>You are currently being helped</p>
+      <form
+        method="post"
+        id="finish_help"
+        action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/finishHelp"
+        onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+        <input type="submit" value="Finish Being Helped" class="btn btn-danger">
+      </form>
+    {% endif %}
+    <br>
+  {% endif %}
+
+  {% if viewer.isGrader()%}
+    <p>
+      <button class="btn btn-primary" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
+        Toggle Filter Settings
+      </button>
+    </p>
+    <div class="collapse" id="filgerSettingsCollapse">
+
+      <br>
+      <form method="post" id="open_new_queue" action="{{base_url}}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="text" name="code" placeholder="Code" required>
+        <input type="submit" value="Open New Queue" class="btn btn-primary">
+      </form>
+
+      <table class="table table-striped" style="width:100%; margin-top:1rem;">
+        <thead>
+          <tr>
+            <th scope="col">Filter</th>
+            <th scope="col">Queue Code</th>
+            <th scope="col">Open/Close</th>
+            <th scope="col">Empty</th>
+            <th scope="col">Delete</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for queue in viewer.getAllQueues() %}
+            <tr class="row_color_v2_{{viewer.getIndexFromCode(queue['code'])}}">
+              <td>
+                <input type="checkbox" title="Toggle filter for: {{viewer.cleanForId(queue['code'])}}" id="queue_filter_{{viewer.cleanForId(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
+              </td>
+              <td style="text-align: left;">{{queue['code']}}</td>
+              <td class="button-padding">
+                <form method="post" id="open_close_queue" action="{{base_url}}/{{queue['code']}}/toggle">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+                  <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
+                  {% if queue['open'] == 0 %}
+                    <input type="submit" value="Open Queue" class="btn btn-primary">
+                  {% else %}
+                    <input type="submit" value="Close Queue" class="btn btn-primary">
+                  {% endif %}
+                </form>
+              </td>
+              <td class="button-padding">
+                <form method="post" id="empty_queue" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+                  <input type="submit" value="Empty Queue" class="btn btn-danger">
+                </form>
+              </td>
+              <td class="button-padding">
+                <form
+                  method="post"
+                  id="delete_queue"
+                  action="{{base_url}}/{{queue['code']}}/deleteQueue"
+                  onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+                  <input type="submit" value="Delete Queue" class="btn btn-danger">
+                </form>
+              </td>
+              <td></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <br>
+  {% endif %}
+
+  {% if viewer.isGrader() %}
+    <table class="table table-striped" style="width:100%;">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Status</th>
+          <th scope="col">Time</th>
+          <th scope="col">Remove</th>
+          <th scope="col">Queue</th>
+          <th scope="col" class="mobile-hide">ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in viewer.getCurrentQueue() %}
+          <tr class="row_color_v2_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
+            <th scope="row" class="row_number">{{entry['row_number'] }}</th>
+            <td>{{ entry['name'] }}</td>
+
+            {% if entry['current_state'] == 'waiting' %}
+              <td>
+                <form method="post" id="start_help" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                  <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
+                  {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
+                    <input type="submit" value="Help" class="btn btn-success">
+                  {% else %}
+                    <input type="submit" value="Help" class="btn btn-primary">
+                  {% endif %}
+                </form>
+              </td>
+            {% elseif entry['current_state'] == 'being_helped' %}
+              <td>
+                <form method="post" id="finish_help" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                  <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
+                  {% if entry['help_started_by'] == viewer.getUserId() %}
+                    <input type="submit" value="Finish Helping" class="btn btn-success">
+                  {% else %}
+                    <input type="submit" value="Finish Helping" class="btn btn-primary">
+                  {% endif %}
+                </form>
+              </td>
+            {% endif %}
+
+            {% if entry['current_state'] == 'being_helped' %}
+              <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_help_start']) }}"></td>
+            {% else %}
+              <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+            {% endif %}
+
+            <td>
+              <form method="post" id="remove" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
+                <input type="submit" value="Remove" class="btn btn-default">
+              </form>
+            </td>
+            <td>{{ entry['queue_code'] }}</td>
+            <td class="mobile-hide">
+              <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr id="queue_empty_msg" style="display:none">
+          <td colspan="100">
+            Your queue is currently empty. Make sure you have the correct filter settings set.
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  {% endif %}
+
+  <br><br>
+  <h1>Today's Queue History</h1>
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" class="mobile-hide">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Queue</th>
+        <th scope="col">Time Entered</th>
+        <th scope="col">Time In Queue</th>
+        <th scope="col">Time Helped</th>
+        <th scope="col" class="mobile-hide">Helped Started By</th>
+        <th scope="col" class="mobile-hide">Removed By</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in viewer.getPastQueue() %}
+        {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
+          <tr class="queue_history_{{entry['queue_code']}}">
+            <th scope="row">{{entry['row_number']}}</th>
+            <td class="mobile-hide">
+              <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+            <td>{{ entry['name'] }}</td>
+            <td>{{ entry['queue_code'] }}</td>
+            <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+
+            <td>{{ viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['removal_type']) }}</td>
+
+            {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
+              <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
+            {% elseif entry['removal_type'] == 'removed' %}
+              <td>Removed</td>
+            {% elseif entry['removal_type'] == 'self' %}
+              <td>Left Queue</td>
+            {% elseif entry['removal_type'] == 'emptied' %}
+              <td>Queue Emptyed</td>
+            {% else %}
+              <td>Not in queue</td>
+            {% endif %}
+
+            <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
+            <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    //Get the list of queue_codes
+    var current_queues = [{% for queue in viewer.getAllQueues() %}
+        "{{queue['code']}}",
+      {% endfor %}]
+    current_queues = Array.from(new Set(current_queues));
+    current_queues = current_queues.map(function(x) {
+      return x.toUpperCase()
+    })
+
+    //checks if the filter settings are in local storage
+    if (!localStorage.getItem('office_hour_queue_filters')) {
+      localStorage.setItem('office_hour_queue_filters', "{}");
+    }
+
+    //Runs the function that gets and fills in the old filter settings
+    filterQueues();
+    //Unide the checkboxes now that they have been set
+    $(".page_loading").removeClass("page_loading");
+
+    //Run this every time a checkbox has been clicked to update the list of filtered queues
+    function updateQueueFilter(queue_code) {
+      var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+      filters[queue_code] = document.getElementById('queue_filter_' + queue_code).checked;
+      localStorage.setItem('office_hour_queue_filters', JSON.stringify(filters));
+      filterQueues();
+    }
+
+    //Goes through the filter settings from local storage Hides and unhides rows of the queue based on the filter settings
+    function filterQueues() {
+      var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+      for (var i = 0; i < current_queues.length; i++) {
+        if (filter_choices[current_queues[i]] != false) {
+          $("#queue_filter_" + current_queues[i]).prop("checked", true);
+          filter_choices[current_queues[i]] = true;
+        }
+      }
+      localStorage.setItem('office_hour_queue_filters', JSON.stringify(filter_choices));
+
+      for (var index in Object.keys(filter_choices)) {
+        let key = Object.keys(filter_choices)[index];
+        if (filter_choices[key]) {
+          $(".queue_current_" + key).show();
+        } else {
+          $(".queue_current_" + key).hide();
+        }
+      }
+
+      var queue_rows = document.getElementsByClassName('current_queue_row');
+      var index = 1;
+      for (var i = 0; i < queue_rows.length; i++) {
+        if ($(queue_rows[i].childNodes[1]).is(":visible")) {
+          queue_rows[i].childNodes[1].innerHTML = index;
+          index++;
+        }
+      }
+      if (index == 1) {
+        $("#queue_empty_msg").show();
+      }
+    }
+
+    function unhideId(element, id) {
+      element.parentElement.innerHTML = id;
+    }
+
+    //get all the timers on the page
+    times = []
+    $(".help_timer").each(function() {
+      times.push([
+        $(this),
+        new Date($(this).attr("help_time"))
+      ]);
+    });
+
+    //update the timers every second
+    updateTimes();
+    setInterval(updateTimes, 1000);
+    function updateTimes() {
+      for (var i = 0; i < times.length; i++) {
+        timer = (new Date() - times[i][1]) / 1000
+        var min = Math.floor(timer / 60)
+        var sec = Math.floor(timer % 60).toString().padStart(2, '0')
+        var timeString = min + ":" + sec;
+        if (min >= 100) {
+          timeString = "∞";
+        }
+        times[i][0].html(timeString);
+      }
+    }
+  </script>
+
+  <style media="screen">
+    .row_color_v2_0 {
+      background: #c98ee4 !important;
+    }
+    .row_color_v2_1 {
+      background: #9fcc55 !important;
+    }
+    .row_color_v2_2 {
+      background: #ea79a1 !important;
+    }
+    .row_color_v2_3 {
+      background: #4ed78e !important;
+    }
+    .row_color_v2_4 {
+      background: #ef7568 !important;
+    }
+    .row_color_v2_5 {
+      background: #38b3eb !important;
+    }
+    .row_color_v2_6 {
+      background: #e09965 !important;
+    }
+    .row_color_v2_7 {
+      background: #8499e3 !important;
+    }
+    .row_color_v2_8 {
+      background: #83cc88 !important;
+    }
+    .row_color_v2_9 {
+      background: #d9ab39 !important;
+    }
+    .row_color_v2_10 {
+      background: #4ddcc0 !important;
+    }
+    .row_color_v2_11 {
+      background: #b9c673 !important;
+    }
+    .row_color_v2_12 {
+      background: #658bfb !important;
+    }
+    .row_color_v2_13 {
+      background: #76cc6c !important;
+    }
+    .row_color_v2_14 {
+      background: #dc8b3d !important;
+    }
+    .row_color_v2_15 {
+      background: #c9bf5d !important;
+    }
+    .row_color_v2_16 {
+      background: #5499f0 !important;
+    }
+    .row_color_v2_17 {
+      background: #9a89f0 !important;
+    }
+    .row_color_v2_18 {
+      background: #e57fcf !important;
+    }
+    .row_color_v2_19 {
+      background: #c0c246 !important;
+    }
+
+    /* Hides elements on the page before they have been fully loaded */
+    .page_loading {
+      visibility: hidden;
+    }
+
+    .button-padding {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+
+    /*
+      This will hide elements on phones. This is useful for extra content that
+      is not normally needed such as a user id
+   */
+    @media only screen and (max-width: 479px) {
+      /* Put this on elements you dont need on mobile */
+      .mobile-hide {
+        display: none !important;
+      }
+    }
+    /* Put this on elements you dont need on desktop */
+    @media only screen and (min-width: 480px) {
+      .desktop-hide {
+        display: none !important;
+      }
+    }
+  </style>
+</div>
