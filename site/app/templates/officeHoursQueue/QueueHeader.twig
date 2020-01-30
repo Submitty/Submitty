@@ -1,0 +1,52 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+<div class="content">
+  <h1>
+    Office Hours Queue
+  </h1>
+  {% if not viewer.isGrader() %}
+    {% if viewer.inQueue() == 0 %}
+      <br>
+      <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <label for="name_box">Your Name:</label>
+        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+        <br>
+        <label for="code_box">Code:</label>
+        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+        <br>
+        <input type="submit" value="Join" class="btn btn-primary">
+      </form>
+    {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+      {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
+        <p>There is currently
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
+          person ahead of you in the queue</p>
+      {% else %}
+        <p>There are currently
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
+          people ahead of you in the queue</p>
+      {% endif %}
+      <p>You are currently in:
+        <b>{{viewer.getCurrentQueueCode()}}</b>
+      </p>
+      <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+        <input type="submit" value="Leave Queue" class="btn btn-danger">
+      </form>
+    {% else %}
+      <p>You are currently being helped</p>
+      <form
+        method="post"
+        id="finish_help"
+        action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/finishHelp"
+        onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+        <input type="submit" value="Finish Being Helped" class="btn btn-danger">
+      </form>
+    {% endif %}
+    <br>
+  {% endif %}
