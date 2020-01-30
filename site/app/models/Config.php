@@ -70,19 +70,19 @@ class Config extends AbstractModel {
      * Variable to set the system to debug mode, which allows, among other things
      * easier access to user switching and to always output full exceptions. Never
      * turn on if running server in production environment.
-     * @property
+     * @prop
      * @var bool
      */
     protected $debug = false;
 
-    /** @property @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
+    /** @prop @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
     protected $semester;
-    /** @property @var string contains the course to use, generally from the $_REQUEST['course'] global */
+    /** @prop @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
-    /** @property @var string path on the filesystem that points to the course data directory */
+    /** @prop @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @property @var string path to the json file that contains all the course specific settings */
+    /** @prop @var string path to the json file that contains all the course specific settings */
     protected $course_json_path;
 
     /** @prop @var array */
@@ -91,131 +91,131 @@ class Config extends AbstractModel {
     /**
     * Indicates whether a course config has been successfully loaded.
     * @var bool
-    * @property
+    * @prop
     */
     protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
-    /** @property @var string */
+    /** @prop @var string */
     protected $base_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $vcs_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $cgi_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $authentication;
-    /** @property @var DateTimeZone */
+    /** @prop @var DateTimeZone */
     protected $timezone;
     /** @var string */
     protected $default_timezone = 'America/New_York';
-    /** @property @var string */
+    /** @prop @var string */
     protected $submitty_path;
-    /** @property @var string */
+    /** @prop @var string */
     protected $course_path;
-    /** @property @var string */
+    /** @prop @var string */
     protected $submitty_log_path;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $log_exceptions;
-    /** @property @var string */
+    /** @prop @var string */
     protected $cgi_tmp_path;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $database_driver = "pgsql";
 
     /**
      * The name of the institution that deployed Submitty. Added to the breadcrumb bar if non-empty.
      * @var string
-     * @property
+     * @prop
      */
     protected $institution_name = "";
 
     /**
      * The url of the institution's homepage. Linked to from the breadcrumb created with institution_name.
      * @var string
-     * @property
+     * @prop
      */
     protected $institution_homepage = "";
 
     /**
      * The text to be shown to a user when they attempt to change their username.
      * @var string
-     * @property
+     * @prop
      */
     protected $username_change_text = "";
 
     /**
      * The text to be shown when an instructor enters a course code for a new course.
      * @var string
-     * @property
+     * @prop
      */
     protected $course_code_requirements = "";
 
-    /** @property @var string Text shown to all users for system announcement */
+    /** @prop @var string Text shown to all users for system announcement */
     protected $system_message = '';
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $submitty_database_params = array();
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $course_database_params = array();
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $wrapper_files = array();
 
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $email_enabled;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $latest_tag;
-    /** @property @var string */
+    /** @prop @var string */
     protected $latest_commit;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $course_name;
-    /** @property @var string */
+    /** @prop @var string */
     protected $course_home_url;
-    /** @property @var int */
+    /** @prop @var int */
     protected $default_hw_late_days;
-    /** @property @var int */
+    /** @prop @var int */
     protected $default_student_late_days;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $zero_rubric_grades;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $upload_message;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $keep_previous_files;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $display_rainbow_grades_summary;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $display_custom_message;
-    /** @property @var string*/
+    /** @prop @var string*/
     protected $course_email;
-    /** @property @var string */
+    /** @prop @var string */
     protected $vcs_base_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $vcs_type;
-    /** @property @var string */
+    /** @prop @var string */
     protected $private_repository;
-    /** @property @var array */
+    /** @prop @var array */
     protected $hidden_details;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $forum_enabled;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $regrade_enabled;
-    /** @property @var string */
+    /** @prop @var string */
     protected $regrade_message;
-    /** @property @var bool*/
+    /** @prop @var bool*/
     protected $seating_only_for_instructor;
-    /** @property @var string|null */
+    /** @prop @var string|null */
     protected $room_seating_gradeable_id;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $auto_rainbow_grades;
-    /** @property @var string */
+    /** @prop @var string */
     protected $secret_session;
     /** @prop-read @var string|null */
     protected $verified_submitty_admin_user = null;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $queue_enabled;
 
     /**
