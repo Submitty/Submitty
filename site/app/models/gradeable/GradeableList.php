@@ -32,27 +32,27 @@ class GradeableList extends AbstractModel {
     const GRADING = 4;
     const GRADED  = 5;
 
-    /** @property @var User */
+    /** @prop @var User */
     protected $user;
 
-    /** @property @var Gradeable[]  */
+    /** @prop @var Gradeable[]  */
     protected $gradeables = array();
 
     /*
      * All elements of $this->gradeables should fall into one of the following six lists. There should
      * be no overlap between them.
      */
-    /** @property @var Gradeable[] These are gradeables which are only viewable by admin users */
+    /** @prop @var Gradeable[] These are gradeables which are only viewable by admin users */
     protected $future_gradeables = array();
-    /** @property @var Gradeable[] These are gradeables which are only viewable by admin & TA users */
+    /** @prop @var Gradeable[] These are gradeables which are only viewable by admin & TA users */
     protected $beta_gradeables = array();
-    /** @property @var Gradeable[] */
+    /** @prop @var Gradeable[] */
     protected $open_gradeables = array();
-    /** @property @var Gradeable[] */
+    /** @prop @var Gradeable[] */
     protected $closed_gradeables = array();
-    /** @property @var Gradeable[] */
+    /** @prop @var Gradeable[] */
     protected $grading_gradeables = array();
-    /** @property @var Gradeable[] */
+    /** @prop @var Gradeable[] */
     protected $graded_gradeables = array();
 
     /** @var \DateTime Timestamp of when we initially loaded the GradeableList so that all timestamp comparisons are
