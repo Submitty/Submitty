@@ -5201,34 +5201,35 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($code) {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($code));
+    public function openQueue($queue_code) {
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($queue_code));
 
         //cannot have more than one queue with the same code
         if (0 < count($this->course_db->rows())) {
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (TRUE, TRIM(?))", array($code));
+        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (TRUE, TRIM(?))", array($queue_code));
         return true;
     }
 
-    public function toggleQueue($code, $state) {
+    public function toggleQueue($queue_code, $state) {
         if ($state === "1") {
             $state = 'false';
         }
         else {
             $state = 'true';
         }
-        $this->course_db->query("UPDATE queue_settings SET open = ? where UPPER(TRIM(code)) = UPPER(TRIM(?))", array($state, $code));
+        $this->course_db->query("UPDATE queue_settings SET open = ? where UPPER(TRIM(code)) = UPPER(TRIM(?))", array($state, $queue_code));
     }
 
-    public function deleteQueue($code) {
-        $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($code));
+    public function deleteQueue($queue_code) {
+        $this->emptyQueue($queue_code);
+        $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($queue_code));
     }
 
-    public function isValidCode($code) {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($code));
+    public function isValidCode($queue_code) {
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($queue_code));
         if (0 < count($this->course_db->rows())) {
             return $this->course_db->rows()[0]['code'];
         }
@@ -5241,7 +5242,7 @@ AND gc_id IN (
         return 0 < count($this->course_db->rows());
     }
 
-    public function addToQueue($code, $user_id, $name) {
+    public function addToQueue($queue_code, $user_id, $name) {
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -5267,7 +5268,7 @@ AND gc_id IN (
                 ?,
                 NULL,
                 NULL
-            )", array($code,$user_id,$name,$user_id));
+            )", array($queue_code,$user_id,$name,$user_id));
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -5354,6 +5355,11 @@ AND gc_id IN (
     public function getCurrentQueueState() {
         $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", array($this->core->getUser()->getId()));
         return $this->course_db->rows()[0];
+    }
+
+    public function getLastQueueUpdate() {
+        $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
+        return $this->course_db->rows()[0]['change_count'];
     }
 
 

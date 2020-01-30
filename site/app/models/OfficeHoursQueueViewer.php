@@ -25,13 +25,14 @@ class OfficeHoursQueueViewer extends AbstractModel {
 
     private $code_to_index = array();//an array maps queue codes to their index (this is used to give each queue a color)
     private $current_queue;
+    private $full_history;
 
     /**
     * OfficeHoursQueueViewer constructor.
     *
     * @param Core  $core
     */
-    public function __construct(Core $core) {
+    public function __construct(Core $core, $full_history = false) {
         parent::__construct($core);
         $index = 0;
         foreach ($this->core->getQueries()->getAllQueues() as $queue) {
@@ -40,6 +41,7 @@ class OfficeHoursQueueViewer extends AbstractModel {
         }
 
         $this->current_queue = $this->core->getQueries()->getCurrentQueue();
+        $this->full_history = $full_history;
     }
 
     public function getIndexFromCode($code) {
@@ -136,5 +138,13 @@ class OfficeHoursQueueViewer extends AbstractModel {
 
     public function cleanForId($str) {
         return strtoupper($str);
+    }
+
+    public function getLastQueueUpdate() {
+        return $this->core->getQueries()->getLastQueueUpdate();
+    }
+
+    public function getFullHistory() {
+        return $this->full_history;
     }
 }
