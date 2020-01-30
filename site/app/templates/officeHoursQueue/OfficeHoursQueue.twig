@@ -200,7 +200,19 @@
   {% endif %}
 
   <br><br>
-  <h1>Today's Queue History</h1>
+  <h1>Today's Queue History
+    {% if viewer.isGrader() %}
+      {% if viewer.getFullHistory() %}
+        <a role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
+          View Limited History
+        </a>
+      {% else %}
+        <a role="button" class="btn btn-default" href="{{base_url}}?full_history=true">
+          View Full History
+        </a>
+      {% endif %}
+    {% endif %}
+  </h1>
   <table class="table table-striped" style="width:100%;">
     <thead>
       <tr>

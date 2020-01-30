@@ -1,0 +1,65 @@
+<br><br>
+<h1>Today's Queue History
+  {% if viewer.isGrader() %}
+    {% if viewer.getFullHistory() %}
+      <a role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
+        View Limited History
+      </a>
+    {% else %}
+      <a role="button" class="btn btn-default" href="{{base_url}}?full_history=true">
+        View Full History
+      </a>
+    {% endif %}
+  {% endif %}
+</h1>
+<table class="table table-striped" style="width:100%;">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col" class="mobile-hide">ID</th>
+      <th scope="col">Name</th>
+      <th scope="col">Queue</th>
+      <th scope="col">Time Entered</th>
+      <th scope="col">Time In Queue</th>
+      <th scope="col">Time Helped</th>
+      <th scope="col" class="mobile-hide">Helped Started By</th>
+      <th scope="col" class="mobile-hide">Removed By</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set history_count = 0 %}
+    {% for entry in viewer.getPastQueue()if history_count < 50 or viewer.getFullHistory() %}
+      {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
+        {% set history_count = history_count + 1 %}
+        <tr class="queue_history_{{entry['queue_code']}}">
+          <th scope="row">{{history_count}}</th>
+          <td class="mobile-hide">
+            <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+              <i class="fas fa-eye"></i>
+            </a>
+          </td>
+          <td>{{ entry['name'] }}</td>
+          <td>{{ entry['queue_code'] }}</td>
+          <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+
+          <td>{{ viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['removal_type']) }}</td>
+
+          {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
+            <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
+          {% elseif entry['removal_type'] == 'removed' %}
+            <td>Removed</td>
+          {% elseif entry['removal_type'] == 'self' %}
+            <td>Left Queue</td>
+          {% elseif entry['removal_type'] == 'emptied' %}
+            <td>Queue Emptyed</td>
+          {% else %}
+            <td>Not in queue</td>
+          {% endif %}
+
+          <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
+          <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>

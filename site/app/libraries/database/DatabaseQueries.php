@@ -5340,7 +5340,7 @@ AND gc_id IN (
     }
 
     public function firstTimeInQueue($id, $queue_code) {
-        $this->course_db->query("SELECT count(*) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
+        $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
         return $this->course_db->rows()[0]['count'] <= 0;
     }
 
