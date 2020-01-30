@@ -5,23 +5,14 @@
   </h1>
   {% if not viewer.isGrader() %}
     {% if viewer.inQueue() == 0 %}
-      {% if viewer.getQueueNumberAheadOfYou() == 1 %}
-        <p>There is currently
-          {{viewer.getQueueNumberAheadOfYou()}}
-          person in a queue</p>
-      {% else %}
-        <p>There are currently
-          {{viewer.getQueueNumberAheadOfYou()}}
-          people in a queue</p>
-      {% endif %}
       <br>
       <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <label for="name_box">Your Name:</label>
-        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem" required>
+        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
         <br>
         <label for="code_box">Code:</label>
-        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
         <br>
         <input type="submit" value="Join" class="btn btn-primary">
       </form>
@@ -38,7 +29,7 @@
       <p>You are currently in:
         <b>{{viewer.getCurrentQueueCode()}}</b>
       </p>
-      <form method="post" id="remove" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+      <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
@@ -71,7 +62,7 @@
       <br>
       <form method="post" id="open_new_queue" action="{{base_url}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="text" name="code" placeholder="Code" required>
+        <input type="text" name="code" placeholder="Code" required="required">
         <input type="submit" value="Open New Queue" class="btn btn-primary">
       </form>
 
@@ -94,7 +85,7 @@
               </td>
               <td style="text-align: left;">{{queue['code']}}</td>
               <td class="button-padding">
-                <form method="post" id="open_close_queue" action="{{base_url}}/{{queue['code']}}/toggle">
+                <form method="post" action="{{base_url}}/{{queue['code']}}/toggle">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
@@ -106,18 +97,14 @@
                 </form>
               </td>
               <td class="button-padding">
-                <form method="post" id="empty_queue" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+                <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="submit" value="Empty Queue" class="btn btn-danger">
                 </form>
               </td>
               <td class="button-padding">
-                <form
-                  method="post"
-                  id="delete_queue"
-                  action="{{base_url}}/{{queue['code']}}/deleteQueue"
-                  onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
+                <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="submit" value="Delete Queue" class="btn btn-danger">
@@ -153,7 +140,7 @@
 
             {% if entry['current_state'] == 'waiting' %}
               <td>
-                <form method="post" id="start_help" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
+                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
@@ -166,7 +153,7 @@
               </td>
             {% elseif entry['current_state'] == 'being_helped' %}
               <td>
-                <form method="post" id="finish_help" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
+                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
@@ -186,7 +173,7 @@
             {% endif %}
 
             <td>
-              <form method="post" id="remove" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
+              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
@@ -229,10 +216,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for entry in viewer.getPastQueue() %}
+      {% set history_count = 0 %}
+      {% for entry in viewer.getPastQueue()if history_count < 50 or viewer.getFullHistory() %}
         {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
+          {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}}">
-            <th scope="row">{{entry['row_number']}}</th>
+            <th scope="row">{{history_count}}</th>
             <td class="mobile-hide">
               <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
                 <i class="fas fa-eye"></i>
@@ -279,6 +268,8 @@
       localStorage.setItem('office_hour_queue_filters', "{}");
     }
 
+    var timers = []; //keep track of the current running timers on the page
+
     //Runs the function that gets and fills in the old filter settings
     filterQueues();
     //Unide the checkboxes now that they have been set
@@ -303,25 +294,40 @@
       }
       localStorage.setItem('office_hour_queue_filters', JSON.stringify(filter_choices));
 
+      timers = []
       for (var index in Object.keys(filter_choices)) {
         let key = Object.keys(filter_choices)[index];
         if (filter_choices[key]) {
-          $(".queue_current_" + key).show();
-        } else {
-          $(".queue_current_" + key).hide();
-        }
-      }
+          let current_element = $(".queue_current_" + key);
 
-      var queue_rows = document.getElementsByClassName('current_queue_row');
-      var index = 1;
-      for (var i = 0; i < queue_rows.length; i++) {
-        if ($(queue_rows[i].childNodes[1]).is(":visible")) {
-          queue_rows[i].childNodes[1].innerHTML = index;
-          index++;
+          current_element.addClass("shown_queue_row");
+
+          current_element.show();
+          timer = current_element.find(".help_timer")
+          if (timer) {
+            timers.push([
+              timer,
+              new Date(timer.attr("help_time"))
+            ]);
+          }
+
+        } else {
+          let current_element = $(".queue_current_" + key);
+          current_element.hide();
+          current_element.removeClass("shown_queue_row");
         }
       }
-      if (index == 1) {
+      updateTimers();
+
+      var queue_rows = document.getElementsByClassName('shown_queue_row');
+      var row_count = 0;
+      for (; row_count < queue_rows.length; row_count++) {
+        queue_rows[row_count].childNodes[1].innerHTML = row_count + 1;
+      }
+      if (queue_rows.length === 0) {
         $("#queue_empty_msg").show();
+      } else {
+        $("#queue_empty_msg").hide();
       }
     }
 
@@ -329,30 +335,34 @@
       element.parentElement.innerHTML = id;
     }
 
-    //get all the timers on the page
-    times = []
-    $(".help_timer").each(function() {
-      times.push([
-        $(this),
-        new Date($(this).attr("help_time"))
-      ]);
-    });
-
-    //update the timers every second
-    updateTimes();
-    setInterval(updateTimes, 1000);
-    function updateTimes() {
-      for (var i = 0; i < times.length; i++) {
-        timer = (new Date() - times[i][1]) / 1000
+    //update the timers few seconds
+    updateTimers();
+    setInterval(updateTimers, 1000);
+    function updateTimers() {
+      for (var i = 0; i < timers.length; i++) {
+        timer = (new Date() - timers[i][1]) / 1000
         var min = Math.floor(timer / 60)
         var sec = Math.floor(timer % 60).toString().padStart(2, '0')
-        var timeString = min + ":" + sec;
+        var timerstring = min + ":" + sec;
         if (min >= 100) {
-          timeString = "∞";
+          timerstring = "∞";
         }
-        times[i][0].html(timeString);
+        timers[i][0].html(timerstring);
       }
     }
+
+    let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
+    {% if viewer.isGrader() %}
+      let refreshSpeed = 1000 * 30;
+    {% endif %}
+
+    setInterval(function() {
+      $.get("{{base_url}}/checkUpdates", function(data) {
+        if (lastQueueEdit < JSON.parse(data)['data']) {
+          location.reload();
+        }
+      });
+    }, refreshSpeed);
   </script>
 
   <style media="screen">

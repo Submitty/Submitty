@@ -32,11 +32,19 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        $queries = array();
+        parse_str($_SERVER['QUERY_STRING'], $queries);
+
+        $full_history = false;
+        if (array_key_exists('full_history', $queries) && $queries['full_history'] === "true") {
+            $full_history = true;
+        }
+
         return Response::WebOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
                 'showTheQueue',                          //Runs this functin showTheQueue()
-                new OfficeHoursQueueViewer($this->core)  //Passing in this variable which is a OfficeHoursQueueViewer object
+                new OfficeHoursQueueViewer($this->core, $full_history)  //Passing in this variable which is a OfficeHoursQueueViewer object
             )
         );
     }
@@ -287,6 +295,16 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->getQueries()->deleteQueue($queue_code);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/checkUpdates", methods={"GET"})
+    * @return Response
+    */
+    public function checkUpdates() {
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($this->core->getQueries()->getLastQueueUpdate())
         );
     }
 }

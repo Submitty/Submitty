@@ -98,7 +98,7 @@ class GlobalController extends AbstractController {
                 if ($this->core->getQueries()->isAnyQueueOpen()) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours",
+                        "title" => "Office Hours/Lab queue",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-queue",
                         "icon" => "fa-door-open"
@@ -107,7 +107,7 @@ class GlobalController extends AbstractController {
                 else {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours",
+                        "title" => "Office Hours/Lab Queue",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-queue",
                         "icon" => "fa-door-closed"
