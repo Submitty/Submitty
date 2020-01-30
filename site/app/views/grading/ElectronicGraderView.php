@@ -712,7 +712,9 @@ HTML;
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $sort, $direction, $from) {
         $peer = false;
-        if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
+        // WIP: Replace this logic when there is a definitive way to get my peer-ness
+        // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
+        if ($gradeable->isPeerGrading() && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
             $peer = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
@@ -799,7 +801,10 @@ HTML;
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
-            "peer" => $peer,
+            "peer_gradeable" => $peer,
+            // WIP. Replace this with a better function call once there is a definitive way to determine my peer-ness.
+            // For now, I am a peer if I cannot access the peer panel.
+            "i_am_a_peer" => !$this->core->getAccess()->canI("grading.electronic.peer_panel"),
             "prev_student_url" => $prev_student_url,
             "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
