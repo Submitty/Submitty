@@ -19,7 +19,7 @@ class SubmissionMultipleChoice extends AbstractGradeableInput {
 
     /** @prop @var bool Whether or not the MC is multiselect */
     protected $allow_multiple;
-
+    /** @var bool @property @var Whether or not the options inside MC will be Randomized */
     protected $randomize_order;
     /** @prop @var array The collection of options for the MC */
     protected $choices;
@@ -33,7 +33,7 @@ class SubmissionMultipleChoice extends AbstractGradeableInput {
         else {
             $this->allow_multiple = false;
         }
-        if (isset($details["randomize_order"]) && $details["randomize_order"] == true) {
+        if ($details["randomize_order"] == true) {
             $this->randomize_order = true;
         }
         else {

@@ -328,10 +328,12 @@
                             {% if team_assignment %}
                                 {% set student_id = submitter.getUser().getLeaderId() %}
                             {% else %}
-                                {% set student_id = submitter.getUser() %}
+                                {% set student_id = submitter.getUser().getId() %}
                             {% endif %}
 
-                            {% set random_choices = numberUtils.getRandomIndices(cell.choices|length, student_id, gradeable_id ) %}
+                            {% set choices_indices = numberUtils.getRandomIndices(cell.choices|length, student_id, gradeable_id ) %}
+                        {% else %}
+                            {% set choices_indices = numberUtils.getIndices(cell.choices) %}
                         {% endif %}
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
@@ -347,7 +349,7 @@
 
                                 {{ self.render_testcase_messages(cell, testcase_messages) }}
 
-                                {% for idx in random_choices %}
+                                {% for idx in choices_indices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         <input type="checkbox"
                                                name="multiple_choice_{{ num_multiple_choice }}"
@@ -369,15 +371,15 @@
 
                                 {{ self.render_testcase_messages(cell, testcase_messages) }}
 
-                                {% for choice in cell.choices %}
+                                {% for idx in choices_indices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         <input type="radio"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                               value="{{ choice.value }}"
+                                               value="{{ cell.choices[idx].value }}"
                                                onclick="handle_input_keypress();"
                                         />
-                                        {{ choice.description | markdown }}
+                                        {{ cell.choices[idx].description | markdown }}
                                     </label>
                                 {% endfor %}
                             {% endif %}

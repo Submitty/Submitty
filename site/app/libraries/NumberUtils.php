@@ -78,4 +78,12 @@ class NumberUtils {
 
         return $randomizedIndices;
     }
+
+    /**
+     * @param array $array
+     * @return array indices for the given array
+     */
+    public function getIndices(array $array) {
+        return array_keys($array);
+    }
 }
