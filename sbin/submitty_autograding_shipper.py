@@ -27,7 +27,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
-AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['autograding_log_path'], 'stack_traces')
+AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['site_log_path'], 'autograding_stack_traces')
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -255,8 +255,11 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    if "generate_output" not in obj:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    elif obj["generate_output"]:
+        item_name = os.path.join(obj["semester"],obj["course"],"generated_output",obj["gradeable"])
     is_batch = "regrade" in obj and obj["regrade"]
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name, which_untrusted=which_untrusted,
                                     is_batch=is_batch, message="Prepared job for " + which_machine)
@@ -269,8 +272,11 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     # variables needed for logging
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    if "generate_output" not in obj:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    elif obj["generate_output"]:
+        item_name = os.path.join(obj["semester"],obj["course"],"generated_output")
     is_batch = "regrade" in obj and obj["regrade"]
 
     # verify the DAEMON_USER is running this script
@@ -392,7 +398,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
 
         #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
         while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR going to re-try prepare_job: " + queue_file)
+            time.sleep(5)
 
         prep_job_success = True
         
@@ -686,11 +692,16 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     for full_path_file, file_time in files_and_times:
         # get the file name (without the path)
         just_file = full_path_file[len(folder)+1:]
+
         # skip items that are already being graded
         if (just_file[0:8]=="GRADING_"):
             continue
         grading_file = os.path.join(folder,"GRADING_"+just_file)
         if grading_file in files:
+            continue
+
+        # skip items (very recently added!) that are already waiting for a VCS checkout
+        if (just_file[0:5]=="VCS__"):
             continue
 
         # found something to do
@@ -720,7 +731,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         grading_file = os.path.join(folder, "GRADING_" + my_job)
         # create the grading file
         with open(os.path.join(grading_file), "w") as queue_file:
-            json.dump({"untrusted": which_untrusted}, queue_file)
+            json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
 
     overall_lock.release()
 

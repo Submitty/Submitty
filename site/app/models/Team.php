@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
@@ -15,22 +16,22 @@ use app\models\gradeable\Gradeable;
  * @method User[] getInvitedUsers()
  */
 class Team extends AbstractModel {
-     
-    /** @property @var string The id of this team of form "<unique number>_<creator user id>" */
+
+    /** @prop @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
-    /** @property @var integer rotating section (registration or rotating) of team creator */
+    /** @prop @var integer rotating section (registration or rotating) of team creator */
     protected $registration_section;
-    /** @property @var integer registration section (registration or rotating) of team creator */
+    /** @prop @var integer registration section (registration or rotating) of team creator */
     protected $rotating_section;
-    /** @property @var string[] containing user ids of team members */
+    /** @prop @var string[] containing user ids of team members */
     protected $member_user_ids;
-    /** @property @var string[] containing user ids of those invited to the team */
+    /** @prop @var string[] containing user ids of those invited to the team */
     protected $invited_user_ids;
-    /** @property @var User[] containing users of team members */
+    /** @prop @var User[] containing users of team members */
     protected $member_users;
-    /** @property @var User[] containing users of those invited to the team */
+    /** @prop @var User[] containing users of those invited to the team */
     protected $invited_users;
-    /** @property @var string containing comma-seperated list of team members */
+    /** @prop @var string containing comma-seperated list of team members */
     protected $member_list;
     /** @var array $assignment_settings */
     protected $assignment_settings;
@@ -50,11 +51,12 @@ class Team extends AbstractModel {
         $this->invited_user_ids = array();
         $this->member_users = array();
         $this->invited_users = array();
-        foreach($details['users'] as $user_details) {
+        foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
             if (array_key_exists('anon_id', $user_details)) {
                 $user = new User($core, $user_details);
-            } else {
+            }
+            else {
                 $user = null;
             }
             if ($user_details['state'] === 1) {
@@ -63,7 +65,7 @@ class Team extends AbstractModel {
                     $this->member_users[] = $user;
                 }
             }
-            else if ($user_details['state'] === 0) {
+            elseif ($user_details['state'] === 0) {
                 $this->invited_user_ids[] = $user_details['user_id'];
                 if ($user !== null) {
                     $this->invited_users[] = $user;
@@ -149,7 +151,7 @@ class Team extends AbstractModel {
     public function hasMember($user_id) {
         return in_array($user_id, $this->member_user_ids);
     }
-    
+
     /**
      * Get whether or not a given user invited to the team
      * @param string $user_id

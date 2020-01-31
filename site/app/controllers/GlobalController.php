@@ -1,8 +1,6 @@
 <?php
 
-
 namespace app\controllers;
-
 
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -20,14 +18,14 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
 
         if (array_key_exists('override.css', $wrapper_urls)) {
-            $css[] = $wrapper_urls['override.css'];
+            $css->add($wrapper_urls['override.css']);
         }
 
         $unread_notifications_count = null;
@@ -37,7 +35,6 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons = [];
         if ($this->core->userLoaded()) {
-
             if ($this->core->getConfig()->isCourseLoaded()) {
                 if ($this->core->getConfig()->getCourseHomeUrl() != "") {
                     $sidebar_buttons[] = new Button($this->core, [
@@ -98,7 +95,7 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getConfig()->isQueueEnabled()) {
-                if ($this->core->getQueries()->isQueueOpen()) {
+                if ($this->core->getQueries()->isAnyQueueOpen()) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
                         "title" => "Office Hours",
@@ -206,8 +203,19 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getUser()->accessGrading()) {
                 $images_course_path = $this->core->getConfig()->getCoursePath();
+                // FIXME: this code is duplicated in ImagesController.php
                 $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
-                $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
+                $common_images_path_1 = Fileutils::joinPaths("/var/local/submitty/student_images");
+                $term = explode('/', $this->core->getConfig()->getCoursePath());
+                $term = $term[count($term) - 2];
+                $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images", $term);
+                // FIXME: consider searching through the common location for matches to my students
+                // (but this would be expensive)
+                $any_images_files = array_merge(
+                    FileUtils::getAllFiles($images_path, array(), true),
+                    FileUtils::getAllFiles($common_images_path_1, array(), true),
+                    FileUtils::getAllFiles($common_images_path_2, array(), true)
+                );
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
@@ -217,7 +225,8 @@ class GlobalController extends AbstractController {
                         "id" => "nav-sidebar-photos",
                         "icon" => "fa-id-card"
                     ]);
-                } else if (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
+                }
+                elseif (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
@@ -232,7 +241,7 @@ class GlobalController extends AbstractController {
                 }
             }
 
-            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true ) {
+            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);
@@ -317,7 +326,7 @@ class GlobalController extends AbstractController {
 
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(['authentication', 'logout']),
-                "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
+                "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
                 "icon" => "fa-power-off"
@@ -343,7 +352,19 @@ class GlobalController extends AbstractController {
             }
         }
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js);
+        $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
+        $month = $now['mon'];
+        $day = $now['mday'];
+
+        $duck_img = 'moorthy_duck.png';
+        if ($month === 10 && ($day >= 27 && $day <= 31)) {
+            //halloween
+            $duck_img = 'moorthy_halloween.png';
+        }
+        //else if(...){}
+        //more Holidays go here!
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
     }
 
     public function footer() {
@@ -355,7 +376,7 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
@@ -432,5 +453,4 @@ class GlobalController extends AbstractController {
 
         return true;
     }
-
 }

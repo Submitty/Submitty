@@ -7,7 +7,7 @@ use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
-
+use app\libraries\NumberUtils;
 
 /**
  * Class Component
@@ -38,37 +38,37 @@ use app\models\AbstractModel;
 class Component extends AbstractModel {
     /** @var Gradeable Reference to the gradeable this belongs to */
     private $gradeable = null;
-    /** @property @var int The course-wide unique numeric id of this component */
+    /** @prop @var int The course-wide unique numeric id of this component */
     protected $id = 0;
-    /** @property @var string The title of this component */
+    /** @prop @var string The title of this component */
     protected $title = "";
-    /** @property @var string The comment only visible to the TA/manual grader */
+    /** @prop @var string The comment only visible to the TA/manual grader */
     protected $ta_comment = "";
-    /** @property @var string The comment visible to the student */
+    /** @prop @var string The comment visible to the student */
     protected $student_comment = "";
-    /** @property @var int The minimum points this component can contribute to the score (can be negative) */
+    /** @prop @var int The minimum points this component can contribute to the score (can be negative) */
     protected $lower_clamp = 0;
-    /** @property @var int The number of points this component is worth with no marks */
+    /** @prop @var int The number of points this component is worth with no marks */
     protected $default = 0;
-    /** @property @var int The full value of this component without extra credit */
+    /** @prop @var int The full value of this component without extra credit */
     protected $max_value = 0;
-    /** @property @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
+    /** @prop @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
     protected $upper_clamp = 0;
-    /** @property @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
+    /** @prop @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
     protected $text = false;
-    /** @property @var bool If this is a peer grading component */
+    /** @prop @var bool If this is a peer grading component */
     protected $peer = false;
-    /** @property @var int The order of this component in the gradeable */
+    /** @prop @var int The order of this component in the gradeable */
     protected $order = -1;
-    /** @property @var int The pdf page this component will reside in */
+    /** @prop @var int The pdf page this component will reside in */
     protected $page = -1;
 
-    /** @property @var Mark[] All possible common marks that can be assigned to this component */
+    /** @prop @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = [];
 
-    /** @property @var Mark[] Array of marks loaded from the database */
+    /** @prop @var Mark[] Array of marks loaded from the database */
     private $db_marks = [];
-    /** @property @var bool If any submitters have grades for this component */
+    /** @prop @var bool If any submitters have grades for this component */
     private $any_grades = false;
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */
@@ -155,8 +155,8 @@ class Component extends AbstractModel {
      * @throws \InvalidArgumentException If the provided mark id isn't part of this component
      */
     public function getMark($mark_id) {
-        foreach($this->marks as $mark) {
-            if($mark->getId() === $mark_id) {
+        foreach ($this->marks as $mark) {
+            if ($mark->getId() === $mark_id) {
                 return $mark;
             }
         }
@@ -227,7 +227,8 @@ class Component extends AbstractModel {
         foreach (self::point_properties as $property) {
             if (is_numeric($points[$property])) {
                 $parsedPoints[$property] = floatval($points[$property]);
-            } else {
+            }
+            else {
                 $parsedPoints[$property] = null;
             }
         }
@@ -295,7 +296,7 @@ class Component extends AbstractModel {
 
         // Round after validation because of potential floating point weirdness
         foreach (self::point_properties as $property) {
-            $this->$property = $this->getGradeable()->roundPointValue($points[$property]);
+            $this->$property = NumberUtils::roundPointValue($points[$property], $this->getGradeable()->getPrecision());
         }
         $this->modified = true;
     }
@@ -316,9 +317,17 @@ class Component extends AbstractModel {
         // Get the implied deleted marks from this operation and make sure that we aren't
         //  deleting any marks that are in use.
         $deleted_marks = array_udiff($this->marks, $marks, Utils::getCompareByReference());
-        if (in_array(true, array_map(function (Mark $mark) {
-                return $mark->anyReceivers();
-        }, $deleted_marks))) {
+        if (
+            in_array(
+                true,
+                array_map(
+                    function (Mark $mark) {
+                        return $mark->anyReceivers();
+                    },
+                    $deleted_marks
+                )
+            )
+        ) {
             throw new \InvalidArgumentException('Call to setMarks implied deletion of marks with receivers');
         }
 
@@ -372,7 +381,7 @@ class Component extends AbstractModel {
      */
     private function deleteMarkInner(Mark $mark, bool $force = false) {
         // Don't delete if the mark has receivers (and we aren't forcing)
-        if($mark->anyReceivers() && !$force) {
+        if ($mark->anyReceivers() && !$force) {
             throw new \InvalidArgumentException('Attempt to delete a mark with receivers!');
         }
 
@@ -423,7 +432,8 @@ class Component extends AbstractModel {
     private function setIdInternal($id) {
         if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Component Id must be a non-negative integer');
         }
     }

@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\models\gradeable\AbstractGradeableInput;
 
@@ -17,9 +16,9 @@ use app\models\gradeable\AbstractGradeableInput;
  */
 class SubmissionMultipleChoice extends AbstractGradeableInput {
 
-    /** @property @var bool Whether or not the MC is multiselect */
+    /** @prop @var bool Whether or not the MC is multiselect */
     protected $allow_multiple;
-    /** @property @var array The collection of options for the MC */
+    /** @prop @var array The collection of options for the MC */
     protected $choices;
 
     public function __construct(Core $core, array $details) {
@@ -27,7 +26,8 @@ class SubmissionMultipleChoice extends AbstractGradeableInput {
 
         if ($details["allow_multiple"] == true) {
             $this->allow_multiple = true;
-        } else {
+        }
+        else {
             $this->allow_multiple = false;
         }
 

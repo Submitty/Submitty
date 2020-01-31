@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 
 /**
@@ -17,28 +18,28 @@ use app\libraries\Core;
 
  */
 class SimpleStat extends AbstractModel {
-    /** @ property @var bool is this a component */
+    /** @prop @var bool is this a component */
     protected $component = true;
-    /** @property @var string Title of gradeable or component */
+    /** @prop @var string Title of gradeable or component */
     protected $title = "";
-    /** @property @var float Maximum value of gradeable or component*/
+    /** @prop @var float Maximum value of gradeable or component*/
     protected $max_value = 0;
-    /** @property @var int Order for components to be shown in */
+    /** @prop @var int Order for components to be shown in */
     protected $order = -1;
-    /** @property @var float Average grade */
+    /** @prop @var float Average grade */
     protected $average_score = 0;
-    /** @property @var float Standard deviation*/
+    /** @prop @var float Standard deviation*/
     protected $standard_deviation = 0;
-    /** @property @var int number of people graded(completely graded)*/
+    /** @prop @var int number of people graded(completely graded)*/
     protected $count = 0;
-    /** @property @var number of active grade inquiries for given grading component*/
+    /** @prop @var number of active grade inquiries for given grading component*/
     protected $active_grade_inquiry_count = 0;
-    /** @property @var bool Does this component use peer grading*/
+    /** @prop @var bool Does this component use peer grading*/
     protected $is_peer = null;
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
-        if(isset($details['gc_id'])) {
+        if (isset($details['gc_id'])) {
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];

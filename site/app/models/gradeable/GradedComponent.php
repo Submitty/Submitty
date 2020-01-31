@@ -7,6 +7,7 @@ use app\models\AbstractModel;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\models\User;
+use app\libraries\NumberUtils;
 
 /**
  * Class GradedComponent
@@ -28,7 +29,7 @@ class GradedComponent extends AbstractModel {
     private $component = null;
     /** @var TaGradedGradeable Reference to TaGradedGradeable this component belongs to */
     private $ta_graded_gradeable = null;
-    /** @property @var string Id of the component this grade is attached to */
+    /** @prop @var string Id of the component this grade is attached to */
     protected $component_id = 0;
 
     /** @var User The grader of this component */
@@ -37,29 +38,29 @@ class GradedComponent extends AbstractModel {
     /** @var Mark[] References to the marks this graded component received */
     private $marks = array();
 
-    /** @property @var int[] The mark ids the submitter received for this component */
+    /** @prop @var int[] The mark ids the submitter received for this component */
     protected $mark_ids = array();
-    /** @property @var int[]|null The mark ids the submitter received for this component as reflected in the db */
+    /** @prop @var int[]|null The mark ids the submitter received for this component as reflected in the db */
     private $db_mark_ids = null;
 
-    /** @property @var bool True if the marks array was modified after construction */
+    /** @prop @var bool True if the marks array was modified after construction */
     protected $marks_modified = false;
 
-    /** @property @var float The score for this component (or custom mark point value) */
+    /** @prop @var float The score for this component (or custom mark point value) */
     protected $score = 0.0;
-    /** @property @var string The comment on this mark / custom mark description */
+    /** @prop @var string The comment on this mark / custom mark description */
     protected $comment = "";
-    /** @property @var string The Id of the grader who most recently updated the component's grade */
+    /** @prop @var string The Id of the grader who most recently updated the component's grade */
     protected $grader_id = "";
-    /** @property @var int The submission version this grade is for */
+    /** @prop @var int The submission version this grade is for */
     protected $graded_version = 0;
-    /** @property @var \DateTime The time which this grade was most recently updated */
+    /** @prop @var \DateTime The time which this grade was most recently updated */
     protected $grade_time = null;
     /** @var User The verifier of this component */
     protected $verifier = null;
-    /** @property @var string The Id of the verifier who verified the grade */
+    /** @prop @var string The Id of the verifier who verified the grade */
     protected $verifier_id = "";
-    /** @property @var \DateTime The time which this grade was verified */
+    /** @prop @var \DateTime The time which this grade was verified */
     protected $verify_time = null;
 
     /**
@@ -74,7 +75,7 @@ class GradedComponent extends AbstractModel {
     public function __construct(Core $core, TaGradedGradeable $ta_graded_gradeable, Component $component, User $grader, array $details) {
         parent::__construct($core);
 
-        if($ta_graded_gradeable === null) {
+        if ($ta_graded_gradeable === null) {
             throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
         }
         $this->ta_graded_gradeable = $ta_graded_gradeable;
@@ -86,13 +87,15 @@ class GradedComponent extends AbstractModel {
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
         $this->verifier_id = $details['verifier_id'] ?? '';
-        if($this->verifier_id !== '')
+        if ($this->verifier_id !== '') {
             $this->verifier = $this->core->getQueries()->getUserById($this->verifier_id);
+        }
         $this->setVerifyTime($details['verify_time'] ?? '');
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $score = $details['score'] ?? 0;
-        } else {
+        }
+        else {
             $score = $details['score'] ?? $component->getDefault();
         }
         $this->setScore($score);
@@ -193,12 +196,13 @@ class GradedComponent extends AbstractModel {
         }
         // Be sure to add the default so count-down gradeables don't become negative
         $score = $this->component->getDefault();
-        foreach($this->marks as $mark) {
+        foreach ($this->marks as $mark) {
             $score += $mark->getPoints();
         }
         $score += $this->getScore();
         $score = min(max($score, $this->component->getLowerClamp()), $this->component->getUpperClamp());
-        return $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->roundPointValue($score);
+        $precision = $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->getPrecision();
+        return NumberUtils::roundPointValue($score, $precision);
     }
 
     /**
@@ -271,10 +275,12 @@ class GradedComponent extends AbstractModel {
     public function setGradeTime($grade_time) {
         if ($grade_time === null) {
             $this->grade_time = null;
-        } else {
+        }
+        else {
             try {
                 $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }
@@ -298,34 +304,35 @@ class GradedComponent extends AbstractModel {
     public function setScore(float $score) {
         if ($this->component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->score = $score;
-        } else {
+        }
+        else {
             // clamp the score (no error if not in bounds)
             //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
             $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
         }
-        $this->score = $this->getComponent()->getGradeable()->roundPointValue($this->score);
+        $this->score = NumberUtils::roundPointValue($this->score, $this->getComponent()->getGradeable()->getPrecision());
         $this->modified = true;
     }
 
-    public function setVerifier(User $verifier = null){
+    public function setVerifier(User $verifier = null) {
         $this->verifier = $verifier;
         $this->verifier_id = $verifier !== null ? $verifier->getId() : '';
-        $this->modified = true;    
+        $this->modified = true;
     }
 
     /**
      * Gets the id of the verifier or '' if none exist
      * @return string
      */
-    public function getVerifierId(){
+    public function getVerifierId() {
         return $this->verifier_id;
     }
 
     /**
-     * Gets the verifier 
+     * Gets the verifier
      * @return User
      */
-    public function getVerifier(){
+    public function getVerifier() {
         return $this->verifier;
     }
 
@@ -333,13 +340,15 @@ class GradedComponent extends AbstractModel {
      * Sets the time for when this component was verified
      * @param string $verify_time
      */
-    public function setVerifyTime($verify_time){
+    public function setVerifyTime($verify_time) {
         if ($verify_time === null) {
             $this->verify_time = null;
-        } else {
+        }
+        else {
             try {
                 $this->verify_time = DateUtils::parseDateTime($verify_time, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }
@@ -350,7 +359,7 @@ class GradedComponent extends AbstractModel {
      * Gets the time when this component was verified
      * @return \DateTime
      */
-    public function getVerifyTime(){
+    public function getVerifyTime() {
         return $this->verify_time;
     }
     /* Intentionally Unimplemented accessor methods */

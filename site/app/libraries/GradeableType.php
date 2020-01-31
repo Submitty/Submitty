@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-abstract class GradeableType{
+abstract class GradeableType {
     const ELECTRONIC_FILE = 0;
     const CHECKPOINTS     = 1;
     const NUMERIC_TEXT    = 2;
@@ -13,7 +13,7 @@ abstract class GradeableType{
      * @return string
      */
     public static function typeToString(int $type): string {
-        switch($type) {
+        switch ($type) {
             case static::ELECTRONIC_FILE:
                 return "Electronic File";
             case static::CHECKPOINTS:
@@ -31,7 +31,7 @@ abstract class GradeableType{
      * @return int
      */
     public static function stringToType(string $string): int {
-        switch($string) {
+        switch ($string) {
             case "Electronic File":
                 return static::ELECTRONIC_FILE;
             case "Checkpoints":

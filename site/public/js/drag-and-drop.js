@@ -91,7 +91,7 @@ function dropWithMultipleZips(e){
     }
 }
 
-// show progressbar when uploading files 
+// show progressbar when uploading files
 function progress(e){
     var progressBar = document.getElementById("loading-bar");
 
@@ -104,16 +104,15 @@ function progress(e){
         progressBar.value = e.loaded;
         let perc = (e.loaded * 100)/e.total;
         $("#loading-bar-percentage").html(perc.toFixed(2) + " %");
-    }  
+    }
 }
 
-function get_part_number(e){
-    if(e.target.id.substring(0, 6) == "upload"){
-        return e.target.id.substring(6);
+function get_part_number(e) {
+    let node = e.target;
+    while (node.id.substring(0, 6) !== 'upload') {
+        node = node.parentNode;
     }
-    else{
-        return e.target.parentNode.id.substring(6);
-    }
+    return node.id.substring(6);
 }
 
 // copy files selected from the file browser
@@ -173,14 +172,18 @@ function isFolder(file){
 function addFile(file, part, check_duplicate_zip=true){
     var i = fileExists(file.name, part);
     if( i[0] == -1 ){    // file does not exist
-        // empty bucket if file is a zip and bucket is not empty
+        // When uploading a zip, we confirm with the user to empty the bucket and then only add the zip
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
             if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
                 deleteFiles(part);
+                file_array[part-1].push(file);
+                addLabel(file.name, (file.size/1024).toFixed(2), part, false);
             }
         }
-        file_array[part-1].push(file);
-        addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+        else {
+            file_array[part-1].push(file);
+            addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+        }
     }
     else if(i[0] == 0){    // file already selected
         if(confirm("Note: " + file_array[part-1][i[1]].name + " is already selected. Do you want to replace it?")){
@@ -212,8 +215,8 @@ function deleteFiles(part) {
     if(previous_files.length != 0){
         previous_files[part-1] = [];
     }
-    var dropzone = document.getElementById("upload" + part);
-    var labels = dropzone.getElementsByClassName("mylabel");
+    var dropzone = document.getElementById("file-upload-table-" + part);
+    var labels = dropzone.getElementsByClassName("file-label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
     }
@@ -259,7 +262,8 @@ function setButtonStatus() {
         $("#startnew").prop("disabled", true);
         if (empty_inputs) {
             $("#submit").prop("disabled", true);
-        } else {
+        }
+        else {
             $("#submit").prop("disabled", false);
         }
     }
@@ -287,8 +291,9 @@ function setButtonStatus() {
 // LABELS FOR SELECTED FILES
 //========================================================================================
 function removeLabel(filename, part){
-    var dropzone = document.getElementById("upload" + part);
-    var labels = dropzone.getElementsByClassName("mylabel");
+    var dropzone = document.getElementById("file-upload-table-" + part);
+    var labels = dropzone.getElementsByClassName("file-label");
+    debugger;
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
@@ -300,40 +305,49 @@ function removeLabel(filename, part){
 
 function addLabel(filename, filesize, part, previous){
     // create element
-    var tmp = document.createElement('label');
-    tmp.setAttribute("class", "mylabel");
-    tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i><br />";
+    var uploadRowElement = document.createElement('tr');
+    uploadRowElement.setAttribute("fname", filename);
+    uploadRowElement.setAttribute("class", 'file-label');
+
+    var fileDataElement = document.createElement('td');
+    var fileTrashElement = document.createElement('td');
+    fileTrashElement.setAttribute('class', 'file-trash');
+
+    fileDataElement.innerHTML= filename;
+    fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
+
+    uploadRowElement.appendChild(fileDataElement);
+    uploadRowElement.appendChild(fileTrashElement);
 
     // styling
-    tmp.children[0].onmouseover = function(e){
+    fileTrashElement.onmouseover = function(e){
         e.stopPropagation();
         this.style.color = "#FF3933";
     };
-    tmp.children[0].onmouseout = function(e){
+    fileTrashElement.onmouseout = function(e){
         e.stopPropagation();
         this.style.color = "black";
     };
-    // remove file and label on click
-    tmp.children[0].onclick = function(e){
+    // remove file and label-row in table on click event
+    fileTrashElement.onclick = function(e){
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
 
     // FOR VPAT if trash can has focus and key is pressed it will delete item
-    tmp.children[0].onkeypress = function(e){
+    fileTrashElement.onkeypress = function(e){
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
 
-    // add to parent div
-    var dropzone = document.getElementById("upload" + part);
+    // adding the file in `table` in the parent div
+    var fileTable = document.getElementById("file-upload-table-" + part);
     // Uncomment if want buttons for emptying single bucket
     // var deletebutton = document.getElementById("delete" + part);
-    dropzone.appendChild(tmp);
-    // dropzone.insertBefore(tmp, deletebutton);
+    fileTable.appendChild(uploadRowElement);
+    // fileTable.insertBefore(tmp, deletebutton);
     label_array[part-1].push(filename);
 }
 
@@ -424,7 +438,8 @@ function validateUserId(csrf_token, gradeable_id, user_id){
                 response = JSON.parse(response);
                 if(response['status'] === 'success'){
                     resolve(response);
-                }else{
+                }
+                else {
                     reject(response);
                 }
             },
@@ -474,10 +489,12 @@ function displayPreviousSubmissionOptions(callback){
         if($("#instructor-submit-option-new").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "0");
             option = 1;
-        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-1").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "1");
             option = 2;
-        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-2").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "2");
             option = 3;
         }
@@ -489,9 +506,11 @@ function displayPreviousSubmissionOptions(callback){
     closer_btn.on('click', function() {
         if($("#instructor-submit-option-new").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "0");
-        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-1").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "1");
-        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-2").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "2");
         }
         form.css("display", "none");
@@ -505,7 +524,8 @@ function displayPreviousSubmissionOptions(callback){
     var radio_idx;
     if(localStorage.getItem("instructor-submit-option") === null) {
         radio_idx = 0;
-    }else {
+    }
+    else {
         radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
     }
     form.find('input:radio')[radio_idx].checked = true;
@@ -525,37 +545,47 @@ function displayPreviousSubmissionOptions(callback){
                 if(current_btn === 0){
                     $("#instructor-submit-option-merge-1").focus();
                     $("#instructor-submit-option-merge-1").css({"outline" : "2px solid #C1E0FF"});
-                }else if(current_btn === 1){
+                }
+                else if(current_btn === 1){
                     $("#instructor-submit-option-merge-2").focus();
                     $("#instructor-submit-option-merge-2").css({"outline" : "2px solid #C1E0FF"});
-                }else if(current_btn === 2){
+                }
+                else if(current_btn === 2){
                     closer_btn.focus();
-                }else if(current_btn === 3){
+                }
+                else if(current_btn === 3){
                     submit_btn.focus();
-                }else if(current_btn === 4){
+                }
+                else if(current_btn === 4){
                     $("#instructor-submit-option-new").focus();
                     $("#instructor-submit-option-new").css({"outline" : "2px solid #C1E0FF"});
                 }
                 current_btn = (current_btn == 4) ? 0 : current_btn + 1;
-            }else if(e.keyCode === 27){
+            }
+            else if(e.keyCode === 27){
                 //close the modal box on escape
                 closer_btn.click();
-            }else if(e.keyCode === 13){
+            }
+            else if(e.keyCode === 13){
                 //on enter update whatever the user is focussing on
                 //uncheck everything and then recheck the desired button to make sure it actually updates
                 if(current_btn === 1){
                     $('input[name=instructor-submit]').prop('checked', false);
                     $("#instructor-submit-option-merge-1").prop('checked', true);
-                }else if(current_btn === 2){
+                }
+                else if(current_btn === 2){
                     $('input[name=instructor-submit]').prop('checked', false);
                     $("#instructor-submit-option-merge-2").prop('checked', true);
-                }else if(current_btn === 0){
+                }
+                else if(current_btn === 0){
                     $('input[name=instructor-submit]').prop('checked', false);
                     $("#instructor-submit-option-new").prop('checked', true);
-                }else if(current_btn === 3){
+                }
+                else if(current_btn === 3){
                     //close the modal if the close button is selected
                     closer_btn.click();
-                }else if(current_btn === 4){
+                }
+                else if(current_btn === 4){
                     submit_btn.click();
                 }
             }
@@ -624,7 +654,8 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
                 response = JSON.parse(response);
                 if (response['status'] === 'success') {
                     resolve(response);
-                }else {
+                }
+                else {
                     reject(response);
                 }
             },
@@ -692,14 +723,14 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             total_size += file_array[i][j].size;
 
             if (total_size >= max_file_size){
-                alert("ERROR! Uploaded file(s) exceed max file size.\n" + 
+                alert("ERROR! Uploaded file(s) exceed max file size.\n" +
                       "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
                 $("#submit").prop("disabled", false);
                 return;
             }
 
              if (total_size >= max_post_size){
-                alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" + 
+                alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" +
                       "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
                 $("#submit").prop("disabled", false);
                 return;
@@ -775,7 +806,8 @@ function gatherInputAnswersByType(type){
             key = this_input_answer.id;
             var editor = this_input_answer.querySelector(".CodeMirror").CodeMirror;
             value = editor.getValue();
-        }else{
+        }
+        else{
             key = this_input_answer.name;
             value = this_input_answer.value;
         }
@@ -1016,15 +1048,19 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path,cmTime) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path,cmTime, sections) {
     var submit_url = buildCourseUrl(['course_materials', 'upload']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
+    formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
+    if(sections !== null){
+        formData.append('sections', sections);
+    }
     var target_path = cmPath; // this one has slash at the end.
     if (requested_path && requested_path.trim().length) {
         target_path = cmPath + requested_path;

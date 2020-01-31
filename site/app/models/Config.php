@@ -4,10 +4,8 @@ namespace app\models;
 
 use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
-use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
 
 /**
  * Class Config
@@ -57,7 +55,13 @@ use app\libraries\Utils;
  * @method array getCourseJson()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
+ * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
+ * @method void setSemester(string $semester)
+ * @method void setCourse(string $course)
+ * @method void setCoursePath(string $course_path)
+ * @method void setSubmittyPath(string $submitty_path)
+ * @method void setDebug(bool $debug)
  */
 
 class Config extends AbstractModel {
@@ -66,150 +70,152 @@ class Config extends AbstractModel {
      * Variable to set the system to debug mode, which allows, among other things
      * easier access to user switching and to always output full exceptions. Never
      * turn on if running server in production environment.
-     * @property
+     * @prop
      * @var bool
      */
     protected $debug = false;
 
-    /** @property @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
+    /** @prop @var string contains the semester to use, generally from the $_REQUEST['semester'] global */
     protected $semester;
-    /** @property @var string contains the course to use, generally from the $_REQUEST['course'] global */
+    /** @prop @var string contains the course to use, generally from the $_REQUEST['course'] global */
     protected $course;
 
-    /** @property @var string path on the filesystem that points to the course data directory */
+    /** @prop @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @property @var string path to the json file that contains all the course specific settings */
+    /** @prop @var string path to the json file that contains all the course specific settings */
     protected $course_json_path;
 
-    /** @property @var array */
-    protected $course_json;
+    /** @prop @var array */
+    protected $course_json = array();
 
     /**
     * Indicates whether a course config has been successfully loaded.
     * @var bool
-    * @property
+    * @prop
     */
     protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
-    /** @property @var string */
+    /** @prop @var string */
     protected $base_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $vcs_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $cgi_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $authentication;
-    /** @property @var DateTimeZone */
+    /** @prop @var DateTimeZone */
     protected $timezone;
     /** @var string */
     protected $default_timezone = 'America/New_York';
-    /** @property @var string */
+    /** @prop @var string */
     protected $submitty_path;
-    /** @property @var string */
+    /** @prop @var string */
     protected $course_path;
-    /** @property @var string */
+    /** @prop @var string */
     protected $submitty_log_path;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $log_exceptions;
-    /** @property @var string */
+    /** @prop @var string */
     protected $cgi_tmp_path;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $database_driver = "pgsql";
 
     /**
      * The name of the institution that deployed Submitty. Added to the breadcrumb bar if non-empty.
      * @var string
-     * @property
+     * @prop
      */
     protected $institution_name = "";
 
     /**
      * The url of the institution's homepage. Linked to from the breadcrumb created with institution_name.
      * @var string
-     * @property
+     * @prop
      */
     protected $institution_homepage = "";
 
     /**
      * The text to be shown to a user when they attempt to change their username.
      * @var string
-     * @property
+     * @prop
      */
     protected $username_change_text = "";
 
     /**
      * The text to be shown when an instructor enters a course code for a new course.
      * @var string
-     * @property
+     * @prop
      */
     protected $course_code_requirements = "";
 
-    /** @property @var string Text shown to all users for system announcement */
+    /** @prop @var string Text shown to all users for system announcement */
     protected $system_message = '';
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $submitty_database_params = array();
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $course_database_params = array();
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $wrapper_files = array();
 
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $email_enabled;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $latest_tag;
-    /** @property @var string */
+    /** @prop @var string */
     protected $latest_commit;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $course_name;
-    /** @property @var string */
+    /** @prop @var string */
     protected $course_home_url;
-    /** @property @var int */
+    /** @prop @var int */
     protected $default_hw_late_days;
-    /** @property @var int */
+    /** @prop @var int */
     protected $default_student_late_days;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $zero_rubric_grades;
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $upload_message;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $keep_previous_files;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $display_rainbow_grades_summary;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $display_custom_message;
-    /** @property @var string*/
+    /** @prop @var string*/
     protected $course_email;
-    /** @property @var string */
+    /** @prop @var string */
     protected $vcs_base_url;
-    /** @property @var string */
+    /** @prop @var string */
     protected $vcs_type;
-    /** @property @var string */
+    /** @prop @var string */
     protected $private_repository;
-    /** @property @var array */
+    /** @prop @var array */
     protected $hidden_details;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $forum_enabled;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $regrade_enabled;
-    /** @property @var string */
+    /** @prop @var string */
     protected $regrade_message;
-    /** @property @var bool*/
+    /** @prop @var bool*/
     protected $seating_only_for_instructor;
-    /** @property @var string|null */
+    /** @prop @var string|null */
     protected $room_seating_gradeable_id;
-    /** @property @var bool */
+    /** @prop @var bool */
     protected $auto_rainbow_grades;
-    /** @property @var string */
+    /** @prop @var string */
     protected $secret_session;
-    /** @property @var bool */
+    /** @prop-read @var string|null */
+    protected $verified_submitty_admin_user = null;
+    /** @prop @var bool */
     protected $queue_enabled;
 
     /**
@@ -224,7 +230,7 @@ class Config extends AbstractModel {
 
     public function loadMasterConfigs($config_path) {
         if (!is_dir($config_path)) {
-            throw new ConfigException("Could not find config directory: ". $config_path, true);
+            throw new ConfigException("Could not find config directory: " . $config_path, true);
         }
         $this->config_path = $config_path;
         // Load config details from the master config file
@@ -286,33 +292,33 @@ class Config extends AbstractModel {
             $this->system_message = strval($submitty_json['system_message']);
         }
 
-        $this->base_url = rtrim($this->base_url, "/")."/";
+        $this->base_url = rtrim($this->base_url, "/") . "/";
 
-        if (!empty($submitty_json['cgi_url'])){
-            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/")."/";
+        if (!empty($submitty_json['cgi_url'])) {
+            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/") . "/";
         }
         else {
-            $this->cgi_url = $this->base_url."cgi-bin/";
+            $this->cgi_url = $this->base_url . "cgi-bin/";
         }
 
         if (empty($submitty_json['vcs_url'])) {
             $this->vcs_url = $this->base_url . '{$vcs_type}/';
         }
         else {
-            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
+            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
-        foreach(array('submitty_path', 'submitty_log_path') as $path) {
+        foreach (array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
 
-        foreach(array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
+        foreach (array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
@@ -323,13 +329,13 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
         }
 
-        foreach(['session'] as $key) {
+        foreach (['session'] as $key) {
             $var = "secret_{$key}";
             $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
             if (empty($secrets_json[$key])) {
                 throw new ConfigException("Missing secret var: {$key}");
             }
-            else if (strlen($secrets_json[$key]) < 32) {
+            elseif (strlen($secrets_json[$key]) < 32) {
                 // enforce a minimum 32 bytes for the secrets
                 throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
             }
@@ -347,12 +353,19 @@ class Config extends AbstractModel {
         if (!$version_json) {
             throw new ConfigException("Could not find version file: {$this->config_path}/version.json");
         }
-        if (!isset($version_json['most_recent_git_tag']) ||
-            !isset($version_json['short_installed_commit'])) {
+        if (
+            !isset($version_json['most_recent_git_tag'])
+            || !isset($version_json['short_installed_commit'])
+        ) {
             throw new ConfigException("Error parsing version information: {$this->config_path}/version.json");
         }
         $this->latest_tag = $version_json['most_recent_git_tag'];
         $this->latest_commit = $version_json['short_installed_commit'];
+
+        $users_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty_users.json'));
+        if ($users_json !== false && isset($users_json['verified_submitty_admin_user'])) {
+            $this->verified_submitty_admin_user = $users_json['verified_submitty_admin_user'];
+        }
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
@@ -361,12 +374,12 @@ class Config extends AbstractModel {
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
 
         if (!file_exists($course_json_path)) {
-            throw new ConfigException("Could not find course config file: ".$course_json_path, true);
+            throw new ConfigException("Could not find course config file: " . $course_json_path, true);
         }
         $this->course_json_path = $course_json_path;
         $this->course_json = json_decode(file_get_contents($course_json_path), true);
         if ($this->course_json === null) {
-            throw new ConfigException("Error parsing the config file: ".json_last_error_msg());
+            throw new ConfigException("Error parsing the config file: " . json_last_error_msg());
         }
 
         if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
@@ -388,12 +401,12 @@ class Config extends AbstractModel {
             $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
         }
 
-        $this->vcs_base_url = rtrim($this->vcs_base_url, "/")."/";
+        $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
 
         if (isset($this->course_json['hidden_details'])) {
             $this->hidden_details = $this->course_json['hidden_details'];
             if (isset($this->course_json['hidden_details']['course_url'])) {
-                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/")."/";
+                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/") . "/";
             }
         }
 
@@ -431,44 +444,9 @@ class Config extends AbstractModel {
         }
     }
 
-    /**
-     * Determine if automatic rainbow grades is fully configured
-     * For some features to be available to the instructors, the submitty-admin user must be configured
-     * at the system level and also must be a member of the course in question.
-     */
-
-    public function getSubmittyAdminUser() {
-        // grab the name of the submitty_admin user (only if 'verified',
-        // that is, password successfully used to grab an API token.
-        $users_file = FileUtils::joinPaths(
-            '/', 'usr', 'local', 'submitty', 'config', 'submitty_users.json'
-        );
-        if(!is_file($users_file)) {
-            throw new FileNotFoundException('Unable to locate the submity_users.json file');
-        }
-        $users_file_contents = json_decode(file_get_contents($users_file));
-        $submitty_admin_user = "";
-        if (property_exists($users_file_contents,"verified_submitty_admin_user")) {
-            $submitty_admin_user = $users_file_contents->verified_submitty_admin_user;
-        }
-        return $submitty_admin_user;
-    }
-
     public function isSubmittyAdminUserVerified() {
-        return $this->getSubmittyAdminUser() !== "";
+        return !empty($this->verified_submitty_admin_user);
     }
-
-    public function isSubmittyAdminUserInCourse() {
-        $submitty_admin_user = $this->getSubmittyAdminUser();
-        if ($submitty_admin_user === "") {
-            return false;
-        }
-        $course = $this->getCourse();
-        $semester = $this->getSemester();
-        return $this->core->getQueries()->checkIsInstructorInCourse
-          ($submitty_admin_user, $course, $semester);
-    }
-
 
     /**
      * @return boolean
@@ -524,8 +502,8 @@ class Config extends AbstractModel {
         return $this->submitty_log_path;
     }
 
-    public function saveCourseJson($save) {
-        FileUtils::writeJsonFile($this->course_json_path, array_merge($this->course_json, $save));
+    public function saveCourseJson($save): bool {
+        return FileUtils::writeJsonFile($this->course_json_path, array_merge($this->course_json, $save));
     }
 
     public function wrapperEnabled() {

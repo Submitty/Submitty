@@ -2,7 +2,7 @@
 
 namespace tests\app\controllers\student;
 
-use \ZipArchive;
+use ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
 use app\libraries\Core;
@@ -133,14 +133,6 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
     private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true) {
-        if ($has_autograding_config) {
-            $details = [
-                'max_submission_size' => $max_size,
-                'part_names' => array_fill(0, $num_parts, "")
-            ];
-            $auto_grading_config = new AutogradingConfig($this->core, $details);
-        }
-
         $submission_open_date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         if ($student_view) {
             $submission_open_date->sub(new \DateInterval('PT1H'));
@@ -190,6 +182,11 @@ class SubmissionControllerTester extends BaseUnitTest {
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
+            $autograding_details = [
+                'max_submission_size' => $max_size,
+                'part_names' => array_fill(0, $num_parts, "")
+            ];
+            $auto_grading_config = new AutogradingConfig($this->core, $autograding_details);
             $gradeable->setAutogradingConfig($auto_grading_config);
         }
         return $gradeable;
@@ -251,9 +248,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string $content
      * @param int    $part
      */
-    private function addUploadFile($filename, $content="", $part=1) {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), true, 0777);
-        $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part, $filename);
+    private function addUploadFile($filename, $content = "", $part = 1) {
+        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part), true, 0777);
+        $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part, $filename);
         if (file_put_contents($filepath, $content) === false) {
             throw new IOException("Could not write file to {$filepath}");
         }
@@ -273,16 +270,16 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param array  $files
      * @param int    $part
      */
-    private function addUploadZip($zip_name, $files, $part=1) {
-        $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part);
+    private function addUploadZip($zip_name, $files, $part = 1) {
+        $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
         FileUtils::createDir($root_path, true, 0777);
-        $zip_path =  FileUtils::joinPaths($part_path, $zip_name.'.zip');
+        $zip_path =  FileUtils::joinPaths($part_path, $zip_name . '.zip');
         $zip = new ZipArchive();
         $zip->open($zip_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
         $this->createZip($files, $zip, $root_path);
         $zip->close();
-        $_FILES["files{$part}"]['name'][] = $zip_name.'.zip';
+        $_FILES["files{$part}"]['name'][] = $zip_name . '.zip';
         $_FILES["files{$part}"]['type'][] = mime_content_type($zip_path);
         $_FILES["files{$part}"]['size'][] = filesize($zip_path);
         $_FILES["files{$part}"]['tmp_name'][] = $zip_path;
@@ -302,7 +299,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string      $dir
      * @param string|null $root_dir
      */
-    private function createZip($files, $zip, $dir, $root_dir=null) {
+    private function createZip($files, $zip, $dir, $root_dir = null) {
         if ($root_dir === null) {
             $root_dir = $dir;
         }
@@ -416,10 +413,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $this->assertEquals(".submit.timestamp", $iter->getFilename());
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertTrue(in_array($iter->getFilename(), array('part1', 'part2')));
                 $files[$iter->getFilename()] = array();
                 $iter2 = $iter->getChildren();
@@ -428,7 +425,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $files[$iter->getFilename()][$iter2->getFilename()] = file_get_contents($iter2->getPathname());
                     }
                     else {
@@ -486,10 +483,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $filenames[] = $iter->getFilename();
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("testDir", $iter->getFilename());
                 $iter2 = $iter->getChildren();
                 while ($iter2 !== "" && $iter2->getFilename() !== "") {
@@ -497,7 +494,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $this->assertEquals("test1.txt", $iter2->getFilename());
                     }
                     else {
@@ -825,7 +822,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -892,7 +889,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
-
     }
 
     /**
@@ -948,14 +944,14 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("folder with spaces", $iter->getFilename());
                 foreach (new \FilesystemIterator($iter->getPathname()) as $iter2) {
                     $this->assertTrue($iter2->isFile());
                     $this->assertEquals("filename with spaces2.txt", $iter2->getFilename());
                 }
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -987,7 +983,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__".$touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__" . $touch_file));
     }
 
     public function testEmptyPost() {
@@ -1104,7 +1100,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testErrorPreviousFilesFirstVersion() {
-        $_POST['previous_files'] = json_encode(array(0=>array('test.txt')));
+        $_POST['previous_files'] = json_encode(array(0 => array('test.txt')));
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1213,8 +1209,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail', "An error should have happened");
-        $this->assertEquals("File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
-            $return['message']);
+        $this->assertEquals(
+            "File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
+            $return['message']
+        );
         $this->assertFalse($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));
@@ -1223,9 +1221,12 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorOnBrokenZip() {
         $this->addUploadZip('broken', array('test1.txt'));
         $path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part1', 'broken.zip');
-        $fh = fopen($path, 'r+') or die("can't open file");
+        $fh = fopen($path, 'r+');
+        if (!$fh) {
+            $this->fail('cannot open the file');
+        }
         $stat = fstat($fh);
-        ftruncate($fh, $stat['size']-1);
+        ftruncate($fh, $stat['size'] - 1);
         fclose($fh);
 
         $controller = new SubmissionController($this->core);
@@ -1542,12 +1543,30 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
+    public function testUpdateInvalidGradeable() {
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('invalid_gradeable', -1);
+
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Invalid gradeable id.", $json['message']);
+    }
+
     public function testUpdateNegativeVersion() {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', -1);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Cannot set the version below 0.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Cannot set the version below 0.", $json['message']);
     }
 
     /**
@@ -1557,8 +1576,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 2);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Cannot set the version past 1.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Cannot set the version past 1.", $json['message']);
     }
 
     /**
@@ -1568,8 +1592,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 1);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Failed to open settings file.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Failed to open settings file.", $json['message']);
     }
 
     /**
@@ -1586,8 +1615,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 1);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Could not write to settings file.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Could not write to settings file.", $json['message']);
     }
 
     public function testUpdateCancelSubmission() {
@@ -1600,9 +1634,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 0);
 
-        $this->assertFalse($return['status'] == 'fail');
-        $this->assertEquals("Cancelled submission for gradeable.", $return['data']['message']);
-        $this->assertEquals(0, $return['data']['version']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test/0', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json_response = $return->json_response->json;
+        $this->assertEquals('success', $json_response['status']);
+        $this->assertEquals("Cancelled submission for gradeable.", $json_response['data']['message']);
+        $this->assertEquals(0, $json_response['data']['version']);
         $json = json_decode(file_get_contents($settings), true);
         $this->assertEquals(0, $json['active_version']);
         $this->assertTrue(isset($json['history']));
@@ -1624,9 +1663,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 4);
 
-        $this->assertFalse($return['status'] == 'fail');
-        $this->assertEquals("Updated version of gradeable to version #4.", $return['data']['message']);
-        $this->assertEquals(4, $return['data']['version']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test/4', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json_response = $return->json_response->json;
+        $this->assertEquals('success', $json_response['status']);
+        $this->assertEquals("Updated version of gradeable to version #4.", $json_response['data']['message']);
+        $this->assertEquals(4, $json_response['data']['version']);
         $json = json_decode(file_get_contents($settings), true);
         $this->assertEquals(4, $json['active_version']);
         $this->assertTrue(isset($json['history']));
@@ -1677,5 +1721,4 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['refresh']);
         $this->assertEquals("REFRESH_ME", $return['string']);
     }
-
 }

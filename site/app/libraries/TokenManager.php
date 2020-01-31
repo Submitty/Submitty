@@ -26,7 +26,7 @@ class TokenManager {
         string $user_id,
         string $issuer,
         string $secret,
-        $persistent=true
+        $persistent = true
     ): Token {
         $expire_time = ($persistent) ? time() + (7 * 24 * 60 * 60) : 0;
         return (new Builder())->issuedBy($issuer)

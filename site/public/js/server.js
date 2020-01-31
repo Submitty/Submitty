@@ -42,11 +42,13 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
         var option = 'unicode'
-    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
+    }
+    else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
         var option = 'escape'
-    } else {
+    }
+    else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
@@ -60,7 +62,8 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         if (data.status === 'fail') {
             alert("Error loading diff: " + data.message);
             return false;
-        } else if (data.status === 'error') {
+        }
+        else if (data.status === 'error') {
             alert("Internal server error: " + data.message);
             return false;
         }
@@ -120,7 +123,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-show").show();
-    }else{
+    }
+    else{
         $("#show_char_"+index).toggle();
         var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
@@ -154,6 +158,7 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
+    captureTabInModal("delete-gradeable-form");
 }
 
 function displayCloseSubmissionsWarning(form_action,gradeable_name) {
@@ -163,6 +168,7 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
+    captureTabInModal("close-submissions-form");
 }
 
 function newDeleteCourseMaterialForm(path, file_name) {
@@ -188,12 +194,14 @@ function newDeleteCourseMaterialForm(path, file_name) {
     $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
+    captureTabInModal("delete-course-material-form");
 }
 
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
     form.css("display", "block");
+    captureTabInModal("upload-images-form");
     $('[name="upload"]', form).val(null);
 }
 
@@ -211,14 +219,49 @@ function newUploadCourseMaterialsForm() {
     }
 
     $('.popup-form').css('display', 'none');
-    var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
-
+    var form = $("#upload-course-materials-form");
     form.css("display", "block");
+    captureTabInModal("upload-course-materials-form");
     $('[name="upload"]', form).val(null);
 
+}
+
+function captureTabInModal(formName){
+    
+    var form = $("#".concat(formName));
+    
+    /*get all the elements to tab through*/
+    var inputs = form.find(':focusable').filter(':visible');
+    var firstInput = inputs.first();
+    var lastInput = inputs.last();
+
+    /*set focus on first element*/
+    firstInput.focus();
+
+    /*redirect last tab to first element*/
+    form.on('keydown', function (e) {
+        if ((e.which === 9 && !e.shiftKey && $(lastInput).is(':focus'))) {
+            firstInput.focus();
+            e.preventDefault();
+        }
+        else if ((e.which === 9 && e.shiftKey && $(firstInput).is(':focus'))) {
+            lastInput.focus();
+            e.preventDefault();
+        }
+    });
+    
+    form.on('hidden.bs.modal', function () {
+        releaseTabFromModal(formName);
+    })
+}
+
+function releaseTabFromModal(formName){
+    
+    var form = $("#".concat(formName));
+    form.off('keydown');
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
@@ -226,8 +269,9 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     $('.popup-form').css('display', 'none');
 
     var form = $("#set-folder-release-form");
-
     form.css("display", "block");
+
+    captureTabInModal("set-folder-release-form");
 
     $('[id="release_title"]',form).attr('data-path',changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
@@ -246,6 +290,7 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
     $('[name="gradeable_title"]', form).append(gradeable_title);
     $('[name="delete"]', form).attr('action', form_action);
     form.css("display", "block");
+    captureTabInModal("delete-plagiarism-result-and-config-form");
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
@@ -548,6 +593,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
 
 function toggleUsersPlagiarism(gradeable_id) {
     var form = $("#users_with_plagiarism");
+    "#set-folder-release-form"
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
 
@@ -587,6 +633,9 @@ function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeabl
         }
         else if ($('[name="language"]', form).val() == "plaintext") {
             $('[name="sequence_length"]', form).val('4');
+        }
+        else if ($('[name="language"]', form).val() == "mips") {
+            $('[name="sequence_length"]', form).val('5');
         }
     }
     else if(select_element_name.substring(0, 9) == "prev_sem_") {
@@ -763,6 +812,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
+    captureTabInModal("admin-team-form");
 
     $("#admin-team-form-submit").prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
@@ -857,7 +907,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             }
         }
     }
-    
+
     $(":text",form).change(function() {
         var found = false;
         for (var i = 0; i < student_full.length; i++) {
@@ -887,7 +937,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     });
     var param = (new_team ? 3 : members.length+2);
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
 }
 
@@ -918,7 +968,7 @@ function addTeamMemberInput(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -932,7 +982,7 @@ function addCategory(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -944,6 +994,7 @@ function importTeamForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#import-team-form");
     form.css("display", "block");
+    captureTabInModal("import-team-form");
     $('[name="upload_team"]', form).val(null);
 }
 
@@ -952,6 +1003,7 @@ function randomizeRotatingGroupsButton() {
     $('.popup-form').css('display', 'none');
     var form = $("#randomize-button-warning");
     form.css("display", "block");
+    captureTabInModal("randomize-button-warning");
 }
 
 
@@ -1037,7 +1089,8 @@ function check_server(url) {
         function(data) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
-            } else {
+            }
+        else {
                 checkRefreshPage(url);
             }
         }
@@ -1195,7 +1248,8 @@ function changeName(element, user, visible_username, anon){
         new_element.innerHTML = visible_username;
         icon.className = "fas fa-eye";
         icon.title = "Show full user information";
-    } else {
+    }
+    else {
         if(anon) {
             new_element.style.color = "grey";
             new_element.style.fontStyle = "italic";
@@ -1297,9 +1351,11 @@ $(function() {
         }
     }
 
-    setTimeout(function() {
-        $('.alert-success').fadeOut();
-    }, 5000);
+    for (const elem of document.getElementsByClassName('alert-success')) {
+        setTimeout(() => {
+            $(elem).fadeOut();
+        }, 5000);
+    }
 });
 
 function getFileExtension(filename){
@@ -1316,10 +1372,35 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-function displayError(message){
-    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + message + '</div>';
+let messages = 0;
+
+function displayErrorMessage(message){
+    displayMessage(message, 'error');
+}
+
+function displaySuccessMessage(message) {
+    displayMessage(message, 'success');
+}
+
+/**
+ * Display a toast message after an action.
+ *
+ * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
+ *
+ * @param {string} message
+ * @param {string} type
+ */
+function displayMessage(message, type) {
+    const id = `${type}-js-${messages}`;
+    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
-    $('#messages').fadeIn("slow");
+    $('#messages').fadeIn('slow');
+    if (type === 'success') {
+        setTimeout(() => {
+            $(`#${id}`).fadeOut();
+        }, 5000);
+    }
+    messages++;
 }
 
 /**
@@ -1347,7 +1428,8 @@ function enableTabsInTextArea(jQuerySelector) {
             var controls = $(":input").filter(":visible");
             controls.eq(controls.index(this) + 1).focus();
             return false;
-        } else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
+        }
+        else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1428,7 +1510,8 @@ function refreshOnResponseOverriddenGrades(json) {
     $('#title').replaceWith(title);
     if(json['data']['users'].length === 0){
         $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
-    } else {
+    }
+    else {
         json['data']['users'].forEach(function(elem){
             var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
             var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
@@ -1751,21 +1834,25 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
+        localStorage.setItem('sidebar', 'true');
         $("aside").toggleClass("collapsed", true);
     }
     else{
+        localStorage.setItem('sidebar', 'false');
         $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
-    localStorage.sidebar = !shown;
+    localStorage.setItem('sidebar', (!shown).toString());
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1787,16 +1874,16 @@ $(document).ready(function() {
     });
 
     //Remember sidebar preference
-    if (localStorage.sidebar !== "") {
-        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
+    if (localStorage.getItem('sidebar') !== "") {
+        $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
+        //Once the sidebar is set the page can be unhidden
+        $("#submitty-body").show();
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
     $(document.body).resize(function() {
         checkSidebarCollapse();
     });
-    checkSidebarCollapse();
 });
 
 function checkBulkProgress(gradeable_id){

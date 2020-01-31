@@ -3,10 +3,10 @@
 namespace tests\app\libraries;
 
 use app\exceptions\AuthenticationException;
-use \app\exceptions\BaseException;
-use \app\libraries\ExceptionHandler;
-use \app\libraries\FileUtils;
-use \app\libraries\Logger;
+use app\exceptions\BaseException;
+use app\libraries\ExceptionHandler;
+use app\libraries\FileUtils;
+use app\libraries\Logger;
 use app\libraries\Utils;
 
 class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
@@ -40,10 +40,10 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         Logger::setLogPath($tmp_dir);
 
         $date = getdate(time());
-        $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']).'.log';
+        $filename = $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']) . '.log';
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
-        ExceptionHandler::handleException(new BaseException("test", array("test"=>"b", "test2"=>array('a','c'))));
+        ExceptionHandler::handleException(new BaseException("test", array("test" => "b", "test2" => array('a','c'))));
         $file = FileUtils::joinPaths($tmp_dir, 'site_errors', $filename);
         $this->assertFileExists($file);
         $actual = file_get_contents($file);
@@ -54,7 +54,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
     }
 
     private function authenticate($username, $password) {
-        throw new AuthenticationException($username. "  ". $password);
+        throw new AuthenticationException($username . "  " . $password);
     }
 
     public function testScrubPassword() {
@@ -62,7 +62,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
             $this->authenticate("test", "test");
             $this->fail("Should have thrown exception");
         }
-        catch(AuthenticationException $e) {
+        catch (AuthenticationException $e) {
             ExceptionHandler::setDisplayExceptions(true);
             $message = ExceptionHandler::handleException($e);
             $this->assertRegExp("/Stack Trace:\n#0 (.*)\/site\/tests\/app\/libraries\/ExceptionHandlerTester\.php\(62\): tests\\\app\\\libraries\\\ExceptionHandlerTester\-\>authenticate\(\)\n/", $message);

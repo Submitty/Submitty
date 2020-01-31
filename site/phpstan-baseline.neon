@@ -1,0 +1,902 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Offset int does not exist on array\\(\\?0 \\=\\> 'results'\\|'results_public'\\|'submissions', \\?1 \\=\\> 'checkout'\\|'results_public', \\?2 \\=\\> 'results'\\|'results_public', \\?3 \\=\\> 'results_public'\\)\\.$#"
+			count: 3
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$show_all\\)\\: Unexpected token \"\\$show_all\", expected type at offset 18$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$nid\\)\\: Unexpected token \"\\$nid\", expected type at offset 18$#"
+			count: 2
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$seen\\)\\: Unexpected token \"\\$seen\", expected type at offset 37$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$gradeable$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Variable \\$repo_paths in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Call to an undefined method app\\\\libraries\\\\Core\\:\\:buildNewCourseUrl\\(\\)\\.$#"
+			count: 2
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$config_path\\)\\: Unexpected token \"\\$config_path\", expected type at offset 18$#"
+			count: 1
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
+			message: "#^Variable \\$seating_assignment_emails might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/EmailRoomSeatingController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$csv_option string csv_option_overwrite_all or csv_option_preserve_higher\\)\\: Unexpected token \"\\$csv_option\", expected type at offset 18$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: "#^Variable \\$threshold might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$sequence_length might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$regex_for_selecting_files might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$instructor_provided_code_path might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$max_matching_version might not be defined\\.$#"
+			count: 3
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$user_2_index_in_others might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
+			count: 6
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$color might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$gg in PHPDoc tag @var does not match any variable in the foreach loop\\: \\$user_id$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(GradedGradeable\\[\\] The list of graded gradeables, indexed by gradeable id\\)\\: Unexpected token \"The\", expected variable at offset 127$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(GradedGradeable\\[\\] The list of graded gradeables, indexed by gradeable id\\)\\: Unexpected token \"The\", expected variable at offset 192$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^Variable \\$file in isset\\(\\) is always null\\.$#"
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^Offset 4 does not exist on null\\.$#"
+			count: 5
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(integer\\(0/1/2\\) \\$modifyType \\- 0 \\=\\> delete, 1 \\=\\> edit content, 2 \\=\\> undelete\\)\\: Unexpected token \"\\(\", expected variable at offset 200$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Variable \\$content might not be defined\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Variable \\$subject might not be defined\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Variable \\$original_creator might not be defined\\.$#"
+			count: 2
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool verify all components or not\\)\\: Unexpected token \"verify\", expected variable at offset 83$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$graded_component might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$num_components might not be defined\\.$#"
+			count: 4
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$peer_grade_set might not be defined\\.$#"
+			count: 3
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$my_grading might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$team_users might not be defined\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$all_teams might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Offset 0 does not exist on array\\(\\)\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$from This is the user that was being viewed when a navigation button was clicked on the TA grading\ninterface\\.  Knowing who we were viewing allows us to decide who to view next\\.\\)\\: Unexpected token \"\\$from\", expected type at offset 236$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$to Used to determine the direction to move in, either 'prev' or 'next'\\)\\: Unexpected token \"\\$to\", expected type at offset 452$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$to_ungraded Should the next student we go to be the next submission or next ungraded submission\\?\\)\\: Unexpected token \"\\$to_ungraded\", expected type at offset 538$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$who_id This is the user we wish to view, this field will only be passed on when the request originates\non the grading index page\\)\\: Unexpected token \"\\$who_id\", expected type at offset 68$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$order_all_sections might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$goToStudent might not be defined\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$total_submitted might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sections\\)\\: Unexpected token \"\\$sections\", expected type at offset 131$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$full_sets$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
+			count: 4
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$section\\)\\: Unexpected token \"\\$section\", expected type at offset 46$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$section_type\\)\\: Unexpected token \"\\$section_type\", expected type at offset 69$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sort\\)\\: Unexpected token \"\\$sort\", expected type at offset 97$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sort\\)\\: Unexpected token \"\\$sort\", expected type at offset 66$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$view\\)\\: Unexpected token \"\\$view\", expected type at offset 46$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 46$#"
+			count: 1
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
+			count: 3
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
+			count: 3
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$component_string might not be defined\\.$#"
+			count: 8
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$body might not be defined\\.$#"
+			count: 5
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$subject might not be defined\\.$#"
+			count: 3
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$notifications might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$emails might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$teams might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Variable \\$uploaded_file might not be defined\\.$#"
+			count: 6
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Variable \\$uploaded_file in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Variable \\$team might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$iterators with type array\\<Iterator\\> is not subtype of native type array\\<int, mixed\\>\\.$#"
+			count: 1
+			path: app/libraries/CascadingIterator.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$course\\)\\: Unexpected token \"\\$course\", expected type at offset 484$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$semester\\)\\: Unexpected token \"\\$semester\", expected type at offset 460$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 22$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$status_code$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected type at offset 230$#"
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$actual_file\\)\\: Unexpected token \"\\$actual_file\", expected type at offset 175$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$diff_file\\)\\: Unexpected token \"\\$diff_file\", expected type at offset 231$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$expected_file\\)\\: Unexpected token \"\\$expected_file\", expected type at offset 202$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$id_prepend\\)\\: Unexpected token \"\\$id_prepend\", expected type at offset 288$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$image_difference\\)\\: Unexpected token \"\\$image_difference\", expected type at offset 256$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$actual \\(array\\) does not accept string\\|false\\.$#"
+			count: 2
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$expected \\(array\\) does not accept string\\|false\\.$#"
+			count: 2
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Option for displaying\\. Currently only supports show empty space\\)\\: Unexpected token \"Option\", expected variable at offset 78$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Option for displaying\\. Currently only supports show empty space\\)\\: Unexpected token \"Option\", expected variable at offset 73$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$html the original HTML before any text transformation\\)\\: Unexpected token \"\\$html\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$with_escape Show escape characters instead of character representations\\)\\: Unexpected token \"\\$with_escape\", expected type at offset 87$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$description \\(What is the description of this character\\)\\)\\: Unexpected token \"\\$description\", expected type at offset 111$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$text String\\)\\: Unexpected token \"\\$text\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$what String\\)\\: Unexpected token \"\\$what\", expected type at offset 45$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$which String\\(Reference\\)\\)\\: Unexpected token \"\\$which\", expected type at offset 72$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Call to an undefined method Throwable\\:\\:getDetails\\(\\)\\.$#"
+			count: 1
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$mode\\)\\: Unexpected token \"\\$mode\", expected type at offset 38$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$path\\)\\: Unexpected token \"\\$path\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$zipname\\)\\: Unexpected token \"\\$zipname\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 637$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$type with type app\\\\libraries\\\\GradeableType\\|int is not subtype of native type int\\.$#"
+			count: 1
+			path: app/libraries/GradeableType.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/GradeableType.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\: message to log to the file\\)\\: Unexpected token \"\\$message\", expected type at offset 484$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$action\\)\\: Unexpected token \"\\$action\", expected type at offset 513$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$token\\)\\: Unexpected token \"\\$token\", expected type at offset 492$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 469$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$params All the params in a key\\-value array\\)\\: Unexpected token \"\\$params\", expected type at offset 502$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\Output\\:\\:renderTemplate\\(\\) should return string but returns null\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$json\\)\\: Unexpected token \"\\$json\", expected type at offset 223$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\)\\: Unexpected token \"\\$message\", expected type at offset 79$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$view$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\Output\\:\\:displayOutput\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Cannot call method exceptionPage\\(\\) on string\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @return with type array is incompatible with native type Ds\\\\Set\\.$#"
+			count: 2
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$session_id\\)\\: Unexpected token \"\\$session_id\", expected type at offset 257$#"
+			count: 1
+			path: app/libraries/SessionManager.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/SessionManager.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\Utils\\:\\:stripStringFromArray\\(\\) should return array but returns null\\.$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected type at offset 119$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected type at offset 404$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected type at offset 163$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:\\$link \\(PDO\\) does not accept null\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$callback\\)\\: Unexpected token \"\\$callback\", expected type at offset 484$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$parameters\\)\\: Unexpected token \"\\$parameters\", expected type at offset 458$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$query\\)\\: Unexpected token \"\\$query\", expected type at offset 437$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$columns\\)\\: Unexpected token \"\\$columns\", expected type at offset 40$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$result\\)\\: Unexpected token \"\\$result\", expected type at offset 18$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$value\\)\\: Unexpected token \"\\$value\", expected type at offset 288$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:convertBoolean\\(\\) should return string but returns int\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:newSession\\(\\) should return string but return statement is missing\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Cannot access offset 'status' on bool\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$type\\)\\: Unexpected token \"\\$type\", expected type at offset 153$#"
+			count: 1
+			path: app/libraries/response/JsonResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 55$#"
+			count: 1
+			path: app/libraries/response/RedirectResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$view_class\\)\\: Unexpected token \"\\$view_class\", expected type at offset 204$#"
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$view_function\\)\\: Unexpected token \"\\$view_function\", expected type at offset 230$#"
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$logged_in\\)\\: Unexpected token \"\\$logged_in\", expected type at offset 96$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected type at offset 350$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$object\\)\\: Unexpected token \"\\$object\", expected type at offset 328$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$arguments\\)\\: Unexpected token \"\\$arguments\", expected type at offset 451$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$name\\)\\: Unexpected token \"\\$name\", expected type at offset 431$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^Class app\\\\models\\\\User referenced with incorrect case\\: app\\\\models\\\\user\\.$#"
+			count: 2
+			path: app/models/CourseMaterial.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$course_path\\)\\: Unexpected token \"\\$course_path\", expected type at offset 112$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 89$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$idx\\)\\: Unexpected token \"\\$idx\", expected type at offset 202$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$results_path\\)\\: Unexpected token \"\\$results_path\", expected type at offset 139$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$results_public_path\\)\\: Unexpected token \"\\$results_public_path\", expected type at offset 167$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$component_id\\)\\: Unexpected token \"\\$component_id\", expected type at offset 89$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:getPrevSubmitterMatching\\(\\) should return app\\\\models\\\\gradeable\\\\Submitter but returns null\\.$#"
+			count: 2
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:getNextSubmitterMatching\\(\\) should return app\\\\models\\\\gradeable\\\\Submitter but returns null\\.$#"
+			count: 2
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$direction Direction of sort \\(ASC or DESC\\)\\)\\: Unexpected token \"\\$direction\", expected type at offset 225$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sort Sort type\\)\\: Unexpected token \"\\$sort\", expected type at offset 195$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @return has invalid value \\(\\$trimmed_message\\)\\: Unexpected token \"\\$trimmed_message\", expected type at offset 119$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$event\\)\\: Unexpected token \"\\$event\", expected type at offset 18$#"
+			count: 2
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$recipients\\)\\: Unexpected token \"\\$recipients\", expected type at offset 39$#"
+			count: 2
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$event$#"
+			count: 1
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$recipients$#"
+			count: 1
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected type at offset 67$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$label The label you would like to assign to the sectionID\\)\\: Unexpected token \"\\$label\", expected type at offset 91$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sectionID The sectionID\\)\\: Unexpected token \"\\$sectionID\", expected type at offset 52$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^Argument of an invalid type app\\\\models\\\\RainbowCustomizationJSON supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string gradable_id\\)\\: Unexpected token \"gradable_id\", expected variable at offset 98$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:threadExists\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Forum\\:\\:checkPostEditAccess\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Forum\\:\\:modifyAnonymous\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Thread\\:\\:getContent\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createEmail\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Forum\\:\\:isValidCategories\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:getTotalPoints\\(\\) should return int but returns float\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Comparison operation \"\\=\\=\" between \\(array\\|float\\|int\\) and 0 results in an error\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 108$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 69$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gc_id int Gradeable Component id\\)\\: Unexpected token \"\\$gc_id\", expected type at offset 95$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected type at offset 87$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$status\\)\\: Unexpected token \"\\$status\", expected type at offset 68$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected type at offset 103$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$popup_css_file\\)\\: Unexpected token \"\\$popup_css_file\", expected type at offset 211$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns false\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns true\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 179$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 104$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 211$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Variable \\$row might not be defined\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$next_id$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$prev_id$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Variable \\$data might not be defined\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+

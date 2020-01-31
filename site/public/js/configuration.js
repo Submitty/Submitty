@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  
+
     $("input,textarea,select").on("change", function() {
         var elem = this;
         let formData = new FormData();
@@ -15,7 +15,7 @@ $(document).ready(function() {
         formData.append("entry", entry);
 
         $.ajax({
-            url: buildCourseUrl(['config', 'update']),
+            url: buildCourseUrl(['config']),
             data: formData,
             type: "POST",
             processData: false,
@@ -46,7 +46,7 @@ $(document).ready(function() {
             }
         });
     });
-  
+
     function updateForumMessage() {
         $("#forum-enabled-message").toggle();
         $("#forum-category-warning").toggle();
@@ -67,7 +67,8 @@ $(document).ready(function() {
     function updateEmailSeatingOption() {
         if ($("#room-seating-gradeable-id").val()) {
             showEmailSeatingOption();
-        } else {
+        }
+        else {
             hideEmailSeatingOption();
         }
     }

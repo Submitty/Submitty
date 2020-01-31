@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\models\gradeable\AbstractTextBox;
 
@@ -15,7 +14,7 @@ use app\models\gradeable\AbstractTextBox;
  * @method string getLanguage()
  */
 class SubmissionCodeBox extends AbstractTextBox {
-    /** @property @var string The programming language of the text box */
+    /** @prop @var string The programming language of the text box */
     protected $language;
 
     public function __construct(Core $core, array $details) {

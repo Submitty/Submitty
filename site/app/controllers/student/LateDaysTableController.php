@@ -2,7 +2,6 @@
 
 namespace app\controllers\student;
 
-
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\models\gradeable\LateDays;
@@ -28,5 +27,4 @@ class LateDaysTableController extends AbstractController {
     public function showLateTablePage() {
         $this->core->getOutput()->renderOutput(array('LateDaysTable'), 'showLateTablePage', LateDays::fromUser($this->core, $this->core->getUser()));
     }
-
 }

@@ -7,7 +7,6 @@ use app\models\User;
 use app\libraries\DataTime;
 use app\models\AbstractModel;
 
-
 /**
  * Class Post
  *
@@ -38,24 +37,24 @@ class Post extends AbstractModel {
     const UNRESOLVED = 1;
     const RESOLVED   = 2;
 
-    /** @property @var int post id */
+    /** @prop @var int post id */
     protected $id;
-    /** @property @var int thread id */
+    /** @prop @var int thread id */
     protected $thread_id;
-    /** @property @var int parent id */
+    /** @prop @var int parent id */
     protected $parent_id;
 
 
     //protected $parent;
-    
-    /** @property @var \User user */
+
+    /** @prop @var \User user */
     protected $author;
-    
-    /** @property @var string content of post */
+
+    /** @prop @var string content of post */
     protected $content;
     //protected $timestamp;
-    
-    /** @property @var bool post display as anon */
+
+    /** @prop @var bool post display as anon */
     protected $is_anonymous;
 
     //Will add soon
@@ -63,22 +62,21 @@ class Post extends AbstractModel {
     //protected $post_type;
     //protected $has_attachment;
 
-    public function __construct(Core $core, $details=array()){
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
 
-        if(empty($details)) {
+        if (empty($details)) {
             return;
         }
 
         //setPostId($details['post_id']);
-        $this->setThreadId((int)$details['thread_id']);
-        $this->setParentId((int)$details['parent_id']);
+        $this->setThreadId((int) $details['thread_id']);
+        $this->setParentId((int) $details['parent_id']);
         $this->setContent($details['content']);
         //setTimestamp($details['timestamp']);
-        $this->setIsAnonymous((bool)$details['anon']);
+        $this->setIsAnonymous((bool) $details['anon']);
         //setDeleted($details['deleted']);
         //setType($details['type']);
         //setAttachment($details['has_attachment']);
-    } 
-
+    }
 }

@@ -1,11 +1,13 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace tests\utils;
 
 use app\libraries\Core;
 use app\libraries\Output;
 
-class NullOutput extends Output{
+class NullOutput extends Output {
     private $twig_output = [];
 
     public function loadTwig($full_load = true) {
@@ -35,9 +37,11 @@ class NullOutput extends Output{
         $this->renderTwigTemplate($filename, $context);
     }
 
-    protected function renderHeader() {}
+    protected function renderHeader() {
+    }
 
-    protected function renderFooter() {}
+    protected function renderFooter() {
+    }
 
     public function bufferOutput() {
         return $this->buffer_output;

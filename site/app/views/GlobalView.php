@@ -1,10 +1,11 @@
 <?php
 
 namespace app\views;
+
 use app\models\Breadcrumb;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css=array(), $js=array()) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -28,9 +29,12 @@ class GlobalView extends AbstractView {
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
             $page_title = "Submitty Login";
-        } else if ($this->core->getConfig()->isCourseLoaded()) {
-            $page_title = "Submitty ".$course_name." ".$page_name;
         }
+        elseif ($this->core->getConfig()->isCourseLoaded()) {
+            $page_title = "Submitty " . $course_name . " " . $page_name;
+        }
+
+        $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"), true);
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
@@ -46,7 +50,9 @@ class GlobalView extends AbstractView {
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
             "system_message" => $this->core->getConfig()->getSystemMessage(),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "enable_banner" => $config_data['duck_special_effects'],
+            "duck_img" => $duck_img
         ]);
     }
 

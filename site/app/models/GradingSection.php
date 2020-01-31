@@ -19,30 +19,30 @@ use app\models\gradeable\Submitter;
 class GradingSection extends AbstractModel {
     /**
      * If this is a registration section (false for rotating)
-     * @property @var bool
+     * @prop @var bool
      */
     protected $registration;
     /**
-     * @property @var string|null
+     * @prop @var string|null
      */
     protected $name;
     /**
-     * @property @var User[]
+     * @prop @var User[]
      */
     protected $graders;
     /**
-     * @property @var User[]
+     * @prop @var User[]
      */
     protected $users;
     /**
-     * @property @var Team[]
+     * @prop @var Team[]
      */
     protected $teams;
 
     public function __construct(Core $core, bool $registration, $name, $graders, $users, $teams) {
         parent::__construct($core);
         $this->registration = $registration;
-        $this->name = $name !== null ? (string)$name : null;
+        $this->name = $name !== null ? (string) $name : null;
         $this->graders = $graders;
         $this->users = $users;
         $this->teams = $teams;
@@ -87,11 +87,13 @@ class GradingSection extends AbstractModel {
             return array_map(function (User $user) {
                 return new Submitter($this->core, $user);
             }, $this->users);
-        } else if ($this->teams !== null) {
+        }
+        elseif ($this->teams !== null) {
             return array_map(function (Team $team) {
                 return new Submitter($this->core, $team);
             }, $this->teams);
-        } else {
+        }
+        else {
             //No users, no teams, this section is empty!
             return [];
         }

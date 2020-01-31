@@ -3,7 +3,7 @@
 namespace tests\app\libraries;
 
 use app\libraries\Core;
-use \app\libraries\Utils;
+use app\libraries\Utils;
 use app\models\User;
 
 class UtilsTester extends \PHPUnit\Framework\TestCase {
@@ -231,9 +231,9 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function uploadedImageProvider() {
         return [
-            [__TEST_DATA__.'/images/test_image.png', true],
-            [__TEST_DATA__.'/images/test_image.jpg', true],
-            [__TEST_DATA__.'/.gitkeep', false]
+            [__TEST_DATA__ . '/images/test_image.png', true],
+            [__TEST_DATA__ . '/images/test_image.jpg', true],
+            [__TEST_DATA__ . '/.gitkeep', false]
         ];
     }
     /**
@@ -261,8 +261,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     public function testCheckUploadedImageFileImageSizeFalse() {
         try {
             $_FILES['test'] = [
-                'name' => [basename(__TEST_DATA__.'/images/test_image.png')],
-                'tmp_name' => [__TEST_DATA__.'/images/test_image.png'],
+                'name' => [basename(__TEST_DATA__ . '/images/test_image.png')],
+                'tmp_name' => [__TEST_DATA__ . '/images/test_image.png'],
                 'type' => ['image/png'],
                 'error' => [UPLOAD_ERR_OK],
                 'size' => [123]
@@ -640,5 +640,23 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
      */
     public function testFormatBytes($format, $bytes, $expected) {
         $this->assertEquals($expected, Utils::formatBytes($format, $bytes));
+    }
+
+    public function testMbStrSplitRegularString() {
+        $this->assertEquals(str_split('abcdef'), Utils::mb_str_split('abcdef'));
+    }
+
+    public function testMbStrSplitMbString() {
+        $this->assertEquals(
+            ["α", "β", "γ", "δ", "ε", "f"],
+            Utils::mb_str_split("αβγδεf")
+        );
+    }
+
+    public function testMbStrSplitLength() {
+        $this->assertEquals(
+            ["αβ", "γδ", "εf", "g"],
+            Utils::mb_str_split("αβγδεfg", 2)
+        );
     }
 }

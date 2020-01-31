@@ -16,8 +16,8 @@ Required Input:
      onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}"
 >
     {% if edit_marks_enabled %}
-        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks">
-            <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks" aria-label="Click and drag to reorder marks">
+            <i class="fas fa-ellipsis-v"></i>
         </span>
     {% endif %}
     <span class="mark-selector-container">

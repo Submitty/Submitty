@@ -28,7 +28,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
-AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['autograding_log_path'], 'stack_traces')
+AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['site_log_path'], 'autograding_stack_traces')
 
 JOB_ID = '~WORK~'
 
@@ -61,7 +61,10 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_results.zip")
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
                 #move doesn't inherit the permissions of the destination directory. Copyfile does.
-                shutil.copyfile(results_zip_tmp, results_zip)
+                try:
+                    shutil.copyfile(results_zip_tmp, results_zip)
+                except Exception as e:
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=f"{e} {results_zip}")
 
                 os.remove(results_zip_tmp)
                 with open(todo_queue_file, 'r') as infile:

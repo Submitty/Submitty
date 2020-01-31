@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+
 class EmailRoomSeatingView extends AbstractView {
     public function displayPage($defaultSubject, $defaultBody) {
         $this->core->getOutput()->addBreadcrumb("Email Room Seating");

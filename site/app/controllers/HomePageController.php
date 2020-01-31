@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\authentication\DatabaseAuthentication;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -31,10 +32,13 @@ class HomePageController extends AbstractController {
      * @Route("/current_user/change_password", methods={"POST"})
      * @return Response
      */
-    public function changePassword(){
+    public function changePassword() {
         $user = $this->core->getUser();
-        if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
-            && $_POST['new_password'] == $_POST['confirm_new_password']) {
+        if (
+            !empty($_POST['new_password'])
+            && !empty($_POST['confirm_new_password'])
+            && $_POST['new_password'] == $_POST['confirm_new_password']
+        ) {
             $user->setPassword($_POST['new_password']);
             $this->core->getQueries()->updateUser($user);
             $this->core->addSuccessMessage("Updated password");
@@ -51,9 +55,9 @@ class HomePageController extends AbstractController {
      * @Route("/current_user/change_username", methods={"POST"})
      * @return Response
      */
-    public function changeUserName(){
+    public function changeUserName() {
         $user = $this->core->getUser();
-        if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
+        if (isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
             $newFirstName = trim($_POST['user_firstname_change']);
             $newLastName = trim($_POST['user_lastname_change']);
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
@@ -74,10 +78,11 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @param $user_id
-     * @param $as_instructor
      * @Route("/api/courses", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
+     *
+     * @param string|null $user_id
+     * @param bool|string $as_instructor
      * @return Response
      */
     public function getCourses($user_id = null, $as_instructor = false) {
@@ -90,40 +95,26 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user_id);
-        $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user_id);
+        $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
 
         // Filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
+        foreach (['archived_courses', 'unarchived_courses'] as $var) {
+            $$var = array_filter($$var, function (Course $course) use ($user_id, $as_instructor) {
+                $query = $as_instructor ? 'checkIsInstructorInCourse' : 'checkStudentActiveInCourse';
+                return $this->core->getQueries()->$query($user_id, $course->getTitle(), $course->getSemester());
+            });
+        }
 
-        $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id, $as_instructor) {
-            return $as_instructor ?
-                $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
-                :
-                $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
-        });
-
-        $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id, $as_instructor) {
-            return $as_instructor ?
-                $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
-                :
-                $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
-        });
+        $callback = function (Course $course) {
+            return $course->getCourseInfo();
+        };
 
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
-                "unarchived_courses" => array_map(
-                    function (Course $course) {
-                        return $course->getCourseInfo();
-                    },
-                    $unarchived_courses
-                ),
-                "archived_courses" => array_map(
-                    function (Course $course) {
-                        return $course->getCourseInfo();
-                    },
-                    $archived_courses
-                )
+                "unarchived_courses" => array_map($callback, $unarchived_courses),
+                "archived_courses" => array_map($callback, $archived_courses)
             ])
         );
     }
@@ -142,10 +133,12 @@ class HomePageController extends AbstractController {
             new WebResponse(
                 ['HomePage'],
                 'showHomePage',
-                $user = $this->core->getUser(),
+                $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["archived_courses"],
-                $this->core->getConfig()->getUsernameChangeText()
+                $this->core->getConfig()->getUsernameChangeText(),
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $this->core->getCsrfToken()
             )
         );
     }
@@ -163,9 +156,11 @@ class HomePageController extends AbstractController {
             );
         }
 
-        if (!isset($_POST['course_semester']) ||
-            !isset($_POST['course_title']) ||
-            !isset($_POST['head_instructor'])) {
+        if (
+            !isset($_POST['course_semester'])
+            || !isset($_POST['course_title'])
+            || !isset($_POST['head_instructor'])
+        ) {
             $error = "Semester, course title or head instructor not set.";
             $this->core->addErrorMessage($error);
             return new Response(
@@ -295,7 +290,9 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllUnarchivedSemester()
+                $this->core->getQueries()->getAllUnarchivedSemester(),
+                $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
+                $this->core->getCsrfToken()
             )
         );
     }

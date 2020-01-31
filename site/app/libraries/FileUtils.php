@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\exceptions\FileReadException;
 
 /**
@@ -27,7 +28,7 @@ class FileUtils {
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
+    public static function getAllFiles(string $dir, array $skip_files = [], bool $flatten = false): array {
         $skip_files = array_map(function ($str) {
             return strtolower($str);
         }, $skip_files);
@@ -51,15 +52,15 @@ class FileUtils {
                     $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
                     if ($flatten) {
                         foreach ($temp as $file => $details) {
-                            $details['relative_name'] = $entry."/".$details['relative_name'];
-                            $return[$entry."/".$file] = $details;
+                            $details['relative_name'] = $entry . "/" . $details['relative_name'];
+                            $return[$entry . "/" . $file] = $details;
                         }
                     }
                     else {
                         $return[$entry] = ['files' => $temp, 'path' => $path];
                     }
                 }
-                else if (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
+                elseif (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
                     // add file to array
                     $return[$entry] = [
                         'name' => $entry,
@@ -129,7 +130,7 @@ class FileUtils {
                     copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
@@ -144,10 +145,9 @@ class FileUtils {
      * off the string.
      */
     public static function getAllFilesTrimSearchPath(string $search_path, int $path_length): array {
-        $files = array_map(function ($entry) use ($path_length) {
+        return array_map(function ($entry) use ($path_length) {
             return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
         }, array_values(FileUtils::getAllFiles($search_path, [], true)));
-        return $files;
     }
 
     /**
@@ -243,7 +243,7 @@ class FileUtils {
             if ($handle = opendir($path)) {
                 while (false !== ($entry = readdir($handle))) {
                     $file = "{$path}/{$entry}";
-                    if(is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
+                    if (is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
                         $return[] = $entry;
                     }
                 }
@@ -277,9 +277,29 @@ class FileUtils {
         return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
-    public static function writeJsonFile($filename, $data) {
+    /**
+     * Given some data, encode it as pretty printed JSON and write it to a file.
+     *
+     * @param string $filename filename to write data to
+     * @param mixed  $data JSON data to write to the file
+     * @return bool
+     */
+    public static function writeJsonFile(string $filename, $data): bool {
         $data = FileUtils::encodeJson($data);
         if ($data === false) {
+            return false;
+        }
+        return static::writeFile($filename, $data);
+    }
+
+    /**
+     * Given some data, write it to a file.
+     * @param string $filename
+     * @param mixed  $data
+     * @return bool
+     */
+    public static function writeFile(string $filename, $data): bool {
+        if (file_exists($filename) && !is_writable($filename)) {
             return false;
         }
         return file_put_contents($filename, $data) !== false;
@@ -311,10 +331,10 @@ class FileUtils {
      */
     public static function checkFileInZipName($zipname) {
         $zip = zip_open($zipname);
-        if(is_resource(($zip))) {
+        if (is_resource(($zip))) {
             while ($inner_file = zip_read($zip)) {
                 $fname = zip_entry_name($inner_file);
-                if(FileUtils::isValidFileName($fname) === false) {
+                if (FileUtils::isValidFileName($fname) === false) {
                     return false;
                 }
             }
@@ -335,11 +355,13 @@ class FileUtils {
         }
         else {
             foreach (str_split($filename) as $char) {
-                if ($char == "'" ||
-                    $char == '"' ||
-                    $char == "\\" ||
-                    $char == "<" ||
-                    $char == ">") {
+                if (
+                    $char == "'"
+                    || $char == '"'
+                    || $char == "\\"
+                    || $char == "<"
+                    || $char == ">"
+                ) {
                     return false;
                 }
             }
@@ -377,7 +399,7 @@ class FileUtils {
         }
 
         $sep = DIRECTORY_SEPARATOR;
-        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+        return preg_replace('#' . preg_quote($sep) . '+#', $sep, join($sep, $paths));
     }
 
     /**
@@ -391,7 +413,7 @@ class FileUtils {
      * @param $filename
      * @return null|string
      */
-    public static function getContentType($filename){
+    public static function getContentType($filename) {
         if ($filename === null) {
             return null;
         }
@@ -460,7 +482,7 @@ class FileUtils {
         $file_contents = @file_get_contents($file);
 
         // Check for failure
-        if($file_contents == false) {
+        if ($file_contents == false) {
             throw new FileReadException('Unable to either locate or read the file contents');
         }
 
@@ -470,7 +492,7 @@ class FileUtils {
         foreach ($words as $word) {
             $word_was_found = strpos($file_contents, $word);
 
-            if($word_was_found) {
+            if ($word_was_found) {
                 $words_detected = true;
                 break;
             }
@@ -480,12 +502,24 @@ class FileUtils {
     }
 
     /**
+     * Attempt to open a zip archive and return the response
+     *
+     * @param string $file Path to the zip archive
+     * @return bool | int returns true on success or an error code otherwise
+     */
+    public static function getZipFileStatus($file) {
+        $zip = new \ZipArchive();
+        //open file with additional checks
+        return $zip->open($file, \ZipArchive::CHECKCONS);
+    }
+
+    /**
      * Given an array of uploaded files, makes sure they are properlly uploaded
      *
      * @param array $files - should be in the same format as the $_FILES[] variable
      * @return array representing the status of each file
      * e.g. array('name' => 'foo.txt','type' => 'application/octet-stream', 'error' =>
-     *            'success','size' => 100, 'success' => true)
+     *            'success','size' => 100, 'is_zip' => false, 'success' => true)
      * if $files is null returns failed => no files sent to validate
      */
     public static function validateUploadedFiles($files) {
@@ -500,32 +534,59 @@ class FileUtils {
         for ($i = 0; $i < $num_files; $i++) {
             //extract the values from each file
             $name = $files['name'][$i];
-            $type = mime_content_type($files['tmp_name'][$i]);
-            $size = $files['size'][$i];
-            $err_msg = "";
+            $tmp_name = $files['tmp_name'][$i];
+            $type = mime_content_type($tmp_name);
 
-            //did anything go wrong?
-            $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
+            $zip_status = FileUtils::getZipFileStatus($tmp_name);
+            $errors = [];
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                $errors[] = ErrorMessages::uploadErrors($files['error'][$i]);
+            }
+
+            //check if its a zip file
+            $is_zip = $type === 'application/zip';
+            if ($is_zip) {
+                $zip_status = FileUtils::getZipFileStatus($tmp_name);
+                if ($zip_status !== \ZipArchive::ER_OK) {
+                    $err_tmp = ErrorMessages::getZipErrorMessage($zip_status);
+                    if ($err_tmp != "No error.") {
+                        $errors[] = $err_tmp;
+                    }
+                }
+                else {
+                    $size = FileUtils::getZipSize($tmp_name);
+                    if (!FileUtils::checkFileInZipName($tmp_name)) {
+                        $errors[] = "Invalid filename within zip file";
+                    }
+                }
+            }
+
+            //for zip files use the size of the contents in case it gets extracted
+            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $files['size'][$i];
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
-            if($size > $max_size){
-                $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
+            if ($size > $max_size) {
+                $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }
 
             //check filename
             if (!FileUtils::isValidFileName($name)) {
-                $err_msg = "Invalid filename";
+                $errors[] = "Invalid filename";
             }
 
-            $success = $err_msg === "No error.";
+            $success = true;
+            if (count($errors) > 0) {
+                $success = false;
+            }
 
             $ret[] = [
                 'name' => $name,
-                'type'=> $type,
-                'error'=> $err_msg,
+                'type' => $type,
+                'error' => $success ? "No error." : implode(" ", $errors),
                 'size' => $size,
-                'success' => $success
+                'is_zip' => $is_zip,
+                'success' => $success,
             ];
         }
 

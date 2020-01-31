@@ -2,7 +2,6 @@
 
 namespace tests\app\exceptions;
 
-
 use app\exceptions\AuthenticationException;
 
 class AuthenticationExceptionTester extends \PHPUnit\Framework\TestCase {

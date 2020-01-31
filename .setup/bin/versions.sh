@@ -6,9 +6,10 @@
 
 # SUBMITTY REPOS
 export AnalysisTools_Version=v.18.06.00
-export Lichen_Version=v.18.12.00
+export Lichen_Version=v19.12.00
 export RainbowGrades_Version=v19.07.00
-export Tutorial_Version=v.19.02.00
+export Tutorial_Version=v20.01.00
+export SysadminTools_Version=v20.01.00
 
 # JAVA
 export JUNIT_VERSION=4.12

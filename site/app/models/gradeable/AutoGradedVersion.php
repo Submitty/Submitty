@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
@@ -27,43 +26,43 @@ use app\models\AbstractModel;
 class AutoGradedVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
     private $graded_gradeable = null;
-    /** @property @var int The submission version for this AutoGradedVersion */
+    /** @prop @var int The submission version for this AutoGradedVersion */
     protected $version = 0;
-    /** @property @var float The number of "normal" points */
+    /** @prop @var float The number of "normal" points */
     protected $non_hidden_non_extra_credit = 0;
-    /** @property @var float The number of "normal extra credit" points */
+    /** @prop @var float The number of "normal extra credit" points */
     protected $non_hidden_extra_credit = 0;
-    /** @property @var float The number of "hidden" points */
+    /** @prop @var float The number of "hidden" points */
     protected $hidden_non_extra_credit = 0;
-    /** @property @var float The number of "hidden extra credit" points */
+    /** @prop @var float The number of "hidden extra credit" points */
     protected $hidden_extra_credit = 0;
-    /** @property @var \Datetime Time the user submitted this version */
+    /** @prop @var \Datetime Time the user submitted this version */
     protected $submission_time = null;
-    /** @property @var bool If the autograding has complete for this version */
+    /** @prop @var bool If the autograding has complete for this version */
     protected $autograding_complete = false;
 
-    /** @property @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
+    /** @prop @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
     private $graded_testcases = null;
-    /** @property @var float The number of early submission incentive points this version is worth */
+    /** @prop @var float The number of early submission incentive points this version is worth */
     private $early_incentive_points = 0.0;
     /** @var AutoGradedVersionHistory[] Array of history info loaded from history.json in results folder
      *      This will only have a size more than 1 if the version was graded multiple times
      */
     private $history = [];
 
-    /** @property @var string[] An array of the names of all meta files in submission directory */
+    /** @prop @var string[] An array of the names of all meta files in submission directory */
     private $meta_files = null;
-    /** @property @var array[] An array indexed by part number of array of file paths
+    /** @prop @var array[] An array indexed by part number of array of file paths
      *      Note: paths are relative to part directory
      *      Note: 0'th part contains all files, flattened
      */
     private $files = null;
-    /** @property @var array[] An array of all the autograded results files  */
+    /** @prop @var array[] An array of all the autograded results files  */
     private $results_files = null;
-    /** @property @var array[] An array of all the autograded results public files  */
+    /** @prop @var array[] An array of all the autograded results public files  */
     private $results_public_files = null;
 
-    /** @property @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
+    /** @prop @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
      *      Note: null default value used to indicate that no queue status data has been loaded
      */
     private $queue_position = null;
@@ -120,8 +119,7 @@ class AutoGradedVersion extends AbstractModel {
         $dirs = $gradeable->isVcs() ? ['submissions', 'checkout'] : ['submissions'];
 
 
-        foreach($dirs as $dir) {
-
+        foreach ($dirs as $dir) {
             $this->meta_files[$dir] = [];
             $this->files[$dir][0] = [];
 
@@ -132,13 +130,14 @@ class AutoGradedVersion extends AbstractModel {
             foreach ($submitted_files as $file => $details) {
                 if (substr(basename($file), 0, 1) === '.') {
                     $this->meta_files[$dir][$file] = $details;
-                } else {
+                }
+                else {
                     $this->files[$dir][0][$file] = $details;
                 }
             }
             // If there is only one part (no separation of upload files),
             //  be sure to set the "Part 1" files to the "all" files
-            if($config->getNumParts() === 1) {
+            if ($config->getNumParts() === 1) {
                 $this->files[$dir][1] = $this->files[$dir][0];
             }
 
@@ -151,35 +150,28 @@ class AutoGradedVersion extends AbstractModel {
                     }
                 }
             }
-
         }
     }
 
-    public function getTestcaseMessages()
-    {
+    public function getTestcaseMessages() {
         $this->loadTestcases();
 
         $output = array();
 
         // If results were found then append message arrays to output array
         // where key is the testcase_label
-        if(!is_null($this->graded_testcases))
-        {
-            foreach ($this->graded_testcases as $graded_testcase)
-            {
+        if (!is_null($this->graded_testcases)) {
+            foreach ($this->graded_testcases as $graded_testcase) {
                 $testcase_label = $graded_testcase->getTestcase()->getTestcaseLabel();
 
                 // If a testcase_label exists then get the auto grading messages
-                if($testcase_label != "")
-                {
+                if ($testcase_label != "") {
                     $output[$testcase_label] = array();
 
                     $autochecks = $graded_testcase->getAutochecks();
 
-                    foreach ($autochecks as $autocheck)
-                    {
-                        foreach ($autocheck->getMessages() as $msg)
-                        {
+                    foreach ($autochecks as $autocheck) {
+                        foreach ($autocheck->getMessages() as $msg) {
                             array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
                         }
                     }
@@ -235,11 +227,18 @@ class AutoGradedVersion extends AbstractModel {
                 // TODO: Autograding results file was incomplete.  This is a big problem, but how should
                 // TODO:   we handle this error
             }
-            if ($result_details != null &&
-                count($result_details['testcases']) > $testcase->getIndex() &&
-                $result_details['testcases'][$testcase->getIndex()] != null) {
-                $graded_testcase = new AutoGradedTestcase
-                ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
+            if (
+                $result_details != null
+                && count($result_details['testcases']) > $testcase->getIndex()
+                && $result_details['testcases'][$testcase->getIndex()] != null
+            ) {
+                $graded_testcase = new AutoGradedTestcase(
+                    $this->core,
+                    $testcase,
+                    $results_path,
+                    $results_public_path,
+                    $result_details['testcases'][$testcase->getIndex()]
+                );
                 $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
                 if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                     $this->early_incentive_points += $graded_testcase->getPoints();
@@ -264,7 +263,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return float
      */
     public function getEarlyIncentivePoints() {
-        if($this->graded_gradeable === null) {
+        if ($this->graded_gradeable === null) {
             $this->loadTestcases();
         }
         return $this->early_incentive_points;
@@ -284,7 +283,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return array
      */
     public function getPartFiles($part = 0) {
-        if($this->files === null) {
+        if ($this->files === null) {
             $this->loadSubmissionFiles();
         }
         return array(
@@ -298,7 +297,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return array
      */
     public function getMetaFiles() {
-        if($this->files === null) {
+        if ($this->files === null) {
             $this->loadSubmissionFiles();
         }
         return array('submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []);
@@ -309,7 +308,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return array
      */
     public function getResultsFiles() {
-        if($this->results_files === null) {
+        if ($this->results_files === null) {
             $this->loadTestcases();
         }
         return $this->results_files;
@@ -320,7 +319,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return array
      */
     public function getResultsPublicFiles() {
-        if($this->results_public_files === null) {
+        if ($this->results_public_files === null) {
             $this->loadTestcases();
         }
         return $this->results_public_files;
@@ -354,7 +353,7 @@ class AutoGradedVersion extends AbstractModel {
      *              otherwise the queue count
      */
     public function getQueuePosition() {
-        if($this->queue_position === null) {
+        if ($this->queue_position === null) {
             return $this->loadQueueStatus();
         }
         return $this->queue_position;
@@ -378,14 +377,15 @@ class AutoGradedVersion extends AbstractModel {
         $dividend = $this->getNonHiddenNonExtraCredit() + $this->getNonHiddenExtraCredit();
 
         // Avoid divide-by-zero (== not a typo)
-        if($divisor == 0) {
+        if ($divisor == 0) {
             return NAN;
         }
         $result = floatval($dividend) / $divisor;
 
         if ($clamp === true && $result > 1.0) {
             return 1.0;
-        } else if ($result < 0) {
+        }
+        elseif ($result < 0) {
             return 0.0;
         }
         return $result;
@@ -419,14 +419,15 @@ class AutoGradedVersion extends AbstractModel {
             $this->getHiddenNonExtraCredit() + $this->getHiddenExtraCredit();
 
         // avoid divide-by-zero (== not a typo)
-        if($divisor == 0) {
+        if ($divisor == 0) {
             return NAN;
         }
         $result = floatval($dividend) / $divisor;
 
         if ($clamp === true && $result > 1.0) {
             return 1.0;
-        } else if ($result < 0) {
+        }
+        elseif ($result < 0) {
             return 0.0;
         }
         return $result;
@@ -438,7 +439,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysLate() {
         return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+            $this->submission_time
+        )) : 0;
     }
 
     /**
@@ -447,7 +450,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysEarly() {
         return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, -DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+            $this->submission_time
+        )) : 0;
     }
 
     /**
@@ -455,7 +460,7 @@ class AutoGradedVersion extends AbstractModel {
      * @return AutoGradedVersionHistory[]
      */
     public function getHistory() {
-        if($this->graded_testcases === null) {
+        if ($this->graded_testcases === null) {
             $this->loadTestcases();
         }
         return $this->history;
@@ -467,7 +472,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getLatestHistory() {
         $history = $this->getHistory();
-        if(count($history) === 0) {
+        if (count($history) === 0) {
             return null;
         }
         return $history[count($history) - 1];
@@ -506,7 +511,8 @@ class AutoGradedVersion extends AbstractModel {
     private function setVersionInternal($version) {
         if ((is_int($version) || ctype_digit($version)) && intval($version) >= 0) {
             $this->version = intval($version);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Version number must be a non-negative integer');
         }
     }
@@ -526,7 +532,8 @@ class AutoGradedVersion extends AbstractModel {
         foreach (self::point_properties as $property) {
             if (is_numeric($points[$property])) {
                 $this->$property = floatval($points[$property]);
-            } else {
+            }
+            else {
                 throw new \InvalidArgumentException('Graded version point values must be numeric');
             }
         }
@@ -540,7 +547,8 @@ class AutoGradedVersion extends AbstractModel {
     private function setSubmissionTimeInternal($submission_time) {
         if ($submission_time !== null) {
             $this->submission_time = DateUtils::parseDateTime($submission_time, $this->core->getConfig()->getTimezone());
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Graded version submission time must not be null');
         }
     }

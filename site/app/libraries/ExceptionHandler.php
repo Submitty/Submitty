@@ -31,8 +31,10 @@ class ExceptionHandler {
     /**
      * This is a static class so it should never be instaniated or copied anywhere
      */
-    private function __construct() { }
-    private function __clone() { }
+    private function __construct() {
+    }
+    private function __clone() {
+    }
 
     /**
      * @param bool $boolean True/False to control whether we log/not log exceptions
@@ -69,15 +71,17 @@ class ExceptionHandler {
             $display_message = $exception->displayMessage();
             $log_exception = $exception->logException();
         }
-        
-        $trace_string = array();
+
+        $trace_string = [];
         foreach ($exception->getTrace() as $elem => $frame) {
-            $trace_string[] = sprintf( "#%s %s(%s): %s(%s)",
-                             $elem,
-                             isset($frame['file']) ? $frame['file'] : 'unknown file',
-                             isset($frame['line']) ? $frame['line'] : 'unknown line',
-                             (isset($frame['class']))  ? $frame['class'].$frame['type'].$frame['function'] : $frame['function'],
-                             static::parseArgs(is_a($exception, '\app\exceptions\AuthenticationException') ? array() : $frame['args']));
+            $trace_string[] = sprintf(
+                "#%s %s(%s): %s(%s)",
+                $elem,
+                isset($frame['file']) ? $frame['file'] : 'unknown file',
+                isset($frame['line']) ? $frame['line'] : 'unknown line',
+                (isset($frame['class']))  ? $frame['class'] . $frame['type'] . $frame['function'] : $frame['function'],
+                static::parseArgs((is_a($exception, '\app\exceptions\AuthenticationException') || !isset($frame['args'])) ? [] : $frame['args'])
+            );
         }
         $trace_string = implode("\n", $trace_string);
 
@@ -87,7 +91,7 @@ class ExceptionHandler {
         $line = 1;
         $line_code = "";
         $fh = fopen($file, 'r');
-        while (($buffer = fgets($fh)) !== FALSE) {
+        while (($buffer = fgets($fh)) !== false) {
             if ($line == $exception_line) {
                 $line_code = $buffer;
                 break;
@@ -102,16 +106,17 @@ class ExceptionHandler {
         if ($is_base_exception) {
             /** @type BaseException $exception */
             $extra = $exception->getDetails();
-            if(count($extra) > 0) {
+            if (count($extra) > 0) {
                 $message .= "Extra Details:\n";
                 foreach ($extra as $key => $value) {
                     $message .= "\t" . $key . ":";
-                    if(is_array($value)) {
+                    if (is_array($value)) {
                         $message .= "\n";
                         foreach ($value as $kk => $vv) {
                             $message .= "\t\t" . $vv . "\n";
                         }
-                    } else {
+                    }
+                    else {
                         $message .= " " . $value . "\n";
                     }
                 }
@@ -125,7 +130,7 @@ class ExceptionHandler {
         if (static::$display_exceptions) {
             return $message;
         }
-        else if ($display_message) {
+        elseif ($display_message) {
             return $exception->getMessage();
         }
         else {
@@ -135,7 +140,7 @@ An exception was thrown. Please contact an administrator about what you were doi
 HTML;
         }
     }
-    
+
     /**
      * Parse the arguments from the stack trace into type appropriate representation for the stack trace. We
      * may want to look into expanding the $args when they're an Array, but for now, this is probably fine.
@@ -147,8 +152,8 @@ HTML;
      */
     private static function parseArgs($args) {
         $return = "";
-        if (isset($args)) {
-            $return_args = array();
+        if (!empty($args)) {
+            $return_args = [];
             foreach ($args as $arg) {
                 if (is_string($arg)) {
                     $return_args[] = "'" . $arg . "'";

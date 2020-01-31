@@ -7,7 +7,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 
-
 class ImagesView extends AbstractView {
     /**
      * @param User[] $students
@@ -18,46 +17,46 @@ class ImagesView extends AbstractView {
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
 
+        $image_data = [];
+        $error_image_data = '_NONE_';
+
+        // image files can be specific to this course (uploaded by instructor)
+        // or in a common path per term (uploaded manually by sysadmin)
+        $term = explode('/', $this->core->getConfig()->getCoursePath());
+        $term = $term[count($term) - 2];
+        // the places we will look for this students photo (in order)
+        $path_locations =
+            [ FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images"),
+              FileUtils::joinPaths("/var/local/submitty", "student_images", $term),
+              FileUtils::joinPaths("/var/local/submitty", "student_images")
+              ];
+        $file_extensions = [ ".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG" ];
+
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
             $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
             if (empty($grader_sections) || in_array($registration, $grader_sections)) {
                 $sections[$registration][] = $student;
-            }
-        }
-
-        $image_data = [];
-        $error_image_data = '_NONE_';
-
-        //Get the expected images path and png files to loop through
-        $expected_images_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
-
-        $dir = new \DirectoryIterator($expected_images_path);
-        foreach ($dir as $fileinfo) {
-            if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
-                $expected_image = $fileinfo->getPathname();
-                $mime_subtype = explode('/', mime_content_type($expected_image), 2)[1];
-                if (FileUtils::isValidImage($expected_image)) {
-                    $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
-                    if ($img_name === "error_image") {
-                        $error_image_data = [
-                            'subtype' => $mime_subtype,
-                            'path' => $expected_image
-                        ];
-                    }
-                    else {
-                        $image_data[$img_name] = [
-                            'subtype' => $mime_subtype,
-                            'path' => $expected_image
-                        ];
+                foreach ($path_locations as $path) {
+                    foreach ($file_extensions as $extension) {
+                        $possible_match =  FileUtils::joinPaths($path, $student->getId() . $extension);
+                        if (file_exists($possible_match) && FileUtils::isValidImage($possible_match)) {
+                            $mime_subtype = explode('/', mime_content_type($possible_match), 2)[1];
+                            $image_data[$student->getId()] =
+                                [
+                                    'subtype' => $mime_subtype,
+                                    'path' => $possible_match
+                                 ];
+                            break;
+                        }
                     }
                 }
             }
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
+        $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
 
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [

@@ -36,35 +36,35 @@ use app\libraries\DateUtils;
  * @method string   getType()
  */
 class Notification extends AbstractModel {
-    /** @property @var bool Notification fetched from DB */
+    /** @prop @var bool Notification fetched from DB */
     protected $view_only;
 
-    /** @property @var string Type of component */
+    /** @prop @var string Type of component */
     protected $component;
-    /** @property @var string Current logged in user */
+    /** @prop @var string Current logged in user */
     protected $current_user;
 
-    /** @property @var string Notification source user (can be null) */
+    /** @prop @var string Notification source user (can be null) */
     protected $notify_source;
-    /** @property @var string Notification target user(s) (null implies all users) */
+    /** @prop @var string Notification target user(s) (null implies all users) */
     protected $notify_target;
-    /** @property @var string Notification text content */
+    /** @prop @var string Notification text content */
     protected $notify_content;
-    /** @property @var string Notification information about redirection link */
+    /** @prop @var string Notification information about redirection link */
     protected $notify_metadata;
-    /** @property @var bool Should $notify_source be ignored from $notify_target */
+    /** @prop @var bool Should $notify_source be ignored from $notify_target */
     protected $notify_not_to_source;
 
-    /** @property @var int Notification ID */
+    /** @prop @var int Notification ID */
     protected $id;
-    /** @property @var bool Is notification already seen */
+    /** @prop @var bool Is notification already seen */
     protected $seen;
-    /** @property @var real Time elapsed from creation of notification in secs */
+    /** @prop @var real Time elapsed from creation of notification in secs */
     protected $elapsed_time;
-    /** @property @var string Timestamp for creation of notification */
+    /** @prop @var string Timestamp for creation of notification */
     protected $created_at;
 
-    /** @property @var string Type of notification used for settings */
+    /** @prop @var string Type of notification used for settings */
     protected $type;
 
 
@@ -78,7 +78,7 @@ class Notification extends AbstractModel {
         parent::__construct($core);
     }
 
-    public static function createNotification(Core $core,array $event) {
+    public static function createNotification(Core $core, array $event) {
         $instance = new self($core);
         $instance->setComponent($event['component']);
         $instance->setNotifyMetadata($event['metadata']);
@@ -126,11 +126,10 @@ class Notification extends AbstractModel {
 
     public static function getThreadIdIfExists($metadata_json) {
         $metadata = json_decode($metadata_json, true);
-        if(is_null($metadata)) {
+        if (is_null($metadata)) {
             return null;
         }
-        $thread_id = $metadata['thread_id'] ?? -1;
-        return $thread_id;
+        return $metadata['thread_id'] ?? -1;
     }
 
     /**
@@ -142,7 +141,7 @@ class Notification extends AbstractModel {
     public static function textShortner($message) {
         $max_length = 40;
         $message = str_replace("\n", " ", $message);
-        if(strlen($message) > $max_length) {
+        if (strlen($message) > $max_length) {
             $message = substr($message, 0, $max_length - 3) . "...";
         }
         return $message;
@@ -161,21 +160,28 @@ class Notification extends AbstractModel {
     public function getNotifyTime() {
         $elapsed_time = $this->getElapsedTime();
         $actual_time = $this->getCreatedAt();
-        if($elapsed_time < 60){
+        if ($elapsed_time < 60) {
             return "Less than a minute ago";
-        } else if($elapsed_time < 3600){
-            $minutes = floor($elapsed_time/60);
-            if($minutes == 1)
+        }
+        elseif ($elapsed_time < 3600) {
+            $minutes = floor($elapsed_time / 60);
+            if ($minutes == 1) {
                 return "1 minute ago";
-            else
+            }
+            else {
                 return "{$minutes} minutes ago";
-        } else if($elapsed_time < 3600*24){
-            $hours = floor($elapsed_time/3600);
-            if($hours == 1)
+            }
+        }
+        elseif ($elapsed_time < 3600 * 24) {
+            $hours = floor($elapsed_time / 3600);
+            if ($hours == 1) {
                 return "1 hour ago";
-            else
+            }
+            else {
                 return "{$hours} hours ago";
-        } else {
+            }
+        }
+        else {
             return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }
     }

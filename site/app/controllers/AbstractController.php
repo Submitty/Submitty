@@ -32,7 +32,7 @@ abstract class AbstractController {
     /**
      * Gets a gradeable config from its id.
      * @param string $gradeable_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return Gradeable|bool false in the fail/error case
      */
     protected function tryGetGradeable(string $gradeable_id, bool $render_json = true) {
@@ -46,11 +46,13 @@ abstract class AbstractController {
         // Get the gradeable
         try {
             return $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Failed to load gradeable');
             }
@@ -62,7 +64,7 @@ abstract class AbstractController {
      * Gets a gradeable component from its id and a gradeable
      * @param Gradeable $gradeable
      * @param string $component_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return Component|bool false in the fail/error case
      */
     protected function tryGetComponent(Gradeable $gradeable, string $component_id, bool $render_json = true) {
@@ -81,7 +83,8 @@ abstract class AbstractController {
         $component_id = intval($component_id);
         try {
             return $gradeable->getComponent($component_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
             }
@@ -93,7 +96,7 @@ abstract class AbstractController {
      * Gets a mark from its id and a component
      * @param Component $component
      * @param string $mark_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return Mark|bool false in the fail/error case
      */
     protected function tryGetMark(Component $component, string $mark_id, bool $render_json = true) {
@@ -112,7 +115,8 @@ abstract class AbstractController {
         $mark_id = intval($mark_id);
         try {
             return $component->getMark($mark_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid mark_id for this component');
             }
@@ -123,7 +127,7 @@ abstract class AbstractController {
     /**
      * Gets a submitter id from an anon id
      * @param string $anon_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return string|bool false in the fail/error case
      */
     protected function tryGetSubmitterIdFromAnonId(string $anon_id, bool $render_json = true) {
@@ -143,7 +147,8 @@ abstract class AbstractController {
                 return false;
             }
             return $submitter_id;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');
             }
@@ -155,7 +160,7 @@ abstract class AbstractController {
      * Gets a graded gradeable for a given gradeable and submitter id
      * @param Gradeable $gradeable
      * @param string $submitter_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return \app\models\gradeable\GradedGradeable|bool false in the fail/error case
      */
     protected function tryGetGradedGradeable(Gradeable $gradeable, string $submitter_id, bool $render_json = true) {
@@ -174,7 +179,8 @@ abstract class AbstractController {
                 return false;
             }
             return $graded_gradeable;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Failed to load Gradeable grade');
             }
@@ -186,7 +192,7 @@ abstract class AbstractController {
      * Gets a submission version for a given auto graded gradeable and version number
      * @param AutoGradedGradeable $auto_graded_gradeable
      * @param string $version
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return AutoGradedVersion|bool false in the fail/error case
      */
     protected function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version, bool $render_json = true) {
@@ -199,7 +205,8 @@ abstract class AbstractController {
                 }
                 return false;
             }
-        } else {
+        }
+        else {
             $version_instance = $auto_graded_gradeable->getActiveVersionInstance();
             if ($version_instance === null) {
                 if ($render_json) {
@@ -215,7 +222,7 @@ abstract class AbstractController {
      * Gets a testcase for a given version and testcase index
      * @param AutoGradedVersion $version
      * @param string $testcase_index
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return AutoGradedTestcase|bool false in the fail/error case
      */
     protected function tryGetTestcase(AutoGradedVersion $version, string $testcase_index, bool $render_json = true) {
@@ -246,18 +253,18 @@ abstract class AbstractController {
      * Gets an autocheck for a given testcase and autocheck index
      * @param AutoGradedTestcase $testcase
      * @param string $autocheck_index
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return \app\models\GradeableAutocheck|bool false in the fail/error case
      */
     protected function tryGetAutocheck(AutoGradedTestcase $testcase, string $autocheck_index, bool $render_json = true) {
-        if($autocheck_index === '') {
-            if($render_json) {
+        if ($autocheck_index === '') {
+            if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Must provide an autocheck index parameter');
             }
             return false;
         }
         if (!ctype_digit($autocheck_index)) {
-            if($render_json) {
+            if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('autocheck index parameter must be a non-negative integer');
             }
             return false;
@@ -265,8 +272,9 @@ abstract class AbstractController {
         $autocheck_index = intval($autocheck_index);
         try {
             return $testcase->getAutocheck($autocheck_index);
-        } catch (\InvalidArgumentException $e){
-            if($render_json) {
+        }
+        catch (\InvalidArgumentException $e) {
+            if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid autocheck index parameter');
             }
             return false;

@@ -3,8 +3,8 @@
 namespace tests\app\libraries;
 
 use app\exceptions\FileReadException;
-use \app\libraries\FileUtils;
-use \app\libraries\Utils;
+use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 class FileUtilsTester extends \PHPUnit\Framework\TestCase {
     use \phpmock\phpunit\PHPMock;
@@ -197,7 +197,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         file_put_contents(FileUtils::joinPaths($this->path, "b", "test.txt"), "aa");
         FileUtils::emptyDir($this->path);
         $this->assertFileExists($this->path);
-        $this->assertCount(2,scandir($this->path));
+        $this->assertCount(2, scandir($this->path));
     }
 
     public function testReadJsonFile() {
@@ -249,14 +249,42 @@ STRING;
         $this->assertStringEqualsFile(FileUtils::joinPaths($this->path, 'test.json'), '"aa"');
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testWriteJsonFileFailEncode() {
-        $this->getFunctionMock("app\\libraries", "json_encode")
-            ->expects($this->once())
-            ->willReturn(false);
-        $this->assertFalse(FileUtils::writeJsonFile(FileUtils::joinPaths($this->path, 'test.json'), 'aa'));
+        $data = ['a' => 1, 'b' => tmpfile()];
+        $this->assertFalse(FileUtils::writeJsonFile(FileUtils::joinPaths($this->path, 'test.json'), $data));
+    }
+
+    public function testWriteJsonFileNonWritable() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test.json');
+        touch($file);
+        try {
+            chmod($file, 0400);
+            $this->assertFalse(FileUtils::writeJsonFile($file, 'aa'));
+        }
+        finally {
+            chmod($file, 0660);
+        }
+    }
+
+    public function testWriteFile() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test_file');
+        $this->assertTrue(FileUtils::writeFile($file, "test"));
+        $this->assertStringEqualsFile($file, "test");
+    }
+
+    public function testWriteFileNonWritableFile() {
+        FileUtils::createDir($this->path);
+        $file = FileUtils::joinPaths($this->path, 'test_file');
+        touch($file);
+        try {
+            chmod($file, 0400);
+            $this->assertFalse(FileUtils::writeFile($file, "test"));
+        }
+        finally {
+            chmod($file, 0660);
+        }
     }
 
     public function testGetZipSize() {
@@ -448,18 +476,22 @@ STRING;
 
     private function buildFakeFile($filename, $part = 1, $err = 0, $size = 100) {
         $file_path = FileUtils::joinpaths($this->path, $filename);
-        file_put_contents($file_path, str_repeat(' ', $size));
+
+        //zip files will already exist
+        if (!file_exists($file_path)) {
+            file_put_contents($file_path, str_repeat(' ', $size));
+        }
 
         $_FILES["files{$part}"]['name'][] = $filename;
         $_FILES["files{$part}"]['type'][] = mime_content_type($file_path);
         $_FILES["files{$part}"]['size'][] = filesize($file_path);
 
         $tmpname = FileUtils::joinPaths($this->path, Utils::generateRandomString() . $filename);
+
         copy($file_path, $tmpname);
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
         $_FILES["files{$part}"]['error'][] = $err;
-
     }
 
     public function testvalidateUploadedFilesGood() {
@@ -469,22 +501,28 @@ STRING;
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files1"]);
 
-        $this->assertCount(2, $stat );
-        $this->assertEquals($stat[0],
+        $this->assertCount(2, $stat);
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'foo.txt',
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' => 100,
+             'is_zip' => false,
              'success' => true
-            ]);
+            ]
+        );
 
-          $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'foo2.txt',
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' => 100,
+             'is_zip' => false,
              'success' => true
-            ]);
+            ]
+        );
     }
 
     public function testvalidateUploadedFilesBad() {
@@ -493,12 +531,14 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(1, $stat);
-        $this->assertEquals($stat[0],
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'bad.txt',
              'type' => 'text/plain',
-             'error'=> 'The file was only partially uploaded',
+             'error' => 'The file was only partially uploaded',
              'size' => 100,
-             'success'=> false
+             'is_zip' => false,
+             'success' => false
              ]
         );
 
@@ -506,12 +546,14 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(2, $stat);
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'bad2.txt',
              'type' => 'text/plain',
-             'error'=> 'No file was uploaded.',
+             'error' => 'No file was uploaded.',
              'size' => 100,
-             'success'=> false
+             'is_zip' => false,
+             'success' => false
              ]
         );
 
@@ -523,21 +565,25 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(6, $stat);
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'bad2.txt',
              'type' => 'text/plain',
-             'error'=> 'No file was uploaded.',
+             'error' => 'No file was uploaded.',
              'size' => 100,
-             'success'=> false
+             'is_zip' => false,
+             'success' => false
              ]
         );
 
-        $this->assertEquals($stat[2],
+        $this->assertEquals(
+            $stat[2],
             ['name' => 'bad3.txt',
              'type' => 'text/plain',
-             'error'=> 'Unknown error code.',
+             'error' => 'Unknown error code.',
              'size' => 100,
-             'success'=> false
+             'is_zip' => false,
+             'success' => false
              ]
         );
 
@@ -545,28 +591,32 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(7, $stat);
-        $this->assertEquals($stat[6],
+        $this->assertEquals(
+            $stat[6],
             ['name' => '\?<>.txt',
              'type' => 'text/plain',
-             'error'=> 'Invalid filename',
+             'error' => 'Invalid filename',
              'size' => 100,
-             'success'=> false
+             'is_zip' => false,
+             'success' => false
              ]
         );
     }
 
-    public function testvalidateUploadedFilesBig(){
+    public function testvalidateUploadedFilesBig() {
         FileUtils::createDir($this->path);
         $this->buildFakeFile("big.txt", 3, 0, 100 + Utils::returnBytes(ini_get('upload_max_filesize')));
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
 
         $this->assertCount(1, $stat);
-        $this->assertEquals($stat[0],
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'big.txt',
              'type' => 'text/plain',
-             'error'=> 'File "big.txt" too large got (2.0000953674316MB)',
-             'size' => 100+ Utils::returnBytes(ini_get('upload_max_filesize')),
-             'success'=> false
+             'error' => 'File "big.txt" too large got (2.0000953674316MB)',
+             'size' => 100 + Utils::returnBytes(ini_get('upload_max_filesize')),
+             'is_zip' => false,
+             'success' => false
              ]
         );
 
@@ -574,30 +624,79 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
 
         $this->assertCount(2, $stat);
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'just_big_enough.txt',
              'type' => 'text/plain',
-             'error'=> 'No error.',
+             'error' => 'No error.',
              'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
-             'success'=> true
+             'is_zip' => false,
+             'success' => true
              ]
         );
     }
 
-    public function testvalidateUploadedFilesFail(){
+    public function testvalidateUploadedFilesFail() {
         $stat = FileUtils::validateUploadedFiles(null);
         $this->assertArrayHasKey("failed", $stat);
-        $this->assertEquals($stat["failed"], "No files sent to validate" );
+        $this->assertEquals($stat["failed"], "No files sent to validate");
 
         $stat = FileUtils::validateUploadedFiles([]);
         $this->assertArrayHasKey("failed", $stat);
-        $this->assertEquals($stat["failed"], "No files sent to validate" );
+        $this->assertEquals($stat["failed"], "No files sent to validate");
+    }
+
+    public function testvalidateUploadedFilesZipGood() {
+        FileUtils::createDir($this->path);
+        $zip = new \ZipArchive();
+        $zip->open(FileUtils::joinPaths($this->path, 'test.zip'), \ZipArchive::CREATE);
+        $zip->addFromString('testfile', "file test");
+        $zip->close();
+
+        $this->buildFakeFile('test.zip', 4);
+        $stat = FileUtils::validateUploadedFiles($_FILES["files4"]);
+
+        $this->assertCount(1, $stat);
+        $this->assertEquals(
+            $stat[0],
+            ['name' => 'test.zip',
+             'type' => 'application/zip',
+             'error' => 'No error.',
+             'size' => 9,
+             'is_zip' => true,
+             'success' => true
+            ]
+        );
+    }
+
+    public function testvalidateUploadedFilesZipBad() {
+        FileUtils::createDir($this->path);
+        $zip = new \ZipArchive();
+        $zip->open(FileUtils::joinPaths($this->path, 'tes<>t.zip'), \ZipArchive::CREATE);
+        $zip->addFromString('test222', "file test");
+        $zip->addFromString('testttt>', "bad name");
+        $zip->close();
+
+        $this->buildFakeFile('tes<>t.zip', 5);
+        $stat = FileUtils::validateUploadedFiles($_FILES["files5"]);
+
+        $this->assertCount(1, $stat);
+        $this->assertEquals(
+            ['name' => 'tes<>t.zip',
+             'type' => 'application/zip',
+             'error' => 'Invalid filename',
+             'size' => 17,
+             'is_zip' => true,
+             'success' => false
+            ],
+            $stat[0]
+        );
     }
 
     private function getAllFilesSetup(): void {
         FileUtils::createDir($this->path);
         foreach (['a', 'b'] as $name) {
-            file_put_contents(FileUtils::joinPaths($this->path, $name.'.txt'), $name);
+            file_put_contents(FileUtils::joinPaths($this->path, $name . '.txt'), $name);
         }
         foreach (['c', 'd'] as $name) {
             FileUtils::createDir(FileUtils::joinPaths($this->path, $name));
