@@ -57,7 +57,13 @@
           {% endif %}
 
           <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
-          <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+          {% if entry['removal_type'] == 'self' %}
+            <a class="post-user-info mobile-hide" onclick="unhideId(this, '{{ entry['removed_by'] }}')" title="Show user id" aria-label="Show user id">
+              <i class="fas fa-eye"></i>
+            </a>
+          {% else %}
+            <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+          {% endif %}
         </tr>
       {% endif %}
     {% endfor %}
