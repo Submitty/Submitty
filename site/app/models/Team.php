@@ -17,21 +17,21 @@ use app\models\gradeable\Gradeable;
  */
 class Team extends AbstractModel {
 
-    /** @property @var string The id of this team of form "<unique number>_<creator user id>" */
+    /** @prop @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
-    /** @property @var integer rotating section (registration or rotating) of team creator */
+    /** @prop @var integer rotating section (registration or rotating) of team creator */
     protected $registration_section;
-    /** @property @var integer registration section (registration or rotating) of team creator */
+    /** @prop @var integer registration section (registration or rotating) of team creator */
     protected $rotating_section;
-    /** @property @var string[] containing user ids of team members */
+    /** @prop @var string[] containing user ids of team members */
     protected $member_user_ids;
-    /** @property @var string[] containing user ids of those invited to the team */
+    /** @prop @var string[] containing user ids of those invited to the team */
     protected $invited_user_ids;
-    /** @property @var User[] containing users of team members */
+    /** @prop @var User[] containing users of team members */
     protected $member_users;
-    /** @property @var User[] containing users of those invited to the team */
+    /** @prop @var User[] containing users of those invited to the team */
     protected $invited_users;
-    /** @property @var string containing comma-seperated list of team members */
+    /** @prop @var string containing comma-seperated list of team members */
     protected $member_list;
     /** @var array $assignment_settings */
     protected $assignment_settings;

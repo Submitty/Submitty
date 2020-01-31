@@ -21,6 +21,12 @@
         </div>
     </header>
 
+    {% if part_names|length > 1 and one_part_only %}
+        <h4 style="color: red;">
+            Please drag and drop your files into only one area below. Files submitted to additional areas will not be graded.
+        </h4>
+    {% endif %}
+
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
@@ -423,7 +429,7 @@
                 >
                     <h2 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
-                            Drag your {{ part }} here or click to open file browser
+                            Drag your {{ part }} file(s) here or click to open file browser
                         {% else %}
                             Drag your file(s) here or click to open file browser
                         {% endif %}
