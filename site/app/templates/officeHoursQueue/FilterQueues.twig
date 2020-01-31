@@ -26,7 +26,7 @@
       </thead>
       <tbody>
         {% for queue in viewer.getAllQueues() %}
-          <tr class="row_color_v2_{{viewer.getIndexFromCode(queue['code'])}}">
+          <tr class="row_color_{{viewer.getIndexFromCode(queue['code'])}}">
             <td>
               <input type="checkbox" title="Toggle filter for: {{viewer.cleanForId(queue['code'])}}" id="queue_filter_{{viewer.cleanForId(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
             </td>

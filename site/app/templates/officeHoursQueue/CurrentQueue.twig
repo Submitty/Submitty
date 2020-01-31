@@ -1,5 +1,5 @@
 {% if viewer.isGrader() %}
-  <table class="table table-striped" style="width:100%;">
+  <table class="table table-striped" style="width:100%;" id="current_queue">
     <thead>
       <tr>
         <th scope="col">#</th>
@@ -13,7 +13,7 @@
     </thead>
     <tbody>
       {% for entry in viewer.getCurrentQueue() %}
-        <tr class="row_color_v2_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
+        <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
           <th scope="row" class="row_number">{{entry['row_number'] }}</th>
           <td>{{ entry['name'] }}</td>
 
