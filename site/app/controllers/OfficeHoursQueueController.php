@@ -172,6 +172,32 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function restorePerson($queue_code) {
+        if (empty($_POST['entry_id'])) {
+            $this->core->addErrorMessage("Missing entry ID");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (empty($queue_code)) {
+            $this->core->addErrorMessage("Missing queue code");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->restoreUserToQueue($_POST['entry_id']);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/startHelp", methods={"POST"})
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response

@@ -14,7 +14,7 @@
         <label for="code_box">Code:</label>
         <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
         <br>
-        <input type="submit" value="Join" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary">Join</button>
       </form>
     {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
       {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
@@ -33,7 +33,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <input type="submit" value="Leave Queue" class="btn btn-danger">
+        <button type="submit" class="btn btn-danger">Leave Queue</button>
       </form>
     {% else %}
       <p>You are currently being helped</p>
@@ -45,7 +45,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <input type="submit" value="Finish Being Helped" class="btn btn-danger">
+        <button type="submit" class="btn btn-danger">Finish Being Helped</button>
       </form>
     {% endif %}
     <br>

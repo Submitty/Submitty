@@ -6,8 +6,8 @@
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Time</th>
-        <th scope="col">Remove</th>
         <th scope="col">Queue</th>
+        <th scope="col">Remove</th>
         <th scope="col" class="mobile-hide">ID</th>
       </tr>
     </thead>
@@ -22,11 +22,12 @@
               <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
                 {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
-                  <input type="submit" value="Help" class="btn btn-success">
+                  <button type="submit" class="btn btn-primary" title="First time in this queue today">
+                    <i class="fas fa-star"></i>
+                    Help</button>
                 {% else %}
-                  <input type="submit" value="Help" class="btn btn-primary">
+                  <button type="submit" class="btn btn-primary">Help</button>
                 {% endif %}
               </form>
             </td>
@@ -35,11 +36,10 @@
               <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
                 {% if entry['help_started_by'] == viewer.getUserId() %}
-                  <input type="submit" value="Finish Helping" class="btn btn-success">
+                  <button type="submit" class="btn btn-success finish_helping_btn">Finish Helping</button>
                 {% else %}
-                  <input type="submit" value="Finish Helping" class="btn btn-primary">
+                  <button type="submit" class="btn btn-primary finish_helping_btn">Finish Helping</button>
                 {% endif %}
               </form>
             </td>
@@ -50,16 +50,14 @@
           {% else %}
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
           {% endif %}
-
+          <td>{{ entry['queue_code'] }}</td>
           <td>
             <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-              <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
-              <input type="submit" value="Remove" class="btn btn-default">
+              <button type="submit" class="btn btn-default">Remove</button>
             </form>
           </td>
-          <td>{{ entry['queue_code'] }}</td>
           <td class="mobile-hide">
             <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
               <i class="fas fa-eye"></i>

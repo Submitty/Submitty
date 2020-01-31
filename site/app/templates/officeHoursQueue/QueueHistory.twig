@@ -24,11 +24,14 @@
       <th scope="col">Time Helped</th>
       <th scope="col" class="mobile-hide">Helped Started By</th>
       <th scope="col" class="mobile-hide">Removed By</th>
+      {% if viewer.isGrader() %}
+        <th scope="col" class="mobile-hide">Restore</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
     {% set history_count = 0 %}
-    {% for entry in viewer.getPastQueue()if history_count < 50 or viewer.getFullHistory() %}
+    {% for entry in viewer.getPastQueue()if history_count < 25 or viewer.getFullHistory() %}
       {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
         {% set history_count = history_count + 1 %}
         <tr class="queue_history_{{entry['queue_code']}}">
@@ -65,6 +68,15 @@
             </td>
           {% else %}
             <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+          {% endif %}
+          {% if viewer.isGrader() %}
+            <td>
+              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
+                <button type="submit" class="btn btn-danger">Restore</button>
+              </form>
+            </td>
           {% endif %}
         </tr>
       {% endif %}

@@ -10,7 +10,7 @@
     <form method="post" id="open_new_queue" action="{{base_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="text" name="code" placeholder="Code" required="required">
-      <input type="submit" value="Open New Queue" class="btn btn-primary">
+      <button type="submit" class="btn btn-primary">Open New Queue</button>
     </form>
 
     <table class="table table-striped" style="width:100%; margin-top:1rem;">
@@ -37,9 +37,9 @@
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                 <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
                 {% if queue['open'] == 0 %}
-                  <input type="submit" value="Open Queue" class="btn btn-primary">
+                  <button type="submit" class="btn btn-primary filter_settings_btn">Open Queue</button>
                 {% else %}
-                  <input type="submit" value="Close Queue" class="btn btn-primary">
+                  <button type="submit" class="btn btn-primary filter_settings_btn">Close Queue</button>
                 {% endif %}
               </form>
             </td>
@@ -47,14 +47,14 @@
               <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-                <input type="submit" value="Empty Queue" class="btn btn-danger">
+                <button type="submit" class="btn btn-danger filter_settings_btn">Empty Queue</button>
               </form>
             </td>
             <td class="button-padding">
               <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-                <input type="submit" value="Delete Queue" class="btn btn-danger">
+                <button type="submit" class="btn btn-danger filter_settings_btn">Delete Queue</button>
               </form>
             </td>
             <td></td>
@@ -64,4 +64,12 @@
     </table>
   </div>
   <br>
+
+  <style media="screen">
+    {% for color in viewer.getColors() %}
+      .row_color_{{loop.index0}}{
+        background: {{color}}!important;
+      }
+    {% endfor %}
+  </style>
 {% endif %}
