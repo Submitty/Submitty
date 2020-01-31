@@ -19,11 +19,15 @@ class OfficeHoursQueueView extends AbstractView {
         return $output;
     }
 
-    private function renderPart($viewer, $twig_location){
-      return $this->core->getOutput()->renderTwigTemplate($twig_location, [
+    public function renderCurrentQueue($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig");
+    }
+
+    private function renderPart($viewer, $twig_location) {
+        return $this->core->getOutput()->renderTwigTemplate($twig_location, [
           'csrf_token' => $this->core->getCsrfToken(),
           'viewer' => $viewer,
           'base_url' => $this->core->buildCourseUrl() . '/office_hours_queue'
-      ]);
+        ]);
     }
 }

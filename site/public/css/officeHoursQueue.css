@@ -1,0 +1,108 @@
+.row_color_0 {
+    background: #c98ee4 !important;
+}
+
+.row_color_1 {
+    background: #9fcc55 !important;
+}
+
+.row_color_2 {
+    background: #ea79a1 !important;
+}
+
+.row_color_3 {
+    background: #4ed78e !important;
+}
+
+.row_color_4 {
+    background: #ef7568 !important;
+}
+
+.row_color_5 {
+    background: #38b3eb !important;
+}
+
+.row_color_6 {
+    background: #e09965 !important;
+}
+
+.row_color_7 {
+    background: #8499e3 !important;
+}
+
+.row_color_8 {
+    background: #83cc88 !important;
+}
+
+.row_color_9 {
+    background: #d9ab39 !important;
+}
+
+.row_color_10 {
+    background: #4ddcc0 !important;
+}
+
+.row_color_11 {
+    background: #b9c673 !important;
+}
+
+.row_color_12 {
+    background: #658bfb !important;
+}
+
+.row_color_13 {
+    background: #76cc6c !important;
+}
+
+.row_color_14 {
+    background: #dc8b3d !important;
+}
+
+.row_color_15 {
+    background: #c9bf5d !important;
+}
+
+.row_color_16 {
+    background: #5499f0 !important;
+}
+
+.row_color_17 {
+    background: #9a89f0 !important;
+}
+
+.row_color_18 {
+    background: #e57fcf !important;
+}
+
+.row_color_19 {
+    background: #c0c246 !important;
+}
+
+/* Hides elements on the page before they have been fully loaded */
+.page_loading {
+    visibility: hidden;
+}
+
+.button-padding {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+/*
+  This will hide elements on phones. This is useful for extra content that
+  is not normally needed such as a user id
+*/
+@media only screen and (max-width: 479px) {
+
+    /* Put this on elements you dont need on mobile */
+    .mobile-hide {
+        display: none !important;
+    }
+}
+
+/* Put this on elements you dont need on desktop */
+@media only screen and (min-width: 480px) {
+    .desktop-hide {
+        display: none !important;
+    }
+}

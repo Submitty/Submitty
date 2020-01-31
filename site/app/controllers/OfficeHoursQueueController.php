@@ -40,6 +40,8 @@ class OfficeHoursQueueController extends AbstractController {
             $full_history = true;
         }
 
+        $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
+
         return Response::WebOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
@@ -305,6 +307,28 @@ class OfficeHoursQueueController extends AbstractController {
     public function checkUpdates() {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($this->core->getQueries()->getLastQueueUpdate())
+        );
+    }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
+    * @return Response
+    */
+    public function showCurrentQueue() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'renderCurrentQueue',
+                new OfficeHoursQueueViewer($this->core, $full_history)
+            )
         );
     }
 }
