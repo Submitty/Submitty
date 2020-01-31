@@ -266,17 +266,12 @@ class SubmissionController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
     */
     public function ajaxBulkUpload($gradeable_id) {
-<<<<<<< HEAD
-        $is_qr = $_POST['use_qr_codes'] === "true";
-        $use_ocr = $_POST['use_ocr'] === "true" && $is_qr;
-=======
         if (empty($_POST)) {
             $max_size =  Utils::returnBytes(ini_get('post_max_size'));
             return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
         }
 
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
->>>>>>> bdc9aaed74d45f394d31fb79030d19de8e64c912
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";

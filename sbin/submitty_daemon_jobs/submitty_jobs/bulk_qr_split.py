@@ -49,13 +49,6 @@ def main(args):
 
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
-<<<<<<< HEAD
-            mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
-            contrast = 255 - cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-
-            # decode img - only look for QR codes
-            val = pyzbar.decode(contrast, symbols=[ZBarSymbol.QRCODE])
-=======
 
             img_grey = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
             ret2, thresh = cv2.threshold(img_grey, 0, 255,
@@ -63,7 +56,7 @@ def main(args):
 
             # decode img - only look for QR codes
             val = pyzbar.decode(thresh, symbols=[ZBarSymbol.QRCODE])
->>>>>>> bdc9aaed74d45f394d31fb79030d19de8e64c912
+
             if val != []:
                 # found a new qr code, split here
                 # convert byte literal to string
@@ -84,24 +77,18 @@ def main(args):
                     if qr_suffix != '' and suf == qr_suffix:
                         data = data[:-len(qr_suffix)]
 
-<<<<<<< HEAD
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
                     data = scanner.getDigits(contrast, val)
                     buff += "Found student ID number of \'" + data + "\' on"
                     buff += " page " + str(page_number) + ", "
 
-                cover_index = i
-                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
-                output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
-=======
                 # since QR splitting doesn't know the max page assume length of 3
                 prepended_index = str(i).zfill(3)
 
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
                                                           prepended_index)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
->>>>>>> bdc9aaed74d45f394d31fb79030d19de8e64c912
 
                 output[output_filename] = {}
                 output[output_filename]['id'] = data
