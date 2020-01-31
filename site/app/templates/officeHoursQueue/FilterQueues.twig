@@ -28,7 +28,13 @@
         {% for queue in viewer.getAllQueues() %}
           <tr class="row_color_{{viewer.getIndexFromCode(queue['code'])}}">
             <td>
-              <input type="checkbox" title="Toggle filter for: {{viewer.cleanForId(queue['code'])}}" id="queue_filter_{{viewer.cleanForId(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
+              <input
+                type="checkbox"
+                title="Toggle filter for: {{viewer.cleanForId(queue['code'])}}"
+                aria-label="Toggle filter for: {{viewer.cleanForId(queue['code'])}}"
+                id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
+                class="page_loading"
+                onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
             </td>
             <td style="text-align: left;">{{queue['code']}}</td>
             <td class="button-padding">
