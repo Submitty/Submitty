@@ -5273,7 +5273,7 @@ AND gc_id IN (
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
         $status_code = null;
-        if ($remove_type === 'self') {//user removeing themselves
+        if ($remove_type !== 'self') {//user removeing themselves
             $status_code = 'being_helped';//dont allow removing yourself if you are being helped
         }
 
