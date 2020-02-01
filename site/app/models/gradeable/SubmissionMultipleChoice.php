@@ -33,7 +33,7 @@ class SubmissionMultipleChoice extends AbstractGradeableInput {
         else {
             $this->allow_multiple = false;
         }
-        if ($details["randomize_order"] == true) {
+        if (isset($details["randomize_order"]) && $details["randomize_order"] == true) {
             $this->randomize_order = true;
         }
         else {
