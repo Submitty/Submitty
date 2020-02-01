@@ -5199,7 +5199,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($queue_code) {
+    public function openQueue($queue_code, $token) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($queue_code));
 
         //cannot have more than one queue with the same code
@@ -5207,7 +5207,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (TRUE, TRIM(?))", array($queue_code));
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token) VALUES (TRUE, TRIM(?), TRIM(?))", array($queue_code,$token));
         return true;
     }
 
@@ -5226,8 +5226,13 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($queue_code));
     }
 
-    public function isValidCode($queue_code) {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($queue_code));
+    public function isValidCode($queue_code, $token = null) {
+        if (is_null($token)) {
+            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($queue_code));
+        }
+        else {
+            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", array($queue_code, $token));
+        }
         if (0 < count($this->course_db->rows())) {
             return $this->course_db->rows()[0]['code'];
         }

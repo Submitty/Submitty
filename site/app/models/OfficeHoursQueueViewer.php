@@ -156,4 +156,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
     public function getColor($index) {
         return $this->colors[$index];
     }
+
+    public function removeUnderScores($value) {
+        return preg_replace('/_/', ' ', $value);
+    }
 }

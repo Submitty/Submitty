@@ -111,5 +111,15 @@
       }
     });
   }, refreshSpeed);
+
+  function genRandCode(id) {
+    var result = '';
+    var characters = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 6; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    $('#' + id).val(result);
+  }
 </script>
 </div>

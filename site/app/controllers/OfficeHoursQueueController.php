@@ -58,7 +58,14 @@ class OfficeHoursQueueController extends AbstractController {
     */
     public function openQueue() {
         if (empty($_POST['code'])) {
-            $this->core->addErrorMessage("No code was provided");
+            $this->core->addErrorMessage("Missing queue name");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (empty($_POST['token'])) {
+            $this->core->addErrorMessage("Missing secret code");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -66,21 +73,23 @@ class OfficeHoursQueueController extends AbstractController {
 
         //Replace whitespace with "_"
         $queue_code = preg_replace('/\s+/', '_', $_POST['code']);
+        $token = preg_replace('/\s+/', '_', $_POST['token']);
 
         $re = '/^[a-zA-Z0-9_\-]+$/m';
-        preg_match_all($re, $queue_code, $matches, PREG_SET_ORDER, 0);
-        if (count($matches) !== 1) {
-            $this->core->addErrorMessage('Queue Code must only contain letters, numbers, spaces, "_", and "-"');
+        preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
+        preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
+        if (count($matches_code) !== 1 || count($matches_token) !== 1) {
+            $this->core->addErrorMessage('Queue name and secret code must only contain letters, numbers, spaces, "_", and "-"');
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
 
-        if ($this->core->getQueries()->openQueue($queue_code)) {
+        if ($this->core->getQueries()->openQueue($queue_code, $token)) {
             $this->core->addSuccessMessage("New queue added");
         }
         else {
-            $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue code");
+            $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue name");
         }
 
         return Response::RedirectOnlyResponse(
@@ -95,24 +104,32 @@ class OfficeHoursQueueController extends AbstractController {
     */
     public function addPerson($queue_code) {
         if (empty($_POST['name'])) {
-            $this->core->addErrorMessage("Missing name");
+            $this->core->addErrorMessage("Missing user's name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
 
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
 
-        $queue_code = preg_replace('/\s+/', '_', $queue_code);
+        if (empty($_POST['token'])) {
+            $this->core->addErrorMessage("Missing secret code");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
 
-        $validated_code = $this->core->getQueries()->isValidCode($queue_code);
+        $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
+        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
+
+        $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {
-            $this->core->addErrorMessage("invalid code");
+            $this->core->addErrorMessage("Invalid secret code");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -146,7 +163,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -185,7 +202,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -211,7 +228,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -236,7 +253,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -268,7 +285,7 @@ class OfficeHoursQueueController extends AbstractController {
     */
     public function emptyQueue($queue_code) {
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -287,7 +304,7 @@ class OfficeHoursQueueController extends AbstractController {
     */
     public function toggleQueue($queue_code) {
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -314,7 +331,7 @@ class OfficeHoursQueueController extends AbstractController {
     */
     public function deleteQueue($queue_code) {
         if (empty($queue_code)) {
-            $this->core->addErrorMessage("Missing queue code");
+            $this->core->addErrorMessage("Missing queue name");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
