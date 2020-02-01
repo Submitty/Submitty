@@ -810,7 +810,7 @@ class ForumController extends AbstractController {
                 if ($thread['merged_thread_id'] != -1) {
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
-                    if(!empty($_REQUEST["ajax"])) {
+                    if (!empty($_REQUEST["ajax"])) {
                         return $this->core->getOutput()->renderJsonSuccess(['merged' => true, 'destination' => $this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']])]);
                     }
                     $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']]));
