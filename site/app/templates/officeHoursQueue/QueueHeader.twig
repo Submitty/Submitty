@@ -37,7 +37,7 @@
           people ahead of you in the queue</p>
       {% endif %}
       <p>You are currently in:
-        <b>{{viewer.getCurrentQueueCode()}}</b>
+        <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
       </p>
       <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
