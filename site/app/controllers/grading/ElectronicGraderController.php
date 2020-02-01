@@ -238,6 +238,7 @@ class ElectronicGraderController extends AbstractController {
         $num_unsubmitted = 0;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
+        $num_components = 0;
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
@@ -1106,11 +1107,11 @@ class ElectronicGraderController extends AbstractController {
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
             return $component->toArray();
-        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable, $graded_gradeable) {
+        }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable, $graded_gradeable) {
             return $this->core->getAccess()->canI('grading.electronic.view_component', ['graded_gradeable' => $graded_gradeable, 'gradeable' => $gradeable, 'component' => $component]);
         }));
         // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
-        $return['components']= array_values($return['components']);
+        $return['components'] = array_values($return['components']);
         return $return;
     }
 

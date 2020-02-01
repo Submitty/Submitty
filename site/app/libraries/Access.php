@@ -635,8 +635,10 @@ class Access {
             * This means the in_array will always be false. Hence the return true so that peer grading is even possible.
             */
             return true;
-            $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
-            return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
+            /*
+            * $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
+            * return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
+            */
         }
     }
 
