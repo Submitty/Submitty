@@ -69,8 +69,8 @@ class GradingQueue {
         foreach ($grading_dirs as $remote_dir) {
             $path = FileUtils::joinPaths($this->grading_path, $remote_dir);
             if ($remote_dir !== "." && $remote_dir !== ".." && is_dir($path)) {
-                $grading_files = scandir($path);
-                foreach ($grading_files as $file) {
+                $this_remote_files = scandir($path);
+                foreach ($this_remote_files as $file) {
                     $full_path = FileUtils::joinPaths($path, $file);
                     if (is_file($full_path)) {
                         if (strpos($file, self::GRADING_FILE_PREFIX) !== false) {
