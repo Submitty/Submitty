@@ -76,6 +76,9 @@ for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
 
+# Update ownership for cache directory
+chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
+
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 

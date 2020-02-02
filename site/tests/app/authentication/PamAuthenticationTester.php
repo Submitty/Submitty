@@ -9,6 +9,7 @@ use app\libraries\database\DatabaseQueries;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Config;
+use app\models\User;
 use tests\BaseUnitTest;
 
 class PamAuthenticationTester extends BaseUnitTest {
@@ -16,8 +17,14 @@ class PamAuthenticationTester extends BaseUnitTest {
     private function getMockCore($curl_response) {
         $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
-        $queries->method('getSubmittyUser')->willReturn(true);
         $core = $this->createMock(Core::class);
+        $user = new User($core, [
+            'user_id' => 'test',
+            'user_firstname' => 'Test',
+            'user_lastname' => 'Person',
+            'user_email' => '',
+        ]);
+        $queries->method('getSubmittyUser')->willReturn($user);
         $core->method('getConfig')->willReturn($config);
         $core->method('getQueries')->willReturn($queries);
         $core->method('curlRequest')->willReturn($curl_response);
@@ -103,8 +110,14 @@ class PamAuthenticationTester extends BaseUnitTest {
     public function testCurlThrow() {
         $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
-        $queries->method('getSubmittyUser')->willReturn(true);
         $core = $this->createMock(Core::class);
+        $user = new User($core, [
+            'user_id' => 'test',
+            'user_firstname' => 'Test',
+            'user_lastname' => 'Person',
+            'user_email' => '',
+        ]);
+        $queries->method('getSubmittyUser')->willReturn($user);
         $core->method('getConfig')->willReturn($config);
         $core->method('getQueries')->willReturn($queries);
         $ch = curl_init();
