@@ -620,8 +620,8 @@ class ForumThreadView extends AbstractView {
                 $class .= " deleted";
             }
 
-            if($this->core->getQueries()->getUserById($thread['created_by'])->getGroup() <= 3){
-              $class .= " important";
+            if ($this->core->getQueries()->getUserById($thread['created_by'])->getGroup() <= 3) {
+                $class .= " important";
             }
 
             //fix legacy code
