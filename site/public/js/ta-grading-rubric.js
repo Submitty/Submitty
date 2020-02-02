@@ -1837,8 +1837,8 @@ function onCancelComponent(me) {
   const anon_id = getAnonId();
   ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
     // If there is any changes made in comment of a component , prompt the TA
-    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val().trim()) {
-      if(confirm("Note: Changes made to the Student Message will be lost! Do you want to continue ? ")){
+    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
+      if(confirm( "Are you sure you want to discard all changes to the student message?")){
         toggleComponent(component_id, false)
           .catch(function (err) {
             console.error(err);
@@ -1889,7 +1889,7 @@ function onCancelOverallComment(me) {
   // if the overall Comment is changed then prompt the TA for loss in comment
   ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallComment) => {
     if (getOverallCommentFromDOM() !== lastSavedOverallComment) {
-      if(confirm("Note: Changes made to the Student Message will be lost! Do you want to continue ? ")){
+      if(confirm( "Are you sure you want to discard all changes to the student message?")){
         toggleOverallComment(false)
           .catch(function (err) {
             console.error(err);
