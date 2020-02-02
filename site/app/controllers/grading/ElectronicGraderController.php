@@ -240,6 +240,7 @@ class ElectronicGraderController extends AbstractController {
         $viewed_grade = 0;
         $num_components = 0;
         $my_grading = 0;
+        $peer_grade_set = 0;
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
@@ -870,6 +871,8 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
+        
+        $total_submitted = 0;
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
