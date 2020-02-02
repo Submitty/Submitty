@@ -298,7 +298,7 @@
                                     {% else %}
                                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
                                         document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
                                     {% endif %}
                                 </script>
                             {% set num_codeboxes = num_codeboxes + 1 %}
@@ -373,7 +373,7 @@
                                 $("#mc_{{ num_multiple_choice }}_recent_button").hide();
                             {% else %}
                                 $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
-                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                             {% endif %}
                         </script>
 
@@ -713,7 +713,7 @@
                 document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
             {% else %}
                 document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
             {% endif %}
 
         </script>
