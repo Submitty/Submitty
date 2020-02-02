@@ -354,6 +354,32 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function changeToken($queue_code) {
+        if (empty($queue_code)) {
+            $this->core->addErrorMessage("Missing queue name");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (empty($_POST['token'])) {
+            $this->core->addErrorMessage("Missing secret code");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->changeQueueToken($_POST['token'], $queue_code);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
     * @Route("/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
     * @return Response
     */

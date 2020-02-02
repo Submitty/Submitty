@@ -5379,6 +5379,10 @@ AND gc_id IN (
         return $this->course_db->rows()[0];
     }
 
+    public function changeQueueToken($token, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", array($token, $queue_code));
+    }
+
     public function getLastQueueUpdate() {
         $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
         return $this->course_db->rows()[0]['change_count'];
