@@ -227,9 +227,9 @@ function newUploadCourseMaterialsForm() {
 
 function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
 
-    var form = $("#edit-course-materials-form");
+    let form = $("#edit-course-materials-form");
 
-    var element = document.getElementById("edit-picker");
+    let element = document.getElementById("edit-picker");
     
     element._flatpickr.setDate(release_time);
     
