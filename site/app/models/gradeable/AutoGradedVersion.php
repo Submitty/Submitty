@@ -26,43 +26,43 @@ use app\models\AbstractModel;
 class AutoGradedVersion extends AbstractModel {
     /** @var GradedGradeable Reference to the GradedGradeable */
     private $graded_gradeable = null;
-    /** @property @var int The submission version for this AutoGradedVersion */
+    /** @prop @var int The submission version for this AutoGradedVersion */
     protected $version = 0;
-    /** @property @var float The number of "normal" points */
+    /** @prop @var float The number of "normal" points */
     protected $non_hidden_non_extra_credit = 0;
-    /** @property @var float The number of "normal extra credit" points */
+    /** @prop @var float The number of "normal extra credit" points */
     protected $non_hidden_extra_credit = 0;
-    /** @property @var float The number of "hidden" points */
+    /** @prop @var float The number of "hidden" points */
     protected $hidden_non_extra_credit = 0;
-    /** @property @var float The number of "hidden extra credit" points */
+    /** @prop @var float The number of "hidden extra credit" points */
     protected $hidden_extra_credit = 0;
-    /** @property @var \Datetime Time the user submitted this version */
+    /** @prop @var \Datetime Time the user submitted this version */
     protected $submission_time = null;
-    /** @property @var bool If the autograding has complete for this version */
+    /** @prop @var bool If the autograding has complete for this version */
     protected $autograding_complete = false;
 
-    /** @property @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
+    /** @prop @var AutoGradedTestcase[] The testcases for this version indexed by testcase id (lazy loaded)  */
     private $graded_testcases = null;
-    /** @property @var float The number of early submission incentive points this version is worth */
+    /** @prop @var float The number of early submission incentive points this version is worth */
     private $early_incentive_points = 0.0;
     /** @var AutoGradedVersionHistory[] Array of history info loaded from history.json in results folder
      *      This will only have a size more than 1 if the version was graded multiple times
      */
     private $history = [];
 
-    /** @property @var string[] An array of the names of all meta files in submission directory */
+    /** @prop @var string[] An array of the names of all meta files in submission directory */
     private $meta_files = null;
-    /** @property @var array[] An array indexed by part number of array of file paths
+    /** @prop @var array[] An array indexed by part number of array of file paths
      *      Note: paths are relative to part directory
      *      Note: 0'th part contains all files, flattened
      */
     private $files = null;
-    /** @property @var array[] An array of all the autograded results files  */
+    /** @prop @var array[] An array of all the autograded results files  */
     private $results_files = null;
-    /** @property @var array[] An array of all the autograded results public files  */
+    /** @prop @var array[] An array of all the autograded results public files  */
     private $results_public_files = null;
 
-    /** @property @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
+    /** @prop @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
      *      Note: null default value used to indicate that no queue status data has been loaded
      */
     private $queue_position = null;

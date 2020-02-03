@@ -31,55 +31,55 @@ use app\models\AbstractModel;
  */
 class AutogradingConfig extends AbstractModel {
 
-    /** @property @var int The maximum allowed size (in bytes) of a submission */
+    /** @prop @var int The maximum allowed size (in bytes) of a submission */
     protected $max_submission_size;
-    /** @property @var int The maximum number of submissions allowed */
+    /** @prop @var int The maximum number of submissions allowed */
     protected $max_submissions;
-    /** @property @var string A message to show the user above the file upload box */
+    /** @prop @var string A message to show the user above the file upload box */
     protected $gradeable_message;
-    /** @property @var bool Indicates if list of test should be shown at the bottom of the page */
+    /** @prop @var bool Indicates if list of test should be shown at the bottom of the page */
     protected $hide_version_and_test_details;
-    /** @property @var bool Indicates if list os submitted files should be shown on page */
+    /** @prop @var bool Indicates if list os submitted files should be shown on page */
     protected $hide_submitted_files;
-    /** @property @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
+    /** @prop @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
-    /** @property @var int The number of seconds allowed for autograding */
+    /** @prop @var int The number of seconds allowed for autograding */
     protected $max_possible_grading_time = -1;
 
-    /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
+    /** @prop @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
     /** @prop @var bool Variable representing if only one of the available parts can be used for submission */
     protected $one_part_only;
 
-    /** @property @var array Array of notebook objects */
+    /** @prop @var array Array of notebook objects */
     private $notebook = [];
-    /** @property @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
+    /** @prop @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
     private $inputs = [];
-    /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
+    /** @prop @var AutogradingTestcase[] Cut-down information about autograding test cases*/
     private $testcases = [];
 
     /* Properties if early submission incentive enabled */
-    /** @property @var bool If there is an early submission incentive */
+    /** @prop @var bool If there is an early submission incentive */
     private $early_submission_incentive = false;
-    /** @property @var string The message given to describe the early submission */
+    /** @prop @var string The message given to describe the early submission */
     protected $early_submission_message = '';
-    /** @property @var int The minimum number days early to receive the early submission incentive */
+    /** @prop @var int The minimum number days early to receive the early submission incentive */
     protected $early_submission_minimum_days_early = 0;
-    /** @property @var int The minimum number of points required to receive the early submission incentive */
+    /** @prop @var int The minimum number of points required to receive the early submission incentive */
     protected $early_submission_minimum_points = 0;
-    /** @property @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
+    /** @prop @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
     protected $early_submission_test_cases = [];
 
 
     /* Properties accumulated from the AutogradingTestcases */
 
-    /** @property @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
+    /** @prop @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
     protected $total_non_hidden_non_extra_credit = 0;
-    /** @property @var int Total number of non-hidden extra-credit points for all test cases */
+    /** @prop @var int Total number of non-hidden extra-credit points for all test cases */
     protected $total_non_hidden_extra_credit = 0;
-    /** @property @var int Total number of hidden non-extra-credit points for all test cases */
+    /** @prop @var int Total number of hidden non-extra-credit points for all test cases */
     protected $total_hidden_non_extra_credit = 0;
-    /** @property @var int Total number of hidden extra-credit points for all test cases */
+    /** @prop @var int Total number of hidden extra-credit points for all test cases */
     protected $total_hidden_extra_credit = 0;
 
     public function __construct(Core $core, array $details) {
