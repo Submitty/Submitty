@@ -619,6 +619,11 @@ class ForumThreadView extends AbstractView {
             if ($thread["deleted"]) {
                 $class .= " deleted";
             }
+
+            if ($this->core->getQueries()->getUserById($thread['created_by'])->accessGrading()) {
+                $class .= " important";
+            }
+
             //fix legacy code
             $titleDisplay = $thread['title'];
 
