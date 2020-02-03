@@ -50,7 +50,7 @@ class ElectronicGraderView extends AbstractView {
     ) {
 
         $peer = false;
-        if ($gradeable->isPeerGrading()) {//&& $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->isPeerGrading()) {
             $peer = true;
         }
         $graded = 0;
@@ -1049,9 +1049,6 @@ HTML;
         $return = "";
         $gradeable = $graded_gradeable->getGradeable();
 
-        // Disable grading if the requested version isn't the active one
-        // $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
-        //     || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $grading_disabled = true;
 
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;

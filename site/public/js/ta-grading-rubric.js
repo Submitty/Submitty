@@ -202,7 +202,7 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id, all_peers) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}&all_peers=${all_peers}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}&all_peers=${all_peers.toString()}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable grade: ' + response.message);
