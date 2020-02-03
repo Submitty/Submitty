@@ -19,22 +19,22 @@ use app\models\AbstractModel;
  */
 class AutogradingTestcase extends AbstractModel {
 
-    /** @property @var string The index of this testcase in the autograding config */
+    /** @prop @var string The index of this testcase in the autograding config */
     protected $index;
 
-    /** @property @var string Name of this testcase */
+    /** @prop @var string Name of this testcase */
     protected $name = "";
-    /** @property @var string TODO: The command to run? */
+    /** @prop @var string TODO: The command to run? */
     protected $details = "";
-    /** @property @var int Number of points this testcase is worth */
+    /** @prop @var int Number of points this testcase is worth */
     protected $points = 0;
-    /** @property @var bool If this testcase is extra credit */
+    /** @prop @var bool If this testcase is extra credit */
     protected $extra_credit = false;
-    /** @property @var bool If this testcase is hidden */
+    /** @prop @var bool If this testcase is hidden */
     protected $hidden = false;
-    /** @property @var bool If the user should see the message from a GradedAutogradingTestCase */
+    /** @prop @var bool If the user should see the message from a GradedAutogradingTestCase */
     protected $view_testcase_message = true;
-    /** @property @var string */
+    /** @prop @var string */
     protected $testcase_label = '';
 
     /**

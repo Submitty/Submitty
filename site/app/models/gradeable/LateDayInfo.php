@@ -31,7 +31,7 @@ class LateDayInfo extends AbstractModel {
     /** @var User */
     private $user = null;
 
-    /** @property @var int The number of unused late days the user has as of this gradeable, not including exceptions */
+    /** @prop @var int The number of unused late days the user has as of this gradeable, not including exceptions */
     protected $late_days_remaining = null;
 
     /**
