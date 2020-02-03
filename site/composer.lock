@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "372e719574a95c8bec9e11370a7eb83f",
+    "content-hash": "a6909621674aacb603844202d7ee3dc1",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1022,7 +1022,7 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.4.3",
+            "version": "v4.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
