@@ -5621,7 +5621,7 @@ AND gc_id IN (
                   json_agg(in_gcd.gc_id) AS array_comp_id,
                   json_agg(gcd_score) AS array_score,
                   json_agg(gcd_component_comment) AS array_comment,
-                  json_agg(gcd_grader_id) AS array_grader_id,
+                  json_agg(in_gcd.gcd_grader_id) AS array_grader_id,
                   json_agg(gcd_graded_version) AS array_graded_version,
                   json_agg(gcd_grade_time) AS array_grade_time,
                   json_agg(string_mark_id) AS array_mark_id,
@@ -5646,10 +5646,11 @@ AND gc_id IN (
                     SELECT
                       json_agg(gcm_id) AS string_mark_id,
                       gc_id,
-                      gd_id
+                      gd_id,
+                      gcd_grader_id
                     FROM gradeable_component_mark_data
-                    GROUP BY gc_id, gd_id
-                  ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id
+                    GROUP BY gc_id, gd_id, gcd_grader_id
+                  ) AS gcmd ON gcmd.gc_id=in_gcd.gc_id AND gcmd.gd_id=in_gcd.gd_id AND gcmd.gcd_grader_id=in_gcd.gcd_grader_id
 
                   /* Join grader data; TODO: do we want/need 'sr' information? */
                   LEFT JOIN (
@@ -5852,6 +5853,7 @@ AND gc_id IN (
                             $grader,
                             $comp_array
                         );
+
                         $graded_component->setMarkIdsFromDb($db_row_split['mark_id'][$i] ?? []);
                         $graded_components_by_id[$graded_component->getComponentId()][] = $graded_component;
                     }
