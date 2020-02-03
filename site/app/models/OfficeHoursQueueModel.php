@@ -4,9 +4,9 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\models\OfficeHoursQueueViewer;
+use app\models\OfficeHoursQueueModel;
 
-class OfficeHoursQueueViewer extends AbstractModel {
+class OfficeHoursQueueModel extends AbstractModel {
 
 
     /*
@@ -29,7 +29,7 @@ class OfficeHoursQueueViewer extends AbstractModel {
     private $colors = array('#c98ee4','#9fcc55','#ea79a1','#4ed78e','#ef7568','#38b3eb','#e09965','#8499e3','#83cc88','#d9ab39','#4ddcc0','#b9c673','#658bfb','#76cc6c','#dc8b3d','#c9bf5d','#5499f0','#9a89f0','#e57fcf','#c0c246');
 
     /**
-    * OfficeHoursQueueViewer constructor.
+    * OfficeHoursQueueModel constructor.
     *
     * @param Core  $core
     */
@@ -43,8 +43,6 @@ class OfficeHoursQueueViewer extends AbstractModel {
 
         $this->current_queue = $this->core->getQueries()->getCurrentQueue();
         $this->full_history = $full_history === 'true';
-
-        $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
     }
 
     public function getIndexFromCode($code) {

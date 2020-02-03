@@ -24,7 +24,7 @@ use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueueViewer;
+use app\models\OfficeHoursQueueModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;

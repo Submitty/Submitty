@@ -3,12 +3,13 @@
 namespace app\views;
 
 use app\models\User;
-use app\models\OfficeHoursQueueViewer;
+use app\models\OfficeHoursQueueModel;
 
 class OfficeHoursQueueView extends AbstractView {
 
     public function showTheQueue($viewer) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
+        $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
 
         $output = $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
         $output .= $this->renderPart($viewer, "officeHoursQueue/FilterQueues.twig");

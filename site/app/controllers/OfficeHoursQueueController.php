@@ -8,7 +8,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\OfficeHoursQueueViewer;
+use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
 
 /**
@@ -36,7 +36,7 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
                 'showTheQueue',                          //Runs this functin showTheQueue()
-                new OfficeHoursQueueViewer($this->core, $full_history)  //Passing in this variable which is a OfficeHoursQueueViewer object
+                new OfficeHoursQueueModel($this->core, $full_history)  //Passing in this variable which is a OfficeHoursQueueModel object
             )
         );
     }
@@ -386,7 +386,7 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderCurrentQueue',
-                new OfficeHoursQueueViewer($this->core)
+                new OfficeHoursQueueModel($this->core)
             )
         );
     }
