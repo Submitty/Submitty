@@ -35,7 +35,7 @@ class OfficeHoursQueueController extends AbstractController {
         return Response::WebOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
-                'showTheQueue',                          //Runs this functin showTheQueue()
+                 'showTheQueue',                          //Runs this function showTheQueue()
                 new OfficeHoursQueueModel($this->core, $full_history)  //Passing in this variable which is a OfficeHoursQueueModel object
             )
         );
