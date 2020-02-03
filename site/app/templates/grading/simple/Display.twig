@@ -3,10 +3,15 @@
 <div class="content">
     <h1>
         {{ gradeable.getTitle() }}
+        {% if gradeable_url|trim != "" %}
+            <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+        {% endif %}
     </h1>
     <p>
-        {% if gradeable.getTaInstructions() != "" %}
-            Overall TA Instructions: {{ gradeable.getTaInstructions() }}
+        {% if gradeable.getTaInstructions()|trim != "" %}
+            Overall TA Instructions: <a class="external" href="{{  gradeable.getTaInstructions() }}" target="_blank" aria-label="Overall TA Instructions for {{ gradeable.getTitle() }}"><i>{{  gradeable.getTaInstructions()  }}</i></a>
         {% endif %}
     </p>
 

@@ -728,7 +728,6 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']) + '?verify_all=true',
             data: {
                 'csrf_token': csrfToken,
-                'component_id': component_id,
                 'anon_id': anon_id,
             },
             success: function (response) {
