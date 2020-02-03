@@ -31,12 +31,12 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['home']))
             );
         }
-        
+
         return Response::WebOnlyResponse(
             new WebResponse(
-                'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
-                 'showTheQueue',                          //Runs this function showTheQueue()
-                new OfficeHoursQueueModel($this->core, $full_history)  //Passing in this variable which is a OfficeHoursQueueModel object
+                'OfficeHoursQueue',
+                'showTheQueue',
+                new OfficeHoursQueueModel($this->core, $full_history)
             )
         );
     }
