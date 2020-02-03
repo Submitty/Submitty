@@ -10,9 +10,10 @@ $("#edit-user-form").ready(function() {
             });
 
             $('[name="user_id"]', form).autocomplete({
-                source: Object.keys(json)
+                appendTo: form,
+                source: Object.keys(json),
+                change: () => $('[name="user_id"]').change()
             });
-            $('[name="user_id"]', form).autocomplete( "option", "appendTo", form);
 
             $(":text",$("#edit-user-form")).change(checkValidEntries);
         },
@@ -191,7 +192,6 @@ function setRedOrTransparent(input,reg_expression) {
 }
 
 function autoCompleteOnUserId(user_information) {
-    var form = $("#edit-user-form");
     if ($('#user_id').val() in user_information) {
         var user = user_information[$('#user_id').val()];
         var user_already_exists = user['already_in_course'] ? 'block' : 'none';
