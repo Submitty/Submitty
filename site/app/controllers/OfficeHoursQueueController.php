@@ -25,23 +25,13 @@ class OfficeHoursQueueController extends AbstractController {
     * @Route("/{_semester}/{_course}/office_hours_queue", methods={"GET"})
     * @return Response
     */
-    public function showQueue() {
+    public function showQueue($full_history = false) {
         if (!$this->core->getConfig()->isQueueEnabled()) {
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['home']))
             );
         }
-
-        $queries = array();
-        parse_str($_SERVER['QUERY_STRING'], $queries);
-
-        $full_history = false;
-        if (array_key_exists('full_history', $queries) && $queries['full_history'] === "true") {
-            $full_history = true;
-        }
-
-        $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
-
+        
         return Response::WebOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
@@ -344,7 +334,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/office_hours_queue/checkUpdates", methods={"GET"})
+    * @Route("/{_semester}/{_course}/office_hours_queue/check_updates", methods={"GET"})
     * @return Response
     */
     public function checkUpdates() {

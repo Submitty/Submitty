@@ -102,7 +102,7 @@
   {% endif %}
 
   setInterval(function() {
-    $.get("{{base_url}}/checkUpdates", function(data) {
+    $.get("{{base_url}}/check_updates", function(data) {
       if (lastQueueEdit < JSON.parse(data)['data']) {
         $.get("{{base_url}}/current_queue", function(newQueue) {
           $("#current_queue").replaceWith(newQueue);

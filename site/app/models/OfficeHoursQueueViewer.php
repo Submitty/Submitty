@@ -42,7 +42,9 @@ class OfficeHoursQueueViewer extends AbstractModel {
         }
 
         $this->current_queue = $this->core->getQueries()->getCurrentQueue();
-        $this->full_history = $full_history;
+        $this->full_history = $full_history === 'true';
+
+        $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
     }
 
     public function getIndexFromCode($code) {
