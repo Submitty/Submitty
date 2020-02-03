@@ -380,7 +380,7 @@ class SubmissionController extends AbstractController {
                     "qr_suffix" => $qr_suffix,
                     "filename"  => $uploaded_file["name"][$i],
                     "is_qr"     => true,
-                    "use_ocr"   => $use_ocr
+                    "use_ocr"   => $_POST['use_ocr'] === "true"
                 ];
 
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";

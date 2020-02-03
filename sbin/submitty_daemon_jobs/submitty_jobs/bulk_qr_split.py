@@ -79,7 +79,7 @@ def main(args):
 
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
-                    data = scanner.getDigits(contrast, val)
+                    data = scanner.getDigits(thresh, val)
                     buff += "Found student ID number of \'" + data + "\' on"
                     buff += " page " + str(page_number) + ", "
 
