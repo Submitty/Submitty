@@ -151,8 +151,8 @@
                             {{ display_section }}
                         </td>
                         <td>
-                            <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}">
-                                <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                            <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}" aria-label="Edit Team">
+                                <i class="fas fa-pencil-alt"></i>
                             </a>
                         </td>
                         <td>{{ team.getId() }}</td>
@@ -404,7 +404,7 @@
 {# Edit Team #}
 {% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column) %}
     <td>
-        <a onclick="{{ team_edit_onclick }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+        <a onclick="{{ team_edit_onclick }}" aria-label="Edit Team"><i class="fas fa-pencil-alt"></i></a>
     </td>
 {% endmacro %}
 

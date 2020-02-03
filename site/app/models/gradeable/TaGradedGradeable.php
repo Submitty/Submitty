@@ -18,17 +18,17 @@ use app\models\User;
  * @method \DateTime|null getUserViewedDate()
  */
 class TaGradedGradeable extends AbstractModel {
-    /** @property @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
+    /** @prop @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
     private $graded_gradeable = null;
-    /** @property @var int The id of this gradeable data */
+    /** @prop @var int The id of this gradeable data */
     protected $id = 0;
-    /** @property @var string The grader's overall comment */
+    /** @prop @var string The grader's overall comment */
     protected $overall_comment = "";
-    /** @property @var \DateTime|null The date the user viewed their grade */
+    /** @prop @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
-    /** @property @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
+    /** @prop @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
     private $graded_component_containers = [];
-    /** @property @var GradedComponent[] The components that have been marked for deletion */
+    /** @prop @var GradedComponent[] The components that have been marked for deletion */
     private $deleted_graded_components = [];
 
 

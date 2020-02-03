@@ -16,9 +16,9 @@ use app\models\gradeable\AbstractGradeableInput;
  */
 class SubmissionMultipleChoice extends AbstractGradeableInput {
 
-    /** @property @var bool Whether or not the MC is multiselect */
+    /** @prop @var bool Whether or not the MC is multiselect */
     protected $allow_multiple;
-    /** @property @var array The collection of options for the MC */
+    /** @prop @var array The collection of options for the MC */
     protected $choices;
 
     public function __construct(Core $core, array $details) {

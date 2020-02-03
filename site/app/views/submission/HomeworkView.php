@@ -384,6 +384,7 @@ class HomeworkView extends AbstractView {
             'gradeable_name' => $gradeable->getTitle(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
+            'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_host_type' => $gradeable->getVcsHostType(),
