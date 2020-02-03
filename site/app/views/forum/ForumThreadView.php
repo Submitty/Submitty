@@ -587,7 +587,7 @@ class ForumThreadView extends AbstractView {
             $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
-                $first_post = ['content' => ""];
+                $first_post = ['content' => "", 'render_markdown' => 0];
                 $date = null;
             }
             else {
