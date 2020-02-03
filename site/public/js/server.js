@@ -228,11 +228,10 @@ function newUploadCourseMaterialsForm() {
 function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
 
     var form = $("#edit-course-materials-form");
-    //const fp = $("#edit_picker", form);
-    console.log(release_time);
-    var element = document.getElementById("edit_picker");
+
+    var element = document.getElementById("edit-picker");
+    
     element._flatpickr.setDate(release_time);
-    //$("#edit_picker", form).prop('value', release_time);
     
     if(this_hide_from_students == "on"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
@@ -242,20 +241,20 @@ function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_stude
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
     
-    $('#show_Some_Section_Selection_Edit :checkbox:enabled').prop('checked', false);
+    $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
     
     if(this_file_section != null){
         for(let index = 0; index < this_file_section.length; ++index){
             $("#section-edit-" + this_file_section[index], form).prop('checked',true);
         }
-        $("#all_Sections_Showing_No", form).prop('checked',false);
-        $("#all_Sections_Showing_Yes", form).prop('checked',true);
-        $("#show_Some_Section_Selection_Edit", form).show();
+        $("#all-sections-showing-no", form).prop('checked',false);
+        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).show();
     }
     else{
-        $("#show_Some_Section_Selection_Edit", form).hide();
-        $("#all_Sections_Showing_Yes", form).prop('checked',false);
-        $("#all_Sections_Showing_No", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).hide();
+        $("#all-sections-showing-yes", form).prop('checked',false);
+        $("#all-sections-showing-no", form).prop('checked',true);
     }
     $("#material-edit-form", form).attr('data-directory', dir);
     form.css("display", "block");

@@ -78,13 +78,19 @@
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
     <script>
+
         function editCourseMaterialsInitialization(this_file_section, this_hide_from_students, dir, release_time){
-            if (this_file_section != null){
+
+            if (this_file_section != null) {
                 newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time);
-            } else{
+            }
+
+            else {
               newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time); 
             }
+
         }
+
     </script>
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
     <div>

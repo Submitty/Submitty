@@ -271,28 +271,24 @@ class CourseMaterialsController extends AbstractController {
     public function ajaxEditCourseMaterialsFiles() {
         $sections = null;
         if (isset($_POST['sections'])) {
-            $sections = $_POST['sections'];
-        }
-        
-        $hide_from_students = null;
-        if (isset($_POST['hide_from_students'])) {
-            $hide_from_students = $_POST['hide_from_students'];
+            $sections = $_POST['sections'] ?? null;
         }
         
         if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
         
-        $requested_path = "";
-        if (isset($_POST['requested_path'])) {
-            $requested_path = $_POST['requested_path'];
-        }
-        
         $sections_exploded = $sections;
         
         if (!(is_null($sections)) && !empty($sections)) {
-            $sections_exploded = [];
             $sections_exploded = explode(",", $sections);
+        }
+        
+        $hide_from_students = $_POST['hide_from_students'];
+        
+        $requested_path = "";
+        if (isset($_POST['requested_path'])) {
+            $requested_path = $_POST['requested_path'] ?? '';
         }
         
         $release_time = "";
@@ -300,8 +296,7 @@ class CourseMaterialsController extends AbstractController {
             $release_time = $_POST['release_time'];
         }
         
-        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-        $json = FileUtils::readJsonFile($fp);
+        $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');        $json = FileUtils::readJsonFile($fp);
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
         $checked = $json[$dst]['checked'];

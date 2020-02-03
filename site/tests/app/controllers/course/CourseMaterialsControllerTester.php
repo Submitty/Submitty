@@ -159,6 +159,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $this->assertEquals($expected_files1, $f1);
     }
+    
+    /**
+     * @runInSeparateProcess
+    */
 
     public function testModifyCourseMaterials() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')

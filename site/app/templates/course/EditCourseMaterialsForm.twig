@@ -8,14 +8,14 @@
                 Do you want to restrict this course material to some sections?
             </p>
             <label class = "radio">
-                <input id = "all_Sections_Showing_No" name="show_Some_Section_Selection_Edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
+                <input id = "all-sections-showing-no" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
                 No
             </label>
             <label class = "radio">
-                <input id = "all_Sections_Showing_Yes" name="show_Some_Section_Selection_Edit" type = "radio" onchange="toggleRegistrationSectionsEdit()">
+                <input id = "all-sections-showing-yes" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()">
                 Yes
             </label>
-            <div id = "show_Some_Section_Selection_Edit" style="display: none">
+            <div id = "show-some-section-selection-edit" style="display: none">
             {% for section in reg_sections %}
                 <tr>
                     <span class = "inline">
@@ -32,7 +32,7 @@
             </div>
             <script type="text/javascript">
                 function toggleRegistrationSectionsEdit(){
-                    $("#show_Some_Section_Selection_Edit").toggle();
+                    $("#show-some-section-selection-edit").toggle();
                 } 
             </script>
         </label>
@@ -40,7 +40,7 @@
             <p>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </p>
-            <input id="edit_picker" class="edit_picker" type="text" size="26"/>
+            <input id="edit-picker" class="edit-picker" type="text" size="26"/>
         </label>
         <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
@@ -50,17 +50,17 @@
     </div>
     <script type="text/javascript">
         function submitEdit(){ // Submit button
-                var sectionsEdit = [];
-                var cmTime = document.getElementById("edit_picker").value;
-                var requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
-                var hideFromStudents = 'off';
+                let sectionsEdit = [];
+                let cmTime = document.getElementById("edit-picker").value;
+                let requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
+                let hideFromStudents = 'off';
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
                 }
                 
-                var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
+                let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 reg_sectionArray.forEach(function(element){
-                    var currentSectionEdit = '#section-edit-' +element['sections_registration_id']
+                    let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
                     if  ($(currentSectionEdit).is(':checked'))  {
                         sectionsEdit.push(element['sections_registration_id']);
                     }
@@ -71,43 +71,43 @@
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
         };
         
-        flatpickr('.edit_picker', {
-                    plugins: [ShortcutButtonsPlugin(
+        flatpickr('.edit-picker', {
+            plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
                         {
-                            button: [
-                                {
-                                    label: "Now"
-                                },
-                                {
-                                    label: "Tomorrow"
-                                },
-                                {
-                                    label: "End of time"
-                                }
-
-                            ],
-                            onClick: (index, fp) => {
-                                switch (index) {
-                                    case 0:
-                                        updateToServerTime(fp);
-                                        break;
-                                    case 1:
-                                        updateToTomorrowServerTime(fp);
-                                        break;
-                                    case 2:
-                                        date = new Date("9998-01-01 00:00:00");
-                                        fp.setDate(date,true);
-                                        break;
-                                }
-                            }
+                            label: "Now"
+                        },
+                        {
+                            label: "Tomorrow"
+                        },
+                        {
+                            label: "End of time"
                         }
-                    )],
-                    allowInput: true,
-                    enableTime: true,
-                    enableSeconds: true,
-                    time_24hr: true,
-                    dateFormat: "Y-m-d H:i:S"
-                    });
+
+                    ],
+                    onClick: (index, fp) => {
+                        switch (index) {
+                            case 0:
+                                updateToServerTime(fp);
+                                break;
+                            case 1:
+                                updateToTomorrowServerTime(fp);
+                                break;
+                            case 2:
+                                date = new Date("9998-01-01 00:00:00");
+                                fp.setDate(date,true);
+                                break;
+                        }
+                    }
+                }
+            )],
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S"
+        });
     </script>
 {% endblock %}
 {% block buttons %}
