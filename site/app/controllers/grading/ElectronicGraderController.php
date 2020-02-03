@@ -1412,8 +1412,7 @@ class ElectronicGraderController extends AbstractController {
         $default = $_POST['default'] ?? null;
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
-        $peer = $_POST['peer'] ?? 'false';
-        // Use 'page_number' since 'page' is used in the router
+
         $page = $_POST['page_number'] ?? '';
 
         // Validate required parameters
@@ -1455,7 +1454,6 @@ class ElectronicGraderController extends AbstractController {
         if (strval(intval($page)) !== $page) {
             $this->core->getOutput()->renderJsonFail('Invalid page parameter');
         }
-        $peer = $peer === 'true';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1487,7 +1485,6 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
             ]);
             $component->setPage($page);
-            $component->setPeer($peer);
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
         }
@@ -1632,6 +1629,8 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        $peer = $_POST['peer'] === 'true';
+
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to add components');
@@ -1651,7 +1650,7 @@ class ElectronicGraderController extends AbstractController {
                 0,
                 0,
                 false,
-                false,
+                $peer,
                 $page
             );
             $component->addMark('No Credit', 0.0, false);

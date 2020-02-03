@@ -50,7 +50,7 @@ class ElectronicGraderView extends AbstractView {
     ) {
 
         $peer = false;
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->isPeerGrading()) {//&& $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
         $graded = 0;
@@ -105,12 +105,12 @@ class ElectronicGraderView extends AbstractView {
                 $total_students = $total_submissions;
             }
             $num_components = count($gradeable->getNonPeerComponents());
-            $submitted_total = $total / $num_components;
-            $graded_total = round($graded / $num_components, 2);
+            $submitted_total = $num_components > 0 ? $total / $num_components : 0;
+            $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
             if ($peer) {
                 $num_components = count($gradeable->getPeerComponents()) * $gradeable->getPeerGradeSet();
-                $graded_total = $graded / $num_components;
-                $submitted_total = $total / $num_components;
+                $graded_total = $num_components > 0 ? $graded / $num_components : 0;
+                $submitted_total = $num_components > 0 ? $total / $num_components : 0;
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
@@ -131,9 +131,15 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($peer) {
                 $peer_count = count($gradeable->getPeerComponents());
-                $peer_total = floor($sections['stu_grad']['total_components'] / $peer_count);
-                $peer_graded = floor($sections['stu_grad']['graded_components'] / $peer_count);
-                $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
+                $peer_percentage = 0;
+                $peer_total = 0;
+                $peer_graded = 0;
+                
+                if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
+                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
+                    $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
+                    $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
+                }
             }
             else {
                 foreach ($sections as $key => &$section) {
@@ -502,7 +508,7 @@ HTML;
             //List of graded components
             $info["graded_groups"] = [];
             foreach ($gradeable->getComponents() as $component) {
-                $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component);
+                $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
                 if ($graded_component === null) {
                     //not graded

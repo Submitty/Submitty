@@ -620,7 +620,7 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
  * @param {string} gradeable_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxAddComponent(gradeable_id) {
+function ajaxAddComponent(gradeable_id, peer) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -628,6 +628,7 @@ function ajaxAddComponent(gradeable_id) {
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
+                'peer' : peer
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -1719,8 +1720,8 @@ function onDeleteComponent(me) {
 /**
  * Called when the 'add new component' button is pressed
  */
-function onAddComponent() {
-    addComponent()
+function onAddComponent(peer) {
+    addComponent(peer)
         .catch(function (err) {
             console.error(err);
             alert('Failed to add component! ' + err.message);
@@ -2140,8 +2141,8 @@ function verifyAllComponents() {
  * Adds a blank component to the gradeable
  * @return {Promise}
  */
-function addComponent() {
-    return ajaxAddComponent(getGradeableId());
+function addComponent(peer) {
+    return ajaxAddComponent(getGradeableId(), peer);
 }
 
 /**

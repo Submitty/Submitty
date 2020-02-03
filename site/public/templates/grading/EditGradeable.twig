@@ -17,7 +17,8 @@
 {% endblock %}
 
 {% block footer_content %}
-    <input type="button" class="btn btn-primary" value="Add New Component" onclick="onAddComponent()" />
+    <input type="button" class="btn btn-primary" value="Add New Component" onclick="onAddComponent(false)" />
+    <input type="button" class="btn btn-danger" value="(DO NOT USE) Add New Peer Component" onclick="onAddComponent(true)"  />
     <a href="{{ export_components_url }}" class="btn btn-default">Export Components</a>
     <label for="import-components-file" class="btn btn-default">Import Components</label>
     <input id="import-components-file" type="file" class="btn ignore" onchange="importComponentsFromFile();" style="display: none;"/>

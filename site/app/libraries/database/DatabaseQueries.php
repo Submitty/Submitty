@@ -4865,7 +4865,7 @@ AND gc_id IN (
                       gcd_score=?,
                       gcd_component_comment=?,
                       gcd_graded_version=?,
-                      gcd_grade_time=?,
+                      gcd_grade_time=?
                     WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
             }
             $this->course_db->query($query, $params);
