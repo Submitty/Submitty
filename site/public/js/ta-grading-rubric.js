@@ -194,14 +194,15 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
  * ajax call to get the entire graded gradeable for a user
  * @param {string} gradeable_id
  * @param {string} anon_id
+ * @param {boolean} all_peers
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxGetGradedGradeable(gradeable_id, anon_id) {
+function ajaxGetGradedGradeable(gradeable_id, anon_id, all_peers) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}&all_peers=${all_peers.toString()}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable grade: ' + response.message);
@@ -620,7 +621,7 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
  * @param {string} gradeable_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxAddComponent(gradeable_id) {
+function ajaxAddComponent(gradeable_id, peer) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -628,6 +629,7 @@ function ajaxAddComponent(gradeable_id) {
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
+                'peer' : peer
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -1719,8 +1721,8 @@ function onDeleteComponent(me) {
 /**
  * Called when the 'add new component' button is pressed
  */
-function onAddComponent() {
-    addComponent()
+function onAddComponent(peer) {
+    addComponent(peer)
         .catch(function (err) {
             console.error(err);
             alert('Failed to add component! ' + err.message);
@@ -1831,11 +1833,30 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-    toggleComponent(getComponentIdFromDOMElement(me), false)
-        .catch(function (err) {
+  const component_id = getComponentIdFromDOMElement(me);
+  const gradeable_id = getGradeableId();
+  const anon_id = getAnonId();
+  ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
+    // If there is any changes made in comment of a component , prompt the TA
+    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
+      if(confirm( "Are you sure you want to discard all changes to the student message?")){
+        toggleComponent(component_id, false)
+          .catch(function (err) {
             console.error(err);
             alert('Error closing component! ' + err.message);
+          });
+      }
+    }
+    // There is no change in comment, i.e it is same as the saved comment (before)
+    else {
+      toggleComponent(component_id, false)
+        .catch(function (err) {
+          console.error(err);
+          alert('Error closing component! ' + err.message);
         });
+    }
+  });
+
 }
 
 /**
@@ -1866,11 +1887,27 @@ function onComponentOrderChange() {
  * @param me DOM element of the cancel button
  */
 function onCancelOverallComment(me) {
-    toggleOverallComment(false)
-        .catch(function (err) {
+  // if the overall Comment is changed then prompt the TA for loss in comment
+  ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallComment) => {
+    if (getOverallCommentFromDOM() !== lastSavedOverallComment) {
+      if(confirm( "Are you sure you want to discard all changes to the student message?")){
+        toggleOverallComment(false)
+          .catch(function (err) {
             console.error(err);
             alert('Error closing overall comment! ' + err.message);
+          });
+      }
+    }
+    // The Overall Comment is same as the saved comment
+    else {
+      toggleOverallComment(false)
+        .catch(function (err) {
+          console.error(err);
+          alert('Error closing overall comment! ' + err.message);
         });
+    }
+  });
+
 }
 
 /**
@@ -2140,8 +2177,8 @@ function verifyAllComponents() {
  * Adds a blank component to the gradeable
  * @return {Promise}
  */
-function addComponent() {
-    return ajaxAddComponent(getGradeableId());
+function addComponent(peer) {
+    return ajaxAddComponent(getGradeableId(), peer);
 }
 
 /**
@@ -2204,7 +2241,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         })
         .then(function (gradeable) {
             gradeable_tmp = gradeable;
-            return ajaxGetGradedGradeable(gradeable_id, anon_id);
+            return ajaxGetGradedGradeable(gradeable_id, anon_id, false);
         })
         .catch(function (err) {
             alert('Could not fetch graded gradeable: ' + err.message);
@@ -2216,6 +2253,39 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         .then(function (elements) {
             setRubricDOMElements(elements);
             return openCookieComponent();
+        })
+        .catch(function (err) {
+            alert("Could not render gradeable: " + err.message);
+            console.error(err);
+        });
+}
+
+/**
+ * Call this once on page load to load the peer panel.
+ * Note: This takes 'gradeable_id' and 'anon_id' parameters since it gets called
+ *  in the 'PeerPanel.twig' server template
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @return {Promise}
+ */
+function reloadPeerRubric(gradeable_id, anon_id) {
+    let gradeable_tmp = null;
+    return ajaxGetGradeableRubric(gradeable_id)
+        .catch(function (err) {
+            alert('Could not fetch gradeable rubric: ' + err.message);
+        })
+        .then(function (gradeable) {
+            gradeable_tmp = gradeable;
+            return ajaxGetGradedGradeable(gradeable_id, anon_id, true);
+        })
+        .catch(function (err) {
+            alert('Could not fetch graded gradeable: ' + err.message);
+        })
+        .then(function (graded_gradeable) {
+            let elements = renderPeerGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+                true, false, getDisplayVersion());
+            let gradingBox = $("#peer-grading-box");
+            gradingBox.html(elements);
         })
         .catch(function (err) {
             alert("Could not render gradeable: " + err.message);
@@ -2318,7 +2388,7 @@ function closeAllComponents(save_changes) {
 }
 
 /**
- * Toggles a the open/close state of a component
+ * Toggles the open/close state of a component
  * @param {int} component_id the component's id
  * @param {boolean} saveChanges
  * @return {Promise}

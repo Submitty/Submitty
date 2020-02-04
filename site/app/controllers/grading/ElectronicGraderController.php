@@ -1151,14 +1151,16 @@ class ElectronicGraderController extends AbstractController {
      * Route for getting information about a individual grader
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable")
      */
-    public function ajaxGetGradedGradeable($gradeable_id, $anon_id = '') {
-        $grader = $this->core->getUser();
-
+    public function ajaxGetGradedGradeable($gradeable_id, $anon_id = '', $all_peers = false) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
         }
+
+        $all_peers = ($all_peers === "true");
+
+        $grader = $this->core->getUser();
 
         // Get user id from the anon id
         $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id);
@@ -1178,6 +1180,12 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        // Check if user has permission to view all peer grades
+        if ($all_peers && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to get view peer panel');
+            return;
+        }
+
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
@@ -1185,7 +1193,7 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $response_data = null;
             if ($ta_graded_gradeable !== null) {
-                $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader);
+                $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader, $all_peers);
             }
             $this->core->getOutput()->renderJsonSuccess($response_data);
         }
@@ -1197,8 +1205,11 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function getGradedGradeable(TaGradedGradeable $ta_graded_gradeable, User $grader) {
-        $response_data = $ta_graded_gradeable->toArray($grader);
+    public function getGradedGradeable(TaGradedGradeable $ta_graded_gradeable, User $grader, $all_peers = false) {
+
+        // Passing null returns grading for all graders.
+        $grading_done_by = ($all_peers ? null : $grader);
+        $response_data = $ta_graded_gradeable->toArray($grading_done_by);
 
         $graded_gradeable = $ta_graded_gradeable->getGradedGradeable();
         $gradeable = $graded_gradeable->getGradeable();
@@ -1216,7 +1227,7 @@ class ElectronicGraderController extends AbstractController {
         // If it is graded at all, then send ta score information
         $response_data['ta_grading_total'] = $gradeable->getTaPoints();
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
-            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore();
+            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
         }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();
@@ -1412,8 +1423,7 @@ class ElectronicGraderController extends AbstractController {
         $default = $_POST['default'] ?? null;
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
-        $peer = $_POST['peer'] ?? 'false';
-        // Use 'page_number' since 'page' is used in the router
+
         $page = $_POST['page_number'] ?? '';
 
         // Validate required parameters
@@ -1455,7 +1465,6 @@ class ElectronicGraderController extends AbstractController {
         if (strval(intval($page)) !== $page) {
             $this->core->getOutput()->renderJsonFail('Invalid page parameter');
         }
-        $peer = $peer === 'true';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1487,7 +1496,6 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
             ]);
             $component->setPage($page);
-            $component->setPeer($peer);
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
         }
@@ -1632,6 +1640,8 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        $peer = $_POST['peer'] === 'true';
+
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to add components');
@@ -1651,7 +1661,7 @@ class ElectronicGraderController extends AbstractController {
                 0,
                 0,
                 false,
-                false,
+                $peer,
                 $page
             );
             $component->addMark('No Credit', 0.0, false);
