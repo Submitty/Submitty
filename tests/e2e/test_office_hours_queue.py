@@ -25,6 +25,9 @@ class TestOfficeHoursQueue(BaseTestCase):
         changeQueueCode(self, "random code")
         changeQueueCode(self, "custom code", "new code")
 
+        studentJoinQueue(self, 'student', 'custom code', 'new code')
+        switchToInstructor(self, 'instructor')
+
         # self.wait_user_input()
 
 def goToQueuePage(self):
@@ -63,3 +66,23 @@ def changeQueueCode(self, name, code=None):
     else:
         self.driver.find_element_by_id('old_queue_rand_token').click()
     self.driver.find_element_by_id('change_code_btn').click()
+
+def switchToStudent(self, account):
+    self.log_out()
+    self.log_in(user_id=account, user_password=account)
+    goToQueuePage(self)
+
+def switchToInstructor(self, account):
+    self.log_out()
+    self.log_in(user_id=account, user_password=account)
+    goToQueuePage(self)
+
+def studentJoinQueue(self, studentAccount, queueName, queueCode, studentName=None):
+    switchToStudent(self, studentAccount)
+    if(studentName):
+        self.driver.find_element_by_id('name_box').send_keys(studentName)
+    self.driver.find_element_by_xpath(f'//*[@id="queue_code"]/option[text()="{queueName}"]').click()
+    self.driver.find_element_by_id('token_box').send_keys(queueCode)
+    self.wait_user_input()
+    self.driver.find_element_by_id('join_queue_btn').click()
+    self.wait_user_input()
