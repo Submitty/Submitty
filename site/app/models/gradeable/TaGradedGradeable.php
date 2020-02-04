@@ -89,8 +89,11 @@ class TaGradedGradeable extends AbstractModel {
             }
         }
         else {
+            // Grab the total peer score for each component here rather than computing on the site.
+            $details["peer_scores"] = array();
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
+                $details["peer_scores"][$container->getComponent()->getId()] = $container->getTotalScore();
                 $details['graded_components'][$container->getComponent()->getId()] = $container->toArray();
                 $graded_components = array_merge($graded_components, $container->getGradedComponents());
             }
@@ -224,11 +227,11 @@ class TaGradedGradeable extends AbstractModel {
      * Gets the manual grading points the student earned
      * @return float
      */
-    public function getTotalScore() {
+    public function getTotalScore($grader = null) {
         $points_earned = 0.0;
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
-            $points_earned += $container->getTotalScore();
+            $points_earned += $container->getTotalScore($grader);
         }
         return $points_earned;
     }
@@ -239,7 +242,7 @@ class TaGradedGradeable extends AbstractModel {
      * @param bool $clamp True to clamp the result to 1.0
      * @return float percentage (0 to 1), or NAN if no grading started
      */
-    public function getTotalScorePercent($clamp = false) {
+    public function getTotalScorePercent($clamp = false, $grader = null) {
         return Utils::safeCalcPercent(
             $this->getTotalScore(),
             $this->getGradedGradeable()->getGradeable()->getTaPoints(),

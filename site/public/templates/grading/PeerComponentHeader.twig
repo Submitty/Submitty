@@ -1,0 +1,13 @@
+{% import "Functions.twig" as functions %}
+
+<span class="col-no-gutters badge-container">
+    <strong id="grading_total"
+            class="badge {{ functions.getBadgeStyle(peer_score, component.max_value) }}">
+        {{ peer_score | round(decimal_precision) }} / {{ component.max_value|round(decimal_precision) }}
+    </strong>
+</span>
+
+<span class="component-title col-no-gutters">
+    <b>{{ component.title|escape }}</b>
+</span>
+
