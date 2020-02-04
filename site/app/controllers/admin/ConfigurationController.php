@@ -39,7 +39,6 @@ class ConfigurationController extends AbstractController {
             'default_student_late_days'      => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'             => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'                 => $this->core->getConfig()->getUploadMessage(),
-            'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'         => $this->core->getConfig()->displayCustomMessage(),
             'course_email'                   => $this->core->getConfig()->getCourseEmail(),
@@ -138,7 +137,6 @@ class ConfigurationController extends AbstractController {
                 $name,
                 [
                     'zero_rubric_grades',
-                    'keep_previous_files',
                     'display_rainbow_grades_summary',
                     'display_custom_message',
                     'forum_enabled',
