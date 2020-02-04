@@ -37,24 +37,24 @@ class Post extends AbstractModel {
     const UNRESOLVED = 1;
     const RESOLVED   = 2;
 
-    /** @property @var int post id */
+    /** @prop @var int post id */
     protected $id;
-    /** @property @var int thread id */
+    /** @prop @var int thread id */
     protected $thread_id;
-    /** @property @var int parent id */
+    /** @prop @var int parent id */
     protected $parent_id;
 
 
     //protected $parent;
-    
-    /** @property @var \User user */
+
+    /** @prop @var \User user */
     protected $author;
-    
-    /** @property @var string content of post */
+
+    /** @prop @var string content of post */
     protected $content;
     //protected $timestamp;
-    
-    /** @property @var bool post display as anon */
+
+    /** @prop @var bool post display as anon */
     protected $is_anonymous;
 
     //Will add soon

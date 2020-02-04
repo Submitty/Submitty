@@ -17,7 +17,7 @@ use app\models\AbstractModel;
  */
 class AbstractGradeableInput extends AbstractModel {
 
-    /** @property @var string The name of the file to save text box data to */
+    /** @prop @var string The name of the file to save text box data to */
     protected $file_name;
 
     public function __construct(Core $core, array $details) {

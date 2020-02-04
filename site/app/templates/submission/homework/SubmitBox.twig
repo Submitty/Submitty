@@ -11,7 +11,14 @@
 
 <div class="content">
     <header id="gradeable-info">
-        <h1>New submission for: {{ gradeable_name }}</h1>
+        <h1>
+            New submission for: {{ gradeable_name }}
+            {% if gradeable_url|trim != "" %}
+                <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            {% endif %}
+        </h1>
         {% if has_due_date %}
             <h2>Due: {{ formatted_due_date }}</h2>
         {% endif %}

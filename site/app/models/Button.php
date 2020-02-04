@@ -34,29 +34,29 @@ use app\libraries\Core;
  * @method void setIcon(string|null $icon)
  */
 class Button extends AbstractModel {
-    /** @property @var string|null $title */
+    /** @prop @var string|null $title */
     protected $title;
-    /** @property @var string|null $subtitle */
+    /** @prop @var string|null $subtitle */
     protected $subtitle;
-    /** @property @var string|null $href */
+    /** @prop @var string|null $href */
     protected $href;
-    /** @property @var string|null $onclick */
+    /** @prop @var string|null $onclick */
     protected $onclick;
-    /** @property @var string $class */
+    /** @prop @var string $class */
     protected $class;
-    /** @property @var string|null $id */
+    /** @prop @var string|null $id */
     protected $id;
-    /** @property @var bool $disabled */
+    /** @prop @var bool $disabled */
     protected $disabled;
-    /** @property @var float|null $progress */
+    /** @prop @var float|null $progress */
     protected $progress;
-    /** @property @var bool $title_on_hover */
+    /** @prop @var bool $title_on_hover */
     protected $title_on_hover;
-    /** @property @var string|null $aria_label */
+    /** @prop @var string|null $aria_label */
     protected $aria_label;
-    /** @property @var string|null $badge */
+    /** @prop @var string|null $badge */
     protected $badge;
-    /** @property @var string|null $icon */
+    /** @prop @var string|null $icon */
     protected $icon;
 
     /**
