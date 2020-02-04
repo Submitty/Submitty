@@ -141,6 +141,10 @@ body {min-width: 925px;}
     font-size: 1.17em;
 }
 
+.btn_markdown {
+    margin-right:10px;
+}
+
 .active-thread-remove-announcement{
     display: inline-block;
     color: orange;
