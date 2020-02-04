@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
 use app\models\User;
+use app\libraries\NumberUtils;
 
 /**
  * Class GradedComponentContainer
@@ -23,7 +24,7 @@ class GradedComponentContainer extends AbstractModel {
     /** @var TaGradedGradeable The TaGradedGradeable all grades belong to */
     private $ta_graded_gradeable = null;
 
-    /** @property @var GradedComponent[] The graded components for this Component */
+    /** @prop @var GradedComponent[] The graded components for this Component */
     protected $graded_components = [];
 
     /**
@@ -206,17 +207,24 @@ class GradedComponentContainer extends AbstractModel {
      *  to the precision of the gradeable
      * @return float
      */
-    public function getTotalScore() {
+    public function getTotalScore($grader = null) {
         $points_earned = 0.0;
+        $number_of_graders = 0;
         // TODO: how should peer grades be calculated: now its an average
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
+            // If there is a grader, we are only computing their total score rather than the total score for all peers.
+            if ($grader !== null && $graded_component->getGrader()->getId() !== $grader->getId()) {
+                continue;
+            }
             $points_earned += $graded_component->getTotalScore();
+            $number_of_graders += 1;
         }
+
         // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
         // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
-        $points_earned = Utils::safeCalcPercent($points_earned, max(1, count($this->graded_components)));
-        return $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->roundPointValue($points_earned);
+        $points_earned = Utils::safeCalcPercent($points_earned, max(1, $number_of_graders));
+        return NumberUtils::roundPointValue($points_earned, $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->getPrecision());
     }
 
     /**

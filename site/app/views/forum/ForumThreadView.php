@@ -258,6 +258,7 @@ class ForumThreadView extends AbstractView {
         if (!$threadExists) {
             $button_params["show_threads"] = false;
             $button_params["thread_exists"] = false;
+            $button_params["show_more"] = false;
         }
         else {
             $more_data = array(
@@ -586,7 +587,7 @@ class ForumThreadView extends AbstractView {
             $first_post = $this->core->getQueries()->getFirstPostForThread($thread["id"]);
             if (is_null($first_post)) {
                 // Thread without any posts(eg. Merged Thread)
-                $first_post = ['content' => ""];
+                $first_post = ['content' => "", 'render_markdown' => 0];
                 $date = null;
             }
             else {
@@ -618,6 +619,11 @@ class ForumThreadView extends AbstractView {
             if ($thread["deleted"]) {
                 $class .= " deleted";
             }
+
+            if ($this->core->getQueries()->getUserById($thread['created_by'])->accessGrading()) {
+                $class .= " important";
+            }
+
             //fix legacy code
             $titleDisplay = $thread['title'];
 

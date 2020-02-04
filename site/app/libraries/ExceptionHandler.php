@@ -72,7 +72,7 @@ class ExceptionHandler {
             $log_exception = $exception->logException();
         }
 
-        $trace_string = array();
+        $trace_string = [];
         foreach ($exception->getTrace() as $elem => $frame) {
             $trace_string[] = sprintf(
                 "#%s %s(%s): %s(%s)",
@@ -80,7 +80,7 @@ class ExceptionHandler {
                 isset($frame['file']) ? $frame['file'] : 'unknown file',
                 isset($frame['line']) ? $frame['line'] : 'unknown line',
                 (isset($frame['class']))  ? $frame['class'] . $frame['type'] . $frame['function'] : $frame['function'],
-                static::parseArgs(is_a($exception, '\app\exceptions\AuthenticationException') ? array() : $frame['args'])
+                static::parseArgs((is_a($exception, '\app\exceptions\AuthenticationException') || !isset($frame['args'])) ? [] : $frame['args'])
             );
         }
         $trace_string = implode("\n", $trace_string);
@@ -152,8 +152,8 @@ HTML;
      */
     private static function parseArgs($args) {
         $return = "";
-        if (isset($args)) {
-            $return_args = array();
+        if (!empty($args)) {
+            $return_args = [];
             foreach ($args as $arg) {
                 if (is_string($arg)) {
                     $return_args[] = "'" . $arg . "'";

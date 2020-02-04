@@ -1123,7 +1123,10 @@ function loadThreadHandler(){
                     $('#messages').append(message);
                     return;
                 }
-
+                if (typeof json.data.merged !== 'undefined') {
+                  window.location.replace(json.data.destination);
+                  return;
+                }
                 $(obj).find('.thread_box').removeClass('new_thread');
 
                 $('.thread_box').removeClass('active');
