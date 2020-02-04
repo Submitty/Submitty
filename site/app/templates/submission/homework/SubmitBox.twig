@@ -297,32 +297,15 @@
                                         }
                                     );
 
-                                    {# Populate codebox initially #}
-                                    {% if core.getConfig().keepPreviousFiles() %}
-                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                                    {% else %}
-                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                                    {% endif %}
-
-                                    {# Hide recent button if no previous submissions #}
+                                    {# Populate codebox and set state of buttons initially #}
                                     {% if highest_version == 0 %}
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
-                                    {% endif %}
-
-                                    {# Setup init state of buttons #}
-                                    {% if core.getConfig().keepPreviousFiles() %}
-
-                                        {% if highest_version == 0 %}
-                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                        {% else %}
-                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                        {% endif %}
-
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
                                         document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = false;
-
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
                                     {% endif %}
                                 </script>
                             {% set num_codeboxes = num_codeboxes + 1 %}
@@ -387,28 +370,17 @@
 
                         <script>
                             {# Populate checkboxes initially #}
-                            {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
+                            {% if cell.recent_submission is defined %}
                                 setMultipleChoices("mc_field_{{ num_multiple_choice }}");
                             {% endif %}
 
-                            {# Hide button if no previous submissions #}
-                            {% if cell.recent_submission is not defined %}
-                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
-                            {% endif %}
-
                             {# Configure initial state for the button #}
-                            {% if core.getConfig().keepPreviousFiles() %}
-
-                                {% if highest_version == 0 %}
-                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                                {% else %}
-                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
-                                {% endif %}
-
-                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
+                            {% if highest_version == 0 %}
+                                $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
                             {% else %}
-                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                                $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                             {% endif %}
                         </script>
 
@@ -472,8 +444,6 @@
 
             {% if display_version == highest_version and display_version > 0 %}
                 <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
-
-                {% if core.getConfig().keepPreviousFiles() %}
                 <script type="text/javascript">
                     $(function() {
                         setUsePrevious();
@@ -483,7 +453,6 @@
                         {% endfor %}
                     });
                 </script>
-                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -698,7 +667,7 @@
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
-                    {% if core.getConfig().keepPreviousFiles() %}
+                    {% if short_answer.recent_submission|length  %}
                         value="{{ short_answer.recent_submission }}"
                     {% else %}
                         value="{{ short_answer.initial_value }}"
@@ -729,7 +698,7 @@
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     onKeyPress="handle_input_keypress()"
-                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
+                >{% if short_answer.recent_submission|length  %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
@@ -745,23 +714,13 @@
         <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
         <script>
 
-            {% if version == 0 %}
-                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
-            {% endif %}
-
             // Setup init state of buttons
-            {% if core.getConfig().keepPreviousFiles() %}
-
-                {% if version == 0 %}
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                {% else %}
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                {% endif %}
-
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-            {% else %}
+            {% if version == 0 %}
                 document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% else %}
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
             {% endif %}
 
         </script>
