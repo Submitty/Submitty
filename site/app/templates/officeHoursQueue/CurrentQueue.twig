@@ -23,11 +23,11 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
-                  <button type="submit" class="btn btn-primary" title="First time in this queue today">
+                  <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today">
                     <i class="fas fa-star"></i>
                     Help</button>
                 {% else %}
-                  <button type="submit" class="btn btn-primary">Help</button>
+                  <button type="submit" class="btn btn-primary help_btn">Help</button>
                 {% endif %}
               </form>
             </td>
@@ -55,7 +55,7 @@
             <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-              <button type="submit" class="btn btn-default">Remove</button>
+              <button type="submit" class="btn btn-default remove_from_queue_btn">Remove</button>
             </form>
           </td>
           <td class="mobile-hide">

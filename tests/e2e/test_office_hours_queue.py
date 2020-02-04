@@ -8,7 +8,7 @@ class TestOfficeHoursQueue(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def test_everything(self):
+    def test_office_hours_queue(self):
         self.log_in(user_id='instructor', user_password='instructor')
 
         # Turn the queue on
@@ -25,9 +25,28 @@ class TestOfficeHoursQueue(BaseTestCase):
         changeQueueCode(self, "random code")
         changeQueueCode(self, "custom code", "new code")
 
-        studentJoinQueue(self, 'student', 'custom code', 'new code')
+        switchToStudent(self, 'student')
+        studentJoinQueue(self, 'custom code', 'new code')
+        studentRemoveSelfFromQueue(self)
+        studentJoinQueue(self, 'custom code', 'new code')
         switchToInstructor(self, 'instructor')
+        helpFirstStudent(self)
+        switchToStudent(self, 'student')
+        studentFinishHelpSelf(self)
+        studentJoinQueue(self, 'custom code', 'new code')
+        switchToStudent(self, 'aphacker')
+        studentJoinQueue(self, 'custom code', 'new code', 'nick name hacker')
+        switchToInstructor(self, 'instructor')
+        helpFirstStudent(self)
+        finishHelpFirstStudent(self)
+        removeFirstStudent(self)
 
+
+
+
+        # deleteAllQueues(self)
+        # This must be at the end otherwise sometimes the last command will not finish before the browser is closed
+        goToQueuePage(self)
         # self.wait_user_input()
 
 def goToQueuePage(self):
@@ -46,7 +65,7 @@ def deleteAllQueues(self):
     openFilterSettings(self)
     while(self.driver.find_elements_by_class_name('delete_queue_btn')):
         self.driver.find_element_by_class_name('delete_queue_btn').click()
-        self.driver.switch_to_alert().accept()
+        self.driver.switch_to.alert.accept()
         openFilterSettings(self)
 
 def openQueue(self, name, code=None):
@@ -77,12 +96,27 @@ def switchToInstructor(self, account):
     self.log_in(user_id=account, user_password=account)
     goToQueuePage(self)
 
-def studentJoinQueue(self, studentAccount, queueName, queueCode, studentName=None):
-    switchToStudent(self, studentAccount)
+def studentJoinQueue(self, queueName, queueCode, studentName=None):
     if(studentName):
         self.driver.find_element_by_id('name_box').send_keys(studentName)
     self.driver.find_element_by_xpath(f'//*[@id="queue_code"]/option[text()="{queueName}"]').click()
     self.driver.find_element_by_id('token_box').send_keys(queueCode)
-    self.wait_user_input()
     self.driver.find_element_by_id('join_queue_btn').click()
-    self.wait_user_input()
+
+def studentRemoveSelfFromQueue(self):
+    self.driver.find_element_by_id('leave_queue').click()
+    self.driver.switch_to.alert.accept()
+
+def studentFinishHelpSelf(self):
+    self.driver.find_element_by_id('self_finish_help').click()
+    self.driver.switch_to.alert.accept()
+
+def helpFirstStudent(self):
+    self.driver.find_element_by_class_name('help_btn').click()
+
+def finishHelpFirstStudent(self):
+    self.driver.find_element_by_class_name('finish_helping_btn').click()
+
+def removeFirstStudent(self):
+    self.driver.find_element_by_class_name('remove_from_queue_btn').click()
+    self.driver.switch_to.alert.accept()
