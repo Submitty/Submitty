@@ -14,7 +14,7 @@
         <div class="form-group">
           <label>Queue Name:
           </label>
-          <select class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+          <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
             <option value="">Queue Name</option>
             {% for queue in viewer.getAllQueues() %}
               <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
@@ -24,7 +24,7 @@
         <label for="code_box">Queue Code:</label>
         <input type="text" name="token" id="token_box" placeholder="Queue Code" style="margin:.5rem" autocomplete="on" required="required">
         <br>
-        <button type="submit" class="btn btn-primary">Join</button>
+        <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
       </form>
     {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
       {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
