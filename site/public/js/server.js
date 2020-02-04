@@ -1877,7 +1877,7 @@ $(document).ready(function() {
     if (localStorage.getItem('sidebar') !== "") {
         $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
         //Once the sidebar is set the page can be unhidden
-        $("#submitty-body").show();
+        $("#submitty-body").css('visibility', 'visible');
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
