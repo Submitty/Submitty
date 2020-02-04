@@ -251,6 +251,28 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
         reader.onload = function() {
             var lines=reader.result.split("\n");
             var headers = lines[0].split(",");
+            
+            var students_lines_present = 0;
+            var graders_lines_present = 0;
+            
+            for(var k=0;k<headers.length;k++){
+                if(headers[k].toLowerCase().trim() == "student"){
+                    students_lines_present++;
+                }
+                else if(headers[k].toLowerCase().trim() == "grader"){
+                    graders_lines_present++;
+                }
+            }
+            
+            if(students_lines_present != 1){
+                alert("Cannot Proccess file, requires exactly one labelled 'student' column");
+                return;
+            }
+            
+            if(graders_lines_present != 1){
+                alert("Cannot Proccess file, requires exactly one labelled 'grader' column");
+                return;
+            }
 
             for(var i=1;i<lines.length;i++){
 
