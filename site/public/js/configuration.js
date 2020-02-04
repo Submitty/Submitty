@@ -49,7 +49,6 @@ $(document).ready(function() {
 
     function updateForumMessage() {
         $("#forum-enabled-message").toggle();
-        $("#forum-category-warning").toggle();
     }
 
     $(document).on("change", "#forum-enabled", updateForumMessage);

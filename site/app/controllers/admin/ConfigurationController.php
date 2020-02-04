@@ -54,7 +54,6 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
         );
-        $categoriesCreated = empty($this->core->getQueries()->getCategories());
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
         if ($this->core->getConfig()->isSubmittyAdminUserVerified()) {
@@ -87,7 +86,6 @@ class ConfigurationController extends AbstractController {
                     'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
                     'in_course' => $admin_in_course,
                 ],
-                $categoriesCreated,
                 $this->core->getCsrfToken()
             )
         );

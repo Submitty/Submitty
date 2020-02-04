@@ -30,9 +30,7 @@
             <label for="forum-enabled">
                 <div class="option-title">Enable Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                {% if categories_empty %}
-                    <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
-                {% endif %}
+                <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
             </label>
         </div>
 
