@@ -62,8 +62,8 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         //Replace whitespace with "_"
-        $queue_code = preg_replace('/\s+/', '_', $_POST['code']);
-        $token = preg_replace('/\s+/', '_', $_POST['token']);
+        $queue_code = preg_replace('/\s+/', '_', trim($_POST['code']));
+        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
 
         $re = '/^[a-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
@@ -363,7 +363,9 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $this->core->getQueries()->changeQueueToken($_POST['token'], $queue_code);
+        $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
+        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
+        $this->core->getQueries()->changeQueueToken($token, $queue_code);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
