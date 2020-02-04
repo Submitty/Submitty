@@ -963,6 +963,12 @@ class Gradeable extends AbstractModel {
             'order' => count($this->components)
         ]);
         $this->components[] = $component;
+
+        // If we added a peer component, we are now guaranteed to be a peer gradeable.
+        if ($component->isPeer()) {
+            $this->setPeerGrading(true);
+        }
+
         return $component;
     }
 
@@ -1003,6 +1009,16 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
+
+        //Check if we have any peer components remaining
+        $still_peer = false;
+        foreach ($this->components as $c) {
+            if ($c->isPeer()) {
+                $still_peer = true;
+                break;
+            }
+        }
+        $this->setPeerGrading($still_peer);
     }
 
     /**

@@ -229,10 +229,12 @@
       </tr>
     </thead>
     <tbody>
-      {% for entry in viewer.getPastQueue() %}
-        {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
+      {% set history_count = 0 %}
+      {% for entry in viewer.getPastQueue() if history_count < 25 %}
+        {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
+          {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}}">
-            <th scope="row">{{entry['row_number']}}</th>
+            <th scope="row">{{history_count}}</th>
             <td class="mobile-hide">
               <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
                 <i class="fas fa-eye"></i>
