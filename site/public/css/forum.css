@@ -10,7 +10,7 @@ body {min-width: 925px;}
 }
 
 .forum_show_threads {
-    overflow: hidden;
+    overflow: visible;
     flex-direction: column;
     display: flex;
 }
