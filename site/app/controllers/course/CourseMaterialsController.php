@@ -296,7 +296,8 @@ class CourseMaterialsController extends AbstractController {
             $release_time = $_POST['release_time'];
         }
         
-        $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');        $json = FileUtils::readJsonFile($fp);
+        $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');
+        $json = FileUtils::readJsonFile($fp);
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
         $checked = $json[$dst]['checked'];
