@@ -148,6 +148,7 @@
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
+
         let promise = loadFile(name, path, page_num);
         $('#file_view').show();
         $("#grading_file_name").html(name);
@@ -159,9 +160,16 @@
         return promise;
     }
 
-    function loadFile(name, path, page_num = 0){
+    function loadFile(name, path, page_num = 0) {
         let extension = name.split('.').pop();
-        if(extension == "pdf"){
+        if (extension == "pdf") {
+            if (path.includes("submissions")) {
+                directory = "submissions";
+            }
+            else if (path.includes("checkout")) {
+                directory = "checkout";
+            }
+
             $('#pdf_annotation_bar').show();
             $('#save_status').show();
             return $.ajax({
@@ -171,7 +179,8 @@
                     'user_id': '{{ submitter_id }}',
                     'filename': name,
                     'page_num': page_num,
-                    'csrf_token': csrfToken
+                    'csrf_token': csrfToken,
+                    'directory': directory
                 },
                 success: function(data){
                     $('#file_content').append(data);

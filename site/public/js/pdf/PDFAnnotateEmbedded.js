@@ -27,11 +27,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
-function render_student(gradeable_id, user_id, file_name, pdf_url){
-    render(gradeable_id, user_id, "", file_name, 1, pdf_url)
+function render_student(gradeable_id, user_id, file_name, pdf_url, directory) {
+    render(gradeable_id, user_id, "", file_name, 1, pdf_url, directory)
 }
 
-function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "") {
+function render(gradeable_id, user_id, grader_id, file_name, page_num, url, directory) {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,
         user_id: user_id,
@@ -41,15 +41,13 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     window.RENDER_OPTIONS.documentId = file_name;
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
     window.RENDER_OPTIONS.userId = grader_id;
-    if(url === ""){
-        url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
-    }
     $.ajax({
         type: 'POST',
         url: url,
         data: {
             user_id: user_id,
             filename: file_name,
+            directory: directory,
             csrf_token: csrfToken
         },
         success: (data) => {

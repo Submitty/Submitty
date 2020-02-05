@@ -115,11 +115,12 @@ class PDFController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function showGraderPDFEmbedded($gradeable_id) {
-        //This is the embedded pdf annotator that we built.
-        //User can be a team
+        // This is the embedded pdf annotator that we built.
+        // User can be a team
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
+        $directory = in_array($_POST['directory'], ['submissions', 'checkout']) ? $_POST['directory'] : 'submissions';
         $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
@@ -156,7 +157,8 @@ class PDFController extends AbstractController {
             "file_name" => $filename,
             "annotation_jsons" => $annotation_jsons,
             "is_student" => false,
-            "page_num" => $page_num
+            "page_num" => $page_num,
+            "directory" => $directory
         ];
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }

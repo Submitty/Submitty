@@ -41,13 +41,13 @@ class MiscController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
+        $directory = in_array($_POST['directory'], ['submissions', 'checkout']) ? $_POST['directory'] : 'submissions';
 
-        $dir = "submissions";
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $dir, $gradeable_id, $id, $active_version, $file_name);
+        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id, $active_version, $file_name);
 
         //See if we are allowed to access this path
-        $path = $this->core->getAccess()->resolveDirPath($dir, $path);
-        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+        $path = $this->core->getAccess()->resolveDirPath($directory, $path);
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $directory, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You do not have access to this file")
             );
