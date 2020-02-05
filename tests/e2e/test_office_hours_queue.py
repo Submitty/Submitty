@@ -13,8 +13,8 @@ class TestOfficeHoursQueue(BaseTestCase):
 
         # Turn the queue on
         self.get(self.get_current_semester()+"/development/config")
-        self.driver.execute_script("document.getElementById('queue-enabled').checked = false;")#turn the queue off
-        self.driver.find_element_by_id('queue-enabled').click()#click the button to test it actually saving as well as turn it on
+        if(not self.driver.find_element_by_id('queue-enabled').is_selected()):
+            self.driver.find_element_by_id('queue-enabled').click()
 
         # Delete any old queues (this should remove anyone that was currently in the queue as well)
         deleteAllQueues(self)
