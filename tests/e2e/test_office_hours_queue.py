@@ -107,9 +107,10 @@ class TestOfficeHoursQueue(BaseTestCase):
         switchToInstructor(self, 'instructor')
         deleteAllQueues(self)
 
-        # This must be at the end otherwise sometimes the last command will not finish before the browser is closed
-        goToQueuePage(self)
-        # self.wait_user_input()
+        self.get(self.get_current_semester()+"/sample/config")
+        self.driver.find_element_by_id('queue-enabled').click()
+
+        self.get(self.test_url)
 
 def goToQueuePage(self):
     queue_url = self.get_current_semester()+"/sample/office_hours_queue"
