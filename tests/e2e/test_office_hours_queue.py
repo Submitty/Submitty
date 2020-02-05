@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 
 class TestOfficeHoursQueue(BaseTestCase):
     """
-    Test cases revolving around the logging in functionality of the site
+    Test cases revolving around the office hours queue
     """
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
