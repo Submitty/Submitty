@@ -20,6 +20,7 @@
 
 {%  include "forum/EditPostForm.twig" with {
     "categories" : filterFormData.categories,
+    "current_categories": filterFormData.current_category_ids
 } %}
 
 {%  include "forum/HistoryForm.twig" %}
