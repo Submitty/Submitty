@@ -15,14 +15,14 @@
                 <form style="display: inline;" method="post"
                       action="{{ cancel_url }}">
                     <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                    <input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">
+                    <button  type="submit"  id="do_not_grade" class="btn btn-default" style="float: right"  value="Do Not Grade This Assignment" >Do Not Grade This Assignment</button>
                 </form>
             {% else %}
                 <form style="display: inline;" method="post"
                       onsubmit='return checkVersionChange({{ display_version_days_late }},{{ allowed_late_days }})'
                       action="{{ change_version_url }}">
                     <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                    <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
+                    <button  type="submit"  id="version_change" class="btn btn-primary"  value="Grade This Version" >Grade This Version</button>
                 </form>
             {% endif %}
         {% endif %}
