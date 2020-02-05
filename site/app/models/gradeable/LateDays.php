@@ -20,9 +20,9 @@ class LateDays extends AbstractModel {
 
     /** @var User|null The user to whom this data belongs */
     private $user = null;
-    /** @property @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
+    /** @prop @var LateDayInfo[] The late day info of each gradeable, indexed by gradeable id */
     protected $late_day_info = [];
-    /** @property @var array All entries for the user in the `late_days` table */
+    /** @prop @var array All entries for the user in the `late_days` table */
     protected $late_days_updates = [];
 
     /**

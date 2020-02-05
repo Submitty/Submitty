@@ -3,9 +3,15 @@ Required Input:
     component: {id, title, ta_comment, student_comment, page, lower_clamp, default, max_value, upper_clamp}
     edit_marks_enabled: If the marks table should be in edit mode
     show_mark_list: If the marks table should be started hidden or not
+    peer_component: boolean, defines what data is stored in the component.
 #}
 
 {% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
+
+{% if peer_component %}
+<div id="peer-component-{{ component.id }}"
+     class="box">
+{% else %}
 <div id="component-{{ component.id }}"
      class="box component"
      data-component_id="{{ component.id }}"
@@ -17,6 +23,8 @@ Required Input:
      data-default="{{ component.default }}"
      data-max_value="{{ component.max_value }}"
      data-upper_clamp="{{ component.upper_clamp }}">
+{% endif %}
+
 
     {# Title bar (only part that triggers collapse on click) #}
     <div class="box-title container">

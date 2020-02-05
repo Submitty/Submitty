@@ -39,7 +39,6 @@ class ConfigurationController extends AbstractController {
             'default_student_late_days'      => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'             => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'                 => $this->core->getConfig()->getUploadMessage(),
-            'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'         => $this->core->getConfig()->displayCustomMessage(),
             'course_email'                   => $this->core->getConfig()->getCourseEmail(),
@@ -138,7 +137,6 @@ class ConfigurationController extends AbstractController {
                 $name,
                 [
                     'zero_rubric_grades',
-                    'keep_previous_files',
                     'display_rainbow_grades_summary',
                     'display_custom_message',
                     'forum_enabled',
@@ -151,7 +149,6 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name === 'queue_enabled') {
             $entry = $entry === "true" ? true : false;
-            $this->core->getQueries()->genQueueSettings();
         }
         elseif ($name === 'upload_message') {
             $entry = nl2br($entry);
@@ -200,14 +197,19 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        $config_ini = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_ini['course_details'][$name])) {
+        $config_json = $this->core->getConfig()->getCourseJson();
+        if (!isset($config_json['course_details'][$name])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );
         }
-        $config_ini['course_details'][$name] = $entry;
-        $this->core->getConfig()->saveCourseJson(['course_details' => $config_ini['course_details']]);
+        $config_json['course_details'][$name] = $entry;
+
+        if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Could not save config file')
+            );
+        }
 
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)

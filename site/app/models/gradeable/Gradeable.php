@@ -91,46 +91,46 @@ class Gradeable extends AbstractModel {
 
     /* Properties for all types of gradeables */
 
-    /** @property @var string The course-wide unique gradeable id */
+    /** @prop @var string The course-wide unique gradeable id */
     protected $id = "";
-    /** @property @var string The gradeable's title */
+    /** @prop @var string The gradeable's title */
     protected $title = "";
-    /** @property @var string The instructions url to give to students */
+    /** @prop @var string The instructions url to give to students */
     protected $instructions_url = "";
-    /** @property @var int The type of gradeable */
+    /** @prop @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
-    /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
+    /** @prop @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
     protected $grader_assignment_method = Gradeable::REGISTRATION_SECTION;
-    /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
+    /** @prop @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
-    /** @property @var string The syllabus classification of this gradeable */
+    /** @prop @var string The syllabus classification of this gradeable */
     protected $syllabus_bucket = "homework";
-    /** @property @var Component[] An array of all of this gradeable's components */
+    /** @prop @var Component[] An array of all of this gradeable's components */
     protected $components = [];
-    /** @property @var Component[] An array of all gradeable components loaded from the database */
+    /** @prop @var Component[] An array of all gradeable components loaded from the database */
     private $db_components = [];
 
-    /** @property @var bool If any submitters have active grade inquiries */
+    /** @prop @var bool If any submitters have active grade inquiries */
     protected $active_regrade_request_count = 0;
 
     /* (private) Lazy-loaded Properties */
 
-    /** @property @var bool If any manual grades have been entered for this gradeable */
+    /** @prop @var bool If any manual grades have been entered for this gradeable */
     private $any_manual_grades = null;
-    /** @property @var bool If any submissions exist */
+    /** @prop @var bool If any submissions exist */
     private $any_submissions = null;
-    /** @property @var bool If any errors occurred in the build output */
+    /** @prop @var bool If any errors occurred in the build output */
     private $any_build_errors = null;
-    /** @property @var Team[] Any teams that have been formed */
+    /** @prop @var Team[] Any teams that have been formed */
     private $teams = null;
-    /** @property @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
+    /** @prop @var string[][] Which graders are assigned to which rotating sections (empty if $grade_by_registration is true)
      *                          Array (indexed by grader id) of arrays of rotating section numbers
      */
     private $rotating_grader_sections = null;
     private $rotating_grader_sections_modified = false;
-    /** @property @var AutogradingConfig The object that contains the autograding config data */
+    /** @prop @var AutogradingConfig The object that contains the autograding config data */
     private $autograding_config = null;
-    /** @property @var array Array of all split pdf uploads. Each key is a filename and then each element is an array
+    /** @prop @var array Array of all split pdf uploads. Each key is a filename and then each element is an array
      * that contains filename, file path, and the file size.
      */
     private $split_pdf_files = null;
@@ -140,78 +140,78 @@ class Gradeable extends AbstractModel {
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
-    /** @property @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
+    /** @prop @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
     protected $ta_instructions = "";
 
     /* Properties exclusive to electronic gradeables */
 
-    /** @property @var string The location of the autograding configuration file */
+    /** @prop @var string The location of the autograding configuration file */
     protected $autograding_config_path = "";
-    /** @property @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
+    /** @prop @var bool If the gradeable is using vcs upload (true) or manual upload (false) */
     protected $vcs = false;
-    /** @property @var string The subdirectory within the VCS repository for this gradeable */
+    /** @prop @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
-    /** @property @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
+    /** @prop @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
     protected $vcs_host_type = -1;
-    /** @property @var bool If the gradeable is a team assignment */
+    /** @prop @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
-    /** @property @var int The maximum team size (if the gradeable is a team assignment) */
+    /** @prop @var int The maximum team size (if the gradeable is a team assignment) */
     protected $team_size_max = 0;
-    /** @property @var bool If the gradeable is using any manual grading */
+    /** @prop @var bool If the gradeable is using any manual grading */
     protected $ta_grading = false;
-    /** @property @var bool If the gradeable is a 'scanned exam' */
+    /** @prop @var bool If the gradeable is a 'scanned exam' */
     protected $scanned_exam = false;
-    /** @property @var bool If students can view submissions */
+    /** @prop @var bool If students can view submissions */
     protected $student_view = false;
-    /** @property @var bool If students can only view submissions after grades released date */
+    /** @prop @var bool If students can only view submissions after grades released date */
     protected $student_view_after_grades = false;
-    /** @property @var bool If students can make submissions */
+    /** @prop @var bool If students can make submissions */
     protected $student_submit = false;
-    /** @property @var bool If the gradeable uses peer grading */
+    /** @prop @var bool If the gradeable uses peer grading */
     protected $peer_grading = false;
-    /** @property @var int The number of peers each student will be graded by */
+    /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
-    /** @property @var bool If submission after student's max deadline
+    /** @prop @var bool If submission after student's max deadline
      *      (due date + min(late days allowed, late days remaining)) is allowed
      */
     protected $late_submission_allowed = true;
-    /** @property @var float The point precision for manual grading */
+    /** @prop @var float The point precision for manual grading */
     protected $precision = 0.0;
-    /** @property @var bool If this gradeable has a due date or not */
+    /** @prop @var bool If this gradeable has a due date or not */
     protected $has_due_date = false;
 
     /* Dates for all types of gradeables */
 
-    /** @property @var \DateTime The so-called 'TA Beta-Testing' date.  This is when the gradeable appears for TA's */
+    /** @prop @var \DateTime The so-called 'TA Beta-Testing' date.  This is when the gradeable appears for TA's */
     protected $ta_view_start_date = null;
-    /** @property @var \DateTime The date that graders may start grading */
+    /** @prop @var \DateTime The date that graders may start grading */
     protected $grade_start_date = null;
-    /** @property @var \DateTime The date that graders must have grades in by */
+    /** @prop @var \DateTime The date that graders must have grades in by */
     protected $grade_due_date = null;
-    /** @property @var \DateTime The date that grades will be released to students */
+    /** @prop @var \DateTime The date that grades will be released to students */
     protected $grade_released_date = null;
-    /** @property @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
+    /** @prop @var \DateTime The date after which only instructors may change grades (aka when grades are 'due') */
     protected $grade_locked_date = null;
 
     /* Dates for electronic gradeables*/
 
-    /** @property @var \DateTime The deadline for joining teams (if the gradeable is a team assignment) */
+    /** @prop @var \DateTime The deadline for joining teams (if the gradeable is a team assignment) */
     protected $team_lock_date = null;
-    /** @property @var \DateTime The date students can start making submissions */
+    /** @prop @var \DateTime The date students can start making submissions */
     protected $submission_open_date = null;
-    /** @property @var \DateTime The date, before which all students must make a submissions (or be marked late) */
+    /** @prop @var \DateTime The date, before which all students must make a submissions (or be marked late) */
     protected $submission_due_date = null;
-    /** @property @var int The number of late days allowed */
+    /** @prop @var int The number of late days allowed */
     protected $late_days = 0;
-    /** @property @var \DateTime The deadline for submitting a grade inquiry */
+    /** @prop @var \DateTime The deadline for submitting a grade inquiry */
     protected $regrade_request_date = null;
-    /** @property @var bool are grade inquiries enabled for this assignment*/
+    /** @prop @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
-    /** @property @var bool are grade inquiries for specific components enabled for this assignment*/
+    /** @prop @var bool are grade inquiries for specific components enabled for this assignment*/
     protected $grade_inquiry_per_component_allowed = false;
-    /** @property @var bool does this assignment have a discussion component*/
+    /** @prop @var bool does this assignment have a discussion component*/
     protected $discussion_based = false;
-    /** @property @var string thread id for corresponding to discussion forum thread*/
+    /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
 
 
@@ -994,10 +994,12 @@ class Gradeable extends AbstractModel {
             'order' => count($this->components)
         ]);
         $this->components[] = $component;
+
         // If we added a peer component, we are now guaranteed to be a peer gradeable.
         if ($component->isPeer()) {
             $this->setPeerGrading(true);
         }
+
         return $component;
     }
 
@@ -1038,7 +1040,8 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
-        
+
+        //Check if we have any peer components remaining
         $still_peer = false;
         foreach ($this->components as $c) {
             if ($c->isPeer()) {
@@ -1197,31 +1200,6 @@ class Gradeable extends AbstractModel {
     private function setTaGradingInternal(bool $ta_grading) {
         $this->ta_grading = $ta_grading;
     }
-
-    /**
-     * Rounds a provided point value to the nearest multiple of $precision
-     *
-     * @param $points float|string The number to round
-     * @return float The rounded result
-     */
-    public function roundPointValue($points) {
-        // Note that changing the gradeable precision does not trigger
-        //  all of the component/mark point values to update.  This is intended.
-
-        // No precision, no rounding
-        if ($this->precision === 0.0) {
-            return $points;
-        }
-
-        $points = floatval($points);
-        $q = (int) ($points / $this->precision);
-        $r = fmod($points, $this->precision);
-
-        // If the remainder is more than half the precision away from zero, then add one
-        //  times the direction from zero to the quotient.  Multiply by precision
-        return ($q + (abs($r) > $this->precision / 2 ? ($r > 0 ? 1 : -1) : 0)) * $this->precision;
-    }
-
 
     /**
      * Gets all of the teams formed for this gradeable

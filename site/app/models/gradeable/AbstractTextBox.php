@@ -16,9 +16,9 @@ use app\models\gradeable\AbstractGradeableModel;
  */
 class AbstractTextBox extends AbstractGradeableInput {
 
-    /** @property @var int The row height for the text box */
+    /** @prop @var int The row height for the text box */
     protected $row_count;
-    /** @property @var bool Whether or not this text box is a code box or not */
+    /** @prop @var bool Whether or not this text box is a code box or not */
     protected $is_codebox;
 
     public function __construct(Core $core, array $details) {
