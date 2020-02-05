@@ -12,7 +12,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.log_in(user_id='instructor', user_password='instructor')
 
         # Turn the queue on
-        self.get(self.get_current_semester()+"/development/config")
+        self.get(self.get_current_semester()+"/sample/config")
         if(not self.driver.find_element_by_id('queue-enabled').is_selected()):
             self.driver.find_element_by_id('queue-enabled').click()
 
@@ -112,7 +112,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         # self.wait_user_input()
 
 def goToQueuePage(self):
-    queue_url = self.get_current_semester()+"/development/office_hours_queue"
+    queue_url = self.get_current_semester()+"/sample/office_hours_queue"
     self.get(queue_url)
     self.assertEqual(self.driver.current_url, self.test_url+"/"+queue_url)
 
