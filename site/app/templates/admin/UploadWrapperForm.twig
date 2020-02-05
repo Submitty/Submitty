@@ -49,7 +49,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                 <input type="hidden" name="location" value="{{ file }}">
                 <input type="file" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}">
-                <input type="submit" class="btn btn-default" value="Upload" />
+                <button  type="submit"  class="btn btn-default"  value="Upload" >Upload</button>
             </form>
         </td>
         <td>
@@ -57,7 +57,7 @@
                 <form action="{{ delete_url }}" method="post">
                     <input type="hidden" name="location" value="{{ file }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
+                    <button  type="submit"  class="btn btn-danger"  value="Delete" >Delete</button>&nbsp;
                     {{ wrapper_files[file] }}
                 </form>
             {% endif %}

@@ -23,7 +23,7 @@
         <label for="code_box">Code:</label>
         <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
         <br>
-        <input type="submit" value="Join" class="btn btn-primary">
+        <button  type="submit"   value="Join"  class="btn btn-primary">Join</button>
       </form>
     {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
       {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
@@ -42,7 +42,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <input type="submit" value="Leave Queue" class="btn btn-danger">
+        <button  type="submit"   value="Leave Queue"  class="btn btn-danger">Leave Queue</button>
       </form>
     {% else %}
       <p>You are currently being helped</p>
@@ -54,7 +54,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <input type="submit" value="Finish Being Helped" class="btn btn-danger">
+        <button  type="submit"   value="Finish Being Helped"  class="btn btn-danger">Finish Being Helped</button>
       </form>
     {% endif %}
     <br>
@@ -72,7 +72,7 @@
       <form method="post" id="open_new_queue" action="{{base_url}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="text" name="code" placeholder="Code" required>
-        <input type="submit" value="Open New Queue" class="btn btn-primary">
+        <button  type="submit"   value="Open New Queue"  class="btn btn-primary">Open New Queue</button>
       </form>
 
       <table class="table table-striped" style="width:100%; margin-top:1rem;">
@@ -99,9 +99,9 @@
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
                   {% if queue['open'] == 0 %}
-                    <input type="submit" value="Open Queue" class="btn btn-primary">
+                    <button  type="submit"   value="Open Queue"  class="btn btn-primary">Open Queue</button>
                   {% else %}
-                    <input type="submit" value="Close Queue" class="btn btn-primary">
+                    <button  type="submit"   value="Close Queue"  class="btn btn-primary">Close Queue</button>
                   {% endif %}
                 </form>
               </td>
@@ -109,7 +109,7 @@
                 <form method="post" id="empty_queue" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-                  <input type="submit" value="Empty Queue" class="btn btn-danger">
+                  <button  type="submit"   value="Empty Queue"  class="btn btn-danger">Empty Queue</button>
                 </form>
               </td>
               <td class="button-padding">
@@ -120,7 +120,7 @@
                   onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-                  <input type="submit" value="Delete Queue" class="btn btn-danger">
+                  <button  type="submit"   value="Delete Queue"  class="btn btn-danger">Delete Queue</button>
                 </form>
               </td>
               <td></td>
@@ -158,9 +158,9 @@
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
                   {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
-                    <input type="submit" value="Help" class="btn btn-success">
+                    <button  type="submit"   value="Help"  class="btn btn-success">Help</button>
                   {% else %}
-                    <input type="submit" value="Help" class="btn btn-primary">
+                    <button  type="submit"   value="Help"  class="btn btn-primary">Help</button>
                   {% endif %}
                 </form>
               </td>
@@ -171,9 +171,9 @@
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
                   {% if entry['help_started_by'] == viewer.getUserId() %}
-                    <input type="submit" value="Finish Helping" class="btn btn-success">
+                    <button  type="submit"   value="Finish Helping"  class="btn btn-success">Finish Helping</button>
                   {% else %}
-                    <input type="submit" value="Finish Helping" class="btn btn-primary">
+                    <button  type="submit"   value="Finish Helping"  class="btn btn-primary">Finish Helping</button>
                   {% endif %}
                 </form>
               </td>
@@ -190,7 +190,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
-                <input type="submit" value="Remove" class="btn btn-default">
+                <button  type="submit"   value="Remove"  class="btn btn-default">Remove</button>
               </form>
             </td>
             <td>{{ entry['queue_code'] }}</td>
