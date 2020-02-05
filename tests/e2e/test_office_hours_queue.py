@@ -19,32 +19,94 @@ class TestOfficeHoursQueue(BaseTestCase):
         # Delete any old queues (this should remove anyone that was currently in the queue as well)
         deleteAllQueues(self)
 
+        base_queue_history_count = queueHistoryCount(self, False)
+
         openQueue(self, "custom code", "this queue rocks")
+        expectedAlerts(self, 1, 0)
+        openQueue(self, "custom code", "same name new code")#should fails
+        expectedAlerts(self, 0, 1)
         openQueue(self, "random code")
+        expectedAlerts(self, 1, 0)
 
         changeQueueCode(self, "random code")
+        expectedAlerts(self, 1, 0)
         changeQueueCode(self, "custom code", "new code")
+        expectedAlerts(self, 1, 0)
 
         switchToStudent(self, 'student')
+        base_queue_history_count_student = queueHistoryCount(self, False)
         studentJoinQueue(self, 'custom code', 'new code')
+        expectedAlerts(self, 1, 0)
         studentRemoveSelfFromQueue(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count_student+1, queueHistoryCount(self, False))
         studentJoinQueue(self, 'custom code', 'new code')
+        expectedAlerts(self, 1, 0)
         switchToInstructor(self, 'instructor')
+
+        self.assertEqual(1, currentQueueCount(self))
         helpFirstStudent(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(1, currentQueueCount(self))
+
         switchToStudent(self, 'student')
         studentFinishHelpSelf(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count_student+2, queueHistoryCount(self, False))
         studentJoinQueue(self, 'custom code', 'new code')
+        expectedAlerts(self, 1, 0)
         switchToStudent(self, 'aphacker')
+        base_queue_history_count_aphacker = queueHistoryCount(self, False)
         studentJoinQueue(self, 'custom code', 'new code', 'nick name hacker')
+        expectedAlerts(self, 1, 0)
         switchToInstructor(self, 'instructor')
+        self.assertEqual(2, currentQueueCount(self))
         helpFirstStudent(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count+2, queueHistoryCount(self, False))
         finishHelpFirstStudent(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count+3, queueHistoryCount(self, False))
+        self.assertEqual(1, currentQueueCount(self))
         removeFirstStudent(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count+4, queueHistoryCount(self, False))
+        self.assertEqual(0, currentQueueCount(self))
+        restoreFirstStudent(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count+3, queueHistoryCount(self, False))
+        self.assertEqual(1, currentQueueCount(self))
+        restoreFirstStudent(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count+2, queueHistoryCount(self, False))
+        self.assertEqual(2, currentQueueCount(self))
+        restoreFirstStudent(self)#should fail because the student is already in the queue
+        expectedAlerts(self, 0, 1)
+        self.assertEqual(base_queue_history_count+2, queueHistoryCount(self, False))
+        self.assertEqual(2, currentQueueCount(self))
+        openFilterSettings(self)
+        toggleQueueFilter(self, 'custom code')#turn it off
+        self.assertEqual(0, currentQueueCount(self))
+        toggleQueueFilter(self, 'custom code')#turn it back on
+        self.assertEqual(2, currentQueueCount(self))
+        closeFirstQueue(self)
+        expectedAlerts(self, 1, 0)
+        openFilterSettings(self)
+        emptyFirstQueue(self)
+        expectedAlerts(self, 1, 0)
+        self.assertEqual(base_queue_history_count+4, queueHistoryCount(self, False))
+        self.assertEqual(0, currentQueueCount(self))
+        switchToStudent(self, 'student')
+        studentJoinQueue(self, 'custom code', 'new code')#this should fail as the queue is closed
+        expectedAlerts(self, 0, 1)
 
+        # Students should not be able to see any of theses elements
+        self.assertEqual(True, verifyElementMissing(self, 'class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
+        self.assertEqual(True, verifyElementMissing(self, 'id', ['toggle_filter_settings', 'new_queue_code', 'new_queue_token', 'new_queue_rand_token', 'open_new_queue_btn']))
 
+        switchToInstructor(self, 'instructor')
+        deleteAllQueues(self)
 
-
-        # deleteAllQueues(self)
         # This must be at the end otherwise sometimes the last command will not finish before the browser is closed
         goToQueuePage(self)
         # self.wait_user_input()
@@ -120,3 +182,66 @@ def finishHelpFirstStudent(self):
 def removeFirstStudent(self):
     self.driver.find_element_by_class_name('remove_from_queue_btn').click()
     self.driver.switch_to.alert.accept()
+
+def restoreFirstStudent(self):
+    self.driver.find_element_by_class_name('queue_restore_btn').click()
+    self.driver.switch_to.alert.accept()
+
+#this checks how many visible students are in the queue
+def toggleQueueFilter(self, code):
+    self.driver.find_element_by_id(f'queue_filter_{code.replace(" ", "_").upper()}').click()
+
+def closeFirstQueue(self):
+    self.driver.find_element_by_class_name('close_queue_btn').click()
+
+def emptyFirstQueue(self):
+    self.driver.find_element_by_class_name('empty_queue_btn').click()
+    self.driver.switch_to.alert.accept()
+
+
+def currentQueueCount(self):
+    return len(self.driver.find_elements_by_class_name("shown_queue_row"))
+
+# counts the number of rows in the queue history
+# if limited is false it will get the fully history otherwise it will only get the limited history
+def queueHistoryCount(self, limited=True):
+    if(limited):
+        return len(self.driver.find_elements_by_class_name("queue_history_row"))
+    else:
+        if('full_history=true' not in self.driver.current_url):
+            self.driver.find_element_by_id('view_history_button').click()
+
+        count = len(self.driver.find_elements_by_class_name("queue_history_row"))
+        self.driver.find_element_by_id('view_history_button').click()
+        return count
+
+# type is 'id' or 'class'
+def verifyElementMissing(self, type, values):
+    for value in values:
+        if(type == 'id'):
+            try:
+                self.driver.find_element_by_id(value)
+                return False
+            except:
+                pass
+        elif(type == 'class'):
+            try:
+                self.driver.find_element_by_class_name(value)
+                return False
+            except:
+                pass
+        else:
+            print(f"invalid type: {type}")
+            print("make sure the test code is correct")
+            exit(1)
+    return True
+
+def countAlertSuccess(self):
+    return len(self.driver.find_elements_by_class_name("alert-success"))
+
+def countAlertError(self):
+    return len(self.driver.find_elements_by_class_name("alert-error"))
+
+def expectedAlerts(self, success=0, error=0):
+    self.assertEqual(countAlertSuccess(self), success)
+    self.assertEqual(countAlertError(self), error)
