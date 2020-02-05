@@ -1,5 +1,6 @@
 {% if viewer.isGrader() %}
-  <table class="table table-striped" style="width:100%;" id="current_queue">
+<div id="current_queue">
+  <table class="table table-striped" style="width:100%;">
     <thead>
       <tr>
         <th scope="col">#</th>
@@ -70,4 +71,5 @@
   <div id="queue_empty_msg" style="display:none; text-align:center">
     Your queue is currently empty. Make sure you have the correct filter settings set.
   </div>
+</div>
 {% endif %}
