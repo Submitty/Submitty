@@ -280,7 +280,9 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 var cells=lines[i].split(",");
 
                 for(var j=0;j<cells.length;j++){
-                    built_line[headers[j].trim()]= cells[j].trim();
+                    if(cells[j].trim() != ''){
+                        built_line[headers[j].trim()]= cells[j].trim();
+                    }
                 }
                 jsonFile[i-1] = built_line;
             }

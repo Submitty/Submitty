@@ -472,18 +472,11 @@ class Gradeable extends AbstractModel {
     }
 
     public function setPeerGradersList($input) {
-        $existing_users = $this->core->getQueries()->getAllUsers();
         foreach ($input as $row_num => $vals) {
-            if (!User::validateUserData('user_id', $vals["student"]) || User::validateUserData('user_id', $vals["grader"])) {
+            if (!User::validateUserData('user_id', $vals["student"]) || !User::validateUserData('user_id', $vals["grader"])) {
                 $bad_rows[] = ($row_num + 1);
             }
             $row_num = 0;
-            foreach ($existing_users as $i => $existing_user) {
-                if ($vals["student"] !== $existing_user->getId() || $vals["grader"] !== $existing_user->getId()) {
-                    $bad_rows[] = ($row_num + 1);
-                }
-                $row_num = $row_num + 1;
-            }
         }
         
         if (!empty($bad_rows)) {
