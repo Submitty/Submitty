@@ -66,7 +66,7 @@ class TestForum(BaseTestCase):
         self.select_categories(categories_list)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
-        self.driver.find_element_by_xpath("//input[@value='Submit Post']").click()
+        self.driver.find_element_by_xpath("//button[@value='Submit Post']").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
             self.driver.switch_to.alert.accept()
