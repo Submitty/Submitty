@@ -39,7 +39,7 @@
                     <form action="{{ cancel_invitation_url }}" method="post">
                         <input type="hidden" name="cancel_id" value={{ invited }} />
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                        &emsp;{{ invited }}: <button  type="submit"   value="Cancel"  class="btn btn-danger">Cancel</button>
+                        &emsp;{{ invited }}: <button type="submit" value="Cancel" class="btn btn-danger">Cancel</button>
                     </form>
                     <br />
                 {% endif %} {# lock #}
@@ -78,7 +78,7 @@
         <form action="{{ send_invitation_url }}" method="post">
             <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-            <button  type="submit"   value="Invite"  class="btn btn-primary">Invite</button>
+            <button type="submit" value="Invite" class="btn btn-primary">Invite</button>
         </form>
         <br />
         <button class="btn btn-danger" onclick="location.href='{{ leave_team_url }}'">Leave Team</button>
@@ -94,7 +94,7 @@
                 <form action="{{ accept_invitation_url }}" method="post">
                     <input type="hidden" name="team_id" value={{ invite.getId() }} />
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                    &emsp;{{  invite.getMemberList() }}: <button  type="submit"   value="Accept"  class="btn btn-success">Accept</button>
+                    &emsp;{{  invite.getMemberList() }}: <button type="submit" value="Accept" class="btn btn-success">Accept</button>
                 </form>
                 <br />
             {% endfor %} {# invite in received #}
