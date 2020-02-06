@@ -6,6 +6,9 @@
 {% if not has_submission %}
     <span class="yellow-message">No Submission</span>
 {% endif %}
+{% if not is_inquiry_open %}
+    <span class="yellow-message">It is currently after grade inquiry deadline. No new grade inquiries can be made.</span>
+{% endif %}
 {% if can_inquiry and has_submission %}
     {% if grade_inquiry_per_component_allowed %}
         {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
@@ -49,6 +52,9 @@
                 {% elseif component.id == 0 %}
                     <p class="yellow-message no-post-warning" >No posts!</p>
                 {% endif %}
+                {# show form if it is before grade inquiry deadline or this is an already opened inquiry #}
+                {% if is_inquiry_open or grade_inquiries[component.id] is defined %}
+                {# show form if grade inquiry per component and (it is not the all tab or there is an unresolved inquiry that is not a component) #}
                 {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
                     <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
@@ -66,7 +72,7 @@
                         <div style="margin-right: auto">
                         {{ self.markdown_buttons() }}
                         </div>
-                            {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status is null %}
+                            {% if grade_inquiries[component.id] is not defined%}
                                 {# No request yet #}
                                 <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Submit Grade Inquiry
@@ -103,6 +109,7 @@
                             {% endif %}
                         </div>
                     </form>
+                {% endif %}
                 {% endif %}
             </div>
         {% endfor %}
