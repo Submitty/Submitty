@@ -10,7 +10,7 @@ Macros
             <td>
 				<label>
 					<span class="screen-reader">Can {{ grader.getId() }} grade all sections</span>
-					<input class="key_to_click" type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all" 
+					<input class="key_to_click" type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all"
 						{{ grader.getGradingRegistrationSections()|length == reg_sections|length ? 'checked' : ''}}
 						onclick="fixCheckBoxes('{{ grader.getId() }}',true);"
 					/>
