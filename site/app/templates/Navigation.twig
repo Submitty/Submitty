@@ -79,7 +79,7 @@
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
-        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}"
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}  {% if button.hasOnclick() %} key_to_click {% endif %}"
             {% if button.getTitle() != null %}
                 name="{{ button.getTitle()|lower }}_button"
             {% endif %}

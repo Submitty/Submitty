@@ -62,7 +62,7 @@
 
   {% if viewer.isGrader()%}
     <p>
-      <button class="btn btn-primary" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
+      <button class="btn btn-primary key_to_click" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
         Toggle Filter Settings
       </button>
     </p>
@@ -195,7 +195,7 @@
             </td>
             <td>{{ entry['queue_code'] }}</td>
             <td class="mobile-hide">
-              <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+              <a class="post-user-info key_to_click" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
                 <i class="fas fa-eye"></i>
               </a>
             </td>
@@ -236,7 +236,7 @@
           <tr class="queue_history_{{entry['queue_code']}}">
             <th scope="row">{{history_count}}</th>
             <td class="mobile-hide">
-              <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+              <a class="post-user-info key_to_click" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
                 <i class="fas fa-eye"></i>
               </a>
             </td>

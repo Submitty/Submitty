@@ -17,7 +17,7 @@
             No changes to save
         </div>
         <div id="save_status_buttons">
-            <input id="save_status_button" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
+            <input id="save_status_button" class="key_to_click" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
             <input id="show_log_button" type="button" value="Log" />
         </div>
         <div id="save_status_log"></div>
@@ -174,7 +174,7 @@
         }
     });
     bucket_lists.disableSelection();
-    
+
     var gradeables_lists = $("ol[id^='gradeables-list']").sortable();
     gradeables_lists.disableSelection();
 

@@ -1923,16 +1923,16 @@ $(document).ready(function() {
   var key_to_click = document.getElementsByClassName("key_to_click");
   for (var i = 0; i < key_to_click.length; i++) {
     key_to_click[i].addEventListener('keydown', function(event) {
-      event.preventDefault();
-      event.stopPropagation();
       if (event.keyCode === 13) {//ENTER key
+        event.preventDefault();
+        event.stopPropagation();
         $(event.target).click();
       }
     });
     key_to_click[i].addEventListener('keyup', function(event) {
-      event.preventDefault();
-      event.stopPropagation();
       if (event.keyCode === 32) { //SPACE key
+        event.preventDefault();
+        event.stopPropagation();
         $(event.target).click();
       }
     });

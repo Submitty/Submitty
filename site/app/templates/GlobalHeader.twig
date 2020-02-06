@@ -137,6 +137,7 @@
                          height = "50"
                          {% if enable_banner %}
                             style="position:absolute; right: 10px;"
+                            class="key_to_click"
                             onclick="ducky();"
                             tabindex="0"
                          {% endif %}
@@ -190,7 +191,7 @@
                             {% endif %}
                             {{ message.error | nl2br }}
                         </span>
-                        <a class="fas fa-times" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                        <a class="fas fa-times key_to_click" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                     </div>
                 {% endfor %}
             </div>

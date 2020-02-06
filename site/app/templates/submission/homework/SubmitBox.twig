@@ -330,7 +330,7 @@
 
                                 {% for choice in cell.choices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-                                        <input type="checkbox"
+                                        <input type="checkbox" class="key_to_click"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                                value="{{ choice.value }}"
@@ -352,7 +352,7 @@
 
                                 {% for choice in cell.choices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-                                        <input type="radio"
+                                        <input type="radio" class="key_to_click"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                                value="{{ choice.value }}"
