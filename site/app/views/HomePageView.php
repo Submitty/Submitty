@@ -66,6 +66,7 @@ class HomePageView extends AbstractView {
         ];
         $this->output->addInternalJs('homepage.js');
         $this->output->addInternalCss('homepage.css');
+        $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
