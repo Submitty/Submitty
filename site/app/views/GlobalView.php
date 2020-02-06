@@ -32,8 +32,8 @@ class GlobalView extends AbstractView {
         elseif ($this->core->getConfig()->isCourseLoaded()) {
             $page_title = "Submitty " . $course_name . " " . $page_name;
         }
-        //$page_name != "Submitty" is needed so we dont end up with pages with the title "Submitty Submitty"
-        elseif (!empty($page_name) && $page_name != "Submitty") {
+        elseif (!empty($page_name) && $page_name !== "Submitty") {
+            // $page_name !== "Submitty" is needed so we dont end up with pages with the title "Submitty Submitty"
             $page_title = "Submitty " . $page_name;
         }
 
