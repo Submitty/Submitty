@@ -519,8 +519,12 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function useMobileViewport($bool = true) {
-        $this->use_mobile_viewport = $bool;
+    public function enableMobileViewport(): void {
+        $this->use_mobile_viewport = true;
+    }
+
+    public function useMobileViewport(): bool {
+        return $this->use_mobile_viewport;
     }
 
     public function addBreadcrumb($string, $url = null, $external_link = false) {

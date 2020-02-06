@@ -9,7 +9,7 @@ class OfficeHoursQueueView extends AbstractView {
 
     public function showTheQueue($viewer) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
-        $this->core->getOutput()->useMobileViewport();
+        $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->renderTwigOutput("OfficeHoursQueue.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'viewer' => $viewer,

@@ -364,7 +364,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $use_mobile_viewport);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
     }
 
     public function footer() {
