@@ -2,6 +2,11 @@ aside {
     display: none;
 }
 
+/* Used to keep the page invisible just long enough for the sidebar to close */
+.invisible{
+  visibility: hidden;
+}
+
 @media (min-width: 541px) {
     aside {
         display: block;
