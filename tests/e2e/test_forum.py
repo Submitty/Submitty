@@ -142,7 +142,7 @@ class TestForum(BaseTestCase):
         edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1]  # Last One
         text_area = edit_form.find_element(By.XPATH, ".//textarea")
         upload_button = edit_form.find_element(By.XPATH, ".//input[@type='file']")
-        submit_button = edit_form.find_element(By.XPATH, ".//input[@type='submit']")
+        submit_button = edit_form.find_element(By.XPATH, ".//button[@type='submit']")
         if first_post:
             assert "first_post" in post.get_attribute("class")
         else:
