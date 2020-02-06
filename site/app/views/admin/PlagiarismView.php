@@ -403,7 +403,7 @@ HTML;
                     <div class="form-buttons">
                         <div class="form-button-container">
                             <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
-                            <button class="btn btn-danger"  type="submit"   value="Delete" >Delete</button>
+                            <button class="btn btn-danger" type="submit"   value="Delete" >Delete</button>
                         </div>
                     </div>
                 </div>
@@ -715,7 +715,7 @@ HTML;
             </div><br /><br />
             <div style="float: right; width: auto; margin-top: 5px;">
                 <a href="{$this->core->buildCourseUrl(['plagiarism'])}" class="btn btn-danger">Cancel</a>
-                <button class="btn btn-primary"  type="submit"   value="Save Configuration" >Save Configuration</button>
+                <button class="btn btn-primary" type="submit"   value="Save Configuration" >Save Configuration</button>
             </div><br /><br /><br />
         </form>
     </div>
