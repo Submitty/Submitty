@@ -117,10 +117,36 @@
 {% endif %}
 
 {% macro markdown_buttons() %}
-    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, '#reply-text-area')" style="margin-right:10px;" class="btn btn-default">
-        Link <i class="fas fa-link fa-1x"></i>
+    <button type="button" 
+            title="Insert a link" 
+            onclick="addMarkdownCode(1, '#reply-text-area')" 
+            style="margin-right:10px;" 
+            class="btn btn-default"> Link 
+            <i 
+                class="fas fa-link fa-1x">
+            </i>
     </button>
-    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, '#reply-text-area')" class="btn btn-default">
-        Code <i class="fas fa-code fa-1x"></i>
+    <button title="Insert a code segment" 
+            type="button" 
+            onclick="addMarkdownCode(0, '#reply-text-area')" 
+            class="btn btn-default"> Code 
+            <i 
+                class="fas fa-code fa-1x">
+            </i>
+    </button>
+    <button title="Insert bold text" 
+            type="button" 
+            onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))"
+            class="btn btn-default"> Bold 
+            <i 
+                class="fas fa-bold fa-1x">
+            </i>
+    </button>
+    <button title="Insert italic text" 
+            type="button" 
+            onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))"class="btn btn-default"> Italics 
+            <i 
+                class="fas fa-italic fa-1x">  
+            </i>
     </button>
 {% endmacro %}
