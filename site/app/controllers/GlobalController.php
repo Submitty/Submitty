@@ -9,7 +9,7 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
 
-    public function header() {
+    public function header($use_mobile_viewport) {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
@@ -364,7 +364,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $use_mobile_viewport);
     }
 
     public function footer() {

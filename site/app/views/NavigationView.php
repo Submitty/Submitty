@@ -200,6 +200,7 @@ class NavigationView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
+        $this->core->getOutput()->useMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
             "course_name" => $this->core->getConfig()->getCourseName(),

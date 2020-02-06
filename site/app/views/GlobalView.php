@@ -5,7 +5,7 @@ namespace app\views;
 use app\models\Breadcrumb;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $use_mobile_viewport) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -52,7 +52,8 @@ class GlobalView extends AbstractView {
             "system_message" => $this->core->getConfig()->getSystemMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             "enable_banner" => $config_data['duck_special_effects'],
-            "duck_img" => $duck_img
+            "duck_img" => $duck_img,
+            "use_mobile_viewport" => $use_mobile_viewport
         ]);
     }
 
