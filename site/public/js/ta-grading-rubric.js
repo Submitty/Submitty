@@ -194,14 +194,15 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
  * ajax call to get the entire graded gradeable for a user
  * @param {string} gradeable_id
  * @param {string} anon_id
+ * @param {boolean} all_peers
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxGetGradedGradeable(gradeable_id, anon_id) {
+function ajaxGetGradedGradeable(gradeable_id, anon_id, all_peers) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}&all_peers=${all_peers.toString()}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable grade: ' + response.message);
@@ -2240,7 +2241,7 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         })
         .then(function (gradeable) {
             gradeable_tmp = gradeable;
-            return ajaxGetGradedGradeable(gradeable_id, anon_id);
+            return ajaxGetGradedGradeable(gradeable_id, anon_id, false);
         })
         .catch(function (err) {
             alert('Could not fetch graded gradeable: ' + err.message);
@@ -2252,6 +2253,39 @@ function reloadGradingRubric(gradeable_id, anon_id) {
         .then(function (elements) {
             setRubricDOMElements(elements);
             return openCookieComponent();
+        })
+        .catch(function (err) {
+            alert("Could not render gradeable: " + err.message);
+            console.error(err);
+        });
+}
+
+/**
+ * Call this once on page load to load the peer panel.
+ * Note: This takes 'gradeable_id' and 'anon_id' parameters since it gets called
+ *  in the 'PeerPanel.twig' server template
+ * @param {string} gradeable_id
+ * @param {string} anon_id
+ * @return {Promise}
+ */
+function reloadPeerRubric(gradeable_id, anon_id) {
+    let gradeable_tmp = null;
+    return ajaxGetGradeableRubric(gradeable_id)
+        .catch(function (err) {
+            alert('Could not fetch gradeable rubric: ' + err.message);
+        })
+        .then(function (gradeable) {
+            gradeable_tmp = gradeable;
+            return ajaxGetGradedGradeable(gradeable_id, anon_id, true);
+        })
+        .catch(function (err) {
+            alert('Could not fetch graded gradeable: ' + err.message);
+        })
+        .then(function (graded_gradeable) {
+            let elements = renderPeerGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
+                true, false, getDisplayVersion());
+            let gradingBox = $("#peer-grading-box");
+            gradingBox.html(elements);
         })
         .catch(function (err) {
             alert("Could not render gradeable: " + err.message);

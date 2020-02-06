@@ -41,7 +41,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->course_config = FileUtils::joinPaths($this->test_dir, 'course.json');
         file_put_contents(
             $this->course_config,
-            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","keep_previous_files":false,"display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"regrade_enabled":false,"regrade_message":"Regrade Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false}}'
+            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"regrade_enabled":false,"regrade_message":"Regrade Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false}}'
         );
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'reports', 'seating'), true);
         foreach ($seating_dirs as $dir) {
@@ -90,7 +90,6 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'default_student_late_days'      => 0,
             'zero_rubric_grades'             => false,
             'upload_message'                 => 'Hit Submit',
-            'keep_previous_files'            => false,
             'display_rainbow_grades_summary' => false,
             'display_custom_message'         => false,
             'course_email'                   => 'Please contact your TA or instructor to submit a grade inquiry.',
@@ -131,7 +130,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsFirstItem(): void {
@@ -168,7 +167,6 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'default_student_late_days'      => 0,
             'zero_rubric_grades'             => false,
             'upload_message'                 => 'Hit Submit',
-            'keep_previous_files'            => false,
             'display_rainbow_grades_summary' => false,
             'display_custom_message'         => false,
             'course_email'                   => 'Please contact your TA or instructor to submit a grade inquiry.',
@@ -215,7 +213,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsNonFirstItem(): void {
@@ -253,7 +251,6 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'default_student_late_days'      => 0,
             'zero_rubric_grades'             => false,
             'upload_message'                 => 'Hit Submit',
-            'keep_previous_files'            => false,
             'display_rainbow_grades_summary' => false,
             'display_custom_message'         => false,
             'course_email'                   => 'Please contact your TA or instructor to submit a grade inquiry.',
@@ -304,7 +301,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
     }
 
     public function testUpdateConfigurationNoName() {
@@ -378,5 +375,72 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         finally {
             chmod($this->course_config, 0600);
         }
+    }
+
+    public function testUpdateConfigurationEnableForum() {
+        $this->setUpConfig();
+        $core = new Core();
+        $controller = new ConfigurationController($core);
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        
+        $_POST['name'] = 'forum_enabled';
+        $_POST['entry'] = 'true';
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn([]);
+        $queries
+            ->expects($this->exactly(4))
+            ->method('addNewCategory')
+            ->withConsecutive(
+                [$this->equalTo('General Questions')],
+                [$this->equalTo('Homework Help')],
+                [$this->equalTo('Quizzes')],
+                [$this->equalTo('Tests')]
+            )
+            ->will($this->onConsecutiveCalls(0, 1, 2, 3));
+
+        $core->setQueries($queries);
+        $response = $controller->updateConfiguration();
+        $expected = [
+            'status' => 'success',
+            'data' => null
+        ];
+        $this->assertNotNull($response->json_response);
+        $this->assertEquals($expected, $response->json_response->json);
+    }
+
+    public function testUpdateConfigurationEnableForumWithCategories() {
+        $this->setUpConfig();
+        $core = new Core();
+        $controller = new ConfigurationController($core);
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        $_POST['name'] = 'forum_enabled';
+        $_POST['entry'] = 'true';
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn(['Category']);
+        $queries
+            ->expects($this->exactly(0))
+            ->method('addNewCategory');
+        $core->setQueries($queries);
+        $response = $controller->updateConfiguration();
+        $expected = [
+            'status' => 'success',
+            'data' => null
+        ];
+        $this->assertNotNull($response->json_response);
+        $this->assertEquals($expected, $response->json_response->json);
     }
 }

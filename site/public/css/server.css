@@ -182,10 +182,6 @@ input.disabled {
     background-color: var(--standard-light-gray);
 }
 
-input{
-  -webkit-appearance: none;
-}
-
 /****************************
  * TABLE STYLES
  ***************************/

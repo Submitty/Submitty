@@ -184,8 +184,6 @@ class Config extends AbstractModel {
     /** @prop @var string */
     protected $upload_message;
     /** @prop @var bool */
-    protected $keep_previous_files;
-    /** @prop @var bool */
     protected $display_rainbow_grades_summary;
     /** @prop @var bool */
     protected $display_custom_message;
@@ -205,7 +203,7 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @prop @var string */
     protected $regrade_message;
-    /** @prop @var bool*/
+    /** @prop @var bool */
     protected $seating_only_for_instructor;
     /** @prop @var string|null */
     protected $room_seating_gradeable_id;
@@ -390,7 +388,7 @@ class Config extends AbstractModel {
 
         $array = [
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
-            'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
+            'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message',
             'auto_rainbow_grades', 'queue_enabled'
@@ -414,7 +412,7 @@ class Config extends AbstractModel {
             $this->$key = intval($this->$key);
         }
 
-        $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+        $array = array('zero_rubric_grades', 'display_rainbow_grades_summary',
             'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled");
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
@@ -474,13 +472,6 @@ class Config extends AbstractModel {
      */
     public function displayCustomMessage() {
         return $this->display_custom_message;
-    }
-
-    /**
-     * @return bool
-     */
-    public function keepPreviousFiles() {
-        return $this->keep_previous_files;
     }
 
     /**
