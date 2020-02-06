@@ -20,22 +20,22 @@ use app\libraries\Utils;
  */
 class GradeableAutocheck extends AbstractModel {
 
-    /** @property @var string */
+    /** @prop @var string */
     protected $index;
 
     /** @var DiffViewer DiffViewer instance to hold the student, instructor, and differences */
     protected $diff_viewer;
 
-    /** @property @var string Description to show for displaying the diff */
+    /** @prop @var string Description to show for displaying the diff */
     protected $description = "";
 
-    /** @property @var array[] Message to show underneath the description for a diff */
+    /** @prop @var array[] Message to show underneath the description for a diff */
     protected $messages = array();
 
-    /** @property @var boolean If this check's file is in results_public */
+    /** @prop @var boolean If this check's file is in results_public */
     protected $public;
 
-    /** @property @var boolean If this check's file should be displayed as a sequence diagram */
+    /** @prop @var boolean If this check's file should be displayed as a sequence diagram */
     protected $display_as_sequence_diagram;
 
     /**
