@@ -9,11 +9,9 @@ Required Input:
 {% set mark_list_visibility = show_mark_list ? '' : 'hidden' %}
 
 {% if peer_component %}
-<div id="peer-component-{{ component.id }}"
-     class="box">
+<div id="peer-component-{{ component.id }}" class="box">
 {% else %}
-<div id="component-{{ component.id }}"
-     class="box component"
+<div id="component-{{ component.id }}" class="box component"
      data-component_id="{{ component.id }}"
      data-title="{{ component.title|escape }}"
      data-ta_comment="{{ component.ta_comment|escape }}"
@@ -46,7 +44,7 @@ Required Input:
         {% endblock %}
         {% if edit_marks_enabled %}
             <div class="add-new-mark-container">
-                <input type="button" class="btn btn-primary add-new-mark" value="Add New Mark" onclick="onAddNewMark(this)"/>
+                <button  type="button" class="btn btn-primary add-new-mark" value="Add New Mark"  onclick="onAddNewMark(this)">Add New Mark</button>
             </div>
         {% endif %}
         {% block extra_mark_rows %}

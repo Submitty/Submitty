@@ -8,28 +8,27 @@
 
 <div class="container mark-conflict-container">
     {% for conflict in conflict_marks %}
-        <div id="mark-conflict-{{ conflict.domMark.id }}"
-             class="row mark-conflict-row {{ loop.index0 > 0 ? 'hidden' : '' }}"
+        <div id="mark-conflict-{{ conflict.domMark.id }}" class="row mark-conflict-row {{ loop.index0 > 0 ? 'hidden' : '' }}"
              data-mark_id="{{ conflict.domMark.id }}">
             <div class="col container">
                 <div class="row mark-resolve mark-resolve-old-server">
                     {{ s.show_mark_info(conflict.oldServerMark) }}
                     <span class="col-no-gutters button-container">
-                        <input type="button" class="btn btn-default" value="Revert to Original"/>
+                        <button  type="button" class="btn btn-default" value="Revert to Original" >Revert to Original</button>
                     </span>
                 </div>
                 <div class="row mark-resolve mark-resolve-server">
                     {% if conflict.serverMark != null %}
                         {{ s.show_mark_info(conflict.serverMark) }}
                         <span class="col-no-gutters button-container">
-                            <input type="button" class="btn btn-primary" value="Ignore My Edits"/>
+                            <button  type="button" class="btn btn-primary" value="Ignore My Edits" >Ignore My Edits</button>
                         </span>
                     {% else %}
                         <span class="col mark-deleted-message">
                             Mark Deleted From Server
                         </span>
                         <span class="col-no-gutters button-container">
-                            <input type="button" class="btn btn-primary" value="Delete Mark"/>
+                            <button  type="button" class="btn btn-primary" value="Delete Mark" >Delete Mark</button>
                         </span>
                     {% endif %}
                 </div>
@@ -37,14 +36,14 @@
                     {% if not conflict.local_deleted %}
                         {{ s.show_mark_info(conflict.domMark) }}
                         <span class="col-no-gutters button-container">
-                            <input type="button" class="btn btn-primary" value="Use My Edits"/>
+                            <button  type="button" class="btn btn-primary" value="Use My Edits" >Use My Edits</button>
                         </span>
                     {% else %}
                         <span class="col mark-deleted-message">
                             You Deleted the Mark
                         </span>
                         <span class="col-no-gutters button-container">
-                            <input type="button" class="btn btn-primary" value="Delete Mark"/>
+                            <button  type="button" class="btn btn-primary" value="Delete Mark" >Delete Mark</button>
                         </span>
                     {% endif %}
                 </div>
