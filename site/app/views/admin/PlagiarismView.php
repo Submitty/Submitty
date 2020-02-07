@@ -170,14 +170,6 @@ HTML;
         $return .= <<<HTML
         <script>
 
-            $(document).ready(function() {
-                var editor0 = $('.CodeMirror')[0].CodeMirror;
-                var editor1 = $('.CodeMirror')[1].CodeMirror;
-
-                //console.log('hello');
-
-            });
-
         </script>
 <div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
