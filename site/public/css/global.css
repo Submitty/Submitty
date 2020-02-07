@@ -23,7 +23,7 @@ nav {
 nav a,
 nav a:link,
 nav a:visited {
-    color: #000;
+    color: var(--text-black);
     text-decoration: underline;
 }
 
@@ -153,4 +153,8 @@ footer .footer-separator {
 
 #loading-bar-percentage{
     margin-left: 10px;
+}
+
+body{
+  color:var(--text-black);
 }
