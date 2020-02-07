@@ -22,7 +22,7 @@
                         <div class="form-button-container">
                             {% block buttons %}
                                 {% block close_button %}
-                                   <a href="javascript:closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button">Close</a>
+                                   <a onclick="closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
                                 {% endblock %}
                             {% endblock %}
                         </div>
