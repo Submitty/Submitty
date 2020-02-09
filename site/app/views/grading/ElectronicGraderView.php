@@ -389,7 +389,7 @@ HTML;
         $columns = [];
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
-            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
+            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
 
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
