@@ -73,7 +73,7 @@ class AccessTester extends BaseUnitTest {
         $gg3->method("getGradeable")->willReturn($g3);
 
 
-        self::assertFalse($this->access->isGradedGradeableInPeerAssignment($gg1, $user1));
+        self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg1, $user1));
         self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg2, $user1));
         self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg3, $user1));
         self::assertTrue($this->access->isGradedGradeableInPeerAssignment($gg1, $user2));
