@@ -2312,3 +2312,4 @@ public function showStatus($gradeable_id) {
             $total_total += $value * $num_components;
         }
     }
+}
