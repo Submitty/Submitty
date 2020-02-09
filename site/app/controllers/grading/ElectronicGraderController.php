@@ -199,7 +199,7 @@ class ElectronicGraderController extends AbstractController {
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
      */
-    public function showStatus($gradeable_id) {
+public function showStatus($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
@@ -238,9 +238,6 @@ class ElectronicGraderController extends AbstractController {
         $num_unsubmitted = 0;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
-        $num_components = 0;
-        $my_grading = 0;
-        $peer_grade_set = 0;
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
@@ -332,13 +329,13 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($peer) {
                 $sections['stu_grad'] = array(
-                    'total_components' => $num_components,
+                    'total_components' => $num_components * $peer_grade_set,
                     'graded_components' => $my_grading,
                     'graders' => array()
                 );
                 $sections['all'] = array(
-                    'total_components' => $num_components,
-                    'graded_components' => $my_grading,
+                    'total_components' => 0,
+                    'graded_components' => 0,
                     'graders' => array()
                 );
                 foreach ($total_users as $key => $value) {
