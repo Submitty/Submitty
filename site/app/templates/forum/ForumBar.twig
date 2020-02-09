@@ -110,6 +110,7 @@
               <li title="Click to edit categories" class='dropdown-item'>
             	<a href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
 			{% endif %}
+			{% if thread_exists %}
 	          <li class="dropdown-divider"></li>
 	          <li title="Click to toggle all post attachments" class='dropdown-item'>
 	          	<a href="#" onclick="loadAllInlineImages()">
@@ -122,6 +123,7 @@
 	              {% if user_group <= core.getUser().accessGrading() %}
 	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha')">Alphabetical</a></li>
 	              {% endif %}
+	        {% endif %}
 	        </ul>
 	    </div>
 	{% endif %}

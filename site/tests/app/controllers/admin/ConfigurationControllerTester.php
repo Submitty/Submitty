@@ -130,7 +130,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsFirstItem(): void {
@@ -213,7 +213,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsNonFirstItem(): void {
@@ -301,7 +301,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
     }
 
     public function testUpdateConfigurationNoName() {
@@ -375,5 +375,72 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         finally {
             chmod($this->course_config, 0600);
         }
+    }
+
+    public function testUpdateConfigurationEnableForum() {
+        $this->setUpConfig();
+        $core = new Core();
+        $controller = new ConfigurationController($core);
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        
+        $_POST['name'] = 'forum_enabled';
+        $_POST['entry'] = 'true';
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn([]);
+        $queries
+            ->expects($this->exactly(4))
+            ->method('addNewCategory')
+            ->withConsecutive(
+                [$this->equalTo('General Questions')],
+                [$this->equalTo('Homework Help')],
+                [$this->equalTo('Quizzes')],
+                [$this->equalTo('Tests')]
+            )
+            ->will($this->onConsecutiveCalls(0, 1, 2, 3));
+
+        $core->setQueries($queries);
+        $response = $controller->updateConfiguration();
+        $expected = [
+            'status' => 'success',
+            'data' => null
+        ];
+        $this->assertNotNull($response->json_response);
+        $this->assertEquals($expected, $response->json_response->json);
+    }
+
+    public function testUpdateConfigurationEnableForumWithCategories() {
+        $this->setUpConfig();
+        $core = new Core();
+        $controller = new ConfigurationController($core);
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        $_POST['name'] = 'forum_enabled';
+        $_POST['entry'] = 'true';
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn(['Category']);
+        $queries
+            ->expects($this->exactly(0))
+            ->method('addNewCategory');
+        $core->setQueries($queries);
+        $response = $controller->updateConfiguration();
+        $expected = [
+            'status' => 'success',
+            'data' => null
+        ];
+        $this->assertNotNull($response->json_response);
+        $this->assertEquals($expected, $response->json_response->json);
     }
 }
