@@ -5,6 +5,7 @@ body {
     position: relative;
     display: flex;
     background: #f6fbfe;
+    color: var(--text-black);
 }
 
 #submitty-body {
@@ -31,8 +32,8 @@ nav a:hover {
     text-decoration: none;
 }
 
-nav a > i.fa, 
-nav a > i.fas, 
+nav a > i.fa,
+nav a > i.fas,
 nav a > i.f {
     font-size: 20px;
 }
@@ -153,8 +154,4 @@ footer .footer-separator {
 
 #loading-bar-percentage{
     margin-left: 10px;
-}
-
-body{
-  color:var(--text-black);
 }

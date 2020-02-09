@@ -1663,8 +1663,8 @@ end of styles used in the admin gradeable page
 }
 
 .black-btn, .black-btn > i {
-    color: #000 !important;
-    border-color: #000 !important;
+    color: var(--text-black) !important;
+    border-color: var(--text-black) !important;
     text-decoration: none;
 }
 
