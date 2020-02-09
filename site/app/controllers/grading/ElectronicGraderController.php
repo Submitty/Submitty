@@ -868,8 +868,6 @@ public function showStatus($gradeable_id) {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
-        
-        $total_submitted = 0;
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
@@ -943,9 +941,7 @@ public function showStatus($gradeable_id) {
         $team = $gradeable->isTeamAssignment();
         if ($peer) {
             $section_key = 'registration_section';
-            $sections = $this->core->getUser()->getGradingRegistrationSections();
             $total = $gradeable->getPeerGradeSet();
-            $total_submitted = $gradeable->getPeerGradeSet();
             $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
         }
         elseif ($gradeable->isGradeByRegistration()) {
@@ -1000,7 +996,7 @@ public function showStatus($gradeable_id) {
         }
 
 
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
@@ -1017,7 +1013,7 @@ public function showStatus($gradeable_id) {
                 break;
             }
         }
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable]);
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
         $show_verify_all = $show_verify_all && $can_verify;
 
@@ -2316,4 +2312,3 @@ public function showStatus($gradeable_id) {
             $total_total += $value * $num_components;
         }
     }
-}

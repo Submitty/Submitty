@@ -494,10 +494,12 @@
 
 {# User ID #}
 {% macro render_column_user_id(self, context, section, graded_gradeable, index, info, column) %}
+   {{dump(graded_gradeable.getSubmitter.getId())}}
     <td>
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter.getId() }}
         {% endif %}
+        
     </td>
 {% endmacro %}
 
