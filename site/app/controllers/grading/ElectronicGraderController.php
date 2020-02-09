@@ -199,7 +199,7 @@ class ElectronicGraderController extends AbstractController {
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
      */
-public function showStatus($gradeable_id) {
+    public function showStatus($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
