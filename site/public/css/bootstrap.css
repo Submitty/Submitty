@@ -67,22 +67,22 @@ fieldset[disabled] a.btn {
     pointer-events: none;
 }
 .btn-default {
-    color: var(--text-black);
+    color: var(--standard-deep-dark-gray);
     background-color: var(--default-white);
 }
 .btn-default:focus,
 .btn-default.focus {
-    color: var(--text-black);
+    color: var(--standard-deep-dark-gray);
     background-color: var(--standard-pale-blue-gray);
 }
 .btn-default:hover {
-    color: var(--text-black);
+    color: var(--standard-deep-dark-gray);
     background-color: var(--standard-pale-gray);
 }
 .btn-default:active,
 .btn-default.active,
 .open > .dropdown-toggle.btn-default {
-    color: var(--text-black);
+    color: var(--standard-deep-dark-gray);
     background-color: var(--standard-pale-blue-gray);
 }
 .btn-default:active:hover,
@@ -94,7 +94,7 @@ fieldset[disabled] a.btn {
 .btn-default:active.focus,
 .btn-default.active.focus,
 .open > .dropdown-toggle.btn-default.focus {
-    color: var(--text-black);
+    color: var(--standard-deep-dark-gray);
     background-color: var(--standard-pale-blue);
 }
 .btn-default:active,

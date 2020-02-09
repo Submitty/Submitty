@@ -129,8 +129,8 @@
     --focus-dropdown: #f5f5f5;
 
     /*text and fonts*/
-    --text-black: #000000; /*use only on white/background-blue*/
-    --text-white: #ffffff; /*use on all colors*/
+    --text-black: blue; /*use only on white/background-blue*/
+    --text-white: red; /*use on all colors*/
 
     /*discussion forum*/
     --viewed-discussion-post-blue: #e8f0f7;

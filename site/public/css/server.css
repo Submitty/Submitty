@@ -105,7 +105,7 @@ input[type="color"] {
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
-    color: var(--text-black);
+    color: var(--standard-dark-gray);
     vertical-align: middle;
     border: 1px solid var(--standard-light-gray);
     -webkit-border-radius: 4px;
