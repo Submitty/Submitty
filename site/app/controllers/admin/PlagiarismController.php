@@ -595,6 +595,7 @@ class PlagiarismController extends AbstractController {
                             if ($other["username"] == $user_id_2) {
                                 $orange_color = true;
                                 $user_2_index_in_others = $i;
+                                break;
                             }
                         }
                     }
@@ -632,11 +633,8 @@ class PlagiarismController extends AbstractController {
                     $color = '#b5e3b5';
                 }
 
-                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
 
-                // foreach($color_info as $i=>$color_info_for_line) {
-                //  ksort($color_info[$i]);
-                // }
             }
         }
         return $color_info;
