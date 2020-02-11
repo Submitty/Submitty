@@ -1242,7 +1242,8 @@ CREATE TABLE IF NOT EXISTS queue(
 CREATE TABLE IF NOT EXISTS queue_settings(
   id serial PRIMARY KEY,
   open boolean NOT NULL,
-  code text NOT NULL
+  code text NOT NULL,
+  token text NOT NULL
 );
 
 -- end office hours queue
