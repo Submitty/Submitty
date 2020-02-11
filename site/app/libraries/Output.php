@@ -28,6 +28,7 @@ class Output {
 
     private $output_buffer = "";
     private $breadcrumbs = array();
+    private $page_name = "";
     private $loaded_views = array();
 
     /** @var Set */
@@ -531,6 +532,17 @@ HTML;
      */
     public function getBreadcrumbs() {
         return $this->breadcrumbs;
+    }
+
+    public function setPageName($page_name) {
+        $this->page_name = $page_name;
+    }
+
+    public function getPageName() {
+        if (!empty($this->page_name)) {
+            return $this->page_name;
+        }
+        return end($this->breadcrumbs)->getTitle();
     }
 
     /**
