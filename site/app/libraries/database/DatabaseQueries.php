@@ -3079,20 +3079,12 @@ SQL;
         }
 
         $query = <<<SQL
-SELECT u.semester, u.course, u.user_group
+SELECT t.name AS term_name, u.semester, u.course, u.user_group
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+INNER JOIN terms t ON u.semester=t.term_id
 WHERE u.user_id=? ${extra}
-ORDER BY u.user_group ASC,
-CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
-    ELSE 0
-END DESC,
-CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN 2
-    WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN 3
-    WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN 4
-    ELSE 1
-END DESC,
-u.course ASC
+ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
         $return = array();
