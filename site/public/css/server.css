@@ -182,10 +182,6 @@ input.disabled {
     background-color: var(--standard-light-gray);
 }
 
-input{
-  -webkit-appearance: none;
-}
-
 /****************************
  * TABLE STYLES
  ***************************/
@@ -1400,7 +1396,7 @@ end of styles used in the admin gradeable page
 
 /* color for student/peer grading */
 .grader-4 {
-    color: var(--standard-vibrant-purple) /* purple */
+    color: var(--standard-plum-purple) /* purple */
 }
 
 /* color for a limited access grader */

@@ -21,6 +21,7 @@ class GlobalController extends AbstractController {
         }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
+        $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
 
@@ -364,7 +365,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
     }
 
     public function footer() {
