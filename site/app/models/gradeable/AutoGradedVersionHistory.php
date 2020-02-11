@@ -21,21 +21,21 @@ use app\models\AbstractModel;
  */
 class AutoGradedVersionHistory extends AbstractModel {
 
-    /** @property @var \DateTime Time the version went into the queue */
+    /** @prop @var \DateTime Time the version went into the queue */
     protected $queue_time = null;
-    /** @property @var bool If the grading run was a batch regrade */
+    /** @prop @var bool If the grading run was a batch regrade */
     protected $batch_regrade = false;
-    /** @property @var \DateTime The time the grading began */
+    /** @prop @var \DateTime The time the grading began */
     protected $grading_began = null;
-    /** @property @var int Seconds the version spent in the queue */
+    /** @prop @var int Seconds the version spent in the queue */
     protected $wait_time = 0;
-    /** @property @var \DateTime The time the grading finished */
+    /** @prop @var \DateTime The time the grading finished */
     protected $grading_finished = null;
-    /** @property @var int Seconds the version took to grade */
+    /** @prop @var int Seconds the version took to grade */
     protected $grade_time = 0;
-    /** @property @var string VCS revision id (i.e. git commit hash) */
+    /** @prop @var string VCS revision id (i.e. git commit hash) */
     protected $vcs_revision = '';
-    /** @property @var \DateTime The time of the most recent submission */
+    /** @prop @var \DateTime The time of the most recent submission */
     protected $submission_time = null;
 
     public function __construct(Core $core, array $details) {

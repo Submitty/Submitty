@@ -22,7 +22,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students) {
+        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
@@ -37,11 +37,10 @@ class CourseMaterialsView extends AbstractView {
                 // If shared, will add to courseMaterialsArray
 
                 $releaseData = $now_date_time->format("Y-m-d H:i:sO");
-                $isShareToOther = '0';
+                $isMaterialReleased = '0';
                 if ($json == true) {
                     if (isset($json[$expected_file_path])) {
-                        $json[$expected_file_path]['checked'] = '1';
-                        $isShareToOther = $json[$expected_file_path]['checked'];
+                        $isMaterialReleased = '1';
 
                         if (isset($json[$expected_file_path]['sections'])) {
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
@@ -51,16 +50,15 @@ class CourseMaterialsView extends AbstractView {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
 
-                        if ($isShareToOther == '1' && $release_date > $now_date_time) {
-                            $isShareToOther = '0';
+                        if ($release_date > $now_date_time) {
+                            $isMaterialReleased = '0';
                         }
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
                     }
                     else {
                         //fill with upload time for new files add all files to json when uploaded
-                        $json[$expected_file_path]['checked'] = '1';
-                        $isShareToOther = $json[$expected_file_path]['checked'];
+                        $isMaterialReleased = '1';
                         $release_date = $json['release_time'];
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
@@ -73,10 +71,8 @@ class CourseMaterialsView extends AbstractView {
                     }
                 }
                 else {
-                    $ex_file_path = $expected_file_path;
                     $ex_file_path = array();
-                    $ex_file_path['checked'] = '1';
-                    $isShareToOther = $ex_file_path['checked'];
+                    $isMaterialReleased = '1';
                     $date = $now_date_time->format("Y-m-d H:i:sO");
                     $date = substr_replace($date, "9999", 0, 4);
                     $ex_file_path['release_datetime'] = $date;
@@ -85,8 +81,9 @@ class CourseMaterialsView extends AbstractView {
                     $no_json[$expected_file_path] = $ex_file_path;
                 }
 
-                if ($student_access && $isShareToOther === '0') {
-                    continue; // skip this so don't add to the courseMaterialsArray
+                // Share with student only when course material is released
+                if ($student_access && $isMaterialReleased === '0') {
+                    continue;
                 }
 
                 $path = explode('/', $file);
@@ -97,21 +94,14 @@ class CourseMaterialsView extends AbstractView {
                     if (!isset($working_dir[$dir])) {
                         $working_dir[$dir] = array();
                     }
-
-
                     $working_dir = &$working_dir[$dir];
                 }
 
                 $working_dir[$filename] = $expected_file_path;
 
-
-                $file_datas[$expected_file_path] = $isShareToOther;
-
                 if ($releaseData == $now_date_time->format("Y-m-d H:i:sO")) {
                     //for uploaded files that have had no manually set date to be set to never and maintained as never
-                    //also permission set to yes
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
-                    $json[$expected_file_path]['checked'] = '1';
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
@@ -127,7 +117,6 @@ class CourseMaterialsView extends AbstractView {
         };
 
         $submissions = array();
-        $file_shares = array();
         $file_release_dates = array();
         $in_dir = array();
         $file_sections = array();
@@ -143,7 +132,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students);
+        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
@@ -164,7 +153,6 @@ class CourseMaterialsView extends AbstractView {
             "folderPath" => $expected_path,
             "uploadFolderPath" => $upload_path,
             "submissions" => $submissions,
-            "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
             "inDir" => $in_dir,

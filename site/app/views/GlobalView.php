@@ -5,7 +5,7 @@ namespace app\views;
 use app\models\Breadcrumb;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -20,7 +20,6 @@ class GlobalView extends AbstractView {
         }
 
         $course_name = ucwords(strtolower($this->core->getFullCourseName()));
-        $page_name = end($breadcrumbs)->getTitle();
         // We assume that if there is no page breadcrumb (only course), we are on gradeables
         if ($course_name == ucwords(strtolower($page_name))) {
             $page_name = "Gradeables";
@@ -32,6 +31,10 @@ class GlobalView extends AbstractView {
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
             $page_title = "Submitty " . $course_name . " " . $page_name;
+        }
+        elseif (!empty($page_name) && $page_name !== "Submitty") {
+            // $page_name !== "Submitty" is needed so we dont end up with pages with the title "Submitty Submitty"
+            $page_title = "Submitty " . $page_name;
         }
 
         $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"), true);
