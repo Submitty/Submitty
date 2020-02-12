@@ -1099,6 +1099,12 @@ function addMarkdownCode(type, divTitle){
         insert = "```" +
             "\ncode\n```";
     }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
@@ -1182,7 +1188,10 @@ function loadThreadHandler(){
                     $('#messages').append(message);
                     return;
                 }
-
+                if (typeof json.data.merged !== 'undefined') {
+                  window.location.replace(json.data.destination);
+                  return;
+                }
                 $(obj).find('.thread_box').removeClass('new_thread');
 
                 $('.thread_box').removeClass('active');

@@ -30,10 +30,7 @@
             <label for="forum-enabled">
                 <div class="option-title">Enable Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                {% if categories_empty %}
-                    <h4 id="forum-category-warning" class="red-message" {{ fields['forum_enabled'] ? '': 'hidden' }} >Categories must be created in order to use the Discussion Forum. Click the link below to add categories.</h4>
-                    <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
-                {% endif %}
+                <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
             </label>
         </div>
 
@@ -65,15 +62,6 @@
             </div>
         </label>
         <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" />
-
-        <div class="config-row checkbox-row">
-            <input type="checkbox" name="keep_previous_files" id="keep-previous-files" value="true" {{ fields['keep_previous_files'] ? 'checked' : '' }} />
-            <label for="keep-previous-files">
-                <div class="option-title">Keep previous files uploaded</div>
-                <div class="option-alt">Should the files from previous submission be in the upload box by default.</div>
-            </label>
-        </div>
-
         <fieldset class="config-row">
             <legend>
                 <div class="option-title">Version Control System (VCS) Type</div>

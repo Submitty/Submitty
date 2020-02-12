@@ -1579,40 +1579,6 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function changePermission(filename, checked) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filename,csrf_token: csrfToken},
-        success: function(data) {},
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
-function changeFolderPermission(filenames, checked,handleData) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
-        success: function(data) {
-            if(handleData){
-                handleData(data);
-            }
-        },
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
 function handleTimeZones(timezone) {
 
     var url = buildUrl(['server_time']);
@@ -1765,8 +1731,7 @@ function updateToTomorrowServerTime(fp) {
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1794,8 +1759,7 @@ function changeNewDateTime(filename, newdatatime,handleData) {
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1834,21 +1798,25 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
+        localStorage.setItem('sidebar', 'true');
         $("aside").toggleClass("collapsed", true);
     }
     else{
+        localStorage.setItem('sidebar', 'false');
         $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
-    localStorage.sidebar = !shown;
+    localStorage.setItem('sidebar', (!shown).toString());
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1870,16 +1838,16 @@ $(document).ready(function() {
     });
 
     //Remember sidebar preference
-    if (localStorage.sidebar !== "") {
-        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
+    if (localStorage.getItem('sidebar') !== "") {
+        $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
+        //Once the sidebar is set the page can be unhidden
+        $("#submitty-body").css('visibility', 'visible');
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
     $(document.body).resize(function() {
         checkSidebarCollapse();
     });
-    checkSidebarCollapse();
 });
 
 function checkBulkProgress(gradeable_id){

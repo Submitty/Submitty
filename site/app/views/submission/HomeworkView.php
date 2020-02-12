@@ -382,8 +382,10 @@ class HomeworkView extends AbstractView {
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
+            'gradeable_url' => $gradeable->getInstructionsUrl(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
+            'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_host_type' => $gradeable->getVcsHostType(),
@@ -750,6 +752,7 @@ class HomeworkView extends AbstractView {
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+        $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         $request_regrade_url = $this->core->buildCourseUrl([
             'gradeable',
@@ -857,6 +860,7 @@ class HomeworkView extends AbstractView {
             'g_id' => $graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
+            'is_inquiry_open' => $is_inquiry_open,
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'gradeable_components' => $components_twig_array,

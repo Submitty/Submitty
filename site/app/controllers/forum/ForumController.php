@@ -866,6 +866,9 @@ class ForumController extends AbstractController {
                 if ($thread['merged_thread_id'] != -1) {
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
+                    if (!empty($_REQUEST["ajax"])) {
+                        return $this->core->getOutput()->renderJsonSuccess(['merged' => true, 'destination' => $this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']])]);
+                    }
                     $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']]));
                     return;
                 }
@@ -933,6 +936,7 @@ class ForumController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/forum/categories", methods={"GET"})
+     * @AccessControl(permission="forum.modify_category")
      */
     public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());

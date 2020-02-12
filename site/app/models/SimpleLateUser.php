@@ -7,28 +7,28 @@ use app\libraries\DateUtils;
 
 class SimpleLateUser extends AbstractModel {
 
-    /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
+    /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
-    /** @property @var string The first name of the user */
+    /** @prop @var string The first name of the user */
     protected $legal_first_name;
-    /** @property @var string The preferred first name of the user if exists */
+    /** @prop @var string The preferred first name of the user if exists */
     protected $preferred_first_name = "";
-    /** @property @var  string The name to be displayed by the system (either preferred last name or legal first name) */
+    /** @prop @var  string The name to be displayed by the system (either preferred last name or legal first name) */
     protected $displayed_first_name;
-    /** @property @var string The last name of the user */
+    /** @prop @var string The last name of the user */
     protected $legal_last_name;
-    /** @property @var string The preferred last name of the user if exists */
+    /** @prop @var string The preferred last name of the user if exists */
     protected $preferred_last_name;
-    /** @property @var  string The name to be displayed by the system (either preferred last name or legal last name) */
+    /** @prop @var  string The name to be displayed by the system (either preferred last name or legal last name) */
     protected $displayed_last_name;
-    /** @property @var string The allowed late days of the user */
+    /** @prop @var string The allowed late days of the user */
     protected $allowed_late_days;
-    /** @property @var string The day late days are put into effect */
+    /** @prop @var string The day late days are put into effect */
     protected $since_timestamp;
-    /** @property @var string The extensions of a user (allowed late days for a specific homework) */
+    /** @prop @var string The extensions of a user (allowed late days for a specific homework) */
     protected $late_day_exceptions;
 
     /**

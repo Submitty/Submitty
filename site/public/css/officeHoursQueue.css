@@ -1,0 +1,50 @@
+/* Hides elements on the page before they have been fully loaded */
+.page_loading {
+    visibility: hidden;
+}
+
+.button-padding {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+td{
+  vertical-align: middle;
+}
+
+th{
+  vertical-align: middle;
+}
+
+/*
+  This will hide elements on phones. This is useful for extra content that
+  is not normally needed such as a user id
+*/
+@media only screen and (max-width: 479px) {
+
+    /* Put this on elements you dont need on mobile */
+    .mobile-hide {
+        display: none !important;
+    }
+
+    .finish_helping_btn{
+      white-space: normal;
+      width: 5rem;
+    }
+
+    .filter_settings_btn{
+      white-space: normal;
+      width: 4rem;
+    }
+
+    .content{
+      padding: 20px;
+    }
+}
+
+/* Put this on elements you dont need on desktop */
+@media only screen and (min-width: 480px) {
+    .desktop-hide {
+        display: none !important;
+    }
+}

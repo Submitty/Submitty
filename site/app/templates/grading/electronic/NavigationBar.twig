@@ -21,8 +21,11 @@
         <button title="Show/Hide Autograding Testcases (Press A)" class="invisible-btn" onclick="toggleAutograding(); updateCookies();"> <i class="fas fa-list icon-header" ></i> </button>
         <button title="Show/Hide Grading Rubric (Press G)" class="invisible-btn" onclick="toggleRubric(); updateCookies();"> <i class="fas fa-edit icon-header" ></i> </button>
         <button title="Show/Hide Submission and Results Browser (Press O)" class="invisible-btn" onclick="toggleSubmissions(); updateCookies();"> <i class="fas fa-folder-open icon-header" ></i> </button>
-        {% if not peer %}
+        {% if ((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) %}
             <button title="Show/Hide Student Information (Press S)" class="invisible-btn" onclick="toggleInfo(); updateCookies();"> <i class="fas fa-user icon-header" ></i> </button>
+        {% endif %}
+        {% if peer_gradeable and not i_am_a_peer %}
+        <button title="Show/Hide Peer Information (Press P)" class="invisible-btn" onclick="togglePeer(); updateCookies();"> <i class="fas fa-users icon-header" ></i> </button>
         {% endif %}
         {% if discussion_based %}
             <button title="Show/Hide Discussion Posts" class="invisible-btn" onclick="toggleDiscussion(); updateCookies();"> <i class="fas fa-comment-alt icon-header" ></i> </button>

@@ -5,8 +5,8 @@ Evan Maicus 2016-current
 
 ## Developers
 
-Eli Schiff 2019-current
-Ben Kelly 2019-current
+Eli Schiff 2019-current  
+Ben Kelly 2019-current  
 Saketh Dargula 2019-current  
 Kevin McKinney 2019-current  
 Jacob McKnight 2019-current  
