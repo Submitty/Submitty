@@ -87,12 +87,47 @@ function setUpLeftPane(editor0, editor1) {
     }
 }
 
-function setUpPlagView() {
-    var editor0 = $('.CodeMirror')[0].CodeMirror;
-    var editor1 = $('.CodeMirror')[1].CodeMirror;
+
+
+function setUpPlagView(gradeable_id) {
+
+	var form = $("#users_with_plagiarism");
+    var editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+
+    editor0.setSize("100%", "100%");
+    editor1.setSize("100%", "100%");
+
+    $('[name="user_id_1"]', form).change(function(){
+        setUserSubmittedCode(gradeable_id,'user_id_1');
+    });
+    $('[name="version_user_1"]', form).change(function(){
+        setUserSubmittedCode(gradeable_id, 'version_user_1');
+    });
+    $('[name="user_id_2"]', form).change(function(){
+        setUserSubmittedCode(gradeable_id, 'user_id_2');
+    });
+
+    // $(document).click(function() {
+    //     if($('#popup_to_show_matches_id').css('display') == 'block'){
+    //         $('#popup_to_show_matches_id').css('display', 'none');
+    //     }
+    // });
 
 
 }
+
+function 
 
 function setUserSubmittedCode(gradeable_id, changed) {
     var form = $("#users_with_plagiarism");
@@ -192,16 +227,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                            for(var users_color in data.ci) {
-                            //console.log(data.ci[users_color]);
-                            for(var pos in data.ci[users_color]) {
-                                var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
-                            }
-                        }
-                        	$('.CodeMirror')[0].CodeMirror.refresh();
-                            //$('[name="code_box_1"]').empty().append(data.display_code1);
+                            colorEditors(data);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -224,7 +250,6 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
                             $('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
                             var code_mirror = 0;
-                            console.log(data.ci);
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
@@ -360,55 +385,3 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
     })
 }
 
-function toggleUsersPlagiarism(gradeable_id) {
-    var form = $("#users_with_plagiarism");
-    "#set-folder-release-form"
-    var user_id_1 = $('[name="user_id_1"]', form).val();
-    var version_user_1 = $('[name="version_user_1"]', form).val();
-
-    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form).val() == '') return;
-
-    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
-    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-    $('[name="user_id_1"]', form).val(user_id_2);
-    jQuery.ajaxSetup({async:false});
-    setUserSubmittedCode(gradeable_id ,'user_id_1');
-    $('[name="version_user_1"]', form).val(version_user_2);
-    setUserSubmittedCode(gradeable_id, 'version_user_1');
-    $('[name="user_id_2"]', form).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
-    jQuery.ajaxSetup({async:true});
-    setUserSubmittedCode(gradeable_id, 'user_id_2');
-}
-
-
-
-var form = $("#users_with_plagiarism");
-    var code_user_1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
-        lineNumbers: true,
-        readOnly: true,
-        cursorHeight: 0.0,
-        lineWrapping: true
-    });
-    var code_user_2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
-        lineNumbers: true,
-        readOnly: true,
-        cursorHeight: 0.0,
-        lineWrapping: true
-    });
-
-    code_user_2.setSize("100%", "100%");
-    code_user_1.setSize("100%", "100%");
-    $('[name="user_id_1"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}','user_id_1');
-    });
-    $('[name="version_user_1"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}', 'version_user_1');
-    });
-    $('[name="user_id_2"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}', 'user_id_2');
-    });
-    $(document).click(function() {
-        if($('#popup_to_show_matches_id').css('display') == 'block'){
-            $('#popup_to_show_matches_id').css('display', 'none');
-        }
-    });
