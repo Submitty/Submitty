@@ -10,7 +10,8 @@
         <div class="component-container edit-component-container">
             {% include "EditComponent.twig" with {
                 'precision': gradeable.precision,
-                'show_mark_list': false
+                'show_mark_list': false,
+                'peer_component' : component.peer,
             } %}
         </div>
     {% endfor %}

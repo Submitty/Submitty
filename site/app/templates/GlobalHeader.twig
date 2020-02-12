@@ -59,10 +59,10 @@
             }
         }
 
+        var onAjaxInit;
     </script>
 
 </head>
-<script>var onAjaxInit;</script>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <a id="skip-nav" href="#main">Skip to main content</a>
     {% if wrapper_urls['top_bar.html'] != null %}
