@@ -31,16 +31,20 @@ function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
     render(gradeable_id, user_id, "", file_name, file_path, 1, pdf_url)
 }
 
-function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url) {
+function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = "") {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,
         user_id: user_id,
         gradeable_id: gradeable_id,
-        file_name: file_name
+        file_name: file_name,
+        file_path: file_path
     }
     window.RENDER_OPTIONS.documentId = file_name;
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
     window.RENDER_OPTIONS.userId = grader_id;
+    if (url === "") {
+        url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
+    }
     $.ajax({
         type: 'POST',
         url: url,
