@@ -54,27 +54,25 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students) %}
+{% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students) %}
     {# Files on top #}
         {% for dir, path in files|filter((path,dir) => path is not iterable) %}
-            {% if userGroup != 4 or fileShares[path] == "1" %}
-                {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
-            {% endif %}
+            {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
         {% endfor %}
 
         {# Directories underneath #}
         {% for dir, path in files if path is iterable %}
-            {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+            {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
         {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+{% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
     <script>
@@ -100,9 +98,9 @@
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}" aria-label="Pop up {{ dir }} in a new window"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}"><i class="fas fa-download" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
                <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
@@ -112,15 +110,15 @@
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
                     {% if this_hide_from_students == "on" %}
-                        <label>Sections (Hidden): 
+                        <label>Sections (Hidden):
                         {{this_file_section|join(',')}}
                         </label>
                     {% else %}
-                        <label>Sections: 
+                        <label>Sections:
                         {{this_file_section|join(',')}}
                         </label>
                     {% endif %}
-                    
+
                 {% endif %}
                 
                 <script>
@@ -197,7 +195,6 @@
                     onClose: function() {
                                             setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
                                             determineRelease('date_to_release_{{ id }}');
-                                            changePermission('{{ path }}','1');
                                          }
                     });
                 </script>
@@ -208,9 +205,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+{% macro display_dir(self, dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
+        {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
         ) }}
     {% else %}
     <div>
@@ -221,10 +218,10 @@
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
-            <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the folder"></i></a>
+            <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}"><i class="fas fa-download" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
                 <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{dir}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-               <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                 [{% for file in inDir %}
@@ -239,7 +236,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+            {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
 
         </div>
     </div>
@@ -349,17 +346,6 @@
         });
         }
     };
-
-    function shareToOther(id, path) {
-        // pass filename to server to record the permission of the file
-        var idName = "#share_checkbox_" + id;
-        if($(idName).is(':checked')) {
-            changePermission(path, '1');
-        }
-        else {
-            changePermission(path, '0');
-        }
-    }
 
 </script>
 

@@ -24,22 +24,22 @@ use app\exceptions\IOException;
 class GradedGradeable extends AbstractModel {
     /** @var Gradeable Reference to gradeable */
     private $gradeable = null;
-    /** @property @var string Id of the gradeable this grade is attached to */
+    /** @prop @var string Id of the gradeable this grade is attached to */
     protected $gradeable_id = "";
 
-    /** @property @var Submitter The submitter who received this graded gradeable */
+    /** @prop @var Submitter The submitter who received this graded gradeable */
     protected $submitter = null;
-    /** @property @var TaGradedGradeable|null The TA Grading info or null if it doesn't exist  */
+    /** @prop @var TaGradedGradeable|null The TA Grading info or null if it doesn't exist  */
     protected $ta_graded_gradeable = null;
-    /** @property @var AutoGradedGradeable The Autograding info */
+    /** @prop @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @property @var array The grade inquiries for this submitter/gradeable  */
+    /** @prop @var array The grade inquiries for this submitter/gradeable  */
     protected $regrade_requests = [];
 
-    /** @property @var array The late day exceptions indexed by user id */
+    /** @prop @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
 
-    /** @property @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
+    /** @prop @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
     protected $overridden_grades = false;
 
     /**

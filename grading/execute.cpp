@@ -14,6 +14,8 @@
 #include <cassert>
 #include <map>
 #include <set>
+#include <chrono>
+#include <iomanip>
 
 // for system call filtering
 #include <seccomp.h>
@@ -816,18 +818,65 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config) {
+int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config,
+                      std::string program_name, const nlohmann::json &test_case_limits, 
+                      const nlohmann::json &assignment_limits, const bool timestamped_stdout) {
 
-  // to avoid creating extra layers of processes, use exec and not
-  // system or the shell
+  /*************************************************
+  * 
+  * COMMAND LINE PARSING
+  *
+  **************************************************/
+  
+  // the default umask is 0027, so we need edit so that we can make
+  // these files 'other read', so that we can read them when we switch
+  // users
+  mode_t everyone_read = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+  mode_t prior_umask = umask(S_IWGRP | S_IWOTH);  // save the prior umask
 
-  // first we need to parse the command line
+
   std::string my_program;
   std::vector<std::string> my_args;
   std::string my_stdin;
   std::string my_stdout;
   std::string my_stderr;
   parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile, whole_config);
+
+
+
+  // SECCOMP:  Used to restrict allowable system calls.
+  // First we determine if the program we will run is a 64 or 32 bit
+  // executable (the system calls are different on 64 vs. 32 bit)
+  Elf64_Ehdr elf_hdr;
+  // std::cout << "reading " <<  my_program << std::endl;
+  int fd = open(my_program.c_str(), O_RDONLY);
+  if (fd == -1) {
+    //perror("can't open");
+    // std::cout << "ERROR: cannot open program '" << my_program << '"' << std::endl;
+    exit(1);
+  }
+  int res = read(fd, &elf_hdr, sizeof(elf_hdr));
+  if (res < sizeof(elf_hdr)) {
+    // perror("can't read ");
+    // std::cout << "ERROR: cannot read program" << std::endl;
+    exit(1);
+  }
+  int prog_is_32bit;
+  if (elf_hdr.e_machine == EM_386) {
+    // std::cout << "this is a 32 bit program" << std::endl;
+    prog_is_32bit = 1;
+  }
+  else {
+    // std::cout << "this is a 64 bit program" << std::endl;
+    prog_is_32bit = 0;
+  }
+  // END SECCOMP
+
+  //if (SECCOMP_ENABLED != 0) {
+  // std::cout << "seccomp filter enabled" << std::endl;
+  //} else {
+  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  // }
 
 
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
@@ -851,63 +900,94 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   std::cout << std::endl;
 
 
-  // SECCOMP:  Used to restrict allowable system calls.
-  // First we determine if the program we will run is a 64 or 32 bit
-  // executable (the system calls are different on 64 vs. 32 bit)
-  Elf64_Ehdr elf_hdr;
-  std::cout << "reading " <<  my_program << std::endl;
-  int fd = open(my_program.c_str(), O_RDONLY);
-  if (fd == -1) {
-    //perror("can't open");
-    logfile << "ERROR: cannot open program '" << my_program << '"' << std::endl;
-    std::cout << "ERROR: cannot open program '" << my_program << '"' << std::endl;
-    exit(1);
+  /*************************************************
+  * 
+  * APPLY RLIMITS / SET PROCESS GROUP
+  *
+  **************************************************/
+
+  enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
+
+  // Student's shouldn't be forking & making threads/processes...
+  // but if they do, let's set them in the same process group
+  int pgrp = setpgid(getpid(), 0);
+  assert(pgrp == 0);
+
+  /*************************************************
+  * 
+  * REDIRECT STDIN/OUT/ERR
+  *
+  **************************************************/
+
+  // FIXME: if we want to assert or print stuff afterward, we should save
+  // the originals and restore after the exec fails.
+  if (my_stdin != "") {
+    std::cout << "PIPED STDIN FILE DETECTED. DISPATCHER ACTIONS WILL BE IGNORED." << std::endl;
+    int new_stdinfd  = open(my_stdin.c_str()  , O_RDONLY );
+    int stdinfd = fileno(stdin);
+    close(stdinfd);
+    dup2(new_stdinfd, stdinfd);
   }
-  int res = read(fd, &elf_hdr, sizeof(elf_hdr));
-  if (res < sizeof(elf_hdr)) {
-    perror("can't read ");
-    std::cerr << "ERROR: cannot read program" << std::endl;
-    exit(1);
+
+  int my_pipe[2];
+  int stdoutfd = fileno(stdout);
+  int pid = -1;
+  int READ_END = 0;
+  int WRITE_END = 1;
+
+  if (my_stdout != "") {
+    // If we aren't timestamping, STDOUT goes straight to a file.
+    if(!timestamped_stdout){
+      int new_stdoutfd = open(my_stdout.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
+      close(stdoutfd);
+      dup2(new_stdoutfd, stdoutfd);
+    }
+    // If we ARE timestamping, we send our stdout to a pipe for processing by a child process.
+    else{
+      pipe(my_pipe);
+      pid = fork();
+      // If we are the child
+      if(pid == 0){
+        close(my_pipe[WRITE_END]);
+        timestamp_stdout( my_stdout, my_pipe[READ_END]);      
+      }
+    }
+    
+
   }
-  int prog_is_32bit;
-  if (elf_hdr.e_machine == EM_386) {
-    std::cout << "this is a 32 bit program" << std::endl;
-    prog_is_32bit = 1;
+  if (my_stderr != "") {
+    int new_stderrfd = open(my_stderr.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
+                     //creat(my_stderr.c_str(), everyone_read );
+    int stderrfd = fileno(stderr);
+    close(stderrfd);
+    dup2(new_stderrfd, stderrfd);
   }
-  else {
-    std::cout << "this is a 64 bit program" << std::endl;
-    prog_is_32bit = 0;
-  }
-  // END SECCOMP
+
+  
+
+  
+
+  
 
 
+  /*************************************************
+  * 
+  * SET UP THE PATH
+  *
+  **************************************************/
 
-
-
-  //if (SECCOMP_ENABLED != 0) {
-  std::cout << "seccomp filter enabled" << std::endl;
-  //} else {
-  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
-  // }
-
-
-  // the default umask is 0027, so we need edit so that we can make
-  // these files 'other read', so that we can read them when we switch
-  // users
-  mode_t everyone_read = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-  mode_t prior_umask = umask(S_IWGRP | S_IWOTH);  // save the prior umask
 
   // The path is probably empty, we need to add /usr/bin to the path
   // since we get a "collect2 ld not found" error from g++ otherwise
   char* my_path = getenv("PATH");
   if (my_path != NULL) {
-    std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
+    // std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
   setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
 
   my_path = getenv("PATH");
 
-  std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+  // std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
   // symbol) are not interpreted as ascii
@@ -936,48 +1016,49 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
-  std::cout << "going to install syscall filter for " << my_program << std::endl;
+  // std::cout << "going to install syscall filter for " << my_program << std::endl;
   //}
 
-
-  // FIXME: if we want to assert or print stuff afterward, we should save
-  // the originals and restore after the exec fails.
-  if (my_stdin != "") {
-    std::cout << "PIPED STDIN FILE DETECTED. DISPATCHER ACTIONS WILL BE IGNORED." << std::endl;
-    int new_stdinfd  = open(my_stdin.c_str()  , O_RDONLY );
-    int stdinfd = fileno(stdin);
-    close(stdinfd);
-    dup2(new_stdinfd, stdinfd);
-  }
-  if (my_stdout != "") {
-    int new_stdoutfd = open(my_stdout.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
-                     //creat(my_stdout.c_str(), everyone_read );
-    int stdoutfd = fileno(stdout);
-    close(stdoutfd);
-    dup2(new_stdoutfd, stdoutfd);
-  }
-  if (my_stderr != "") {
-    int new_stderrfd = open(my_stderr.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
-                     //creat(my_stderr.c_str(), everyone_read );
-    int stderrfd = fileno(stderr);
-    close(stderrfd);
-    dup2(new_stderrfd, stderrfd);
-  }
-  
+  /*************************************************
+  * 
+  * APPLY SECCOMP
+  *
+  **************************************************/
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
-    std::cout << "seccomp filter install failed" << std::endl;
+    logfile << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // END SECCOMP
 
+
+  /*************************************************
+  * 
+  * RUN (execv) THE STUDENT CODE
+  *
+  **************************************************/
+
+  if(timestamped_stdout){
+    close(my_pipe[READ_END]);
+    close(stdoutfd);
+    dup2(my_pipe[WRITE_END], stdoutfd);
+  }
+
+
+
+  // TO AVOID CREATING EXTRA LAYERS OF PROCESSES, USE EXEC RATHER THAN SYSTEM OR THE SHELL
   int child_result =  execv ( my_program.c_str(), my_char_args );
   
 
   // if exec does not fail, we'll never get here
 
   umask(prior_umask);  // reset to the prior umask
+  //Stop the timestamp process if it exists.
+  if(pid != -1 && timestamped_stdout){
+    close(my_pipe[WRITE_END]);
+    close(stdoutfd);
+  }
 
   return child_result;
 }
@@ -1071,6 +1152,68 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
   std::cout << "exiting thread function" << std::endl;
 }
 
+// From https://gist.github.com/bschlinker/844a88c09dcf7a61f6a8df1e52af7730
+std::string getTimestamp() {
+  // get a precise timestamp as a string
+  const auto now = std::chrono::system_clock::now();
+  const auto nowAsTimeT = std::chrono::system_clock::to_time_t(now);
+  const auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+      now.time_since_epoch()) % 1000;
+  std::stringstream nowSs;
+  nowSs
+      << std::put_time(std::localtime(&nowAsTimeT), "%m/%d/%y %T")
+      << '.' << std::setfill('0') << std::setw(3) << nowMs.count() << " ";
+  return nowSs.str();
+}
+
+//Thread function for timestamping stdout
+void timestamp_stdout(std::string filename, int pipe){
+
+  std::ofstream stdout_file;
+  std::ofstream timestamped_stdout;
+
+  stdout_file.open (filename.c_str());
+
+  size_t pos = filename.find(".txt");
+  filename.erase(pos, filename.length());
+  std::string timestamped_filename = filename + "_TIMESTAMPED.txt";
+  timestamped_stdout.open (timestamped_filename.c_str());
+
+  try
+  {
+    char ch;
+    std::string s;
+    FILE *stream = fdopen (pipe, "r");
+    while ((ch = fgetc (stream)) != EOF){
+      if (ch != '\n')
+          s.push_back(ch);
+      else
+      {
+        stdout_file << s << std::endl;
+        timestamped_stdout << getTimestamp() << s  << std::endl;
+        s.clear();
+      }
+    }
+    //Make sure we're not leaving anything in the buffer
+    if(s.length() > 0){
+      stdout_file << s << std::endl;
+      timestamped_stdout << getTimestamp() << s  << std::endl;
+    }
+    fclose (stream);
+  }
+  catch (const std::exception &exc)
+  {
+      std::cout << "Exception thrown" << std::endl;
+      // catch anything thrown within try block that derives from std::exception
+      std::cout << exc.what();
+  }
+
+
+  stdout_file.close();
+  timestamped_stdout.close();
+  exit(0);
+}
+
 
 // Executes command (from shell) and returns error code (0 = success)
 int execute(const std::string &cmd,
@@ -1081,7 +1224,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
       const bool windowed,
-      const std::string display_variable2) {
+      const std::string display_variable2,
+      const bool timestamped_stdout) {
 
   
   std::string display_variable = display_variable2;
@@ -1150,13 +1294,6 @@ int execute(const std::string &cmd,
   int allowed_rss_memory = get_the_limit(program_name,RLIMIT_RSS,test_case_limits,assignment_limits);
 
   if (childPID == 0) {
-    // CHILD PROCESS
-    enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
-
-    // Student's shouldn't be forking & making threads/processes...
-    // but if they do, let's set them in the same process group
-    int pgrp = setpgid(getpid(), 0);
-    assert(pgrp == 0);
 
     if(num_dispatched_actions > 0){
       close(dispatcherpipe[1]); //close write end of the pipe
@@ -1164,8 +1301,7 @@ int execute(const std::string &cmd,
       dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
       close(dispatcherpipe[0]); // close read end of the pipe
     }
-    int child_result;
-    child_result = exec_this_command(cmd,logfile,whole_config);
+    int child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits, timestamped_stdout);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -1230,7 +1366,7 @@ int execute(const std::string &cmd,
 
               if (childPID == 0) {
                 // CHILD PROCESS
-                enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
+                //enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
 
                 // Student's shouldn't be forking & making threads/processes...
                 // but if they do, let's set them in the same process group
@@ -1244,7 +1380,7 @@ int execute(const std::string &cmd,
                   close(dispatcherpipe[0]); // close read end of the pipe
                 }
                 int child_result;
-                child_result = exec_this_command(cmd,logfile,whole_config);
+                child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits,timestamped_stdout);
 
                 // send the system status code back to the parent process
                 //std::cout << "    child_result = " << child_result << std::endl;

@@ -79,8 +79,8 @@
 }
 
 .icon-selected.fa-comment-alt {
-    box-shadow: 0px 0px 3px 3px var(--standard-plum-purple);
-    background-color: var(--standard-plum-purple);
+    box-shadow: 0px 0px 3px 3px var(--standard-light-seafoam);
+    background-color: var(--standard-light-seafoam);
 }
 
 .icon-files {
@@ -106,11 +106,14 @@
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
+.icon-selected.fa-users {
+    box-shadow: 0px 0px 3px 3px var(--standard-plum-purple);
+    background-color: var(--standard-plum-purple);
+}
 .icon-selected.grade_inquiry_icon{
     box-shadow: 0px 0px 3px 3px var(--standard-vibrant-orange);
     background-color: var(--standard-vibrant-orange);
 }
-
 .icon-header {
     text-align: center;
     width: 1em;
@@ -201,6 +204,9 @@ progress::-webkit-progress-value {
 }
 #student_info.rubric_panel {
     border:5px solid var(--text-black);
+}
+#peer_info.rubric_panel {
+    border:5px solid var(--standard-plum-purple);
 }
 
 .grading_label {
@@ -403,6 +409,10 @@ tr.is_publish {
 
 .gradeable .component {
     cursor: default;
+}
+
+.gradeable .peer-border {
+    border: 3px solid var(--standard-plum-purple);
 }
 
 .gradeable .component .badge-container.edit-mode {
@@ -779,7 +789,7 @@ tr.is_publish {
 }
 
 #discussion_browser.rubric_panel {
-    border:5px solid #72518a;
+    border:5px solid var(--standard-light-seafoam);
 }
 
 #directory_view {

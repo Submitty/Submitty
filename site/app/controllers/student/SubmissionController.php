@@ -7,6 +7,9 @@ use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\Response;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
@@ -134,6 +137,7 @@ class SubmissionController extends AbstractController {
                 $show_hidden = false;
                 if ($graded_gradeable != null) {
                     $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    // can this user access grade inquiries for this graded_gradeable
                     $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 }
 
@@ -508,7 +512,7 @@ class SubmissionController extends AbstractController {
                 }
                 catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
-                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
+                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . ($leader_user !== null ? $leader_user->getId() : ''), false);
                 }
 
                 // Once team is created, load in the graded gradeable
@@ -1350,15 +1354,18 @@ class SubmissionController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
      */
-    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null) {
+    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): Response {
         $ta = $ta === "true" ?? false;
         if ($ta !== false) {
             // make sure is full grader
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                $this->core->redirect($this->core->buildCourseUrl());
-                return $this->core->getOutput()->renderJsonFail($msg);
+                return new Response(
+                    JsonResponse::getFailResponse($msg),
+                    null,
+                    new RedirectResponse($this->core->buildCourseUrl())
+                );
             }
             $ta = true;
         }
@@ -1367,8 +1374,11 @@ class SubmissionController extends AbstractController {
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildCourseUrl());
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl())
+            );
         }
 
         $who = $who ?? $this->core->getUser()->getId();
@@ -1379,31 +1389,43 @@ class SubmissionController extends AbstractController {
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildCourseUrl());
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($url)
+            );
         }
 
         $new_version = intval($new_version);
         if ($new_version < 0) {
             $msg = "Cannot set the version below 0.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($url);
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($url)
+            );
         }
 
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         if ($new_version > $highest_version) {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($url);
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($url)
+            );
         }
 
         if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($url);
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($url)
+            );
         }
 
         $original_user_id = $this->core->getUser()->getId();
@@ -1420,8 +1442,11 @@ class SubmissionController extends AbstractController {
         if ($json === false) {
             $msg = "Failed to open settings file.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($url);
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($url)
+            );
         }
         $json["active_version"] = $new_version;
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
@@ -1432,8 +1457,11 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]))
+            );
         }
 
         $version = ($new_version > 0) ? $new_version : null;
@@ -1455,15 +1483,22 @@ class SubmissionController extends AbstractController {
             $msg = "Updated version of gradeable to version #{$new_version}.";
             $this->core->addSuccessMessage($msg);
         }
+
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]);
         if ($ta) {
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?'
-                . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
-        }
-        else {
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]));
+            $url = $this->core->buildCourseUrl([
+                'gradeable',
+                $graded_gradeable->getGradeableId(),
+                'grading',
+                'grade'
+            ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
         }
 
-        return $this->core->getOutput()->renderJsonSuccess(['version' => $new_version, 'message' => $msg]);
+        return new Response(
+            JsonResponse::getSuccessResponse(['version' => $new_version, 'message' => $msg]),
+            null,
+            new RedirectResponse($url)
+        );
     }
 
     /**

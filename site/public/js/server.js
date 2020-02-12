@@ -158,6 +158,7 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
+    captureTabInModal("delete-gradeable-form");
 }
 
 function displayCloseSubmissionsWarning(form_action,gradeable_name) {
@@ -167,6 +168,7 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
+    captureTabInModal("close-submissions-form");
 }
 
 function newDeleteCourseMaterialForm(path, file_name) {
@@ -192,12 +194,14 @@ function newDeleteCourseMaterialForm(path, file_name) {
     $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
+    captureTabInModal("delete-course-material-form");
 }
 
 function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
     form.css("display", "block");
+    captureTabInModal("upload-images-form");
     $('[name="upload"]', form).val(null);
 }
 
@@ -215,12 +219,12 @@ function newUploadCourseMaterialsForm() {
     }
 
     $('.popup-form').css('display', 'none');
-    var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
-
+    var form = $("#upload-course-materials-form");
     form.css("display", "block");
+    captureTabInModal("upload-course-materials-form");
     $('[name="upload"]', form).val(null);
 
 }
@@ -258,6 +262,40 @@ function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_stude
     }
     $("#material-edit-form", form).attr('data-directory', dir);
     form.css("display", "block");
+
+  function captureTabInModal(formName){
+    
+    var form = $("#".concat(formName));
+    
+    /*get all the elements to tab through*/
+    var inputs = form.find(':focusable').filter(':visible');
+    var firstInput = inputs.first();
+    var lastInput = inputs.last();
+
+    /*set focus on first element*/
+    firstInput.focus();
+
+    /*redirect last tab to first element*/
+    form.on('keydown', function (e) {
+        if ((e.which === 9 && !e.shiftKey && $(lastInput).is(':focus'))) {
+            firstInput.focus();
+            e.preventDefault();
+        }
+        else if ((e.which === 9 && e.shiftKey && $(firstInput).is(':focus'))) {
+            lastInput.focus();
+            e.preventDefault();
+        }
+    });
+    
+    form.on('hidden.bs.modal', function () {
+        releaseTabFromModal(formName);
+    })
+}
+
+function releaseTabFromModal(formName){
+    
+    var form = $("#".concat(formName));
+    form.off('keydown');
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
@@ -265,8 +303,9 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     $('.popup-form').css('display', 'none');
 
     var form = $("#set-folder-release-form");
-
     form.css("display", "block");
+
+    captureTabInModal("set-folder-release-form");
 
     $('[id="release_title"]',form).attr('data-path',changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
@@ -285,6 +324,7 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
     $('[name="gradeable_title"]', form).append(gradeable_title);
     $('[name="delete"]', form).attr('action', form_action);
     form.css("display", "block");
+    captureTabInModal("delete-plagiarism-result-and-config-form");
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
@@ -587,6 +627,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
 
 function toggleUsersPlagiarism(gradeable_id) {
     var form = $("#users_with_plagiarism");
+    "#set-folder-release-form"
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
 
@@ -805,6 +846,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
+    captureTabInModal("admin-team-form");
 
     $("#admin-team-form-submit").prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
@@ -929,7 +971,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     });
     var param = (new_team ? 3 : members.length+2);
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
 }
 
@@ -960,7 +1002,7 @@ function addTeamMemberInput(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -974,7 +1016,7 @@ function addCategory(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -986,6 +1028,7 @@ function importTeamForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#import-team-form");
     form.css("display", "block");
+    captureTabInModal("import-team-form");
     $('[name="upload_team"]', form).val(null);
 }
 
@@ -994,6 +1037,7 @@ function randomizeRotatingGroupsButton() {
     $('.popup-form').css('display', 'none');
     var form = $("#randomize-button-warning");
     form.css("display", "block");
+    captureTabInModal("randomize-button-warning");
 }
 
 
@@ -1569,40 +1613,6 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function changePermission(filename, checked) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filename,csrf_token: csrfToken},
-        success: function(data) {},
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
-function changeFolderPermission(filenames, checked,handleData) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
-        success: function(data) {
-            if(handleData){
-                handleData(data);
-            }
-        },
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
 function handleTimeZones(timezone) {
 
     var url = buildUrl(['server_time']);
@@ -1755,8 +1765,7 @@ function updateToTomorrowServerTime(fp) {
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1784,8 +1793,7 @@ function changeNewDateTime(filename, newdatatime,handleData) {
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1824,21 +1832,25 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
+        localStorage.setItem('sidebar', 'true');
         $("aside").toggleClass("collapsed", true);
     }
     else{
+        localStorage.setItem('sidebar', 'false');
         $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
+    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
-    localStorage.sidebar = !shown;
+    localStorage.setItem('sidebar', (!shown).toString());
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1860,16 +1872,16 @@ $(document).ready(function() {
     });
 
     //Remember sidebar preference
-    if (localStorage.sidebar !== "") {
-        //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
+    if (localStorage.getItem('sidebar') !== "") {
+        $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
+        //Once the sidebar is set the page can be unhidden
+        $("#submitty-body").css('visibility', 'visible');
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
     $(document.body).resize(function() {
         checkSidebarCollapse();
     });
-    checkSidebarCollapse();
 });
 
 function checkBulkProgress(gradeable_id){

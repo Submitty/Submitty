@@ -27,6 +27,7 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
+     * @Route("/api/{_semester}/{_course}/config", methods={"GET"})
      * @Route("/{_semester}/{_course}/config", methods={"GET"})
      * @return Response
      */
@@ -38,7 +39,6 @@ class ConfigurationController extends AbstractController {
             'default_student_late_days'      => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'             => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'                 => $this->core->getConfig()->getUploadMessage(),
-            'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'         => $this->core->getConfig()->displayCustomMessage(),
             'course_email'                   => $this->core->getConfig()->getCourseEmail(),
@@ -50,30 +50,49 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'submitty_admin_user'            => $this->core->getConfig()->getSubmittyAdminUser(),
-            'submitty_admin_user_verified'   => $this->core->getConfig()->isSubmittyAdminUserVerified(),
-            'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
         );
-        $categoriesCreated = empty($this->core->getQueries()->getCategories());
+        $seating_options = $this->getGradeableSeatingOptions();
+        $admin_in_course = false;
+        if ($this->core->getConfig()->isSubmittyAdminUserVerified()) {
+            $admin_in_course =  $this->core->getQueries()->checkIsInstructorInCourse(
+                $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
+                $this->core->getConfig()->getCourse(),
+                $this->core->getConfig()->getSemester()
+            );
+        }
 
         return new Response(
-            JsonResponse::getSuccessResponse($fields),
+            JsonResponse::getSuccessResponse([
+                'config' => $fields,
+                'gradeable_seating_options' => $seating_options,
+                'email_enabled' => $this->core->getConfig()->isEmailEnabled(),
+                'submitty_admin_user' => [
+                    'user_id' => $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
+                    'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
+                    'in_course' => $admin_in_course,
+                ]
+            ]),
             new WebResponse(
                 ConfigurationView::class,
                 'viewConfig',
                 $fields,
-                $this->getGradeableSeatingOptions(),
-                $categoriesCreated,
+                $seating_options,
                 $this->core->getConfig()->isEmailEnabled(),
+                [
+                    'user_id' => $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
+                    'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
+                    'in_course' => $admin_in_course,
+                ],
                 $this->core->getCsrfToken()
             )
         );
     }
 
     /**
-     * @Route("/{_semester}/{_course}/config/update", methods={"POST"})
+     * @Route("/api/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/{_semester}/{_course}/config", methods={"POST"})
      * @return Response
      */
     public function updateConfiguration(): Response {
@@ -116,7 +135,6 @@ class ConfigurationController extends AbstractController {
                 $name,
                 [
                     'zero_rubric_grades',
-                    'keep_previous_files',
                     'display_rainbow_grades_summary',
                     'display_custom_message',
                     'forum_enabled',
@@ -129,7 +147,6 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name === 'queue_enabled') {
             $entry = $entry === "true" ? true : false;
-            $this->core->getQueries()->genQueueSettings();
         }
         elseif ($name === 'upload_message') {
             $entry = nl2br($entry);
@@ -163,29 +180,29 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true" ? true : false;
         }
 
-        if ($name === 'forum_enabled') {
-            if ($entry == 1) {
-                if ($this->core->getAccess()->canI("forum.modify_category")) {
-                    $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
-                    $rows = $this->core->getQueries()->getCategories();
-
-                    foreach ($categories as $category) {
-                        if (ForumUtils::isValidCategories($rows, -1, array($category))) {
-                            $this->core->getQueries()->addNewCategory($category);
-                        }
-                    }
+        if ($name === 'forum_enabled' && $entry == 1) {
+            // Only create default categories when there is no existing categories (only happens when first enabled)
+            if (empty($this->core->getQueries()->getCategories())) {
+                $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
+                foreach ($categories as $category) {
+                    $this->core->getQueries()->addNewCategory($category);
                 }
             }
         }
 
-        $config_ini = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_ini['course_details'][$name])) {
+        $config_json = $this->core->getConfig()->getCourseJson();
+        if (!isset($config_json['course_details'][$name])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );
         }
-        $config_ini['course_details'][$name] = $entry;
-        $this->core->getConfig()->saveCourseJson(['course_details' => $config_ini['course_details']]);
+        $config_json['course_details'][$name] = $entry;
+
+        if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Could not save config file')
+            );
+        }
 
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
@@ -201,14 +218,6 @@ class ConfigurationController extends AbstractController {
             return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
         });
 
-        // This needs to be -1 or it will default to 0 and clobber g_id 0
-        // if that gradeable is in $gradeable_seating_options
-        // during the concatenation in return (which is basically array_merge).
-        $empty_option = [-1 => [
-            'g_id' => "",
-            'g_title' => "--None--"
-        ]];
-
-        return $empty_option + $gradeable_seating_options;
+        return array_merge([['g_id' => '', 'g_title' => '--None--']], $gradeable_seating_options);
     }
 }

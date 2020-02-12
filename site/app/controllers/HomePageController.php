@@ -78,10 +78,11 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @param $user_id
-     * @param $as_instructor
      * @Route("/api/courses", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
+     *
+     * @param string|null $user_id
+     * @param bool|string $as_instructor
      * @return Response
      */
     public function getCourses($user_id = null, $as_instructor = false) {
@@ -97,7 +98,7 @@ class HomePageController extends AbstractController {
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
 
-        // Filter out any courses a student has dropped so they do not appear on the homepage.
+        // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
         foreach (['archived_courses', 'unarchived_courses'] as $var) {
             $$var = array_filter($$var, function (Course $course) use ($user_id, $as_instructor) {

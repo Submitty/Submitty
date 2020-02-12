@@ -1,0 +1,81 @@
+{% extends "Component.twig" %}
+{#
+Required inputs:
+    component: {id, title, ta_comment, student_comment, page, max_value}
+    graded_component: {graders, marksassigned}
+    peer_details: {graders, marks_assigned}
+
+    show_verify_grader = can_verify and grader_id is defined and grader_id != your_user_id
+    {{ functions.getBadgeStyle(graded_component.total_score, component.max_value) }}
+#}
+
+{% set show_verify_grader = false %}
+
+{% block header_block %}
+    {% include 'PeerComponentHeader.twig' with {
+        'peer_score': graded_gradeable.peer_scores[component.id],
+    } %}
+{% endblock %}
+
+{% block content_block %}
+{% endblock %}
+
+{% block marks_block %}
+{% endblock %}
+
+{% block extra_mark_rows %}
+{% endblock %}
+
+{% block mark_list_footer %}
+    {# Component is closed, so show just the received marks #}
+    {% if not show_mark_list %}
+        <div class="container">
+            <div class="row divider"></div>
+        </div>
+        <div class="received-marks-list container">
+            {# Header row with the name of each grader #}
+            <table id="peer-grading-table" class="mobile-table">
+                <thead>
+                    <tr> 
+                        {% for grader in peer_details.graders | sort %}
+                            <th class="peer-table-header">
+                                {{ grader }}
+                            </th class="peer-table-header">
+                        {% endfor %}
+                        <th> Points </th>
+                        <th class="peer-table-title-data"> Title  </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mark in component.marks %}
+                        <tr>
+                        {% for grader in peer_details.graders | sort %}
+                            <td class="peer-table-data">
+                                {% if mark.id in peer_details.marks_assigned[grader] %}
+                                    <div class="col-no-gutters indicator">
+                                        <i class="far fa-check-square fa-1g"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="col-no-gutters indicator">
+                                        <i class="far fa-square fa-1g"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                            <td class="peer-table-data">
+                                <div class="col-no-gutters point-value">
+                                    <span>{{ mark.points }}</span>
+                                </div>
+                            </td>
+                            <td class="peer-table-title-data">
+                                <div class="col">
+                                    <span>{{ mark.title|nl2br }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

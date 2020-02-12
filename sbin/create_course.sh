@@ -40,9 +40,9 @@ if [[ $? -ne "0" ]] ; then
 fi
 
 #Ensure that tables exist within Submitty Master DB.
-sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('courses','courses_users','sessions','users');"
+sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms','courses','courses_users','sessions','users');"
 table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "${sql}"`
-if [[ $table_count -ne "4" ]] ; then
+if [[ $table_count -ne "5" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit
 fi
@@ -225,6 +225,7 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/tmp
 #               drwxrws---       $PHP_USER        ta_www_group    uploads/seating
+#               drwxrws---       $PHP_USER        ta_www_group    rainbow_grades
 #               drwxrws---       $DAEMON_USER     ta_www_group    lichen/
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/config
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/provided_code
@@ -244,7 +245,7 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/up
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/uploads/split_pdf
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/uploads/seating
-create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/rainbow_grades
+create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/rainbow_grades
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code
@@ -293,6 +294,9 @@ fi
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -c "INSERT INTO courses (semester, course) VALUES ('${semester}', '${course}');"
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to add this course to the master Submitty database."
+    echo "HINT:  'insert or update on table \"courses\" violates foreign key constraint...'"
+    echo "       may indicate that term ${semester} does not exist in master DB."
+    echo "       To fix, try running 'create_term.sh'."
     exit
 fi
 echo -e "\nSUCCESS!\n\n"

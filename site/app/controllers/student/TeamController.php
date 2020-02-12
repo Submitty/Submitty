@@ -421,9 +421,37 @@ class TeamController extends AbstractController {
         }
 
         $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable_id);
+
+        $members = [];
+        $seekers = [];
+        $invites_received = [];
+        $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
+        $seeking_partner = false;
+        if ($team !== null) {
+            //List team members
+            foreach ($team->getMembers() as $teammate) {
+                $members[] = $this->core->getQueries()->getUserById($teammate);
+            }
+        }
+        else {
+            //Invites
+            foreach ($teams as $t) {
+                if ($t->sentInvite($user_id)) {
+                    $invites_received[] = $t;
+                }
+            }
+
+            //Are you seeking a team?
+            $seeking_partner = in_array($user_id, $users_seeking_team);
+        }
+
+        foreach ($users_seeking_team as $user_seeking_team) {
+            $seekers[] = $this->core->getQueries()->getUserById($user_seeking_team);
+        }
+
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
-        $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
-        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $team, $teams, $lock, $users_seeking_team);
+        $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
+        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock);
     }
 }

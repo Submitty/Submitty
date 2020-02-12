@@ -1,6 +1,12 @@
 from .base_testcase import BaseTestCase
 import os
 import unittest
+
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
 class TestGradeInquiry(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
@@ -20,6 +26,7 @@ class TestGradeInquiry(BaseTestCase):
     def set_grade_inquiries_for_gradeable(self, gradeable_id, date=None, allowed=True):
         # ensure that grade inquiries are enabled for grades_released_homework gradeable
         self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//*[@name='edit gradeable configuration_button']").click()
+
         if allowed:
             self.driver.find_element_by_id("yes_regrade_allowed").click()
         else:
@@ -28,7 +35,15 @@ class TestGradeInquiry(BaseTestCase):
         # set deadline
         if date is not None:
             self.driver.find_element_by_xpath("//a[text()='Dates']").click()
-            self.driver.find_element_by_name("regrade_request_date").send_keys(date)
+
+            grade_inquiry_date_input = self.driver.find_element_by_name("regrade_request_date")
+            # wait for flatpickr to appear
+            grade_inquiry_date_input.click()
+            wait = WebDriverWait(self.driver, self.WAIT_TIME)
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#date_regrade_request.active")))
+            # then input new date
+            grade_inquiry_date_input.clear()
+            grade_inquiry_date_input.send_keys(date,Keys.ENTER)
 
         # navigate back to gradeable page
         self.driver.find_element_by_id("nav-sidebar-submitty").click()
@@ -37,6 +52,8 @@ class TestGradeInquiry(BaseTestCase):
     # travis should not run this
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_normal_submission_grade_inquiry_panel(self):
+        # makes sure that default ta grading panel is correct
+        # user bauchg should have a submission and no grade inquiries
         gradeable_id = 'grades_released_homework'
         grade_inquiry_deadline_date = "9998-01-01 00:00:00"
 
@@ -44,7 +61,7 @@ class TestGradeInquiry(BaseTestCase):
         self.log_in(user_id='instructor')
         self.click_class('sample')
         self.set_grade_inquiries_for_course(True)
-        self.set_grade_inquiries_for_gradeable(gradeable_id, grade_inquiry_deadline_date, allowed=True)
+        self.set_grade_inquiries_for_gradeable(gradeable_id, date=grade_inquiry_deadline_date, allowed=True)
 
         # navigate to TA grading interface of student with normal submission
         self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//a[contains(@class,'btn-nav-grade')]").click()
@@ -58,12 +75,16 @@ class TestGradeInquiry(BaseTestCase):
 
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_no_submission_grade_inquiry_panel(self):
+        # makes sure that it is made clear to the use that there is no submission
+        # and no grade inquiry can be made
+        # user likinh should have no submission
         gradeable_id = 'grades_released_homework'
+        grade_inquiry_deadline_date = "9998-01-01 00:00:00"
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
         self.set_grade_inquiries_for_course(True)
-        self.set_grade_inquiries_for_gradeable(gradeable_id,allowed=True)
+        self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         # navigate to TA grading interface of student with no submission
         self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//a[contains(@class,'btn-nav-grade')]").click()
@@ -78,16 +99,43 @@ class TestGradeInquiry(BaseTestCase):
         buttons = self.driver.find_elements_by_xpath("//button[contains(@class,'gi-submit')]")
         assert len(buttons) == 0
 
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
+    def test_after_grade_inquiry_deadline_no_previous_inquiry(self):
+        # This test makes sure that a gradeable with no grade inquiry has no
+        # buttons or forms when it is currently past the grade inquiry deadline
+        # user bauchg should have a submission and no grade inquiries
+        gradeable_id = 'grades_released_homework'
+        grade_inquiry_deadline_date = "1974-01-01 23:59:59"
+        # login as instructor
+        self.log_in(user_id='instructor')
+        self.click_class('sample')
+        self.set_grade_inquiries_for_course(True)
+        self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
+
+        # navigate to TA grading interface of student with no inquiry
+        self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//a[contains(@class,'btn-nav-grade')]").click()
+        self.driver.find_element_by_xpath("//a[contains(text(),'Grading Index')]").click()
+        self.driver.find_element_by_xpath("//a[contains(@href,'grading/grade?who_id=bauchg')]").click()
+
+        # There should be no forms or buttons
+        forms = self.driver.find_elements_by_xpath("//form[contains(@class,'reply-text-form')]")
+        assert len(forms) == 0
+        buttons = self.driver.find_elements_by_xpath("//form[contains(@class,'gi-submit')]")
+        assert len(buttons) == 0
+
+
     # STUDENT SUBMISSION TESTS
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_normal_submission_student_grade_inquiry_box(self):
+        # makes sure default student view is correct
+        # user bauchg should have a submission and no grade inquiries
         gradeable_id = 'grades_released_homework'
         grade_inquiry_deadline_date = "9998-01-01 00:00:00"
 
         self.log_in(user_id='instructor')
         self.click_class('sample')
         self.set_grade_inquiries_for_course(True)
-        self.set_grade_inquiries_for_gradeable(gradeable_id,allowed=True)
+        self.set_grade_inquiries_for_gradeable(gradeable_id,date=grade_inquiry_deadline_date,allowed=True)
 
         self.log_out()
         self.log_in(user_id='bauchg')

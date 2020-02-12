@@ -465,6 +465,27 @@ td>a.active-sort {
     margin-left: 0;
 }
 
+.file-upload-table {
+    border: none;
+    border-collapse: collapse;
+    text-align: left;
+    margin: 5px auto;
+}
+
+.file-upload-table td {
+    border: none;
+    vertical-align: middle;
+    padding: 1px 10px;
+}
+
+.file-upload-table .file-trash{
+    text-align: right;
+}
+
+.file-upload-table tr:hover {
+    background: #d1d1d1;
+}
+
 .green-message {
     font-style: italic;
     font-weight: bold;
@@ -513,12 +534,6 @@ td>a.active-sort {
     padding: 5px 5px 10px;
 }
 
-.active {
-    background-color: var(--default-white);
-    /*    color: #4a4a4a;*/
-    border: 4px solid var(--submitty-logo-blue);
-}
-
 .viewed_post{
     background-color: var(--default-white);
 }
@@ -541,6 +556,12 @@ td>a.active-sort {
     border-style: solid;
     border-width: 4px;
     border-color: var(--important-post); /* gold */
+}
+
+.active {
+    background-color: var(--default-white);
+    /*    color: #4a4a4a;*/
+    border: 4px solid var(--submitty-logo-blue);
 }
 
 .new_thread{
@@ -1096,6 +1117,7 @@ div.full_height {
     background-position: center center;
     background-repeat: no-repeat;
     border-radius: 5px;
+    display: table-cell;
     border: 1px solid var(--standard-medium-gray);
 }
 
@@ -1374,7 +1396,7 @@ end of styles used in the admin gradeable page
 
 /* color for student/peer grading */
 .grader-4 {
-    color: var(--standard-vibrant-purple) /* purple */
+    color: var(--standard-plum-purple) /* purple */
 }
 
 /* color for a limited access grader */

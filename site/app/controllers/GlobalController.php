@@ -21,6 +21,7 @@ class GlobalController extends AbstractController {
         }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
+        $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
 
@@ -95,10 +96,10 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getConfig()->isQueueEnabled()) {
-                if ($this->core->getQueries()->isQueueOpen()) {
+                if ($this->core->getQueries()->isAnyQueueOpen()) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours",
+                        "title" => "Office Hours/Lab queue",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-queue",
                         "icon" => "fa-door-open"
@@ -107,7 +108,7 @@ class GlobalController extends AbstractController {
                 else {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours",
+                        "title" => "Office Hours/Lab Queue",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-queue",
                         "icon" => "fa-door-closed"
@@ -203,8 +204,19 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getUser()->accessGrading()) {
                 $images_course_path = $this->core->getConfig()->getCoursePath();
+                // FIXME: this code is duplicated in ImagesController.php
                 $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
-                $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
+                $common_images_path_1 = Fileutils::joinPaths("/var/local/submitty/student_images");
+                $term = explode('/', $this->core->getConfig()->getCoursePath());
+                $term = $term[count($term) - 2];
+                $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images", $term);
+                // FIXME: consider searching through the common location for matches to my students
+                // (but this would be expensive)
+                $any_images_files = array_merge(
+                    FileUtils::getAllFiles($images_path, array(), true),
+                    FileUtils::getAllFiles($common_images_path_1, array(), true),
+                    FileUtils::getAllFiles($common_images_path_2, array(), true)
+                );
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
@@ -353,7 +365,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
     }
 
     public function footer() {
