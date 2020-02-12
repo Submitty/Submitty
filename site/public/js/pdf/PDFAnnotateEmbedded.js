@@ -27,11 +27,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
-function render_student(gradeable_id, user_id, file_name, pdf_url, directory) {
-    render(gradeable_id, user_id, "", file_name, 1, pdf_url, directory)
+function render_student(gradeable_id, user_id, file_name, file_path, pdf_url) {
+    render(gradeable_id, user_id, "", file_name, file_path, 1, pdf_url)
 }
 
-function render(gradeable_id, user_id, grader_id, file_name, page_num, url, directory) {
+function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url) {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,
         user_id: user_id,
@@ -47,7 +47,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url, dire
         data: {
             user_id: user_id,
             filename: file_name,
-            directory: directory,
+            file_path: file_path,
             csrf_token: csrfToken
         },
         success: (data) => {
@@ -59,6 +59,8 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url, dire
                 pdfData = JSON.parse(data)['data'];
                 pdfData = atob(pdfData);
             } catch (err){
+                console.log(err);
+                console.log(data);
                 alert("Something went wrong, please try again later.");
             }
             pdfjsLib.getDocument({
