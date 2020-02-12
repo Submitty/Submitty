@@ -19,8 +19,7 @@
 </script>
 
 {%  include "forum/EditPostForm.twig" with {
-    "categories" : filterFormData.categories,
-    "current_categories": filterFormData.current_category_ids
+    "categories" : filterFormData.categories
 } %}
 
 {%  include "forum/HistoryForm.twig" %}

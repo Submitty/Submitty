@@ -225,6 +225,7 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
     }
     var form = $("#thread_form");
     var url = buildCourseUrl(['forum', 'posts', 'get']);
+    console.log(url);
     $.ajax({
         url: url,
         type: "POST",
@@ -304,11 +305,11 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
                 $('#lock_thread_date').val(thread_lock_date);
 
                 // Categories
-                $(".cat-buttons").removeClass('cat-selected');
+                $(".cat-buttons").removeClass('btn-selected');
                 $.each(categories_ids, function(index, category_id) {
                     var cat_input = $(".cat-buttons input[value="+category_id+"]");
                     cat_input.prop('checked', true);
-                    cat_input.parent().addClass('cat-selected');
+                    cat_input.parent().addClass('btn-selected');
                 });
                 $(".cat-buttons").trigger("eventChangeCatClass");
                 $("#thread_form").prop("ignore-cat",false);
