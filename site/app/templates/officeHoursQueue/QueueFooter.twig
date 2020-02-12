@@ -105,7 +105,7 @@
     }
     let auto_refresh = localStorage.getItem('office_hour_queue_auto_refresh') === "true";
     if (auto_refresh) {
-      $('#auto_refresh_btn').html("Turn off auto refresh");
+      $('#auto_refresh_btn').html("Turn Off Auto Refresh");
     }
 
     let refreshSpeed = 1000 * 30;
@@ -128,9 +128,9 @@
       auto_refresh = !auto_refresh;
       localStorage.setItem('office_hour_queue_auto_refresh', auto_refresh);
       if (auto_refresh) {
-        $('#auto_refresh_btn').html("Turn off auto refresh");
+        $('#auto_refresh_btn').html("Turn Off Auto Refresh");
       } else {
-        $('#auto_refresh_btn').html("Turn on auto refresh");
+        $('#auto_refresh_btn').html("Turn On Auto Refresh");
       }
     }
   {% endif %}

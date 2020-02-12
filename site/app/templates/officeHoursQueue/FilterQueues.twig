@@ -4,7 +4,7 @@
       Toggle Filter Settings
     </button>
     <button id="auto_refresh_btn" class="btn btn-default" type="button" onclick="toggleAutoRefresh()">
-      Turn on auto refresh
+      Turn On Auto Refresh
     </button>
   </p>
   <div class="collapse" id="filgerSettingsCollapse">
@@ -63,7 +63,7 @@
               </b>{{viewer.removeUnderScores(queue['code'])}}<br>
               <b>Code:
               </b>{{queue['token']}}</td>
-            <td class="button-padding">
+            <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/toggle">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
@@ -75,14 +75,14 @@
                 {% endif %}
               </form>
             </td>
-            <td class="button-padding">
+            <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                 <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn">Empty Queue</button>
               </form>
             </td>
-            <td class="button-padding">
+            <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
