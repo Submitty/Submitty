@@ -453,6 +453,54 @@ WHERE status = 1"
         return $categories_list;
     }
 
+    public function splitPost($post_id, $title, $categories_ids) {
+        $this->course_db->query("SELECT * from posts where id = ?", array($post_id));
+        $posts = $this->course_db->rows();
+        $old_thread_id = -1;
+        $thread_id = -1;
+        // Safety measure in case the database is bad for some reason
+        $counted_posts = array();
+        if (count($posts) > 0) {
+            $post = $posts[0];
+            if ($post["parent_id"] != -1) {
+                $old_thread_id = $post["thread_id"];
+                $this->course_db->query("SELECT id from threads where merged_post_id = ?", array($post_id));
+                $thread_id = $this->course_db->rows();
+                if (count($thread_id) > 0) {
+                    $thread_id = $thread_id[0]["id"];
+                    $this->course_db->query("UPDATE threads set merged_thread_id=-1, merged_post_id=-1 where id=?", array($thread_id));
+                    $this->course_db->query("DELETE FROM thread_categories where thread_id=?", array($thread_id));
+                } else {
+                    $this->course_db->query("INSERT INTO threads (title, created_by, is_visible, lock_thread_date) VALUES (?, ?, ?, ?)", array($title, $post["author_user_id"], true, null));
+                    $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $post["author_user_id"]));
+                    $thread_id = $this->course_db->rows()[0]["max_id"];
+                }
+                foreach ($categories_ids as $id) {
+                    $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $id));
+                }
+                while (count($posts) > 0) {
+                    $check_posts = array();
+                    $str = "";
+                    for ($i = 0; $i < count($posts); $i++) {
+                        if (!in_array($posts[$i]["id"], $counted_posts)) {
+                            $check_posts[] = $posts[$i]["id"];
+                            $str .= "?, ";
+                            $counted_posts[] = $posts[$i]["id"];
+                            $this->course_db->query("UPDATE posts set thread_id = ? where parent_id = ?", array($thread_id, $posts[$i]["id"]));
+                        }
+                    }
+                    if (strlen($str) > 0) {
+                        $str = substr($str, 0, -2);
+                    }
+                    $this->course_db->query("SELECT id from posts where parent_id in (" . $str . ")", $check_posts);
+                    $posts = $this->course_db->rows();
+                }
+                $this->course_db->query("UPDATE posts set thread_id=?, parent_id=? where id=?", array($thread_id, -1, $post_id));
+            }
+        }
+        return array($old_thread_id, $thread_id, $counted_posts);
+    }
+
     public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $markdown, $parent_post = -1) {
         if (!$first && $parent_post == 0) {
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", array($thread_id));
@@ -532,6 +580,18 @@ WHERE status = 1"
     public function getPostHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history where post_id = ? ORDER BY edit_timestamp DESC", array($post_id));
         return $this->course_db->rows();
+    }
+
+    public function getPostOldThread($post_id) {
+        $this->course_db->query("SELECT id, merged_thread_id, title FROM threads WHERE merged_thread_id <> -1 AND merged_post_id = ?", array($post_id));
+        $rows = $this->course_db->rows();
+        if (count($rows) > 0) {
+            return $rows[0];
+        } else {
+            $rows = array();
+            $rows["merged_thread_id"] = -1;
+            return $rows;
+        }
     }
 
     public function getDeletedPostsByUser($user) {

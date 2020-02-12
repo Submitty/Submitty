@@ -24,6 +24,10 @@
 
 {%  include "forum/HistoryForm.twig" %}
 
+{% include "forum/SplitPostForm.twig" with {
+    "categories" : filterFormData.categories,
+} %}
+
 <div class="full_height content forum_content forum_show_threads">
 
     {% if thread_exists == false %}
