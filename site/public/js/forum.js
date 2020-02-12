@@ -225,7 +225,6 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
     }
     var form = $("#thread_form");
     var url = buildCourseUrl(['forum', 'posts', 'get']);
-    console.log(url);
     $.ajax({
         url: url,
         type: "POST",
