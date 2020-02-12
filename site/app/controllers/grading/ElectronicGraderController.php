@@ -1167,6 +1167,11 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
+        
+        $section = $this->core->getQueries()->getUserById($submitter_id)->getRotatingSection();
+        if($gradeable->isGradeByRegistration()) {
+            $section = $this->core->getQueries()->getUserById($submitter_id)->getRegistrationSection();
+        }
 
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
@@ -1175,7 +1180,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get graded gradeable');
             return;
         }
