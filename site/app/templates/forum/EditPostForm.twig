@@ -20,7 +20,7 @@
     } %}
     <script type="text/javascript">
         $("#thread_form").submit(function() {
-            if((!$(this).prop("ignore-cat")) && $(this).find('.cat-selected').length == 0) {
+            if((!$(this).prop("ignore-cat")) && $(this).find('.btn-selected').length == 0) {
                 alert("At least one category must be selected.");
                 return false;
             }
