@@ -34,7 +34,11 @@
             </td>
           {% elseif entry['current_state'] == 'being_helped' %}
             <td>
-              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
+              {% if entry['help_started_by'] == viewer.getUserId() %}
+                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
+              {% else %}
+                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp" onsubmit="return confirm('{{entry['help_started_by']}} was the one who originally clicked to say they were helping this student, are you sure you want to finish helping {{entry['name']}}?');">
+              {% endif %}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 {% if entry['help_started_by'] == viewer.getUserId() %}
