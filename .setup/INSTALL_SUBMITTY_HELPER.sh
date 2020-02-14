@@ -813,16 +813,12 @@ if [ "${WORKER}" == 1 ]; then
     chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    # This takes a bit of time, let's skip if there are no workers
-    num_machines=$(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
-    if [ "${num_machines}" != "1" ]; then
-        # in order to update the submitty source files on the worker machines
-        # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
-        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
-        chmod -R g+r ${SUBMITTY_REPOSITORY}
+    # in order to update the submitty source files on the worker machines
+    # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
+    chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
+    chmod -R g+r ${SUBMITTY_REPOSITORY}
 
-        # Update any foreign worker machines
-        echo -e -n "Updating worker machines\n\n"
-        sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
-    fi
+    # Update any foreign worker machines
+    echo -e -n "Updating worker machines\n\n"
+    sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
 fi

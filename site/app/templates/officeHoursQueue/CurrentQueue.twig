@@ -1,0 +1,75 @@
+{% if viewer.isGrader() %}
+<div id="current_queue">
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Status</th>
+        <th scope="col">Time</th>
+        <th scope="col">Queue</th>
+        <th scope="col">Remove</th>
+        <th scope="col" class="mobile-hide">ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in viewer.getCurrentQueue() %}
+        <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
+          <th scope="row" class="row_number">{{entry['row_number'] }}</th>
+          <td>{{ entry['name'] }}</td>
+
+          {% if entry['current_state'] == 'waiting' %}
+            <td>
+              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
+                  <button type="submit" class="btn btn-primary" title="First time in this queue today">
+                    <i class="fas fa-star"></i>
+                    Help</button>
+                {% else %}
+                  <button type="submit" class="btn btn-primary">Help</button>
+                {% endif %}
+              </form>
+            </td>
+          {% elseif entry['current_state'] == 'being_helped' %}
+            <td>
+              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                {% if entry['help_started_by'] == viewer.getUserId() %}
+                  <button type="submit" class="btn btn-success finish_helping_btn" title="Being helped by {{entry['help_started_by']}}">Finish Helping</button>
+                {% else %}
+                  <button type="submit" class="btn btn-primary finish_helping_btn" title="Being helped by {{entry['help_started_by']}}">Finish Helping</button>
+                {% endif %}
+              </form>
+            </td>
+          {% endif %}
+
+          {% if entry['current_state'] == 'being_helped' %}
+            <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_help_start']) }}"></td>
+          {% else %}
+            <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+          {% endif %}
+          <td>{{ entry['queue_code'] }}</td>
+          <td>
+            <form method="post" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+              <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+              <button type="submit" class="btn btn-default">Remove</button>
+            </form>
+          </td>
+          <td class="mobile-hide">
+            <a class="post-user-info" onclick="unhideId(this,'{{ entry['user_id'] }}')" onkeypress="unhideId(this,'{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
+              <i class="fas fa-eye"></i>
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div id="queue_empty_msg" style="display:none; text-align:center">
+    Your queue is currently empty. Make sure you have the correct filter settings set.
+  </div>
+</div>
+{% endif %}

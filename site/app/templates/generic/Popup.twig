@@ -15,17 +15,17 @@
                 {% block body_panel %}
                     <div class="form-body">
                         {% block body %}Be sure to override the body block.{% endblock %}
-                    </div>
-                {% endblock %}
-                {% block buttons_panel %}
-                    <div class="form-buttons">
-                        <div class="form-button-container">
-                            {% block buttons %}
-                                {% block close_button %}
-                                   <a onclick="closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
-                                {% endblock %}
-                            {% endblock %}
-                        </div>
+                        {% block buttons_panel %}
+                          <div class="form-buttons">
+                                <div class="form-button-container">
+                                    {% block buttons %}
+                                        {% block close_button %}
+                                            <a onclick="closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
+                                        {% endblock %}
+                                    {% endblock %}
+                                </div>
+                           </div>
+                       {% endblock %}
                     </div>
                 {% endblock %}
             </div>

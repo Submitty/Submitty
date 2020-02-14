@@ -47,6 +47,7 @@ class PDFView extends AbstractView {
             'user_id' => $params["id"],
             'grader_id' => $this->core->getUser()->getId(),
             'filename' => $params["file_name"],
+            'file_path' => $params['file_path'],
             'annotation_jsons' => json_encode($params["annotation_jsons"]),
             'student_popup' => $is_student,
             'page_num' => $params["page_num"],

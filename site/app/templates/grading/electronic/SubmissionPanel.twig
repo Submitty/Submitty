@@ -148,6 +148,7 @@
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
+
         let promise = loadFile(name, path, page_num);
         $('#file_view').show();
         $("#grading_file_name").html(name);
@@ -159,9 +160,9 @@
         return promise;
     }
 
-    function loadFile(name, path, page_num = 0){
+    function loadFile(name, path, page_num = 0) {
         let extension = name.split('.').pop();
-        if(extension == "pdf"){
+        if (extension == "pdf") {
             $('#pdf_annotation_bar').show();
             $('#save_status').show();
             return $.ajax({
@@ -170,6 +171,7 @@
                 data: {
                     'user_id': '{{ submitter_id }}',
                     'filename': name,
+                    'file_path': path,
                     'page_num': page_num,
                     'csrf_token': csrfToken
                 },
