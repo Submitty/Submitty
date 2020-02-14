@@ -986,7 +986,7 @@ class ElectronicGraderController extends AbstractController {
             $total_submitted = $total_submitted * count($gradeable->getComponents());
         }
         else {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted ?? 0) * count($gradeable->getComponents());
         }
         if ($total_submitted == 0) {
             $progress = 100;
@@ -996,7 +996,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
 
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
