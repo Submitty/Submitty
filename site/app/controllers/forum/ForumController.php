@@ -880,7 +880,7 @@ class ForumController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/forum/categories", methods={"GET"})
-     * @AccessControl(permission="forum.modify_category")
+     * @AccessControl(permission="forum.view_modify_category")
      */
     public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
