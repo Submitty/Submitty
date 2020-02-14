@@ -386,7 +386,7 @@ HTML;
 
     protected function renderHeader() {
         if ($this->use_header) {
-            return $this->controller->header($this->use_mobile_viewport);
+            return $this->controller->header();
         }
         else {
             return '';

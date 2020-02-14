@@ -9,7 +9,7 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
 
-    public function header($use_mobile_viewport) {
+    public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
