@@ -854,7 +854,7 @@ function refreshCategories() {
                 selection_class = "btn-selected";
             }
             var element = ' <a class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
-                                <input type="checkbox" name="cat[]" value="'+category_id+'">\
+                                <input aria-label="Category: '+category_desc+'" type="checkbox" name="cat[]" value="'+category_id+'">\
                             </a>';
             $('#categories-pick-list').append(element);
         });

@@ -68,8 +68,8 @@
                         <td>{{ user.getAllowedLateDays() }}</td>
                         <td>{{ user.getSinceTimestamp() }}</td>
                         <td>
-                            <a 
-                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}' 
+                            <a
+                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >
                                 <i class="fas fa-trash"></i>
@@ -91,7 +91,7 @@
                         button: [
                             {
                                 label: "Now"
-                            }, 
+                            },
                             {
                                 label: "End of time"
                             }
@@ -100,10 +100,10 @@
                         onClick: (index, fp) => {
                             let date;
                             switch (index) {
-                                case 0: 
+                                case 0:
                                     date = new Date();
                                     break;
-                                case 1: 
+                                case 1:
                                     date = new Date("01/01/9998");
                                     break;
                             }
@@ -112,7 +112,10 @@
                     }
                 )],
             allowInput: true,
-            dateFormat: "Y-m-d"
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
         });
 
 </script>

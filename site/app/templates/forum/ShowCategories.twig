@@ -15,7 +15,7 @@
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <span  style="float: right;">
-                <input id="new_category_text" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
+                <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" id="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
                 <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus-circle fa-1x"></i> Add category
                 </button>
@@ -37,12 +37,12 @@
                             <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
-                            <input type="text" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
+                            <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
                             <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check"></i></a>
                             <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times"></i></a>
                         </span>
                     <div style="float: right;width: auto;">
-                        <select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
+                        <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
                             {% for color_name, color_code in category_colors %}
                                 <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
                             {% endfor %}
@@ -65,12 +65,12 @@
                 <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit"></i></a>
                 </span>
             <span class="categorylistitem-editdesc" style="display: none;">
-                <input type="text" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
+                <input type="text" aria-label="New Description of Category" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
                 <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check"></i></a>
                 <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times"></i></a>
                 </span>
             <div style="float: right;width: auto;">
-                <select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
+                <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
                     {% for color_name, color_code in category_colors %}
                         <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
                     {% endfor %}
