@@ -19,6 +19,10 @@
                     Component graded by a limited access grader
                 </li>
                 <li>
+                    <i class="fas fa-circle grader-4"></i>
+                    Peer component graded by a student
+                </li>
+                <li>
                     <i class="fas fa-circle grader-1"></i>
                     Component graded by a full access grader
                 </li>
@@ -341,7 +345,7 @@
                 {% set btn_class = "btn-primary" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() or core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
