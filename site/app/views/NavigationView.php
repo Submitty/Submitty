@@ -75,7 +75,7 @@ class NavigationView extends AbstractView {
 
     const DATE_FORMAT = "m/d/Y @ h:i A";
 
-    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -122,7 +122,6 @@ class NavigationView extends AbstractView {
             $this->core->getOutput()->addRoomTemplatesTwigPath();
             // use the room seating gradeable id to find the title to display.
             $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
-            $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
             foreach ($gradeable_ids_and_titles as $gradeable_id_and_title) {
                 if ($gradeable_id_and_title['g_id'] === $gradeable_id) {
                     $gradeable_title = $gradeable_id_and_title['g_title'];
