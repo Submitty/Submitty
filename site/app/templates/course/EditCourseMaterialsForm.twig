@@ -65,7 +65,7 @@
                         sectionsEdit.push(element['sections_registration_id']);
                     }
                 });
-                if({{ reg_sections|json_encode|raw }} == null || $("#all_Sections_Showing_No").is(':checked') == true){
+                if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
