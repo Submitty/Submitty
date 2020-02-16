@@ -10,6 +10,7 @@ class OfficeHoursQueueView extends AbstractView {
     public function showTheQueue($viewer) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
+        $this->core->getOutput()->enableMobileViewport();
 
         $output = $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
         $output .= $this->renderPart($viewer, "officeHoursQueue/FilterQueues.twig");

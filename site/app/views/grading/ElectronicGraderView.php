@@ -676,8 +676,7 @@ HTML;
         ]);
     }
 
-    public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
-        $students = $this->core->getQueries()->getAllUsers();
+    public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections, $students) {
         $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [

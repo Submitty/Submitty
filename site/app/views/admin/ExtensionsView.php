@@ -16,6 +16,7 @@ class ExtensionsView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb('Excused Absence Extensions');
+        $this->core->getOutput()->enableMobileViewport();
 
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = Utils::getAutoFillData($students);
