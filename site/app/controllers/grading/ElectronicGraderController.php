@@ -329,7 +329,7 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($peer) {
                 $sections['stu_grad'] = array(
-                    'total_components' => $num_components * $peer_grade_set,
+                    'total_components' => $num_components,
                     'graded_components' => $my_grading,
                     'graders' => array()
                 );
@@ -342,10 +342,10 @@ class ElectronicGraderController extends AbstractController {
                     if ($key == 'NULL') {
                         continue;
                     }
-                    $sections['all']['total_components'] += $value * $num_components * $peer_grade_set;
+                    $sections['all']['total_components'] += $value * $num_components;
                     $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
                 }
-                $sections['all']['total_components'] -= $peer_grade_set * $num_components;
+                $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
@@ -409,7 +409,6 @@ class ElectronicGraderController extends AbstractController {
         else {
             $total_students_submitted = 0;
         }
-
         $this->core->getOutput()->renderOutput(
             array('grading', 'ElectronicGrader'),
             'statusPage',

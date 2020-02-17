@@ -651,7 +651,6 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
