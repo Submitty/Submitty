@@ -1075,23 +1075,11 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
         
-        $graded_gradeable = null;
-
         // checks if user has permission
-        /*if($gradeable->isTeamAssignment()){
-            $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
-            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $team, false);
-        }
-        
-        else{
-            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
-        }
-        
-        var_dump($graded_gradeable->getGradeable()->getUser()->getId);
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
             return;
-        }*/
+        }
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
@@ -1116,10 +1104,9 @@ class ElectronicGraderController extends AbstractController {
         $return['components'] = array_map(function (Component $component) {
             return $component->toArray();
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
-            //return $this->core->getAccess()->canI('grading.electronic.view_component', ['graded_gradeable' => $graded_gradeable, 'gradeable' => $gradeable, 'component' => $component]);
-            return true;
+            return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
-        // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
+        //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         $return['components'] = array_values($return['components']);
         return $return;
     }

@@ -439,7 +439,7 @@ class Access {
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Check their peer assignment
-                if (!$this->isGradedGradeableInPeerAssignment($graded_gradeable, $user)) {
+                if (!$this->isGradeableInPeerAssignment($gradeable, $user)) {
                     $grading_checks = false;
                 }
             }
@@ -616,16 +616,15 @@ class Access {
     }
 
     /**
-     * Check if a Graded Gradeable is in a user's peer grading assignment
-     * @param GradedGradeable $graded_gradeable Graded Gradeable to be peer graded
+     * Check if a Gradeable is in a user's peer grading assignment
+     * @param Gradeable $gradeable Gradeable to be peer graded
      * @param User $user User doing the peer grading
      * @return bool
      */
-    public function isGradedGradeableInPeerAssignment($graded_gradeable, User $user) {
-        if ($graded_gradeable === null) {
+    public function isGradeableInPeerAssignment($gradeable, User $user) {
+        if ($gradeable === null) {
             return false;
         }
-        $gradeable = $graded_gradeable->getGradeable();
 
         if (!$gradeable->isPeerGrading()) {
             return false;
