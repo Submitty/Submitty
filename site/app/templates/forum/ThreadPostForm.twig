@@ -170,9 +170,11 @@
         </select>
         {% endif %}
         {% if show_announcement and core.getUser().accessFullGrading() %}
-            {% set announcement_text = email_enabled ? "Announcement?(w/ notification and email)" : "Announcement?(w/ notification)" %}
+            {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Announcement?(w/ notification)" %}
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+            <label class="inline-block" for="Announcement">{{ "Pin Thread" }}</label>
+            <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="false"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
