@@ -9,9 +9,10 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    {# TODO, eventually remove these form individual twig files and enable this one
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    #}
+    {# TODO, eventually this wont need an if statement and will work on every page #}
+    {% if use_mobile_viewport %}
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {% endif %}
 
     {% for js_ref in js %}
     <script type='text/javascript' src='{{ js_ref }}'></script>
