@@ -15,17 +15,17 @@
                 {% block body_panel %}
                     <div class="form-body">
                         {% block body %}Be sure to override the body block.{% endblock %}
-                    </div>
-                {% endblock %}
-                {% block buttons_panel %}
-                    <div class="form-buttons">
-                        <div class="form-button-container">
-                            {% block buttons %}
-                                {% block close_button %}
-                                   <a href="javascript:closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button">Close</a>
-                                {% endblock %}
-                            {% endblock %}
-                        </div>
+                        {% block buttons_panel %}
+                          <div class="form-buttons">
+                                <div class="form-button-container">
+                                    {% block buttons %}
+                                        {% block close_button %}
+                                            <a href="javascript:closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button">Close</a>
+                                        {% endblock %}
+                                    {% endblock %}
+                                </div>
+                           </div>
+                       {% endblock %}
                     </div>
                 {% endblock %}
             </div>
@@ -37,6 +37,6 @@
     $(".popup-window").draggable();
 
     function closePopup(id) {
-        $('#' + id).hide(); 
+        $('#' + id).hide();
     }
 </script>

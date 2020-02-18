@@ -258,7 +258,7 @@ class ForumThreadView extends AbstractView {
         if (!$threadExists) {
             $button_params["show_threads"] = false;
             $button_params["thread_exists"] = false;
-            $button_params["show_more"] = false;
+            $button_params["show_more"] =  $this->core->getUser()->accessGrading();
         }
         else {
             $more_data = array(

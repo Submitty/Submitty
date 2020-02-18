@@ -166,12 +166,29 @@ def main():
                               user_preferred_lastname=user.preferred_lastname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
-    submitty_conn.close()
 
+    # INSERT term into terms table, based on today's date.
     today = datetime.today()
-    semester = 'Fall'
+    year = str(today.year)
     if today.month < 7:
-        semester = 'Spring'
+        term_id    = "s" + year[-2:]
+        term_name  = "Spring " + year
+        term_start = "01/02/" + year
+        term_end   = "06/30/" + year
+    else:
+        term_id    = "f" + year[-2:]
+        term_name  = "Fall " + year
+        term_start = "07/01/" + year
+        term_end   = "12/23/" + year
+
+    terms_table = Table("terms", submitty_metadata, autoload=True)
+    submitty_conn.execute(terms_table.insert(),
+                          term_id    = term_id,
+                          name       = term_name,
+                          start_date = term_start,
+                          end_date   = term_end)
+
+    submitty_conn.close()
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
@@ -201,6 +218,8 @@ def main():
             students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
             course.users.append(students[key])
             key += 1
+
+
 
     for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]

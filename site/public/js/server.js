@@ -169,6 +169,7 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("close-submissions-form");
+    form.find('.form-body').scrollTop(0);
 }
 
 function newDeleteCourseMaterialForm(path, file_name) {
@@ -195,6 +196,7 @@ function newDeleteCourseMaterialForm(path, file_name) {
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
+    form.find('.form-body').scrollTop(0);
 }
 
 function newUploadImagesForm() {
@@ -202,6 +204,7 @@ function newUploadImagesForm() {
     var form = $("#upload-images-form");
     form.css("display", "block");
     captureTabInModal("upload-images-form");
+    form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
 
@@ -219,20 +222,22 @@ function newUploadCourseMaterialsForm() {
     }
 
     $('.popup-form').css('display', 'none');
+    var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
-    var form = $("#upload-course-materials-form");
+
     form.css("display", "block");
     captureTabInModal("upload-course-materials-form");
+    form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 
 }
 
 function captureTabInModal(formName){
-    
+
     var form = $("#".concat(formName));
-    
+
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
     var firstInput = inputs.first();
@@ -252,14 +257,14 @@ function captureTabInModal(formName){
             e.preventDefault();
         }
     });
-    
+
     form.on('hidden.bs.modal', function () {
         releaseTabFromModal(formName);
     })
 }
 
 function releaseTabFromModal(formName){
-    
+
     var form = $("#".concat(formName));
     form.off('keydown');
 }
@@ -273,6 +278,7 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 
     captureTabInModal("set-folder-release-form");
 
+    form.find('.form-body').scrollTop(0);
     $('[id="release_title"]',form).attr('data-path',changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
     $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
@@ -290,6 +296,7 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
     $('[name="gradeable_title"]', form).append(gradeable_title);
     $('[name="delete"]', form).attr('action', form_action);
     form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
     captureTabInModal("delete-plagiarism-result-and-config-form");
 }
 
@@ -814,6 +821,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     form.css("display", "block");
     captureTabInModal("admin-team-form");
 
+    form.find('.form-body').scrollTop(0);
     $("#admin-team-form-submit").prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
     $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
@@ -995,6 +1003,7 @@ function importTeamForm() {
     var form = $("#import-team-form");
     form.css("display", "block");
     captureTabInModal("import-team-form");
+    form.find('.form-body').scrollTop(0);
     $('[name="upload_team"]', form).val(null);
 }
 
@@ -1004,6 +1013,7 @@ function randomizeRotatingGroupsButton() {
     var form = $("#randomize-button-warning");
     form.css("display", "block");
     captureTabInModal("randomize-button-warning");
+    form.find('.form-body').scrollTop(0);
 }
 
 
@@ -1579,40 +1589,6 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function changePermission(filename, checked) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filename,csrf_token: csrfToken},
-        success: function(data) {},
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
-function changeFolderPermission(filenames, checked,handleData) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
-        success: function(data) {
-            if(handleData){
-                handleData(data);
-            }
-        },
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
 function handleTimeZones(timezone) {
 
     var url = buildUrl(['server_time']);
@@ -1765,8 +1741,7 @@ function updateToTomorrowServerTime(fp) {
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1794,8 +1769,7 @@ function changeNewDateTime(filename, newdatatime,handleData) {
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1877,7 +1851,7 @@ $(document).ready(function() {
     if (localStorage.getItem('sidebar') !== "") {
         $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
         //Once the sidebar is set the page can be unhidden
-        $("#submitty-body").show();
+        $("#submitty-body").css('visibility', 'visible');
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space

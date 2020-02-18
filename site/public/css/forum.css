@@ -10,7 +10,7 @@ body {min-width: 925px;}
 }
 
 .forum_show_threads {
-    overflow: hidden;
+    overflow: visible;
     flex-direction: column;
     display: flex;
 }
@@ -139,6 +139,10 @@ body {min-width: 925px;}
     margin-top: 10px;
     margin-left: 5px;
     font-size: 1.17em;
+}
+
+.btn_markdown {
+    margin-right:10px;
 }
 
 .active-thread-remove-announcement{
