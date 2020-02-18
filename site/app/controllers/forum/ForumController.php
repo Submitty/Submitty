@@ -654,7 +654,8 @@ class ForumController extends AbstractController {
         }
         if (!$this->isValidCategories($categories_ids)) {
             $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-        } elseif (is_numeric($post_id) && $post_id > 0) {
+        }
+        elseif (is_numeric($post_id) && $post_id > 0) {
             $thread_ids = $this->core->getQueries()->splitPost($post_id, $title, $categories_ids);
             if ($thread_ids[0] != -1) {
                 $original_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_ids[0]);
@@ -691,7 +692,8 @@ class ForumController extends AbstractController {
         }
         if ($thread_id == -1) {
             $this->core->redirect($this->core->buildCourseUrl(['forum']));
-        } else {
+        }
+        else {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
         }
     }
@@ -954,7 +956,8 @@ class ForumController extends AbstractController {
             $post = $this->core->getQueries()->getPost($post_id);
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"])["title"];
-        } else {
+        }
+        else {
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
