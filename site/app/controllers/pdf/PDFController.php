@@ -111,16 +111,17 @@ class PDFController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function showGraderPDFEmbedded($gradeable_id) {
-        //This is the embedded pdf annotator that we built.
-        //User can be a team
+        // This is the embedded pdf annotator that we built.
+        // User can be a team
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
         $filename = html_entity_decode($filename);
+
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $id);
@@ -154,6 +155,7 @@ class PDFController extends AbstractController {
             "gradeable_id" => $gradeable_id,
             "id" => $id,
             "file_name" => $filename,
+            "file_path" => $_POST['file_path'],
             "annotation_jsons" => $annotation_jsons,
             "is_student" => false,
             "page_num" => $page_num
