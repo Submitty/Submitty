@@ -472,11 +472,11 @@ class Gradeable extends AbstractModel {
     }
 
     public function setPeerGradersList($input) {
-        foreach ($input as $row_num => $vals) {
+        /*foreach ($input as $row_num => $vals) {
             if (!User::validateUserData('user_id', $vals["student"]) || !User::validateUserData('user_id', $vals["grader"])) {
                 $bad_rows[] = ($row_num + 1);
             }
-            $row_num = 0;
+            //$row_num = 0;
         }
         
         if (!empty($bad_rows)) {
@@ -485,7 +485,7 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$row_num}";
             });
             $this->core->addErrorMessage($msg);
-        }
+        }*/
         $current_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
         foreach ($input as $row_num => $vals) {

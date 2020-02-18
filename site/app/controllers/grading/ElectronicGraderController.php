@@ -320,6 +320,8 @@ class ElectronicGraderController extends AbstractController {
         //Either # of teams or # of students (for non-team assignments). Either case
         // this is the max # of submitted copies for this gradeable.
         $total_submissions = 0;
+        //var_dump($no_team_users);
+        //var_dump($team_users);
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
                 if ($key == 'NULL') {
@@ -347,6 +349,12 @@ class ElectronicGraderController extends AbstractController {
                 }
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
+                if ($gradeable->isTeamAssignment()) {
+                        $sections['stu_grad']['no_team'] = 0;
+                        $sections['stu_grad']['team'] = 0;
+                        $sections['all']['no_team'] = 0;
+                        $sections['all']['team'] = 0;
+                }
             }
             else {
                 foreach ($total_users as $key => $value) {
