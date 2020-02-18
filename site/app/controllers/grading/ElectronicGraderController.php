@@ -1173,7 +1173,8 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable->isGradeByRegistration()) {
             $section = $this->core->getQueries()->getUserById($submitter_id)->getRegistrationSection();
         }
-        else{
+        
+        else {
             $section = $this->core->getQueries()->getUserById($submitter_id)->getRotatingSection();
         }
 
