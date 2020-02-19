@@ -1,0 +1,148 @@
+<script>
+  //Get the list of queue_codes
+  var current_queues = [{% for queue in viewer.getAllQueues() %}
+      "{{queue['code']}}",
+    {% endfor %}]
+  current_queues = Array.from(new Set(current_queues));
+  current_queues = current_queues.map(function(x) {
+    return x.toUpperCase()
+  })
+
+  //checks if the filter settings are in local storage
+  if (!localStorage.getItem('office_hour_queue_filters')) {
+    localStorage.setItem('office_hour_queue_filters', "{}");
+  }
+
+  var timers = []; //keep track of the current running timers on the page
+
+  //Runs the function that gets and fills in the old filter settings
+  filterQueues();
+  //Unide the checkboxes now that they have been set
+  $(".page_loading").removeClass("page_loading");
+
+  //Run this every time a checkbox has been clicked to update the list of filtered queues
+  function updateQueueFilter(queue_code) {
+    var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+    filters[queue_code] = document.getElementById('queue_filter_' + queue_code).checked;
+    localStorage.setItem('office_hour_queue_filters', JSON.stringify(filters));
+    filterQueues();
+  }
+
+  //Goes through the filter settings from local storage Hides and unhides rows of the queue based on the filter settings
+  function filterQueues() {
+    var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+    for (var i = 0; i < current_queues.length; i++) {
+      if (filter_choices[current_queues[i]] != false) {
+        $("#queue_filter_" + current_queues[i]).prop("checked", true);
+        filter_choices[current_queues[i]] = true;
+      }
+    }
+    localStorage.setItem('office_hour_queue_filters', JSON.stringify(filter_choices));
+
+    timers = []
+    for (var index in Object.keys(filter_choices)) {
+      let key = Object.keys(filter_choices)[index];
+      if (filter_choices[key]) {
+        let current_element = $(".queue_current_" + key);
+
+        current_element.addClass("shown_queue_row");
+
+        current_element.show();
+        timer = current_element.find(".help_timer")
+        if (timer) {
+          timers.push([
+            timer,
+            new Date(timer.attr("help_time"))
+          ]);
+        }
+
+      } else {
+        let current_element = $(".queue_current_" + key);
+        current_element.hide();
+        current_element.removeClass("shown_queue_row");
+      }
+    }
+    updateTimers();
+
+    var queue_rows = document.getElementsByClassName('shown_queue_row');
+    var row_count = 0;
+    for (; row_count < queue_rows.length; row_count++) {
+      queue_rows[row_count].childNodes[1].innerHTML = row_count + 1;
+    }
+    if (queue_rows.length === 0) {
+      $("#queue_empty_msg").show();
+    } else {
+      $("#queue_empty_msg").hide();
+    }
+  }
+
+  function unhideId(element, id) {
+    element.parentElement.innerHTML = id;
+  }
+
+  //update the timers few seconds
+  updateTimers();
+  setInterval(updateTimers, 1000);
+  function updateTimers() {
+    for (var i = 0; i < timers.length; i++) {
+      timer = (new Date() - timers[i][1]) / 1000
+      var min = Math.floor(timer / 60)
+      var sec = Math.floor(timer % 60).toString().padStart(2, '0')
+      var timerstring = min + ":" + sec;
+      if (min >= 100) {
+        timerstring = "∞";
+      }
+      timers[i][0].html(timerstring);
+    }
+  }
+
+  {% if viewer.isGrader() %}
+
+    let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
+
+    if (!localStorage.getItem('office_hour_queue_auto_refresh')) {
+      localStorage.setItem('office_hour_queue_auto_refresh', "false");
+    }
+    let auto_refresh = localStorage.getItem('office_hour_queue_auto_refresh') === "true";
+    if (auto_refresh) {
+      $('#auto_refresh_btn').html("Turn off auto refresh");
+    }
+
+    let refreshSpeed = 1000 * 30;
+    setInterval(refreshQueue, refreshSpeed);
+    function refreshQueue() {
+      if (!auto_refresh) {
+        return;
+      }
+      $.get("{{base_url}}/check_updates", function(data) {
+        if (lastQueueEdit < JSON.parse(data)['data']) {
+          $.get("{{base_url}}/current_queue", function(newQueue) {
+            $("#current_queue").replaceWith(newQueue);
+            filterQueues();
+          });
+        }
+      });
+    }
+
+    function toggleAutoRefresh() {
+      auto_refresh = !auto_refresh;
+      localStorage.setItem('office_hour_queue_auto_refresh', auto_refresh);
+      if (auto_refresh) {
+        $('#auto_refresh_btn').html("Turn off auto refresh");
+      } else {
+        $('#auto_refresh_btn').html("Turn on auto refresh");
+      }
+    }
+  {% endif %}
+
+  function genRandCode(id) {
+    var result = '';
+    var characters = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 6; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    $('#' + id).val(result);
+  }
+</script>
+</div>

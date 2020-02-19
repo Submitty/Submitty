@@ -399,11 +399,11 @@ HTML;
                         <p>Note: Deleting plagiarism results will also delete the saved configuration for the gradeable.</p><br>
                         Are you sure to delete Plagiarism Results for
                         <b><div name="gradeable_title"></div></b>
-                    </div>
-                    <div class="form-buttons">
-                        <div class="form-button-container">
-                            <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
-                            <input class="btn btn-danger" type="submit" value="Delete" />
+                        <div class="form-buttons">
+                            <div class="form-button-container">
+                                <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
+                                <input class="btn btn-danger" type="submit" value="Delete" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -423,7 +423,7 @@ HTML;
 HTML;
     }
 
-    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config) {
+    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config, $title) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
@@ -511,10 +511,6 @@ HTML;
 HTML;
         }
         elseif ($new_or_edit == "edit") {
-            $title = '';
-            if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
-                $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
-            }
             $return .= <<<HTML
                     $title
 HTML;

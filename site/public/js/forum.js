@@ -115,7 +115,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
     }
     if(test_category) {
 
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
+        if((!form.prop("ignore-cat")) && form.find('.btn-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -304,11 +304,11 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
                 $('#lock_thread_date').val(thread_lock_date);
 
                 // Categories
-                $(".cat-buttons").removeClass('cat-selected');
+                $(".cat-buttons").removeClass('btn-selected');
                 $.each(categories_ids, function(index, category_id) {
                     var cat_input = $(".cat-buttons input[value="+category_id+"]");
                     cat_input.prop('checked', true);
-                    cat_input.parent().addClass('cat-selected');
+                    cat_input.parent().addClass('btn-selected');
                 });
                 $(".cat-buttons").trigger("eventChangeCatClass");
                 $("#thread_form").prop("ignore-cat",false);
@@ -1040,6 +1040,12 @@ function addMarkdownCode(type, divTitle){
         insert = "```" +
             "\ncode\n```";
     }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
@@ -1123,7 +1129,10 @@ function loadThreadHandler(){
                     $('#messages').append(message);
                     return;
                 }
-
+                if (typeof json.data.merged !== 'undefined') {
+                  window.location.replace(json.data.destination);
+                  return;
+                }
                 $(obj).find('.thread_box').removeClass('new_thread');
 
                 $('.thread_box').removeClass('active');

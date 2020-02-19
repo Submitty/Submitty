@@ -629,37 +629,39 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted):
 
     folder = worker_folder(my_name)
 
+    '''
+    ----------------------------------------------------------------
+    Our first priority is to perform any awaiting VCS checkouts
 
-    # ----------------------------------------------------------------
-    # Our first priority is to perform any awaiting VCS checkouts
-
-    # Note: This design is imperfect:
-    #
-    #   * If all shippers are busy working on long-running autograding
-    #     tasks there will be a delay of seconds or minutes between
-    #     a student pressing the submission button and clone happening.
-    #     This is a minor exploit allowing them to theoretically
-    #     continue working on their submission past the deadline for
-    #     the time period of the delay.
-    #     -- This is not a significant, practical problem.
-    #
-    #   * If multiple and/or large git submissions arrive close
-    #     together, this shipper job will be tied up performing these
-    #     clone operations.  Because we don't release the lock, any
-    #     other shippers that complete their work will also be blocked
-    #     from either helping with the clones or tackling the next
-    #     autograding job.
-    #     -- Based on experience with actual submission patterns, we
-    #        do not anticipate that this will be a significant
-    #        bottleneck at this time.
-    #
-    #   * If a git clone takes a very long time and/or hangs because of
-    #     network problems, this could halt all work on the server.
-    #     -- We'll need to monitor the production server.
-    #
-    # We plan to do a complete overhaul of the
-    # scheduler/shipper/worker and refactoring this design should be
-    # part of the project.
+    Note: This design is imperfect:
+    
+        * If all shippers are busy working on long-running autograding
+        tasks there will be a delay of seconds or minutes between
+        a student pressing the submission button and clone happening.
+        This is a minor exploit allowing them to theoretically
+        continue working on their submission past the deadline for
+        the time period of the delay.
+        -- This is not a significant, practical problem.
+    
+        * If multiple and/or large git submissions arrive close
+        together, this shipper job will be tied up performing these
+        clone operations.  Because we don't release the lock, any
+        other shippers that complete their work will also be blocked
+        from either helping with the clones or tackling the next
+        autograding job.
+        -- Based on experience with actual submission patterns, we
+            do not anticipate that this will be a significant
+            bottleneck at this time.
+    
+        * If a git clone takes a very long time and/or hangs because of
+        network problems, this could halt all work on the server.
+        -- We'll need to monitor the production server.
+    
+    We plan to do a complete overhaul of the
+    scheduler/shipper/worker and refactoring this design should be
+    part of the project.
+    ----------------------------------------------------------------
+    '''
 
     # Grab all the VCS files currently in the folder...
     vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
@@ -733,7 +735,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted):
         grading_file = os.path.join(folder, "GRADING_" + my_job)
         # create the grading file
         with open(os.path.join(grading_file), "w") as queue_file:
-            json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
+                json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
 
     time_get_job_end = dateutils.get_current_time()
 
