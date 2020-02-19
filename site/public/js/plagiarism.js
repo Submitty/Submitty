@@ -2,16 +2,17 @@ const YELLOW = "#ffff00";
 const ORANGE = "#ffa500";
 const RED    = "#ff0000";
 const BLUE   = "#89CFF0";
-var LeftUserMatches = null;
 var editor0 = null;
 var editor1 = null;
 var form = null;
+var si = null;
 
 function isColoredMarker(marker, color) {
     return marker.css.toLowerCase().indexOf(color) != -1;
 }
 
 function colorEditors(data) {
+    window.si = data.si;
     for(var users_color in data.ci) {
     	var editor = users_color == 1 ? editor0 : editor1;
     	editor.operation(() => {
@@ -43,11 +44,11 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
 	}
 }
 
-function setUpLeftPane() {
-    editor0.getWrapperElement().onmousedown = function(e) {
+function setUpLeftPane(gradeable_id) {
+    editor0.getWrapperElement().onmouseup = function(e) {
         var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
         var markers = editor0.findMarksAt(lineCh);
-
+        console.log('help');
         // Did not select a marker 
         if (markers.length === 0) { 
             return; 
@@ -56,21 +57,43 @@ function setUpLeftPane() {
         // Only grab the first one if there is overlap...
         var lineData = markers[0].find();
         var clickedMark = markers[0];
-
+        console.log('help2');
         if(isColoredMarker(clickedMark, YELLOW)) {
-            //var allMarks = editor0.getAllMarks();
+            var user_id_1 = $('[name="user_id_1"]', form).val();
+            var user_1_version = $('[name="version_user_1"]', form).val();
 
-
-            //getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+            getMatchesListForClick(gradeable_id, user_id_1, user_1_version, lineData.from);
+            console.log('hel3');
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             // In this case we want to update the right side as well...
             updatePanesOnOrangeClick(clickedMark, editor0, editor1);
+        } else {
+            if($('#popup_to_show_matches_id').css('display') == 'block'){
+                $('#popup_to_show_matches_id').css('display', 'none');
+            }
         }
 
     }
 }
 
 
+
+function getMatchesListForClick(gradeable_id, user_id_1, user_1_version, user_1_match_start) {
+    var user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
+    var to_append = '';
+    $.each(user_matches, function(i, match) {
+        var res = match.split('_');
+        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${gradeable_id}', '${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>'; 
+    }); 
+    to_append = $.parseHTML(to_append); 
+    $("#popup_to_show_matches_id").empty().append(to_append);   
+    var x = event.pageX;    
+    var y = event.pageY;    
+    $('#popup_to_show_matches_id').css('display', 'block'); 
+    var width = $('#popup_to_show_matches_id').width(); 
+    $('#popup_to_show_matches_id').css('top', y+5); 
+    $('#popup_to_show_matches_id').css('left', x-width/2.00);
+}
 
 function setUpPlagView(gradeable_id) {
 
@@ -106,6 +129,8 @@ function setUpPlagView(gradeable_id) {
     //         $('#popup_to_show_matches_id').css('display', 'none');
     //     }
     // });
+
+    setUpLeftPane(gradeable_id);
 
 
 }
