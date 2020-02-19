@@ -60,6 +60,7 @@
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}
             <a class="post-email-toggle" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
+            <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
         {% endif %}
 
         {% if userGroup <= 2 %}
