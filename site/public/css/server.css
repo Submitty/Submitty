@@ -1180,6 +1180,12 @@ div.full_height {
 
 .popup-form .form-button-container {
     text-align: right;
+    padding: 0.5rem;
+}
+
+.close-button {
+    margin-right: 5px;
+    border: 1px solid black !important;
 }
 
 .popup-form .form-button-container .btn {

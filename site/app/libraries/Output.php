@@ -38,6 +38,7 @@ class Output {
 
     private $use_header = true;
     private $use_footer = true;
+    private $use_mobile_viewport = false;
 
     private $start_time;
 
@@ -517,6 +518,14 @@ HTML;
 
     public function useFooter($bool = true) {
         $this->use_footer = $bool;
+    }
+
+    public function enableMobileViewport(): void {
+        $this->use_mobile_viewport = true;
+    }
+
+    public function useMobileViewport(): bool {
+        return $this->use_mobile_viewport;
     }
 
     public function addBreadcrumb($string, $url = null, $external_link = false) {
