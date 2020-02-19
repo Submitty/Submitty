@@ -58,7 +58,8 @@ function setUpLeftPane(gradeable_id) {
             getMatchesListForClick(gradeable_id, user_id_1, user_1_version, lineData.from);
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             // In this case we want to update the right side as well...
-            updatePanesOnOrangeClick(clickedMark, editor0, editor1);
+            // Needs work...
+            //updatePanesOnOrangeClick(clickedMark, editor0, editor1);
         } else {
             if($('#popup_to_show_matches_id').css('display') == 'block'){
                 $('#popup_to_show_matches_id').css('display', 'none');
@@ -115,16 +116,7 @@ function setUpPlagView(gradeable_id) {
     $('[name="user_id_2"]', form).change(function(){
         setCodeInEditor(gradeable_id, 'user_id_2');
     });
-
-    // $(document).click(function() {
-    //     if($('#popup_to_show_matches_id').css('display') == 'block'){
-    //         $('#popup_to_show_matches_id').css('display', 'none');
-    //     }
-    // });
-
     setUpLeftPane(gradeable_id);
-
-
 }
 
 function requestAjaxData(url, f, es) {
