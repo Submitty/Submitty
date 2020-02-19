@@ -174,8 +174,6 @@ function createLeftUserVersionDropdown(version_data, active_version_user_1, max_
 }
 
 function clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_id_1, user_id_2 = null, version_id_2 = null) {
-    editor0.getDoc().setValue('');
-    editor1.getDoc().setValue('');
     const f = function(data, secondEditor) {
         editor0.getDoc().setValue(data.display_code1);
         editor0.refresh();
@@ -183,6 +181,8 @@ function clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_id_
         if (secondEditor) {
             editor1.getDoc().setValue(data.display_code2);
             editor1.refresh();
+        } else {
+            editor1.getDoc().setValue('');
         }
         colorEditors(data);
     };
