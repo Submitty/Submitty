@@ -5,6 +5,7 @@ const BLUE   = "#89CFF0";
 var LeftUserMatches = null;
 var editor0 = null;
 var editor1 = null;
+var form = null;
 
 function isColoredMarker(marker, color) {
     return marker.css.toLowerCase().indexOf(color) != -1;
@@ -14,7 +15,6 @@ function colorEditors(data) {
     for(var users_color in data.ci) {
     	var editor = users_color == 1 ? editor0 : editor1;
     	editor.operation(() => {
-    		editor.getDoc().setValue((users_color === 1) ? data.display_code1 : data.display_code2);
         	for(var pos in data.ci[users_color]) {
             	var element = data.ci[users_color][pos];
             	editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "background: " + element[4]});
@@ -74,7 +74,7 @@ function setUpLeftPane() {
 
 function setUpPlagView(gradeable_id) {
 
-	var form = $("#users_with_plagiarism");
+	form = $("#users_with_plagiarism");
     editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
         readOnly: true,
@@ -110,14 +110,6 @@ function setUpPlagView(gradeable_id) {
 
 }
 
-function createUserList(search, form) {
-    var append_options='<option value="">None</option>';
-    $.each(data, function(i,users){
-        append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}">'+ users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
-    });
-    $('[name="' + search +'"]', form).find('option').remove().end().append(append_options).val('');
-}
-
 function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
@@ -133,6 +125,14 @@ function requestAjaxData(url, f, es) {
             alert("Error occured when requesting via ajax. Please refresh the page and try again.");
         }
     });
+}
+
+function createRightUsersList(data, form) {
+    var append_options='<option value="">None</option>';
+    $.each(data, function(i,users){
+        append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}">'+ users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
+    });
+    $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
 }
 
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
@@ -160,7 +160,6 @@ function clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_id_
     editor0.getDoc().setValue('');
     editor1.getDoc().setValue('');
     const f = function(data, secondEditor) {
-        //colorEditors(data);
         editor0.getDoc().setValue(data.display_code1);
         editor0.refresh();
         createLeftUserVersionDropdown(data.all_versions_user_1, data.active_version_user_1, data.max_matching_version, data.code_version_user_1);
@@ -168,12 +167,19 @@ function clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_id_
             editor1.getDoc().setValue(data.display_code2);
             editor1.refresh();
         }
+        colorEditors(data);
     };
     var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
     var es = false;
-    if (user_id_2 !== null) {
-        url += `&user_id_2${user_id_2}$version_user_2=${version_id_2}`;
+    if (user_id_2 != null) {
+        url += `&user_id_2=${user_id_2}&version_user_2=${version_id_2}`;
         es = true;
+    } else {
+        var url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+        const f2 = function(data, secondEditor) {
+            createRightUsersList(data);
+        }
+        requestAjaxData(url2, f2, false);
     }
     requestAjaxData(url, f, es);
 }
@@ -193,7 +199,7 @@ function setCodeInEditor(gradeable_id, changed) {
     } else if (changed == "user_id_2" && user_id_2_data == "") {
         editor1.getDoc().setValue('');
     } else {
-        // First check if left side changed...
+        // First check if left side changed... Clean up this...
         if (changed === 'user_id_1' || changed === 'version_user_1') {
             if(version_user_1 == "") {
                 version_user_1 = "max_matching";

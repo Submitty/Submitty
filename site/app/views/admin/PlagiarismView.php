@@ -203,7 +203,7 @@ HTML;
                 <select name="user_id_2">
                     <option value="">None</option>
                 </select>
-                <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
+                <a name="toggle" class="btn btn-primary disable" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>
         </form><br />
         <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
