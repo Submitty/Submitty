@@ -2,6 +2,8 @@ const YELLOW = "#ffff00";
 const ORANGE = "#ffa500";
 const RED    = "#ff0000";
 var LeftUserMatches = null;
+var editor0 = null;
+var editor1 = null;
 
 function isColoredMarker(marker, color) {
     return marker.css.toLowerCase().indexOf(color) != -1;
@@ -9,8 +11,8 @@ function isColoredMarker(marker, color) {
 
 function colorEditors(data) {
     for(var users_color in data.ci) {
-    	var editor = $('.CodeMirror')[users_color-1].CodeMirror;
-    	editor.getDoc().setValue((users_color === 1) ? data.display_code1 : data.display_code2)
+    	var editor = users_color == 1 ? editor0 : editor1;
+    	editor.getDoc().setValue((users_color === 1) ? data.display_code1 : data.display_code2);
         for(var pos in data.ci[users_color]) {
             var element = data.ci[users_color][pos];
             editor.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "background: " + element[4]});
@@ -26,11 +28,16 @@ function updateCssForMark(mark, prevColor, toColor) {
 }
 
 function colorReset(allMarks, clickedMark, updateClickedCallback) {
+    var attrTemp = {"data_prev_color": null, "data_current_color": null};
     allMarks.forEach(m => {
-        if(m.className === "red_plag") {
-            m.css = "background: " + m.attributes["data_prev_color"];
-            m.className = "";
-        }
+        if(currentColor === RED || currentColor == ORANGE) {
+    		const currentColor = m.attributes["data_current_color"];
+    		const prevColor    = m.attributes["data_prev_color"]; 
+            attrTemp["data_current_color"] = prevColor;
+            attrTemp["data_prev_color"] = 
+        	m.attributes = attrTemp;
+        	m.css = "background: " + m.attributes["data_prev_color"];
+        } 
     });
     updateClickedCallback(clickedMark,);
 }
@@ -45,8 +52,7 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
         
             if (!setLeft) {
                 clickedMark.css = "background:#FF0000";
-                clickedMark.className = "red_plag";
-                clickedMark.attributes = {"data_prev_color": "#ffa500"};
+                clickedMark.attributes = {"data_prev_color": ORANGE, "data_current_color": RED};
                 editor0.refresh();
                 setLeft = true;
             } 
@@ -59,7 +65,7 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
     });
 }
 
-function setUpLeftPane(editor0, editor1) {
+function setUpLeftPane() {
     editor0.getWrapperElement().onmousedown = function(e) {
         var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
         var markers = editor0.findMarksAt(lineCh);
@@ -92,13 +98,13 @@ function setUpLeftPane(editor0, editor1) {
 function setUpPlagView(gradeable_id) {
 
 	var form = $("#users_with_plagiarism");
-    var editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
+    editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
         readOnly: true,
         cursorHeight: 0.0,
         lineWrapping: true
     });
-    var editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
+    editor1 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
         lineNumbers: true,
         readOnly: true,
         cursorHeight: 0.0,
@@ -126,8 +132,6 @@ function setUpPlagView(gradeable_id) {
 
 
 }
-
-function 
 
 function setUserSubmittedCode(gradeable_id, changed) {
     var form = $("#users_with_plagiarism");

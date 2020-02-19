@@ -607,6 +607,7 @@ class PlagiarismController extends AbstractController {
                     elseif (!$orange_color) {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
+                        
                     }
 
                     if ($codebox == "2" && $user_id_2 != "" && $orange_color) {
