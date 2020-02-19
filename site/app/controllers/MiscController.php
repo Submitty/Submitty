@@ -45,6 +45,7 @@ class MiscController extends AbstractController {
 
         if ($gradeable->isGradeByRegistration()) {
             $section = $submitter->getRegistrationSection();
+        }
         else {
             $section = $submitter->getRotatingSection();
         }
