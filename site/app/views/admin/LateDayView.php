@@ -16,6 +16,7 @@ class LateDayView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb('Late Days Allowed');
+        $this->core->getOutput()->enableMobileViewport();
 
         $student_full = Utils::getAutoFillData($students);
 
