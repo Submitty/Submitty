@@ -27,6 +27,6 @@ def down(config, database, semester, course):
             j = json.load(in_file)
 
         if 'forum_create_thread_message' in j['course_details']:
-            del j['forum_create_thread_message']
+            del j['course_details']['forum_create_thread_message']
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
