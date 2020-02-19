@@ -26,29 +26,24 @@ function colorEditors(data) {
 
 function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
     var marks_editor2 = editor1.getAllMarks();
-    var setLeft = false;
     editor1.operation( () => {
     	marks_editor2.forEach(mark => {
 	        var rightMarkerData = mark.find();
-	        if(mark.attributes.data_start == leftClickedMark.attributes.data_start && mark.attributes.data_end == leftClickedMark.attributes.data_end) {
+	        if(mark.attributes.data_start == leftClickedMarker.attributes.data_start && mark.attributes.data_end == leftClickedMarker.attributes.data_end) {
 	            mark.css = "background: #FF0000";
 	            mark.attributes = {"data_color_prev": ORANGE, "data_current_color": RED};
-	            setLeft = true;
 	        }
     	});
 	});
-	if (setLeft) {
-	    clickedMark.css = "background:#FF0000";
-	    clickedMark.attributes = {"data_prev_color": ORANGE, "data_current_color": RED};
-	    editor0.refresh();
-	}
+	leftClickedMarker.css = "background:#FF0000";
+	leftClickedMarker.attributes = {"data_prev_color": ORANGE, "data_current_color": RED};
+	editor0.refresh();
 }
 
 function setUpLeftPane(gradeable_id) {
     editor0.getWrapperElement().onmouseup = function(e) {
         var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
         var markers = editor0.findMarksAt(lineCh);
-        console.log('help');
         // Did not select a marker 
         if (markers.length === 0) { 
             return; 
@@ -57,13 +52,10 @@ function setUpLeftPane(gradeable_id) {
         // Only grab the first one if there is overlap...
         var lineData = markers[0].find();
         var clickedMark = markers[0];
-        console.log('help2');
         if(isColoredMarker(clickedMark, YELLOW)) {
             var user_id_1 = $('[name="user_id_1"]', form).val();
             var user_1_version = $('[name="version_user_1"]', form).val();
-
             getMatchesListForClick(gradeable_id, user_id_1, user_1_version, lineData.from);
-            console.log('hel3');
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             // In this case we want to update the right side as well...
             updatePanesOnOrangeClick(clickedMark, editor0, editor1);
