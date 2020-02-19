@@ -165,11 +165,14 @@ HTML;
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addInternalJs('plagiarism.js');
 
         $return = "";
         $return .= <<<HTML
         <script>
-
+        $( document ).ready(function() {
+    		setUpPlagView("${gradeable_id}");
+		});
         </script>
 <div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
@@ -218,36 +221,7 @@ HTML;
         $return .= <<<HTML
 </div>
 <script>
-    var form = $("#users_with_plagiarism");
-    var code_user_1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
-        lineNumbers: true,
-        readOnly: true,
-        cursorHeight: 0.0,
-        lineWrapping: true
-    });
-    var code_user_2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
-        lineNumbers: true,
-        readOnly: true,
-        cursorHeight: 0.0,
-        lineWrapping: true
-    });
-
-    code_user_2.setSize("100%", "100%");
-    code_user_1.setSize("100%", "100%");
-    $('[name="user_id_1"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}','user_id_1');
-    });
-    $('[name="version_user_1"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}', 'version_user_1');
-    });
-    $('[name="user_id_2"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}', 'user_id_2');
-    });
-    $(document).click(function() {
-        if($('#popup_to_show_matches_id').css('display') == 'block'){
-            $('#popup_to_show_matches_id').css('display', 'none');
-        }
-    });
+	
 </script>
 HTML;
         return $return;
