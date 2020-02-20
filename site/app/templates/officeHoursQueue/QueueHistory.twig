@@ -1,15 +1,13 @@
 <br><br>
 <h1>Today's Queue History
-  {% if viewer.isGrader() %}
-    {% if viewer.getFullHistory() %}
-      <a role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
-        View Limited History
-      </a>
-    {% else %}
-      <a role="button" class="btn btn-default" href="{{base_url}}?full_history=true">
-        View Full History
-      </a>
-    {% endif %}
+  {% if viewer.getFullHistory() %}
+    <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
+      View Limited History
+    </a>
+  {% else %}
+    <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=true">
+      View Full History
+    </a>
   {% endif %}
 </h1>
 <table class="table table-striped" style="width:100%;">
@@ -34,7 +32,7 @@
     {% for entry in viewer.getPastQueue() if history_count < 25 or viewer.getFullHistory() %}
       {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
         {% set history_count = history_count + 1 %}
-        <tr class="queue_history_{{entry['queue_code']}}">
+        <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
           <th scope="row">{{history_count}}</th>
           <td class="mobile-hide">
             <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
@@ -74,7 +72,7 @@
               <form method="post" action="{{base_url}}/{{entry['queue_code']}}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
-                <button type="submit" class="btn btn-danger">Restore</button>
+                <button type="submit" class="btn btn-danger queue_restore_btn">Restore</button>
               </form>
             </td>
           {% endif %}
