@@ -510,8 +510,8 @@ class Access {
             if (!array_key_exists($dir, $this->directories)) {
                 return false;
             }
-            //This condition checks for the existense of path asked itself
-            else if (!file_exists($path)) {
+            elseif (!file_exists($path)) {
+                //checks for the existense of path which is asked for
                 return false;
             }
 

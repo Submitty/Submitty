@@ -113,7 +113,7 @@ class CourseMaterialsController extends AbstractController {
 
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-        $isFolderEmptyForMe=true;
+        $isFolderEmptyForMe = true;
         // iterate over the files inside the requested directory
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($root_path),
@@ -126,14 +126,14 @@ class CourseMaterialsController extends AbstractController {
                     // only add the file if the section of student is allowed and course material is released!
                     if (CourseMaterial::isSectionAllowed($this->core, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
                         $relativePath = substr($file_path, strlen($root_path) + 1);
-                        $isFolderEmptyForMe=false;
+                        $isFolderEmptyForMe = false;
                         $zip->addFile($file_path, $relativePath);
                     }
                 }
                 else {
                     // For graders and instructors, download the course-material unconditionally!
                     $relativePath = substr($file_path, strlen($root_path) + 1);
-                    $isFolderEmptyForMe=false;
+                    $isFolderEmptyForMe = false;
                     $zip->addFile($file_path, $relativePath);
                 }
             }
