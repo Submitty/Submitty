@@ -844,7 +844,8 @@ HTML;
         if ($isTeam) {
             $submitters = explode(", ", $submitter->getTeam()->getMemberList());
             $id = $submitter->getTeam()->getId();
-        } else {
+        }
+        else {
             $id = $submitter->getId();
             $submitters = [$id];
         }
