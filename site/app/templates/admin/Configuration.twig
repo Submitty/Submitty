@@ -162,7 +162,7 @@
         {% if submitty_admin_user['verified'] %}
             {% if submitty_admin_user['in_course'] %}
                 <div class="config-row checkbox-row">
-                    <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
+                    <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
                         <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
                         <div class="option-alt">

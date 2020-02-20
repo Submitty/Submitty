@@ -43,23 +43,24 @@
     for (var index in Object.keys(filter_choices)) {
       let key = Object.keys(filter_choices)[index];
       if (filter_choices[key]) {
-        let current_element = $(".queue_current_" + key);
+        let current_elements = $(".queue_current_" + key);
 
-        current_element.addClass("shown_queue_row");
+        current_elements.addClass("shown_queue_row");
 
-        current_element.show();
-        timer = current_element.find(".help_timer")
-        if (timer) {
-          timers.push([
-            timer,
-            new Date(timer.attr("help_time"))
-          ]);
-        }
-
+        current_elements.show();
+        current_elements.each(function(i, obj) {
+          let timer = $(obj).find(".help_timer")
+          if (timer) {
+            timers.push([
+              timer,
+              new Date(timer.attr("help_time"))
+            ]);
+          }
+        });
       } else {
-        let current_element = $(".queue_current_" + key);
-        current_element.hide();
-        current_element.removeClass("shown_queue_row");
+        let current_elements = $(".queue_current_" + key);
+        current_elements.hide();
+        current_elements.removeClass("shown_queue_row");
       }
     }
     updateTimers();
@@ -105,7 +106,7 @@
     }
     let auto_refresh = localStorage.getItem('office_hour_queue_auto_refresh') === "true";
     if (auto_refresh) {
-      $('#auto_refresh_btn').html("Turn off auto refresh");
+      $('#auto_refresh_btn').html("Turn Off Auto Refresh");
     }
 
     let refreshSpeed = 1000 * 30;
@@ -128,9 +129,9 @@
       auto_refresh = !auto_refresh;
       localStorage.setItem('office_hour_queue_auto_refresh', auto_refresh);
       if (auto_refresh) {
-        $('#auto_refresh_btn').html("Turn off auto refresh");
+        $('#auto_refresh_btn').html("Turn Off Auto Refresh");
       } else {
-        $('#auto_refresh_btn').html("Turn on auto refresh");
+        $('#auto_refresh_btn').html("Turn On Auto Refresh");
       }
     }
   {% endif %}
