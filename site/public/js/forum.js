@@ -675,6 +675,9 @@ function showHistory(post_id) {
                 var visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
                 var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fas fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                if(!author_user_id){
+                  user_button_code = ""
+                }
                 box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                 box.find("h7").before(user_button_code);
                 $("#popup-post-history .form-body").prepend(box);
