@@ -5,7 +5,7 @@
 >
 
 <div class="form-group row position-relative">
-    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
 
     {% if show_title %}
     <span class="edit_thread">
@@ -25,10 +25,10 @@
         <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
         &nbsp;&nbsp;
         <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
-            <button id="link_btn" type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Link <i class="fas fa-link fa-1x"></i></button>
-            <button id="code_btn" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Code <i class="fas fa-code fa-1x"></i></button>
-            <button id="bold_btn" title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button id="italic_btn" title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Italics <i class="fas fa-italic fa-1x"></i></button>
+            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Link <i class="fas fa-link fa-1x"></i></button>
+            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Code <i class="fas fa-code fa-1x"></i></button>
+            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Bold <i class="fas fa-bold fa-1x"></i></button>
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Italics <i class="fas fa-italic fa-1x"></i></button>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary" tabindex = "0" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
@@ -82,7 +82,7 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}"
+        <textarea name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}"
         onkeydown="submitNearestForm(event,$(this))"></textarea>
     </div>
 <br/>
@@ -119,8 +119,8 @@
         <span class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
-                <label id="file_input_label" class="btn btn-default" tabindex="0">Upload Attachment</label>
-                <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <label id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">Upload Attachment</label>
+                <input type="file" accept="image/*" aria-labelledby="file_input_label_{{post_box_id}}" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
             </div>
@@ -164,7 +164,7 @@
     {% endif %}
     <span class="inline-block right-zero">
         {% if show_anon %}
-            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
+            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
         {% endif %}
         {% if show_thread_status %}
         <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status">

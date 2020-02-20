@@ -19,7 +19,7 @@ body {min-width: 925px;}
     margin-bottom: 10px;
 }
 
-#forum_bar {
+.forum_bar {
     margin-right: 10px;
     padding-left:15px;
     margin-top: 10px;
@@ -49,7 +49,7 @@ body {min-width: 925px;}
 .first_post .post_button {
 }
 
-#post_user_id {
+.post_user_id {
     left:5px;
 }
 
@@ -286,9 +286,9 @@ body {min-width: 925px;}
     display:inline-block;
 }
 
-#forum_bar div div.col-6,
+.forum_bar div div.col-6,
 #search_block div div,
-#forum_bar div div.col-5{
+.forum_bar div div.col-5{
     padding: 0;
     top: 0px;
 }

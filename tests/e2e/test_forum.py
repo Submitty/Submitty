@@ -61,7 +61,7 @@ class TestForum(BaseTestCase):
         attachment_file = None
         self.switch_to_page_create_thread()
         self.driver.find_element_by_id("title").send_keys(title)
-        self.driver.find_element_by_id("thread_post_content").send_keys(first_post)
+        self.driver.find_element_by_class_name("thread_post_content").send_keys(first_post)
         upload_button = self.driver.find_element_by_xpath("//input[@type='file']")
         self.select_categories(categories_list)
         if upload_attachment:
