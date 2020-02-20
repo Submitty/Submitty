@@ -192,7 +192,7 @@
                             {% endif %}
                             {{ message.error | nl2br }}
                         </span>
-                        <a class="fas fa-times key_to_click" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                        <a class="fas fa-times key_to_click" tabindex="0" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                     </div>
                 {% endfor %}
             </div>

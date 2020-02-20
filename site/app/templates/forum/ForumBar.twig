@@ -62,7 +62,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
@@ -113,15 +113,15 @@
 			{% if thread_exists %}
 	          <li class="dropdown-divider"></li>
 	          <li title="Click to toggle all post attachments" class='dropdown-item'>
-	          	<a href="#" class="key_to_click" onclick="loadAllInlineImages()">
+	          	<a href="#" class="key_to_click" tabindex="0" onclick="loadAllInlineImages()">
    					Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
    				</a></li>
 	          <li class="dropdown-divider"></li>
 	              <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item'><a tabindex="-1" class="key_to_click" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" class="key_to_click" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
-				        <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})" class="key_to_click">Chronological  <i class="fas fa-angle-down"></i> </a></li>
+	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
+				        <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})" class="key_to_click" tabindex="0">Chronological  <i class="fas fa-angle-down"></i> </a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
-	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha')" class="key_to_click">Alphabetical</a></li>
+	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha')" class="key_to_click" tabindex="0">Alphabetical</a></li>
 	              {% endif %}
 	        {% endif %}
 	        </ul>
