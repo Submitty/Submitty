@@ -196,7 +196,6 @@ body {min-width: 925px;}
 .delete-post-button, .edit-post-button{
     position: relative;
     display: inline-block;
-    float: right;
 }
 
 .delete-post-button{
@@ -309,9 +308,9 @@ body {min-width: 925px;}
 }
 
 .more-dropdown{
-    float:right;
+    position:absolute;
+    right:118px;
     top:3px;
-    margin-right:5px;
 }
 
 #post-hr{
