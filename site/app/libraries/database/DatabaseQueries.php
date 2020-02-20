@@ -5290,7 +5290,6 @@ AND gc_id IN (
         }
 
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND current_state IN ('waiting','being_helped')", array($remove_type,$this->core->getUser()->getId(), $user_id, $queue_code));
-        $this->core->addSuccessMessage("Removed from queue");
     }
 
     public function startHelpUser($user_id, $queue_code) {
@@ -5335,6 +5334,7 @@ AND gc_id IN (
             return;
         }
         $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null where entry_id = ?", array($entry_id));
+        $this->core->addSuccessMessage("Student restored");
     }
 
     public function getAllQueues() {

@@ -3,11 +3,6 @@
     visibility: hidden;
 }
 
-.button-padding {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-}
-
 td{
   vertical-align: middle;
 }

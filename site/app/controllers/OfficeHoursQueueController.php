@@ -173,6 +173,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $remove_type, $queue_code);
+        $this->core->addSuccessMessage("Removed from queue");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -225,6 +226,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->startHelpUser($_POST['user_id'], $queue_code);
+        $this->core->addSuccessMessage("Started helping student");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -263,6 +265,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->finishHelpUser($_POST['user_id'], $queue_code, $remove_type);
+        $this->core->addSuccessMessage("Finished helping student");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -282,6 +285,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->emptyQueue($queue_code);
+        $this->core->addSuccessMessage("Queue emptied");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -328,6 +332,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->deleteQueue($queue_code);
+        $this->core->addSuccessMessage("Queue deleted");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -366,6 +371,7 @@ class OfficeHoursQueueController extends AbstractController {
         $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
         $token = preg_replace('/\s+/', '_', trim($_POST['token']));
         $this->core->getQueries()->changeQueueToken($token, $queue_code);
+        $this->core->addSuccessMessage("Queue Code Changed");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );

@@ -40,7 +40,7 @@
         <div id="cust_messages" class="customization_item">
             <h2>Messages</h2>
             <div id="cust_messages_collapse" class="collapsible_area">
-                <p>You may enter a message that will appear above the student's rainbow grades.</p>
+                <label for="cust_messages_textarea">You may enter a message that will appear above the student's rainbow grades.</label>
                 <textarea id="cust_messages_textarea">{{ messages[0] }}</textarea>
             </div>
         </div>
@@ -66,7 +66,7 @@
                         {%  for bucket in used_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: inline;">
-                                    <input type="text" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
                                 </div>
                                 {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
                             </li>
@@ -80,7 +80,7 @@
                         {%  for bucket in available_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: none;">
-                                    <input type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                    <input aria-label="{{ bucket|capitalize }} percent" type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
                                 </div>
                                 {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
                             </li>
@@ -94,7 +94,7 @@
 
                             <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
                                 <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
-                                <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
+                                <input type="text" aria-label="{{ bucket|capitalize }} config count" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
 {#                                <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>#}
 {#                                <div style="float:right">#}
 {#                                    Point Distribution:<br>#}
@@ -109,7 +109,7 @@
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
                                             <li>
-                                                <input type="text" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
+                                                <input type="text" aria-label="{{gradeable["title"]}} max score" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
                                                 {{ gradeable["title"] }}
                                                 <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
                                             </li>
@@ -174,7 +174,7 @@
         }
     });
     bucket_lists.disableSelection();
-    
+
     var gradeables_lists = $("ol[id^='gradeables-list']").sortable();
     gradeables_lists.disableSelection();
 
