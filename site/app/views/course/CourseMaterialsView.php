@@ -20,6 +20,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
+        $this->core->getOutput()->enableMobileViewport();
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
         $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students) {
