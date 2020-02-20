@@ -838,7 +838,7 @@ HTML;
         //Empty thread input
         if ($threadIds === "{}") {
             $threadIds = array();
-        } 
+        }
         $id = '';
         $submitters = [];
         if ($isTeam) {
