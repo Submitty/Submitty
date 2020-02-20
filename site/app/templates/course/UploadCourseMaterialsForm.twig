@@ -19,24 +19,24 @@
             <p class="black-message">
                 Do you want to restrict this course material to some sections?
             </p>
-            <label class = "radio">
+            <label class = "radio" for="all_Sections_Showing">
                 <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
                 No
             </label>
-            <label class = "radio">
-                <input name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
+            <label class = "radio" for="all_Sections_Showing_yes">
+                <input id="all_Sections_Showing_yes" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
                 Yes
             </label>
             <script type="text/javascript">
                 function toggleRegistrationSections(){
                     $("#show_Some_Section_Selection").toggle();
-                } 
+                }
             </script>
             <div id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
                     <td>Section {{ section['sections_registration_id'] }}</td>
-                    <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                    <td><input id="section-{{ section['sections_registration_id'] }}" aria-label="Section {{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
                 </tr>
             {% endfor %}
             </div>
@@ -85,14 +85,14 @@
                     hideFromStudents = 'on';
                 }
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
-                
+
                 reg_sectionArray.forEach(function(element){
                     var currentSection = '#section-' +element['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
                 });
-                
+
                 if(document.getElementById('show_Some_Section_Selection').style.display == "none"){
                     sections = null;
                 }
@@ -141,7 +141,11 @@
                     enableTime: true,
                     enableSeconds: true,
                     time_24hr: true,
-                    dateFormat: "Y-m-d H:i:S"
+                    dateFormat: "Y-m-d H:i:S",
+                    onReady: (a, b, fp) => {
+                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    }
                     });
     </script>
     <script type="text/javascript">
