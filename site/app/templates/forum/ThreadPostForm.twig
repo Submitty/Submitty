@@ -31,7 +31,7 @@
             <button id="italic_btn" title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Italics <i class="fas fa-italic fa-1x"></i></button>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+        <a class="btn btn-primary" tabindex = "0" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -119,7 +119,7 @@
         <span class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
-                <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
+                <label id="file_input_label" class="btn btn-default" tabindex="0">Upload Attachment</label>
                 <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
