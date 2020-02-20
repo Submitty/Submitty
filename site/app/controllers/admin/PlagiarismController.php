@@ -597,13 +597,13 @@ class PlagiarismController extends AbstractController {
                 if ($match["type"] == "match") {
                     $segment_info["{$start_line}_{$start_pos}"] = array();
                     $orange_color = false;
-                        foreach ($match['others'] as $i => $other) {
-                            $segment_info["{$start_line}_{$start_pos}"][] = $other["username"] . "_" . $other["version"];
-                            if ($other["username"] == $user_id_2) {
-                                $orange_color = true;
-                                $user_2_index_in_others = $i;
-                            }
+                    foreach ($match['others'] as $i => $other) {
+                        $segment_info["{$start_line}_{$start_pos}"][] = $other["username"] . "_" . $other["version"];
+                        if ($other["username"] == $user_id_2) {
+                            $orange_color = true;
+                            $user_2_index_in_others = $i;
                         }
+                    }
 
                     if ($orange_color) {
                         //Color is orange -- general match from selected match
@@ -612,7 +612,6 @@ class PlagiarismController extends AbstractController {
                     elseif (!$orange_color) {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
-                        
                     }
 
                     if ($codebox == "2" && $user_id_2 != "" && $orange_color) {
@@ -640,7 +639,6 @@ class PlagiarismController extends AbstractController {
                 }
 
                 array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
-
             }
         }
         return [$color_info, $segment_info];
