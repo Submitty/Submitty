@@ -301,22 +301,20 @@ class AutoGradingView extends AbstractView {
         }
 
         // Get the names of all full access or above graders
-        $grader_names = array_map(function (User $grader) {
+        $ta_grader_names = array_map(function (User $grader) {
             return $grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName();
         }, $ta_graded_gradeable->getVisibleGraders());
 
-        // Special messages for peer / mentor-only grades
-        if ($gradeable->isPeerGrading()) {
-            $grader_names = ['Graded by Peer(s)'];
-        }
-        elseif (count($grader_names) === 0) {
+        if (count($ta_grader_names) === 0) {
             // Non-peer assignment with only limited access graders
-            $grader_names = ['Course Staff'];
+            $ta_grader_names = ['Course Staff'];
         }
 
         //get total score and max possible score
         $total_score = $graded_score = $ta_graded_gradeable->getTotalScore();
-        $total_max = $graded_max = $gradeable->getTaPoints();
+        $total_max = $graded_max = $gradeable->getManualGradingPoints();
+        $peer_max = $gradeable->getPeerPoints();
+        $ta_max = $gradeable->getTaPoints();
 
         //change title if autograding exists or not
         //display a sum of autograding and instructor points if both exist
@@ -349,13 +347,44 @@ class AutoGradingView extends AbstractView {
             $num_decimals = min(3, count($precision_parts));
         }
 
-        $component_data = array_map(function (Component $component) use ($ta_graded_gradeable) {
+        $peer_aliases = array();
+        $num_peers = 0;
+        $peer_grading_earned = 0;
+        $ta_grading_earned = 0;
+        $component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$peer_aliases, &$num_peers, &$peer_grading_earned, &$ta_grading_earned) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            $component_marks = array_map(function (Mark $mark) use ($container, $component) {
+                return [
+                    'title' => $mark->getTitle(),
+                    'points' => $mark->getPoints(),
+
+                    'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                    'earned' => $component->isPeer() ? array_map(function (User $grader) use ($component, $mark, $container) {
+                        return $container->hasMark($mark, $grader);
+                    }, $container->getGraders()) : $container->hasMark($mark)
+                ];
+            }, $component->getMarks());
+
+            if($component->isPeer()){
+                $peer_grading_earned += $container->getTotalScore();
+                // Maintain names (Peer 1, Peer 2, etc.) for each of the peer graders to help the student
+                // reason about feedback.
+                foreach($container->getGraders() as $grader) {
+                    if (!array_key_exists($grader->getId(), $peer_aliases)) {
+                        $num_peers += 1;
+                        $peer_aliases[$grader->getId()] = "Peer " . $num_peers;
+                    }
+                }
+            }
+            else {
+                $ta_grading_earned += $container->getTotalScore();
+            }
             return [
                 'title' => $component->getTitle(),
                 'extra_credit' => $component->isExtraCredit(),
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
+                'is_peer_component' => $component->isPeer(),
 
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
@@ -363,17 +392,21 @@ class AutoGradingView extends AbstractView {
                 'graders' => array_map(function (User $grader) {
                     return $grader->getDisplayedLastName();
                 }, $container->getVisibleGraders()),
-                'marks' => array_map(function (Mark $mark) use ($container) {
-                    return [
-                        'title' => $mark->getTitle(),
-                        'points' => $mark->getPoints(),
-
-                        'show_mark' => $mark->isPublish() || $container->hasMark($mark),
-                        'earned' => $container->hasMark($mark),
-                    ];
-                }, $component->getMarks())
+                'peer_ids' => array_values(array_map(function (User $grader) {
+                    return $grader->getId();
+                }, $container->getGraders())),
+                'marks' => $component_marks,
+                    
             ];
         }, $gradeable->getComponents());
+
+        // The call to array_values rey-keys the returned arrays so that indexing starts at zero.
+        $ta_component_data = array_values(array_filter($component_data, function ($element) {
+            return $element['is_peer_component'] === false;
+        }));
+        $peer_component_data = array_values(array_filter($component_data, function ($element) {
+            return $element['is_peer_component'] === true;
+        }));
 
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
@@ -423,7 +456,6 @@ class AutoGradingView extends AbstractView {
             $files = array_merge($files['submissions'], $files['checkout']);
         }
 
-
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -431,14 +463,21 @@ class AutoGradingView extends AbstractView {
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
             'is_peer' => $gradeable->isPeerGrading(),
-            'components' => $component_data,
+            'ta_components' => $ta_component_data,
+            'peer_components' => $peer_component_data,
+            'peer_aliases' => $peer_aliases,
             'regrade_date' => $regrade_date,
             'late_days_url' => $late_days_url,
-            'grader_names' => $grader_names,
+            'ta_grader_names' => $ta_grader_names,
+            'number_of_peers' => $num_peers,
             'grading_complete' => $grading_complete,
             'has_autograding' => $has_autograding,
             'graded_score' => $graded_score,
             'graded_max' => $graded_max,
+            'peer_score' => $peer_grading_earned,
+            'peer_max' => $peer_max,
+            'ta_score' => $ta_grading_earned,
+            'ta_max' => $ta_max,
             'total_score' => $total_score,
             'total_max' => $total_max,
             'active_same_as_graded' => $active_same_as_graded,

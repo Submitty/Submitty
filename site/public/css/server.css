@@ -534,6 +534,12 @@ td>a.active-sort {
     padding: 5px 5px 10px;
 }
 
+.submission-page-total-header {
+  padding: 6px;
+  color: var(--text-white);
+  background-color: var(--actionable-blue);
+}
+
 .viewed_post{
     background-color: var(--default-white);
 }
@@ -578,6 +584,10 @@ td>a.active-sort {
 .grade-results {
     display: flex;
     flex-direction: row;
+}
+
+.grading-results-area {
+  margin-bottom: 25px;
 }
 
 .box > h4 {

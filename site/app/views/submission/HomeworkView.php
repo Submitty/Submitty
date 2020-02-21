@@ -31,6 +31,7 @@ class HomeworkView extends AbstractView {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalCss('table.css');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_days_use = 0;
@@ -676,15 +677,15 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [
-            'gradeable_id' => $gradeable->getId(),
+            //'gradeable_id' => $gradeable->getId(),
             'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
-            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
+            //'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             // TODO: change this to submitter ID when the MiscController uses new model
-            'user_id' => $this->core->getUser()->getId(),
-            'team_assignment' => $gradeable->isTeamAssignment(),
+            //'user_id' => $this->core->getUser()->getId(),
+            //'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
-            'display_version' => $display_version,
+            //'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
             'change_version_url' => $change_version_url,
