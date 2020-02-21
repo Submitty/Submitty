@@ -109,7 +109,13 @@
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
                                             <li>
-                                                <input type="text" aria-label="{{gradeable["title"]}} max score" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
+                                                <input type="text"
+                                                       aria-label="{{gradeable["title"]}} max score"
+                                                       value="{{ gradeable["max_score"] }}"
+                                                       id="maxscore-{{ gradeable["id"] }}"
+                                                       data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                       style="margin-right: 10px;display:inline;"
+                                                       onblur="ClampPoints(this);">
                                                 {{ gradeable["title"] }}
                                                 <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
                                             </li>
