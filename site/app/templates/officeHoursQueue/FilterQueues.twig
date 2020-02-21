@@ -1,10 +1,10 @@
 {% if viewer.isGrader()%}
   <p>
-    <button class="btn btn-primary" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
+    <button id="toggle_filter_settings" class="btn btn-primary" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
       Toggle Filter Settings
     </button>
     <button id="auto_refresh_btn" class="btn btn-default" type="button" onclick="toggleAutoRefresh()">
-      Turn on auto refresh
+      Turn On Auto Refresh
     </button>
   </p>
   <div class="collapse" id="filgerSettingsCollapse">
@@ -12,27 +12,27 @@
     <br>
     <form method="post" id="open_new_queue" action="{{base_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <input type="text" name="code" placeholder="Name" required="required">
+      <input type="text" id="new_queue_code" name="code" placeholder="Name" required="required">
       <input type="text" id="new_queue_token" name="token" placeholder="Code" required="required">
-      <a onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
+      <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-sync"></i>
       </a>
-      <button type="submit" class="btn btn-primary">Open New Queue</button>
+      <button id="open_new_queue_btn" type="submit" class="btn btn-primary">Open New Queue</button>
     </form>
     <br>
     <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <select class="form-control" name="code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
+      <select id="old_queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllQueues() %}
           <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
         {% endfor %}
       </select>
       <input type="text" id="old_queue_token" name="token" placeholder="New Code" required="required">
-      <a onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
+      <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-sync"></i>
       </a>
-      <button type="submit" class="btn btn-primary">Change Queue Code</button>
+      <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Code</button>
     </form>
 
     <table class="table table-striped" style="width:100%; margin-top:1rem;">
@@ -63,30 +63,30 @@
               </b>{{viewer.removeUnderScores(queue['code'])}}<br>
               <b>Code:
               </b>{{queue['token']}}</td>
-            <td class="button-padding">
+            <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/toggle">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                 <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
                 {% if queue['open'] == 0 %}
-                  <button type="submit" class="btn btn-primary filter_settings_btn">Open Queue</button>
+                  <button type="submit" class="btn btn-primary filter_settings_btn open_queue_btn">Open Queue</button>
                 {% else %}
-                  <button type="submit" class="btn btn-primary filter_settings_btn">Close Queue</button>
+                  <button type="submit" class="btn btn-primary filter_settings_btn close_queue_btn">Close Queue</button>
                 {% endif %}
               </form>
             </td>
-            <td class="button-padding">
+            <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-                <button type="submit" class="btn btn-danger filter_settings_btn">Empty Queue</button>
+                <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn">Empty Queue</button>
               </form>
             </td>
-            <td class="button-padding">
+            <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-                <button type="submit" class="btn btn-danger filter_settings_btn">Delete Queue</button>
+                <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn">Delete Queue</button>
               </form>
             </td>
             <td></td>

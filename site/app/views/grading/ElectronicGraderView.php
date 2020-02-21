@@ -731,7 +731,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPeerPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId());
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
         }
 
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
@@ -828,7 +828,7 @@ HTML;
         ]);
     }
 
-    public function renderDiscussionForum($threadIds, $submitter_id) {
+    public function renderDiscussionForum($threadIds, $submitter, $isTeam = false) {
         $posts_view = <<<HTML
             <span class="col grading_label">Discussion Posts</span>
 HTML;
@@ -839,11 +839,23 @@ HTML;
         if ($threadIds === "{}") {
             $threadIds = array();
         }
-
+        $id = '';
+        $submitters = [];
+        if ($isTeam) {
+            $submitters = explode(", ", $submitter->getTeam()->getMemberList());
+            $id = $submitter->getTeam()->getId();
+        }
+        else {
+            $id = $submitter->getId();
+            $submitters = [$id];
+        }
         foreach ($threadIds as $threadId) {
-            $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
+            $posts = array();
+            foreach ($submitters as $s_id) {
+                $posts = array_merge($posts, $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $s_id));
+            }
             if (count($posts) > 0) {
-                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $submitter_id);
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $id);
             }
             else {
                 $posts_view .= <<<HTML
@@ -852,7 +864,7 @@ HTML;
             }
 
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
+                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick=""> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
         }

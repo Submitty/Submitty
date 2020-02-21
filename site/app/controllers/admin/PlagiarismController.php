@@ -559,7 +559,8 @@ class PlagiarismController extends AbstractController {
                 return;
             }
         }
-        $data['ci'] = $color_info;
+        $data['ci'] = $color_info[0];
+        $data['si'] = $color_info[1];
         $return = json_encode($data);
         echo($return);
     }
@@ -570,6 +571,7 @@ class PlagiarismController extends AbstractController {
         //Represents left and right display users
         $color_info[1] = array();
         $color_info[2] = array();
+        $segment_info = array();
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
         if (!file_exists($file_path)) {
@@ -593,13 +595,13 @@ class PlagiarismController extends AbstractController {
                 $userMatchesStarts = array();
                 $userMatchesEnds = array();
                 if ($match["type"] == "match") {
+                    $segment_info["{$start_line}_{$start_pos}"] = array();
                     $orange_color = false;
-                    if ($user_id_2 != "") {
-                        foreach ($match['others'] as $i => $other) {
-                            if ($other["username"] == $user_id_2) {
-                                $orange_color = true;
-                                $user_2_index_in_others = $i;
-                            }
+                    foreach ($match['others'] as $i => $other) {
+                        $segment_info["{$start_line}_{$start_pos}"][] = $other["username"] . "_" . $other["version"];
+                        if ($other["username"] == $user_id_2) {
+                            $orange_color = true;
+                            $user_2_index_in_others = $i;
                         }
                     }
 
@@ -636,14 +638,10 @@ class PlagiarismController extends AbstractController {
                     $color = '#b5e3b5';
                 }
 
-                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
-
-                // foreach($color_info as $i=>$color_info_for_line) {
-                //  ksort($color_info[$i]);
-                // }
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
             }
         }
-        return $color_info;
+        return [$color_info, $segment_info];
     }
 
     public function getDisplayForCode(string $file_name, $color_info) {
