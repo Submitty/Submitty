@@ -1061,7 +1061,7 @@ div.full_height {
     margin-top: 5px;
 }
 
-.cat-buttons:hover {
+.cat-buttons:hover, .cat-buttons:focus{
     opacity: 0.8;
     filter: alpha(opacity=80);
 }
