@@ -768,17 +768,16 @@ HTML;
         elseif ($rollbackSubmission != -1) {
             $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                 "color" => "var(--standard-creamsicle-orange)", // fire engine red
-                "message" => "Late Submission (Rollback to on-time submission" . $rollbackSubmission . ")"
+                "message" => "Late Submission (Rollback to on-time submission - " . $rollbackSubmission . ")"
             ]);
         }
-        else {
-            if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
-                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "var(--standard-red-orange)", // fire engine red
-                    "message" => "Late Submission"
-                ]);
-            }
+        elseif ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
+            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                "color" => "var(--standard-red-orange)", // fire engine red
+                "message" => "Late Submission (No on time submission available)"
+            ]);
         }
+
         return $return;
     }
 

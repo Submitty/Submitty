@@ -1043,28 +1043,23 @@ class ElectronicGraderController extends AbstractController {
             $late_status = $ldi->getStatus();
         }
         $rollbackSubmission = -1;
-        $previousVersion = $display_version-1;
+        $previousVersion =  $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() - 1;
         // check for rollback submission only if the Active version is greater than 1 and that too is late.
         if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
-            while($previousVersion) {
-                $graded_gradeable->getAutoGradedGradeable()->setActiveVersion($previousVersion);
+            while ($previousVersion) {
                 $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
                 $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
-                $newLateInfo =  LateDays::fromUser($this->core, $late_days_user)->getLateDaysRemainingByContext($prevVersionInstance->getSubmissionTime());
-                $mkj =$graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-                echo 'checking for version'.$previousVersion.$lateInfo->getStatus().'<-late status , new status->'.$newLateInfo.'\n';
-                echo  'Active version is ' . $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-                if ($lateInfo == null or ($lateInfo->getStatus($newLateInfo) == LateDayInfo::STATUS_GOOD) ) {
-                    echo 'found good one\n';
+                $daysLate = $prevVersionInstance->getDaysLate();
+
+                // If this version is a good submission then it the rollback Submision
+                if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
                     $rollbackSubmission = $previousVersion;
                     break;
                 }
-                // check the same thing for previous version.
-                $previousVersion-=1;
+                // applying same condition for previous version. i.e going back one version
+                $previousVersion -= 1;
             }
         }
-        // set the active version back to what it was
-        $graded_gradeable->getAutoGradedGradeable()->setActiveVersion($display_version);
 
         $logger_params = array(
             "course_semester" => $this->core->getConfig()->getSemester(),

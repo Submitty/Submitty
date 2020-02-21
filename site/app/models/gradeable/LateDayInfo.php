@@ -105,7 +105,7 @@ class LateDayInfo extends AbstractModel {
 
     /**
      * Gets the late status of the gradeable
-     * @param int $relative_days optional
+     * @param int $relative_days optional - if passed, calculations will be made with reference to this.
      * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
      */
     public function getStatus(int $relative_days = null) {
@@ -115,7 +115,7 @@ class LateDayInfo extends AbstractModel {
             return self::STATUS_NO_ACTIVE_VERSION;
         }
 
-        $days = $relative_days !==null ? $relative_days : $this->getDaysLate();
+        $days = $relative_days !== null ? $relative_days : $this->getDaysLate();
 
         // If the number of days late is more than the number allowed, then its BAD
         if ($days > $this->getLateDaysAllowed()) {
