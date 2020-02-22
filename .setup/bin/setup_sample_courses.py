@@ -523,7 +523,7 @@ def create_gradeable_submission(src, dst):
 
     if src[-3:] == "zip":
         with ZipFile(src, 'r') as zip_file:
-            shutil.unpack_archive(zip_file,dst,"zip")
+            shutil.unpack_archive(str(zip_file), dst, "zip")
     else:
         shutil.copy(src, dst)
 
@@ -1035,7 +1035,7 @@ class Course(object):
             zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
             with TemporaryDirectory() as tmpdir:
                 with ZipFile(zip_path) as open_file:
-                    shutil.unpack_archive(open_file,tmpdir,"zip")
+                    shutil.unpack_archive(str(open_file), str(tmpdir), "zip")
                 inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
