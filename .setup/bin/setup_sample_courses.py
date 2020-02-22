@@ -39,9 +39,6 @@ from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
-# TODO: Remove this and purely use shutil once we move totally to Python 3
-#from zipfile import ZipFile
-
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
 import yaml
 
@@ -507,8 +504,6 @@ def create_gradeable_submission(src, dst):
     At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
     a .zip), then we will extract the contents of the source (using ZipFile) to the destination, else we
     just do a simple copy operation of the source file to the destination location.
-
-    At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
 
     :param src: path of the file or directory we want to use for this submission
     :type src: str
