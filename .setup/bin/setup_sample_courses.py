@@ -502,8 +502,10 @@ def create_gradeable_submission(src, dst):
     zip file (stored in /tmp) and store the path to this newly created zip as our new source.
 
     At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
-    a .zip), then we will extract the contents of the source (using ZipFile) to the destination, else we
+    a .zip), then we will extract the contents of the source (using Shutil) to the destination, else we
     just do a simple copy operation of the source file to the destination location.
+
+    At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
 
     :param src: path of the file or directory we want to use for this submission
     :type src: str
