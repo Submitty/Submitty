@@ -96,26 +96,28 @@
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
                 <div id="nav-links">
-                    <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home">
+                    <div id="mobile_home_link_parent">
+                      <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home">
                         <img id="submitty-mascot-home-btn"
                          src="{{ base_url }}/img/{{ duck_img }}"
                          alt="Submitty's duck mascot!"
                          height = "50px"
                          />
-                     </a>
+                      </a>
+                    </div>
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}
                                 <span>&gt;</span> {# span required to give conditional rendering #}
                             {% endif %}
-                            <div class="breadcrumb">
+                            <div id="desktop_home_link_parent" class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
-                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    <a id="desktop_home_link" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
                                 {% if b.getExternalUrl() is not empty %}
-                                    <a class="external-breadcrumb" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
+                                    <a id="desktop_home_link" class="external-breadcrumb" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
                                 {% endif %}
                             </div>
                         {% endfor %}
