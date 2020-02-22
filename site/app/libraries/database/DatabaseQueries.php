@@ -566,7 +566,7 @@ WHERE status = 1"
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
-    public function postHasHistory($post_id){
+    public function postHasHistory($post_id) {
         $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", array($post_id));
         return 0 !== count($this->course_db->rows());
     }
