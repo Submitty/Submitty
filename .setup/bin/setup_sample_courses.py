@@ -40,7 +40,7 @@ from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
 # TODO: Remove this and purely use shutil once we move totally to Python 3
-from zipfile import ZipFile
+#from zipfile import ZipFile
 
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
 import yaml
