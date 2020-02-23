@@ -6,6 +6,7 @@ use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DatabaseUtils;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 
@@ -99,7 +100,8 @@ class RainbowCustomization extends AbstractModel {
             $this->customization_data[$bucket][] = [
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
-                "max_score" => $max_score
+                "max_score" => $max_score,
+                "grade_release_date" => DateUtils::dateTimeToString($gradeable->getGradeReleasedDate())
             ];
         }
 
