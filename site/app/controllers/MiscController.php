@@ -50,8 +50,6 @@ class MiscController extends AbstractController {
         }
         $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id, $active_version);
 
-        $section = null;
-
         if ($gradeable->isGradeByRegistration()) {
             $section = $submitter->getRegistrationSection();
         }
@@ -59,19 +57,13 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-        $dir = "submissions";
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $dir, $gradeable_id, $id, $active_version, $file_name);
-
-        //See if we are allowed to access this path
-        $path = $this->core->getAccess()->resolveDirPath($dir, $path);
-      
         if ($file_path !== $_POST['file_path'] || !Utils::startsWith($file_path, $check_path)) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
         }
-      
-        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
+
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $directory, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You do not have access to this file")
             );
