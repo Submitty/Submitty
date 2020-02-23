@@ -29,7 +29,9 @@ class PDFView extends AbstractView {
         $localjs = array();
 
         //This jquery file should not need to be added here as jquery should already be in the header on any page
-        // $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
+        if (isset($params['jquery']) && $params['jquery'] === true) {
+            $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
+        }
 
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
