@@ -16,6 +16,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\gradeable\AbstractGradeableInput;
+use app\libraries\NumberUtils;
 
 class HomeworkView extends AbstractView {
 
@@ -586,6 +587,7 @@ class HomeworkView extends AbstractView {
      */
     private function renderVersionBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
@@ -667,25 +669,36 @@ class HomeworkView extends AbstractView {
         }
 
         $cancel_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version' ,'0']);
-
         $change_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $display_version]);
-
         $view_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/';
-
         $check_refresh_submission_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
-
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
+        $total_score = $ta_graded_gradeable->getTotalScore();
+        $total_max = $gradeable->getManualGradingPoints();
+
+        if ($version_instance !== null) {
+            $total_score += $version_instance->getTotalPoints();
+            $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+        }
+
+        //Clamp full gradeable score to zero
+        $total_score = max($total_score, 0);
+        $total_score = NumberUtils::roundPointValue($total_score, $gradeable->getPrecision());
+
         $param = array_merge($param, [
-            //'gradeable_id' => $gradeable->getId(),
+            'total_score' => $total_score,
+            'total_max'   => $total_max,
+            'gradeable_id' => $gradeable->getId(),
             'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
-            //'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
+            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
+            'incomplete_autograding' => !$version_instance->isAutogradingComplete(),
             // TODO: change this to submitter ID when the MiscController uses new model
-            //'user_id' => $this->core->getUser()->getId(),
-            //'team_assignment' => $gradeable->isTeamAssignment(),
+            'user_id' => $this->core->getUser()->getId(),
+            'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
-            //'display_version' => $display_version,
+            'display_version' => $display_version,
             'active_version' => $active_version_number,
             'cancel_url' => $cancel_url,
             'change_version_url' => $change_version_url,

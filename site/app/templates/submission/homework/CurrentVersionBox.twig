@@ -1,3 +1,22 @@
+{% import 'functions/Badge.twig' as Badge %}
+
+
+{% if ta_grades_released and has_manual_grading and incomplete_autograding == false %}
+    <div class="content">
+        <div class="box submission-page-total-header">
+            <div class="box-title"
+                {% if total_score >= total_max %}
+                    onclick="addConfetti();"
+                    style="cursor:pointer;"
+                {% endif %}
+            >
+                {{ Badge.render(total_score, total_max, false) }}
+                <h4>Total Score</h4>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
 <div class="content">
     {% if team_assignment %}
         <h3>Team: {{ team_members }}</h3><br />
