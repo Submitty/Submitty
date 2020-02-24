@@ -20,25 +20,17 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadInBreadcrumbLinks(){
-  if($("#home-button")){
-    mobileHomeLink = $("#home-button")[0].outerHTML;
-  }
-  if($("#desktop_home_link")){
-    desktopHomeLink = $("#desktop_home_link")[0].outerHTML;
-  }
+  mobileHomeLink = $("#home-button").attr('href');
+  desktopHomeLink = $("#desktop_home_link").attr('href');
 }
 
 function adjustBreadcrumbLinks(){
   if($(document).width() > 528){
-    if($("#home-button")){
-      $("#home-button").remove();
-    }
-    $("#desktop_home_link_parent")[0].innerHTML = desktopHomeLink;
+    $("#home-button").attr('href', "");
+    $("#desktop_home_link").attr('href', desktopHomeLink);
   }else{
-    if($("#desktop_home_link")){
-      $("#desktop_home_link").remove();
-    }
-    $("#mobile_home_link_parent")[0].innerHTML = mobileHomeLink;
+    $("#home-button").attr('href', mobileHomeLink);
+    $("#desktop_home_link").attr('href', "");
   }
 }
 

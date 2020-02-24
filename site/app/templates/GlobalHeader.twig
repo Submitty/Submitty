@@ -96,7 +96,7 @@
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
                 <div id="nav-links">
-                    <div id="mobile_home_link_parent">
+                    <div>
                       <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home">
                         <img id="submitty-mascot-home-btn"
                          src="{{ base_url }}/img/{{ duck_img }}"
@@ -110,14 +110,14 @@
                             {% if loop.index0 > 0 %}
                                 <span>&gt;</span> {# span required to give conditional rendering #}
                             {% endif %}
-                            <div id="desktop_home_link_parent" class="breadcrumb">
+                            <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
                                     <a id="desktop_home_link" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
                                 {% if b.getExternalUrl() is not empty %}
-                                    <a id="desktop_home_link" class="external-breadcrumb" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
+                                    <a class="external-breadcrumb" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
                                 {% endif %}
                             </div>
                         {% endfor %}
