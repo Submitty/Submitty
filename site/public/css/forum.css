@@ -419,11 +419,6 @@ body {min-width: 925px;}
     margin-left: 1em;
 }
 
-#hidden-forum-header{
-    font-size:1px;
-    color: #f6fbfe;
-}
-
 .thread-list-item{
     font-weight: bold;
     display: block;

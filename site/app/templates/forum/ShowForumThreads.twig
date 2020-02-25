@@ -1,5 +1,3 @@
-<h1 id="hidden-forum-header">Discussion Forum</h1>
-
 <script>
 
     $( document ).ready(function(){
@@ -26,7 +24,7 @@
 
 <div class="full_height content forum_content forum_show_threads">
 
-    {% if not thread_exists  %}        
+    {% if not thread_exists  %}
         {%  include "forum/ForumBar.twig" with {
                 "current_thread" : button_params.current_thread,
                 "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
