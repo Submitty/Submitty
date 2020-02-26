@@ -111,74 +111,71 @@ $( document ).ready(function() {
         {# /Overview #}
 
         {% if ta_components | length > 0 %}
-            <div class="box grading-results-area">
-                {# TA/Instructor Manual total #}
-                <div class="box submission-page-total-header">
-                    <div class="box-title">
-                        {{ Badge.render(ta_score, ta_max, false) }}
-                        <h4>TA / Instructor Grading Total</h4>
+            {# TA/Instructor Manual total #}
+            <div class="box submission-page-total-header">
+                <div class="box-title">
+                    {{ Badge.render(ta_score, ta_max, false) }}
+                    <h4>TA / Instructor Grading Total</h4>
+                </div>
+            </div>
+            {# /TA/Instructor Manual total #}
+
+            {# TA Component boxes #}
+            {% for component in ta_components %}
+                <div class="box grade-results">
+                    <div class="box-badge">
+                        {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+                    </div>
+                    <div class="box-info">
+                        <h4>{{ component.title|escape }}
+                            {% if component.graders|length != 0 %}
+                                <i>(Graded by: {{ component.graders|join(' / ') }})</i>
+                            {% endif %}
+                        </h4>
+                        <div style="float:left;">
+                            <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
+                            <p>
+                            {# This is a layout table #}
+                            <table class="gradeable_comment">
+                                {% for mark in component.marks|filter((mark) => mark.show_mark) %}
+                                    <tr>
+                                        <td>
+                                            {% if mark.earned %}
+                                                <i class="far fa-check-square fa-1g"></i>
+                                            {% else %}
+                                                <i class="far fa-square fa-1g"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td class="mark-score">
+                                            {{ mark.points|number_format(num_decimals) }}
+                                        </td>
+                                        <td>
+                                            {{ mark.title|nl2br }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% if component.custom_mark_score != 0 or component.comment != '' %}
+                                    <tr>
+                                        <td>
+                                            <i class="far fa-check-square fa-1g"></i>
+                                        </td>
+                                        <td class="mark-score">
+                                            {{ component.custom_mark_score|number_format(num_decimals) }}
+                                        </td>
+                                        <td>
+                                            {{ component.comment|nl2br }}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                            </p>
+                        </div>
                     </div>
                 </div>
-                {# /TA/Instructor Manual total #}
-
-                {# TA Component boxes #}
-                {% for component in ta_components %}
-                    <div class="box grade-results">
-                        <div class="box-badge">
-                            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
-                        </div>
-                        <div class="box-info">
-                            <h4>{{ component.title|escape }}
-                                {% if component.graders|length != 0 %}
-                                    <i>(Graded by: {{ component.graders|join(' / ') }})</i>
-                                {% endif %}
-                            </h4>
-                            <div style="float:left;">
-                                <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
-                                <p>
-                                {# This is a layout table #}
-                                <table class="gradeable_comment">
-                                    {% for mark in component.marks|filter((mark) => mark.show_mark) %}
-                                        <tr>
-                                            <td>
-                                                {% if mark.earned %}
-                                                    <i class="far fa-check-square fa-1g"></i>
-                                                {% else %}
-                                                    <i class="far fa-square fa-1g"></i>
-                                                {% endif %}
-                                            </td>
-                                            <td class="mark-score">
-                                                {{ mark.points|number_format(num_decimals) }}
-                                            </td>
-                                            <td>
-                                                {{ mark.title|nl2br }}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    {% if component.custom_mark_score != 0 or component.comment != '' %}
-                                        <tr>
-                                            <td>
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            </td>
-                                            <td class="mark-score">
-                                                {{ component.custom_mark_score|number_format(num_decimals) }}
-                                            </td>
-                                            <td>
-                                                {{ component.comment|nl2br }}
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                </table>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-            {# /Component boxes #}
-        {% endif %}
-
-    </div>
+            {% endfor %}
+        </div>
+        {# /Component boxes #}
+    {% endif %}
     {% if regrade_available %}
         <div id="ShowRegradeRequestButton">
             <button type="button" title="Open Grade Inquiry" onclick="$('#regradeBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#regradeBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default">Open Grade Inquiry</button>
