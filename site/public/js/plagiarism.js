@@ -82,11 +82,12 @@ function getUserData() {
 
 function toggle() {
     var data = getUserData();
-    clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
     updateRightUserLists(data['user_id_2'], data['version_user_2']);
+    clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
     $('[name="user_id_1"]', form).val(data['user_id_2']);
     $('[name="version_user_1"]', form).val(data['version_user_2']);
-    $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']});
+    //console.log({'user_id': data['user_id_1'], 'version': data['version_user_1']});
+    //setTimeout(function(){ $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']}); }, 3000);
 }
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
