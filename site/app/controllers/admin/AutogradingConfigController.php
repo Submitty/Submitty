@@ -19,9 +19,10 @@ use Symfony\Component\Routing\Annotation\Route;
 class AutogradingConfigController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
+     * @param string $g_id gradeable Id
      * @return Response
      */
-    public function showConfig() {
+    public function showConfig($g_id='') {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
         $all_paths = array();
@@ -42,6 +43,7 @@ class AutogradingConfigController extends AbstractController {
                 'uploadConfigForm',
                 $target_dir,
                 $all_files,
+                $gradeable_id = $g_id,
                 $inuse_config
             )
         );

@@ -5,7 +5,7 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class GradeableView extends AbstractView {
-    public function uploadConfigForm($target_dir, $all_files, $inuse_config) {
+    public function uploadConfigForm($target_dir, $all_files, $gradeable_id, $inuse_config) {
         $this->core->getOutput()->addBreadcrumb("upload config", $this->core->buildCourseUrl(['autograding_config']));
         $course = $this->core->getConfig()->getCourse();
 
@@ -18,6 +18,9 @@ class GradeableView extends AbstractView {
             "rename_url" => $this->core->buildCourseUrl(['autograding_config', 'rename']),
             "delete_url" => $this->core->buildCourseUrl(['autograding_config', 'delete']),
             "display_url" => $this->core->buildCourseUrl(['display_file']),
+            "back_url" => $gradeable_id !== ''
+                ? $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update?nav_tab=1'])
+                : $this->core->buildCourseUrl(),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
