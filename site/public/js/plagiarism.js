@@ -6,6 +6,7 @@ var editor0 = null;
 var editor1 = null;
 var form = null;
 var si = null;
+var gradeableId = null;
 
 function isColoredMarker(marker, color) {
     return marker.css.toLowerCase().indexOf(color) != -1;
@@ -40,7 +41,7 @@ function updatePanesOnOrangeClick(leftClickedMarker, editor0, editor1) {
 	editor0.refresh();
 }
 
-function setUpLeftPane(gradeable_id) {
+function setUpLeftPane() {
     editor0.getWrapperElement().onmouseup = function(e) {
         var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
         var markers = editor0.findMarksAt(lineCh);
@@ -55,7 +56,7 @@ function setUpLeftPane(gradeable_id) {
         if(isColoredMarker(clickedMark, YELLOW)) {
             var user_id_1 = $('[name="user_id_1"]', form).val();
             var user_1_version = $('[name="version_user_1"]', form).val();
-            getMatchesListForClick(gradeable_id, user_id_1, user_1_version, lineData.from);
+            getMatchesListForClick(user_id_1, user_1_version, lineData.from);
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             // In this case we want to update the right side as well...
             // Needs work...
@@ -69,14 +70,31 @@ function setUpLeftPane(gradeable_id) {
     }
 }
 
+function getUserData() {
+    var user_id_2_data = $('[name="user_id_2"]', form).val();
+    const user_id_2_parsed = JSON.parse(user_id_2_data);
+    var user_id_2 = user_id_2_parsed['user_id'];
+    var version_user_2 = user_id_2_parsed['version'];
+    var user_id_1 = $('[name="user_id_1"]', form).val();
+    var version_user_1 = $('[name="version_user_1"]', form).val();
+    return {'user_id_1': user_id_1, 'version_user_1': version_user_1, 'user_id_2': user_id_2, 'version_user_2': version_user_2};
+}
 
+function toggle() {
+    var data = getUserData();
+    clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
+    updateRightUserLists(data['user_id_2'], data['version_user_2']);
+    $('[name="user_id_1"]', form).val(data['user_id_2']);
+    $('[name="version_user_1"]', form).val(data['version_user_2']);
+    $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']});
+}
 
-function getMatchesListForClick(gradeable_id, user_id_1, user_1_version, user_1_match_start) {
+function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     var user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
     var to_append = '';
     $.each(user_matches, function(i, match) {
         var res = match.split('_');
-        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${gradeable_id}', '${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>'; 
+        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${gradeableId}', '${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>'; 
     }); 
     to_append = $.parseHTML(to_append); 
     $("#popup_to_show_matches_id").empty().append(to_append);   
@@ -90,6 +108,7 @@ function getMatchesListForClick(gradeable_id, user_id_1, user_1_version, user_1_
 
 function setUpPlagView(gradeable_id) {
 
+    gradeableId = gradeable_id; 
 	form = $("#users_with_plagiarism");
     editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
@@ -108,15 +127,15 @@ function setUpPlagView(gradeable_id) {
     editor1.setSize("100%", "100%");
 
     $('[name="user_id_1"]', form).change(function(){
-        setCodeInEditor(gradeable_id,'user_id_1');
+        setCodeInEditor('user_id_1');
     });
     $('[name="version_user_1"]', form).change(function(){
-        setCodeInEditor(gradeable_id, 'version_user_1');
+        setCodeInEditor('version_user_1');
     });
     $('[name="user_id_2"]', form).change(function(){
-        setCodeInEditor(gradeable_id, 'user_id_2');
+        setCodeInEditor('user_id_2');
     });
-    setUpLeftPane(gradeable_id);
+    setUpLeftPane();
 }
 
 function requestAjaxData(url, f, es) {
@@ -165,7 +184,15 @@ function createLeftUserVersionDropdown(version_data, active_version_user_1, max_
 
 }
 
-function clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_id_1, user_id_2 = null, version_id_2 = null) {
+function updateRightUserLists(user_id_1, version_id_1) {
+    var url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    const f2 = function(data, secondEditor) {
+        createRightUsersList(data);
+    }
+    requestAjaxData(url2, f2, false);
+}
+
+function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 = null, version_id_2 = null) {
     const f = function(data, secondEditor) {
         editor0.getDoc().setValue(data.display_code1);
         editor0.refresh();
@@ -178,23 +205,18 @@ function clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_id_
         }
         colorEditors(data);
     };
-    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
+    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
     var es = false;
     if (user_id_2 != null) {
         url += `&user_id_2=${user_id_2}&version_user_2=${version_id_2}`;
         es = true;
     } else {
-        var url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
-        const f2 = function(data, secondEditor) {
-            createRightUsersList(data);
-        }
-        requestAjaxData(url2, f2, false);
+        updateRightUserLists(user_id_1, version_id_1);
     }
     requestAjaxData(url, f, es);
 }
 
-function setCodeInEditor(gradeable_id, changed) {
-    var form = $("#users_with_plagiarism");
+function setCodeInEditor(changed) {
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
     var user_id_2_data = $('[name="user_id_2"]', form).val();
@@ -213,13 +235,13 @@ function setCodeInEditor(gradeable_id, changed) {
             if(version_user_1 == "") {
                 version_user_1 = "max_matching";
             }
-            clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_user_1);
+            clearCodeEditorsAndUpdateSelection(user_id_1, version_user_1);
         } else {
             // We know that our right side changed
             const user_id_2_parsed = JSON.parse(user_id_2_data);
             var user_id_2 = user_id_2_parsed['user_id'];
             var version_user_2 = user_id_2_parsed['version'];
-            clearCodeEditorsAndUpdateSelection(gradeable_id, user_id_1, version_user_1, user_id_2, version_user_2);
+            clearCodeEditorsAndUpdateSelection(user_id_1, version_user_1, user_id_2, version_user_2);
         }
     }
 }
