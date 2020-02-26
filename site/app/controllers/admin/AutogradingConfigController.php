@@ -22,7 +22,7 @@ class AutogradingConfigController extends AbstractController {
      * @param string $g_id gradeable Id
      * @return Response
      */
-    public function showConfig($g_id='') {
+    public function showConfig($g_id = '') {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
         $all_paths = array();
