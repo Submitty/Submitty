@@ -144,7 +144,7 @@ table#grader-history th, table#grader-history td {
     margin-top: 20px;
 }
 
-[name = 'config_search_error'] {
+.config_search_error {
     font-weight:normal;
     /* color is danger-red from colors.css can be changed when available */
     color: var(--danger-red);
