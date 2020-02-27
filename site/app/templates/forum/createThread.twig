@@ -11,7 +11,11 @@
         "show_filter": false
     } %}
 
-    <h3 class="create-thread-title"> Create Thread </h3>
+    <div class="create-thread-title">
+        <h3> Create Thread </h3>
+        <span class="create-thread-message">{{ create_thread_message }}</span>
+    </div>
+
     <form id="thread_form" method="POST" action="{{ form_action }}" enctype="multipart/form-data">
 
         {%  include "forum/ThreadPostForm.twig" with {
@@ -19,7 +23,7 @@
             "show_post" : true,
             "post_textarea_large" : true,
             "show_lock_date" : true,
-            "post_content_placeholder" : create_thread_message,
+            "post_content_placeholder" : "Enter your post here...",
             "show_categories" : true,
             "post_box_id" : 1,
             "attachment_script" : true,

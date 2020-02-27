@@ -231,7 +231,12 @@ body {min-width: 925px;}
 }
 
 .create-thread-title{
+    margin-left: 15px; 
     margin-bottom: 10px;
+}
+
+.create-thread-message{
+    font-style: italic;
 }
 
 .thread-announcement, .thread-favorite, .thread-merged, .thread-locked{
