@@ -8,9 +8,9 @@
    {% endif %}
 {% endif %}
 
-{% if show_hidden_breakdown and hidden_earned >= hidden_max %}
+{% if show_hidden_breakdown and hidden_earned >= hidden_max and hidden_max > 0 %}
     <canvas id="confetti_canvas"></canvas>
-{% elseif nonhidden_earned >= nonhidden_max %}
+{% elseif nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
     <canvas id="confetti_canvas"></canvas>
 {% endif %}
 
@@ -19,7 +19,7 @@
         {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
 
         <div class="box-title submission-page-total-header"
-            {% if nonhidden_earned >= nonhidden_max %}
+            {% if nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
                 onclick="addConfetti();"
                 style="cursor:pointer;"
             {% endif %}
@@ -29,7 +29,7 @@
         </div>
         {% if show_hidden_breakdown %}
             <div class="box submission-page-total-header"
-                {% if hidden_earned >= hidden_max %}
+                {% if hidden_earned >= hidden_max and hidden_max > 0 %}
                     onclick="addConfetti();"
                     style="cursor:pointer;"
                 {% endif %}

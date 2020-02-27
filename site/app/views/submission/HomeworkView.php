@@ -57,7 +57,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
         }
         elseif ($gradeable->isStudentSubmit()) {
-            if ($gradeable->canStudentSubmit()) {
+            if ($gradeable->canStdudentSubmit()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             }
             else {
@@ -88,7 +88,25 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
-        if($submission_count > 0){
+        // Determine how many grading "parts" there are (e.g. peer grading, ta grading, autograding).
+        $num_parts = 0;
+        if ($gradeable->isPeerGrading()) {
+            $num_parts++;
+        }
+        if ($gradeable->isTaGrading()) {
+            $num_parts++;
+        }
+
+        if ($version_instance !== null && $version_instance->isAutogradingComplete()) {
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $num_parts++;
+                    break;
+                }
+            }
+        }
+
+        if ($submission_count > 0 && $num_parts > 1) {
             $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
@@ -680,19 +698,20 @@ class HomeworkView extends AbstractView {
                 'total_score' => $total_score,
                 'total_max'   => $total_max,
                 // Autograding Information
-                'has_autograding' => $num_visible_testcases > 0,
+                // autograding_max > 0 if there are normal points, $autograding_earned > 0 if we  earned extra credit
+                'has_autograding' => $num_visible_testcases > 0 && ($autograding_max > 0 or $autograding_earned > 0),
                 'autograding_complete' => $autograding_complete,
                 'autograding_earned' => $autograding_earned,
                 'autograding_max' => $autograding_max,
                 // Is there a version conflict?
                 'active_same_as_graded' => $active_same_as_graded,
                 // Ta Grading Information
-                'has_ta_grading' => $gradeable->isTaGrading(),
+                'has_ta_grading' => $gradeable->isTaGrading() && ($ta_grading_max > 0 or $ta_grading_earned > 0),
                 'ta_grading_complete' => $ta_grading_complete,
                 'ta_grading_earned' => $ta_grading_earned,
                 'ta_grading_max' => $ta_grading_max,
                 // Peer Grading Information
-                'has_peer_grading' => $gradeable->isPeerGrading(),
+                'has_peer_grading' => $gradeable->isPeerGrading() && ($peer_grading_max > 0 or $peer_grading_earned > 0),
                 'peer_grading_complete' => $peer_grading_complete,
                 'peer_grading_earned' => $peer_grading_earned,
                 'peer_grading_max' => $peer_grading_max,
@@ -760,6 +779,29 @@ class HomeworkView extends AbstractView {
 
         $check_refresh_submission_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+
+
+        // Get the number of visible testcases (needed to see if there is autograding)
+        $num_visible_testcases = 0;
+        if ($version_instance->isAutogradingComplete()) {
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $num_visible_testcases++;
+                }
+            }
+        }
+        // If there are 0 visible testcases and autograding is complete,
+        // there is no autograding for this assignment.
+        $no_autograding = $num_visible_testcases == 0 && $version_instance->isAutogradingComplete();
+        // If there is no autograding at all, only explicitly let the student know that before
+        // TA grades are released.
+        if ($no_autograding
+            && $gradeable->isTaGrading()
+            && $graded_gradeable->isTaGradingComplete()
+            && $gradeable->isTaGradeReleased()) {
+            return "";
+        }
+
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),

@@ -81,8 +81,8 @@ class AutoGradingView extends AbstractView {
                 }
             }
 
-            $show_hidden_breakdown = $any_visible_hidden && $show_hidden &&
-                ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
+            $show_hidden_breakdown = $any_visible_hidden && $show_hidden;
+            // &&($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         // testcases should only be visible if autograding is complete
         if (!$incomplete_autograding) {
@@ -361,14 +361,13 @@ class AutoGradingView extends AbstractView {
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
-        }
-
-        // for bulk uploads only show PDFs
-        if ($gradeable->isScannedExam()) {
-            $files = $uploaded_pdfs;
-        }
-        else {
-            $files = array_merge($files['submissions'], $files['checkout']);
+            // for bulk uploads only show PDFs
+            if ($gradeable->isScannedExam()) {
+                $files = $uploaded_pdfs;
+            }
+            else {
+                $files = array_merge($files['submissions'], $files['checkout']);
+            }
         }
 
         $uploaded_pdfs = [];
