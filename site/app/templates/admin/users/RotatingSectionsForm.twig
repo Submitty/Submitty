@@ -3,29 +3,29 @@
         $("[name='rotating_type']").change(function() {
             if ($(this).val() == "alphabetically") {
                 $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
-				
+
             }
             else {
                 $("[name='fewest']").attr('onclick', '').removeClass('disabled');
             }
         });
-		
+
         $("[name='sort_type']").change(function() {
             var val = $(this).val();
 			if (val != "redo") {
 				$('#redo-data').hide();
-			}	
+			}
             else {
 				$('#redo-data').show();
             }
         });
     });
 
-	
+
     $(document).ready(function() {
        $('#redo-data').hide();
     });
-	
+
 </script>
 <div class="content">
     <h1>Manage Registration Sections</h1>
@@ -49,7 +49,6 @@
                 <h2>Current Registration Section Counts</h2>
                 {# This is a data table #}
                 <table class="table table-bordered table-striped">
-                    <caption />
                     <thead>
                         <tr>
                             <th>Section</th>
@@ -195,7 +194,7 @@
                     <label>
                         Number of sections:
                         <input type="number" name="sections" />
-                    </label> 
+                    </label>
                     <label>
                         Sort students:
                         <select name="rotating_type">
