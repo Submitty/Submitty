@@ -13,7 +13,7 @@
 
     <div class="create-thread-title">
         <h3> Create Thread </h3>
-        <span class="create-thread-message">{{ create_thread_message }}</span>
+        <span>{{ create_thread_message | markdown }}</span>
     </div>
 
     <form id="thread_form" method="POST" action="{{ form_action }}" enctype="multipart/form-data">

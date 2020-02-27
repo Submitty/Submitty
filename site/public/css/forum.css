@@ -235,10 +235,6 @@ body {min-width: 925px;}
     margin-bottom: 10px;
 }
 
-.create-thread-message{
-    font-style: italic;
-}
-
 .thread-announcement, .thread-favorite, .thread-merged, .thread-locked{
     padding-left: 3px;
     position: relative;

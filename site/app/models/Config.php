@@ -393,7 +393,7 @@ class Config extends AbstractModel {
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor', 
+            'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
             'regrade_message', 'auto_rainbow_grades', 'queue_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
