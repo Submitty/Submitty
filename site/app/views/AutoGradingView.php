@@ -323,14 +323,14 @@ class AutoGradingView extends AbstractView {
         }
 
         // Get just the non-peer components.
-        $ta_graded_components = array_filter($gradeable->getComponents(), function(Component $component) {
-            return $component->isPeer() === false; 
+        $ta_graded_components = array_filter($gradeable->getComponents(), function (Component $component) {
+            return $component->isPeer() === false;
         });
 
         $ta_grading_earned = 0;
         $ta_component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$ta_grading_earned) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
-            $component_marks = array_map(function (Mark $mark) use ($container, $component) {
+            $component_marks = array_map(function (Mark $mark) use ($container) {
                 return [
                     'title' => $mark->getTitle(),
                     'points' => $mark->getPoints(),
@@ -352,12 +352,12 @@ class AutoGradingView extends AbstractView {
                 'graders' => array_map(function (User $grader) {
                     return $grader->getDisplayedLastName();
                 }, $container->getVisibleGraders()),
-                'marks' => $component_marks, 
+                'marks' => $component_marks,
             ];
         }, $ta_graded_components);
 
         $files = null;
-        $display_version = 0;        
+        $display_version = 0;
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();
@@ -476,32 +476,31 @@ class AutoGradingView extends AbstractView {
 
         $graders_found = array();
         $peer_aliases = array();
-        $num_peers = 0;
         $peer_grading_earned = 0;
 
         // Get just the peer components.
-        $peer_graded_components = array_filter($gradeable->getComponents(), function(Component $component) {
-            return $component->isPeer() === true; 
+        $peer_graded_components = array_filter($gradeable->getComponents(), function (Component $component) {
+            return $component->isPeer() === true;
         });
 
-        $peer_component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$graders_found, &$num_peers, &$peer_grading_earned) {
+        $peer_component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$graders_found, &$peer_grading_earned) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
-            $component_marks = array_map(function (Mark $mark) use ($container, $component) {
+            $component_marks = array_map(function (Mark $mark) use ($container) {
                 return [
                     'title' => $mark->getTitle(),
                     'points' => $mark->getPoints(),
 
                     'show_mark' => $mark->isPublish() || $container->hasMark($mark),
-                    'earned' => array_map(function (User $grader) use ($component, $mark, $container) {
+                    'earned' => array_map(function (User $grader) use ($mark, $container) {
                                     return $container->hasMark($mark, $grader);
-                                }, $container->getGraders())
+                    }, $container->getGraders())
                 ];
             }, $component->getMarks());
 
             $peer_grading_earned += $container->getTotalScore();
             // Maintain names (Peer 1, Peer 2, etc.) for each of the peer graders to help the student
             // reason about feedback.
-            foreach($container->getGraders() as $grader) {
+            foreach ($container->getGraders() as $grader) {
                 array_push($graders_found, $grader->getId());
             }
             return [
@@ -531,14 +530,14 @@ class AutoGradingView extends AbstractView {
         // TODO: Eventually we want to move to having a students anonid be displayable
         // So that we don't have to do this (e.g. Anonymous Moose).
         sort($unique_graders);
-        foreach($unique_graders as $grader_id) {
+        foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $peer_aliases[$grader_id] = "Peer " . $num_peers;
         }
 
 
         $files = null;
-        $display_version = 0;        
+        $display_version = 0;
         if ($version_instance !== null) {
             $files = $version_instance->getFiles();
             $display_version = $version_instance->getVersion();

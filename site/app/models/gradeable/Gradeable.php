@@ -1498,7 +1498,7 @@ class Gradeable extends AbstractModel {
     public function getTaPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if (!$component->isPeer()){
+            if (!$component->isPeer()) {
                 $total += $component->getMaxValue();
             }
         }
@@ -1512,7 +1512,7 @@ class Gradeable extends AbstractModel {
     public function getPeerPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            if($component->isPeer()){
+            if ($component->isPeer()) {
                 $total += $component->getMaxValue();
             }
         }

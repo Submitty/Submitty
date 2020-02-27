@@ -130,10 +130,9 @@ class HomeworkView extends AbstractView {
         ) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
 
-            if($gradeable->isPeerGrading()){
+            if ($gradeable->isPeerGrading()) {
                 $return .= $this->renderPeerResultsBox($graded_gradeable, $regrade_available);
             }
-
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable, $can_inquiry);
@@ -609,7 +608,7 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden
      * @return string
      */
-    private function renderTotalScoreBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden) : string {
+    private function renderTotalScoreBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
@@ -622,7 +621,7 @@ class HomeworkView extends AbstractView {
 
         if ($version_instance !== null) {
             $total_score += $version_instance->getTotalPoints();
-            if($show_hidden) {
+            if ($show_hidden) {
                 $total_max += $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
             }
             else {
@@ -641,7 +640,7 @@ class HomeworkView extends AbstractView {
         $ta_grading_earned = 0;
         $peer_grading_earned = 0;
 
-        foreach($gradeable->getComponents() as $component) {
+        foreach ($gradeable->getComponents() as $component) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
             if ($component->isPeer()) {
                 $peer_grading_earned += $container->getTotalScore();
@@ -652,10 +651,11 @@ class HomeworkView extends AbstractView {
         }
 
         // Get Autograding Score
-        if($show_hidden){
+        if ($show_hidden) {
             $autograding_earned = $version_instance->getTotalPoints();
             $autograding_max = $autograding_config->getTotalNonExtraCredit();
-        } else {
+        }
+        else {
             $autograding_earned = $version_instance->getNonHiddenPoints();
             $autograding_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
         }
@@ -690,34 +690,36 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/TotalScoreBox.twig',
+        return $this->core->getOutput()->renderTwigTemplate(
+            'submission/homework/TotalScoreBox.twig',
             [
                 // Total Information
-                'total_complete' => $autograding_complete && $ta_grading_complete 
+                'total_complete' => $autograding_complete && $ta_grading_complete
                                     && $peer_grading_complete && $gradeable->isTaGradeReleased(),
                 'total_score' => $total_score,
                 'total_max'   => $total_max,
                 // Autograding Information
                 // autograding_max > 0 if there are normal points, $autograding_earned > 0 if we  earned extra credit
-                'has_autograding' => $num_visible_testcases > 0 && ($autograding_max > 0 or $autograding_earned > 0),
+                'has_autograding' => $num_visible_testcases > 0 && ($autograding_max > 0 || $autograding_earned > 0),
                 'autograding_complete' => $autograding_complete,
                 'autograding_earned' => $autograding_earned,
                 'autograding_max' => $autograding_max,
                 // Is there a version conflict?
                 'active_same_as_graded' => $active_same_as_graded,
                 // Ta Grading Information
-                'has_ta_grading' => $gradeable->isTaGrading() && ($ta_grading_max > 0 or $ta_grading_earned > 0),
+                'has_ta_grading' => $gradeable->isTaGrading() && ($ta_grading_max > 0 || $ta_grading_earned > 0),
                 'ta_grading_complete' => $ta_grading_complete,
                 'ta_grading_earned' => $ta_grading_earned,
                 'ta_grading_max' => $ta_grading_max,
                 // Peer Grading Information
-                'has_peer_grading' => $gradeable->isPeerGrading() && ($peer_grading_max > 0 or $peer_grading_earned > 0),
+                'has_peer_grading' => $gradeable->isPeerGrading() && ($peer_grading_max > 0 || $peer_grading_earned > 0),
                 'peer_grading_complete' => $peer_grading_complete,
                 'peer_grading_earned' => $peer_grading_earned,
                 'peer_grading_max' => $peer_grading_max,
                 // Have grades been released yet?
                 'ta_grades_released' => $gradeable->isTaGradeReleased()
-            ]);
+            ]
+        );
     }
 
      /**
@@ -726,7 +728,7 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden
      * @return string
      */
-    private function renderAutogradingBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden) : string {
+    private function renderAutogradingBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
@@ -795,10 +797,12 @@ class HomeworkView extends AbstractView {
         $no_autograding = $num_visible_testcases == 0 && $version_instance->isAutogradingComplete();
         // If there is no autograding at all, only explicitly let the student know that before
         // TA grades are released.
-        if ($no_autograding
+        if (
+            $no_autograding
             && $gradeable->isTaGrading()
             && $graded_gradeable->isTaGradingComplete()
-            && $gradeable->isTaGradeReleased()) {
+            && $gradeable->isTaGradeReleased()
+        ) {
             return "";
         }
 

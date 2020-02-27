@@ -269,13 +269,13 @@ class GradedComponentContainer extends AbstractModel {
      */
     public function getMarkMultiplicity(Mark $mark, User $grader = null) {
         $count = 0;
-        foreach ($this->graded_components as $graded_component) {            
+        foreach ($this->graded_components as $graded_component) {
             if ($graded_component->hasMark($mark)) {
-                if($grader === null){
+                if ($grader === null) {
                     $count++;
                 }
-                else{
-                    if($graded_component->getGrader()->getId() === $grader->getId()) {
+                else {
+                    if ($graded_component->getGrader()->getId() === $grader->getId()) {
                         return 1;
                     }
                 }
