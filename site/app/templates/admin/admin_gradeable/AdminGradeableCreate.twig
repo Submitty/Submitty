@@ -34,9 +34,11 @@
     <div class="option row">
         <div class="option-desc col-md-6">
             <label for="g_title">
-                <div class="option-title">Title</div>
-                <div class="option-alt">What is the title of this gradable?</div>
-                <p id="required_type">(Required)</p>
+                <span class="option-title">Title</span>
+                <br>
+                <span class="option-alt">What is the title of this gradable?</span>
+                <br>
+                <span class="required_type">(Required)</span>
             </label>
         </div>
 
@@ -50,8 +52,9 @@
 <div class="option row">
     <div class="option-desc col-md-6">
         <label for="instructions_url">
-            <div class="option-title">Assignment URL</div>
-            <div class="option-alt">What is the URL to the assignment instructions? (shown to student)</div>
+            <span class="option-title">Assignment URL</span>
+            <br>
+            <span class="option-alt">What is the URL to the assignment instructions? (shown to student)</span>
         </label>
     </div>
     <div class="option-input col-md-6">
@@ -65,8 +68,9 @@
 <div class="option row">
     <div class="option-desc col-md-6">
         <label for="g_id">
-            <div class="option-title">Unique ID</div>
-            <div class="option-alt">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>)</div>
+            <span class="option-title">Unique ID</span>
+            <br>
+            <span class="option-alt">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>)</span>
         </label>
     </div>
     <div class="option-input col-md-6">
@@ -81,9 +85,9 @@
         {% if action == 'new' or action == 'template' %}
             <!-- Gradeable Type radio buttons (readonly in edit mode) -->
             {# (VPAT) fieldset/legend required for gradeable type container radio group #}
-            <fieldset><legend><div class="option-title">Gradeable Type</div></legend>
+            <fieldset><legend><span class="option-title">Gradeable Type</span></legend>
             <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="fa-question-circle"></i></a></div>
-            <span id="required_type" >(Required)</span>
+            <span class="required_type" >(Required)</span>
         {% else %}
             <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
@@ -231,8 +235,8 @@
                             {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
 
-                        <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
-                            <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
+                        <div id="vcs_submitty_url_content" style="margin-left: 5%">
+                            <kbd>{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
                             <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
                             <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
                         </div>
@@ -242,14 +246,14 @@
                             {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
                             {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted_set_url">Submitty hosted – choose repository name (can be used for multiple gradeables)</label>
 
-                        <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
+                        <div id="vcs_submitty_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
-                                <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
+                                <kbd>{{ vcs_base_url }}</kbd>
                                 <input style='width: 30%' type='text' name="vcs_url" id="vcs_submitty_url" class="required auto_save" placeholder="(Required)"
                                     aria-label="repository name" value="" required />
-                                <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
+                                <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
-                                <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
+                                <kbd>{{ gradeable.getVcsSubdirectory() }}</kbd>
                             {% endif %}
                         </div>
                     </div>
@@ -271,8 +275,9 @@
 <div class="option row">
     <div class="option-desc col-md-6">
         <label for="syllabus_bucket">
-            <div class="option-title">Syllabus Category</div>
-            <div class="option-alt"><a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="fa-question-circle"></i></a></div>
+            <span class="option-title">Syllabus Category</span>
+            <br>
+            <span class="option-alt"><a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="fa-question-circle"></i></a></span>
         </label>
     </div>
 
@@ -349,7 +354,7 @@
         if($('#radio_electronic_file').is(':checked') ||
            $('#radio_checkpoints').is(':checked') ||
            $('#radio_numeric').is(':checked')) {
-               $('#required_type').hide();
+               $('.required_type').hide();
         }
 
         if(!$('#radio_electronic_file').is(':checked')) {
@@ -429,7 +434,8 @@
     }
 
     function onVCSTypeChange() {
-        disableElementChildren('[name=vcs_content]', true);
+        disableElementChildren('[id=vcs_submitty_set_url_content]', true);
+        disableElementChildren('[id=vcs_submitty_url_content]', true);
 
         if($('#vcs_radio_submitty_hosted').is(':checked')) {
             disableElementChildren('#vcs_submitty_url_content', false);
