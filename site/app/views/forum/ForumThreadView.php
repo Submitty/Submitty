@@ -21,7 +21,7 @@ class ForumThreadView extends AbstractView {
             array(
                 "required_rank" => 4,
                 "display_text" => 'Create Thread',
-                "style" => 'position:relative;float:right;top:3px;',
+                "style" => 'position:absolute;top:3px;right:0px',
                 "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
                 "optional_class" => '',
                 "title" => 'Create Thread',
@@ -207,7 +207,7 @@ class ForumThreadView extends AbstractView {
             array(
                 "required_rank" => 4,
                 "display_text" => 'Create Thread',
-                "style" => 'float:right;position:relative;top:3px;',
+                "style" => 'position:absolute;top:3px;right:0px',
                 "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
                 "optional_class" => '',
                 "title" => 'Create Thread',

@@ -326,7 +326,7 @@ function addLabel(filename, filesize, part, previous){
     };
     fileTrashElement.onmouseout = function(e){
         e.stopPropagation();
-        this.style.color = "black";
+        this.style.color = "var(--text-black)";
     };
     // remove file and label-row in table on click event
     fileTrashElement.onclick = function(e){
