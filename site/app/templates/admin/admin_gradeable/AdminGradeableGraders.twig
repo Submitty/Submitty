@@ -59,7 +59,7 @@ Form
         <a class="fa-question-circle" target=_blank aria-label="Help for grading by registration or rotating section" href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
 	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
-        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="grader_assignment_method">All Access Grading</label>
+        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="all_access">All Access Grading</label>
 
     <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
         {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> <label for="registration_section">Registration Section</label>
