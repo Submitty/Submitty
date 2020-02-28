@@ -13,14 +13,15 @@ class GradeableView extends AbstractView {
             "all_files" => $all_files,
             "target_dir" => $target_dir,
             "course" => $course,
+            "gradeable_id" => $gradeable_id,
             "inuse_config" => $inuse_config,
             "upload_url" => $this->core->buildCourseUrl(['autograding_config', 'upload']),
-            "rename_url" => $this->core->buildCourseUrl(['autograding_config', 'rename']),
             "delete_url" => $this->core->buildCourseUrl(['autograding_config', 'delete']),
+            "rename_url" => $this->core->buildCourseUrl(['autograding_config', 'rename']),
             "display_url" => $this->core->buildCourseUrl(['display_file']),
             "back_url" => $gradeable_id !== ''
                 ? $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update?nav_tab=1'])
-                : $this->core->buildCourseUrl(),
+                : '',
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
