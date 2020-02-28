@@ -55,10 +55,13 @@ class AutogradingConfigController extends AbstractController {
      * @return Response
      */
     public function uploadConfig($g_id = '') {
+        $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
+            : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
+
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+                new RedirectResponse($redirect_url)
             );
         }
 
@@ -66,7 +69,7 @@ class AutogradingConfigController extends AbstractController {
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
             $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+                new RedirectResponse($redirect_url)
             );
         }
 
@@ -92,7 +95,7 @@ class AutogradingConfigController extends AbstractController {
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
                 $this->core->addErrorMessage("Upload failed: {$error_message}");
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+                    new RedirectResponse($redirect_url)
                 );
             }
         }
@@ -101,13 +104,13 @@ class AutogradingConfigController extends AbstractController {
                 FileUtils::recursiveRmdir($target_dir);
                 $this->core->addErrorMessage("Upload failed: Could not copy file");
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+                    new RedirectResponse($redirect_url)
                 );
             }
         }
         $this->core->addSuccessMessage("Gradeable config uploaded");
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+            new RedirectResponse($redirect_url)
         );
     }
 
@@ -142,8 +145,10 @@ class AutogradingConfigController extends AbstractController {
                 }
             }
         }
+        $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
+            : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+            new RedirectResponse($redirect_url)
         );
     }
 
@@ -178,8 +183,10 @@ class AutogradingConfigController extends AbstractController {
                 $this->core->addErrorMessage("Deleting config failed.");
             }
         }
+        $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
+            : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id)
+            new RedirectResponse($redirect_url)
         );
     }
 
