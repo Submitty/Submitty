@@ -234,11 +234,11 @@ class GradedComponentContainer extends AbstractModel {
      * @return bool
      */
     public function isComplete() {
-        if($this->component->isPeer()){
-            if(count($this->graded_components) > 0){
+        if ($this->component->isPeer()) {
+            if (count($this->graded_components) > 0) {
                 return true;
             }
-            else{
+            else {
                 return false;
             }
         }
