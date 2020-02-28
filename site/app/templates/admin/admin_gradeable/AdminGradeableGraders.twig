@@ -71,13 +71,13 @@ Form
 <div id="doc_all_access">
     <br />
 
-    All <span class="g1_hidden"> instructors </span><span class="g2_hidden"> full access graders </span><span class="g3_hidden"> limited access graders </span> will have access to grade all students, organized by rotating sections.
+    All <span class="g3"> limited access graders, </span> <span class="g2"> full access graders</span><span class ="g3">,</span> <span class ="g2"> and </span> </span><span class="g1"> instructors </span> will have access to grade all students, organized by rotating sections.
     <br />
 </div>
 
 <div id="doc_registration">
     <br />
-    All <span class="g1_hidden"> instructors </span><span class="g2_hidden"> full access graders </span><span class="g3_hidden"> limited access graders </span> will have access to grade students in registration sections assigned on the 'Manage Sections' page (click on the pencil to edit a grader's assigned registration sections).
+    All <span class="g3"> limited access graders, </span> <span class="g2"> full access graders</span><span class ="g3">,</span> <span class ="g2"> and </span> </span><span class="g1"> instructors </span> will have access to grade students in registration sections assigned on the 'Manage Sections' page (click on the pencil to edit a grader's assigned registration sections).
     <br />
 </div>
 
@@ -201,31 +201,21 @@ Form
         // $('.g1').show();
         // $('.g2').show();
 
-        //rotating sections tables: all shown on page by default,
+        //used by rotating sections tables and radio buttons on page documentation
+        //: all shown on page by default,
         //and less privileged graders hidden as access is more restricted
         disableElementChildren('.g2', false);
         disableElementChildren('.g3', false);
 
-        //radio buttons documentation: hidden by default
-        //and shown when the specific class is selected
-        disableElementChildren('.g1_hidden', true);
-        disableElementChildren('.g2_hidden', true);
-        disableElementChildren('.g3_hidden', true);
-
+       
         switch ($('#minimum_grading_group').val()) {
             case '1': // Instructor only?
                 // $('.g1').hide();
-                disableElementChildren('.g1_hidden', false);
                 disableElementChildren('.g2', true);
-                disableElementChildren('.g3', true);
-                break;
             case '2': // Instructors and TA's
                 // $('.g2').hide();
-                disableElementChildren('.g2_hidden', false);
                 disableElementChildren('.g3', true);
-                break;
             case '3': // Everyone
-                disableElementChildren('.g3_hidden', false);
                 break;
             default:
                 alert('Error!  Invalid Minimum Grader!');
