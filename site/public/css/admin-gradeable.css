@@ -90,7 +90,7 @@ a.nav-bar.normal-btn {
 
 a.nav-bar.active-btn {
     background-color: var(--submitty-logo-blue);
-    color: var(--default-white);
+    color: var(--text-white);
     font-weight: bold;
 }
 
