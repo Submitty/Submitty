@@ -81,7 +81,6 @@ Form
     <br />
 </div>
 
-
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
         <br />
@@ -202,11 +201,8 @@ Form
         // $('.g2').show();
 
         //used by rotating sections tables and radio buttons on page documentation
-        //: all shown on page by default,
-        //and less privileged graders hidden as access is more restricted
         disableElementChildren('.g2', false);
         disableElementChildren('.g3', false);
-
        
         switch ($('#minimum_grading_group').val()) {
             case '1': // Instructor only?
