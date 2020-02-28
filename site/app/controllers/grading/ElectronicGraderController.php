@@ -294,6 +294,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         if (count($sections) > 0) {
+            var_dump($sections);
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
                 $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
@@ -478,6 +479,8 @@ class ElectronicGraderController extends AbstractController {
         $graders = $order->getSectionGraders();
         $sections = $order->getSectionNames();
 
+        var_dump($order->getSortedGradedGradeables());
+        
         $student_ids = [];
         foreach ($section_submitters as $section) {
             $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
@@ -507,6 +510,7 @@ class ElectronicGraderController extends AbstractController {
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
+            var_dump($g);
             if ($gradeable->isTeamAssignment()) {
                 $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
             }

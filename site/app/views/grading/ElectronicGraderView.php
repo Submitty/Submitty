@@ -454,7 +454,9 @@ HTML;
         // are too messy to calculate in the template.
         $sections = [];
         /** @var GradedGradeable $row */
+        var_dump($sections);
         foreach ($graded_gradeables as $row) {
+            var_dump($row);
             //Extra info for the template
             $info = [
                 "graded_gradeable" => $row

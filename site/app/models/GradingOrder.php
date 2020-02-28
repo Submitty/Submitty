@@ -446,10 +446,10 @@ class GradingOrder extends AbstractModel {
             $this->all_team_ids,
             [$this->getSectionKey(), 'team_id', 'user_id']
         );
-
         $gg_idx = [];
         $unsorted = [];
         foreach ($iter as $gg) {
+            var_dump($gg);
             $idx = $this->getSubmitterIndex($gg->getSubmitter());
             //Should never happen, but better to be safe
             if ($idx === false) {
