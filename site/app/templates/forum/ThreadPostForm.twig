@@ -22,7 +22,7 @@
         style="margin-right:10px;padding: unset;cursor: pointer; "
         title="Render markdown" onclick="$('#markdown_buttons_{{ post_box_id }}').toggle(); $(this).toggleClass('markdown-active'); $('#markdown_input_{{ post_box_id }}').val($('#markdown_input_{{ post_box_id }}').val() == 0? '1':'0');$('#markdown-info-{{ post_box_id }}').toggleClass('disabled');"><i class="fab fa-markdown fa-2x"></i></div>
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown?1:0 }}" />
-        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
         &nbsp;&nbsp;
         <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
             <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Link <i class="fas fa-link fa-1x"></i></button>
@@ -91,8 +91,7 @@
 {% if show_categories %}
 
     <div id="category-selection-container" class="form-group row thread-category-container inline-block">
-        <label id="cat_label">Categories</label>
-        <br />
+        <p id="cat_label">Categories</p>
 
         {% if categories | length == 0 %}
             <span class='category-list-no-element' >
@@ -102,9 +101,9 @@
         <div id='categories-pick-list'>
 
         {% for category in categories %}
-            <a class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
+            <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
                 <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
-            </a>
+            </div>
         {% endfor %}
     </div>
     <script type="text/javascript">
@@ -119,8 +118,8 @@
         <span class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
-                <label id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">Upload Attachment</label>
-                <input type="file" accept="image/*" aria-labelledby="file_input_label_{{post_box_id}}" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <label id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0" for="input-file{{ post_box_id }}">Upload Attachment</label>
+                <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
             </div>

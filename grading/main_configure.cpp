@@ -298,11 +298,13 @@ int main(int argc, char *argv[]) {
           assert(num_of_choices > 0);
 
           bool allow_multiple = in_notebook_cell.value("allow_multiple", false);
+          bool randomize_order = in_notebook_cell.value("randomize_order", false);
 
           // Pass forward items
           out_notebook_cell["filename"] = filename;
           out_notebook_cell["choices"] = choices;
           out_notebook_cell["allow_multiple"] = allow_multiple;
+          out_notebook_cell["randomize_order"] = randomize_order;
       }
 
       // Else unknown type was passed in throw exception

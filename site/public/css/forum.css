@@ -90,7 +90,7 @@ body {min-width: 925px;}
 
 #thread_list a {
     text-decoration: none;
-    color: initial;
+    color: var(--text-black);
 }
 
 .create_thread_button {

@@ -58,8 +58,8 @@ Form
         How should graders be assigned to grade this item?
         <a class="fa-question-circle" target=_blank aria-label="Help for grading by registration or rotating section" href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
-	<input type="radio" name="grader_assignment_method" id="grader_assignment_method" value="2" id="all_access"
-        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="grader_assignment_method">All Access Grading</label>
+	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
+        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="all_access">All Access Grading</label>
 
     <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
         {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> <label for="registration_section">Registration Section</label>
@@ -67,6 +67,20 @@ Form
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
+
+<div id="doc_all_access">
+    <br />
+
+    All <span class="g3"> limited access graders, </span> <span class="g2"> full access graders</span><span class ="g3">,</span> <span class ="g2"> and </span> </span><span class="g1"> instructors </span> will have access to grade all students, organized by rotating sections.
+    <br />
+</div>
+
+<div id="doc_registration">
+    <br />
+    All <span class="g3"> limited access graders, </span> <span class="g2"> full access graders</span><span class ="g3">,</span> <span class ="g2"> and </span> </span><span class="g1"> instructors </span> will have access to grade students in registration sections assigned on the 'Manage Sections' page (click on the pencil to edit a grader's assigned registration sections).
+    <br />
+</div>
+
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
         <br />
@@ -162,15 +176,21 @@ Form
     }
 
     function onSectionTypeChange() {
+
+        disableElementChildren('#doc_all_access', true);
+        disableElementChildren('#doc_registration', true);
+
         if ($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
             disableElementChildren('#grader-warning',false);
         }
         else if ($('#all_access').is(':checked')) {
+            disableElementChildren('#doc_all_access', false);
             disableElementChildren('#rotating_data', true);
             disableElementChildren('#grader-warning',false);
         }
         else {
+            disableElementChildren('#doc_registration', false);
             disableElementChildren('#rotating_data', true);
             disableElementChildren('#grader-warning',true);
         }
@@ -180,9 +200,10 @@ Form
         // $('.g1').show();
         // $('.g2').show();
 
+        //used by rotating sections tables and radio buttons on page documentation
         disableElementChildren('.g2', false);
         disableElementChildren('.g3', false);
-
+       
         switch ($('#minimum_grading_group').val()) {
             case '1': // Instructor only?
                 // $('.g1').hide();
@@ -197,7 +218,7 @@ Form
                 break;
         }
     }
-
+    
     $(document).ready(function() {
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
