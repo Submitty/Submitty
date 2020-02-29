@@ -24,7 +24,7 @@
             Total files cannot exceed {{ max_size_string }}.
         </p>
     </div>
-    <script type="text/javascript">
+    <script>
         function makeSubmission() {
             handleDownloadImages('{{ csrf_token }}');
         }
@@ -35,7 +35,7 @@
             });
         });
     </script>
-    <script type="text/javascript">
+    <script>
         createArray(1);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("click", clicked_on_box, false);

@@ -92,7 +92,7 @@
             </div>
         </form>
 
-        <script type="text/javascript">
+        <script>
             $(function() {
                 students_full = {{ students_full|json_encode|raw }};
                 $('#qr_prefix').prop('hidden', true);
@@ -455,7 +455,7 @@
 
             {% if display_version == highest_version and display_version > 0 %}
                 <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
-                <script type="text/javascript">
+                <script>
                     $(function() {
                         setUsePrevious();
                         {% for file in old_files %}
@@ -467,7 +467,7 @@
             {% endif %}
         {% endif %}
 
-        <script type="text/javascript">
+        <script>
             $(function() {
                 setButtonStatus();
             });
@@ -515,7 +515,7 @@
     {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
-<script type="text/javascript">
+<script>
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);

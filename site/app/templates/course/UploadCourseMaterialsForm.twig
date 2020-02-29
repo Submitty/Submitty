@@ -27,7 +27,7 @@
                 <input id="all_Sections_Showing_yes" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
                 Yes
             </label>
-            <script type="text/javascript">
+            <script>
                 function toggleRegistrationSections(){
                     $("#show_Some_Section_Selection").toggle();
                 }
@@ -73,7 +73,7 @@
         </div>
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
-    <script type="text/javascript">
+    <script>
         function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {
             handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
         }
@@ -151,7 +151,7 @@
                     }
                     });
     </script>
-    <script type="text/javascript">
+    <script>
         createArray(1);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("dragenter", draghandle, false);
