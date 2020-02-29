@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\libraries\DateUtils;
+use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
@@ -10,6 +11,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\SubmissionMultipleChoice;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
@@ -352,6 +354,12 @@ class HomeworkView extends AbstractView {
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
+        $student_id = '';
+        if (!is_null($graded_gradeable)) {
+            $student_id = ($graded_gradeable->getSubmitter()->isTeam()) ?
+                $graded_gradeable->getSubmitter()->getTeam()->getLeaderId() :
+                $graded_gradeable->getSubmitter()->getId();
+        }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -377,7 +385,7 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
 
         $DATE_FORMAT = "m/d/Y @ h:i A";
-
+        $numberUtils = new NumberUtils();
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
@@ -407,6 +415,9 @@ class HomeworkView extends AbstractView {
             'highest_version' => $highest_version,
             'student_page' => $student_page,
             'students_full' => $students_full,
+            'team_assignment' => $gradeable->isTeamAssignment(),
+            'student_id' => $student_id,
+            'numberUtils' => $numberUtils,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,

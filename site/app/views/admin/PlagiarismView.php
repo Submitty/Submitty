@@ -144,14 +144,14 @@ HTML;
 HTML;
 
         $return .= <<<HTML
-<script type="text/javascript">
+<script>
     checkRefreshLichenMainPage("{$this->core->buildCourseUrl(['plagiarism', 'check_refresh'])}" ,"{$semester}", "{$course}");
 </script>
 HTML;
         #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
         if ($refresh_page == "REFRESH_ME") {
             $return .= <<<HTML
-<script type="text/javascript">
+<script>
     var last_data= "REFRESH_ME";
     localStorage.setItem("last_data", last_data);
 </script>
@@ -221,7 +221,7 @@ HTML;
         $return .= <<<HTML
 </div>
 <script>
-	
+
 </script>
 HTML;
         return $return;
