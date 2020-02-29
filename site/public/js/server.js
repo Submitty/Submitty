@@ -8,6 +8,39 @@ window.addEventListener("load", function() {
 
 window.addEventListener("resize", checkSidebarCollapse);
 
+
+////////////Begin: Removed redundant link in breadcrumbs////////////////////////
+//See this pr for why we might want to remove this code at some point
+//https://github.com/Submitty/Submitty/pull/5071
+window.addEventListener("resize", function(){
+  adjustBreadcrumbLinks();
+});
+
+var mobileHomeLink = null;
+var desktopHomeLink = null;
+document.addEventListener("DOMContentLoaded", function() {
+  loadInBreadcrumbLinks();
+  adjustBreadcrumbLinks();
+});
+
+function loadInBreadcrumbLinks(){
+  mobileHomeLink = $("#home-button").attr('href');
+  desktopHomeLink = $("#desktop_home_link").attr('href');
+}
+
+function adjustBreadcrumbLinks(){
+  if($(document).width() > 528){
+    $("#home-button").attr('href', "");
+    $("#desktop_home_link").attr('href', desktopHomeLink);
+  }else{
+    $("#home-button").attr('href', mobileHomeLink);
+    $("#desktop_home_link").attr('href', "");
+  }
+}
+////////////End: Removed redundant link in breadcrumbs//////////////////////////
+
+
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -234,9 +267,43 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+
+    let form = $("#edit-course-materials-form");
+
+    let element = document.getElementById("edit-picker");
+    
+    element._flatpickr.setDate(release_time);
+    
+    if(this_hide_from_students == "on"){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    }
+    
+    else{
+        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+    }
+    
+    $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
+    
+    if(this_file_section != null){
+        for(let index = 0; index < this_file_section.length; ++index){
+            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
+        }
+        $("#all-sections-showing-no", form).prop('checked',false);
+        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).show();
+    }
+    else{
+        $("#show-some-section-selection-edit", form).hide();
+        $("#all-sections-showing-yes", form).prop('checked',false);
+        $("#all-sections-showing-no", form).prop('checked',true);
+    }
+    $("#material-edit-form", form).attr('data-directory', dir);
+    form.css("display", "block");
+}
 function captureTabInModal(formName){
 
-    var form = $("#".concat(formName));
+  var form = $("#".concat(formName));
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
