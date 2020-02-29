@@ -1358,6 +1358,10 @@
               "type" : "boolean",
               "description" : "If true allows multiple values to be selected, if false only one value may be selected."
             },
+            "randomize_order" : {
+              "type" : "boolean",
+              "description" : "If true, shows the option to user in a random fashion"
+            },
             "testcase_ref" : {
               "description" : "Used to reference a testcase_label",
               "type" : "string"
