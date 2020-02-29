@@ -95,7 +95,7 @@ function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     var to_append = '';
     $.each(user_matches, function(i, match) {
         var res = match.split('_');
-        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${gradeableId}', '${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>';
+        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>';
     });
     to_append = $.parseHTML(to_append);
     $("#popup_to_show_matches_id").empty().append(to_append);
