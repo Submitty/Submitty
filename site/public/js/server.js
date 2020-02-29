@@ -8,6 +8,39 @@ window.addEventListener("load", function() {
 
 window.addEventListener("resize", checkSidebarCollapse);
 
+
+////////////Begin: Removed redundant link in breadcrumbs////////////////////////
+//See this pr for why we might want to remove this code at some point
+//https://github.com/Submitty/Submitty/pull/5071
+window.addEventListener("resize", function(){
+  adjustBreadcrumbLinks();
+});
+
+var mobileHomeLink = null;
+var desktopHomeLink = null;
+document.addEventListener("DOMContentLoaded", function() {
+  loadInBreadcrumbLinks();
+  adjustBreadcrumbLinks();
+});
+
+function loadInBreadcrumbLinks(){
+  mobileHomeLink = $("#home-button").attr('href');
+  desktopHomeLink = $("#desktop_home_link").attr('href');
+}
+
+function adjustBreadcrumbLinks(){
+  if($(document).width() > 528){
+    $("#home-button").attr('href', "");
+    $("#desktop_home_link").attr('href', desktopHomeLink);
+  }else{
+    $("#home-button").attr('href', mobileHomeLink);
+    $("#desktop_home_link").attr('href', "");
+  }
+}
+////////////End: Removed redundant link in breadcrumbs//////////////////////////
+
+
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
