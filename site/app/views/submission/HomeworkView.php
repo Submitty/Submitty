@@ -18,7 +18,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\gradeable\AbstractGradeableInput;
-use app\libraries\NumberUtils;
 
 class HomeworkView extends AbstractView {
 
