@@ -6,9 +6,9 @@
         <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
     {% endfor %}
     {% for script in code_js %}
-        <script type='text/javascript' src='{{ script }}'></script>
+        <script src='{{ script }}'></script>
     {% endfor %}
-    <script type="text/javascript">
+    <script>
         $(document).ready(function() {
             $('body').css("height", ($('.CodeMirror').height()) + "px");
         });

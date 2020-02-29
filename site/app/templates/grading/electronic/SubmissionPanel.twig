@@ -12,7 +12,7 @@
 
             <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
 
-            <script type="text/javascript">
+            <script>
                 $(document).ready(function(){
                     //note the commented out code here along with the code where files are displayed that is commented out
                     //is intended to allow open and close to change dynamically on click
@@ -40,7 +40,7 @@
                     <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
                 </label>
             </div>
-            <span style="padding-right: 10px"> <input type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto open </span>
+            <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();"> Auto open </span>
             <br />
             {# Files #}
             <div class="inner-container" id="file-container">
@@ -52,7 +52,7 @@
                 {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
             </div>
             {# /Files #}
-            <script type="text/javascript">
+            <script>
                 // $(document).ready(function(){
                 //     $(".openAllDiv").on('click', function(){
                 //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
@@ -77,7 +77,7 @@
 </div>
 
 {# todo: Move to ta-grading.js #}
-<script type="text/javascript">
+<script>
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
@@ -148,6 +148,7 @@
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
+
         let promise = loadFile(name, path, page_num);
         $('#file_view').show();
         $("#grading_file_name").html(name);
@@ -159,9 +160,9 @@
         return promise;
     }
 
-    function loadFile(name, path, page_num = 0){
+    function loadFile(name, path, page_num = 0) {
         let extension = name.split('.').pop();
-        if(extension == "pdf"){
+        if (extension == "pdf") {
             $('#pdf_annotation_bar').show();
             $('#save_status').show();
             return $.ajax({
@@ -170,6 +171,7 @@
                 data: {
                     'user_id': '{{ submitter_id }}',
                     'filename': name,
+                    'file_path': path,
                     'page_num': page_num,
                     'csrf_token': csrfToken
                 },

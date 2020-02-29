@@ -166,7 +166,11 @@ class AutoGradedVersion extends AbstractModel {
 
                 // If a testcase_label exists then get the auto grading messages
                 if ($testcase_label != "") {
-                    $output[$testcase_label] = array();
+                    // If this testcase_label doesn't already exist as a key in the output array, then create a
+                    // child array for that testcase_label
+                    if (!array_key_exists($testcase_label, $output)) {
+                        $output[$testcase_label] = array();
+                    }
 
                     $autochecks = $graded_testcase->getAutochecks();
 

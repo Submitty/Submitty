@@ -10,9 +10,10 @@ $("#edit-user-form").ready(function() {
             });
 
             $('[name="user_id"]', form).autocomplete({
-                source: Object.keys(json)
+                appendTo: form,
+                source: Object.keys(json),
+                change: () => $('[name="user_id"]').change()
             });
-            $('[name="user_id"]', form).autocomplete( "option", "appendTo", form);
 
             $(":text",$("#edit-user-form")).change(checkValidEntries);
         },
@@ -47,6 +48,7 @@ function newUserForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
     $("#edit-student-modal-title").css('display','none');
     $("#edit-grader-modal-title").css('display','none');
     $("#user-form-already-exists-error-message").css('display','none');
@@ -75,6 +77,7 @@ function editUserForm(user_id) {
             var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
+            form.find('.form-body').scrollTop(0);
             if (json['user_group'] == 4) {
                 $("#edit-student-modal-title").css('display','block');
                 $("#edit-grader-modal-title").css('display','none');
@@ -191,7 +194,6 @@ function setRedOrTransparent(input,reg_expression) {
 }
 
 function autoCompleteOnUserId(user_information) {
-    var form = $("#edit-user-form");
     if ($('#user_id').val() in user_information) {
         var user = user_information[$('#user_id').val()];
         var user_already_exists = user['already_in_course'] ? 'block' : 'none';
