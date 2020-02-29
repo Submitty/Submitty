@@ -6,33 +6,7 @@ window.addEventListener("load", function() {
   }
 });
 
-window.addEventListener("resize", function(){
-  checkSidebarCollapse();
-  adjustBreadcrumbLinks();
-});
-
-
-var mobileHomeLink = null;
-var desktopHomeLink = null;
-document.addEventListener("DOMContentLoaded", function() {
-  loadInBreadcrumbLinks();
-  adjustBreadcrumbLinks();
-});
-
-function loadInBreadcrumbLinks(){
-  mobileHomeLink = $("#home-button").attr('href');
-  desktopHomeLink = $("#desktop_home_link").attr('href');
-}
-
-function adjustBreadcrumbLinks(){
-  if($(document).width() > 528){
-    $("#home-button").attr('href', "");
-    $("#desktop_home_link").attr('href', desktopHomeLink);
-  }else{
-    $("#home-button").attr('href', mobileHomeLink);
-    $("#desktop_home_link").attr('href', "");
-  }
-}
+window.addEventListener("resize", checkSidebarCollapse);
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code

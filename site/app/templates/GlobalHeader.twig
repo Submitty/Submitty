@@ -110,7 +110,7 @@
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
-                                    <a id="desktop_home_link" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
