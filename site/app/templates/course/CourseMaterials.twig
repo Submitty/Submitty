@@ -74,7 +74,7 @@
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
-    <div>
+    <div class="file-container">
         <div class="file-viewer">
 
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
@@ -190,7 +190,7 @@
         {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
         ) }}
     {% else %}
-    <div>
+    <div class="folder-container">
 
         <div class="div-viewer">
             {# button to open each folder #}
@@ -245,6 +245,9 @@
         return "";
     }
     window.onload = function () {
+        // hide the folders which have no content for the current user ..ie empty folders
+        hideEmptyCourseMaterialFolders();
+
         //determine if folders have been left open or closed
         var folderCookie = getCookie('foldersOpen');
         //if the cookie says it is open

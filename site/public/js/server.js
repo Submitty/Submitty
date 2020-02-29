@@ -895,22 +895,13 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
+function hideEmptyCourseMaterialFolders() {
+  // fetch all the folders and remove those one which have no `file` within.
+  $('.folder-container').each(function() {
+    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
+  });
 }
+
 function closeDivForCourseMaterials(num) {
     var elem = $('#div_viewer_' + num);
     elem.hide();
