@@ -57,7 +57,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
         }
         elseif ($gradeable->isStudentSubmit()) {
-            if ($gradeable->canStdudentSubmit()) {
+            if ($gradeable->canStudentSubmit()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             }
             else {
@@ -953,7 +953,7 @@ class HomeworkView extends AbstractView {
      */
     private function renderPeerResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
 
-        $rendered_ta_results = '';
+        $rendered_peer_results = '';
         $been_peer_graded = false;
         // TODO: For now, Peer and TA grading completeness are synonymous.
         if ($graded_gradeable->isTaGradingComplete()) {

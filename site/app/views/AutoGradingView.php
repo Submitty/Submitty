@@ -356,6 +356,19 @@ class AutoGradingView extends AbstractView {
             ];
         }, $ta_graded_components);
 
+
+        $uploaded_pdfs = [];
+        foreach ($uploaded_files['submissions'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $uploaded_pdfs[] = $file;
+            }
+        }
+        foreach ($uploaded_files['checkout'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $uploaded_pdfs[] = $file;
+            }
+        }
+
         $files = null;
         $display_version = 0;
         if ($version_instance !== null) {
@@ -367,18 +380,6 @@ class AutoGradingView extends AbstractView {
             }
             else {
                 $files = array_merge($files['submissions'], $files['checkout']);
-            }
-        }
-
-        $uploaded_pdfs = [];
-        foreach ($uploaded_files['submissions'] as $file) {
-            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $uploaded_pdfs[] = $file;
-            }
-        }
-        foreach ($uploaded_files['checkout'] as $file) {
-            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $uploaded_pdfs[] = $file;
             }
         }
 
@@ -412,17 +413,12 @@ class AutoGradingView extends AbstractView {
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
-            //'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
             'ta_components' => $ta_component_data,
             'regrade_date' => DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
             'grading_complete' => $grading_complete,
-            //'graded_score' => $graded_score,
-            //'graded_max' => $graded_max,
             'ta_score' => $ta_grading_earned,
             'ta_max' => $ta_max,
-            //'total_score' => $total_score,
-            //'total_max' => $total_max,
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
             'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
@@ -535,22 +531,6 @@ class AutoGradingView extends AbstractView {
             $peer_aliases[$grader_id] = "Peer " . $num_peers;
         }
 
-
-        $files = null;
-        $display_version = 0;
-        if ($version_instance !== null) {
-            $files = $version_instance->getFiles();
-            $display_version = $version_instance->getVersion();
-        }
-
-        // for bulk uploads only show PDFs
-        if ($gradeable->isScannedExam()) {
-            $files = $uploaded_pdfs;
-        }
-        else {
-            $files = array_merge($files['submissions'], $files['checkout']);
-        }
-
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
@@ -563,9 +543,24 @@ class AutoGradingView extends AbstractView {
             }
         }
 
+        $files = null;
+        $display_version = 0;
+        if ($version_instance !== null) {
+            $files = $version_instance->getFiles();
+            $display_version = $version_instance->getVersion();
+
+            // for bulk uploads only show PDFs
+            if ($gradeable->isScannedExam()) {
+                $files = $uploaded_pdfs;
+            }
+            else {
+                $files = array_merge($files['submissions'], $files['checkout']);
+            }
+        }
+
         $id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
         }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
