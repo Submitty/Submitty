@@ -469,8 +469,8 @@ WHERE status = 1"
                     $this->course_db->query("DELETE FROM thread_categories where thread_id=?", array($thread_id));
                 }
                 else {
-//                  $this->course_db->query("INSERT INTO threads (title, created_by, is_visible, lock_thread_date) VALUES (?, ?, ?, ?) RETURNING id", array($title, $post["author_user_id"], true, null));
-//                  $thread_id = $this->course_db->rows()[0]["id"];
+                    //TODO: Update AbstractDatabase.php to be able to use returning syntax (Postgres)
+                    $this->course_db->query("INSERT INTO threads (title, created_by, is_visible, lock_thread_date) VALUES (?, ?, ?, ?)", array($title, $post["author_user_id"], true, null));
                     $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $post["author_user_id"]));
                     $thread_id = $this->course_db->rows()[0]["max_id"];
                 }
@@ -480,8 +480,8 @@ WHERE status = 1"
                     if (!empty($str)) {
                         $str .= ", ";
                     }
-                    $str .= "(?, ?)";
-                    array_push($arr, $thread_id, $id);
+                    $str .= "({$thread_id}, ?)";
+                    array_push($arr, $id);
                 }
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES {$str}", $arr);
                 $posts = array($post);
