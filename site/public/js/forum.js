@@ -856,9 +856,9 @@ function refreshCategories() {
             if(selected_button.has(category_id)) {
                 selection_class = "btn-selected";
             }
-            var element = ' <a class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
+            var element = ' <div tabindex="0" class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
                                 <input aria-label="Category: '+category_desc+'" type="checkbox" name="cat[]" value="'+category_id+'">\
-                            </a>';
+                            </div>';
             $('#categories-pick-list').append(element);
         });
 
@@ -871,7 +871,7 @@ function refreshCategories() {
 
     // Selectors for categories pick up
     // If JS enabled hide checkbox
-    $("a.cat-buttons input").hide();
+    $("div.cat-buttons input").hide();
 
     $(".cat-buttons").click(function() {
         if($(this).hasClass("btn-selected")) {
