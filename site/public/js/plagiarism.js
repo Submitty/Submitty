@@ -45,9 +45,9 @@ function setUpLeftPane() {
     editor0.getWrapperElement().onmouseup = function(e) {
         var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
         var markers = editor0.findMarksAt(lineCh);
-        // Did not select a marker 
-        if (markers.length === 0) { 
-            return; 
+        // Did not select a marker
+        if (markers.length === 0) {
+            return;
         }
 
         // Only grab the first one if there is overlap...
@@ -95,21 +95,21 @@ function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     var to_append = '';
     $.each(user_matches, function(i, match) {
         var res = match.split('_');
-        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${gradeableId}', '${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>'; 
-    }); 
-    to_append = $.parseHTML(to_append); 
-    $("#popup_to_show_matches_id").empty().append(to_append);   
-    var x = event.pageX;    
-    var y = event.pageY;    
-    $('#popup_to_show_matches_id').css('display', 'block'); 
-    var width = $('#popup_to_show_matches_id').width(); 
-    $('#popup_to_show_matches_id').css('top', y+5); 
+        to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick="clearCodeEditorsAndUpdateSelection(' + `'${gradeableId}', '${user_id_1}', '${user_1_version}', '${res[0]}', '${res[1]}'); $('#popup_to_show_matches_id').css('display', 'none');"` + '>' + res[0] + '(version:'+res[1]+')</div></li>';
+    });
+    to_append = $.parseHTML(to_append);
+    $("#popup_to_show_matches_id").empty().append(to_append);
+    var x = event.pageX;
+    var y = event.pageY;
+    $('#popup_to_show_matches_id').css('display', 'block');
+    var width = $('#popup_to_show_matches_id').width();
+    $('#popup_to_show_matches_id').css('top', y+5);
     $('#popup_to_show_matches_id').css('left', x-width/2.00);
 }
 
 function setUpPlagView(gradeable_id) {
 
-    gradeableId = gradeable_id; 
+    gradeableId = gradeable_id;
 	form = $("#users_with_plagiarism");
     editor0 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
         lineNumbers: true,
@@ -159,7 +159,7 @@ function requestAjaxData(url, f, es) {
 function createRightUsersList(data, select = null) {
     if (select == null) {
         var append_options='<option value="">None</option>';
-    }        
+    }
         console.log('select ' + select);
     $.each(data, function(i,users){
         console.log('users[0] ' + users[0]);
@@ -167,10 +167,10 @@ function createRightUsersList(data, select = null) {
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select == users[0]) {
             console.log('cheers');
-            append_options += ' selected>'; 
+            append_options += ' selected>';
         } else {
             append_options += '>';
-        } 
+        }
         append_options += users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
     });
     $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
@@ -233,9 +233,9 @@ function setCodeInEditor(changed) {
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
     var user_id_2_data = $('[name="user_id_2"]', form).val();
-    
+
     // Empty lists and code
-    if((changed == "user_id_1" && user_id_1 == "") || (changed == "version_user_1" && version_user_1 == "")){ 
+    if((changed == "user_id_1" && user_id_1 == "") || (changed == "version_user_1" && version_user_1 == "")){
         $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
         editor0.getDoc().setValue('');
