@@ -35,8 +35,15 @@
             <div id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
-                    <td>Section {{ section['sections_registration_id'] }}</td>
-                    <td><input id="section-{{ section['sections_registration_id'] }}" aria-label="Section {{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                    <span class = "inline">
+                        <td>
+                            Section&nbsp;{{section['sections_registration_id']}}
+                            <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                    </span>
                 </tr>
             {% endfor %}
             </div>
@@ -97,13 +104,11 @@
                     sections = null;
                 }
                 var cmPath = document.getElementById('cm_path').innerHTML;
-
                 var requestedPath = document.getElementById("input-provide-full-path").value;
                 makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
                 e.stopPropagation();
             });
         });
-
         flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
@@ -117,7 +122,6 @@
                                 {
                                     label: "End of time"
                                 }
-
                             ],
                             onClick: (index, fp) => {
                                 let date;
@@ -132,7 +136,6 @@
                                         date = new Date("9998-01-01 00:00:00");
                                         fp.setDate(date,true);
                                         break;
-
                                 }
                             }
                         }

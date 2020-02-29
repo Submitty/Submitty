@@ -234,9 +234,43 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+
+    let form = $("#edit-course-materials-form");
+
+    let element = document.getElementById("edit-picker");
+    
+    element._flatpickr.setDate(release_time);
+    
+    if(this_hide_from_students == "on"){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    }
+    
+    else{
+        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+    }
+    
+    $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
+    
+    if(this_file_section != null){
+        for(let index = 0; index < this_file_section.length; ++index){
+            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
+        }
+        $("#all-sections-showing-no", form).prop('checked',false);
+        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).show();
+    }
+    else{
+        $("#show-some-section-selection-edit", form).hide();
+        $("#all-sections-showing-yes", form).prop('checked',false);
+        $("#all-sections-showing-no", form).prop('checked',true);
+    }
+    $("#material-edit-form", form).attr('data-directory', dir);
+    form.css("display", "block");
+}
 function captureTabInModal(formName){
 
-    var form = $("#".concat(formName));
+  var form = $("#".concat(formName));
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');

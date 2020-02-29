@@ -73,6 +73,21 @@
 {% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
+    <script>
+
+        function editCourseMaterialsInitialization(this_file_section, this_hide_from_students, dir, release_time){
+
+            if (this_file_section != null) {
+                newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time);
+            }
+
+            else {
+              newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time); 
+            }
+
+        }
+
+    </script>
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
     <div class="file-container">
         <div class="file-viewer">
@@ -85,6 +100,8 @@
             {% endif %}
             <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}"><i class="fas fa-download" title="Download the file"></i></a>
             {% if userGroup == 1 %}
+
+               <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="date_to_release_{{ id }}">Share to student on</label>
@@ -101,6 +118,7 @@
                     {% endif %}
 
                 {% endif %}
+                
                 <script>
 
                     function determineRelease(inputID){
@@ -200,7 +218,8 @@
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}"><i class="fas fa-download" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-               <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");' aria-label="Delete the folder: {{ dir }}"> <i class="fas fa-trash" title="Delete the folder" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{dir}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                 [{% for file in inDir %}
@@ -334,4 +353,5 @@
 
 {% include('course/SetFolderReleaseForm.twig') %}
 {% include 'course/UploadCourseMaterialsForm.twig' with {reg_sections: reg_sections} %}
+{% include 'course/EditCourseMaterialsForm.twig' %}
 {% include('course/DeleteCourseMaterialForm.twig') %}
