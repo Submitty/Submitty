@@ -87,7 +87,7 @@
             {% if userGroup == 1 %}
 
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
-                <label for="latest-events">Share to student on</label>
+                <label for="date_to_release_{{ id }}">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
                     {% if this_hide_from_students == "on" %}
