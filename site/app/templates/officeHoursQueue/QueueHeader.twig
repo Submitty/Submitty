@@ -1,7 +1,6 @@
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 <div class="content">
   <h1>
-    Office Hours Queue
+    Office Hours/Lab Queue
   </h1>
   {% if not viewer.isGrader() %}
     {% if viewer.inQueue() == 0 %}
@@ -9,10 +8,10 @@
       <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <label for="name_box">Your Name:</label>
-        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Queue Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
         <br>
         <div class="form-group">
-          <label>Queue Name:
+          <label for="queue_code">Queue Name:
           </label>
           <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
             <option value="">Queue Name</option>
@@ -21,7 +20,7 @@
             {% endfor %}
           </select>
         </div>
-        <label for="code_box">Queue Code:</label>
+        <label for="token_box">Queue Code:</label>
         <input type="text" name="token" id="token_box" placeholder="Queue Code" style="margin:.5rem" autocomplete="on" required="required">
         <br>
         <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
