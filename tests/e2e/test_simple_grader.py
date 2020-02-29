@@ -84,7 +84,7 @@ class TestSimpleGrader(BaseTestCase):
                 self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
                 preceding_removed = td_elem.text.strip()[len(expected_text)+1:]
                 if preceding_removed != "NULL":
-                    section_num = int(preceding_removed)
+                    section_num = int(preceding_removed[0])
                     if prev_section_num is not None:
                         # check that the ordering is correct
                         self.assertTrue(prev_section_num < section_num)
