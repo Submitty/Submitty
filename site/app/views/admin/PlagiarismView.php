@@ -182,7 +182,7 @@ HTML;
         $return .= <<<HTML
         <span style="line-height: 2">Gradeable: <b>$gradeable_title</b> <a style="float:right;" class="btn btn-primary" title="View Key" onclick="$('#Plagiarism-Highlighting-Key').css('display', 'block');">View Key</a></span>
         <hr style="margin-top: 10px;margin-bottom: 10px;" />
-        <form id="users_with_plagiarism">
+        <form autocomplete="off" id="users_with_plagiarism">
             User 1 (sorted by %match):
             <select name="user_id_1">
                 <option value="">None</option>

@@ -82,12 +82,12 @@ function getUserData() {
 
 function toggle() {
     var data = getUserData();
-    updateRightUserLists(data['user_id_2'], data['version_user_2']);
+    updateRightUserLists(data['user_id_2'], data['version_user_2'], data['user_id_1']);
     clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
     $('[name="user_id_1"]', form).val(data['user_id_2']);
     $('[name="version_user_1"]', form).val(data['version_user_2']);
     //console.log({'user_id': data['user_id_1'], 'version': data['version_user_1']});
-    //setTimeout(function(){ $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']}); }, 3000);
+    //SsetTimeout(function(){ $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']}).change(); }, 2000);
 }
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
@@ -156,10 +156,22 @@ function requestAjaxData(url, f, es) {
     });
 }
 
-function createRightUsersList(data, form) {
-    var append_options='<option value="">None</option>';
+function createRightUsersList(data, select = null) {
+    if (select == null) {
+        var append_options='<option value="">None</option>';
+    }        
+        console.log('select ' + select);
     $.each(data, function(i,users){
-        append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}">'+ users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
+        console.log('users[0] ' + users[0]);
+        console.log(users[0] == select)
+        append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
+        if (select == users[0]) {
+            console.log('cheers');
+            append_options += ' selected>'; 
+        } else {
+            append_options += '>';
+        } 
+        append_options += users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
     });
     $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
 }
@@ -185,12 +197,12 @@ function createLeftUserVersionDropdown(version_data, active_version_user_1, max_
 
 }
 
-function updateRightUserLists(user_id_1, version_id_1) {
+function updateRightUserLists(user_id_1, version_id_1, select = null) {
     var url2 = buildCourseUrl(['plagiarism', 'gradeable', gradeableId, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_id_1}`;
-    const f2 = function(data, secondEditor) {
-        createRightUsersList(data);
+    const f2 = function(data, select) {
+        createRightUsersList(data, select);
     }
-    requestAjaxData(url2, f2, false);
+    requestAjaxData(url2, f2, select);
 }
 
 function clearCodeEditorsAndUpdateSelection(user_id_1, version_id_1, user_id_2 = null, version_id_2 = null) {
