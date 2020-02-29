@@ -15,10 +15,10 @@
     {% endif %}
 
     {% for js_ref in js %}
-    <script type='text/javascript' src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}'></script>
     {% endfor %}
 
-    <script type="text/javascript">
+    <script>
         function ducky() {
             var duck = document.getElementById("duckdiv");
             var banner = document.getElementById("submitty-banner");
