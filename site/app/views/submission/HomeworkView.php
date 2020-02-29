@@ -354,6 +354,12 @@ class HomeworkView extends AbstractView {
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
+        $student_id = '';
+        if (!is_null($graded_gradeable)) {
+            $student_id = ($graded_gradeable->getSubmitter()->isTeam()) ?
+                $graded_gradeable->getSubmitter()->getTeam()->getLeaderId() :
+                $graded_gradeable->getSubmitter()->getId();
+        }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -410,7 +416,7 @@ class HomeworkView extends AbstractView {
             'student_page' => $student_page,
             'students_full' => $students_full,
             'team_assignment' => $gradeable->isTeamAssignment(),
-            'submitter' => $graded_gradeable->getSubmitter(),
+            'student_id' => $student_id,
             'numberUtils' => $numberUtils,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
