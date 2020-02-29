@@ -12,7 +12,7 @@
 
             <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
 
-            <script type="text/javascript">
+            <script>
                 $(document).ready(function(){
                     //note the commented out code here along with the code where files are displayed that is commented out
                     //is intended to allow open and close to change dynamically on click
@@ -52,7 +52,7 @@
                 {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
             </div>
             {# /Files #}
-            <script type="text/javascript">
+            <script>
                 // $(document).ready(function(){
                 //     $(".openAllDiv").on('click', function(){
                 //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
@@ -77,7 +77,7 @@
 </div>
 
 {# todo: Move to ta-grading.js #}
-<script type="text/javascript">
+<script>
     function openFrame(html_file, url_file, num) {
         var iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {

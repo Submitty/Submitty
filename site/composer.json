@@ -16,7 +16,7 @@
     }
   },
   "require": {
-    "twig/twig": "2.12.3",
+    "twig/twig": "2.12.5",
     "ramsey/uuid": "3.9.3",
     "aptoma/twig-markdown": "3.3.0",
     "erusev/parsedown": "1.7.4",

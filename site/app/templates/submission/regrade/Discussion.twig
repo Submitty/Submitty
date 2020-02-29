@@ -98,6 +98,10 @@
                                 </button>
                             {% elseif grade_inquiries[component.id].status == 0 and is_grading %}
                                 {# Grader view, Request closed #}
+                                {# Letting Instructor reply(comment) to the inquiry without reopening the grade_inquiry #}
+                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Add Comment
+                                </button>
                                 <button type="button" id="gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Reopen Grade Inquiry
                                 </button>
