@@ -115,7 +115,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
     }
     if(test_category) {
 
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
+        if((!form.prop("ignore-cat")) && form.find('.btn-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -304,11 +304,11 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
                 $('#lock_thread_date').val(thread_lock_date);
 
                 // Categories
-                $(".cat-buttons").removeClass('cat-selected');
+                $(".cat-buttons").removeClass('btn-selected');
                 $.each(categories_ids, function(index, category_id) {
                     var cat_input = $(".cat-buttons input[value="+category_id+"]");
                     cat_input.prop('checked', true);
-                    cat_input.parent().addClass('cat-selected');
+                    cat_input.parent().addClass('btn-selected');
                 });
                 $(".cat-buttons").trigger("eventChangeCatClass");
                 $("#thread_form").prop("ignore-cat",false);
@@ -675,6 +675,9 @@ function showHistory(post_id) {
                 var visible_user_json = JSON.stringify(visible_username);
                 info_name = JSON.stringify(info_name);
                 var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fas fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                if(!author_user_id){
+                  user_button_code = ""
+                }
                 box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                 box.find("h7").before(user_button_code);
                 $("#popup-post-history .form-body").prepend(box);
@@ -853,9 +856,9 @@ function refreshCategories() {
             if(selected_button.has(category_id)) {
                 selection_class = "btn-selected";
             }
-            var element = ' <a class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
-                                <input type="checkbox" name="cat[]" value="'+category_id+'">\
-                            </a>';
+            var element = ' <div tabindex="0" class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
+                                <input aria-label="Category: '+category_desc+'" type="checkbox" name="cat[]" value="'+category_id+'">\
+                            </div>';
             $('#categories-pick-list').append(element);
         });
 
@@ -868,7 +871,7 @@ function refreshCategories() {
 
     // Selectors for categories pick up
     // If JS enabled hide checkbox
-    $("a.cat-buttons input").hide();
+    $("div.cat-buttons input").hide();
 
     $(".cat-buttons").click(function() {
         if($(this).hasClass("btn-selected")) {
@@ -1040,6 +1043,12 @@ function addMarkdownCode(type, divTitle){
         insert = "```" +
             "\ncode\n```";
     }
+    else if(type == 2){
+        insert = "__bold text__ ";
+    }
+    else if(type == 3){
+        insert = "_italic text_ ";
+    }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
@@ -1123,7 +1132,10 @@ function loadThreadHandler(){
                     $('#messages').append(message);
                     return;
                 }
-
+                if (typeof json.data.merged !== 'undefined') {
+                  window.location.replace(json.data.destination);
+                  return;
+                }
                 $(obj).find('.thread_box').removeClass('new_thread');
 
                 $('.thread_box').removeClass('active');

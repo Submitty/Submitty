@@ -104,3 +104,15 @@
         padding-right: 15px;
     }
 }
+
+.peer-table-data {
+    width: 50px;
+}
+
+.peer-table-header {
+    width: 50px;
+}
+
+.peer-table-title-data {
+    text-align: left;
+}

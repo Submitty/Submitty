@@ -41,7 +41,7 @@
                     </td>
                     <td>
                         <a href="javascript:openFile('{{ file.url_full }}');" aria-label="View full PDF in a new window">
-                            <i class="fas fa-window-restore" aria-hidden="true"></i>
+                            <i class="fas fa-window-restore"></i>
 			            </a>
                     </td>
                     <td id="input_area">
@@ -88,7 +88,7 @@
     </table>
 </div>
 
-<script type="text/javascript">
+<script>
     var path_list = {{ count_array|json_encode|raw }};
     var num_submissions = {{ files|length }};
     var CSRF = "{{ csrf_token }}";

@@ -28,6 +28,7 @@ class Output {
 
     private $output_buffer = "";
     private $breadcrumbs = array();
+    private $page_name = "";
     private $loaded_views = array();
 
     /** @var Set */
@@ -37,6 +38,7 @@ class Output {
 
     private $use_header = true;
     private $use_footer = true;
+    private $use_mobile_viewport = false;
 
     private $start_time;
 
@@ -518,8 +520,16 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function addBreadcrumb($string, $url = null, $external_link = false) {
-        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
+    public function enableMobileViewport(): void {
+        $this->use_mobile_viewport = true;
+    }
+
+    public function useMobileViewport(): bool {
+        return $this->use_mobile_viewport;
+    }
+
+    public function addBreadcrumb($string, $url = null, $external_link = false, $use_as_heading = false) {
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link, $use_as_heading);
     }
 
     public function addRoomTemplatesTwigPath() {
@@ -531,6 +541,17 @@ HTML;
      */
     public function getBreadcrumbs() {
         return $this->breadcrumbs;
+    }
+
+    public function setPageName($page_name) {
+        $this->page_name = $page_name;
+    }
+
+    public function getPageName() {
+        if (!empty($this->page_name)) {
+            return $this->page_name;
+        }
+        return end($this->breadcrumbs)->getTitle();
     }
 
     /**

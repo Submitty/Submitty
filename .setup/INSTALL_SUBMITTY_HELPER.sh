@@ -224,6 +224,8 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
   	mkdir -p ${SUBMITTY_DATA_DIR}/logs/vcs_generation
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
 fi
 # ------------------------------------------------------------------------
 
@@ -257,7 +259,12 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
 	chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
+    chown  -R postgres:${DAEMON_GROUP}                ${SUBMITTY_DATA_DIR}/logs/psql
+    # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
+    chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
+    chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
 fi
+
 # Set permissions of all files in the logs directories
 find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
 # Set permissions of all logs subdirectires
@@ -784,7 +791,7 @@ if [ "${WORKER}" == 0 ]; then
         rainbow_total=$((rainbow_total+1))
         set +e
         python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
-        
+
         if [[ $? -ne 0 ]]; then
             echo -e "\n[ FAILED ] sample test\n"
         else
@@ -806,16 +813,12 @@ if [ "${WORKER}" == 1 ]; then
     chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    # This takes a bit of time, let's skip if there are no workers
-    num_machines=$(jq '. | length' /usr/local/submitty/config/autograding_workers.json)
-    if [ "${num_machines}" != "1" ]; then
-        # in order to update the submitty source files on the worker machines
-        # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
-        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
-        chmod -R g+r ${SUBMITTY_REPOSITORY}
+    # in order to update the submitty source files on the worker machines
+    # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
+    chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
+    chmod -R g+r ${SUBMITTY_REPOSITORY}
 
-        # Update any foreign worker machines
-        echo -e -n "Updating worker machines\n\n"
-        sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
-    fi
+    # Update any foreign worker machines
+    echo -e -n "Updating worker machines\n\n"
+    sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
 fi

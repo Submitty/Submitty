@@ -19,10 +19,10 @@
     {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
 
     <div class="box">
-        <div class="box-title" 
+        <div class="box-title"
             {% if nonhidden_earned >= nonhidden_max %}
-                onclick="addConfetti();" 
-                style="cursor:pointer;" 
+                onclick="addConfetti();"
+                style="cursor:pointer;"
             {% endif %}
          >
             {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
@@ -32,8 +32,8 @@
     {% if show_hidden_breakdown %}
         <div class="box"
             {% if hidden_earned >= hidden_max %}
-                onclick="addConfetti();" 
-                style="cursor:pointer;" 
+                onclick="addConfetti();"
+                style="cursor:pointer;"
             {% endif %}
         >
             <div class="box-title">
@@ -66,8 +66,8 @@
                         <span class="loading-tools-show" style="color: #0000EE; text-decoration: underline;">
                             Show Details
                         </span>
-                        <span class="loading-tools-in-progress" hidden>
-                            <i class="fas fa-circle-notch fa-spin save-button" aria-hidden="true"></i>Loading...
+                        <span class="loading-tools-in-progress" aria-label="Loading Details for {{testcase.name}}" hidden>
+                            <i class="fas fa-circle-notch fa-spin save-button"></i>Loading...
                         </span>
                     </span>
                     {% endif %}

@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\libraries\DateUtils;
+use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
@@ -10,6 +11,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\SubmissionMultipleChoice;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
@@ -352,6 +354,12 @@ class HomeworkView extends AbstractView {
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
+        $student_id = '';
+        if (!is_null($graded_gradeable)) {
+            $student_id = ($graded_gradeable->getSubmitter()->isTeam()) ?
+                $graded_gradeable->getSubmitter()->getTeam()->getLeaderId() :
+                $graded_gradeable->getSubmitter()->getId();
+        }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -377,13 +385,15 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
 
         $DATE_FORMAT = "m/d/Y @ h:i A";
-
+        $numberUtils = new NumberUtils();
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
+            'gradeable_url' => $gradeable->getInstructionsUrl(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
+            'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_host_type' => $gradeable->getVcsHostType(),
@@ -405,6 +415,9 @@ class HomeworkView extends AbstractView {
             'highest_version' => $highest_version,
             'student_page' => $student_page,
             'students_full' => $students_full,
+            'team_assignment' => $gradeable->isTeamAssignment(),
+            'student_id' => $student_id,
+            'numberUtils' => $numberUtils,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
@@ -750,6 +763,7 @@ class HomeworkView extends AbstractView {
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+        $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         $request_regrade_url = $this->core->buildCourseUrl([
             'gradeable',
@@ -857,6 +871,7 @@ class HomeworkView extends AbstractView {
             'g_id' => $graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
+            'is_inquiry_open' => $is_inquiry_open,
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'gradeable_components' => $components_twig_array,

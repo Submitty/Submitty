@@ -15,7 +15,7 @@ $(document).ready(function() {
         formData.append("entry", entry);
 
         $.ajax({
-            url: buildCourseUrl(['config', 'update']),
+            url: buildCourseUrl(['config']),
             data: formData,
             type: "POST",
             processData: false,
@@ -49,7 +49,6 @@ $(document).ready(function() {
 
     function updateForumMessage() {
         $("#forum-enabled-message").toggle();
-        $("#forum-category-warning").toggle();
     }
 
     $(document).on("change", "#forum-enabled", updateForumMessage);

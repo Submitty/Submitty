@@ -16,9 +16,11 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
       const bool windowed,
-      const std::string display_variable);
+      const std::string display_variable,
+      const bool timestamped_stdout);
 
-int exec_this_command(const std::string &cmd, std::ofstream &logfile);
+int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config, std::string program_name, 
+                      const nlohmann::json &test_case_limits, const nlohmann::json &assignment_limits, const bool timestamped_stdout);
 
 int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &logfile, const nlohmann::json &whole_config);
 
@@ -49,3 +51,7 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float& 
 std::string output_of_system_command(const char* cmd);
 
 void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CHILD_NOT_TERMINATED);
+
+void timestamp_stdout(std::string filename, int pipe);
+
+std::string getTimestamp();
