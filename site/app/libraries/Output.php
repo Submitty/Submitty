@@ -528,8 +528,8 @@ HTML;
         return $this->use_mobile_viewport;
     }
 
-    public function addBreadcrumb($string, $url = null, $external_link = false) {
-        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
+    public function addBreadcrumb($string, $url = null, $external_link = false, $use_as_heading = false) {
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link, $use_as_heading);
     }
 
     public function addRoomTemplatesTwigPath() {
