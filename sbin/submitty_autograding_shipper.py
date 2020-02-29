@@ -624,116 +624,117 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
     time_get_job_begin = dateutils.get_current_time()
 
-    overall_lock.acquire()
-    folder= INTERACTIVE_QUEUE
+    with overall_lock:
+        folder= INTERACTIVE_QUEUE
 
 
-    # ----------------------------------------------------------------
-    # Our first priority is to perform any awaiting VCS checkouts
+        '''
+        ----------------------------------------------------------------
+        Our first priority is to perform any awaiting VCS checkouts
 
-    # Note: This design is imperfect:
-    #
-    #   * If all shippers are busy working on long-running autograding
-    #     tasks there will be a delay of seconds or minutes between
-    #     a student pressing the submission button and clone happening.
-    #     This is a minor exploit allowing them to theoretically
-    #     continue working on their submission past the deadline for
-    #     the time period of the delay.
-    #     -- This is not a significant, practical problem.
-    #
-    #   * If multiple and/or large git submissions arrive close
-    #     together, this shipper job will be tied up performing these
-    #     clone operations.  Because we don't release the lock, any
-    #     other shippers that complete their work will also be blocked
-    #     from either helping with the clones or tackling the next
-    #     autograding job.
-    #     -- Based on experience with actual submission patterns, we
-    #        do not anticipate that this will be a significant
-    #        bottleneck at this time.
-    #
-    #   * If a git clone takes a very long time and/or hangs because of
-    #     network problems, this could halt all work on the server.
-    #     -- We'll need to monitor the production server.
-    #
-    # We plan to do a complete overhaul of the
-    # scheduler/shipper/worker and refactoring this design should be
-    # part of the project.
+        Note: This design is imperfect:
+        
+          * If all shippers are busy working on long-running autograding
+            tasks there will be a delay of seconds or minutes between
+            a student pressing the submission button and clone happening.
+            This is a minor exploit allowing them to theoretically
+            continue working on their submission past the deadline for
+            the time period of the delay.
+            -- This is not a significant, practical problem.
+        
+          * If multiple and/or large git submissions arrive close
+            together, this shipper job will be tied up performing these
+            clone operations.  Because we don't release the lock, any
+            other shippers that complete their work will also be blocked
+            from either helping with the clones or tackling the next
+            autograding job.
+            -- Based on experience with actual submission patterns, we
+               do not anticipate that this will be a significant
+               bottleneck at this time.
+        
+          * If a git clone takes a very long time and/or hangs because of
+            network problems, this could halt all work on the server.
+            -- We'll need to monitor the production server.
+        
+        We plan to do a complete overhaul of the
+        scheduler/shipper/worker and refactoring this design should be
+        part of the project.
+        ----------------------------------------------------------------
+        '''
 
-    # Grab all the VCS files currently in the folder...
-    vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
-    for f in vcs_files:
-        vcs_file = f[len(folder)+1:]
-        no_vcs_file = f[len(folder)+1+5:]
-        # do the checkout
-        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
-        # save the regular grading queue file
-        with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
-            json.dump(updated_obj, queue_file)
-        # cleanup the vcs queue file
-        os.remove(folder+"/"+vcs_file)
-    # ----------------------------------------------------------------
+        # Grab all the VCS files currently in the folder...
+        vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
+        for f in vcs_files:
+            vcs_file = f[len(folder)+1:]
+            no_vcs_file = f[len(folder)+1+5:]
+            # do the checkout
+            updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+            # save the regular grading queue file
+            with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
+                json.dump(updated_obj, queue_file)
+            # cleanup the vcs queue file
+            os.remove(folder+"/"+vcs_file)
+        # ----------------------------------------------------------------
 
 
-    # Grab all the files currently in the folder, sorted by creation
-    # time, and put them in the queue to be graded
-    files = [str(f) for f in Path(folder).glob('*')]
-    files_and_times = list()
-    for f in files:
-        try:
-            my_time = os.path.getctime(f)
-        except:
-            continue
-        tup = (f, my_time)
-        files_and_times.append(tup)
+        # Grab all the files currently in the folder, sorted by creation
+        # time, and put them in the queue to be graded
+        files = [str(f) for f in Path(folder).glob('*')]
+        files_and_times = list()
+        for f in files:
+            try:
+                my_time = os.path.getctime(f)
+            except:
+                continue
+            tup = (f, my_time)
+            files_and_times.append(tup)
 
-    files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
-    my_job=""
+        files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
+        my_job=""
 
-    for full_path_file, file_time in files_and_times:
-        # get the file name (without the path)
-        just_file = full_path_file[len(folder)+1:]
+        for full_path_file, file_time in files_and_times:
+            # get the file name (without the path)
+            just_file = full_path_file[len(folder)+1:]
 
-        # skip items that are already being graded
-        if (just_file[0:8]=="GRADING_"):
-            continue
-        grading_file = os.path.join(folder,"GRADING_"+just_file)
-        if grading_file in files:
-            continue
+            # skip items that are already being graded
+            if (just_file[0:8]=="GRADING_"):
+                continue
+            grading_file = os.path.join(folder,"GRADING_"+just_file)
+            if grading_file in files:
+                continue
 
-        # skip items (very recently added!) that are already waiting for a VCS checkout
-        if (just_file[0:5]=="VCS__"):
-            continue
+            # skip items (very recently added!) that are already waiting for a VCS checkout
+            if (just_file[0:5]=="VCS__"):
+                continue
 
-        # found something to do
-        try:
-            with open(full_path_file, 'r') as infile:
-                queue_obj = json.load(infile)
-        except:
-            continue
+            # found something to do
+            try:
+                with open(full_path_file, 'r') as infile:
+                    queue_obj = json.load(infile)
+            except:
+                continue
 
-        #Check to make sure that we are capable of grading this submission
-        required_capabilities = queue_obj["required_capabilities"]
-        if not required_capabilities in my_capabilities:
-            continue
+            #Check to make sure that we are capable of grading this submission
+            required_capabilities = queue_obj["required_capabilities"]
+            if not required_capabilities in my_capabilities:
+                continue
 
-        # prioritize interactive jobs over (batch) regrades
-        # if you've found an interactive job, exit early (since they are sorted by timestamp)
-        if not "regrade" in queue_obj or not queue_obj["regrade"]:
-            my_job = just_file
-            break
+            # prioritize interactive jobs over (batch) regrades
+            # if you've found an interactive job, exit early (since they are sorted by timestamp)
+            if not "regrade" in queue_obj or not queue_obj["regrade"]:
+                my_job = just_file
+                break
 
-        # otherwise it's a regrade, and if we don't already have a
-        # job, take it, but we have to search the rest of the list
-        if my_job == "":
-            my_job = just_file
+            # otherwise it's a regrade, and if we don't already have a
+            # job, take it, but we have to search the rest of the list
+            if my_job == "":
+                my_job = just_file
 
-    if not my_job == "":
-        grading_file = os.path.join(folder, "GRADING_" + my_job)
-        # create the grading file
-        with open(os.path.join(grading_file), "w") as queue_file:
-            json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
-
-    overall_lock.release()
+        if not my_job == "":
+            grading_file = os.path.join(folder, "GRADING_" + my_job)
+            # create the grading file
+            with open(os.path.join(grading_file), "w") as queue_file:
+                json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
 
     time_get_job_end = dateutils.get_current_time()
 

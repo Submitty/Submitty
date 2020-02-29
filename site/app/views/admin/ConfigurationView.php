@@ -10,16 +10,15 @@ class ConfigurationView extends AbstractView {
         $gradeable_seating_options,
         bool $email_enabled,
         array $submitty_admin_user,
-        $categories,
         string $csrf_token
     ) {
         $this->output->addInternalJs("configuration.js");
         $this->output->addInternalCss("configuration.css");
         $this->output->addBreadcrumb('Course Settings');
+        $this->core->getOutput()->enableMobileViewport();
         return $this->output->renderTwigTemplate("admin/Configuration.twig", [
             "fields" => $fields,
             "gradeable_seating_options" => $gradeable_seating_options,
-            "categories_empty" => $categories,
             "submitty_admin_user" => $submitty_admin_user,
             "theme_url" => $this->core->buildCourseUrl(['theme']),
             "email_enabled" => $email_enabled,
