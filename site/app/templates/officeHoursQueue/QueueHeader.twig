@@ -14,7 +14,7 @@
         <div class="form-group">
           <label>Queue Name:
           </label>
-          <select class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+          <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
             <option value="">Queue Name</option>
             {% for queue in viewer.getAllQueues() %}
               <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
@@ -24,7 +24,7 @@
         <label for="code_box">Queue Code:</label>
         <input type="text" name="token" id="token_box" placeholder="Queue Code" style="margin:.5rem" autocomplete="on" required="required">
         <br>
-        <button type="submit" class="btn btn-primary">Join</button>
+        <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
       </form>
     {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
       {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
@@ -43,7 +43,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <button type="submit" class="btn btn-danger">Leave Queue</button>
+        <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
       </form>
     {% else %}
       <p>You are currently being helped</p>
@@ -55,7 +55,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <button type="submit" class="btn btn-danger">Finish Being Helped</button>
+        <button id="self_finish_help" type="submit" class="btn btn-danger">Finish Being Helped</button>
       </form>
     {% endif %}
     <br>

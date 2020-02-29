@@ -165,143 +165,14 @@ HTML;
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addInternalJs('plagiarism.js');
 
         $return = "";
         $return .= <<<HTML
         <script>
-
-            $(document).ready(function() {
-                var editor0 = $('.CodeMirror')[0].CodeMirror;
-                var editor1 = $('.CodeMirror')[1].CodeMirror;
-
-                //console.log('hello');
-
-                editor0.getWrapperElement().onmousedown = function(e) {
-                    var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
-                    //console.log(lineCh);
-                    var markers = editor0.findMarksAt(lineCh);
-                    if (markers.length === 0) { return; }
-                    var lineData = markers[0].find();
-                    var clickedMark = markers[0];
-
-                    if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
-
-                        // var redSegments = document.getElementsByClassName("red_plag");
-
-                        //console.log($(".red_plag")[0]);
-
-                        var allMarks = editor0.getAllMarks();
-
-                        allMarks.forEach(m => {
-                            if(m.className === "red_plag") {
-                                m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
-                                m.className = "";
-                            }
-                        });
-
-                        //console.log($($(redSegments[0]).parent().parent().parent())(".CodeMirror-linenumber").html());
-
-                        // if(redSegments.length > 0) {
-                        //     var r = redSegments[0];
-                        //     console.log($(r).parent());
-                        //     var position = r.
-                        //     var rLineCh = editor0.coordsChar( {left: position.left, top: position.top} );
-                        //     //console.log(rLineCh);
-                        //     var redMarkers = editor0.findMarksAt(lineCh);
-                        //     //console.log(redMarkers);
-                        //     var redClickedMark = redMarkers[0];
-
-                        //     redClickedMark.css = "border: 1px solid black; background:" + redClickedMark.attributes["data_prev_color"];
-                        //     //redClickedMark.className = "";
-                        //     console.log(redClickedMark);
-                        // }
-
-
-
-
-                        // redSegments.forEach(e => {
-                        //     console.log(e);
-                        // });
-
-                        setTimeout(function() {
-                            //your code to be executed after 1 second
-                            clickedMark.css = "border: 1px solid black; background:#FF0000";
-                            clickedMark.className = "red_plag";
-                            clickedMark.attributes = {"data_prev_color": "#ffff00"};
-                            editor0.refresh();
-                        }, 250);
-
-                            getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
-
-
-                        //editor0.markText(lineData.from, lineData.to, {attributes: {"data_color_prev": "#ffff00"}, 'className': 'red_plag', 'css': 'background: #FF0000;'});
-
-                        //Use jquery to modify all classesWith red_plag back to prev_color
-
-                    }
-                    if(markers[0].css.toLowerCase().indexOf("#ffa500") != -1) { //Can be used to determine click
-
-
-                        var redSegments = document.getElementsByClassName("red_plag");
-
-                        //console.log(redSegments);
-
-
-                        // redSegments.forEach(e => {
-                        //     console.log(e);
-                        // });
-
-
-                        //editor0.markText(lineData.from, lineData.to, {attributes: {"data_color_prev": "#ffa500"}, 'className': 'red_plag', 'css': 'background: #FF0000;'});
-                        var marks_editor2 = editor1.getAllMarks();
-                        marks_editor2.forEach(mark => {
-                            if(mark.attributes.data_start == markers[0].attributes.data_start && mark.attributes.data_end == markers[0].attributes.data_end) {
-                                //mark.className = 'red_plag';
-                                var marker_linedata = mark.find();
-                                //mark.css = "border: 1px solid black; border-right:1px solid red;background: #FF0000";
-                                //console.log(mark);
-                                //console.log(marker_linedata);
-
-                                var allMarks = editor0.getAllMarks();
-
-                                // allMarks.forEach(m => {
-                                //     if(m.className === "red_plag") {
-                                //         m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
-                                //         m.className = "";
-                                //     }
-                                // });
-
-                                // allMarks = marks_editor2;
-
-                                // allMarks.forEach(m => {
-                                //     if(m.className === "red_plag") {
-                                //         m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
-                                //         m.className = "";
-                                //     }
-                                // });
-
-                                clickedMark.css = "border: 1px solid black; background:#FF0000";
-                                clickedMark.className = "red_plag";
-                                clickedMark.attributes = {"data_prev_color": "#ffff00"};
-                                editor0.refresh();
-
-                                mark.css = "border: 1px solid black; background: #FF0000";
-                                mark.className = 'red_plag';
-                                mark.attributes = {"data_color_prev": "#ffa500"};
-                                editor1.refresh();
-
-                                //var top = editor1.charCoords(marker_linedata.from.line).top;
-
-                                editor1.scrollIntoView(marker_linedata.to);
-                                //
-
-                            }
-                        });
-                        //getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_2", "orange", markers[0].attributes, "", "");
-                    }
-                }
-            });
-
+        $( document ).ready(function() {
+    		setUpPlagView("${gradeable_id}");
+		});
         </script>
 <div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
@@ -332,7 +203,7 @@ HTML;
                 <select name="user_id_2">
                     <option value="">None</option>
                 </select>
-                <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
+                <a name="toggle" class="btn btn-primary disabled" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>
         </form><br />
         <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
@@ -350,36 +221,7 @@ HTML;
         $return .= <<<HTML
 </div>
 <script>
-    var form = $("#users_with_plagiarism");
-    var code_user_1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
-        lineNumbers: true,
-        readOnly: true,
-        cursorHeight: 0.0,
-        lineWrapping: true
-    });
-    var code_user_2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
-        lineNumbers: true,
-        readOnly: true,
-        cursorHeight: 0.0,
-        lineWrapping: true
-    });
-
-    code_user_2.setSize("100%", "100%");
-    code_user_1.setSize("100%", "100%");
-    $('[name="user_id_1"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}','user_id_1');
-    });
-    $('[name="version_user_1"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}', 'version_user_1');
-    });
-    $('[name="user_id_2"]', form).change(function(){
-        setUserSubmittedCode('{$gradeable_id}', 'user_id_2');
-    });
-    $(document).click(function() {
-        if($('#popup_to_show_matches_id').css('display') == 'block'){
-            $('#popup_to_show_matches_id').css('display', 'none');
-        }
-    });
+	
 </script>
 HTML;
         return $return;
