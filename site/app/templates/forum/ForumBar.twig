@@ -161,7 +161,7 @@
 </div>
 <hr/>
 {% if thread_exists and show_filter %}
-<script type="text/javascript">
+<script>
 	function updateThreads(loadFirstPage, success_callback) {
 		{% if thread_exists %}
 		modifyThreadList({{ current_thread }}, '{{ current_category_ids|join("|") }}', '{{ current_course }}', loadFirstPage, success_callback);

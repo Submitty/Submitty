@@ -107,7 +107,7 @@
             </a>
         {% endfor %}
     </div>
-    <script type="text/javascript">
+    <script>
     $(function() {
         refreshCategories();
     });
@@ -129,7 +129,7 @@
 
         {% if attachment_script %}
             {# To be executed at last attachment box #}
-            <script type="text/javascript">
+            <script>
                 $(function() {
                     $('div.upload_attachment_box').on('DOMNodeInserted',function(e){
                         var part = get_part_number(e);
@@ -195,7 +195,7 @@
 </div>
 <br>
 </div>
-<script type="text/javascript">
+<script>
     $(function(){
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
