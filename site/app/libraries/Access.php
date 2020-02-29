@@ -507,7 +507,12 @@ class Access {
                 $this->loadDirectories();
             }
             //This is not a valid directory
+            //checks for top level dirs like annotations, checkout, course_materials, submissions ... )
             if (!array_key_exists($dir, $this->directories)) {
+                return false;
+            }
+            elseif (!file_exists($path)) {
+                //checks for the existense of path which is asked for
                 return false;
             }
 

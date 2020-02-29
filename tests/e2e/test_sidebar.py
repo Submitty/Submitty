@@ -49,11 +49,15 @@ class TestSidebar(BaseTestCase):
             if expected_text in title_map:
                 expected_text = title_map[expected_text]
 
-            self.assertEqual(
-                expected_text,
-                self.driver.find_element_by_id('main')
-                    .find_elements_by_tag_name('h1')[0].text
-            )
+            heading_text = []
+            heading_text.append(self.driver.find_element_by_id('main')
+                                .find_elements_by_tag_name('h1')[0].text)
+            if(self.driver.find_element_by_id('breadcrumbs')
+               and len(self.driver.find_element_by_id('breadcrumbs')
+                       .find_elements_by_tag_name('h1')) > 0):
+                heading_text.append(self.driver.find_element_by_id('breadcrumbs')
+                                    .find_elements_by_tag_name('h1')[0].text)
+            self.assertIn(expected_text, heading_text)
             current_idx += 1
 
     def test_click_sidebar_links_instructor(self):

@@ -293,7 +293,7 @@ function setButtonStatus() {
 function removeLabel(filename, part){
     var dropzone = document.getElementById("file-upload-table-" + part);
     var labels = dropzone.getElementsByClassName("file-label");
-    debugger;
+
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
@@ -326,7 +326,7 @@ function addLabel(filename, filesize, part, previous){
     };
     fileTrashElement.onmouseout = function(e){
         e.stopPropagation();
-        this.style.color = "black";
+        this.style.color = "var(--text-black)";
     };
     // remove file and label-row in table on click event
     fileTrashElement.onclick = function(e){
