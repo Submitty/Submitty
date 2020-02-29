@@ -1048,7 +1048,7 @@ class ElectronicGraderController extends AbstractController {
         if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
             while ($previousVersion) {
                 $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
-                if($prevVersionInstance == null) {
+                if ($prevVersionInstance == null) {
                     $rollbackSubmission = -1;
                     break;
                 }
