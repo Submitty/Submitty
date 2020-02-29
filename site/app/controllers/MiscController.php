@@ -195,6 +195,10 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->showError("You may not access this file until it is released.");
                 return false;
             }
+            elseif (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
+                $this->core->getOutput()->showError("You do not have access to this file.");
+                return false;
+            }
         }
 
         if ($dir == 'submissions') {

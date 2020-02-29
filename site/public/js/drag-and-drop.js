@@ -293,7 +293,7 @@ function setButtonStatus() {
 function removeLabel(filename, part){
     var dropzone = document.getElementById("file-upload-table-" + part);
     var labels = dropzone.getElementsByClassName("file-label");
-    debugger;
+
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
