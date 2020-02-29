@@ -42,18 +42,18 @@ a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
 
-    color: var(--default-white);
+    color: var(--text-white);
 
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: var(--default-white);
+    color: var(--text-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
-    color: #fff;
+    color: var(--text-white);
 }
 
 a.btn-default,
@@ -105,7 +105,7 @@ input[type="color"] {
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
-    color: #555555;
+    color: var(--standard-dark-gray);
     vertical-align: middle;
     border: 1px solid var(--standard-light-gray);
     -webkit-border-radius: 4px;
@@ -308,7 +308,7 @@ td>a.active-sort {
 
 .content.gradeable_message {
     background-color: var(--actionable-blue);
-    color: var(--default-white);
+    color: var(--text-white);
 }
 
 .content.gradeable_message p:not(:last-child){
@@ -1669,8 +1669,8 @@ end of styles used in the admin gradeable page
 }
 
 .black-btn, .black-btn > i {
-    color: #000 !important;
-    border-color: #000 !important;
+    color: var(--text-black) !important;
+    border-color: var(--text-black) !important;
     text-decoration: none;
 }
 

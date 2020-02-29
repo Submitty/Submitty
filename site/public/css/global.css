@@ -5,6 +5,7 @@ body {
     position: relative;
     display: flex;
     background: #f6fbfe;
+    color: var(--text-black);
 }
 
 #submitty-body {
@@ -23,7 +24,7 @@ nav {
 nav a,
 nav a:link,
 nav a:visited {
-    color: #000;
+    color: var(--text-black);
     text-decoration: underline;
 }
 
@@ -31,8 +32,8 @@ nav a:hover {
     text-decoration: none;
 }
 
-nav a > i.fa, 
-nav a > i.fas, 
+nav a > i.fa,
+nav a > i.fas,
 nav a > i.f {
     font-size: 20px;
 }

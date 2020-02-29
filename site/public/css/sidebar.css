@@ -21,7 +21,7 @@ aside {
     }
 
     aside i  {
-        color: #000;
+        color: var(--text-black);
         width: 30px;
         min-width: 30px;
         text-align: center;
@@ -35,7 +35,7 @@ aside {
     aside li {
         list-style: none;
     }
-        
+
     aside li .nav-row {
         padding: 6px 0;
         width: 100%;
@@ -46,7 +46,7 @@ aside {
         font-weight: bold;
         font-variant: all-small-caps;
         font-size: 20px;
-    }    
+    }
 
     aside .icon-title {
         margin-right: 15px;
@@ -59,25 +59,25 @@ aside {
     aside a {
         text-decoration: none;
     }
-        
+
     aside a .icon-title {
-        color: #006398;
+        color: var(--nav-sidebar-text);
     }
-    
+
     aside a .icon-title:hover {
         color: #002334;
     }
-    
+
     aside a .icon-title:active {
         color: #790000;
     }
 
     aside li .selected {
-        background-color: #d9e1e2;
+        background-color: var(--selected-nav-sidebar);
     }
 
     aside a.selected .icon-title {
-        color: #000;
+        color: var(--text-black);
         font-weight: bold;
     }
 
@@ -85,7 +85,7 @@ aside {
         width: 60px;
         min-width: 60px;
     }
-        
+
     aside.collapsed i {
         padding: 2px 0px;
         margin: 0 15px;
@@ -97,7 +97,7 @@ aside {
         min-width: 0px;
         white-space: nowrap;
     }
-    
+
     /* put it on top of the icon */
     aside.collapsed .notification-badge {
         font-size: 12px;

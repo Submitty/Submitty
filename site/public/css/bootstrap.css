@@ -114,31 +114,31 @@ fieldset[disabled] .btn-default.focus {
     background-color: var(--default-white);
 }
 .btn-default .badge {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--standard-deep-dark-gray);
 }
 .btn-primary {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--actionable-blue);
 }
 
 a.btn-primary {
-    color: var(--default-white);
+    color: var(--text-white);
 }
 
 .btn-primary:focus,
 .btn-primary.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--focus-actionable-blue);
 }
 .btn-primary:hover {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-actionable-blue)
 }
 .btn-primary:active,
 .btn-primary.active,
 .open > .dropdown-toggle.btn-primary {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--focus-actionable-blue);
 }
 .btn-primary:active:hover,
@@ -150,7 +150,7 @@ a.btn-primary {
 .btn-primary:active.focus,
 .btn-primary.active.focus,
 .open > .dropdown-toggle.btn-primary.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--focus-actionable-blue);
 }
 .btn-primary:active,
@@ -174,23 +174,23 @@ fieldset[disabled] .btn-primary.focus {
     background-color: var(--default-white);
 }
 .btn-success {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--good-green);
 
 }
 .btn-success:focus,
 .btn-success.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-good-green);
 }
 .btn-success:hover {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-good-green);
 }
 .btn-success:active,
 .btn-success.active,
 .open > .dropdown-toggle.btn-success {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-good-green);
 }
 .btn-success:active:hover,
@@ -202,7 +202,7 @@ fieldset[disabled] .btn-primary.focus {
 .btn-success:active.focus,
 .btn-success.active.focus,
 .open > .dropdown-toggle.btn-success.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-good-green);
 }
 .btn-success:active,
@@ -226,22 +226,22 @@ fieldset[disabled] .btn-success.focus {
     background-color: var(--default-white);
 }
 .btn-info {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--info-blue);
 }
 .btn-info:focus,
 .btn-info.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-focus-info-blue);
 }
 .btn-info:hover {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-focus-info-blue);
 }
 .btn-info:active,
 .btn-info.active,
 .open > .dropdown-toggle.btn-info {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-focus-info-blue);
 }
 .btn-info:active:hover,
@@ -253,7 +253,7 @@ fieldset[disabled] .btn-success.focus {
 .btn-info:active.focus,
 .btn-info.active.focus,
 .open > .dropdown-toggle.btn-info.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-active-all-info-blue);
 }
 .btn-info:active,
@@ -277,22 +277,22 @@ fieldset[disabled] .btn-info.focus {
     background-color: var(--default-white);
 }
 .btn-warning {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--warning-brown);
 }
 .btn-warning:focus,
 .btn-warning.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--focus-warning-brown);
 }
 .btn-warning:hover {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-warning-brown);
 }
 .btn-warning:active,
 .btn-warning.active,
 .open > .dropdown-toggle.btn-warning {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--active-warning-brown);
 }
 .btn-warning:active:hover,
@@ -304,7 +304,7 @@ fieldset[disabled] .btn-info.focus {
 .btn-warning:active.focus,
 .btn-warning.active.focus,
 .open > .dropdown-toggle.btn-warning.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--active-warning-brown);
 }
 .btn-warning:active,
@@ -328,22 +328,22 @@ fieldset[disabled] .btn-warning.focus {
     background-color: var(--default-white);
 }
 .btn-danger {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--danger-red) /*f74037;*/
 }
 .btn-danger:focus,
 .btn-danger.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--focus-danger-red); /*ff4845;*/
 }
 .btn-danger:hover {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-active-danger-red); /*ff524d;*/
 }
 .btn-danger:active,
 .btn-danger.active,
 .open > .dropdown-toggle.btn-danger {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-active-danger-red);
 }
 .btn-danger:active:hover,
@@ -355,7 +355,7 @@ fieldset[disabled] .btn-warning.focus {
 .btn-danger:active.focus,
 .btn-danger.active.focus,
 .open > .dropdown-toggle.btn-danger.focus {
-    color: var(--default-white);
+    color: var(--text-white);
     background-color: var(--hover-active-danger-red);
 }
 .btn-danger:active,
@@ -524,7 +524,7 @@ input[type="button"].btn-block {
   font-size: 65%;
   font-weight: bold;
   line-height: 2.5;
-  color: var(--default-white);
+  color: var(--text-white);
   text-align: center;
   /*white-space: nowrap;*/
   word-wrap: break-word;
