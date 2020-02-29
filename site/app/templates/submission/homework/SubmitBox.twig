@@ -281,7 +281,7 @@
                                      class="codebox"
                                      data-initial_value="{{ cell.initial_value }}"
                                      data-recent_submission="{{ cell.recent_submission }}"
-                                     onKeyPress="handle_input_keypress();">
+                                     onkeyup="handle_input_keypress();">
                                 </div>
 
                                 <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
@@ -305,7 +305,7 @@
                                     {% else %}
                                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
                                         document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
                                     {% endif %}
                                 </script>
                             {% set num_codeboxes = num_codeboxes + 1 %}
@@ -683,7 +683,7 @@
                     {% else %}
                         value="{{ short_answer.initial_value }}"
                     {% endif %}
-                    onKeyPress="handle_input_keypress();"
+                    onkeyup="handle_input_keypress();"
                 />
             </label>
         {% else %}
@@ -708,7 +708,7 @@
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
-                    onKeyPress="handle_input_keypress()"
+                    onkeyup="handle_input_keypress()"
                 >{% if short_answer.recent_submission|length  %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             </label>
             {#
