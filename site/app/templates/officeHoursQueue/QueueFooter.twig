@@ -109,6 +109,13 @@
       $('#auto_refresh_btn').html("Turn Off Auto Refresh");
     }
 
+    var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
+    if ("Notification" in window && Notification.permission === "granted" && notifications_enabled) {
+      setNotificationState(true);
+    }else{
+      setNotificationState(false);
+    }
+
     let refreshSpeed = 1000 * 30;
     setInterval(refreshQueue, refreshSpeed);
     function refreshQueue() {
@@ -117,21 +124,30 @@
       }
       $.get("{{base_url}}/check_updates", function(data) {
         if (lastQueueEdit < JSON.parse(data)['data']) {
+          var queueEmpty = $( ".help_btn:visible" ).length === 0;
           $.get("{{base_url}}/current_queue", function(newQueue) {
             $("#current_queue").replaceWith(newQueue);
             filterQueues();
+            if(notifications_enabled && queueEmpty && $( ".help_btn:visible" ).length > 0){
+              new Notification("A student has joined the queue");
+            }
           });
         }
       });
     }
 
     function toggleAutoRefresh() {
-      auto_refresh = !auto_refresh;
+      setAutoRefresh(!auto_refresh);
+    }
+
+    function setAutoRefresh(turnOn){
+      auto_refresh = turnOn;
       localStorage.setItem('office_hour_queue_auto_refresh', auto_refresh);
       if (auto_refresh) {
         $('#auto_refresh_btn').html("Turn Off Auto Refresh");
       } else {
         $('#auto_refresh_btn').html("Turn On Auto Refresh");
+        setNotificationState(false);
       }
     }
   {% endif %}
@@ -144,6 +160,42 @@
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     $('#' + id).val(result);
+  }
+
+  function setNotificationState(turnOn){
+    if(turnOn){
+      setAutoRefresh(true);
+    }
+    notifications_enabled = turnOn;
+    localStorage.setItem('office_hour_queue_notifications', turnOn ? "true":"false");
+    $('#notification_btn').html(turnOn ? "Disable Notifications":"Enable Notifications");
+  }
+
+  function enableNotifications() {
+    if(notifications_enabled){
+      setNotificationState(false);
+      return;
+    }
+
+    if (!("Notification" in window)) {
+      alert("This browser does not support desktop notification");
+    }
+
+    else if (Notification.permission === "granted") {
+      new Notification("Notifications have been enabled. You will be notified only when somebody joins the queue and there was nobody previously waiting for help.");
+      setNotificationState(true);
+    }
+
+    else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then(function (permission) {
+        if (permission === "granted") {
+          new Notification("Notifications have been enabled. You will be notified only when somebody joins the queue and there was nobody previously waiting for help.");
+          setNotificationState(true);
+        }else{
+          setNotificationState(false);
+        }
+      });
+    }
   }
 </script>
 </div>

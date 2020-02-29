@@ -89,7 +89,7 @@
 
     </script>
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
-    <div>
+    <div class="file-container">
         <div class="file-viewer">
 
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
@@ -102,9 +102,9 @@
             {% if userGroup == 1 %}
 
                <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-               
-               <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <label for="latest-events">Share to student on</label>
+
+               <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
+                <label for="date_to_release_{{ id }}">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
                     {% if this_hide_from_students == "on" %}
@@ -208,7 +208,7 @@
         {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
         ) }}
     {% else %}
-    <div>
+    <div class="folder-container">
 
         <div class="div-viewer">
             {# button to open each folder #}
@@ -264,6 +264,9 @@
         return "";
     }
     window.onload = function () {
+        // hide the folders which have no content for the current user ..ie empty folders
+        hideEmptyCourseMaterialFolders();
+
         //determine if folders have been left open or closed
         var folderCookie = getCookie('foldersOpen');
         //if the cookie says it is open

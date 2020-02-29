@@ -1042,6 +1042,24 @@ class ElectronicGraderController extends AbstractController {
         else {
             $late_status = $ldi->getStatus();
         }
+        $rollbackSubmission = -1;
+        $previousVersion =  $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() - 1;
+        // check for rollback submission only if the Active version is greater than 1 and that too is late.
+        if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
+            while ($previousVersion) {
+                $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
+                $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+                $daysLate = $prevVersionInstance->getDaysLate();
+
+                // If this version is a good submission then it the rollback Submision
+                if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
+                    $rollbackSubmission = $previousVersion;
+                    break;
+                }
+                // applying same condition for previous version. i.e going back one version
+                $previousVersion -= 1;
+            }
+        }
 
         $logger_params = array(
             "course_semester" => $this->core->getConfig()->getSemester(),
@@ -1059,7 +1077,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $sort, $direction, $who_id);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');

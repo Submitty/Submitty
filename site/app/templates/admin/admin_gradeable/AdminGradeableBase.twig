@@ -8,14 +8,14 @@
     <div id="ajax_debug" style="display: none;"></div>
     <div id="ajax_raw" style="display: none;"></div>
     <form id="gradeable-form" class="form-signin" action="{{ submit_url }}"
-        method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
+        method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
 
         <div class="modal-header" style="overflow: auto;">
             <div>
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}<span id="modal_label_title"></span></h1>
 			</div>
             <div>
-                <b>                    
+                <b>
                     <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Need help with creating/editing a gradeable? <i style="font-style:normal;" class="fa-question-circle"></i></a>
                 </b>
                 <div style="float: right" id="save_status"></div>
