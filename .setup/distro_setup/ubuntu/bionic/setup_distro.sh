@@ -7,7 +7,8 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-    export SUBMISSION_URL='http://192.168.56.111'
+    export SUBMISSION_URL='http://localhost:1501'
+    export SUBMISSION_PORT=1501
     export DATABASE_PORT=16432
 fi
 

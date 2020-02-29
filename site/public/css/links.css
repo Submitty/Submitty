@@ -34,38 +34,38 @@ a:active {
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
-    color: #fff;
+    color: var(--text-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: #fff;
+    color: var(--text-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
-    color: #fff;
+    color: var(--text-white);
 }
 
 a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
-    color: #000;
+    color: var(--text-black);
 }
 
 a.btn-default,
 a.fas.btn-default,
 a.fas,
 a > i.fas {
-    color: #000;
+    color: var(--text-black);
 }
 
 a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: #000;
+    color: var(--text-black);
 }
 
 a.btn {

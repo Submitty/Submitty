@@ -39,9 +39,6 @@ from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
-# TODO: Remove this and purely use shutil once we move totally to Python 3
-from zipfile import ZipFile
-
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
 import yaml
 
@@ -505,7 +502,7 @@ def create_gradeable_submission(src, dst):
     zip file (stored in /tmp) and store the path to this newly created zip as our new source.
 
     At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
-    a .zip), then we will extract the contents of the source (using ZipFile) to the destination, else we
+    a .zip), then we will extract the contents of the source (using Shutil) to the destination, else we
     just do a simple copy operation of the source file to the destination location.
 
     At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
@@ -522,8 +519,7 @@ def create_gradeable_submission(src, dst):
         src = zip_dst
 
     if src[-3:] == "zip":
-        with ZipFile(src, 'r') as zip_file:
-            zip_file.extractall(dst)
+        shutil.unpack_archive(src, dst)
     else:
         shutil.copy(src, dst)
 
@@ -1034,8 +1030,7 @@ class Course(object):
             student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
             zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
             with TemporaryDirectory() as tmpdir:
-                with ZipFile(zip_path) as open_file:
-                    open_file.extractall(tmpdir)
+                shutil.unpack_archive(zip_path, tmpdir)
                 inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))

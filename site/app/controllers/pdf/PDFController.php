@@ -19,7 +19,7 @@ class PDFController extends AbstractController {
      * @param $filename
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")
      */
-    public function showStudentPDF($gradeable_id, $filename = null) {
+    public function showStudentPDF($gradeable_id, $filename, $path) {
         $filename = html_entity_decode($filename);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -53,9 +53,11 @@ class PDFController extends AbstractController {
             "gradeable_id" => $gradeable_id,
             "id" => $id,
             "file_name" => $filename,
+            "file_path" => urldecode($path),
             "annotation_jsons" => $annotation_jsons,
             "is_student" => true,
-            "page_num" => 1
+            "page_num" => 1,
+            'jquery' => true
         ];
 
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
