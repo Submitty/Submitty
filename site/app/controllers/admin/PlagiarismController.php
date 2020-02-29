@@ -165,8 +165,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
     }
 
     /**
