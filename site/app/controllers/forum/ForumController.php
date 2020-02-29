@@ -649,11 +649,13 @@ class ForumController extends AbstractController {
         $post_id = $_POST["split_post_id"];
         $thread_id = -1;
         $categories_ids = array();
-        foreach ($_POST["cat"] as $category_id) {
-            $categories_ids[] = (int) $category_id;
+        if (isset($_POST["cat"]) && is_array($_POST["cat"])) {
+            foreach ($_POST["cat"] as $category_id) {
+                $categories_ids[] = (int) $category_id;
+            }
         }
-        if (!$this->isValidCategories($categories_ids)) {
-            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
+        if (empty($title) || empty($categories_ids) || !$this->isValidCategories($categories_ids)) {
+            $this->core->addErrorMessage("Failed to split thread; make sure that you have a title and that you have at least one category selected.");
         }
         elseif (is_numeric($post_id) && $post_id > 0) {
             $thread_ids = $this->core->getQueries()->splitPost($post_id, $title, $categories_ids);
@@ -665,10 +667,10 @@ class ForumController extends AbstractController {
                         FileUtils::createDir($thread_dir);
                     }
                     $old_post_dirs = FileUtils::getAllDirs($original_thread_dir);
-                    foreach ($old_post_dirs as $post_id) {
-                        if (in_array($post_id, $thread_ids[2])) {
-                            $old_post_dir = FileUtils::joinPaths($original_thread_dir, $post_id);
-                            $new_post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+                    foreach ($old_post_dirs as $file_post_id) {
+                        if (in_array($file_post_id, $thread_ids[2])) {
+                            $old_post_dir = FileUtils::joinPaths($original_thread_dir, $file_post_id);
+                            $new_post_dir = FileUtils::joinPaths($thread_dir, $file_post_id);
                             rename($old_post_dir, $new_post_dir);
                         }
                     }

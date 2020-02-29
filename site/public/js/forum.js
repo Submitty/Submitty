@@ -647,7 +647,6 @@ function showSplit(post_id) {
       } catch (err) {
         var message = '<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
         $('#messages').append(message);
-        console.log(data);
         return;
       }
       if(json['status'] === 'fail'){

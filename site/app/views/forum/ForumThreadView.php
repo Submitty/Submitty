@@ -831,7 +831,7 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-        $merged_thread = "false";
+        $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
             $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
@@ -873,7 +873,7 @@ class ForumThreadView extends AbstractView {
                 if ($this->core->getUser()->getGroup() <= 3) {
                     $merged_thread_query = $this->core->getQueries()->getPostOldThread($post_id);
                     if ($merged_thread_query["merged_thread_id"] != -1) {
-                        $merged_thread = "true";
+                        $merged_thread = true;
                     }
                 }
 

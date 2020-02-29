@@ -453,14 +453,12 @@ WHERE status = 1"
     }
 
     public function splitPost($post_id, $title, $categories_ids) {
-        $this->course_db->query("SELECT * from posts where id = ?", array($post_id));
-        $posts = $this->course_db->rows();
         $old_thread_id = -1;
         $thread_id = -1;
+        $post = $this->core->getQueries()->getPost($post_id);
         // Safety measure in case the database is bad for some reason
         $counted_posts = array();
-        if (count($posts) > 0) {
-            $post = $posts[0];
+        if (!empty($post)) {
             if ($post["parent_id"] != -1) {
                 $old_thread_id = $post["thread_id"];
                 $this->course_db->query("SELECT id from threads where merged_post_id = ?", array($post_id));
@@ -471,22 +469,31 @@ WHERE status = 1"
                     $this->course_db->query("DELETE FROM thread_categories where thread_id=?", array($thread_id));
                 }
                 else {
-                    $this->course_db->query("INSERT INTO threads (title, created_by, is_visible, lock_thread_date) VALUES (?, ?, ?, ?)", array($title, $post["author_user_id"], true, null));
+//                  $this->course_db->query("INSERT INTO threads (title, created_by, is_visible, lock_thread_date) VALUES (?, ?, ?, ?) RETURNING id", array($title, $post["author_user_id"], true, null));
+//                  $thread_id = $this->course_db->rows()[0]["id"];
                     $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $post["author_user_id"]));
                     $thread_id = $this->course_db->rows()[0]["max_id"];
                 }
+                $str = "";
+                $arr = array();
                 foreach ($categories_ids as $id) {
-                    $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $id));
+                    if (!empty($str)) {
+                        $str .= ", ";
+                    }
+                    $str .= "(?, ?)";
+                    array_push($arr, $thread_id, $id);
                 }
+                $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES {$str}", $arr);
+                $posts = array($post);
                 while (count($posts) > 0) {
                     $check_posts = array();
                     $str = "";
-                    for ($i = 0; $i < count($posts); $i++) {
-                        if (!in_array($posts[$i]["id"], $counted_posts)) {
-                            $check_posts[] = $posts[$i]["id"];
+                    foreach ($posts as $check_post) {
+                        if (!in_array($check_post["id"], $counted_posts)) {
+                            $check_posts[] = $check_post["id"];
                             $str .= "?, ";
-                            $counted_posts[] = $posts[$i]["id"];
-                            $this->course_db->query("UPDATE posts set thread_id = ? where parent_id = ?", array($thread_id, $posts[$i]["id"]));
+                            $counted_posts[] = $check_post["id"];
+                            $this->course_db->query("UPDATE posts set thread_id = ? where parent_id = ?", array($thread_id, $check_post["id"]));
                         }
                     }
                     if (strlen($str) > 0) {
