@@ -73,7 +73,7 @@ Required Input:
     {% if show_publish %}
         {% if not first_mark %}
             <span class="col-no-gutters mark-publish-container">
-                Show mark to all students: <input type="checkbox" {{ mark.publish ? 'checked' : '' }} onchange="onMarkPublishChange(this)"/>
+                <label for="show_all_marks_{{mark.id}}">Show mark to all students:</label> <input id="show_all_marks_{{mark.id}}" type="checkbox" {{ mark.publish ? 'checked' : '' }} onchange="onMarkPublishChange(this)"/>
             </span>
         {% endif %}
     {% endif %}

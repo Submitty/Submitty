@@ -16,6 +16,7 @@
         "vcs_type": "git",
         "private_repository": "",
         "forum_enabled": false,
+        "forum_create_thread_message": "",
         "regrade_enabled": false,
         "regrade_message": "Warning: Frivolous grade inquiries may lead to grade deductions or lost late days",
         "seating_only_for_instructor": false,
