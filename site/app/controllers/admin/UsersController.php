@@ -986,4 +986,20 @@ class UsersController extends AbstractController {
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
     }
+
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/{_semester}/{_course}/users/view_grades", methods={"POST"})
+     **/
+    public function viewStudentGrades(){
+        $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
+            . $_POST["student_id"] . "_summary.html";
+
+        $grade_file = null;
+        if (file_exists($grade_path)) {
+            $grade_file = file_get_contents($grade_path);
+        }
+
+        $this->core->getOutput()->renderOutput(array('submission', 'RainbowGrades'), 'showGrades', $grade_file);
+    }
 }
