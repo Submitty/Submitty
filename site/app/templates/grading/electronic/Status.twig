@@ -229,7 +229,7 @@
                             {# otherwise add the overall grade to array and total score possible to array (possible future use) #}
                             {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
                                 {% set bTA = bTA|merge( [ ov.getTaGradedGradeable.getTotalScore()  ]) %}
-                                {% set tTA = tTA|merge( [ ov.getGradeable().getTaPoints() ]) %}
+                                {% set tTA = tTA|merge( [ ov.getGradeable().getManualGradingPoints() ]) %}
 
                             {% endif %}
                         {% endif %}
