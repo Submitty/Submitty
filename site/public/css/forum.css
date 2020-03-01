@@ -236,8 +236,10 @@ body {min-width: 925px;}
 }
 
 .content.create-thread-message {
-    border: solid gold 3px;
+    border: solid gold 4px;
     margin: 15px;
+    padding: 20px;
+    word-break: break-word;
 }
 
 .thread-announcement, .thread-favorite, .thread-merged, .thread-locked{
