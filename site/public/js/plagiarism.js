@@ -97,12 +97,8 @@ function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     });
     to_append = $.parseHTML(to_append);
     $("#popup_to_show_matches_id").empty().append(to_append);
-    var x = event.pageX;
-    var y = event.pageY;
     $('#popup_to_show_matches_id').css('display', 'block');
-    var width = $('#popup_to_show_matches_id').width();
-    //$('#popup_to_show_matches_id').css('top', y+5);
-    //$('#popup_to_show_matches_id').css('left', x-width/2.00);
+    // TODO: Discuss location for matches popup
 }
 
 function setUpPlagView(gradeable_id) {
