@@ -358,6 +358,7 @@ class ForumThreadView extends AbstractView {
                 "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit
             ]);
         }
@@ -381,6 +382,7 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
                 "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit
             ]);
 
@@ -529,7 +531,8 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $totalAttachments,
-                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
+                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
             ]);
         }
         else {
@@ -828,7 +831,7 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-
+        $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
             $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
@@ -866,6 +869,13 @@ class ForumThreadView extends AbstractView {
                     "ud_button_title" => $ud_button_title,
                     "ud_button_icon" => $ud_button_icon
                 ];
+
+                if ($this->core->getUser()->accessGrading()) {
+                    $merged_thread_query = $this->core->getQueries()->getPostOldThread($post_id);
+                    if ($merged_thread_query["merged_thread_id"] != -1) {
+                        $merged_thread = true;
+                    }
+                }
 
                 $shouldEditThread = null;
 
@@ -958,7 +968,8 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
             "parent_id" => $post_id,
-            "render_markdown" => $markdown
+            "render_markdown" => $markdown,
+            "thread_previously_merged" => $merged_thread
         ];
     }
 
