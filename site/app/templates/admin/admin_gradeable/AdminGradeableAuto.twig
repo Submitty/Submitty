@@ -37,19 +37,19 @@
                 <p> Manually type the full path to a configuration file, or select from the list below. </p>
         <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
         {% for error_message in repository_error_messages %}
-            <div name="config_search_error">({{error_message}})</div>
+            <div class="config_search_error">({{error_message}})</div>
         {% endfor %}
         {% if not currently_valid_repository %}
-            <div name="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
+            <div class="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
         {% endif %}
 
     <div class="settings">
         <input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
+            autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
         <a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
         <datalist id="path_data" style="display:none" >
         {% for path in all_config_paths %}
-            <option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
+            <option class="path_autofill_option" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
         {% endfor %}
         </datalist>
 
@@ -113,7 +113,7 @@
         var names = [];
         var paths = [];
 
-        $("[name='path_autofill_option']").each(function() {
+        $(".path_autofill_option").each(function() {
             names.push($(this).attr("id"));
             paths.push($(this).attr("data-value"));
         });
