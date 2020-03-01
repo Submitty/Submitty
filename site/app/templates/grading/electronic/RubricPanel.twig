@@ -25,18 +25,18 @@
                     {# Verify all button #}
                     {% if show_verify_all %}
                         <div class="col-no-gutters">
-                            <input id="verify-all" type="button" class="btn btn-default" value="Verify All" onclick="onVerifyAll(this)"/>
+                            <input id="verify-all" type="button" class="btn btn-default key_to_click" tabindex="0" value="Verify All" onclick="onVerifyAll(this)"/>
                         </div>
                     {% endif %}
                     {# Silent Edit Checkbox #}
                     {% if show_silent_edit %}
                         <div class="col-no-gutters">
-                            <input id="silent-edit-id" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</input>
+                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</input>
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
                     <div class="col-no-gutters">
-                        <input id="edit-mode-enabled" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
+                        <input id="edit-mode-enabled" class="key_to_click" tabindex="0" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
                     </div>
                 </div>
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id}}" data-can_verify="{{ can_verify }}" hidden></div>
