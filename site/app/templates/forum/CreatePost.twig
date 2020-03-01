@@ -46,7 +46,7 @@
             <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
         {% endif %}
 
-        {% if userGroup <= 3 %}
+        {% if userGroup <= 3 and has_history %}
             <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
             {% if (isThreadLocked != 1 or accessFullGrading) and first != 1 %}
                 <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
