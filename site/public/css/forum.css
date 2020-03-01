@@ -90,7 +90,7 @@ body {min-width: 925px;}
 
 #thread_list a {
     text-decoration: none;
-    color: initial;
+    color: var(--text-black);
 }
 
 .create_thread_button {
@@ -417,11 +417,6 @@ body {min-width: 925px;}
 
 .category-list-no-element{
     margin-left: 1em;
-}
-
-#hidden-forum-header{
-    font-size:1px;
-    color: #f6fbfe;
 }
 
 .thread-list-item{
