@@ -287,8 +287,10 @@ def main():
                     continue
 
                 if entry.is_regrade:
+                    regrade_count += 1
                     regrade_grading_count += 1
                 else:
+                    interactive_count += 1
                     interactive_grading_count += 1
                 
                 full_machine = entry.grading_queue_obj['machine']
@@ -310,8 +312,6 @@ def main():
                     machine_stale_job[grading_machine] = True
                     stale = True
                     print(f"--> STALE JOB: {int(entry.elapsed_time):5d} seconds   {json_file:s}")
-
-                capability_queue_counts[capability] -= 1
 
 
         done = print_status(epoch_time,
