@@ -43,6 +43,7 @@ def preprocess(img):
     thresh, img_bin = cv2.threshold(img, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     img_bin = 255 - img_bin
 
+
     # Defining a kernel length
     kernel_length = np.array(img).shape[1]//80
 
@@ -66,6 +67,8 @@ def preprocess(img):
 
     thresh, img_final_bin = cv2.threshold(img_final_bin, 128, 255,
                                           cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+
     img_final_bin = 255 - img_final_bin
 
     contours, hierarchy = cv2.findContours(img_final_bin, cv2.RETR_TREE,
@@ -153,6 +156,8 @@ def preprocess(img):
 
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
             new_img = cv2.dilate(new_img, kernel, iterations=1)
+            new_img = 255 - new_img
+
 
             # normalize from 0-255 to 0-1
             new_img = new_img / 255
@@ -168,6 +173,7 @@ def preprocess(img):
 
 def scanForDigits(images):
     """Take the processed sub-images and perform OCR."""
+    # Returns a string of the decoded 
     model_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               'MNIST', 'model.onnx')
     sess = rt.InferenceSession(model_path)
@@ -175,61 +181,47 @@ def scanForDigits(images):
     output_name = sess.get_outputs()[0].name
 
     ret = ""
-
+    confidences = []
     for image in images:
         out = sess.run([output_name], {input_name: image})
         out = out[0][0]
-        out = out.astype(np.float128)
+        out = out.astype(np.float64)
 
         # run through softmax to map the outputs to probability distrabution
-        e_x = np.exp(out - np.max(out))
-        out = e_x / e_x.sum(axis=0)
+        # https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.softmax.html
+        out = np.exp( out ) / sum( np.exp( out ) )
+        max_index = np.argmax(out)
 
-        # get the index of whatever the highest confidence is
-        max_ = 0
-        index_ = 0
-        max_index = 0
-
-        for i in out:
-            if i > max_:
-                max_ = i
-                max_index = index_
-
-            index_ += 1
-
-        # and the digit....*drumroll*....is
+        confidences.append( out[max_index] )
         ret += str(max_index)
         if len(ret) == expected_box_count:
             break
 
-    return ret
+    return ret, confidences
 
 
 def getDigits(page, qr_data):
     """Driver function for performing OCR to find student numbers."""
-    # convert to grayscale
-    page = cv2.cvtColor(page, cv2.COLOR_BGR2GRAY)
-
     # real position of 4 edges of QR code
     rect = np.array(qr_data[0][3])
+    #/usr/local/submitty/GIT_CHECKOUT/Submitty
 
-    # deskew the img first
     rect = cv2.minAreaRect(rect)
     angle = rect[-1]
 
-    if angle < -45:
-        angle = -(90 + angle)
+    if ( angle < -45 ):
+        angle += 90
 
     page_height, page_width = page.shape
-
     center = (page_width // 2, page_height // 2)
 
-    if abs(angle) > 0:
-        M = cv2.getRotationMatrix2D(center, angle, 1.0)
-        page = cv2.warpAffine(page, M, (page_width, page_height),
-                              flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-        # QR code has shifted, rescan
-        qr_data = pyzbar.decode(page, symbols=[ZBarSymbol.QRCODE])
+    #rotate page if not straight relative to QR code
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    page = cv2.warpAffine(page, M, (page_width, page_height),
+                      flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+
+    # QR code has shifted, rescan
+    qr_data = pyzbar.decode(page, symbols=[ZBarSymbol.QRCODE])
 
     # bounding box for QR code
     left = qr_data[0][2][0]
