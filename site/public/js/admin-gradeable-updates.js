@@ -318,6 +318,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                         alert('Internal server error');
                         console.error(response.message);
                     }
+                    location.reload();
                 },
                 error: function (response) {
                     setGradeableUpdateComplete();

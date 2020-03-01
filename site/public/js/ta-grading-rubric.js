@@ -626,7 +626,7 @@ function ajaxAddComponent(gradeable_id, peer) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildCourseUrl(['gradeable', gradeable_id, 'components', peer, 'new']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
                 'peer' : peer

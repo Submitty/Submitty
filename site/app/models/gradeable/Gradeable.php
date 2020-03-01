@@ -472,21 +472,23 @@ class Gradeable extends AbstractModel {
     }
 
     public function setPeerGradersList($input) {
+        $bad_rows = [];
         foreach ($input as $row_num => $vals) {
-            if (!User::validateUserData('user_id', $vals["student"]) || !User::validateUserData('user_id', $vals["grader"])) {
-                $bad_rows[] = ($row_num + 1);
+            if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
+                array_push($bad_rows,($vals["student"]));
             }
-            $row_num = 0;
+            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
+               array_push($bad_rows,($vals["grader"]));
+            }
         }
-        
         if (!empty($bad_rows)) {
-            $msg = "Error(s) on row(s) ";
-            array_walk($bad_rows, function ($row_num) use (&$msg) {
-                $msg .= " {$row_num}";
+            $msg = "The given user id is not valid: ";
+            array_walk($bad_rows, function ($val) use (&$msg) {
+                $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
+            
         }
-        $current_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
         foreach ($input as $row_num => $vals) {
             $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
