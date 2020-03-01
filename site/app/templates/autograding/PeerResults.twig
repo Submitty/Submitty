@@ -111,16 +111,9 @@ $( document ).ready(function() {
         {% endif %}
         {# /Overview #}
 
-        {% if (graded_score >= graded_max) or (total_score >= total_max) %}
-            <canvas id="confetti_canvas"></canvas>
-        {% endif %}
-
         {% if peer_components | length > 0 %}
             <div class="box submission-page-total-header">
-                <div class="box-title"
-                    {% if graded_score >= graded_max %}
-                        onclick="addConfetti();" style="cursor:pointer;"
-                    {% endif %}>
+                <div class="box-title">
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
