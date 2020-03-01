@@ -30,7 +30,12 @@
         {% endif %}
         {% if has_ta_grading == true and ta_grading_complete == true %}
             <div class="box">
-                <div class="box-title">
+                <div class="box-title"
+                    {% if ta_grading_earned >= ta_grading_max %}
+                        onclick="addConfetti();"
+                        style="cursor:pointer;"
+                    {% endif %}>
+
                     {{ Badge.render(ta_grading_earned, ta_grading_max, false) }}
                     <h4>TA / Instructor Score</h4>
                 </div>
@@ -38,7 +43,11 @@
         {% endif %}
         {% if has_peer_grading == true and peer_grading_complete == true %}
             <div class="box">
-                <div class="box-title">
+                <div class="box-title"
+                    {% if peer_grading_earned >= peer_grading_max %}
+                        onclick="addConfetti();"
+                        style="cursor:pointer;"
+                    {% endif %}>
                     {{ Badge.render(peer_grading_earned, peer_grading_max, false) }}
                     <h4>Peer Grading Score</h4>
                 </div>
