@@ -32,6 +32,7 @@ class TestAccessibility(BaseTestCase):
         '/s20/sample/forum',
         '/s20/sample/forum/threads/new',
         '/s20/sample/forum/categories',
+        'http://localhost:1501/s20/sample/forum/stats',
         '/s20/sample/users',
         '/s20/sample/graders',
         '/s20/sample/sections',
