@@ -1483,13 +1483,38 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets the total possible non-extra-credit ta points
+     * Gets the total possible non-extra-credit manual grading (ta + peer) points
+     * @return float
+     */
+    public function getManualGradingPoints() {
+        return $this->getTaPoints() + $this->getPeerPoints();
+    }
+
+
+    /**
+     * Gets the total possible non-extra-credit ta/instructor (non-peer) points
      * @return float
      */
     public function getTaPoints() {
         $total = 0.0;
         foreach ($this->getComponents() as $component) {
-            $total += $component->getMaxValue();
+            if (!$component->isPeer()) {
+                $total += $component->getMaxValue();
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Gets the total possible non-extra-credit peer grading points
+     * @return float
+     */
+    public function getPeerPoints() {
+        $total = 0.0;
+        foreach ($this->getComponents() as $component) {
+            if ($component->isPeer()) {
+                $total += $component->getMaxValue();
+            }
         }
         return $total;
     }
