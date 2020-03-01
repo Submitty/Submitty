@@ -1,0 +1,116 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-course-materials-form{% endblock %}
+{% block title %}Edit Course Materials{% endblock %}
+{% block body %}
+    <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
+        <label id="edit_sections">
+            <p class="black-message">
+                Do you want to restrict this course material to some sections?
+            </p>
+            <label class = "radio">
+                <input id = "all-sections-showing-no" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
+                No
+            </label>
+            <label class = "radio">
+                <input id = "all-sections-showing-yes" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()">
+                Yes
+            </label>
+            <div id = "show-some-section-selection-edit" style="display: none">
+            {% for section in reg_sections %}
+                <tr>
+                    <span class = "inline">
+                        <td>
+                            Section {{ section['sections_registration_id'] }}
+                            <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                    </span>
+                </tr>
+            {% endfor %}
+            </div>
+            <script type="text/javascript">
+                function toggleRegistrationSectionsEdit(){
+                    $("#show-some-section-selection-edit").toggle();
+                } 
+            </script>
+        </label>
+        <label id="upload_dt">
+            <p>
+                <strong>Choose a time to release the files being uploaded:</strong>
+            </p>
+            <input id="edit-picker" class="edit-picker" type="text" size="26"/>
+        </label>
+        <label>
+            <input id="hide-materials-checkbox-edit" type="checkbox"/>
+            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
+        </label>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    </div>
+    <script type="text/javascript">
+        function submitEdit(){ // Submit button
+                let sectionsEdit = [];
+                let cmTime = document.getElementById("edit-picker").value;
+                let requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
+                let hideFromStudents = 'off';
+                if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
+                    hideFromStudents = 'on';
+                }
+                
+                let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
+                reg_sectionArray.forEach(function(element){
+                    let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
+                    if  ($(currentSectionEdit).is(':checked'))  {
+                        sectionsEdit.push(element['sections_registration_id']);
+                    }
+                });
+                if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
+                    sectionsEdit = null;
+                }
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
+        };
+        
+        flatpickr('.edit-picker', {
+            plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
+                        {
+                            label: "Now"
+                        },
+                        {
+                            label: "Tomorrow"
+                        },
+                        {
+                            label: "End of time"
+                        }
+
+                    ],
+                    onClick: (index, fp) => {
+                        switch (index) {
+                            case 0:
+                                updateToServerTime(fp);
+                                break;
+                            case 1:
+                                updateToTomorrowServerTime(fp);
+                                break;
+                            case 2:
+                                date = new Date("9998-01-01 00:00:00");
+                                fp.setDate(date,true);
+                                break;
+                        }
+                    }
+                }
+            )],
+            allowInput: true,
+            enableTime: true,
+            enableSeconds: true,
+            time_24hr: true,
+            dateFormat: "Y-m-d H:i:S"
+        });
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" id="submit-edit" type="submit" value="Submit" onclick = "submitEdit();"/>
+{% endblock %}

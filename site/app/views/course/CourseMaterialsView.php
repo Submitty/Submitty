@@ -134,7 +134,6 @@ class CourseMaterialsView extends AbstractView {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students);
-
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view

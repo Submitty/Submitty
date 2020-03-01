@@ -385,6 +385,12 @@ class HomeworkView extends AbstractView {
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
+        $student_id = '';
+        if (!is_null($graded_gradeable)) {
+            $student_id = ($graded_gradeable->getSubmitter()->isTeam()) ?
+                $graded_gradeable->getSubmitter()->getTeam()->getLeaderId() :
+                $graded_gradeable->getSubmitter()->getId();
+        }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -441,7 +447,7 @@ class HomeworkView extends AbstractView {
             'student_page' => $student_page,
             'students_full' => $students_full,
             'team_assignment' => $gradeable->isTeamAssignment(),
-            'submitter' => $graded_gradeable->getSubmitter(),
+            'student_id' => $student_id,
             'numberUtils' => $numberUtils,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
@@ -655,17 +661,21 @@ class HomeworkView extends AbstractView {
         }
 
         // Get Autograding Score
-        if ($show_hidden) {
-            $autograding_earned = $version_instance->getTotalPoints();
-            $autograding_max = $autograding_config->getTotalNonExtraCredit();
-        }
-        else {
-            $autograding_earned = $version_instance->getNonHiddenPoints();
-            $autograding_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
+        $autograding_earned = 0;
+        $autograding_max = 0;
+        if ($version_instance !== null) {
+            if ($show_hidden) {
+                $autograding_earned = $version_instance->getTotalPoints();
+                $autograding_max = $autograding_config->getTotalNonExtraCredit();
+            }
+            else {
+                $autograding_earned = $version_instance->getNonHiddenPoints();
+                $autograding_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
+            }
         }
 
         // Find which parts of grading are complete
-        $autograding_complete = $version_instance->isAutogradingComplete();
+        $autograding_complete = $version_instance !== null ? $version_instance->isAutogradingComplete() : false;
         $peer_grading_complete = true;
         $ta_grading_complete = true;
         $active_same_as_graded = true;
@@ -789,7 +799,7 @@ class HomeworkView extends AbstractView {
 
         // Get the number of visible testcases (needed to see if there is autograding)
         $num_visible_testcases = 0;
-        if ($version_instance->isAutogradingComplete()) {
+        if ($version_instance !== null && $version_instance->isAutogradingComplete()) {
             foreach ($version_instance->getTestcases() as $testcase) {
                 if ($testcase->canView()) {
                     $num_visible_testcases++;
@@ -798,7 +808,13 @@ class HomeworkView extends AbstractView {
         }
         // If there are 0 visible testcases and autograding is complete,
         // there is no autograding for this assignment.
-        $no_autograding = $num_visible_testcases == 0 && $version_instance->isAutogradingComplete();
+        if ($version_instance !== null){
+            $no_autograding = $num_visible_testcases == 0 && $version_instance->isAutogradingComplete();
+        }
+        else {
+            $no_autograding = true;
+        }
+        
         // If there is no autograding at all, only explicitly let the student know that before
         // TA grades are released.
         if (
@@ -814,7 +830,7 @@ class HomeworkView extends AbstractView {
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
             'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
-            'incomplete_autograding' => !$version_instance->isAutogradingComplete(),
+            'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             'display_version' => $display_version,
             'check_refresh_submission_url' => $check_refresh_submission_url,
             'show_testcases' => $show_testcases,
@@ -899,7 +915,7 @@ class HomeworkView extends AbstractView {
             'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
             'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
-            'incomplete_autograding' => !$version_instance->isAutogradingComplete(),
+            'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             // TODO: change this to submitter ID when the MiscController uses new model
             'user_id' => $this->core->getUser()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),

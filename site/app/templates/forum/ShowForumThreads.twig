@@ -22,6 +22,10 @@
 
 {%  include "forum/HistoryForm.twig" %}
 
+{% include "forum/SplitPostForm.twig" with {
+    "categories" : filterFormData.categories,
+} %}
+
 <div class="full_height content forum_content forum_show_threads">
 
     {% if not thread_exists  %}
@@ -84,7 +88,7 @@
                 <i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
                 <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
             </div>
-            <script type="text/javascript">
+            <script>
                 $(function(){
                     dynamicScrollContentOnDemand($('#thread_list'), buildCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ currentThread }}, '', '{{ currentCourse }}');
                     var active_thread = $('#thread_list .active');
