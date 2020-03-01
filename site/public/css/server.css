@@ -1476,7 +1476,7 @@ end of styles used in the admin gradeable page
 .required::-moz-placeholder { var(--error-alert-dark-red); }
 .required:-ms-input-placeholder { var(--error-alert-dark-red); }
 
-#required_type{
+.required_type{
     color: var(--error-alert-dark-red);
     display: inline;
 }
