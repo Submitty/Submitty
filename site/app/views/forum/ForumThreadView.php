@@ -1000,6 +1000,7 @@ class ForumThreadView extends AbstractView {
         $category_colors;
 
         $categories = $this->core->getQueries()->getCategories();
+        $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
         $buttons = array(
             array(
@@ -1021,6 +1022,7 @@ class ForumThreadView extends AbstractView {
             "category_colors" => $category_colors,
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
+            "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
