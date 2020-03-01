@@ -48,107 +48,115 @@
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">New Announcement</div>
-                        <div class="option-alt">Alert me when an instructor posts a new announcement</div>
-                    </label>
+                    <span>
+                        <span class="option-title">New Announcement</span>
+                        <br>
+                        <span class="option-alt">Alert me when an instructor posts a new announcement</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification New Announcement" name="announcement" id="announcement" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email New Announcement" name="announcement_email" id="announcement_email" disabled checked></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Reply to My Thread</div>
-                        <div class="option-alt">Alert me when a reply is posted in a thread that I created</div>
-                    </label>
+                    <span>
+                        <span class="option-title">Reply to My Thread</span>
+                        <br>
+                        <span class="option-alt">Alert me when a reply is posted in a thread that I created</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Reply to My Thread" name="reply_thread" id="reply_thread" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Reply to My Thread" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">My Post was Modified</div>
-                        <div class="option-alt">Alert me when one of my posts is edited, deleted, or merged</div>
-                    </label>
+                    <span>
+                        <span class="option-title">My Post was Modified</span>
+                        <br>
+                        <span class="option-alt">Alert me when one of my posts is edited, deleted, or merged</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="my_post_altered" id="my_post_altered" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification My Post was Modified" name="my_post_altered" id="my_post_altered" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="my_post_altered_email" id="my_post_altered_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email My Post was Modified" name="my_post_altered_email" id="my_post_altered_email" disabled checked></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Reply in Participating Thread</div>
-                        <div class="option-alt">Alert me when a reply is posted in a thread in which I also posted</div>
-                    </label>
+                    <span>
+                        <span class="option-title">Reply in Participating Thread</span>
+                        <br>
+                        <span class="option-alt">Alert me when a reply is posted in a thread in which I also posted</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Reply in Participating Thread" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
 
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Reply in Participating Thread" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Merged Thread</div>
-                        <div class="option-alt">Alert me when a thread is merged</div>
-                    </label>
+                    <span>
+                        <span class="option-title">Merged Thread</span>
+                        <br>
+                        <span class="option-alt">Alert me when a thread is merged</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Merged Thread" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">All New Threads</div>
-                        <div class="option-alt">Alert me when a thread is created</div>
-                    </label>
+                    <span>
+                        <span class="option-title">All New Threads</span>
+                        <br>
+                        <span class="option-alt">Alert me when a thread is created</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All New Threads" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All New Threads" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">All New Posts</div>
-                        <div class="option-alt">Alert me when a post is created</div>
-                    </label>
+                    <span>
+                        <span class="option-title">All New Posts</span>
+                        <br>
+                        <span class="option-alt">Alert me when a post is created</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All New Posts" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All New Posts" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             {% if core.getUser().accessFullGrading() %}
                 <div class="option row">
                     <div class="option-desc col-md-4">
-                        <label for="forum_enabled">
-                            <div class="option-title">All Modified Threads & Posts</div>
-                            <div class="option-alt">Alert me when a thread/post has been edited, deleted, or undeleted</div>
-                        </label>
+                        <span>
+                            <span class="option-title">All Modified Threads & Posts</span>
+                            <br>
+                            <span class="option-alt">Alert me when a thread/post has been edited, deleted, or undeleted</span>
+                        </span>
                     </div>
-                    <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All Modified Threads & Posts" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
                     {% if email_enabled %}
-                        <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
+                        <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All Modified Threads & Posts" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
                     {% endif %}
                 </div>
             {% endif %}
@@ -160,57 +168,61 @@
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Grade Inquiry Submitted</div>
+                    <span>
+                        <span class="option-title">Grade Inquiry Submitted</span>
+                        <br>
                         {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student that I graded submits a grade inquiry" : "Alert me when my team member or grader makes a grade inquiry on my work" %}
-                        <div class="option-alt">{{ notification_setting_text }}</div>
-                    </label>
+                        <span class="option-alt">{{ notification_setting_text }}</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Grade Inquiry Submitted" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Grade Inquiry Submitted" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Grade Inquiry Post</div>
+                    <span>
+                        <span class="option-title">Grade Inquiry Post</span>
+                        <br>
                         {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student posts a followup message on their grade inquiry" : "Alert me when my team member or grader posts a followup message on my grade inquiry" %}
-                        <div class="option-alt">{{ notification_setting_text }}</div>
-                    </label>
+                        <span class="option-alt">{{ notification_setting_text }}</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Grade Inquiry Post" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Grade Inquiry Post" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Grade Inquiry Resolved</div>
+                    <span>
+                        <span class="option-title">Grade Inquiry Resolved</span>
+                        <br>
                         {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student closes their grade inquiry" : "Alert me when a team member or grader resolves my grade inquiry" %}
-                        <div class="option-alt">{{ notification_setting_text }}</div>
-                    </label>
+                        <span class="option-alt">{{ notification_setting_text }}</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Grade Inquiry Resolved" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Grade Inquiry Resolved" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Grade Inquiry Re-Opened</div>
+                    <span>
+                        <span class="option-title">Grade Inquiry Re-Opened</span>
+                        <br>
                         {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student reopens their grade inquiry" : "Alert me when a team member or grader reopens my grade inquiry" %}
-                        <div class="option-alt">{{ notification_setting_text }}</div>
-                    </label>
+                        <span class="option-alt">{{ notification_setting_text }}</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Grade Inquiry Re-Opened" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Grade Inquiry Re-Opened" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -221,54 +233,58 @@
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Team Invitation</div>
-                        <div class="option-alt">Alert me when I get an invitation to join a team</div>
-                    </label>
+                    <span>
+                        <span class="option-title">Team Invitation</span>
+                        <br>
+                        <span class="option-alt">Alert me when I get an invitation to join a team</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Team Invitation" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Team Invitation" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">New Team Member</div>
-                        <div class="option-alt">Alert me when a new team member joins my team</div>
-                    </label>
+                    <span>
+                        <span class="option-title">New Team Member</span>
+                        <br>
+                        <span class="option-alt">Alert me when a new team member joins my team</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification New Team Member" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email New Team Member" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">Team Member Submission</div>
-                        <div class="option-alt">Alert me when a team member makes a submission to the gradeable</div>
-                    </label>
+                    <span>
+                        <span class="option-title">Team Member Submission</span>
+                        <br>
+                        <span class="option-alt">Alert me when a team member makes a submission to the gradeable</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="TNotification eam Member Submission" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Team Member Submission" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
             <hr>
             <div class="option row">
                 <div class="option-desc col-md-4">
-                    <label for="forum_enabled">
-                        <div class="option-title">My Actions/Updates</div>
-                        <div class="option-alt">Alert me when I perform the actions selected above</div>
-                    </label>
+                    <span>
+                        <span class="option-title">My Actions/Updates</span>
+                        <br>
+                        <span class="option-alt">Alert me when I perform the actions selected above</span>
+                    </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification My Actions/Updates" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email My Actions/Updates" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
