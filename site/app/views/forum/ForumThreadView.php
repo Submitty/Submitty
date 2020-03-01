@@ -870,7 +870,7 @@ class ForumThreadView extends AbstractView {
                     "ud_button_icon" => $ud_button_icon
                 ];
 
-                if ($this->core->getUser()->getGroup() <= 3) {
+                if ($this->core->getUser()->accessGrading()) {
                     $merged_thread_query = $this->core->getQueries()->getPostOldThread($post_id);
                     if ($merged_thread_query["merged_thread_id"] != -1) {
                         $merged_thread = true;
