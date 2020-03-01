@@ -121,6 +121,7 @@ $( document ).ready(function() {
                     {% if ta_score >= ta_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
                      {% endif %}>
+
                     {{ Badge.render(ta_score, ta_max, false) }}
                     <h4>TA / Instructor Grading Total</h4>
                 </div>

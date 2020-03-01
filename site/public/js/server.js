@@ -8,6 +8,39 @@ window.addEventListener("load", function() {
 
 window.addEventListener("resize", checkSidebarCollapse);
 
+
+////////////Begin: Removed redundant link in breadcrumbs////////////////////////
+//See this pr for why we might want to remove this code at some point
+//https://github.com/Submitty/Submitty/pull/5071
+window.addEventListener("resize", function(){
+  adjustBreadcrumbLinks();
+});
+
+var mobileHomeLink = null;
+var desktopHomeLink = null;
+document.addEventListener("DOMContentLoaded", function() {
+  loadInBreadcrumbLinks();
+  adjustBreadcrumbLinks();
+});
+
+function loadInBreadcrumbLinks(){
+  mobileHomeLink = $("#home-button").attr('href');
+  desktopHomeLink = $("#desktop_home_link").attr('href');
+}
+
+function adjustBreadcrumbLinks(){
+  if($(document).width() > 528){
+    $("#home-button").attr('href', "");
+    $("#desktop_home_link").attr('href', desktopHomeLink);
+  }else{
+    $("#home-button").attr('href', mobileHomeLink);
+    $("#desktop_home_link").attr('href', "");
+  }
+}
+////////////End: Removed redundant link in breadcrumbs//////////////////////////
+
+
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -154,8 +187,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
-    $('[name="delete-gradeable-message"]', form).html('');
-    $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="delete-gradeable-message"]', form).html('');
+    $('[id="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("delete-gradeable-form");
@@ -164,8 +197,8 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#close-submissions-form");
-    $('[name="close-submissions-message"]', form).html('');
-    $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="close-submissions-message"]', form).html('');
+    $('[id="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("close-submissions-form");
@@ -234,9 +267,43 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+
+    let form = $("#edit-course-materials-form");
+
+    let element = document.getElementById("edit-picker");
+    
+    element._flatpickr.setDate(release_time);
+    
+    if(this_hide_from_students == "on"){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    }
+    
+    else{
+        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+    }
+    
+    $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
+    
+    if(this_file_section != null){
+        for(let index = 0; index < this_file_section.length; ++index){
+            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
+        }
+        $("#all-sections-showing-no", form).prop('checked',false);
+        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).show();
+    }
+    else{
+        $("#show-some-section-selection-edit", form).hide();
+        $("#all-sections-showing-yes", form).prop('checked',false);
+        $("#all-sections-showing-no", form).prop('checked',true);
+    }
+    $("#material-edit-form", form).attr('data-directory', dir);
+    form.css("display", "block");
+}
 function captureTabInModal(formName){
 
-    var form = $("#".concat(formName));
+  var form = $("#".concat(formName));
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -895,22 +962,13 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
+function hideEmptyCourseMaterialFolders() {
+  // fetch all the folders and remove those one which have no `file` within.
+  $('.folder-container').each(function() {
+    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
+  });
 }
+
 function closeDivForCourseMaterials(num) {
     var elem = $('#div_viewer_' + num);
     elem.hide();

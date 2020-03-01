@@ -35,7 +35,6 @@ Required Input:
                    onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    step="{{ precision }}"
-                   data-overall=""
                    value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
             <script>

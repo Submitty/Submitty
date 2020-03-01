@@ -15,10 +15,10 @@
     {% endif %}
 
     {% for js_ref in js %}
-    <script type='text/javascript' src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}'></script>
     {% endfor %}
 
-    <script type="text/javascript">
+    <script>
         function ducky() {
             var duck = document.getElementById("duckdiv");
             var banner = document.getElementById("submitty-banner");
@@ -78,7 +78,7 @@
         <div id="submitty-body" class="flex-col" style="visibility: hidden;">
             <div id="mobile-menu">
                 <div id="menu-header" class="flex-row">
-                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><h1>Submitty</h1></a>
+                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
                     <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
                 </div>
                 <ul>
@@ -110,7 +110,9 @@
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
-                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    <a id="desktop_home_link" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                {% elseif b.useAsHeading() %}
+                                    <h1 class="breadcrumb_heading">{{ b.getTitle() }}</h1>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
@@ -210,7 +212,7 @@
 
 {% macro render_sidebar_button(button, mobile) %}
     {% if button.getTitle() == "" %}
-        <hr />
+        <li><hr /></li>
     {% else %}
         <li>
             {% if button.getHref() == null %}
