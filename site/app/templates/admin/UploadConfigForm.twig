@@ -1,5 +1,11 @@
 {% import _self as self %}
 
+{% if gradeable_id|length %}
+    {% set upload_url = upload_url ~ '?g_id=' ~ gradeable_id %}
+    {% set rename_url = rename_url ~ '?g_id=' ~ gradeable_id %}
+    {% set delete_url = delete_url ~ '?g_id=' ~ gradeable_id %}
+{% endif %}
+
 <div class="content">
     <h1>Upload Autograding Config</h1>
     <br><br>
@@ -26,6 +32,10 @@
         Upload Config: <input type="file" name="config_upload" /><br />
         <input type="submit" value="Upload" />
     </form>
+    <br>
+    {% if gradeable_id|length %}
+        <a class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
+    {% endif %}
 </div>
 
 {% if all_files|length > 0 %}

@@ -88,7 +88,7 @@
     </table>
 </div>
 
-<script type="text/javascript">
+<script>
     var path_list = {{ count_array|json_encode|raw }};
     var num_submissions = {{ files|length }};
     var CSRF = "{{ csrf_token }}";

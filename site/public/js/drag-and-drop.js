@@ -1111,7 +1111,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (filesToBeAdded == false){
         return;
     }
-
     $.ajax({
         url: submit_url,
         data: formData,
@@ -1132,6 +1131,52 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+                console.log(data);
+            }
+        },
+        error: function(data) {
+            window.location.href = buildCourseUrl(['course_materials']);
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+
+function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime) {
+    var edit_url = buildCourseUrl(['course_materials', 'edit']);
+    var return_url = buildCourseUrl(['course_materials']);
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('hide_from_students', hide_from_students);
+    formData.append('requested_path', requested_path);
+    formData.append('release_time',cmTime);
+    
+    if(sectionsEdit !== null){
+        formData.append('sections', sectionsEdit);
+    }
+    
+    $.ajax({
+        url: edit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                var jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were editting. - [handleEditCourseMaterials]");
                 console.log(data);
             }
         },
