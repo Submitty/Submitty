@@ -1,0 +1,38 @@
+<div class="content">
+    <div class="sub">
+        {% if show_testcases %}
+            <h3 class="label">Autograding Results</h3>
+        {% endif %}
+
+        {# Actual results #}
+        {% if in_queue or grading %}
+            {% if grading %}
+                <p class="red-message">
+                    This submission is currently being graded.
+                </p>
+            {% else %}
+                <p class="red-message">
+                    This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
+                </p>
+            {% endif %}
+            <script type="text/javascript">
+                checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
+            </script>
+        {% elseif results is not defined %}
+            <p class="red-message">
+                Something has gone wrong with grading this submission. Please contact your instructor about this.
+            </p>
+        {% else %}
+            {# Has results! #}
+            {% if show_incentive_message %}
+                <script type="text/javascript">
+                    (function() {
+                        ('#incentive_message').show();
+                    })();
+                </script>
+            {% endif %}
+        {% endif %}
+
+        {{ result_text|raw }}
+    </div>
+</div>
