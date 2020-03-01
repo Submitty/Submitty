@@ -511,7 +511,7 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
                 
-                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                if($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null){
                     $info["graded_groups"][] = 4;
                 }
                 elseif ($graded_component === null) {
