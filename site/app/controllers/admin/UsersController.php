@@ -991,7 +991,7 @@ class UsersController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      * @Route("/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
-    public function viewStudentGrades(){
+    public function viewStudentGrades() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
             . $_POST["student_id"] . "_summary.html";
 
