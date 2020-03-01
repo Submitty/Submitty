@@ -7,6 +7,7 @@ var editor1 = null;
 var form = null;
 var si = null;
 var gradeableId = null;
+var blueClickedMark = null;
 
 function isColoredMarker(marker, color) {
     return marker.css.toLowerCase().indexOf(color) != -1;
@@ -56,7 +57,10 @@ function setUpLeftPane() {
         if(isColoredMarker(clickedMark, YELLOW)) {
             var user_id_1 = $('[name="user_id_1"]', form).val();
             var user_1_version = $('[name="version_user_1"]', form).val();
+            clickedMark.css = "background: " + BLUE;
+            blueClickedMark = clickedMark;
             getMatchesListForClick(user_id_1, user_1_version, lineData.from);
+            editor0.refresh();
         } else if(isColoredMarker(clickedMark, ORANGE)) {
             // In this case we want to update the right side as well...
             // Needs work...
@@ -64,6 +68,9 @@ function setUpLeftPane() {
         } else {
             if($('#popup_to_show_matches_id').css('display') == 'block'){
                 $('#popup_to_show_matches_id').css('display', 'none');
+                blueClickedMark.css = "background: " + YELLOW;
+                blueClickedMark = null;
+                editor0.refresh();
             }
         }
 
