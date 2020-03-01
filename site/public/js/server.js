@@ -188,8 +188,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
-    $('[name="delete-gradeable-message"]', form).html('');
-    $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="delete-gradeable-message"]', form).html('');
+    $('[id="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("delete-gradeable-form");
@@ -198,8 +198,8 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#close-submissions-form");
-    $('[name="close-submissions-message"]', form).html('');
-    $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="close-submissions-message"]', form).html('');
+    $('[id="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("close-submissions-form");
@@ -1607,7 +1607,7 @@ $(document).ready(function() {
     if (localStorage.getItem('sidebar') !== "") {
         $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
         //Once the sidebar is set the page can be unhidden
-        $("#submitty-body").css('visibility', 'visible');
+        $("#submitty-body").removeClass( "invisible" )
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space

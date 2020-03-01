@@ -25,6 +25,11 @@ class TestSidebar(BaseTestCase):
         while current_idx < len(expected):
             nav = self.driver.find_element_by_tag_name('aside')
             links = nav.find_elements_by_tag_name('li')
+            
+            for link in links:
+                if not link.find_elements_by_tag_name('a'):
+                    links.remove(link)
+
             actual = [
                 [link.find_element_by_tag_name('a').get_attribute('href'), link.text]
                 for link in links

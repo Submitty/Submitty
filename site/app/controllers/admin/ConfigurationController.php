@@ -45,6 +45,7 @@ class ConfigurationController extends AbstractController {
             'vcs_base_url'                   => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
+            'forum_create_thread_message'    => $this->core->getConfig()->getForumCreateThreadMessage(),
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),

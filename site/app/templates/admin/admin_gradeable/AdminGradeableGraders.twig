@@ -95,18 +95,16 @@ Form
                             <th>{{ row }}</th>
                         {% endfor %}
                     </tr>
-                    <tr>
-                        {% for user_group,users in graders_from_usertypes %}
-                            {% for user in users %}
-                                <tr class="g_history g{{ user_group }}">
-                                    <th>{{ user[1] ~ " " ~ user[2] ~ "(" ~ user[0] ~ ")" }} </th>
-                                    {% for g_id in rotating_gradeables|filter((g_id) => g_id != gradeable.getId()) %}
-                                        <td>{{ gradeable_section_history[user[0]][g_id]|join(',') }}</td>
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                        {% endfor %}
-                    </tr>
+                      {% for user_group,users in graders_from_usertypes %}
+                          {% for user in users %}
+                              <tr class="g_history g{{ user_group }}">
+                                  <th>{{ user[1] ~ " " ~ user[2] ~ "(" ~ user[0] ~ ")" }} </th>
+                                  {% for g_id in rotating_gradeables|filter((g_id) => g_id != gradeable.getId()) %}
+                                      <td>{{ gradeable_section_history[user[0]][g_id]|join(',') }}</td>
+                                  {% endfor %}
+                              </tr>
+                          {% endfor %}
+                      {% endfor %}
                 </table>
             </div>
         </div>
@@ -124,18 +122,21 @@ Form
             </tr>
             <tr class="g1">
                 <th>Instructor Graders</th>
+                <th colspan="{{section_numbers|length + 1}}"></th>
             </tr>
             <!-- Instructors -->
             {{ self.display_graders(graders_from_usertypes[1], 'g1',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
             <tr class="g2">
                 <th>Full Access Graders</th>
+                <th colspan="{{section_numbers|length + 1}}"></th>
             </tr>
             <!-- Full Access Graders -->
             {{ self.display_graders(graders_from_usertypes[2], 'g2',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
             <tr class="g3">
                 <th>Limited Access Graders</th>
+                <th colspan="{{section_numbers|length + 1}}"></th>
             </tr>
             <!-- Limited Access Graders -->
             {{ self.display_graders(graders_from_usertypes[3], 'g3',
