@@ -107,21 +107,6 @@
                 {% endif %}
                 <script>
 
-                    function strToDate(str){
-
-                        var date_array = str.split(" ")[0].split('-');
-                        var time_array = str.split(" ")[1].split(':');
-
-                        year = date_array[0];
-                        month = date_array[1];
-                        day = date_array[2];
-                        hour = time_array[0];
-                        min = time_array[1];
-                        sec = time_array[2];
-
-                        return new Date(year, month, day, hour, min, sec)
-                    }
-
                     function determineRelease(inputID){
                         var now = server_time;
 
@@ -139,14 +124,14 @@
                         var inputDT = document.getElementById(inputID);
                         var fileDT = inputDT.value;
 
-                        currentDate = strToDate(currentDT);
-                        fileDate = strToDate(fileDT);
-                        neverDate = strToDate(neverDT);
+                        fileDT = fileDT.replace(/\s/, 'T');
+                        currentDT = currentDT.replace(/\s/, 'T');
+                        neverDT = neverDT.replace(/\s/, 'T');
 
                         //also custom colors for this page for readability
-                        if(fileDate.getTime() <= currentDate.getTime()) {
+                        if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
                             return green;
-                        } else if(fileDate.getTime() >= neverDate.getTime()) {
+                        } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
                             return red;
                         } else {
                             return yellow;
