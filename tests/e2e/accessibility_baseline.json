@@ -54,7 +54,7 @@
         },
         "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
             "type": "error",
-            "lastLine": 1417,
+            "lastLine": 1415,
             "lastColumn": 76,
             "firstColumn": 9,
             "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
@@ -634,7 +634,7 @@
             "lastColumn": 69,
             "firstColumn": 79,
             "message": "Attribute “fname” not allowed on element “tr” at this point.",
-            "extract": "-table-1\">\n                    <tr fname=\"fork_bomb_print.c\" class=\"file-label\"><td",
+            "extract": "-table-1\">\n                    <tr fname=\"fork_bomb_print.c\" class=\"file-label\"><td>fo",
             "hiliteStart": 10,
             "hiliteLength": 70
         },
@@ -1683,6 +1683,28 @@
             "extract": "          <i class=\"fas fa-bars handle ui-sortable-handle\" aria-label=\"Drag to reorder\" title=\"Drag to reorder\"></i>\n ",
             "hiliteStart": 10,
             "hiliteLength": 102
+        }
+    },
+    "http://localhost:1501/s20/sample/forum/stats": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 135,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
         }
     },
     "/s20/sample/users": {
