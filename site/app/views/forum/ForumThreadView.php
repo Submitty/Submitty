@@ -942,6 +942,8 @@ class ForumThreadView extends AbstractView {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
 
+        $has_history = $this->core->getQueries()->postHasHistory($post_id);
+
         return [
             "classes" => $classes,
             "post_id" => $post_id,
@@ -969,6 +971,7 @@ class ForumThreadView extends AbstractView {
             "thread_id" => $thread_id,
             "parent_id" => $post_id,
             "render_markdown" => $markdown,
+            "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread
         ];
     }
