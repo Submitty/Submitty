@@ -86,7 +86,6 @@ function toggle() {
     clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
     $('[name="user_id_1"]', form).val(data['user_id_2']);
     $('[name="version_user_1"]', form).val(data['version_user_2']);
-    setTimeout(function(){ $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']}).change(); }, 2000);
 }
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
@@ -171,7 +170,7 @@ function createRightUsersList(data, select = null) {
         append_options += users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
     });
     $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
-    $('g
+    $('[name="user_id_2"] option:eq(' + position.toString() + ')', form).prop('selected', true);
 }
 
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
