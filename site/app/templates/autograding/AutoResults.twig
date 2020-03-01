@@ -8,107 +8,106 @@
    {% endif %}
 {% endif %}
 
-{% if show_hidden_breakdown and hidden_earned >= hidden_max %}
+{% if show_hidden_breakdown and hidden_earned >= hidden_max and hidden_max > 0 %}
     <canvas id="confetti_canvas"></canvas>
-{% elseif nonhidden_earned >= nonhidden_max %}
+{% elseif nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
     <canvas id="confetti_canvas"></canvas>
 {% endif %}
 
+{% if num_visible_testcases > 0 and incomplete_autograding == false %}
+    {% if num_visible_testcases > 0 %}
+        {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
 
-{% if num_visible_testcases > 0 %}
-    {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
-
-    <div class="box">
-        <div class="box-title"
-            {% if nonhidden_earned >= nonhidden_max %}
+        <div class="box-title submission-page-total-header"
+            {% if nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
                 onclick="addConfetti();"
                 style="cursor:pointer;"
             {% endif %}
          >
             {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-            <h4>{{ is_ta_grading ? "Autograding Subtotal" : "Total" }} {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
+            <h4>Autograding Total {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
         </div>
-    </div>
-    {% if show_hidden_breakdown %}
-        <div class="box"
-            {% if hidden_earned >= hidden_max %}
-                onclick="addConfetti();"
-                style="cursor:pointer;"
-            {% endif %}
-        >
-            <div class="box-title">
-                {{ Badge.render(hidden_earned, hidden_max, false) }}
-                <h4>{{ is_ta_grading ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
-            </div>
-        </div>
-    {% endif %}
-{% endif %}
-
-{% if hide_version_and_test_details == false %}
-    {% if not incomplete_autograding %}
-        {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
-            {% set can_view = (not testcase.hidden or show_hidden) %}
-            {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
-            <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
-                <div id='tc_{{ loop.index0 }}' class="box-title"
-                        {% if can_view_details and testcase.has_extra_results %}
-                            style="cursor: pointer"
-                            onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});"
-                        {% endif %}
-                >
-
-                    {# Details button #}
-                    {% if testcase.has_extra_results and can_view_details %}
-                        <span class="loading-tools" id="details_tc_{{ loop.index0 }}" style="float:right">
-                        <span class="loading-tools-hide" style="color: #0000EE; text-decoration: underline;" hidden>
-                            Hide Details
-                        </span>
-                        <span class="loading-tools-show" style="color: #0000EE; text-decoration: underline;">
-                            Show Details
-                        </span>
-                        <span class="loading-tools-in-progress" aria-label="Loading Details for {{testcase.name}}" hidden>
-                            <i class="fas fa-circle-notch fa-spin save-button"></i>Loading...
-                        </span>
-                    </span>
-                    {% endif %}
-                    {# /Details button #}
-
-                    {# Badge #}
-                    {% if testcase.has_points %}
-                        {% if not testcase.hidden or show_hidden %}
-                            {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit) }}
-                        {% else %}
-                            <div class="badge">
-                                Hidden
-                            </div>
-                        {% endif %}
-                    {% elseif has_badges %}
-                        <div class="no-badge"></div>
-                    {% endif %}
-                    {# /Badge #}
-
-                    <h4>
-                        {% if testcase.hidden %}
-                            HIDDEN:
-                        {% endif %}
-                        {{ testcase.name }}
-                        &nbsp;&nbsp;&nbsp;
-                        <code>{{ testcase.details }}</code>
-                        &nbsp;&nbsp;
-                        {% if testcase.extra_credit %}
-                            <span class='italics' style="color: #0a6495;">Extra Credit</span>
-                        {% endif %}
-                        &nbsp;&nbsp;
-                        {% if can_view and testcase.view_testcase_message %}
-                            <span class='italics' style="color: #af0000;">{{ testcase.testcase_message }}</span>
-                        {% endif %}
-                    </h4>
-                </div>
-
-                {% if testcase.has_extra_results and can_view %}
-                    <div id="testcase_{{ loop.index0 }}" style="display:{{ num_visible_testcases == 0 ? "block" : "none" }};"></div>
+        {% if show_hidden_breakdown %}
+            <div class="box submission-page-total-header"
+                {% if hidden_earned >= hidden_max and hidden_max > 0 %}
+                    onclick="addConfetti();"
+                    style="cursor:pointer;"
                 {% endif %}
+            >
+                <div class="box-title">
+                    {{ Badge.render(hidden_earned, hidden_max, false) }}
+                    <h4>Autograding Total <i>(With Hidden Points)</i></h4>
+                </div>
             </div>
-        {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    {% if hide_version_and_test_details == false %}
+        {% if not incomplete_autograding %}
+            {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
+                {% set can_view = (not testcase.hidden or show_hidden) %}
+                {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
+                <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
+                    <div id='tc_{{ loop.index0 }}' class="box-title"
+                            {% if can_view_details and testcase.has_extra_results %}
+                                style="cursor: pointer"
+                                onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});"
+                            {% endif %}
+                    >
+
+                        {# Details button #}
+                        {% if testcase.has_extra_results and can_view_details %}
+                            <span class="loading-tools" id="details_tc_{{ loop.index0 }}" style="float:right">
+                            <span class="loading-tools-hide" style="color: #0000EE; text-decoration: underline;" hidden>
+                                Hide Details
+                            </span>
+                            <span class="loading-tools-show" style="color: #0000EE; text-decoration: underline;">
+                                Show Details
+                            </span>
+                            <span class="loading-tools-in-progress" aria-label="Loading Details for {{testcase.name}}" hidden>
+                                <i class="fas fa-circle-notch fa-spin save-button"></i>Loading...
+                            </span>
+                        </span>
+                        {% endif %}
+                        {# /Details button #}
+
+                        {# Badge #}
+                        {% if testcase.has_points %}
+                            {% if not testcase.hidden or show_hidden %}
+                                {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit) }}
+                            {% else %}
+                                <div class="badge">
+                                    Hidden
+                                </div>
+                            {% endif %}
+                        {% elseif has_badges %}
+                            <div class="no-badge"></div>
+                        {% endif %}
+                        {# /Badge #}
+
+                        <h4>
+                            {% if testcase.hidden %}
+                                HIDDEN:
+                            {% endif %}
+                            {{ testcase.name }}
+                            &nbsp;&nbsp;&nbsp;
+                            <code>{{ testcase.details }}</code>
+                            &nbsp;&nbsp;
+                            {% if testcase.extra_credit %}
+                                <span class='italics' style="color: #0a6495;">Extra Credit</span>
+                            {% endif %}
+                            &nbsp;&nbsp;
+                            {% if can_view and testcase.view_testcase_message %}
+                                <span class='italics' style="color: #af0000;">{{ testcase.testcase_message }}</span>
+                            {% endif %}
+                        </h4>
+                    </div>
+
+                    {% if testcase.has_extra_results and can_view %}
+                        <div id="testcase_{{ loop.index0 }}" style="display:{{ num_visible_testcases == 0 ? "block" : "none" }};"></div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
     {% endif %}
 {% endif %}

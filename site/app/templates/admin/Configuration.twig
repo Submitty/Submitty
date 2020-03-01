@@ -23,6 +23,8 @@
         </label>
         <input class="config-row" type="text" name="course_home_url" id="course-home-url" value="{{ fields['course_home_url'] }}" />
 
+        <h2>Discussion Forum</h2>
+        <hr>
         <div id="forum-enabled-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="forum_enabled" id="forum-enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
             <label for="forum-enabled">
@@ -31,7 +33,14 @@
                 <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
             </label>
         </div>
+        <label for="create-thread-message" class="config-row">
+            <div class="option-title">Create Thread Default Message</div>
+            <div class="option-alt">Input a message that would be shown in the thread creation page.</div>
+        </label>
+        <textarea class="config-row" name="forum_create_thread_message" id="create-thread-message" rows="4"/>{{ fields['forum_create_thread_message'] }}</textarea>
 
+        <h2>Office Hours Queue</h2>
+        <hr>
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} />
             <label for="queue-enabled">

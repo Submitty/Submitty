@@ -2,17 +2,17 @@
 {% block popup_id %}delete-gradeable-form{% endblock %}
 {% block title %}Delete Gradeable{% endblock %}
 {% block body %}
-    <p>Note: A gradeable can only be deleted if it has no formed student teams, 
+    <p>Note: A gradeable can only be deleted if it has no formed student teams,
 	it has no student submission files, it has no TA grading data, and it does not have VCS repos created.
     </p>
     <br />
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     Are you sure you want to delete
-    <div name="delete-gradeable-message">
+    <div id="delete-gradeable-message">
     </div>
 {% endblock %}
 {% block form %}
-    <form name="delete-confirmation" method="post" action="">
+    <form name="delete-confirmation" method="post">
         {{ parent() }}
     </form>
 {% endblock %}
@@ -20,4 +20,3 @@
     {{ block('close_button') }}
     <input class="btn btn-danger" type="submit" value="Delete">
 {% endblock %}
-
