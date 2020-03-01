@@ -15,10 +15,10 @@
     {% endif %}
 
     {% for js_ref in js %}
-    <script type='text/javascript' src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}'></script>
     {% endfor %}
 
-    <script type="text/javascript">
+    <script>
         function ducky() {
             var duck = document.getElementById("duckdiv");
             var banner = document.getElementById("submitty-banner");
@@ -100,7 +100,7 @@
                         <img id="submitty-mascot-home-btn"
                          src="{{ base_url }}/img/{{ duck_img }}"
                          alt="Submitty's duck mascot!"
-                         height = "50px"
+                         height = "50"
                          />
                      </a>
                     <div id="breadcrumbs">
@@ -110,7 +110,9 @@
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
-                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    <a id="desktop_home_link" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                {% elseif b.useAsHeading() %}
+                                    <h1 class="breadcrumb_heading">{{ b.getTitle() }}</h1>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
@@ -210,7 +212,7 @@
 
 {% macro render_sidebar_button(button, mobile) %}
     {% if button.getTitle() == "" %}
-        <hr />
+        <li><hr /></li>
     {% else %}
         <li>
             {% if button.getHref() == null %}

@@ -5,25 +5,30 @@
                 <h1>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
                 {% for rank in ranks %}
                     <h2>As {{ rank.title }}</h2>
-                    <ul id="course-list" class="bare-list">
-                        {% set display_semester = '' %}
-                        {% for course in rank.courses %}
-                            {% if display_semester != course.display_semester %}
-                                {% set display_semester = course.display_semester %}
-                                <h3> {{ display_semester }} </h3>
+                    {% set display_semester = '' %}
+                    {% for course in rank.courses %}
+                        {% if display_semester != course.display_semester %}
+                            {% if display_semester != '' %}
+                            </ul>
                             {% endif %}
-                            <li>
-                                <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl([course['semester'], course['title']]) }}">
-                                    {{ course['display_semester'] }} &nbsp; &nbsp;
-                                    {{ course['title'] | upper }} &nbsp; &nbsp;
-                                    {% if course['display_name'] != "" %}
-                                        {{ course['display_name'] }}
-                                    {% endif %}
-                                    {{ user.accessAdmin() }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                            {% set display_semester = course.display_semester %}
+                            <h3> {{ display_semester }} </h3>
+                            <ul id="course-list" class="bare-list">
+                        {% endif %}
+                                <li>
+                                    <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl([course['semester'], course['title']]) }}">
+                                        {{ course['display_semester'] }} &nbsp; &nbsp;
+                                        {{ course['title'] | upper }} &nbsp; &nbsp;
+                                        {% if course['display_name'] != "" %}
+                                            {{ course['display_name'] }}
+                                        {% endif %}
+                                        {{ user.accessAdmin() }}
+                                    </a>
+                                </li>
+                    {% endfor %}
+                    {% if display_semester != '' %}
+                            </ul>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endfor %}
