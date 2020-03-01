@@ -1,0 +1,57 @@
+{% import 'functions/Badge.twig' as Badge %}
+
+{% if total_complete == true  and active_same_as_graded == true %}
+    <canvas id="confetti_canvas"></canvas>
+    <div class="content">
+        <h3 class="label">Score Overview</h3>
+        <div class="box submission-page-total-header">
+            <div class="box-title"
+                {% if total_score >= total_max %}
+                    onclick="addConfetti();"
+                    style="cursor:pointer;"
+                {% endif %}
+            >
+                {{ Badge.render(total_score, total_max, false) }}
+                <h4>Total Score</h4>
+            </div>
+        </div>
+        {% if has_autograding == true and autograding_complete == true %}
+            <div class="box">
+                <div class="box-title"
+                    {% if autograding_earned >= autograding_max %}
+                        onclick="addConfetti();"
+                        style="cursor:pointer;"
+                    {% endif %}
+                >
+                    {{ Badge.render(autograding_earned, autograding_max, false) }}
+                    <h4>Autograding Score</h4>
+                </div>
+            </div>
+        {% endif %}
+        {% if has_ta_grading == true and ta_grading_complete == true %}
+            <div class="box">
+                <div class="box-title"
+                    {% if ta_grading_earned >= ta_grading_max %}
+                        onclick="addConfetti();"
+                        style="cursor:pointer;"
+                    {% endif %}>
+
+                    {{ Badge.render(ta_grading_earned, ta_grading_max, false) }}
+                    <h4>TA / Instructor Score</h4>
+                </div>
+            </div>
+        {% endif %}
+        {% if has_peer_grading == true and peer_grading_complete == true %}
+            <div class="box">
+                <div class="box-title"
+                    {% if peer_grading_earned >= peer_grading_max %}
+                        onclick="addConfetti();"
+                        style="cursor:pointer;"
+                    {% endif %}>
+                    {{ Badge.render(peer_grading_earned, peer_grading_max, false) }}
+                    <h4>Peer Grading Score</h4>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
