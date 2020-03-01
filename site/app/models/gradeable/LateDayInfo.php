@@ -105,21 +105,25 @@ class LateDayInfo extends AbstractModel {
 
     /**
      * Gets the late status of the gradeable
+     * @param int $days_late optional - calculate the late day status based on if the gradeable used $days_late late days
      * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
      */
-    public function getStatus() {
+    public function getStatus(int $days_late = null) {
+
         // No late days info, so NO_SUBMISSION
         if (!$this->hasLateDaysInfo()) {
             return self::STATUS_NO_ACTIVE_VERSION;
         }
 
+        $days = $days_late !== null ? $days_late : $this->getDaysLate();
+
         // If the number of days late is more than the number allowed, then its BAD
-        if ($this->getDaysLate() > $this->getLateDaysAllowed()) {
+        if ($days > $this->getLateDaysAllowed()) {
             return self::STATUS_BAD;
         }
 
         // if the student submitted after the deadline (plus extensions) then its late
-        if ($this->getDaysLate() > $this->getLateDayException()) {
+        if ($days > $this->getLateDayException()) {
             return self::STATUS_LATE;
         }
 

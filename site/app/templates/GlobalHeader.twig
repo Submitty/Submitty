@@ -9,15 +9,16 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    {# TODO, eventually remove these form individual twig files and enable this one
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    #}
+    {# TODO, eventually this wont need an if statement and will work on every page #}
+    {% if use_mobile_viewport %}
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {% endif %}
 
     {% for js_ref in js %}
-    <script type='text/javascript' src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}'></script>
     {% endfor %}
 
-    <script type="text/javascript">
+    <script>
         function ducky() {
             var duck = document.getElementById("duckdiv");
             var banner = document.getElementById("submitty-banner");
@@ -59,10 +60,10 @@
             }
         }
 
+        var onAjaxInit;
     </script>
 
 </head>
-<script>var onAjaxInit;</script>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <a id="skip-nav" href="#main">Skip to main content</a>
     {% if wrapper_urls['top_bar.html'] != null %}
@@ -99,7 +100,7 @@
                         <img id="submitty-mascot-home-btn"
                          src="{{ base_url }}/img/{{ duck_img }}"
                          alt="Submitty's duck mascot!"
-                         height = "50px"
+                         height = "50"
                          />
                      </a>
                     <div id="breadcrumbs">
@@ -109,7 +110,9 @@
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
-                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    <a id="desktop_home_link" href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                {% elseif b.useAsHeading() %}
+                                    <h1 class="breadcrumb_heading">{{ b.getTitle() }}</h1>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}

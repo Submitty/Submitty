@@ -105,50 +105,45 @@ class CourseMaterialsController extends AbstractController {
         // makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
         $zip_name = $temp_dir . "/" . $temp_name . ".zip";
+        // replacing any whitespace with underscore char.
         $zip_file_name = preg_replace('/\s+/', '_', $dir_name) . ".zip";
+        // getting the meta-data of the course-material in '$json' variable
+        $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        $json = FileUtils::readJsonFile($file_data);
 
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-
-        if (!$this->core->getUser()->accessGrading()) {
-            // if the user is not the instructor
-            // download all accessible files according to course_materials_file_data.json
-            $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-            $json = FileUtils::readJsonFile($file_data);
-            foreach ($json as $path => $file) {
-                if (!CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                    $this->core->getOutput()->showError("Your section may not access this file.");
-                    return false;
+        $isFolderEmptyForMe = true;
+        // iterate over the files inside the requested directory
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root_path),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+        foreach ($files as $name => $file) {
+            if (!$file->isDir()) {
+                $file_path = $file->getRealPath();
+                if (!$this->core->getUser()->accessGrading()) {
+                    // only add the file if the section of student is allowed and course material is released!
+                    if (CourseMaterial::isSectionAllowed($this->core, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                        $relativePath = substr($file_path, strlen($root_path) + 1);
+                        $isFolderEmptyForMe = false;
+                        $zip->addFile($file_path, $relativePath);
+                    }
                 }
-
-                // check if the file is in the requested folder
-                if (!Utils::startsWith(realpath($path), $root_path)) {
-                    continue;
-                }
-                if ($file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
-                    $relative_path = substr($path, strlen($root_path) + 1);
-                    $zip->addFile($path, $relative_path);
-                }
-            }
-        }
-        else {
-            // if the user is an instructor
-            // download all files
-            $files = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($root_path),
-                \RecursiveIteratorIterator::LEAVES_ONLY
-            );
-
-            foreach ($files as $name => $file) {
-                if (!$file->isDir()) {
-                    $file_path = $file->getRealPath();
+                else {
+                    // For graders and instructors, download the course-material unconditionally!
                     $relativePath = substr($file_path, strlen($root_path) + 1);
-
+                    $isFolderEmptyForMe = false;
                     $zip->addFile($file_path, $relativePath);
                 }
             }
         }
 
+        // If the Course Material Folder Does not contain anything for current user display an error message.
+        if ($isFolderEmptyForMe) {
+            $this->core->getOutput()->showError("You do not have access to this folder");
+            return false;
+        }
         $zip->close();
         header("Content-type: application/zip");
         header("Content-Disposition: attachment; filename=$zip_file_name");
@@ -157,54 +152,6 @@ class CourseMaterialsController extends AbstractController {
         header("Expires: 0");
         readfile("$zip_name");
         unlink($zip_name); //deletes the random zip file
-    }
-
-    /**
-     * @Route("/{_semester}/{_course}/course_materials/modify_permission")
-     * @AccessControl(role="INSTRUCTOR")
-     */
-    public function modifyCourseMaterialsFilePermission($checked) {
-        $data = $_POST['fn'];
-        if (is_string($data)) {
-            $data = [$data];
-        }
-
-        foreach ($data as $filename) {
-            if (
-                !isset($filename)
-                || !isset($checked)
-            ) {
-                $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
-            }
-
-            $file_name = htmlspecialchars($filename);
-
-            $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-
-
-            $end_of_time = new \DateTime("9998-01-01");
-            $release_datetime = $end_of_time->format("Y-m-d H:i:sO");
-            $json = FileUtils::readJsonFile($fp);
-            $sections = null;
-            $hide_from_students = "off";
-            if ($json != false) {
-                $release_datetime  = $json[$file_name]['release_datetime'];
-                if (isset($json[$file_name]['sections'])) {
-                    $sections = $json[$file_name]['sections'];
-                }
-                $hide_from_students = $json[$file_name]['hide_from_students'];
-            }
-
-            if (!is_null($sections)) {
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
-            }
-            else {
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime, 'hide_from_students' => $hide_from_students);
-            }
-            if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
-                return "Failed to write to file {$fp}";
-            }
-        }
     }
 
     /**
@@ -238,11 +185,9 @@ class CourseMaterialsController extends AbstractController {
             $file_name = htmlspecialchars($filename);
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-            $checked = '0';
             $sections = null;
             $json = FileUtils::readJsonFile($fp);
             if ($json != false) {
-                $checked  = $json[$file_name]['checked'];
                 if (isset($json[$file_name]['sections'])) {
                     $sections  = $json[$file_name]['sections'];
                 }
@@ -251,10 +196,10 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
             if (!is_null($sections)) {
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
+                $json[$file_name] = array('release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
             }
             else {
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students);
+                $json[$file_name] = array('release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students);
             }
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
@@ -262,6 +207,47 @@ class CourseMaterialsController extends AbstractController {
         }
 
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
+    }
+    
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/edit", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function ajaxEditCourseMaterialsFiles() {
+        $sections = null;
+        if (isset($_POST['sections'])) {
+            $sections = $_POST['sections'] ?? null;
+        }
+        
+        if (empty($sections) && !is_null($sections)) {
+            $sections = [];
+        }
+        
+        $sections_exploded = $sections;
+        
+        if (!(is_null($sections)) && !empty($sections)) {
+            $sections_exploded = explode(",", $sections);
+        }
+        
+        $hide_from_students = $_POST['hide_from_students'];
+        
+        $requested_path = "";
+        if (isset($_POST['requested_path'])) {
+            $requested_path = $_POST['requested_path'] ?? '';
+        }
+        
+        $release_time = "";
+        if (isset($_POST['release_time'])) {
+            $release_time = $_POST['release_time'];
+        }
+        
+        $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');
+        $json = FileUtils::readJsonFile($fp);
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
+        $dst = FileUtils::joinPaths($upload_path, $requested_path);
+        $json[$dst] =  array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+        FileUtils::writeJsonFile($fp, $json);
+        return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }
 
     /**
@@ -425,7 +411,6 @@ class CourseMaterialsController extends AbstractController {
                                     $sections_exploded = [];
                                 }
                                 $json[$path] = [
-                                    'checked' => '1',
                                     'release_datetime' => $release_time,
                                     'sections' => $sections_exploded,
                                     'hide_from_students' => $hide_from_students
@@ -433,7 +418,6 @@ class CourseMaterialsController extends AbstractController {
                             }
                             else {
                                 $json[$path] = [
-                                    'checked' => '1',
                                     'release_datetime' => $release_time,
                                     'hide_from_students' => $hide_from_students
                                 ];
@@ -450,10 +434,10 @@ class CourseMaterialsController extends AbstractController {
                                 if ($sections_exploded == null) {
                                     $sections_exploded = [];
                                 }
-                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+                                $json[$dst] = array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
                             }
                             else {
-                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'hide_from_students' => $hide_from_students);
+                                $json[$dst] = array('release_datetime' => $release_time, 'hide_from_students' => $hide_from_students);
                             }
                         }
                     }
