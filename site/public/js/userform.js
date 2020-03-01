@@ -48,6 +48,7 @@ function newUserForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
     $("#edit-student-modal-title").css('display','none');
     $("#edit-grader-modal-title").css('display','none');
     $("#user-form-already-exists-error-message").css('display','none');
@@ -76,6 +77,7 @@ function editUserForm(user_id) {
             var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
+            form.find('.form-body').scrollTop(0);
             if (json['user_group'] == 4) {
                 $("#edit-student-modal-title").css('display','block');
                 $("#edit-grader-modal-title").css('display','none');

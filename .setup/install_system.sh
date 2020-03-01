@@ -434,13 +434,18 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
+        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
+            echo "Listen 1501" >> /etc/apache2/ports.conf
+        fi
+
         # remove default sites which would cause server to mess up
         rm /etc/apache2/sites*/000-default.conf
         rm /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/Require host __your_domain__/Require ip ${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require host localhost/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/\*:80/*:${SUBMISSION_PORT}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf

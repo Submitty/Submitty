@@ -190,7 +190,8 @@ class Access {
 
 
         //Forum permissions
-        $this->permissions["forum.modify_category"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
+        $this->permissions["forum.view_modify_category"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER;//allows you to view the page to modify forum categorys
+        $this->permissions["forum.modify_category"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;//allows you to actually modify the categorys
         $this->permissions["forum.publish"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
         $this->permissions["forum.modify_announcement"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT;
@@ -506,7 +507,12 @@ class Access {
                 $this->loadDirectories();
             }
             //This is not a valid directory
+            //checks for top level dirs like annotations, checkout, course_materials, submissions ... )
             if (!array_key_exists($dir, $this->directories)) {
+                return false;
+            }
+            elseif (!file_exists($path)) {
+                //checks for the existense of path which is asked for
                 return false;
             }
 

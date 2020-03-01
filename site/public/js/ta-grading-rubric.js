@@ -1127,7 +1127,8 @@ function getComponentFromDOM(component_id) {
             default: countUp ? 0.0 : maxValue,
             max_value: maxValue,
             upper_clamp: maxValue + extraCreditPoints,
-            marks: getMarkListFromDOM(component_id)
+            marks: getMarkListFromDOM(component_id),
+            peer: (domElement.attr('data-peer') === 'true')
         };
     }
     return {
@@ -1140,7 +1141,8 @@ function getComponentFromDOM(component_id) {
         default: parseFloat(domElement.attr('data-default')),
         max_value: parseFloat(domElement.attr('data-max_value')),
         upper_clamp: parseFloat(domElement.attr('data-upper_clamp')),
-        marks: getMarkListFromDOM(component_id)
+        marks: getMarkListFromDOM(component_id),
+        peer: (domElement.attr('data-peer') === 'true')
     };
 }
 

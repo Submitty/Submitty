@@ -23,6 +23,7 @@ class LateDaysTableView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("My Late Days");
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
+        $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate('LateDaysTable.twig', [
             'late_days' => $late_days,
             'grade_inquiry_enabled' => $this->core->getConfig()->isRegradeEnabled()

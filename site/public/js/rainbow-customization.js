@@ -153,6 +153,9 @@ function getGradeableBuckets()
                 // Get max points
                 gradeable.max = parseFloat(children[0].value);
 
+                // Get gradeable release date
+                gradeable.release_date = children[0].dataset.gradeReleaseDate;
+
                 // Get gradeable id
                 gradeable.id = children[1].innerHTML;
 

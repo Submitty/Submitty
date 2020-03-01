@@ -8,6 +8,39 @@ window.addEventListener("load", function() {
 
 window.addEventListener("resize", checkSidebarCollapse);
 
+
+////////////Begin: Removed redundant link in breadcrumbs////////////////////////
+//See this pr for why we might want to remove this code at some point
+//https://github.com/Submitty/Submitty/pull/5071
+window.addEventListener("resize", function(){
+  adjustBreadcrumbLinks();
+});
+
+var mobileHomeLink = null;
+var desktopHomeLink = null;
+document.addEventListener("DOMContentLoaded", function() {
+  loadInBreadcrumbLinks();
+  adjustBreadcrumbLinks();
+});
+
+function loadInBreadcrumbLinks(){
+  mobileHomeLink = $("#home-button").attr('href');
+  desktopHomeLink = $("#desktop_home_link").attr('href');
+}
+
+function adjustBreadcrumbLinks(){
+  if($(document).width() > 528){
+    $("#home-button").attr('href', "");
+    $("#desktop_home_link").attr('href', desktopHomeLink);
+  }else{
+    $("#home-button").attr('href', mobileHomeLink);
+    $("#desktop_home_link").attr('href', "");
+  }
+}
+////////////End: Removed redundant link in breadcrumbs//////////////////////////
+
+
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -169,6 +202,7 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("close-submissions-form");
+    form.find('.form-body').scrollTop(0);
 }
 
 function newDeleteCourseMaterialForm(path, file_name) {
@@ -195,6 +229,7 @@ function newDeleteCourseMaterialForm(path, file_name) {
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
+    form.find('.form-body').scrollTop(0);
 }
 
 function newUploadImagesForm() {
@@ -202,6 +237,7 @@ function newUploadImagesForm() {
     var form = $("#upload-images-form");
     form.css("display", "block");
     captureTabInModal("upload-images-form");
+    form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
 
@@ -219,20 +255,56 @@ function newUploadCourseMaterialsForm() {
     }
 
     $('.popup-form').css('display', 'none');
+    var form = $("#upload-course-materials-form");
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
-    var form = $("#upload-course-materials-form");
+
     form.css("display", "block");
     captureTabInModal("upload-course-materials-form");
+    form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 
 }
 
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+
+    let form = $("#edit-course-materials-form");
+
+    let element = document.getElementById("edit-picker");
+    
+    element._flatpickr.setDate(release_time);
+    
+    if(this_hide_from_students == "on"){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    }
+    
+    else{
+        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+    }
+    
+    $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
+    
+    if(this_file_section != null){
+        for(let index = 0; index < this_file_section.length; ++index){
+            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
+        }
+        $("#all-sections-showing-no", form).prop('checked',false);
+        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).show();
+    }
+    else{
+        $("#show-some-section-selection-edit", form).hide();
+        $("#all-sections-showing-yes", form).prop('checked',false);
+        $("#all-sections-showing-no", form).prop('checked',true);
+    }
+    $("#material-edit-form", form).attr('data-directory', dir);
+    form.css("display", "block");
+}
 function captureTabInModal(formName){
-    
-    var form = $("#".concat(formName));
-    
+
+  var form = $("#".concat(formName));
+
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
     var firstInput = inputs.first();
@@ -252,14 +324,14 @@ function captureTabInModal(formName){
             e.preventDefault();
         }
     });
-    
+
     form.on('hidden.bs.modal', function () {
         releaseTabFromModal(formName);
     })
 }
 
 function releaseTabFromModal(formName){
-    
+
     var form = $("#".concat(formName));
     form.off('keydown');
 }
@@ -273,6 +345,7 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 
     captureTabInModal("set-folder-release-form");
 
+    form.find('.form-body').scrollTop(0);
     $('[id="release_title"]',form).attr('data-path',changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
     $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
@@ -290,6 +363,7 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
     $('[name="gradeable_title"]', form).append(gradeable_title);
     $('[name="delete"]', form).attr('action', form_action);
     form.css("display", "block");
+    form.find('.form-body').scrollTop(0);
     captureTabInModal("delete-plagiarism-result-and-config-form");
 }
 
@@ -308,309 +382,6 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
         PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
-
-function setUserSubmittedCode(gradeable_id, changed) {
-    var form = $("#users_with_plagiarism");
-    var user_id_1 = $('[name="user_id_1"]', form).val();
-    if(user_id_1 == ""){
-        $('[name="version_user_1"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-        $('[name="code_box_1"]').empty();
-        $('[name="code_box_2"]').empty();
-    }
-    else {
-        var version_user_1 = $('[name="version_user_1"]', form).val();
-        if(changed == 'version_user_1' && version_user_1 == '') {
-            $('[name="user_id_2"]', form).find('option').remove().end().append('<option value="">None</option>').val('');
-            $('[name="code_box_1"]').empty();
-            $('[name="code_box_2"]').empty();
-        }
-        else {
-            if(changed == 'user_id_1' || changed =='version_user_1') {
-                if( version_user_1 == '' || changed == 'user_id_1') {
-                    version_user_1 = "max_matching";
-                }
-
-                var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
-                $.ajax({
-                    url: url,
-                    success: function(data) {
-
-                        data = JSON.parse(data);
-                        console.log(data.ci);
-
-                        if(data.error){
-                            alert(data.error);
-                            return;
-                        }
-                        var append_options='<option value="">None</option>';
-                        $.each(data.all_versions_user_1, function(i,version_to_append){
-                            if(version_to_append == data.active_version_user_1 && version_to_append == data.max_matching_version){
-                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)(Max Match)</option>';
-                            }
-                            if(version_to_append == data.active_version_user_1 && version_to_append != data.max_matching_version){
-                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Active)</option>';
-                            }
-                            if(version_to_append != data.active_version_user_1 && version_to_append == data.max_matching_version){
-                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +' (Max Match)</option>';
-                            }
-
-                            if(version_to_append != data.active_version_user_1 && version_to_append != data.max_matching_version){
-                                append_options += '<option value="'+ version_to_append +'">'+ version_to_append +'</option>';
-                            }
-                        });
-                        $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
-
-                        $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                        for(var users_color in data.ci) {
-                            //console.log(data.ci[users_color]);
-                            for(var pos in data.ci[users_color]) {
-                                var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});
-                            }
-                        }
-                        $('.CodeMirror')[0].CodeMirror.refresh();
-                        //$('[name="code_box_1"]').empty().append(data.display_code1);
-                    },
-                    error: function(e) {
-                        alert("Could not load submitted code, please refresh the page and try again.");
-                    }
-                })
-
-                var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
-                $.ajax({
-                    url: url,
-                    success: function(data) {
-                        if(data == "no_match_for_this_version") {
-                            var append_options='<option value="">None</option>';
-                            $('[name="code_box_2"]').empty();
-                        }
-                        else {
-                            data = JSON.parse(data);
-                            if(data.error){
-                                alert(data.error);
-                                return;
-                            }
-                            var append_options='<option value="">None</option>';
-                            $.each(data, function(i,matching_users){
-                                append_options += '<option value="{&#34;user_id&#34;:&#34;'+ matching_users[0]+'&#34;,&#34;version&#34;:'+ matching_users[1] +'}">'+ matching_users[2]+ ' '+matching_users[3]+' &lt;'+matching_users[0]+'&gt; (version:'+matching_users[1]+')</option>';
-                            });
-                        }
-                        $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
-                    },
-                    error: function(e) {
-                        alert("Could not load submitted code, please refresh the page and try again.");
-                    }
-                })
-                $('[name="code_box_2"]').empty();
-            }
-            if (changed == 'user_id_2') {
-                if (($('[name="user_id_2"]', form).val()) == '') {
-                    $('[name="code_box_2"]').empty();
-                    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=&version_user_2=`;
-                    $.ajax({
-                        url: url,
-                        success: function(data) {
-                            data = JSON.parse(data);
-                            if(data.error){
-                                alert(data.error);
-                                return;
-                            }
-                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                            for(var users_color in data.ci) {
-                            //console.log(data.ci[users_color]);
-                            for(var pos in data.ci[users_color]) {
-                                var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
-                            }
-                        }
-                        	$('.CodeMirror')[0].CodeMirror.refresh();
-                            //$('[name="code_box_1"]').empty().append(data.display_code1);
-                        },
-                        error: function(e) {
-                            alert("Could not load submitted code, please refresh the page and try again.");
-                        }
-                    })
-
-                }
-                else {
-                    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
-                    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=${user_id_2}&version_user_2=${version_user_2}`;
-                    $.ajax({
-                        url: url,
-                        success: function(data) {
-                            data = JSON.parse(data);
-                            if(data.error){
-                                alert(data.error);
-                                return;
-                            }
-                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
-                            $('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
-                            var code_mirror = 0;
-                            console.log(data.ci);
-                            for(var users_color in data.ci) {
-                            for(var pos in data.ci[users_color]) {
-                                var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
-                            }
-                        }
-                        	$('.CodeMirror')[0].CodeMirror.refresh();
-
-                        	$('.CodeMirror')[1].CodeMirror.refresh();
-                            // $('[name="code_box_1"]').empty().append(data.display_code1);
-                            // $('[name="code_box_2"]').empty().append(data.display_code2);
-                        },
-                        error: function(e) {
-                            alert("Could not load submitted code, please refresh the page and try again.");
-                        }
-                    })
-
-                }
-            }
-        }
-    }
-}
-
-function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
-    //console.log(user_1_match_start);
-    //console.log(user_1_match_end);
-    var form = $("#users_with_plagiarism");
-    var user_id_1 = $('[name="user_id_1"]', form).val();
-    var version_user_1 = $('[name="version_user_1"]', form).val();
-    var version_user_2='';
-    var user_id_2='';
-    if($('[name="user_id_2"]', form).val() != "") {
-        user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
-        version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-    }
-
-    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'clicked_match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&start=${user_1_match_start.line}&end=${user_1_match_end.line}`;
-
-    //console.log(user_1_match_start.line);
-
-    $.ajax({
-        url: url,
-        success: function(data) {
-            //console.log(data);
-            data = JSON.parse(data);
-            if(data.error){
-                alert(data.error);
-                return;
-            }
-
-            if(where == 'code_box_2') {
-                var name_span_clicked = $(span_clicked).attr('name');
-                var scroll_position=-1;
-                $('[name="code_box_2"]').find('span').each(function(){
-                    var attr = $(this).attr('name');
-                    if (typeof attr !== typeof undefined && attr !== false && attr == name_span_clicked) {
-                        $(this).css('background-color',"#FF0000");
-                    }
-                });
-                $('[name="code_box_1"]').find('span').each(function(){
-                    var attr = $(this).attr('name');
-                    if (typeof attr !== typeof undefined && attr !== false) {
-                        attr= JSON.parse(attr);
-                        if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");
-                        }
-                    }
-                });
-                $('[name="code_box_1"]').scrollTop(0);
-                var scroll_position=0;
-                $('[name="code_box_1"]').find('span').each(function(){
-                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
-                        scroll_position = $(this).offset().top-$('[name="code_box_1"]').offset().top;
-                        return false;
-                    }
-                });
-                $('[name="code_box_1"]').scrollTop(scroll_position);
-            }
-
-            else if(where == 'code_box_1') {
-                var to_append='';
-
-                $.each(data, function(i,match){
-                    //console.log(match);
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start.line+','+ user_1_match_end.line+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
-                });
-                to_append = $.parseHTML(to_append);
-                $("#popup_to_show_matches_id").empty().append(to_append);
-                var x = event.pageX;
-                var y = event.pageY;
-                $('#popup_to_show_matches_id').css('display', 'block');
-                var width = $('#popup_to_show_matches_id').width();
-                $('#popup_to_show_matches_id').css('top', y+5);
-                $('#popup_to_show_matches_id').css('left', x-width/2.00);
-
-            }
-
-            else if(where == 'popup') {
-                jQuery.ajaxSetup({async:false});
-                $('[name="user_id_2"]', form).val('{"user_id":"'+popup_user_2+'","version":'+popup_version_user_2+'}');
-                setUserSubmittedCode(gradeable_id, 'user_id_2');
-                $('[name="code_box_1"]').find('span').each(function(){
-                    var attr = $(this).attr('name');
-                    if (typeof attr !== typeof undefined && attr !== false) {
-                        attr= JSON.parse(attr);
-                        if(attr['start'] == user_1_match_start && attr['end'] == user_1_match_end) {
-                            $(this).css('background-color',"#FF0000");
-                        }
-                    }
-                });
-                $.each(data, function(i,match){
-                    if(match[0] == popup_user_2 && match[1] == popup_version_user_2) {
-                        $.each(match[2], function(j, range){
-                            $('[name="code_box_2"]').find('span').each(function(){
-                                var attr = $(this).attr('name');
-                                if (typeof attr !== typeof undefined && attr !== false) {
-                                    if((JSON.parse($(this).attr("name")))["start"] == range["start"] && (JSON.parse($(this).attr("name")))["end"] == range["end"]) {
-                                        $(this).css('background-color',"#FF0000");
-                                    }
-                                }
-                            });
-                        });
-                    }
-                });
-                $('[name="code_box_2"]').scrollTop(0);
-                var scroll_position=0;
-                $('[name="code_box_2"]').find('span').each(function(){
-                    if ($(this).css('background-color')=="rgb(255, 0, 0)") {
-                        scroll_position = $(this).offset().top-$('[name="code_box_2"]').offset().top;
-                        return false;
-                    }
-                });
-                $('[name="code_box_2"]').scrollTop(scroll_position);
-                jQuery.ajaxSetup({async:true});
-            }
-        },
-        error: function(e) {
-            alert("Could not load submitted code, please refresh the page and try again.");
-        }
-    })
-}
-
-function toggleUsersPlagiarism(gradeable_id) {
-    var form = $("#users_with_plagiarism");
-    "#set-folder-release-form"
-    var user_id_1 = $('[name="user_id_1"]', form).val();
-    var version_user_1 = $('[name="version_user_1"]', form).val();
-
-    if( user_id_1 == '' || version_user_1 == '' || $('[name="user_id_2"]', form).val() == '') return;
-
-    var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
-    var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-    $('[name="user_id_1"]', form).val(user_id_2);
-    jQuery.ajaxSetup({async:false});
-    setUserSubmittedCode(gradeable_id ,'user_id_1');
-    $('[name="version_user_1"]', form).val(version_user_2);
-    setUserSubmittedCode(gradeable_id, 'version_user_1');
-    $('[name="user_id_2"]', form).val('{"user_id":"'+user_id_1+'","version":'+version_user_1+'}');
-    jQuery.ajaxSetup({async:true});
-    setUserSubmittedCode(gradeable_id, 'user_id_2');
-}
-
 
 function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name) {
     var form = $("#save-configuration-form");
@@ -814,6 +585,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     form.css("display", "block");
     captureTabInModal("admin-team-form");
 
+    form.find('.form-body').scrollTop(0);
     $("#admin-team-form-submit").prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
     $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
@@ -995,6 +767,7 @@ function importTeamForm() {
     var form = $("#import-team-form");
     form.css("display", "block");
     captureTabInModal("import-team-form");
+    form.find('.form-body').scrollTop(0);
     $('[name="upload_team"]', form).val(null);
 }
 
@@ -1004,6 +777,7 @@ function randomizeRotatingGroupsButton() {
     var form = $("#randomize-button-warning");
     form.css("display", "block");
     captureTabInModal("randomize-button-warning");
+    form.find('.form-body').scrollTop(0);
 }
 
 
@@ -1188,22 +962,13 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
+function hideEmptyCourseMaterialFolders() {
+  // fetch all the folders and remove those one which have no `file` within.
+  $('.folder-container').each(function() {
+    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
+  });
 }
+
 function closeDivForCourseMaterials(num) {
     var elem = $('#div_viewer_' + num);
     elem.hide();
@@ -1579,40 +1344,6 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function changePermission(filename, checked) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filename,csrf_token: csrfToken},
-        success: function(data) {},
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
-function changeFolderPermission(filenames, checked,handleData) {
-    // send to server to handle file permission change
-    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
-
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
-        success: function(data) {
-            if(handleData){
-                handleData(data);
-            }
-        },
-        error: function(e) {
-            alert("Encounter saving the checkbox state.");
-        }
-    })
-}
-
 function handleTimeZones(timezone) {
 
     var url = buildUrl(['server_time']);
@@ -1765,8 +1496,7 @@ function updateToTomorrowServerTime(fp) {
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
@@ -1794,8 +1524,7 @@ function changeNewDateTime(filename, newdatatime,handleData) {
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
-    var tbr;
-    tbr=false;
+    var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
