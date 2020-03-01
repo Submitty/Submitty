@@ -428,6 +428,18 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
+    private function removeLowConfidenceDigits($confidences, $id){
+        $ret = "";
+        $str_id = strval($id);
+        $i = 0;
+        foreach ($confidences as $confidence_val) {
+            $ret .= ($confidence_val <= .65) ? "%" : $str_id[$i];
+            $i ++;
+        }
+
+        return $ret;
+    }
+
     /**
      * @param Gradeable $gradeable
      * @return string
@@ -522,6 +534,12 @@ class HomeworkView extends AbstractView {
 
             //decoded.json may be read before the assoicated data is written, check if key exists first
             if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+
+                if (array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr']){
+                    $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
+                    $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+                }
+
                 if (array_key_exists('id', $data)) {
                     $id = $data['id'];
                     $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);

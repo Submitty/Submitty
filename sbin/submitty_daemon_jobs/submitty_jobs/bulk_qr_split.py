@@ -38,7 +38,7 @@ def main(args):
         i = id_index = 0
         page_count = 1
         prev_file = data = "BLANK"
-        output = {"filename": filename, "is_qr": True}
+        output = {"filename": filename, "is_qr": True, "use_ocr" : use_ocr}
         json_file = os.path.join(split_path, "decoded.json")
 
         for page_number in range(pdfPages.numPages):
