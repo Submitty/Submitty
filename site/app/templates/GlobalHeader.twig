@@ -75,7 +75,7 @@
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
         {# separates our content from user custom bars #}
-        <div id="submitty-body" class="flex-col" style="visibility: hidden;">
+        <div id="submitty-body" class="flex-col invisible">
             <div id="mobile-menu">
                 <div id="menu-header" class="flex-row">
                 <a href="{{ base_url }}" aria-label="Go to Submitty Home"><h1>Submitty</h1></a>
@@ -175,6 +175,11 @@
             </nav>
             <noscript class="system-message danger">
                 You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.
+                <style media="screen">
+                  #submitty-body{
+                    visibility: visible;
+                  }
+                </style>
             </noscript>
             {% if system_message is not null and system_message|length > 0 %}
             <div class="system-message warning">
