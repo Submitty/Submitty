@@ -167,10 +167,10 @@
     {% else %}
         <div class = "tab">
             <div class =tab-bar-wrapper">
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(event, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-auto" onclick="openStat(event, 'autograding-score-histogram'), this.blur()">Autograding Histogram</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-comp" onclick="openStat(event, 'component-averages'), this.blur()">Manual Grading Component Averages</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-tot" onclick="openStat(event, 'total-score-histogram'), this.blur()">Overall Histogram</a>
+                <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
+                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-auto" onclick="openStat(this, 'autograding-score-histogram'), this.blur()">Autograding Histogram</a>
+                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-comp" onclick="openStat(this, 'component-averages'), this.blur()">Manual Grading Component Averages</a>
+                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-tot" onclick="openStat(this, 'total-score-histogram'), this.blur()">Overall Histogram</a>
             </div>
             {% set bTA = [] %}
             {% set tTA = [] %}
@@ -761,7 +761,7 @@
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(statName).style.display = "block";
-        evt.currentTarget.className += " active-btn";
+        evt.className += " active-btn";
 
     }
     // Get the element with id="defaultOpen" and click on it

@@ -143,6 +143,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
                 loadingTools.find("span").hide();
                 loadingTools.find(".loading-tools-hide").show();
+                enableKeyToClick();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -1582,6 +1583,10 @@ function resizeNoScrollTextareas() {
 }
 
 $(document).ready(function() {
+  enableKeyToClick();
+});
+
+function enableKeyToClick(){
   var key_to_click = document.getElementsByClassName("key_to_click");
   for (var i = 0; i < key_to_click.length; i++) {
     key_to_click[i].addEventListener('keydown', function(event) {
@@ -1599,4 +1604,4 @@ $(document).ready(function() {
       }
     });
   }
-});
+}
