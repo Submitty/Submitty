@@ -34,7 +34,7 @@ class NotificationFactory {
         $notifications = $this->createNotificationsArray($event, $recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails = $this->createEmailsArray($event, $recipients);
+            $emails = $this->createEmailsArray($event, $recipients, true);
             $this->sendEmails($emails);
         }
     }
@@ -52,7 +52,7 @@ class NotificationFactory {
             $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
             $recipients[] = $this->core->getUser()->getId();
             $recipients = array_unique($recipients);
-            $emails = $this->createEmailsArray($event, $recipients);
+            $emails = $this->createEmailsArray($event, $recipients, true);
             $this->sendEmails($emails);
         }
     }
@@ -81,7 +81,7 @@ class NotificationFactory {
             $email_recipients = array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference);
             $email_recipients[] = $current_user_id;
             $email_recipients = array_unique($email_recipients);
-            $emails = $this->createEmailsArray($event, $email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients, true);
             $this->sendEmails($emails);
         }
     }
@@ -103,7 +103,7 @@ class NotificationFactory {
             $email_recipients[] = $event['recipient'];
             $email_recipients[] = $this->core->getUser()->getId();
             $email_recipients = array_unique($email_recipients);
-            $emails = $this->createEmailsArray($event, $email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients, true);
             $this->sendEmails($emails);
         }
     }
@@ -137,7 +137,7 @@ class NotificationFactory {
         $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails = $this->createEmailsArray($event, $email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients, false);
             $this->sendEmails($emails);
         }
     }
@@ -164,7 +164,7 @@ class NotificationFactory {
      * @param $recipients
      * @return array of email objects
      */
-    private function createEmailsArray($event, $recipients) {
+    private function createEmailsArray($event, $recipients, $author) {
         $emails = array();
         foreach ($recipients as $recipient) {
             //Checks if a url is in metadata and sets $relevant_url null or that url
@@ -178,7 +178,8 @@ class NotificationFactory {
                 'to_user_id' => $recipient,
                 'subject' => $event['subject'],
                 'body' => $event['content'],
-                'relevant_url' => $relevant_url
+                'relevant_url' => $relevant_url,
+                'author' => $author
             ];
             $emails[] = new Email($this->core, $details);
         }

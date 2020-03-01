@@ -1,5 +1,3 @@
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
 <div class="content">
     <header>
         <h1>Course Settings</h1>
@@ -30,18 +28,15 @@
             <label for="forum-enabled">
                 <div class="option-title">Enable Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                {% if categories_empty %}
-                    <h4 id="forum-category-warning" class="red-message" {{ fields['forum_enabled'] ? '': 'hidden' }} >Categories must be created in order to use the Discussion Forum. Click the link below to add categories.</h4>
-                    <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
-                {% endif %}
+                <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
             </label>
         </div>
 
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} />
             <label for="queue-enabled">
-                <div class="option-title">Enable Office Hours Queue</div>
-                <div class="option-alt">Choose whether to enable an office hours queue for this course.</div>
+                <div class="option-title">Enable Office Hours/Lab Queue</div>
+                <div class="option-alt">Choose whether to enable an office hours/lab queue for this course.</div>
             </label>
         </div>
 
@@ -65,15 +60,6 @@
             </div>
         </label>
         <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" />
-
-        <div class="config-row checkbox-row">
-            <input type="checkbox" name="keep_previous_files" id="keep-previous-files" value="true" {{ fields['keep_previous_files'] ? 'checked' : '' }} />
-            <label for="keep-previous-files">
-                <div class="option-title">Keep previous files uploaded</div>
-                <div class="option-alt">Should the files from previous submission be in the upload box by default.</div>
-            </label>
-        </div>
-
         <fieldset class="config-row">
             <legend>
                 <div class="option-title">Version Control System (VCS) Type</div>
@@ -130,7 +116,7 @@
             <div class="option-title">Grades Returned Message</div>
             <div class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</div>
         </label>
-        <textarea class="config-row" name="course_email" id="course-email" />{{ fields['course_email'] }}</textarea>
+        <textarea class="config-row" name="course_email" id="course-email">{{ fields['course_email'] }}</textarea>
 
         <div class="config-row checkbox-row">
             <input type="checkbox" name="regrade_enabled" id="regrade-enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} />
@@ -145,7 +131,7 @@
             <div class="option-title">Grade Inquiry Warning Message</div>
             <div class="option-alt">Input the warning message show to students while submitting a grade inquiry.</div>
         </label>
-        <textarea class="config-row" name="regrade_message" id="regrade-message" rows="4"/>{{ fields['regrade_message'] }}</textarea>
+        <textarea class="config-row" name="regrade_message" id="regrade-message" rows="4">{{ fields['regrade_message'] }}</textarea>
 
         {# TODO: Not sure what this is
             <label for="zero_rubric_grades">
@@ -176,7 +162,7 @@
         {% if submitty_admin_user['verified'] %}
             {% if submitty_admin_user['in_course'] %}
                 <div class="config-row checkbox-row">
-                    <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
+                    <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
                         <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
                         <div class="option-alt">

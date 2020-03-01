@@ -25,12 +25,15 @@ use app\libraries\Core;
  * @method string|null getExternalUrl()
 */
 class Breadcrumb extends AbstractModel {
-    /** @property string */
+    /** @prop string */
     protected $title;
-    /** @property string|null */
+    /** @prop string|null */
     protected $url = null;
-    /** @property string|null */
+    /** @prop string|null */
     protected $external_url = false;
+    /** @prop string|null */
+    protected $use_as_heading = false;
+
 
     /**
      * Breadcrumb constructor.
@@ -39,10 +42,15 @@ class Breadcrumb extends AbstractModel {
      * @param string|null $url
      * @param string|null $external_url
      */
-    public function __construct(Core $core, string $title, $url = null, $external_url = null) {
+    public function __construct(Core $core, string $title, $url = null, $external_url = null, $use_as_heading = false) {
         parent::__construct($core);
         $this->title = $title;
         $this->url = $url;
         $this->external_url = $external_url;
+        $this->use_as_heading = $use_as_heading;
+    }
+
+    public function useAsHeading() {
+        return $this->use_as_heading;
     }
 }

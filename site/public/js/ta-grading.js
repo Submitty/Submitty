@@ -27,6 +27,7 @@ $(function() {
         setInfoVisible(true);
         setRegradeVisible(true);
         setDiscussionVisible(true);
+        setPeerVisible(false);
         resetModules();
     }
    else{
@@ -141,6 +142,13 @@ function readCookies(){
     var discussion_visible = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var discussion_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)discussion_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
+    var peer_top = document.cookie.replace(/(?:(?:^|.*;\s*)peer_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var peer_left = document.cookie.replace(/(?:(?:^|.*;\s*)peer_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var peer_width = document.cookie.replace(/(?:(?:^|.*;\s*)peer_width\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var peer_height = document.cookie.replace(/(?:(?:^|.*;\s*)peer_height\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var peer_visible = document.cookie.replace(/(?:(?:^|.*;\s*)peer_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    var peer_z_index = document.cookie.replace(/(?:(?:^|.*;\s*)peer_z_index\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
     var bar_wrapper_top = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_left = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
     var bar_wrapper_visible = document.cookie.replace(/(?:(?:^|.*;\s*)bar_wrapper_visible\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -199,6 +207,13 @@ function readCookies(){
     (discussion_visible) ? $("#discussion_browser").css("display", discussion_visible):{};
     (discussion_z_index) ? $("#discussion_browser").css("z-index", discussion_z_index):{};
 
+    (peer_top) ? $("#peer_info").css("top", peer_top):{};
+    (peer_left) ? $("#peer_info").css("left", peer_left):{};
+    (peer_width) ? $("#peer_info").css("width", peer_width):{};
+    (peer_height) ? $("#peer_info").css("height", peer_height):{};
+    (peer_visible) ? $("#peer_info").css("display", peer_visible):{};
+    (peer_z_index) ? $("#peer_info").css("z-index", peer_z_index):{};
+
     (bar_wrapper_top) ? $("#bar_wrapper").css("top", bar_wrapper_top):{};
     (bar_wrapper_left) ? $("#bar_wrapper").css("left", bar_wrapper_left):{};
     (bar_wrapper_visible) ? $("#bar_wrapper").css("display", bar_wrapper_visible):{};
@@ -214,6 +229,7 @@ function readCookies(){
     (status_visible) ? ((status_visible) == "none" ? $(".grading_toolbar .fa-user").removeClass("icon-selected") : $(".grading_toolbar .fa-user").addClass("icon-selected")) : {};
     (regrade_visible) ? ((regrade_visible) == "none" ? $(".grading_toolbar .grade_inquiry_icon").removeClass("icon-selected") : $(".grading_toolbar .grade_inquiry_icon").addClass("icon-selected")) : {};
     (discussion_visible) ? ((discussion_visible) == "none" ? $(".grading_toolbar .fa-comment-alt").removeClass("icon-selected") : $(".grading_toolbar .fa-comment-alt").addClass("icon-selected")) : {};
+    (peer_visible) ? ((peer_visible) == "none" ? $(".grading_toolbar .fa-users").removeClass("icon-selected") : $(".grading_toolbar .fa-users").addClass("icon-selected")) : {};
 
     (autoscroll) ? ((autoscroll) == "on" ? $('#autoscroll_id').prop('checked', true) : $('#autoscroll_id').prop('checked', false)) : {};
 
@@ -303,6 +319,13 @@ function updateCookies(){
     document.cookie = "discussion_height=" + $("#discussion_browser").css("height") + "; path=/;";
     document.cookie = "discussion_visible=" + $("#discussion_browser").css("display") + "; path=/;";
     document.cookie = "discussion_z_index=" + $("#discussion_browser").css("z-index") + "; path=/;";
+
+    document.cookie = "peer_top=" + $("#peer_info").css("top") + "; path=/;";
+    document.cookie = "peer_left=" + $("#peer_info").css("left") + "; path=/;";
+    document.cookie = "peer_width=" + $("#peer_info").css("width") + "; path=/;";
+    document.cookie = "peer_height=" + $("#peer_info").css("height") + "; path=/;";
+    document.cookie = "peer_visible=" + $("#peer_info").css("display") + "; path=/;";
+    document.cookie = "peer_z_index=" + $("#peer_info").css("z-index") + "; path=/;";
 
     document.cookie = "bar_wrapper_top=" + $("#bar_wrapper").css("top") + "; path=/;";
     document.cookie = "bar_wrapper_left=" + $("#bar_wrapper").css("left") + "; path=/;";
@@ -450,6 +473,10 @@ function isDiscussionVisible() {
     return $("#discussion_browser").is(":visible");
 }
 
+function isPeerVisible() {
+    return $("#peer_info").is(":visible");
+}
+
 function setAutogradingVisible(visible) {
     $('.grading_toolbar .fa-list').toggleClass('icon-selected', visible);
     $("#autograding_results").toggle(visible);
@@ -485,6 +512,10 @@ function setDiscussionVisible(visible) {
     hideIfEmpty("#discussion_browser");
 }
 
+function setPeerVisible(visible) {
+    $('.grading_toolbar .fa-users').toggleClass('icon-selected', visible);
+    $("#peer_info").toggle(visible);
+}
 function toggleAutograding() {
     setAutogradingVisible(!isAutogradingVisible());
 }
@@ -508,6 +539,10 @@ function toggleDiscussion() {
     setDiscussionVisible(!isDiscussionVisible());
 }
 
+function togglePeer() {
+    setPeerVisible(!isPeerVisible());
+}
+
 function resetModules() {
     var width = $("main").width();
     var height = $("main").height();
@@ -525,6 +560,8 @@ function resetModules() {
     $("#regrade_info").attr("style", "position: absolute; bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     $('.grading_toolbar .fa-comment-alt').addClass('icon-selected');
     $("#discussion_browser").attr("style", "position: absolute; bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
+    $('.grading_toolbar .fa-users').addClass('icon-selected');
+    $("#peer_info").attr("style", "position: absolute; bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     // $("#pdf_annotation_bar").attr("style", "left: 58%, z-index:40; top:307px");
     deleteCookies();
     updateCookies();
@@ -557,6 +594,10 @@ registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function(
 });
 registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyD"}, function() {
     toggleDiscussion();
+    updateCookies();
+});
+registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyP"}, function() {
+    togglePeer();
     updateCookies();
 });
 //-----------------------------------------------------------------------------

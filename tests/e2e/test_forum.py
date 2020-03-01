@@ -49,7 +49,7 @@ class TestForum(BaseTestCase):
         assert '/threads/new' in self.driver.current_url
         for category, set_it in categories_list:
             category_button = self.driver.find_element_by_xpath(
-                "//a[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
+                "//div[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
             if ('cat-selected' in category_button.get_attribute('class')) ^ set_it:
                 category_button.click()
 
@@ -61,7 +61,7 @@ class TestForum(BaseTestCase):
         attachment_file = None
         self.switch_to_page_create_thread()
         self.driver.find_element_by_id("title").send_keys(title)
-        self.driver.find_element_by_id("thread_post_content").send_keys(first_post)
+        self.driver.find_element_by_class_name("thread_post_content").send_keys(first_post)
         upload_button = self.driver.find_element_by_xpath("//input[@type='file']")
         self.select_categories(categories_list)
         if upload_attachment:

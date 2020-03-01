@@ -1,7 +1,5 @@
 {% import _self as self %}
 
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
 {% if display_custom_message %}
     <div class="content">
         {# This is a layout table #}
@@ -80,9 +78,6 @@
         <div class="button-placeholder"></div>
     {% else %}
         <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}"
-            {% if button.getTitle() != null %}
-                name="{{ button.getTitle()|lower }}_button"
-            {% endif %}
             {% if button.isDisabled() %}
                 disabled
             {% else %}
