@@ -98,6 +98,11 @@ class TestSimpleGrader(BaseTestCase):
     def test_multiple_graders(self):
         def template_func():
             self.driver.refresh()
+
+            # click show my sections if possible
+            view_all = self.driver.find_elements(By.XPATH, '//a[contains(text(), "View All Sections")]')
+            if len(view_all) > 0:
+                view_all[0].click()
             # grade the first cell (as good as any other)
             grade_elem = self.driver.find_element_by_id("cell-0-0")
             # attribute where data is stored is different for lab/numeric
