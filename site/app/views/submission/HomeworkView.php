@@ -808,7 +808,7 @@ class HomeworkView extends AbstractView {
         }
         // If there are 0 visible testcases and autograding is complete,
         // there is no autograding for this assignment.
-        if ($version_instance !== null){
+        if ($version_instance !== null) {
             $no_autograding = $num_visible_testcases == 0 && $version_instance->isAutogradingComplete();
         }
         else {
