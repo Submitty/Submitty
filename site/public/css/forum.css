@@ -231,7 +231,15 @@ body {min-width: 925px;}
 }
 
 .create-thread-title{
+    margin-left: 15px; 
     margin-bottom: 10px;
+}
+
+.content.create-thread-message {
+    border: solid gold 4px;
+    margin: 15px;
+    padding: 20px;
+    word-break: break-word;
 }
 
 .thread-announcement, .thread-favorite, .thread-merged, .thread-locked{
