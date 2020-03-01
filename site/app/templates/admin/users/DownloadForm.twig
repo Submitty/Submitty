@@ -29,7 +29,7 @@
 {% block buttons %}
     <div class="btn-wrapper wrap-reverse float-right">
         {{ block('close_button') }}
-        <input class="btn btn-primary" type="button" value="Download CSV" onclick="downloadCSV('{{ code }}');" />
-        <input class="btn btn-primary" type="button" id="copybuttonid" value="Copy Emails to Clipboard" onclick="copyToClipboard('{{ code }}');" />
+        <input class="btn btn-primary key_to_click" tabindex="0" type="button" value="Download CSV" onclick="downloadCSV('{{ code }}');" />
+        <input class="btn btn-primary key_to_click" tabindex="0" type="button" id="copybuttonid" value="Copy Emails to Clipboard" onclick="copyToClipboard('{{ code }}');" />
     </div>
 {% endblock %}
