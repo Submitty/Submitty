@@ -86,8 +86,7 @@ function toggle() {
     clearCodeEditorsAndUpdateSelection(data['user_id_2'], data['version_user_2'], data['user_id_1'], data['version_user_1']);
     $('[name="user_id_1"]', form).val(data['user_id_2']);
     $('[name="version_user_1"]', form).val(data['version_user_2']);
-    //console.log({'user_id': data['user_id_1'], 'version': data['version_user_1']});
-    //SsetTimeout(function(){ $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']}).change(); }, 2000);
+    setTimeout(function(){ $('[name="user_id_2"]', form).val({'user_id': data['user_id_1'], 'version': data['version_user_1']}).change(); }, 2000);
 }
 
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
@@ -157,16 +156,14 @@ function requestAjaxData(url, f, es) {
 }
 
 function createRightUsersList(data, select = null) {
+    var position = 0;
     if (select == null) {
         var append_options='<option value="">None</option>';
     }
-        console.log('select ' + select);
     $.each(data, function(i,users){
-        console.log('users[0] ' + users[0]);
-        console.log(users[0] == select)
         append_options += '<option value="{&#34;user_id&#34;:&#34;'+ users[0]+'&#34;,&#34;version&#34;:'+ users[1] +'}"';
         if (select == users[0]) {
-            console.log('cheers');
+            position = i;
             append_options += ' selected>';
         } else {
             append_options += '>';
@@ -174,6 +171,7 @@ function createRightUsersList(data, select = null) {
         append_options += users[2]+ ' '+users[3]+' &lt;'+users[0]+'&gt; (version:'+users[1]+')</option>';
     });
     $('[name="user_id_2"]', form).find('option').remove().end().append(append_options).val('');
+    $('g
 }
 
 function createLeftUserVersionDropdown(version_data, active_version_user_1, max_matching_version, code_version_user_1) {
