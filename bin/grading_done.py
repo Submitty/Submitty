@@ -261,12 +261,6 @@ def main():
             full_path_file = str(full_path_file)
             json_file = full_path_file
 
-            # get the file name (without the path)
-            just_file = full_path_file[len(GRADING_QUEUE)+1:]
-            # skip items that are already being graded
-            is_grading = just_file[0:8]=="GRADING_"
-            is_regrade = False
-            
             try:
                 entry = QueueItem(json_file, epoch_time)
             except e:
