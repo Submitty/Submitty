@@ -50,7 +50,7 @@
                          '#F06291',
                          '#FF0000'] %}
         {% for color in colors %}
-            <a class="color" value="{{ color }}" style="background: {{ color }}" onclick="emitEvent(this)"></a>
+            <a class="color key_to_click" tabindex="0" value="{{ color }}" style="background: {{ color }}" onclick="emitEvent(this)"></a>
         {% endfor %}
     </div>
 </div>
