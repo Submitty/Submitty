@@ -12,7 +12,7 @@ def up(config, database, semester, course):
             j = json.load(in_file)
 
         if 'forum_create_thread_message' not in j['course_details']:
-            j['course_details']['forum_create_thread_message'] = 'Enter your post here...'
+            j['course_details']['forum_create_thread_message'] = ''
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
 
