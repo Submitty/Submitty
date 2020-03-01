@@ -1,0 +1,2721 @@
+{
+    "/home": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 135,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        }
+    },
+    "/s20/sample": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 305,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “disabled” not allowed on element “a” at this point.": {
+            "type": "error",
+            "lastLine": 553,
+            "lastColumn": 130,
+            "firstColumn": 84,
+            "message": "Attribute “disabled” not allowed on element “a” at this point.",
+            "extract": "          <a class=\"btn btn-default btn-nav\" disabled=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 47
+        },
+        "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
+            "type": "error",
+            "lastLine": 1417,
+            "lastColumn": 76,
+            "firstColumn": 9,
+            "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
+            "extract": ">\n        <form name=\"close-submissions-confirmation\" method=\"post\" action=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 68
+        }
+    },
+    "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 294,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 291,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 317,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
+            "type": "info",
+            "lastLine": 625,
+            "lastColumn": 46,
+            "firstColumn": 13,
+            "subType": "warning",
+            "message": "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
+            "extract": "          <div aria-hidden=\"true\" hidden=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 34
+        },
+        "Attribute “placeholder” not allowed on element “input” at this point.": {
+            "type": "error",
+            "lastLine": 1117,
+            "lastColumn": 273,
+            "firstColumn": 17,
+            "message": "Attribute “placeholder” not allowed on element “input” at this point.",
+            "extract": "          <input style=\"width: 83%\" type=\"hidden\" id=\"input-provide-full-path\" name=\"autograding_config_path\" value=\"PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)\" class=\"required\" placeholder=\"(Required)\" disabled=\"\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 257
+        },
+        "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
+            "type": "error",
+            "lastLine": 1117,
+            "lastColumn": 273,
+            "firstColumn": 17,
+            "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
+            "extract": "          <input style=\"width: 83%\" type=\"hidden\" id=\"input-provide-full-path\" name=\"autograding_config_path\" value=\"PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)\" class=\"required\" placeholder=\"(Required)\" disabled=\"\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 257
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 2299,
+            "lastColumn": 172,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"November 27, 9994\" tabindex=\"-1\">27</sp",
+            "hiliteStart": 10,
+            "hiliteLength": 86
+        }
+    },
+    "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 287,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 284,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 310,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “width” attribute on the “th” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 586,
+            "firstLine": 585,
+            "lastColumn": 31,
+            "firstColumn": 17,
+            "message": "The “width” attribute on the “th” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                <th width=\"20\"></th>\n",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 3562,
+            "firstLine": 3561,
+            "lastColumn": 31,
+            "firstColumn": 25,
+            "message": "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "  </tbody>\n                        <thead>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "The “width” attribute on the “td” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 3584,
+            "firstLine": 3583,
+            "lastColumn": 32,
+            "firstColumn": 17,
+            "message": "The “width” attribute on the “td” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                <td width=\"33%\"><b>Tot",
+            "hiliteStart": 10,
+            "hiliteLength": 33
+        }
+    },
+    "/s20/sample/gradeable/future_no_tas_test/grading?view=all": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 287,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 284,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 310,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “width” attribute on the “th” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 587,
+            "firstLine": 586,
+            "lastColumn": 31,
+            "firstColumn": 17,
+            "message": "The “width” attribute on the “th” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                <th width=\"20\"></th>\n",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "Attribute “type” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 647,
+            "lastColumn": 137,
+            "firstColumn": 13,
+            "message": "Attribute “type” not allowed on element “div” at this point.",
+            "extract": "          <div class=\"option-small-box cell-total\" style=\"text-align: center\" type=\"text\" border=\"none\" id=\"total-0\" data-total=\"true\">0</div",
+            "hiliteStart": 10,
+            "hiliteLength": 125
+        },
+        "Attribute “border” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 647,
+            "lastColumn": 137,
+            "firstColumn": 13,
+            "message": "Attribute “border” not allowed on element “div” at this point.",
+            "extract": "          <div class=\"option-small-box cell-total\" style=\"text-align: center\" type=\"text\" border=\"none\" id=\"total-0\" data-total=\"true\">0</div",
+            "hiliteStart": 10,
+            "hiliteLength": 125
+        },
+        "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 4488,
+            "firstLine": 4487,
+            "lastColumn": 31,
+            "firstColumn": 25,
+            "message": "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "  </tbody>\n                        <thead>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "The “width” attribute on the “td” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 4510,
+            "firstLine": 4509,
+            "lastColumn": 32,
+            "firstColumn": 17,
+            "message": "The “width” attribute on the “td” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                <td width=\"33%\"><b>Tot",
+            "hiliteStart": 10,
+            "hiliteLength": 33
+        }
+    },
+    "/s20/sample/gradeable/open_homework/grading/status": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 285,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 282,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 308,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        }
+    },
+    "/s20/sample/gradeable/open_homework/grading/details?view=all": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 283,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 280,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 309,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “width” attribute on the “th” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 569,
+            "firstLine": 568,
+            "lastColumn": 75,
+            "firstColumn": 17,
+            "message": "The “width” attribute on the “th” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                                                            <th width=\"2%\"></th>\n",
+            "hiliteStart": 10,
+            "hiliteLength": 76
+        },
+        "The “width” attribute on the “td” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 571,
+            "firstLine": 570,
+            "lastColumn": 96,
+            "firstColumn": 108,
+            "message": "The “width” attribute on the “td” element is obsolete. Use CSS instead.",
+            "extract": "ction</th>\n                                                                                <td width=\"13%\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 97
+        }
+    },
+    "/s20/sample/gradeable/open_homework": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 299,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 296,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 322,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Bad value “true” for attribute “checked” on element “input”.": {
+            "type": "error",
+            "lastLine": 557,
+            "lastColumn": 96,
+            "firstColumn": 21,
+            "message": "Bad value “true” for attribute “checked” on element “input”.",
+            "extract": "          <input type=\"radio\" id=\"radio-normal\" name=\"submission_type\" checked=\"true\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 76
+        },
+        "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.": {
+            "type": "error",
+            "lastLine": 567,
+            "lastColumn": 131,
+            "firstColumn": 25,
+            "message": "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.",
+            "extract": "          <a aria-label=\"Bulk PDF Upload Help\" href=\"https://submitty.org/instructor/bulk_pdf_upload\" target=\"_none\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Bad value “text” for attribute “role” on element “div”.": {
+            "type": "error",
+            "lastLine": 708,
+            "lastColumn": 205,
+            "firstColumn": 57,
+            "message": "Bad value “text” for attribute “role” on element “div”.",
+            "extract": "          <div tabindex=\"0\" id=\"upload1\" class=\"upload-box\" onkeypress=\"clicked_on_box(event)\" role=\"text\" aria-label=\"Press enter to upload your Part 1 file\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 149
+        }
+    },
+    "/s20/sample/gradeable/open_team_homework/team": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 283,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 280,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 306,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “width” attribute on the “th” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 542,
+            "firstLine": 541,
+            "lastColumn": 35,
+            "firstColumn": 21,
+            "message": "The “width” attribute on the “th” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                    <th width=\"3%\"></th>\n",
+            "hiliteStart": 10,
+            "hiliteLength": 36
+        }
+    },
+    "/s20/sample/gradeable/grades_released_homework_autota": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 301,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 298,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 324,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Bad value “true” for attribute “checked” on element “input”.": {
+            "type": "error",
+            "lastLine": 559,
+            "lastColumn": 96,
+            "firstColumn": 21,
+            "message": "Bad value “true” for attribute “checked” on element “input”.",
+            "extract": "          <input type=\"radio\" id=\"radio-normal\" name=\"submission_type\" checked=\"true\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 76
+        },
+        "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.": {
+            "type": "error",
+            "lastLine": 569,
+            "lastColumn": 131,
+            "firstColumn": 25,
+            "message": "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.",
+            "extract": "          <a aria-label=\"Bulk PDF Upload Help\" href=\"https://submitty.org/instructor/bulk_pdf_upload\" target=\"_none\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Bad value “text” for attribute “role” on element “div”.": {
+            "type": "error",
+            "lastLine": 710,
+            "lastColumn": 205,
+            "firstColumn": 57,
+            "message": "Bad value “text” for attribute “role” on element “div”.",
+            "extract": "          <div tabindex=\"0\" id=\"upload1\" class=\"upload-box\" onkeypress=\"clicked_on_box(event)\" role=\"text\" aria-label=\"Press enter to upload your Part 1 file\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 149
+        },
+        "Attribute “fname” not allowed on element “tr” at this point.": {
+            "type": "error",
+            "lastLine": 716,
+            "firstLine": 715,
+            "lastColumn": 69,
+            "firstColumn": 79,
+            "message": "Attribute “fname” not allowed on element “tr” at this point.",
+            "extract": "-table-1\">\n                    <tr fname=\"fork_bomb_print.c\" class=\"file-label\"><td",
+            "hiliteStart": 10,
+            "hiliteLength": 70
+        },
+        "Bad value “text” for attribute “role” on element “i”.": {
+            "type": "error",
+            "lastLine": 716,
+            "lastColumn": 246,
+            "firstColumn": 127,
+            "message": "Bad value “text” for attribute “role” on element “i”.",
+            "extract": "\">0.37KB  <i role=\"text\" aria-label=\"Press enter to remove file fork_bomb_print.c\" tabindex=\"0\" class=\"fas fa-trash custom-focus\"></i></",
+            "hiliteStart": 10,
+            "hiliteLength": 120
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 1110,
+            "lastColumn": 129,
+            "firstColumn": 29,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <span class=\"loading-tools-in-progress\" aria-label=\"Loading Details for Test 2 ./a.out 10\" hidden=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 101
+        },
+        "CSS: The value “break-word” is deprecated": {
+            "type": "error",
+            "lastLine": 1181,
+            "lastColumn": 97,
+            "firstColumn": 17,
+            "message": "CSS: The value “break-word” is deprecated",
+            "extract": "          <div class=\"box half\" style=\"padding: 10px; width: 30%; word-break: break-word;\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 81
+        }
+    },
+    "/s20/sample/notifications": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 285,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 282,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 308,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        }
+    },
+    "/s20/sample/notifications/settings": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 284,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 281,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 310,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Element “style” not allowed as child of element “main” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 524,
+            "lastColumn": 7,
+            "firstColumn": 1,
+            "message": "Element “style” not allowed as child of element “main” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "=\"main\">\n\n<style>\n    i",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 565,
+            "lastColumn": 50,
+            "firstColumn": 25,
+            "message": "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div class=\"option-title\">New An",
+            "hiliteStart": 10,
+            "hiliteLength": 26
+        },
+        "Bad value “true” for attribute “checked” on element “input”.": {
+            "type": "error",
+            "lastLine": 712,
+            "lastColumn": 152,
+            "firstColumn": 79,
+            "message": "Bad value “true” for attribute “checked” on element “input”.",
+            "extract": "ng-input\"><input type=\"checkbox\" name=\"team_invite\" id=\"team_invite\" checked=\"true\"></div>",
+            "hiliteStart": 10,
+            "hiliteLength": 74
+        },
+        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
+            "type": "error",
+            "lastLine": 564,
+            "lastColumn": 47,
+            "firstColumn": 21,
+            "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
+            "extract": "          <label for=\"forum_enabled\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 27
+        }
+    },
+    "/s20/sample/gradeable": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 289,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 286,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 312,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
+            "type": "info",
+            "lastLine": 625,
+            "lastColumn": 46,
+            "firstColumn": 13,
+            "subType": "warning",
+            "message": "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
+            "extract": "          <div aria-hidden=\"true\" hidden=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 34
+        }
+    },
+    "/s20/sample/config": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 286,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 283,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 309,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 537,
+            "lastColumn": 38,
+            "firstColumn": 13,
+            "message": "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div class=\"option-title\">Full C",
+            "hiliteStart": 10,
+            "hiliteLength": 26
+        },
+        "Attribute “alt” not allowed on element “a” at this point.": {
+            "type": "error",
+            "lastLine": 555,
+            "lastColumn": 130,
+            "firstColumn": 17,
+            "message": "Attribute “alt” not allowed on element “a” at this point.",
+            "extract": "          <a id=\"forum-enabled-message\" href=\"http://localhost:1501/s20/sample/forum/categories\" alt=\"Customize Categories\">Custom",
+            "hiliteStart": 10,
+            "hiliteLength": 114
+        },
+        "Element “div” not allowed as child of element “legend” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 596,
+            "lastColumn": 42,
+            "firstColumn": 17,
+            "message": "Element “div” not allowed as child of element “legend” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div class=\"option-title\">Versio",
+            "hiliteStart": 10,
+            "hiliteLength": 26
+        },
+        "The element “a” must not appear as a descendant of the “button” element.": {
+            "type": "error",
+            "lastLine": 709,
+            "lastColumn": 106,
+            "firstColumn": 21,
+            "message": "The element “a” must not appear as a descendant of the “button” element.",
+            "extract": "          <a href=\"http://localhost:1501/s20/sample/email_room_seating\" class=\"btn btn-primary\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 86
+        }
+    },
+    "/s20/sample/theme": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 283,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 280,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 306,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        }
+    },
+    "/s20/sample/office_hours_queue": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 285,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 282,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 308,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 609,
+            "lastColumn": 9,
+            "firstColumn": 3,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "  <br>\n\n  <style>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        }
+    },
+    "/s20/sample/course_materials": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 290,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 287,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 313,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Element “k” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 615,
+            "lastColumn": 71,
+            "firstColumn": 13,
+            "message": "Element “k” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <k class=\"fas fa-file\" style=\"vertical-align:text-bottom;\"></k>\n ",
+            "hiliteStart": 10,
+            "hiliteLength": 59
+        },
+        "The “center” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 3997,
+            "lastColumn": 12,
+            "firstColumn": 5,
+            "message": "The “center” element is obsolete. Use CSS instead.",
+            "extract": "   \n\n\n    <center>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 8
+        },
+        "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 4176,
+            "lastColumn": 15,
+            "firstColumn": 13,
+            "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <p>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 3
+        },
+        "The element “label” must not appear as a descendant of the “label” element.": {
+            "type": "error",
+            "lastLine": 4474,
+            "lastColumn": 33,
+            "firstColumn": 13,
+            "message": "The element “label” must not appear as a descendant of the “label” element.",
+            "extract": "          <label class=\"radio\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 21
+        },
+        "The “label” element may contain at most one “button”, “input”, “meter”, “output”, “progress”, “select”, or “textarea” descendant.": {
+            "type": "error",
+            "lastLine": 4479,
+            "lastColumn": 150,
+            "firstColumn": 17,
+            "message": "The “label” element may contain at most one “button”, “input”, “meter”, “output”, “progress”, “select”, or “textarea” descendant.",
+            "extract": "          <input id=\"all-sections-showing-yes\" name=\"show-some-section-selection-edit\" type=\"radio\" onchange=\"toggleRegistrationSectionsEdit()\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 134
+        },
+        "“label” element with multiple labelable descendants.": {
+            "type": "info",
+            "lastLine": 4470,
+            "lastColumn": 34,
+            "firstColumn": 9,
+            "subType": "warning",
+            "message": "“label” element with multiple labelable descendants.",
+            "extract": ">\n        <label id=\"edit_sections\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 26
+        },
+        "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 4482,
+            "lastColumn": 77,
+            "firstColumn": 13,
+            "message": "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div id=\"show-some-section-selection-edit\" style=\"display: none\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 65
+        },
+        "The “type” attribute is unnecessary for JavaScript resources.": {
+            "type": "info",
+            "lastLine": 4594,
+            "lastColumn": 43,
+            "firstColumn": 13,
+            "subType": "warning",
+            "message": "The “type” attribute is unnecessary for JavaScript resources.",
+            "extract": "          <script type=\"text/javascript\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 31
+        },
+        "Duplicate ID “upload_dt”.": {
+            "type": "error",
+            "lastLine": 4600,
+            "lastColumn": 30,
+            "firstColumn": 9,
+            "message": "Duplicate ID “upload_dt”.",
+            "extract": ">\n        <label id=\"upload_dt\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The first occurrence of ID “upload_dt” was here.": {
+            "type": "info",
+            "lastLine": 4333,
+            "lastColumn": 30,
+            "firstColumn": 9,
+            "subType": "warning",
+            "message": "The first occurrence of ID “upload_dt” was here.",
+            "extract": ">\n        <label id=\"upload_dt\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “name” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 4702,
+            "lastColumn": 47,
+            "firstColumn": 5,
+            "message": "Attribute “name” not allowed on element “div” at this point.",
+            "extract": "elete\n    <div name=\"delete-course-material-message\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 43
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 4741,
+            "lastColumn": 172,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"December 28, 9997\" tabindex=\"-1\">28</sp",
+            "hiliteStart": 10,
+            "hiliteLength": 86
+        },
+        "Too many messages.": {
+            "type": "error",
+            "subType": "fatal",
+            "message": "Too many messages."
+        }
+    },
+    "/s20/sample/forum": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 300,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 297,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 323,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Element “p” not allowed as child of element “pre” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 726,
+            "lastColumn": 87,
+            "firstColumn": 32,
+            "message": "Element “p” not allowed as child of element “pre” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "re_forum\"><p class=\"post_content\" style=\"white-space: pre-wrap; \"></p></",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “h7” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 729,
+            "lastColumn": 50,
+            "firstColumn": 9,
+            "message": "Element “h7” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
+            "extract": ">\n        <h7 style=\"position:relative; right:5px;\"><stron",
+            "hiliteStart": 10,
+            "hiliteLength": 42
+        },
+        "Bad value “input” for attribute “type” on element “input”.": {
+            "type": "error",
+            "lastLine": 767,
+            "lastColumn": 179,
+            "firstColumn": 9,
+            "message": "Bad value “input” for attribute “type” on element “input”.",
+            "extract": ">\n        <input type=\"input\" id=\"split_post_input\" name=\"split_post_input\" oninput=\"disableIfEmpty(this, 'split_post_submit')\" placeholder=\"Name of new thread\" style=\"width: 100%\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 171
+        },
+        "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
+            "type": "error",
+            "lastLine": 767,
+            "lastColumn": 179,
+            "firstColumn": 9,
+            "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
+            "extract": ">\n        <input type=\"input\" id=\"split_post_input\" name=\"split_post_input\" oninput=\"disableIfEmpty(this, 'split_post_submit')\" placeholder=\"Name of new thread\" style=\"width: 100%\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 171
+        },
+        "The element “input” must not appear as a descendant of the “a” element.": {
+            "type": "error",
+            "lastLine": 773,
+            "lastColumn": 93,
+            "firstColumn": 17,
+            "message": "The element “input” must not appear as a descendant of the “a” element.",
+            "extract": "          <input type=\"checkbox\" name=\"cat[]\" value=\"2\" aria-label=\"Category Question\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 77
+        },
+        "The “type” attribute is unnecessary for JavaScript resources.": {
+            "type": "info",
+            "lastLine": 792,
+            "lastColumn": 35,
+            "firstColumn": 5,
+            "subType": "warning",
+            "message": "The “type” attribute is unnecessary for JavaScript resources.",
+            "extract": "=\"\">\n\n    <script type=\"text/javascript\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 31
+        },
+        "Attribute “label” not allowed on element “a” at this point.": {
+            "type": "error",
+            "lastLine": 866,
+            "lastColumn": 171,
+            "firstColumn": 6,
+            "message": "Attribute “label” not allowed on element “a” at this point.",
+            "extract": "\t\t\t\t\n\t\t\t\t\t<a id=\"clear_filter_button\" class=\"inline-block text-decoration-none\" style=\"color: var(--actionable-blue);\" label=\"Clear Filters\" onclick=\"clearForumFilter(event);\">× Clea",
+            "hiliteStart": 10,
+            "hiliteLength": 166
+        },
+        "Attribute “checked” not allowed on element “li” at this point.": {
+            "type": "error",
+            "lastLine": 896,
+            "lastColumn": 130,
+            "firstColumn": 16,
+            "message": "Attribute “checked” not allowed on element “li” at this point.",
+            "extract": "          <li title=\"Sort posts by reply hierarchy\" id=\"tree\" class=\"dropdown-item active\" role=\"menuitem\" checked=\"checked\"><a onc",
+            "hiliteStart": 10,
+            "hiliteLength": 115
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 908,
+            "lastColumn": 10,
+            "firstColumn": 4,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 939,
+            "lastColumn": 109,
+            "firstColumn": 4,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "true\">\n\t\t\t<div id=\"thread_category\" aria-label=\"Select thread category\" class=\"inline-block\" data-ays-ignore=\"true\">\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 106
+        },
+        "Attribute “cat-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 940,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “cat-id” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “btn-selected” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 940,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “sel-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 945,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “sel-id” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        },
+        "Attribute “prev_page” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 985,
+            "lastColumn": 76,
+            "firstColumn": 13,
+            "message": "Attribute “prev_page” not allowed on element “div” at this point.",
+            "extract": "          <div id=\"thread_list\" class=\"col-3\" prev_page=\"0\" next_page=\"2\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 64
+        },
+        "Attribute “next_page” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 985,
+            "lastColumn": 76,
+            "firstColumn": 13,
+            "message": "Attribute “next_page” not allowed on element “div” at this point.",
+            "extract": "          <div id=\"thread_list\" class=\"col-3\" prev_page=\"0\" next_page=\"2\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 64
+        },
+        "Attribute “data” not allowed on element “a” at this point.": {
+            "type": "error",
+            "lastLine": 989,
+            "lastColumn": 112,
+            "firstColumn": 21,
+            "message": "Attribute “data” not allowed on element “a” at this point.",
+            "extract": "          <a href=\"http://localhost:1501/s20/sample/forum/threads/1\" class=\"thread_box_link\" data=\"1\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 92
+        },
+        "Attribute “reply-level” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 1132,
+            "lastColumn": 107,
+            "firstColumn": 5,
+            "message": "Attribute “reply-level” not allowed on element “div” at this point.",
+            "extract": "     \n    <div class=\"post_box first_post viewed_post important\" id=\"1\" style=\"margin-left:0px;\" reply-level=\"1\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 103
+        },
+        "Attribute “post_box_id” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 1180,
+            "lastColumn": 54,
+            "firstColumn": 9,
+            "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
+            "extract": "\n\n        <div class=\"thread-post-form\" post_box_id=\"1\">\n\n<div",
+            "hiliteStart": 10,
+            "hiliteLength": 46
+        },
+        "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
+            "type": "error",
+            "lastLine": 1201,
+            "lastColumn": 363,
+            "firstColumn": 17,
+            "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
+            "extract": "          <textarea name=\"thread_post_content\" class=\"fill-available post_content_reply thread_post_content\" style=\"resize: none; min-height: 100px; max-height: 300px; height: 0px;\" rows=\"10\" cols=\"30\" placeholder=\"Enter your reply to Quinn I. here...\" required=\"\" aria-label=\"Thread Post Textarea\" maxlength=\"\" onkeydown=\"submitNearestForm(event,$(this))\"></text",
+            "hiliteStart": 10,
+            "hiliteLength": 347
+        },
+        "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 1207,
+            "lastColumn": 87,
+            "firstColumn": 25,
+            "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div class=\"upload_attachment_box cursor-pointer\" id=\"upload1\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 63
+        },
+        "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).": {
+            "type": "info",
+            "lastLine": 303,
+            "lastColumn": 99,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).",
+            "extract": "          <h1 class=\"breadcrumb_heading\">Discus",
+            "hiliteStart": 10,
+            "hiliteLength": 31
+        }
+    },
+    "/s20/sample/forum/threads/new": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 291,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 288,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 317,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “align” attribute on the “div” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 562,
+            "lastColumn": 52,
+            "firstColumn": 5,
+            "message": "The “align” attribute on the “div” element is obsolete. Use CSS instead.",
+            "extract": "/h3>\n\n    <div id=\"manage_categories_view\" align=\"center\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 48
+        },
+        "Attribute “rows” not allowed on element “input” at this point.": {
+            "type": "error",
+            "lastLine": 567,
+            "lastColumn": 215,
+            "firstColumn": 17,
+            "message": "Attribute “rows” not allowed on element “input” at this point.",
+            "extract": "          <input id=\"new_category_text\" aria-label=\"New Category\" placeholder=\"New Category\" style=\"resize:none;\" rows=\"1\" type=\"text\" name=\"new_category\" maxlength=\"50\" onkeyup=\"checkInputMaxLength($(this))\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 199
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 576,
+            "lastColumn": 122,
+            "firstColumn": 21,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <i class=\"fas fa-bars handle ui-sortable-handle\" aria-label=\"Drag to reorder\" title=\"Drag to reorder\"></i>\n ",
+            "hiliteStart": 10,
+            "hiliteLength": 102
+        },
+        "Attribute “label” not allowed on element “a” at this point.": {
+            "type": "error",
+            "lastLine": 790,
+            "lastColumn": 171,
+            "firstColumn": 6,
+            "message": "Attribute “label” not allowed on element “a” at this point.",
+            "extract": "\t\t\t\t\n\t\t\t\t\t<a id=\"clear_filter_button\" class=\"inline-block text-decoration-none\" style=\"color: var(--actionable-blue);\" label=\"Clear Filters\" onclick=\"clearForumFilter(event);\">× Clea",
+            "hiliteStart": 10,
+            "hiliteLength": 166
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 809,
+            "lastColumn": 10,
+            "firstColumn": 4,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "Attribute “cat-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 841,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “cat-id” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “btn-selected” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 841,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “sel-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 846,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “sel-id” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        },
+        "Attribute “post_box_id” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 859,
+            "lastColumn": 54,
+            "firstColumn": 9,
+            "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
+            "extract": "\n\n        <div class=\"thread-post-form\" post_box_id=\"1\">\n\n<div",
+            "hiliteStart": 10,
+            "hiliteLength": 46
+        },
+        "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
+            "type": "error",
+            "lastLine": 927,
+            "lastColumn": 353,
+            "firstColumn": 17,
+            "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
+            "extract": "          <textarea name=\"thread_post_content\" class=\"fill-available post_content_reply thread_post_content\" style=\"resize: none; min-height: 40vmin; max-height: 300px; height: 358px;\" rows=\"10\" cols=\"30\" placeholder=\"Enter your post here...\" required=\"\" aria-label=\"Thread Post Textarea\" maxlength=\"\" onkeydown=\"submitNearestForm(event,$(this))\"></text",
+            "hiliteStart": 10,
+            "hiliteLength": 337
+        },
+        "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 944,
+            "lastColumn": 87,
+            "firstColumn": 25,
+            "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div class=\"upload_attachment_box cursor-pointer\" id=\"upload1\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 63
+        }
+    },
+    "/s20/sample/forum/categories": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 288,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 285,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 314,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “align” attribute on the “div” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 555,
+            "lastColumn": 52,
+            "firstColumn": 5,
+            "message": "The “align” attribute on the “div” element is obsolete. Use CSS instead.",
+            "extract": "/h3>\n\n    <div id=\"manage_categories_view\" align=\"center\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 48
+        },
+        "Attribute “rows” not allowed on element “input” at this point.": {
+            "type": "error",
+            "lastLine": 560,
+            "lastColumn": 215,
+            "firstColumn": 17,
+            "message": "Attribute “rows” not allowed on element “input” at this point.",
+            "extract": "          <input id=\"new_category_text\" aria-label=\"New Category\" placeholder=\"New Category\" style=\"resize:none;\" rows=\"1\" type=\"text\" name=\"new_category\" maxlength=\"50\" onkeyup=\"checkInputMaxLength($(this))\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 199
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 569,
+            "lastColumn": 122,
+            "firstColumn": 21,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <i class=\"fas fa-bars handle ui-sortable-handle\" aria-label=\"Drag to reorder\" title=\"Drag to reorder\"></i>\n ",
+            "hiliteStart": 10,
+            "hiliteLength": 102
+        }
+    },
+    "/s20/sample/users": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 289,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 286,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 312,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "A table row was 8 columns wide and exceeded the column count established by the first row (7).": {
+            "type": "info",
+            "lastLine": 551,
+            "lastColumn": 30,
+            "firstColumn": 26,
+            "subType": "warning",
+            "message": "A table row was 8 columns wide and exceeded the column count established by the first row (7).",
+            "extract": "     </th></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        },
+        "Table column 8 established by element “th” has no cells beginning in it.": {
+            "type": "error",
+            "lastLine": 550,
+            "firstLine": 549,
+            "lastColumn": 62,
+            "firstColumn": 38,
+            "message": "Table column 8 established by element “th” has no cells beginning in it.",
+            "extract": "ss=\"info\">\n                        <th class=\"section-break\" colspan=\"8\">Studen",
+            "hiliteStart": 10,
+            "hiliteLength": 63
+        },
+        "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 1861,
+            "lastColumn": 91,
+            "firstColumn": 58,
+            "message": "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "     <h1>\t<div id=\"edit-grader-modal-title\">Edit G",
+            "hiliteStart": 10,
+            "hiliteLength": 34
+        },
+        "Duplicate ID “edit-user-form”.": {
+            "type": "error",
+            "lastLine": 1870,
+            "lastColumn": 29,
+            "firstColumn": 5,
+            "message": "Duplicate ID “edit-user-form”.",
+            "extract": "lse\">\n    <div id=\"edit-user-form\">\n\t\t<la",
+            "hiliteStart": 10,
+            "hiliteLength": 25
+        },
+        "The first occurrence of ID “edit-user-form” was here.": {
+            "type": "info",
+            "lastLine": 1856,
+            "lastColumn": 67,
+            "firstColumn": 1,
+            "subType": "warning",
+            "message": "The first occurrence of ID “edit-user-form” was here.",
+            "extract": "   </div>\n<div class=\"popup-form\" id=\"edit-user-form\" style=\"display: none;\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 67
+        },
+        "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 1872,
+            "lastColumn": 50,
+            "firstColumn": 4,
+            "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "idth\">\n\t\t\t<p id=\"user-form-already-exists-error-message\">\n\t\t\t\tU",
+            "hiliteStart": 10,
+            "hiliteLength": 47
+        },
+        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
+            "type": "error",
+            "lastLine": 1871,
+            "lastColumn": 85,
+            "firstColumn": 3,
+            "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
+            "extract": "-form\">\n\t\t<label for=\"user-form-already-exists-error-message\" class=\"red-message full-width\">\n\t\t\t<p",
+            "hiliteStart": 10,
+            "hiliteLength": 83
+        }
+    },
+    "/s20/sample/graders": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 289,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 286,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 312,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "A table row was 8 columns wide and exceeded the column count established by the first row (6).": {
+            "type": "info",
+            "lastLine": 549,
+            "lastColumn": 34,
+            "firstColumn": 30,
+            "subType": "warning",
+            "message": "A table row was 8 columns wide and exceeded the column count established by the first row (6).",
+            "extract": "     </th></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        },
+        "Duplicate ID “section-”.": {
+            "type": "error",
+            "lastLine": 575,
+            "firstLine": 574,
+            "lastColumn": 40,
+            "firstColumn": 69,
+            "message": "Duplicate ID “section-”.",
+            "extract": "  </tbody>\n\t\t\t                <tbody id=\"section-\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 41
+        },
+        "The first occurrence of ID “section-” was here.": {
+            "type": "info",
+            "lastLine": 546,
+            "firstLine": 545,
+            "lastColumn": 40,
+            "firstColumn": 26,
+            "subType": "warning",
+            "message": "The first occurrence of ID “section-” was here.",
+            "extract": "r></thead>\n\t\t\t                <tbody id=\"section-\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 41
+        },
+        "Table columns in range 7…8 established by element “th” have no cells beginning in them.": {
+            "type": "error",
+            "lastLine": 548,
+            "firstLine": 547,
+            "lastColumn": 66,
+            "firstColumn": 62,
+            "message": "Table columns in range 7…8 established by element “th” have no cells beginning in them.",
+            "extract": "ss=\"info\">\n                            <th class=\"section-break\" colspan=\"8\">Instru",
+            "hiliteStart": 10,
+            "hiliteLength": 67
+        },
+        "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 632,
+            "lastColumn": 91,
+            "firstColumn": 58,
+            "message": "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "     <h1>\t<div id=\"edit-grader-modal-title\">Edit G",
+            "hiliteStart": 10,
+            "hiliteLength": 34
+        },
+        "Duplicate ID “edit-user-form”.": {
+            "type": "error",
+            "lastLine": 641,
+            "lastColumn": 29,
+            "firstColumn": 5,
+            "message": "Duplicate ID “edit-user-form”.",
+            "extract": "lse\">\n    <div id=\"edit-user-form\">\n\t\t<la",
+            "hiliteStart": 10,
+            "hiliteLength": 25
+        },
+        "The first occurrence of ID “edit-user-form” was here.": {
+            "type": "info",
+            "lastLine": 627,
+            "lastColumn": 67,
+            "firstColumn": 1,
+            "subType": "warning",
+            "message": "The first occurrence of ID “edit-user-form” was here.",
+            "extract": "   </div>\n<div class=\"popup-form\" id=\"edit-user-form\" style=\"display: none;\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 67
+        },
+        "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 643,
+            "lastColumn": 50,
+            "firstColumn": 4,
+            "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "idth\">\n\t\t\t<p id=\"user-form-already-exists-error-message\">\n\t\t\t\tU",
+            "hiliteStart": 10,
+            "hiliteLength": 47
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 1430,
+            "lastColumn": 7,
+            "firstColumn": 1,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</table>\n\n<style>\n\t.gra",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
+            "type": "error",
+            "lastLine": 642,
+            "lastColumn": 85,
+            "firstColumn": 3,
+            "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
+            "extract": "-form\">\n\t\t<label for=\"user-form-already-exists-error-message\" class=\"red-message full-width\">\n\t\t\t<p",
+            "hiliteStart": 10,
+            "hiliteLength": 83
+        }
+    },
+    "/s20/sample/sections": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 284,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 281,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 307,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 631,
+            "lastColumn": 33,
+            "firstColumn": 8,
+            "message": "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "\">\n\t\t\t\t\t\t\t<div class=\"option-title\">Add Re",
+            "hiliteStart": 10,
+            "hiliteLength": 26
+        }
+    },
+    "/s20/sample/student_photos": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 286,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 283,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 309,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “font” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 538,
+            "lastColumn": 194,
+            "firstColumn": 176,
+            "message": "The “font” element is obsolete. Use CSS instead.",
+            "extract": "   <td><i><font color=\"gray\"><img a",
+            "hiliteStart": 10,
+            "hiliteLength": 19
+        },
+        "Element “img” is missing required attribute “src”.": {
+            "type": "error",
+            "lastLine": 538,
+            "lastColumn": 224,
+            "firstColumn": 195,
+            "message": "Element “img” is missing required attribute “src”.",
+            "extract": "or=\"gray\"><img alt=\"No Image Available\"></font",
+            "hiliteStart": 10,
+            "hiliteLength": 30
+        },
+        "A table row was 5 columns wide, which is less than the column count established by the first row (8).": {
+            "type": "info",
+            "lastLine": 557,
+            "firstLine": 556,
+            "lastColumn": 69,
+            "firstColumn": 30,
+            "subType": "warning",
+            "message": "A table row was 5 columns wide, which is less than the column count established by the first row (8).",
+            "extract": "     </td>\n                                                                </tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 70
+        },
+        "A table row was 4 columns wide, which is less than the column count established by the first row (8).": {
+            "type": "info",
+            "lastLine": 604,
+            "firstLine": 603,
+            "lastColumn": 97,
+            "firstColumn": 30,
+            "subType": "warning",
+            "message": "A table row was 4 columns wide, which is less than the column count established by the first row (8).",
+            "extract": "     </td>\n                                                                                            </tr></tbod",
+            "hiliteStart": 10,
+            "hiliteLength": 98
+        },
+        "A table row was 2 columns wide, which is less than the column count established by the first row (8).": {
+            "type": "info",
+            "lastLine": 672,
+            "firstLine": 671,
+            "lastColumn": 97,
+            "firstColumn": 30,
+            "subType": "warning",
+            "message": "A table row was 2 columns wide, which is less than the column count established by the first row (8).",
+            "extract": "     </td>\n                                                                                            </tr></tbod",
+            "hiliteStart": 10,
+            "hiliteLength": 98
+        },
+        "A table row was 3 columns wide, which is less than the column count established by the first row (8).": {
+            "type": "info",
+            "lastLine": 1316,
+            "firstLine": 1315,
+            "lastColumn": 97,
+            "firstColumn": 30,
+            "subType": "warning",
+            "message": "A table row was 3 columns wide, which is less than the column count established by the first row (8).",
+            "extract": "     </td>\n                                                                                            </tr></tbod",
+            "hiliteStart": 10,
+            "hiliteLength": 98
+        },
+        "Table columns in range 6…8 established by element “td” have no cells beginning in them.": {
+            "type": "error",
+            "lastLine": 530,
+            "firstLine": 529,
+            "lastColumn": 63,
+            "firstColumn": 61,
+            "message": "Table columns in range 6…8 established by element “td” have no cells beginning in them.",
+            "extract": "ss=\"info\">\n                    <td colspan=\"8\" style=\"text-align: center\">Studen",
+            "hiliteStart": 10,
+            "hiliteLength": 64
+        }
+    },
+    "/s20/sample/late_days": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 291,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 288,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 314,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “type” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 528,
+            "lastColumn": 32,
+            "firstColumn": 1,
+            "message": "Attribute “type” not allowed on element “div” at this point.",
+            "extract": "=\"main\">\n\n<div type=\"hidden\" id=\"message\"></div>",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "Element “div” not allowed as child of element “legend” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 558,
+            "lastColumn": 44,
+            "firstColumn": 17,
+            "message": "Element “div” not allowed as child of element “legend” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <div id=\"csv_upload_format\">Do not",
+            "hiliteStart": 10,
+            "hiliteLength": 28
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 627,
+            "lastColumn": 181,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day today\" aria-label=\"March 1, 2020\" aria-current=\"date\" tabindex=\"-1\">1</spa",
+            "hiliteStart": 10,
+            "hiliteLength": 95
+        }
+    },
+    "/s20/sample/extensions": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 291,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 288,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 314,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “type” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 528,
+            "lastColumn": 32,
+            "firstColumn": 1,
+            "message": "Attribute “type” not allowed on element “div” at this point.",
+            "extract": "=\"main\">\n\n<div type=\"hidden\" id=\"message\"></div>",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
+            "type": "error",
+            "lastLine": 531,
+            "lastColumn": 108,
+            "firstColumn": 5,
+            "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
+            "extract": "</h1>\n    <form id=\"extensions-form\" class=\"exception-form\" method=\"post\" enctype=\"multipart/form-data\" action=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 104
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 699,
+            "lastColumn": 181,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day today\" aria-label=\"March 1, 2020\" aria-current=\"date\" tabindex=\"-1\">1</spa",
+            "hiliteStart": 10,
+            "hiliteLength": 95
+        }
+    },
+    "/s20/sample/grade_override": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 284,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 281,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 307,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
+            "type": "error",
+            "lastLine": 540,
+            "lastColumn": 135,
+            "firstColumn": 5,
+            "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
+            "extract": "<br>\n\n    <form id=\"gradeOverrideForm\" method=\"post\" enctype=\"multipart/form-data\" action=\"\" onsubmit=\"return updateGradeOverride($(this));\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 131
+        },
+        "The “align” attribute on the “div” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 590,
+            "lastColumn": 56,
+            "firstColumn": 9,
+            "message": "The “align” attribute on the “div” element is obsolete. Use CSS instead.",
+            "extract": ">\n        <div id=\"load-overridden-grades\" align=\"center\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 48
+        },
+        "The “align” attribute on the “table” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 592,
+            "lastColumn": 136,
+            "firstColumn": 27,
+            "message": "The “align” attribute on the “table” element is obsolete. Use CSS instead.",
+            "extract": "    </div><table id=\"my_table\" class=\"table table-striped table-bordered persist-area\" style=\"width:70%\" align=\"center\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 110
+        }
+    },
+    "/s20/sample/plagiarism": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 283,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 280,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 306,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “center” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 526,
+            "lastColumn": 12,
+            "firstColumn": 5,
+            "message": "The “center” element is obsolete. Use CSS instead.",
+            "extract": "sub\">\n    <center>\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 8
+        },
+        "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
+            "type": "error",
+            "lastLine": 532,
+            "lastColumn": 52,
+            "firstColumn": 9,
+            "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
+            "extract": ">\n        <form name=\"delete\" method=\"post\" action=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 44
+        },
+        "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 542,
+            "lastColumn": 55,
+            "firstColumn": 28,
+            "message": "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "       <b><div name=\"gradeable_title\"></div>",
+            "hiliteStart": 10,
+            "hiliteLength": 28
+        }
+    },
+    "/s20/sample/plagiarism/configuration/new": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 283,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 280,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 309,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Attribute “name” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 586,
+            "lastColumn": 92,
+            "firstColumn": 17,
+            "message": "Attribute “name” not allowed on element “div” at this point.",
+            "extract": "          <div style=\"width:70%;float:right;overflow:auto;\" name=\"prev_gradeable_div\">      ",
+            "hiliteStart": 10,
+            "hiliteLength": 76
+        },
+        "Attribute “name” not allowed on element “span” at this point.": {
+            "type": "error",
+            "lastLine": 596,
+            "lastColumn": 79,
+            "firstColumn": 21,
+            "message": "Attribute “name” not allowed on element “span” at this point.",
+            "extract": "          <span name=\"add_more_prev_gradeable\" aria-label=\"Add more\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 59
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 596,
+            "lastColumn": 79,
+            "firstColumn": 21,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <span name=\"add_more_prev_gradeable\" aria-label=\"Add more\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 59
+        }
+    },
+    "/s20/sample/reports": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 283,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 280,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 306,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "The “width” attribute on the “td” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 539,
+            "firstLine": 538,
+            "lastColumn": 32,
+            "firstColumn": 17,
+            "message": "The “width” attribute on the “td” element is obsolete. Use CSS instead.",
+            "extract": "      <tr>\n                <td width=\"50%\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 33
+        },
+        "Row 3 of a row group established by a “tbody” element has no cells beginning on it.": {
+            "type": "error",
+            "lastLine": 555,
+            "lastColumn": 33,
+            "firstColumn": 29,
+            "message": "Row 3 of a row group established by a “tbody” element has no cells beginning on it.",
+            "extract": "ass=\"bar\"></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        },
+        "A table row was 0 columns wide, which is less than the column count established by the first row (3).": {
+            "type": "info",
+            "lastLine": 555,
+            "lastColumn": 33,
+            "firstColumn": 29,
+            "subType": "warning",
+            "message": "A table row was 0 columns wide, which is less than the column count established by the first row (3).",
+            "extract": "ass=\"bar\"></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        },
+        "Row 4 of a row group established by a “tbody” element has no cells beginning on it.": {
+            "type": "error",
+            "lastLine": 556,
+            "lastColumn": 33,
+            "firstColumn": 29,
+            "message": "Row 4 of a row group established by a “tbody” element has no cells beginning on it.",
+            "extract": "ass=\"bar\"></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        },
+        "Row 6 of a row group established by a “tbody” element has no cells beginning on it.": {
+            "type": "error",
+            "lastLine": 566,
+            "lastColumn": 33,
+            "firstColumn": 29,
+            "message": "Row 6 of a row group established by a “tbody” element has no cells beginning on it.",
+            "extract": "ass=\"bar\"></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        },
+        "Row 7 of a row group established by a “tbody” element has no cells beginning on it.": {
+            "type": "error",
+            "lastLine": 567,
+            "lastColumn": 33,
+            "firstColumn": 29,
+            "message": "Row 7 of a row group established by a “tbody” element has no cells beginning on it.",
+            "extract": "ass=\"bar\"></tr>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 5
+        }
+    },
+    "/s20/sample/reports/rainbow_grades_customization": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 285,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 282,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 308,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        }
+    },
+    "/s20/sample/late_table": {
+        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
+            "type": "error",
+            "lastLine": 1,
+            "lastColumn": 16,
+            "firstColumn": 1,
+            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
+            "extract": "<html lang=\"en\"><head>",
+            "hiliteStart": 0,
+            "hiliteLength": 16
+        },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 286,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 283,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
+        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 309,
+            "lastColumn": 38,
+            "firstColumn": 17,
+            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "          <style media=\"screen\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 22
+        },
+        "Bad value “” for attribute “id” on element “td”: An ID must not be the empty string.": {
+            "type": "error",
+            "lastLine": 549,
+            "firstLine": 548,
+            "lastColumn": 31,
+            "firstColumn": 34,
+            "message": "Bad value “” for attribute “id” on element “td”: An ID must not be the empty string.",
+            "extract": "\">N/A</td>\n            <td class=\"\" id=\"\">Good</",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        },
+        "Duplicate ID “”.": {
+            "type": "error",
+            "lastLine": 550,
+            "firstLine": 549,
+            "lastColumn": 47,
+            "firstColumn": 41,
+            "message": "Duplicate ID “”.",
+            "extract": ">Good</td>\n                            <td class=\"\" id=\"\">0</td>",
+            "hiliteStart": 10,
+            "hiliteLength": 48
+        },
+        "The first occurrence of ID “” was here.": {
+            "type": "info",
+            "lastLine": 549,
+            "firstLine": 548,
+            "lastColumn": 31,
+            "firstColumn": 34,
+            "subType": "warning",
+            "message": "The first occurrence of ID “” was here.",
+            "extract": "\">N/A</td>\n            <td class=\"\" id=\"\">Good</",
+            "hiliteStart": 10,
+            "hiliteLength": 32
+        }
+    }
+}
