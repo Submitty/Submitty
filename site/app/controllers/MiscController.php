@@ -110,11 +110,15 @@ class MiscController extends AbstractController {
                     $this->core->getOutput()->showError("You may not access this file until it is released.");
                     return false;
                 }
-
                 if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
                     $this->core->getOutput()->showError("Your section may not access this file.");
                     return false;
                 }
+            }
+
+            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
+                $this->core->getOutput()->showError("Your section may not access this file.");
+                return false;
             }
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
@@ -193,6 +197,10 @@ class MiscController extends AbstractController {
             // If the user attempting to access the file is not at least a grader then ensure the file has been released
             if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
                 $this->core->getOutput()->showError("You may not access this file until it is released.");
+                return false;
+            }
+            elseif (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
+                $this->core->getOutput()->showError("You do not have access to this file.");
                 return false;
             }
         }

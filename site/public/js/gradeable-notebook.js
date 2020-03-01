@@ -102,14 +102,35 @@ $(document).ready(function () {
     });
 
     // Register handler to detect changes inside codeboxes and then enable buttons
-    $("div .codebox").keypress(function() {
-
+    $("div .codebox").keyup(function() {
         // Get index of codebox so we can select appropriate buttons to enable
         var index = this.id.substr(-1);
 
-        // Enable buttons
-        $("#codebox_" + index + "_clear_button").attr("disabled", false);
-        $("#codebox_" + index + "_recent_button").attr("disabled", false);
+        var initial_value = this.getAttribute("data-initial_value");
+        var recent_submission = this.getAttribute("data-recent_submission");
+
+        var codebox = $("#codebox_" + index + " .CodeMirror").get(0).CodeMirror;
+        var code = codebox.getValue();
+        var clear_button_id = "#codebox_" + index + "_clear_button";
+        var recent_button_id = "#codebox_" + index + "_recent_button";
+
+        if(code === initial_value)
+        {
+          $(clear_button_id).attr("disabled", true);
+        }
+        else
+        {
+          $(clear_button_id).attr("disabled", false);
+        }
+
+        if(code === recent_submission)
+        {
+          $(recent_button_id).attr("disabled", true);
+        }
+        else
+        {
+          $(recent_button_id).attr("disabled", false);
+        }
     });
 
     // Register click handler for multiple choice buttons
@@ -180,9 +201,7 @@ $(document).ready(function () {
     // Setup keyup event for short answer boxes
     $(".sa-box").keyup(function() {
 
-        var items = this.id.split("_");
-
-        var index_num = items[2];
+        var index_num = this.id.split("_")[2];
 
         var initial_value = this.getAttribute("data-initial_value");
         var recent_submission = this.getAttribute("data-recent_submission");
