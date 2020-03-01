@@ -640,6 +640,66 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/posts/split", methods={"POST"})
+     * @AccessControl(permission="forum.merge_thread")
+     */
+    public function splitThread() {
+        $title = $_POST["split_post_input"];
+        $post_id = $_POST["split_post_id"];
+        $thread_id = -1;
+        $categories_ids = array();
+        if (isset($_POST["cat"]) && is_array($_POST["cat"])) {
+            foreach ($_POST["cat"] as $category_id) {
+                $categories_ids[] = (int) $category_id;
+            }
+        }
+        if (empty($title) || empty($categories_ids) || !$this->isValidCategories($categories_ids)) {
+            $this->core->addErrorMessage("Failed to split thread; make sure that you have a title and that you have at least one category selected.");
+        }
+        elseif (is_numeric($post_id) && $post_id > 0) {
+            $thread_ids = $this->core->getQueries()->splitPost($post_id, $title, $categories_ids);
+            if ($thread_ids[0] != -1) {
+                $original_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_ids[0]);
+                if (is_dir($original_thread_dir)) {
+                    $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_ids[1]);
+                    if (!is_dir($thread_dir)) {
+                        FileUtils::createDir($thread_dir);
+                    }
+                    $old_post_dirs = FileUtils::getAllDirs($original_thread_dir);
+                    foreach ($old_post_dirs as $file_post_id) {
+                        if (in_array($file_post_id, $thread_ids[2])) {
+                            $old_post_dir = FileUtils::joinPaths($original_thread_dir, $file_post_id);
+                            $new_post_dir = FileUtils::joinPaths($thread_dir, $file_post_id);
+                            rename($old_post_dir, $new_post_dir);
+                        }
+                    }
+                }
+                $thread_id = $thread_ids[1];
+
+                $full_course_name = $this->core->getFullCourseName();
+                $thread = $this->core->getQueries()->getThread($thread_id)[0];
+                $thread_author = $thread['created_by'];
+                $thread_title = $thread['title'];
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id, 'post_id' => $post_id));
+                $subject = "Post Split: " . Notification::textShortner($thread['title']);
+                $content = "A post was split in:\n" . $full_course_name . "\n\nAll posts under the split post are now contained within the new thread:\n" . $thread_title;
+                $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $thread_author, 'preference' => 'merge_threads'];
+                $this->core->getNotificationFactory()->onPostModified($event);
+                $this->core->addSuccessMessage("Post split!");
+            }
+            else {
+                $this->core->addErrorMessage("Splitting Failed! ");
+            }
+        }
+        if ($thread_id == -1) {
+            $this->core->redirect($this->core->buildCourseUrl(['forum']));
+        }
+        else {
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
+        }
+    }
+
     private function editThread() {
         // Ensure authentication before call
         if (!empty($_POST["title"])) {
@@ -884,6 +944,25 @@ class ForumController extends AbstractController {
      */
     public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/forum/posts/splitinfo",methods={"POST"})
+     * @AccessControl(permission="forum.merge_thread")
+     */
+    public function getSplitPostInfo() {
+        $post_id = $_POST["post_id"];
+        $result = $this->core->getQueries()->getPostOldThread($post_id);
+        $result["all_categories_list"] = $this->core->getQueries()->getCategories();
+        if ($result["merged_thread_id"] == -1) {
+            $post = $this->core->getQueries()->getPost($post_id);
+            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
+            $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"])["title"];
+        }
+        else {
+            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);
+        }
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     /**

@@ -81,8 +81,8 @@ class AutoGradingView extends AbstractView {
                 }
             }
 
-            $show_hidden_breakdown = $any_visible_hidden && $show_hidden &&
-                ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
+            $show_hidden_breakdown = $any_visible_hidden && $show_hidden;
+            // &&($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         // testcases should only be visible if autograding is complete
         if (!$incomplete_autograding) {
@@ -288,6 +288,7 @@ class AutoGradingView extends AbstractView {
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
         $grading_complete = true;
         $active_same_as_graded = true;
+
         foreach ($gradeable->getComponents() as $component) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
             if (!$container->isComplete()) {
@@ -301,46 +302,18 @@ class AutoGradingView extends AbstractView {
         }
 
         // Get the names of all full access or above graders
-        $grader_names = array_map(function (User $grader) {
+        $ta_grader_names = array_map(function (User $grader) {
             return $grader->getDisplayedFirstName() . ' ' . $grader->getDisplayedLastName();
         }, $ta_graded_gradeable->getVisibleGraders());
 
-        // Special messages for peer / mentor-only grades
-        if ($gradeable->isPeerGrading()) {
-            $grader_names = ['Graded by Peer(s)'];
-        }
-        elseif (count($grader_names) === 0) {
+        if (count($ta_grader_names) === 0) {
             // Non-peer assignment with only limited access graders
-            $grader_names = ['Course Staff'];
+            $ta_grader_names = ['Course Staff'];
         }
 
         //get total score and max possible score
-        $total_score = $graded_score = $ta_graded_gradeable->getTotalScore();
-        $total_max = $graded_max = $gradeable->getTaPoints();
+        $ta_max = $gradeable->getTaPoints();
 
-        //change title if autograding exists or not
-        //display a sum of autograding and instructor points if both exist
-        $has_autograding = $gradeable->getAutogradingConfig()->anyVisibleTestcases();
-
-        // Todo: this is a modest amount of math for the view
-        // add total points if autograding and ta grading are the same version consistently
-        $files = null;
-        $display_version = 0;
-        if ($version_instance !== null) {
-            $total_score += $version_instance->getTotalPoints();
-            $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
-            $files = $version_instance->getFiles();
-            $display_version = $version_instance->getVersion();
-        }
-        $regrade_message = $this->core->getConfig()->getRegradeMessage();
-        //Clamp full gradeable score to zero
-        $total_score = max($total_score, 0);
-        $total_score = NumberUtils::roundPointValue($total_score, $gradeable->getPrecision());
-
-        $late_days_url = $this->core->buildCourseUrl(['late_table']);
-        $regrade_allowed = $gradeable->isRegradeAllowed();
-        $regrade_date = $gradeable->getRegradeRequestDate();
-        $regrade_date = DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         // Get the number of decimal places for floats to display nicely
         $num_decimals = 0;
         $precision_parts = explode('.', strval($gradeable->getPrecision()));
@@ -349,8 +322,24 @@ class AutoGradingView extends AbstractView {
             $num_decimals = min(3, count($precision_parts));
         }
 
-        $component_data = array_map(function (Component $component) use ($ta_graded_gradeable) {
+        // Get just the non-peer components.
+        $ta_graded_components = array_filter($gradeable->getComponents(), function (Component $component) {
+            return $component->isPeer() === false;
+        });
+
+        $ta_grading_earned = 0;
+        $ta_component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$ta_grading_earned) {
             $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            $component_marks = array_map(function (Mark $mark) use ($container) {
+                return [
+                    'title' => $mark->getTitle(),
+                    'points' => $mark->getPoints(),
+
+                    'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                    'earned' => $container->hasMark($mark)
+                ];
+            }, $component->getMarks());
+            $ta_grading_earned += $container->getTotalScore();
             return [
                 'title' => $component->getTitle(),
                 'extra_credit' => $component->isExtraCredit(),
@@ -363,17 +352,10 @@ class AutoGradingView extends AbstractView {
                 'graders' => array_map(function (User $grader) {
                     return $grader->getDisplayedLastName();
                 }, $container->getVisibleGraders()),
-                'marks' => array_map(function (Mark $mark) use ($container) {
-                    return [
-                        'title' => $mark->getTitle(),
-                        'points' => $mark->getPoints(),
-
-                        'show_mark' => $mark->isPublish() || $container->hasMark($mark),
-                        'earned' => $container->hasMark($mark),
-                    ];
-                }, $component->getMarks())
+                'marks' => $component_marks,
             ];
-        }, $gradeable->getComponents());
+        }, $ta_graded_components);
+
 
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
@@ -386,15 +368,27 @@ class AutoGradingView extends AbstractView {
                 $uploaded_pdfs[] = $file;
             }
         }
-        $can_download = !$gradeable->isVcs();
 
-        //trying something
-        $gradeable_id = $gradeable->getId();
+        $files = null;
+        $display_version = 0;
+        if ($version_instance !== null) {
+            $files = $version_instance->getFiles();
+            $display_version = $version_instance->getVersion();
+            // for bulk uploads only show PDFs
+            if ($gradeable->isScannedExam()) {
+                $files = $uploaded_pdfs;
+            }
+            else {
+                $files = array_merge($files['submissions'], $files['checkout']);
+            }
+        }
+
         $id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
-            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
         }
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
+
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
         $annotated_file_names = [];
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
             $first_file = scandir($annotation_path)[2];
@@ -415,40 +409,201 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        // for bulk uploads only show PDFs
-        if ($gradeable->isScannedExam()) {
-            $files = $uploaded_pdfs;
-        }
-        else {
-            $files = array_merge($files['submissions'], $files['checkout']);
-        }
-
-
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
-            'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
             'overall_comment' => $ta_graded_gradeable->getOverallComment(),
-            'is_peer' => $gradeable->isPeerGrading(),
-            'components' => $component_data,
-            'regrade_date' => $regrade_date,
-            'late_days_url' => $late_days_url,
-            'grader_names' => $grader_names,
+            'ta_components' => $ta_component_data,
+            'regrade_date' => DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
             'grading_complete' => $grading_complete,
-            'has_autograding' => $has_autograding,
-            'graded_score' => $graded_score,
-            'graded_max' => $graded_max,
-            'total_score' => $total_score,
-            'total_max' => $total_max,
+            'ta_score' => $ta_grading_earned,
+            'ta_max' => $ta_max,
             'active_same_as_graded' => $active_same_as_graded,
             'regrade_available' => $regrade_available,
-            'regrade_message' => $regrade_message,
+            'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
-            'can_download' => $can_download,
+            'can_download' => !$gradeable->isVcs(),
+            'display_version' => $display_version,
+            'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            "annotated_file_names" =>  $annotated_file_names
+        ]);
+    }
+
+
+    /**
+     * @param TaGradedGradeable $ta_graded_gradeable
+     * @param bool $regrade_available
+     * @param array $uploaded_files
+     * @return string
+     */
+    public function showPeerResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
+        $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
+        $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
+        $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
+        $grading_complete = true;
+        $active_same_as_graded = true;
+
+        foreach ($gradeable->getComponents() as $component) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            if (!$container->isComplete()) {
+                $grading_complete = false;
+                continue;
+            }
+
+            if ($container->getGradedVersion() !== $active_version) {
+                $active_same_as_graded = false;
+            }
+        }
+
+        //get total score and max possible score
+        $peer_max = $gradeable->getPeerPoints();
+
+        // Get the number of decimal places for floats to display nicely
+        $num_decimals = 0;
+        $precision_parts = explode('.', strval($gradeable->getPrecision()));
+        if (count($precision_parts) > 1) {
+            // TODO: this hardcoded value will mean a weird precision value (like 1/3) won't appear ridiculous
+            $num_decimals = min(3, count($precision_parts));
+        }
+
+        $graders_found = array();
+        $peer_aliases = array();
+        $peer_grading_earned = 0;
+
+        // Get just the peer components.
+        $peer_graded_components = array_filter($gradeable->getComponents(), function (Component $component) {
+            return $component->isPeer() === true;
+        });
+
+        $peer_component_data = array_map(function (Component $component) use ($ta_graded_gradeable, &$graders_found, &$peer_grading_earned) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            $component_marks = array_map(function (Mark $mark) use ($container) {
+                return [
+                    'title' => $mark->getTitle(),
+                    'points' => $mark->getPoints(),
+
+                    'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                    'earned' => array_map(function (User $grader) use ($mark, $container) {
+                                    return $container->hasMark($mark, $grader);
+                    }, $container->getGraders())
+                ];
+            }, $component->getMarks());
+
+            $peer_grading_earned += $container->getTotalScore();
+            // Maintain names (Peer 1, Peer 2, etc.) for each of the peer graders to help the student
+            // reason about feedback.
+            foreach ($container->getGraders() as $grader) {
+                array_push($graders_found, $grader->getId());
+            }
+            return [
+                'title' => $component->getTitle(),
+                'extra_credit' => $component->isExtraCredit(),
+                'points_possible' => $component->getMaxValue(),
+                'student_comment' => $component->getStudentComment(),
+
+                'total_score' => $container->getTotalScore(),
+                'custom_mark_score' => $container->getScore(),
+                'comment' => $container->getComment(),
+                'graders' => array_map(function (User $grader) {
+                    return $grader->getDisplayedLastName();
+                }, $container->getVisibleGraders()),
+                'peer_ids' => array_values(array_map(function (User $grader) {
+                    return $grader->getId();
+                }, $container->getGraders())),
+                'marks' => $component_marks,
+                    
+            ];
+        }, $peer_graded_components);
+
+        $unique_graders = array_unique($graders_found);
+        $peer_aliases = array();
+        $num_peers = 0;
+        // Sort the graders ids so that peer alias assignment stays mostly consistent.
+        // TODO: Eventually we want to move to having a students anonid be displayable
+        // So that we don't have to do this (e.g. Anonymous Moose).
+        sort($unique_graders);
+        foreach ($unique_graders as $grader_id) {
+            $num_peers += 1;
+            $peer_aliases[$grader_id] = "Peer " . $num_peers;
+        }
+
+        $uploaded_pdfs = [];
+        foreach ($uploaded_files['submissions'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $uploaded_pdfs[] = $file;
+            }
+        }
+        foreach ($uploaded_files['checkout'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $uploaded_pdfs[] = $file;
+            }
+        }
+
+        $files = null;
+        $display_version = 0;
+        if ($version_instance !== null) {
+            $files = $version_instance->getFiles();
+            $display_version = $version_instance->getVersion();
+
+            // for bulk uploads only show PDFs
+            if ($gradeable->isScannedExam()) {
+                $files = $uploaded_pdfs;
+            }
+            else {
+                $files = array_merge($files['submissions'], $files['checkout']);
+            }
+        }
+
+        $id = $this->core->getUser()->getId();
+        if ($gradeable->isTeamAssignment()) {
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
+        }
+
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        $annotated_file_names = [];
+        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+            $first_file = scandir($annotation_path)[2];
+            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
+            if (is_file($annotation_path)) {
+                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+                foreach ($dir_iter as $fileinfo) {
+                    if (!$fileinfo->isDot()) {
+                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                        $pdf_info = explode('_', $no_extension);
+                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
+                        if (file_get_contents($fileinfo->getPathname()) != "") {
+                            $pdf_id = $pdf_id . '.pdf';
+                            $annotated_file_names[] = $pdf_id;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
+            'files' => $files,
+            'been_ta_graded' => $ta_graded_gradeable->isComplete(),
+            'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
+            'overall_comment' => $ta_graded_gradeable->getOverallComment(),
+            'is_peer' => $gradeable->isPeerGrading(),
+            'peer_components' => $peer_component_data,
+            'peer_aliases' => $peer_aliases,
+            'regrade_date' => DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+            'grading_complete' => $grading_complete,
+            'peer_score' => $peer_grading_earned,
+            'peer_max' => $peer_max,
+            'active_same_as_graded' => $active_same_as_graded,
+            'regrade_available' => $regrade_available,
+            'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
+            'num_decimals' => $num_decimals,
+            'uploaded_pdfs' => $uploaded_pdfs,
+            'user_id' => $this->core->getUser()->getId(),
+            'gradeable_id' => $gradeable->getId(),
+            'can_download' => !$gradeable->isVcs(),
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
             "annotated_file_names" =>  $annotated_file_names
