@@ -1195,7 +1195,7 @@ class AdminGradeableController extends AbstractController {
         if (is_file($rebuilding_path)) {
             $status = 'processing';
         }
-        else if (is_file($queued_path)) {
+        elseif (is_file($queued_path)) {
             $status = 'queued';
         }
         else {
