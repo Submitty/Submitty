@@ -215,13 +215,13 @@ function ajaxCheckBuildStatus() {
             if (response['data'] == 'queued') {
                 $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display','none');
-                $('[name="config_search_error"]').hide();
+                $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'processing') {
                 $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display','none');
-                $('[name="config_search_error"]').hide();
+                $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == true) {
@@ -229,7 +229,7 @@ function ajaxCheckBuildStatus() {
             }
             else if (response['data'] == false) {
                 $('#rebuild-status').html('Gradeable build failed');
-                $('[name="config_search_error"]').show();
+                $('.config_search_error').show();
             }
             else {
                 $('#rebuild-status').html('Error');

@@ -20,11 +20,11 @@
             </thead>
             <tbody>
                 {% for thread in threads %}
-                    <tr class="info hoverable cursor-pointer" title="Go to thread" onclick="window.location = '{{ thread.thread_link }}';">
+                    <tr class="info hoverable cursor-pointer key_to_click" tabindex="0" title="Go to thread" onclick="window.location = '{{ thread.thread_link }}';">
                         <td colspan="10" class="text-center"><h4>{{ thread.thread_title }}</h4></td>
                     </tr>
                     {% for post in thread.posts %}
-                        <tr title="Go to post" class="cursor-pointer" onclick="window.location = '{{ post.post_link }}';" id="search-row-{{ post.count }}" class="hoverable">
+                        <tr title="Go to post" class="cursor-pointer key_to_click" tabindex="0" onclick="window.location = '{{ post.post_link }}';" id="search-row-{{ post.count }}" class="hoverable">
                             <td align="left"><pre style="max-width: 67vw">
                                     <p class="post_content pre-wrap" style="word-wrap: break-word;">
                                         {% include "forum/RenderPost.twig" with { "post_content": post.post_content } only %}

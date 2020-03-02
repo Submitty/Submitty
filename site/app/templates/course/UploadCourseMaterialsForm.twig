@@ -15,7 +15,7 @@
             </p>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
-        <label id="upload_sections">
+        <div>
             <p class="black-message">
                 Do you want to restrict this course material to some sections?
             </p>
@@ -37,7 +37,9 @@
                 <tr>
                     <span class = "inline">
                         <td>
-                            Section&nbsp;{{section['sections_registration_id']}}
+                          <label for="section-{{ section['sections_registration_id'] }}">Section&nbsp;{{section['sections_registration_id']}}</label>
+                        </td>
+                        <td>
                             <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
                         </td>
                         <td>
@@ -47,7 +49,7 @@
                 </tr>
             {% endfor %}
             </div>
-        </label>
+        </div>
         <label id="upload_dt">
             <p>
                 <strong>Choose a time to release the files being uploaded:</strong>

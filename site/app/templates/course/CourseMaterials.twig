@@ -20,14 +20,14 @@
     {% if userGroup == 1 %}
         <div style="float: right; margin-bottom: 20px;">
             {# button to open all of the subfolders and cookie it#}
-            <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary">Open/Close All Folders</a>
+            <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
             {# button to set the release dates of all files in the page/course materials #}
             <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                     [{% for file in inDir %}
                         "{{ file }}",
                     {% endfor %}]
-                    )' class="btn btn-primary">Set All Release Dates</a>
-            <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
+                    )' class="btn btn-primary key_to_click" tabindex="0">Set All Release Dates</a>
+            <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Course Materials</a>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
@@ -96,14 +96,14 @@
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}" aria-label="Pop up {{ dir }} in a new window"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}" aria-label="Pop up {{ dir }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}"><i class="fas fa-download" title="Download the file"></i></a>
+            <a class="key_to_click" onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
-               <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+               <a class="key_to_click" tabindex="0" onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
-               <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
+               <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");' aria-label="Delete {{ dir }}"> <i class="fas fa-trash" title="Delete the file" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="date_to_release_{{ id }}">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
@@ -212,14 +212,14 @@
 
         <div class="div-viewer">
             {# button to open each folder #}
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ folderPath }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")'>
+            <a class='openAllDiv key_to_click openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ folderPath }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")' tabindex="0">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
-            <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}"><i class="fas fa-download" title="Download the folder"></i></a>
+            <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")' aria-label="Download the folder: {{ dir }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{dir}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a class="key_to_click" tabindex="0" onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{dir}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                 [{% for file in inDir %}
@@ -227,7 +227,7 @@
                             "{{ file }}",
                         {% endif %}
                 {% endfor %}]
-                        )' class="btn btn-primary">Set Folder Release Date</a>
+                        )' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
             {% endif %}
         </div>
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">

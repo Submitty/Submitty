@@ -942,6 +942,8 @@ class ForumThreadView extends AbstractView {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
 
+        $has_history = $this->core->getQueries()->postHasHistory($post_id);
+
         return [
             "classes" => $classes,
             "post_id" => $post_id,
@@ -969,6 +971,7 @@ class ForumThreadView extends AbstractView {
             "thread_id" => $thread_id,
             "parent_id" => $post_id,
             "render_markdown" => $markdown,
+            "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread
         ];
     }
@@ -997,6 +1000,7 @@ class ForumThreadView extends AbstractView {
         $category_colors;
 
         $categories = $this->core->getQueries()->getCategories();
+        $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
         $buttons = array(
             array(
@@ -1018,6 +1022,7 @@ class ForumThreadView extends AbstractView {
             "category_colors" => $category_colors,
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
+            "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
