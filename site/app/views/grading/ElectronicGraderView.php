@@ -511,7 +511,7 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
                 
-                if($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null){
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
                     $info["graded_groups"][] = 4;
                 }
                 elseif ($graded_component === null) {
@@ -806,7 +806,7 @@ HTML;
         $next_ungraded_student_url =  $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'true']);
 
         $i_am_a_peer = false;
-        if($peer && $this->core->getUser()->getGroup() == 4){
+        if ($peer && $this->core->getUser()->getGroup() == 4) {
             $i_am_a_peer = true;
         }
         

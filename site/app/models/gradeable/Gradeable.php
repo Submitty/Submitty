@@ -478,7 +478,7 @@ class Gradeable extends AbstractModel {
                 array_push($bad_rows,($vals["student"]));
             }
             if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
-               array_push($bad_rows,($vals["grader"]));
+                array_push($bad_rows, ($vals["grader"]));
             }
         }
         if (!empty($bad_rows)) {
@@ -487,7 +487,6 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
-            
         }
         $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
         foreach ($input as $row_num => $vals) {
@@ -1559,12 +1558,12 @@ class Gradeable extends AbstractModel {
      */
     public function getGradingSectionsForUser(User $user) {
         if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
-            if($this->isTeamAssignment()){
+            if ($this->isTeamAssignment()) {
                 $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
                 $teams = [];
-                foreach ($users as $u){
-                    $teamToAdd = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(),$u->getId());
-                    $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(),$u->getId());
+                foreach ($users as $u) {
+                    $teamToAdd = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                    $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
                 }
                 $g_section = new GradingSection($this->core, false, "Peer", [$user], null, $teams);
                 return [$g_section];
