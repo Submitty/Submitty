@@ -64,8 +64,7 @@ def validatePages(self):
     self.log_out()
     self.log_in(user_id='instructor')
     self.click_class('sample')
-
-    with open('e2e/accessibility_baseline.json') as f:
+    with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json') as f:
         baseline = json.load(f)
 
     foundError = False
