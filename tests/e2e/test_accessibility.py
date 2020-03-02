@@ -97,7 +97,7 @@ def genBaseline(self, new_url=None):
     baseline = {}
     urls = self.urls
     if new_url:
-        with open('e2e/accessibility_baseline.json') as f:
+        with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json') as f:
             baseline = json.load(f)
         urls = [new_url]
 
@@ -114,5 +114,5 @@ def genBaseline(self, new_url=None):
         for error in response.json()['messages']:
             if error['message'] not in baseline[url]:
                 baseline[url][error['message']] = error
-    with open('e2e/accessibility_baseline.json', 'w') as f:
-        json.dump(baseline, f, ensure_ascii=False, indent=4)
+    with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json', 'w') as file:
+        json.dump(baseline, file, ensure_ascii=False, indent=4)
