@@ -566,6 +566,47 @@
             "hiliteStart": 0,
             "hiliteLength": 16
         },
+        "The \u201ctype\u201d attribute is unnecessary for JavaScript resources.":{
+            "extract": "          <script type=\"text/javascript\">\n     ",
+            "firstColumn": 25,
+            "hiliteLength": 31,
+            "hiliteStart": 10,
+            "lastColumn": 55,
+            "lastLine": 1015,
+            "message": "The \u201ctype\u201d attribute is unnecessary for JavaScript resources.",
+            "subType": "warning",
+            "type": "info"
+        },
+        "Element \u201chead\u201d is missing a required instance of child element \u201ctitle\u201d.":{
+            "extract": "en\"><head></head><body ",
+            "firstColumn": 23,
+            "hiliteLength": 7,
+            "hiliteStart": 10,
+            "lastColumn": 29,
+            "lastLine": 1,
+            "message": "Element \u201chead\u201d is missing a required instance of child element \u201ctitle\u201d.",
+            "type": "error"
+        },
+        "Element \u201ctitle\u201d not allowed as child of element \u201cbody\u201d in this context. (Suppressing further errors from this subtree.)":{
+            "extract": "r>\n\n\n\n    <title>Submit",
+            "firstColumn": 5,
+            "hiliteLength": 7,
+            "hiliteStart": 10,
+            "lastColumn": 11,
+            "lastLine": 6,
+            "message": "Element \u201ctitle\u201d not allowed as child of element \u201cbody\u201d in this context. (Suppressing further errors from this subtree.)",
+            "type": "error"
+        },
+        "itle>\n    <link rel=\"shortcut icon\" href=\"http://localhost/img/favicon.ico\" type=\"image/x-icon\">\n\n    ":{
+            "extract": "itle>\n    <link rel=\"shortcut icon\" href=\"http://localhost/img/favicon.ico\" type=\"image/x-icon\">\n\n    ",
+            "firstColumn": 5,
+            "hiliteLength": 86,
+            "hiliteStart": 10,
+            "lastColumn": 90,
+            "lastLine": 7,
+            "message": "A \u201clink\u201d element must not appear as a descendant of a \u201cbody\u201d element unless the \u201clink\u201d element has an \u201citemprop\u201d attribute or has a \u201crel\u201d attribute whose value contains \u201cdns-prefetch\u201d, \u201cmodulepreload\u201d, \u201cpingback\u201d, \u201cpreconnect\u201d, \u201cprefetch\u201d, \u201cpreload\u201d, \u201cprerender\u201d, or \u201cstylesheet\u201d.",
+            "type": "error"
+        },
         "Duplicate ID “desktop_home_link”.": {
             "type": "error",
             "lastLine": 291,
@@ -2599,6 +2640,47 @@
             "extract": "<html lang=\"en\"><head>",
             "hiliteStart": 0,
             "hiliteLength": 16
+        },
+        "The \u201ctype\u201d attribute is unnecessary for JavaScript resources.":{
+            "extract": "          <script type=\"text/javascript\">\n     ",
+            "firstColumn": 25,
+            "hiliteLength": 31,
+            "hiliteStart": 10,
+            "lastColumn": 55,
+            "lastLine": 1015,
+            "message": "The \u201ctype\u201d attribute is unnecessary for JavaScript resources.",
+            "subType": "warning",
+            "type": "info"
+        },
+        "Element \u201chead\u201d is missing a required instance of child element \u201ctitle\u201d.":{
+            "extract": "en\"><head></head><body ",
+            "firstColumn": 23,
+            "hiliteLength": 7,
+            "hiliteStart": 10,
+            "lastColumn": 29,
+            "lastLine": 1,
+            "message": "Element \u201chead\u201d is missing a required instance of child element \u201ctitle\u201d.",
+            "type": "error"
+        },
+        "Element \u201ctitle\u201d not allowed as child of element \u201cbody\u201d in this context. (Suppressing further errors from this subtree.)":{
+            "extract": "r>\n\n\n\n    <title>Submit",
+            "firstColumn": 5,
+            "hiliteLength": 7,
+            "hiliteStart": 10,
+            "lastColumn": 11,
+            "lastLine": 6,
+            "message": "Element \u201ctitle\u201d not allowed as child of element \u201cbody\u201d in this context. (Suppressing further errors from this subtree.)",
+            "type": "error"
+        },
+        "itle>\n    <link rel=\"shortcut icon\" href=\"http://localhost/img/favicon.ico\" type=\"image/x-icon\">\n\n    ":{
+            "extract": "itle>\n    <link rel=\"shortcut icon\" href=\"http://localhost/img/favicon.ico\" type=\"image/x-icon\">\n\n    ",
+            "firstColumn": 5,
+            "hiliteLength": 86,
+            "hiliteStart": 10,
+            "lastColumn": 90,
+            "lastLine": 7,
+            "message": "A \u201clink\u201d element must not appear as a descendant of a \u201cbody\u201d element unless the \u201clink\u201d element has an \u201citemprop\u201d attribute or has a \u201crel\u201d attribute whose value contains \u201cdns-prefetch\u201d, \u201cmodulepreload\u201d, \u201cpingback\u201d, \u201cpreconnect\u201d, \u201cprefetch\u201d, \u201cpreload\u201d, \u201cprerender\u201d, or \u201cstylesheet\u201d.",
+            "type": "error"
         },
         "Duplicate ID “desktop_home_link”.": {
             "type": "error",
