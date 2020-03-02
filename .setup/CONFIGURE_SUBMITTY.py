@@ -159,7 +159,9 @@ defaults = {'database_host': 'localhost',
             'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
             'email_server_hostname': 'mail.myuniversity.edu',
             'email_server_port': 25,
-            'course_code_requirements': "Please follow your school's convention for course code."
+            'course_code_requirements': "Please follow your school's convention for course code.",
+            'sys_admin_email': 'submitty-admin@googlegroups.com',
+            'sys_admin_url': 'https://groups.google.com/forum/#!forum/submitty'
 }
 
 loaded_defaults = {}
@@ -240,6 +242,14 @@ else:
         if INSTITUTION_HOMEPAGE.lower() == "none":
             INSTITUTION_HOMEPAGE = ''
         print()
+
+    while True:
+        SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
+        SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
+        # loop until the we have atleast one of the email, url
+        if SYS_ADMIN_EMAIL == '' and SYS_ADMIN_URL == '':
+            continue
+        break
 
     USERNAME_TEXT = defaults['username_change_text']
 
@@ -491,6 +501,8 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
+config['sys_admin_email'] = SYS_ADMIN_EMAIL
+config['sys_admin_url'] = SYS_ADMIN_URL
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
 
