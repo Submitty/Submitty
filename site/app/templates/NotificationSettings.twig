@@ -17,15 +17,15 @@
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
                 <div class="button-group">
                     <div class="button-row">
-                        <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="checkAll(this)">Subscribe to all notifications</button>
-                        <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional notifications</button>
-                        <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="resetNotification(this)">Reset notification settings</button>
+                        <button type="button" class="notification-setting-button btn key_to_click" tabindex="0" data-selector=".notification-setting-input" onclick="checkAll(this)">Subscribe to all notifications</button>
+                        <button type="button" class="notification-setting-button btn key_to_click" tabindex="0" data-selector=".notification-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional notifications</button>
+                        <button type="button" class="notification-setting-button btn key_to_click" tabindex="0" data-selector=".notification-setting-input" onclick="resetNotification(this)">Reset notification settings</button>
                     </div>
                     {% if email_enabled %}
                         <div class="button-row">
-                            <button type="button" class="notification-setting-button btn" data-selector=".email-setting-input" onclick="checkAll(this)">Subscribe to all emails</button>
-                            <button type="button" class="notification-setting-button btn" data-selector=".email-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional emails</button>
-                            <button type="button" class="notification-setting-button btn" data-selector=".email-setting-input" onclick="resetNotification(this)">Reset email settings</button>
+                            <button type="button" class="notification-setting-button btn key_to_click" tabindex="0" data-selector=".email-setting-input" onclick="checkAll(this)">Subscribe to all emails</button>
+                            <button type="button" class="notification-setting-button btn key_to_click" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional emails</button>
+                            <button type="button" class="notification-setting-button btn key_to_click" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)">Reset email settings</button>
                         </div>
                     {% endif %}
                 </div>
@@ -321,13 +321,13 @@
                     try {
                         var json = JSON.parse(data);
                         if(json['status'] == 'fail') {
-                            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close key_to_click" tabindex="0" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                         }
                         else {
-                            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['data'] + '</div>';
+                            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close key_to_click" tabindex="0" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['data'] + '</div>';
                         }
                     } catch(err) {
-                        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close key_to_click" tabindex="0" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     }
                     $('#notification-settings').css('display', 'none');
                     $('#messages').empty();

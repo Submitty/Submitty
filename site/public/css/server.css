@@ -296,7 +296,7 @@ td>a.active-sort {
     background-color: var(--default-white);
     border-radius: 3px;
     overflow: auto;
-    margin: 10px;;
+    margin: 10px;
     padding: 30px;
     background-color: #fff;
     flex-grow: 1;
