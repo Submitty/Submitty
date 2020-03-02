@@ -51,14 +51,14 @@
         <a style="float: right;" class="btn btn-primary" href="{{ export_teams_url }}">Export Teams Members</a>
     {% endif %}
     {% if show_export_teams_button %}
-        <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>
+        <button style="float: right;" class="btn btn-primary key_to_click" tabindex="0" onclick="importTeamForm();">Import Teams Members</button>
     {% endif %}
     {# /Import+Export teams buttons #}
 
 	{# Randomize team button #}
 	{% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
 		{% if past_grade_start_date %}
-			<Button style="float: left;" class="btn btn-default" onclick="randomizeRotatingGroupsButton()"> Randomly Re-Assign Teams to Rotating Sections</Button>
+			<Button style="float: left;" class="btn btn-default key_to_click" tabindex="0" onclick="randomizeRotatingGroupsButton()"> Randomly Re-Assign Teams to Rotating Sections</Button>
 		{% else %}
 			<a style="float: left;" class="btn btn-default" href="{{ randomize_team_rotating_sections_url }}"> Randomly Re-Assign Teams to Rotating Sections</a>
 		{% endif %}
@@ -151,7 +151,7 @@
                             {{ display_section }}
                         </td>
                         <td>
-                            <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}" aria-label="Edit Team">
+                            <a onclick="{{ empty_team_info[loop.index0].team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0">
                                 <i class="fas fa-pencil-alt"></i>
                             </a>
                         </td>
@@ -404,7 +404,7 @@
 {# Edit Team #}
 {% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column) %}
     <td>
-        <a onclick="{{ team_edit_onclick }}" aria-label="Edit Team"><i class="fas fa-pencil-alt"></i></a>
+        <a onclick="{{ team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
     </td>
 {% endmacro %}
 

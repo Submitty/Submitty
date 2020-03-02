@@ -18,20 +18,20 @@
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row position-relative">
         <div role="button" id="markdown_toggle_{{ post_box_id }}"
-        class="markdown-toggle {{ render_markdown?"markdown-active":"markdown-inactive" }}"
+        class="markdown-toggle {{ render_markdown?"markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
         style="margin-right:10px;padding: unset;cursor: pointer; "
         title="Render markdown" onclick="$('#markdown_buttons_{{ post_box_id }}').toggle(); $(this).toggleClass('markdown-active'); $('#markdown_input_{{ post_box_id }}').val($('#markdown_input_{{ post_box_id }}').val() == 0? '1':'0');$('#markdown-info-{{ post_box_id }}').toggleClass('disabled');"><i class="fab fa-markdown fa-2x"></i></div>
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown?1:0 }}" />
         <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
         &nbsp;&nbsp;
         <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
-            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Link <i class="fas fa-link fa-1x"></i></button>
-            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Code <i class="fas fa-code fa-1x"></i></button>
-            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Bold <i class="fas fa-bold fa-1x"></i></button>
-            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown">Italics <i class="fas fa-italic fa-1x"></i></button>
+            <button type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Link <i class="fas fa-link fa-1x"></i></button>
+            <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Code <i class="fas fa-code fa-1x"></i></button>
+            <button title="Insert bold text" type="button" onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Bold <i class="fas fa-bold fa-1x"></i></button>
+            <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary" tabindex = "0" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -182,7 +182,7 @@
                  $(this).closest('.thread-post-form').find('[name=thread_post_content]').val('');
                  $('#title').val('');
                  $(this).closest('form').trigger('reinitialize.areYouSure');"
-                     class="btn btn-default close-button">Cancel</a>
+                     class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
 

@@ -28,7 +28,7 @@
                         <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
                     {% endfor %}
                 </select>
-                <button type="button" class="btn btn-primary" style="margin-top: 10px" onclick="loadOverriddenGrades($('#g_id').val())"> Apply Changes </button>
+                <button type="button" class="btn btn-primary key_to_click" tabindex="0" style="margin-top: 10px" onclick="loadOverriddenGrades($('#g_id').val())"> Apply Changes </button>
             </div>
         </div>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
