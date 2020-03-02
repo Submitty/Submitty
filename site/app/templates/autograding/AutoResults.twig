@@ -51,13 +51,10 @@
             {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
                 {% set can_view = (not testcase.hidden or show_hidden) %}
                 {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
-<<<<<<< HEAD
+
                 <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#e5e5e5;'" : "" }}>
-                    <div id='tc_{{ loop.index0 }}' class="box-title"
-=======
-                <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
                     <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"
->>>>>>> 159dd33e5233dcfe43cf5cae0273078d8ab20cb2
+
                             {% if can_view_details and testcase.has_extra_results %}
                                 style="cursor: pointer"
                                 onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});"
