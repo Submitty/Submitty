@@ -848,13 +848,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         }
     }
     // check due date
-    if (days_late > 0 && days_late <= late_days_allowed) {
+    if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
     }
-    else if (days_late > 0) {
+    else if (days_late > 0 && days_late > late_days_allowed) {
         message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
