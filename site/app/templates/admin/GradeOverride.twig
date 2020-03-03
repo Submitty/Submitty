@@ -17,7 +17,7 @@
     <br>
     <br>
 
-    <form id="gradeOverrideForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateGradeOverride($(this));">
+    <form id="gradeOverrideForm" method="post" enctype="multipart/form-data" onsubmit="return updateGradeOverride($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <input type="hidden" name="option" value="-1" />
         <div class="option">
@@ -45,9 +45,9 @@
             </label>
         </fieldset>
         <input class="btn btn-primary" type="submit" value="Submit" >
-        <div id="load-overridden-grades" align="center">
+        <div id="load-overridden-grades">
         {# This is a data table #}
-            <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
+            <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%;margin:auto">
                 <div class="option-title" id="title"></div>
                 <div>
                     <thead>
