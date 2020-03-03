@@ -84,13 +84,13 @@
             {% endif %}
         {% endif %}
 
-        <h7 class="last-edit">
+        <span class="last-edit">
 			<strong class="post_user_id">{{ visible_username }}</strong>
 			{{ post_date }}
             {% if edit_date is not null %}
                 (<i>Last edit at {{ edit_date }}</i>)
             {% endif %}
-        </h7>
+        </span>
     </span>
 
     {% if post_attachment.exist == true %}
