@@ -117,8 +117,10 @@
     {% if post_box_id %}
         <span class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
-            <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
-                <label id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0" for="input-file{{ post_box_id }}">Upload Attachment</label>
+            <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
+                <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
+                  <label for="input-file{{ post_box_id }}">Upload Attachment</label>
+                </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
                 <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
