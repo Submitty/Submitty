@@ -1742,6 +1742,11 @@ end of styles used in the admin gradeable page
     display: block !important;
 }
 
+#popup_to_show_matches_id {
+  overflow:hidden;
+  border:2px solid grey;
+}
+
 .notification-badge {
     background-color: red;
     padding: 1px 5px;

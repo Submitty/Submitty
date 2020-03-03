@@ -17,23 +17,23 @@
         {# /Nav buttons #}
 
         {# Panel buttons #}
-        <button title="Reset Rubric Panel Positions (Press R)" class="invisible-btn" onclick="resetModules(); updateCookies();"> <i class="fas fa-redo icon-header" ></i> </button>
-        <button title="Show/Hide Autograding Testcases (Press A)" class="invisible-btn" onclick="toggleAutograding(); updateCookies();"> <i class="fas fa-list icon-header" ></i> </button>
-        <button title="Show/Hide Grading Rubric (Press G)" class="invisible-btn" onclick="toggleRubric(); updateCookies();"> <i class="fas fa-edit icon-header" ></i> </button>
-        <button title="Show/Hide Submission and Results Browser (Press O)" class="invisible-btn" onclick="toggleSubmissions(); updateCookies();"> <i class="fas fa-folder-open icon-header" ></i> </button>
+        <button title="Reset Rubric Panel Positions (Press R)" class="invisible-btn key_to_click" tabindex="0" onclick="resetModules(); updateCookies();"> <i class="fas fa-redo icon-header" ></i> </button>
+        <button title="Show/Hide Autograding Testcases (Press A)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleAutograding(); updateCookies();"> <i class="fas fa-list icon-header" ></i> </button>
+        <button title="Show/Hide Grading Rubric (Press G)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleRubric(); updateCookies();"> <i class="fas fa-edit icon-header" ></i> </button>
+        <button title="Show/Hide Submission and Results Browser (Press O)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleSubmissions(); updateCookies();"> <i class="fas fa-folder-open icon-header" ></i> </button>
         {% if ((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) %}
-            <button title="Show/Hide Student Information (Press S)" class="invisible-btn" onclick="toggleInfo(); updateCookies();"> <i class="fas fa-user icon-header" ></i> </button>
+            <button title="Show/Hide Student Information (Press S)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleInfo(); updateCookies();"> <i class="fas fa-user icon-header" ></i> </button>
         {% endif %}
         {% if peer_gradeable and not i_am_a_peer %}
-        <button title="Show/Hide Peer Information (Press P)" class="invisible-btn" onclick="togglePeer(); updateCookies();"> <i class="fas fa-users icon-header" ></i> </button>
+        <button title="Show/Hide Peer Information (Press P)" class="invisible-btn key_to_click" tabindex="0" onclick="togglePeer(); updateCookies();"> <i class="fas fa-users icon-header" ></i> </button>
         {% endif %}
         {% if discussion_based %}
-            <button title="Show/Hide Discussion Posts" class="invisible-btn" onclick="toggleDiscussion(); updateCookies();"> <i class="fas fa-comment-alt icon-header" ></i> </button>
+            <button title="Show/Hide Discussion Posts" class="invisible-btn key_to_click" tabindex="0" onclick="toggleDiscussion(); updateCookies();"> <i class="fas fa-comment-alt icon-header" ></i> </button>
         {% endif %}
         {% if regrade_panel_available %}
-            <button title="Show/Hide Grade Inquiry Information (Press X)" class="invisible-btn" onclick="toggleRegrade(); updateCookies();"> <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon icon-header" ></i> </button>
+            <button title="Show/Hide Grade Inquiry Information (Press X)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleRegrade(); updateCookies();"> <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon icon-header" ></i> </button>
         {% endif %}
-        <button title="Show Grading Settings" class="invisible-btn" onclick="showSettings();"> <i class="fas fa-wrench icon-header" ></i> </button>
+        <button title="Show Grading Settings" class="invisible-btn key_to_click" tabindex="0" onclick="showSettings();"> <i class="fas fa-wrench icon-header" ></i> </button>
         {# /Panel buttons #}
     </div>
 
