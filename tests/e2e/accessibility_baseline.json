@@ -566,6 +566,47 @@
             "hiliteStart": 0,
             "hiliteLength": 16
         },
+        "The \u201ctype\u201d attribute is unnecessary for JavaScript resources.":{
+            "extract": "          <script type=\"text/javascript\">\n     ",
+            "firstColumn": 25,
+            "hiliteLength": 31,
+            "hiliteStart": 10,
+            "lastColumn": 55,
+            "lastLine": 1015,
+            "message": "The \u201ctype\u201d attribute is unnecessary for JavaScript resources.",
+            "subType": "warning",
+            "type": "info"
+        },
+        "Element \u201chead\u201d is missing a required instance of child element \u201ctitle\u201d.":{
+            "extract": "en\"><head></head><body ",
+            "firstColumn": 23,
+            "hiliteLength": 7,
+            "hiliteStart": 10,
+            "lastColumn": 29,
+            "lastLine": 1,
+            "message": "Element \u201chead\u201d is missing a required instance of child element \u201ctitle\u201d.",
+            "type": "error"
+        },
+        "Element \u201ctitle\u201d not allowed as child of element \u201cbody\u201d in this context. (Suppressing further errors from this subtree.)":{
+            "extract": "r>\n\n\n\n    <title>Submit",
+            "firstColumn": 5,
+            "hiliteLength": 7,
+            "hiliteStart": 10,
+            "lastColumn": 11,
+            "lastLine": 6,
+            "message": "Element \u201ctitle\u201d not allowed as child of element \u201cbody\u201d in this context. (Suppressing further errors from this subtree.)",
+            "type": "error"
+        },
+        "itle>\n    <link rel=\"shortcut icon\" href=\"http://localhost/img/favicon.ico\" type=\"image/x-icon\">\n\n    ":{
+            "extract": "itle>\n    <link rel=\"shortcut icon\" href=\"http://localhost/img/favicon.ico\" type=\"image/x-icon\">\n\n    ",
+            "firstColumn": 5,
+            "hiliteLength": 86,
+            "hiliteStart": 10,
+            "lastColumn": 90,
+            "lastLine": 7,
+            "message": "A \u201clink\u201d element must not appear as a descendant of a \u201cbody\u201d element unless the \u201clink\u201d element has an \u201citemprop\u201d attribute or has a \u201crel\u201d attribute whose value contains \u201cdns-prefetch\u201d, \u201cmodulepreload\u201d, \u201cpingback\u201d, \u201cpreconnect\u201d, \u201cprefetch\u201d, \u201cpreload\u201d, \u201cprerender\u201d, or \u201cstylesheet\u201d.",
+            "type": "error"
+        },
         "Duplicate ID “desktop_home_link”.": {
             "type": "error",
             "lastLine": 291,
@@ -987,15 +1028,46 @@
             "hiliteStart": 0,
             "hiliteLength": 16
         },
+        "Duplicate ID “desktop_home_link”.": {
+            "type": "error",
+            "lastLine": 285,
+            "lastColumn": 134,
+            "firstColumn": 69,
+            "message": "Duplicate ID “desktop_home_link”.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
+            "hiliteStart": 10,
+            "hiliteLength": 66
+        },
+        "The first occurrence of ID “desktop_home_link” was here.": {
+            "type": "info",
+            "lastLine": 282,
+            "lastColumn": 124,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "The first occurrence of ID “desktop_home_link” was here.",
+            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
+            "hiliteStart": 10,
+            "hiliteLength": 56
+        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 135,
+            "lastLine": 308,
             "lastColumn": 38,
             "firstColumn": 17,
             "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
             "extract": "          <style media=\"screen\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 22
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 576,
+            "lastColumn": 9,
+            "firstColumn": 3,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "  <br>\n\n  <style>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 7
         }
     },
     "/s20/sample/course_materials": {
@@ -2587,49 +2659,6 @@
             "extract": "ass=\"bar\"></tr>\n     ",
             "hiliteStart": 10,
             "hiliteLength": 5
-        }
-    },
-    "/s20/sample/reports/rainbow_grades_customization": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
-        "Duplicate ID “desktop_home_link”.": {
-            "type": "error",
-            "lastLine": 275,
-            "lastColumn": 134,
-            "firstColumn": 69,
-            "message": "Duplicate ID “desktop_home_link”.",
-            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/s20/sample\">sample",
-            "hiliteStart": 10,
-            "hiliteLength": 66
-        },
-        "The first occurrence of ID “desktop_home_link” was here.": {
-            "type": "info",
-            "lastLine": 272,
-            "lastColumn": 124,
-            "firstColumn": 69,
-            "subType": "warning",
-            "message": "The first occurrence of ID “desktop_home_link” was here.",
-            "extract": "          <a id=\"desktop_home_link\" href=\"http://localhost:1501/\">Submit",
-            "hiliteStart": 10,
-            "hiliteLength": 56
-        },
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 298,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
         }
     },
     "/s20/sample/late_table": {

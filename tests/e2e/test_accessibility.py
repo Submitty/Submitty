@@ -43,7 +43,6 @@ class TestAccessibility(BaseTestCase):
         '/s20/sample/plagiarism',
         '/s20/sample/plagiarism/configuration/new',
         '/s20/sample/reports',
-        '/s20/sample/reports/rainbow_grades_customization',
         '/s20/sample/late_table'
     ]
 
