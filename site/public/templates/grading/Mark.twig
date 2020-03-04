@@ -9,7 +9,7 @@ Required Input:
     show_publish: True to show the 'publish' option
 #}
 <div id="mark-{{ mark.id }}"
-     class="mark-container row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}"
+     class="mark-container key_to_click row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}" tabindex="0"
      data-component_id="{{ component.id }}"
      data-mark_id="{{ mark.id }}"
      data-publish="{{ mark.publish }}"
@@ -77,7 +77,7 @@ Required Input:
             </span>
         {% endif %}
     {% endif %}
-    <span class="col-no-gutters mark-tools" onclick="onGetMarkStats(this);event.stopPropagation()">
+    <span class="col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onGetMarkStats(this);event.stopPropagation()">
         <i class="fas fa-users icon-mark-stats" title="See who got this mark"></i>
     </span>
     {% if edit_marks_enabled %}
@@ -87,10 +87,10 @@ Required Input:
                 <i class="fas fa-trash hidden"></i>
             </span>
         {% else %}
-            <span class="delete-mark-container col-no-gutters mark-tools" onclick="onDeleteMark(this)" title="Tag for deletion">
+            <span class="delete-mark-container col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onDeleteMark(this)" title="Tag for deletion">
                 <i class="fas fa-trash"></i>
             </span>
-            <span class="restore-mark-container col-no-gutters mark-tools" onclick="onRestoreMark(this)" title="Don't delete" hidden>
+            <span class="restore-mark-container col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onRestoreMark(this)" title="Don't delete" hidden>
                 <i class="fas fa-undo"></i>
             </span>
         {% endif %}

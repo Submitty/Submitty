@@ -5,12 +5,14 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
+use app\libraries\routers\FeatureFlag;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class PlagiarismController
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
+ * @FeatureFlag("plagiarism")
  */
 class PlagiarismController extends AbstractController {
     private function getGradeablesFromPriorTerm() {

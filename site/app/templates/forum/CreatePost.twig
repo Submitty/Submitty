@@ -4,7 +4,7 @@
 
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
-                <a class="active-thread-remove-announcement" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to remove this thread as an announcement?', 0, '{{ csrf_token }}')" title="Remove Announcement" aria-label="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
+                <a class="active-thread-remove-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to remove this thread as an announcement?', 0, '{{ csrf_token }}')" title="Remove Announcement" aria-label="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
@@ -12,17 +12,17 @@
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
-                <a class="not-active-thread-announcement" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to make this thread an announcement?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Make Announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
+                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to make this thread an announcement?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Make Announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
 
             {% endif %}
 
             {% if isCurrentFavorite %}
 
-                <a class="current-favorite" onClick="pinThread({{ activeThread.id }}, '0');" title="Pin Thread" aria-label="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
+                <a class="current-favorite key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '0');" title="Pin Thread" aria-label="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
 
             {% else %}
 
-                <a class="pinned-thread" onClick="pinThread({{ activeThread.id }}, '1');" title="Pin Thread" aria-label="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
+                <a class="pinned-thread key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '1');" title="Pin Thread" aria-label="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
 
             {% endif %}
 
@@ -41,13 +41,12 @@
         {% if not (isThreadLocked != 1 or userAccessFullGrading) %}
             {# pass #}
         {% elseif not first %}
-            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="replyPost({{ post.id }})"> Reply</a>
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="replyPost({{ post.id }})"> Reply</a>
         {% else %}
-            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
         {% endif %}
-
         {% if userGroup <= 3 and has_history %}
-            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
             {% if (isThreadLocked != 1 or accessFullGrading) and first != 1 %}
                 <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
                 {% if thread_previously_merged %}
@@ -62,26 +61,26 @@
     {% endif %}
 
     {% if includeReply and (userGroup <= 3 or post.author_user_id == current_user) and first and thread_resolve_state == -1 %}
-        <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
+        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
     {% endif %}
 
     <span class="post-action-container">
 
         {% if userGroup <= 2 and post.author_user_id != current_user %}
-            <a class="post-email-toggle" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
+            <a class="post-email-toggle key_to_click" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
             <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
         {% endif %}
 
         {% if userGroup <= 2 %}
-            <a class="post-user-info" tabindex = "0" onClick='changeName(this.parentNode, {{ post_user_info.info_name }}, {{ post_user_info.visible_user_json}}, {{ post_user_info.jscriptAnonFix}})' title="Show full user information" aria-label="Show full user information"><i class="fas fa-eye"></i></a>
+            <a class="post-user-info key_to_click" tabindex = "0" onClick='changeName(this.parentNode, {{ post_user_info.info_name }}, {{ post_user_info.visible_user_json}}, {{ post_user_info.jscriptAnonFix}})' title="Show full user information" aria-label="Show full user information"><i class="fas fa-eye"></i></a>
         {% endif %}
 
         {% if userGroup <= 3 or post.author_user_id == current_user %}
             {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                 {#pass#}
             {% else %}
-                <a class="post_button delete-post-button" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}"></i></a>
-                <a class="post_button edit-post-button" tabindex = "0" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a>
+                <a class="post_button delete-post-button key_to_click" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}"></i></a>
+                <a class="post_button edit-post-button key_to_click" tabindex = "0" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a>
             {% endif %}
         {% endif %}
 
@@ -96,7 +95,7 @@
 
     {% if post_attachment.exist == true %}
 
-        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm" type="button">
+        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm key_to_click" tabindex="0" type="button">
                     Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
 
 

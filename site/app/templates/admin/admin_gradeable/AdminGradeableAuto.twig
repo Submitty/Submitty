@@ -46,7 +46,7 @@
     <div class="settings">
         <input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
             autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
-        <a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
+        <a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();" class="key_to_click" tabindex="0">
         <datalist id="path_data" style="display:none" >
         {% for path in all_config_paths %}
             <option class="path_autofill_option" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
@@ -63,7 +63,7 @@
     <br><br>
 
     <div class="btn-container" id="rebuild-gradeable-button">
-        <a class="btn btn-primary" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
+        <a class="btn btn-primary key_to_click" tabindex="0" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
     </div>
 
     <div id="rebuild-status-panel">
@@ -72,8 +72,8 @@
     </div>
 
     <div id="rebuild-log-button">
-        <input type="button" class="btn btn-default" id="open-build-log" type="button" value="Open Build Log" onclick="showBuildLog()" />
-        <input type="button" class="btn btn-primary" id="close-build-log" type="button" value="Close Build Log" onclick="hideBuildLog()" />
+        <input type="button" class="btn btn-default key_to_click" tabindex="0" id="open-build-log" type="button" value="Open Build Log" onclick="showBuildLog()" />
+        <input type="button" class="btn btn-primary key_to_click" tabindex="0" id="close-build-log" type="button" value="Close Build Log" onclick="hideBuildLog()" />
     </div>
 
     <div class="log-container" hidden>

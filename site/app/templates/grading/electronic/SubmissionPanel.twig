@@ -29,7 +29,7 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
+                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
             {% endif %}
 
             <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
@@ -40,7 +40,7 @@
                     <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
                 </label>
             </div>
-            <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();"> <label for="autoscroll_id">Auto open</label> </span>
+            <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             <br />
             {# Files #}
             <div class="inner-container" id="file-container">
@@ -69,7 +69,7 @@
             <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30; display: none">No changes</strong>
             <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
             <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
-            <a onclick='collapseFile()' aria-label="Collapse File"><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
+            <a onclick='collapseFile()' aria-label="Collapse File" class="key_to_click" tabindex="0"><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
             {% include "grading/electronic/PDFAnnotationBar.twig" %}
             <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
         </div>
@@ -227,12 +227,12 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }} key_to_click" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
-            <a onclick='expandFile("{{ dir }}", "{{ path }}")' aria-label="Show file in full panel"><i class="fas fa-share" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path }}", "{{ title }}")' aria-label="Download the file"><i class="fas fa-download" title="Download the file"></i></a>
+            <a onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            <a onclick='expandFile("{{ dir }}", "{{ path }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
+            <a onclick='downloadFile("{{ path }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
@@ -241,7 +241,7 @@
 {% macro display_dir(self, dir, contents, id, indent, title) %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();'>
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();'>
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>
