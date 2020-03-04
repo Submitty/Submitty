@@ -78,7 +78,7 @@
         <div id="submitty-body" class="flex-col invisible">
             <div id="mobile-menu">
                 <div id="menu-header" class="flex-row">
-                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><h1>Submitty</h1></a>
+                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
                     <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
                 </div>
                 <ul>
@@ -140,6 +140,7 @@
                          height = "50"
                          {% if enable_banner %}
                             style="position:absolute; right: 10px;"
+                            class="key_to_click"
                             onclick="ducky();"
                             tabindex="0"
                          {% endif %}
@@ -198,7 +199,7 @@
                             {% endif %}
                             {{ message.error | nl2br }}
                         </span>
-                        <a class="fas fa-times" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                        <a class="fas fa-times key_to_click" tabindex="0" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                     </div>
                 {% endfor %}
             </div>
