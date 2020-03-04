@@ -20,14 +20,14 @@
             {% include "grading/simple/StudentSearch.twig" %}
             <div>
                 <p class="not-sticky">Undo/Redo Changes</p>
-                <button id="checkpoint-undo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled><i class="fas fa-undo"></i></button>
-                <button id="checkpoint-redo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled><i class="fas fa-redo"></i></button>
+                <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled><i class="fas fa-undo"></i></button>
+                <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled><i class="fas fa-redo"></i></button>
             </div>
         </div>
 
         <div>
-            <button class="btn btn-primary" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
-            <button class="btn btn-primary" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+            <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary key_to_click" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>
     </div>
 
@@ -252,7 +252,7 @@
             {% set total = total + component_grade.getScore() %}
             <td class="option-small-input">
                 <input
-                    class="option-small-box cell-grade"
+                    class="option-small-box cell-grade key_to_click" tabindex="0"
                     style="text-align: center; {{ component_grade.getScore() == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
                         {{ component_grade.getScore() == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
@@ -284,7 +284,7 @@
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
             <input
-                class="option-small-box cell-grade"
+                class="option-small-box cell-grade key_to_click" tabindex="0"
                 type="text"
                 id="cell-{{ index }}-{{ text_start + loop.index0 }}"
                 value="{{ component_grade.getComment() }}"

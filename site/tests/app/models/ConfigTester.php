@@ -114,7 +114,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'room_seating_gradeable_id' => "",
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
-            )
+            ),
+            'feature_flags' => [
+
+            ]
         );
 
         $config = array_replace_recursive($config, $extra);
@@ -265,7 +268,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
-                ]
+                ],
+                'feature_flags' => []
             ],
             'course_loaded' => true,
             'forum_enabled' => true,
@@ -287,7 +291,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
             'verified_submitty_admin_user' => null,
-            'queue_enabled' => true
+            'queue_enabled' => true,
+            'feature_flags' => []
         );
         $actual = $config->toArray();
 
@@ -554,5 +559,50 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testFeatureFlagTrueDebug() {
+        $extra = ['debugging_enabled' => true];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core);
+        $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
+
+        $this->assertTrue($config->isDebug());
+        $this->assertTrue($config->checkFeatureFlagEnabled('non_existing_name'));
+    }
+
+    public function testFeatureFlagEnabled() {
+        $extra = ['feature_flags' => ['feature_1' => true, 'feature_2' => false]];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core);
+        $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
+
+        $this->assertFalse($config->isDebug());
+        $this->assertFalse($config->checkFeatureFlagEnabled('non_existing_name'));
+        $this->assertTrue($config->checkFeatureFlagEnabled('feature_1'));
+        $this->assertFalse($config->checkFeatureFlagEnabled('feature_2'));
+    }
+
+    public function testNonexistingFeatureFlagConfig() {
+        $extra = ['feature_flags' => null];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core);
+        $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
+
+        $this->assertFalse($config->isDebug());
+        $this->assertFalse($config->checkFeatureFlagEnabled('non_existing_name'));
+        $this->assertFalse($config->checkFeatureFlagEnabled('feature_1'));
     }
 }

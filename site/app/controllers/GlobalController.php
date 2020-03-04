@@ -270,13 +270,17 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-grade-override",
                     "icon" => "fa-eraser"
                 ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildCourseUrl(['plagiarism']),
-                    "title" => "Plagiarism Detection",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-plagiarism",
-                    "icon" => "fa-exclamation-triangle"
-                ]);
+
+                if ($this->core->getConfig()->checkFeatureFlagEnabled('plagiarism')) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildCourseUrl(['plagiarism']),
+                        "title" => "Plagiarism Detection",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-plagiarism",
+                        "icon" => "fa-exclamation-triangle"
+                    ]);
+                }
+
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['reports']),
                     "title" => "Grade Reports",
