@@ -12,38 +12,36 @@
                 <tr class="info">
                     <td colspan="5" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</td>
                 </tr>
-                <tbody id="section-{{ registration }}">
-                {% set count = 0 %}
+                <tbody>
+                  {% set count = 4 - (students|length % 5) %}
                 {% for student in students %}
-                    {% set count = 4 - (loop.index % 5) %}
                     {% if loop.index % 5 == 1 %}
-                        <tr id="user-{{ student.getId() }}">
+                          <tr>
                     {% endif %}
-                    {% if imageData[student.getId()] is defined %}
-                        <td>{{ base64_image(imageData[student.getId()].path, student.getId()) }}
-                        <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
-                        <br />{{student.getId()}}</div>
-                        </td>
-                    {% else %}
-                        {% if errorImageData == '_NONE_' %}
-                            <td><i><span style="color:gray">No Image Available</span></i>
-                            <div class="name"><br />
+                      <td>
+                          {% if imageData[student.getId()] is defined %}
+                              {{ base64_image(imageData[student.getId()].path, student.getId()) }}
                         {% else %}
-                            <td>{{ base64_image(errorImageData.path, 'No Image Available') }}
-                            <div class="name"><br /><br />
+                              {% if errorImageData == '_NONE_' %}
+                                  <i><span style="color:gray">No Image Available</span></i>
+                              {% else %}
+                                  {{ base64_image(errorImageData.path, 'No Image Available') }}
+                              {% endif %}
                         {% endif %}
-                        {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
+                          <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                         <br />{{student.getId()}}</div>
-                        </td>
-                    {% endif %}
+                      </td>
                     {% if loop.index % 5 == 0 %}
                         </tr>
                     {% endif %}
                     {% flush %}
                 {% endfor %}
-                {% for spacer in 0..count %}
-                  <td></td>
-                {% endfor %}
+                  {% if count < 4 %}
+                      {% for spacer in 0..count %}
+                          <td></td>
+                      {% endfor %}
+                      </tr>
+                  {% endif %}
                 </tbody>
             {% endfor %}
         {% else %}
