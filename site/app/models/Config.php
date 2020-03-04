@@ -219,6 +219,9 @@ class Config extends AbstractModel {
     /** @prop @var bool */
     protected $queue_enabled;
 
+    /** @prop-read @var array */
+    protected $feature_flags = [];
+
     /**
      * Config constructor.
      *
@@ -421,6 +424,10 @@ class Config extends AbstractModel {
             $this->$key = ($this->$key == true) ? true : false;
         }
 
+        if (!empty($this->course_json['feature_flags']) && is_array($this->course_json['feature_flags'])) {
+            $this->feature_flags = $this->course_json['feature_flags'];
+        }
+
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
         foreach (WrapperController::WRAPPER_FILES as $file) {
             $path = FileUtils::joinPaths($wrapper_files_path, $file);
@@ -508,5 +515,18 @@ class Config extends AbstractModel {
     public function getWrapperFiles() {
         //Return empty if not logged in because we can't access them
         return ($this->core->getUser() === null ? [] : $this->wrapper_files);
+    }
+
+    /**
+     * Checks to see if a given feature flag is enabled or not. If the site
+     * is running under debug, we assume all flags are enabled, else, the
+     * flag must exist in the course config.json file and be set to true.
+     */
+    public function checkFeatureFlagEnabled(string $flag): bool {
+        return $this->debug
+            || (
+                isset($this->feature_flags[$flag])
+                && $this->feature_flags[$flag] === true
+            );
     }
 }
