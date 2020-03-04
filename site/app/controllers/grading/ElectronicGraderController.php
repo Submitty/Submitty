@@ -294,7 +294,6 @@ class ElectronicGraderController extends AbstractController {
         }
 
         if (count($sections) > 0) {
-            var_dump($sections);
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
                 $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
@@ -321,8 +320,6 @@ class ElectronicGraderController extends AbstractController {
         //Either # of teams or # of students (for non-team assignments). Either case
         // this is the max # of submitted copies for this gradeable.
         $total_submissions = 0;
-        //var_dump($no_team_users);
-        //var_dump($team_users);
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
                 if ($key == 'NULL') {
@@ -478,9 +475,7 @@ class ElectronicGraderController extends AbstractController {
         $section_key = $order->getSectionKey();
         $graders = $order->getSectionGraders();
         $sections = $order->getSectionNames();
-
-        var_dump($order->getSortedGradedGradeables());
-        
+                
         $student_ids = [];
         foreach ($section_submitters as $section) {
             $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
@@ -510,7 +505,6 @@ class ElectronicGraderController extends AbstractController {
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
-            var_dump($g);
             if ($gradeable->isTeamAssignment()) {
                 $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
             }
@@ -994,7 +988,7 @@ class ElectronicGraderController extends AbstractController {
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted ?? 0) * count($gradeable->getComponents());
         }
         else {
             $total_submitted = ($total_submitted ?? 0) * count($gradeable->getComponents());

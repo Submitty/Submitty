@@ -449,7 +449,6 @@ class GradingOrder extends AbstractModel {
         $gg_idx = [];
         $unsorted = [];
         foreach ($iter as $gg) {
-            var_dump($gg);
             $idx = $this->getSubmitterIndex($gg->getSubmitter());
             //Should never happen, but better to be safe
             if ($idx === false) {
