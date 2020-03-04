@@ -164,7 +164,7 @@
         <div class="sub">
             No Grading To Be Done! :)
         </div>
-    {% elseif not peer or core.getUser().getGroup() < 4 %}
+    {% elseif core.getUser().getGroup() < 4 %}
         <div class = "tab">
             <div class =tab-bar-wrapper">
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
