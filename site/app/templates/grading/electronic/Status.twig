@@ -164,7 +164,7 @@
         <div class="sub">
             No Grading To Be Done! :)
         </div>
-    {% else %}
+    {% elseif not peer or core.getUser().getGroup() < 4 %}
         <div class = "tab">
             <div class =tab-bar-wrapper">
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
@@ -707,6 +707,8 @@
 
             </div>
         </div>
+    {% else %}
+        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}

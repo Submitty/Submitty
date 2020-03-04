@@ -475,7 +475,7 @@ class Gradeable extends AbstractModel {
         $bad_rows = [];
         foreach ($input as $row_num => $vals) {
             if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
-                array_push($bad_rows,($vals["student"]));
+                array_push($bad_rows, ($vals["student"]));
             }
             if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
                 array_push($bad_rows, ($vals["grader"]));
