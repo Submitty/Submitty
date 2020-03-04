@@ -87,20 +87,20 @@
         {% if file.files != null %}
             <div>
                 {% if indent == 1 %}
-                    <a class="fas fa-pencil-alt" onclick="openRenamePopup('{{ file.path }}')"></a>
+                    <a class="fas fa-pencil-alt key_to_click" tabindex="0" onclick="openRenamePopup('{{ file.path }}')"></a>
                     {% if file.path not in inuse_config %}
-                        <a class="fas fa-trash" onclick="openDeletePopup('{{ file.path }}')"></a>
+                        <a class="fas fa-trash key_to_click" tabindex="0" onclick="openDeletePopup('{{ file.path }}')"></a>
                     {% endif %}
                 {% endif %}
-                <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
+                <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a class="key_to_click" tabindex="0" onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
                     {{ self.display_files(self, file.files, indent + 1, true, inuse_config, display_url) }}
                 </div>
             </div>
         {% else %}
             <div>
-                <div class="file-viewer"><a onclick='openFrame("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}", "{{ id }}", "{{ file.name }}")'>
-                    <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}")'>(Popout)</a>
+                <div class="file-viewer"><a class="key_to_click" tabindex="0" onclick='openFrame("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}", "{{ id }}", "{{ file.name }}")'>
+                    <span class='icon-plus'></span>{{ file.name }}</a> <a class="key_to_click" tabindex="0" onclick='openUrl("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}")'>(Popout)</a>
                 </div>
                 <div id="file_viewer_{{ id }}" style='margin-left: {{ neg_margin_left }}px'></div>
             </div>

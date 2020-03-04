@@ -56,7 +56,7 @@
     border-bottom: 2px solid #FFF;
 }
 
-#menu-header h1 {
+.mobile-title {
     margin: 0;
     font-size: 31px;
 }
