@@ -638,8 +638,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
             members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
-                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
-                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+                <button id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true">Accept</button><br />');
         }
         for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');

@@ -33,7 +33,7 @@
             <script type="text/javascript">
                 function toggleRegistrationSectionsEdit(){
                     $("#show-some-section-selection-edit").toggle();
-                } 
+                }
             </script>
         </label>
         <label id="upload_dt">
@@ -57,7 +57,7 @@
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
                 }
-                
+
                 let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 reg_sectionArray.forEach(function(element){
                     let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
@@ -70,7 +70,7 @@
                 }
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
         };
-        
+
         flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
@@ -112,5 +112,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" id="submit-edit" type="submit" value="Submit" onclick = "submitEdit();"/>
+    <button class="btn btn-primary" id="submit-edit" type="submit" value="Submit" onclick = "submitEdit();">Submit</button>
 {% endblock %}
