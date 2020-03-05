@@ -928,49 +928,62 @@ class UsersController extends AbstractController {
         // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
-        $bad_rows = [];
+        $bad_row_details = [];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
             if (count($vals) === 1) {
                 if (!User::validateUserData('user_id', $vals[0])) {
                     $bad_rows[] = ($row_num + 1);
                 }
+                continue;
             }
-            else {
-                // Blacklist validation.  Validation fails if any test resolves as false.
-                switch (false) {
-                   // Bounds check to ensure minimum required number of rows is present.
-                    case count($vals) >= 5:
-                       // Username must contain only lowercase alpha, numbers, underscores, hyphens
-                    case User::validateUserData('user_id', $vals[0]):
-                       // First and Last name must be alpha characters, white-space, or certain punctuation.
-                    case User::validateUserData('user_legal_firstname', $vals[1]):
-                    case User::validateUserData('user_legal_lastname', $vals[2]):
-                       // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-                    case User::validateUserData('user_email', $vals[3]):
-                       // $row[4] validation varies by $list_type
-                       // "classlist" validates registration_section, and "graderlist" validates user_group
-                    case $row4_validation_function():
-                       // Database password cannot be blank, no check on format.
-                       // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
-                    case !$use_database || User::validateUserData('user_password', $vals[5]):
-                       // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-                       // Automatically validate if not set (this field is optional).
-                    case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                    case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]):
-                       // Validation failed somewhere.  Record which row failed.
-                       // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
-                        $bad_rows[] = ($row_num + 1);
-                        break;
-                }
+            // Bounds check to ensure minimum required number of rows is present.
+            if (!count($vals) >= 5) {
+                $bad_row_details[$row_num + 1][] = 'column Count';
+            }
+            // Username must contain only lowercase alpha, numbers, underscores, hyphens
+            if (!User::validateUserData('user_id', $vals[0])) {
+                $bad_row_details[$row_num + 1][] = 'user_id';
+            }
+            // First Name must be alpha characters, white-space, or certain punctuation.
+            if (!User::validateUserData('user_legal_firstname', $vals[1])) {
+                $bad_row_details[$row_num + 1][] = 'first name';
+            }
+            // Last Name must be alpha characters, white-space, or certain punctuation.
+            if (!User::validateUserData('user_legal_lastname', $vals[2])) {
+                $bad_row_details[$row_num + 1][] = 'last Name';
+            }
+            // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+            if (!User::validateUserData('user_email', $vals[3])) {
+                $bad_row_details[$row_num + 1][] = 'user email';
+            }
+            /* $row[4] validation varies by $list_type
+               "classlist" validates registration_section, and "graderlist" validates user_group */
+            if (!$row4_validation_function()) {
+                $bad_row_details[$row_num + 1][] = $list_type === 'classlist'
+                    ? 'Registration section'
+                    : 'Grader-group';
+            }
+            /* Database password cannot be blank, no check on format.
+               Automatically validate if NOT using database authentication (e.g. using PAM authentication) */
+            if (!(!$use_database || User::validateUserData('user_password', $vals[5]))) {
+                $bad_row_details[$row_num + 1][] = 'User password';
+            }
+            /* Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+               Automatically validate if not set (this field is optional) */
+            if (!(!isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]))) {
+                $bad_row_details[$row_num + 1][] = 'preferred first name';
+            }
+            if (!(!isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]))) {
+                $bad_row_details[$row_num + 1][] = 'preferred last name';
             }
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
-        if (!empty($bad_rows)) {
-            $msg = "Error(s) on row(s) ";
-            array_walk($bad_rows, function ($row_num) use (&$msg) {
-                $msg .= " {$row_num}";
+        if (!empty($bad_row_details)) {
+            $msg = "Please correct the following errors :- ";
+            array_walk($bad_row_details, function ($errors, $row_num) use (&$msg) {
+                $msg .= "\n Invalid " . implode(', ', $errors) . " on row number - $row_num";
             });
             $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
