@@ -8,9 +8,9 @@
         <table class="table table-striped table-bordered persist-area">
             <thead>
                 <tr>
-                    <th width="33%"><b>By Section</b></th>
-                    <th width="33%">Average</th>
-                    <th width="33%">Std. Deviation</th>
+                    <th style="width:33%"><b>By Section</b></th>
+                    <th style="width:33%">Average</th>
+                    <th style="width:33%">Std. Deviation</th>
                 </tr>
             </thead>
             {% for section, info in sections |filter((section,info) => section != null) %}
@@ -39,9 +39,9 @@
             {% endfor %}
             <thead>
             <tr>
-                <td width="33%"><b>Total</b></td>
-                <td width="33%" id="avg-total"></td>
-                <td width="33%" id="stddev-total"></td>
+                <td style="width:33%"><b>Total</b></td>
+                <td style="width:33%" id="avg-total"></td>
+                <td style="width:33%" id="stddev-total"></td>
             </tr>
             </thead>
         </table>
@@ -50,8 +50,8 @@
         <table class="table table-striped table-bordered persist-area">
             <tbody>
             <tr>
-                <td width="50%">Students with a nonzero grade</td>
-                <td width="50%" id="num-graded"></td>
+                <td style="width:50%">Students with a nonzero grade</td>
+                <td style="width:50%" id="num-graded"></td>
             </tr>
             </tbody>
         </table>
