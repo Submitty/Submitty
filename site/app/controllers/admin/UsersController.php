@@ -932,12 +932,12 @@ class UsersController extends AbstractController {
         $bad_columns = array(); //Tracks columns in which errors occured
         // lists all the validation formats
         $column_formats = [
-            'column_count'=> 'Only 5 to 7 columns are allowed',
+            'column_count' => 'Only 5 to 7 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
             'user_legal_firstname' => 'user_legal_firstname must be alpha characters, white-space, or certain punctuation.',
             'user_legal_lastname' => 'user_legal_lastname must be alpha characters, white-space, or certain punctuation.',
             'user_email' => 'Email address should be valid with appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.',
-            'row4_validation' => $list_type === 'classlist' ? 'Registration must contain only these characters - A-Z,a-z,_,-' : 'Grader-level check is a digit between 1 - 4.',
+            'row4_validation' => $list_type === 'classlist' ? 'Registration must contain only these characters - A-Z,a-z,_,-' : 'Grader-level should be in between 1 - 4.',
             'user_password' => 'user_password cannot be blank',
             'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
             'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.'
@@ -953,35 +953,35 @@ class UsersController extends AbstractController {
             // Bounds check to ensure minimum required number of rows is present.
             if (!count($vals) >= 5) {
                 $bad_row_details[$row_num + 1][] = 'column Count';
-                if(!in_array('column_count', $bad_columns)) {
+                if (!in_array('column_count', $bad_columns)) {
                     $bad_columns[] = 'column_count';
                 }
             }
             // Username must contain only lowercase alpha, numbers, underscores, hyphens
             if (!User::validateUserData('user_id', $vals[0])) {
                 $bad_row_details[$row_num + 1][] = 'user_id';
-                if(!in_array('user_id', $bad_columns)) {
+                if (!in_array('user_id', $bad_columns)) {
                     $bad_columns[] = 'user_id';
                 }
             }
             // First Name must be alpha characters, white-space, or certain punctuation.
             if (!User::validateUserData('user_legal_firstname', $vals[1])) {
                 $bad_row_details[$row_num + 1][] = 'first name';
-                if(!in_array('user_legal_firstname', $bad_columns)) {
+                if (!in_array('user_legal_firstname', $bad_columns)) {
                     $bad_columns[] = 'user_legal_firstname';
                 }
             }
             // Last Name must be alpha characters, white-space, or certain punctuation.
             if (!User::validateUserData('user_legal_lastname', $vals[2])) {
                 $bad_row_details[$row_num + 1][] = 'last Name';
-                if(!in_array('user_legal_lastname', $bad_columns)) {
+                if (!in_array('user_legal_lastname', $bad_columns)) {
                     $bad_columns[] = 'user_legal_lastname';
                 }
             }
             // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
             if (!User::validateUserData('user_email', $vals[3])) {
                 $bad_row_details[$row_num + 1][] = 'user email';
-                if(!in_array('user_email', $bad_columns)) {
+                if (!in_array('user_email', $bad_columns)) {
                     $bad_columns[] = 'user_email';
                 }
             }
@@ -991,7 +991,7 @@ class UsersController extends AbstractController {
                 $bad_row_details[$row_num + 1][] = $list_type === 'classlist'
                     ? 'Registration section'
                     : 'Grader-group';
-                if(!in_array('row4_validation', $bad_columns)) {
+                if (!in_array('row4_validation', $bad_columns)) {
                     $bad_columns[] = 'row4_validation';
                 }
             }
@@ -999,7 +999,7 @@ class UsersController extends AbstractController {
                Automatically validate if NOT using database authentication (e.g. using PAM authentication) */
             if (!(!$use_database || User::validateUserData('user_password', $vals[5]))) {
                 $bad_row_details[$row_num + 1][] = 'User password';
-                if(!in_array('user_password', $bad_columns)) {
+                if (!in_array('user_password', $bad_columns)) {
                     $bad_columns[] = 'user_password';
                 }
             }
@@ -1007,13 +1007,13 @@ class UsersController extends AbstractController {
                Automatically validate if not set (this field is optional) */
             if (!(!isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]))) {
                 $bad_row_details[$row_num + 1][] = 'preferred first name';
-                if(!in_array('user_preferred_firstname', $bad_columns)) {
+                if (!in_array('user_preferred_firstname', $bad_columns)) {
                     $bad_columns[] = 'user_preferred_firstname';
                 }
             }
             if (!(!isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]))) {
                 $bad_row_details[$row_num + 1][] = 'preferred last name';
-                if(!in_array('user_preferred_lastname', $bad_columns)) {
+                if (!in_array('user_preferred_lastname', $bad_columns)) {
                     $bad_columns[] = 'user_preferred_lastname';
                 }
             }
