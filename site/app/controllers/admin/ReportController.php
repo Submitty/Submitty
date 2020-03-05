@@ -634,7 +634,7 @@ class ReportController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
 
-     public function displayFullGrades(){
+    public function displayFullGrades() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
 
         $grade_file = null;
