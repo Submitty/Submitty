@@ -19,7 +19,7 @@
                         <tr>
                     {% endif %}
                         <td>
-                          {% if imageData[student.getId()] is defined %}
+                            {% if imageData[student.getId()] is defined %}
                                 {{ base64_image(imageData[student.getId()].path, student.getId()) }}
                             {% else %}
                                 {% if errorImageData == '_NONE_' %}
