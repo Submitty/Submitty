@@ -7,6 +7,7 @@
             <span class="black-message">
                 Do you want to restrict this course material to some sections?
             </span>
+            <br>
             <label class = "radio">
                 <input id = "all-sections-showing-no" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
                 No
@@ -15,6 +16,7 @@
                 <input id = "all-sections-showing-yes" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()">
                 Yes
             </label>
+            <br>
             <span id = "show-some-section-selection-edit" style="display: none">
             {% for section in reg_sections %}
                 <tr>

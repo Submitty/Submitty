@@ -19,6 +19,7 @@
             <p class="black-message">
                 Do you want to restrict this course material to some sections?
             </span>
+            <br>
             <label class = "radio" for="all_Sections_Showing">
                 <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
                 No
@@ -32,6 +33,7 @@
                     $("#show_Some_Section_Selection").toggle();
                 }
             </script>
+            <br>
             <span id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
