@@ -9,6 +9,7 @@ use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
+use app\libraries\response\RedirectResponse;
 use app\models\User;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -992,6 +993,13 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
     public function viewStudentGrades() {
+        $user = $this->core->getQueries()->getUserById($_POST["student_id"]);
+        if ($user === null) {
+            $this->core->addErrorMessage("Invalid Student ID \"" . $_POST["student_id"] . "\"");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['users']))
+            );
+        }
         $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
             . $_POST["student_id"] . "_summary.html";
 
