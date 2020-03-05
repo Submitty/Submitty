@@ -13,24 +13,26 @@
                     <th colspan="5" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</th>
                 </tr>
                 <tbody>
-                  {% set count = 4 - (students|length % 5) %}
+                {% set count = 4 - (students|length % 5) %}
                 {% for student in students %}
                     {% if loop.index % 5 == 1 %}
-                          <tr>
+                        <tr>
                     {% endif %}
-                      <td>
+                        <td>
                           {% if imageData[student.getId()] is defined %}
-                              {{ base64_image(imageData[student.getId()].path, student.getId()) }}
-                        {% else %}
-                              {% if errorImageData == '_NONE_' %}
-                                  <i><span style="color:#595959">No Image Available</span></i>
-                              {% else %}
-                                  {{ base64_image(errorImageData.path, 'No Image Available') }}
-                              {% endif %}
-                        {% endif %}
-                          <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
-                        <br />{{student.getId()}}</div>
-                      </td>
+                                {{ base64_image(imageData[student.getId()].path, student.getId()) }}
+                            {% else %}
+                                {% if errorImageData == '_NONE_' %}
+                                    <i><span style="color:#595959">No Image Available</span></i>
+                                {% else %}
+                                    {{ base64_image(errorImageData.path, 'No Image Available') }}
+                                {% endif %}
+                            {% endif %}
+                            <div class="name">
+                                <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
+                                <br />{{student.getId()}}
+                            </div>
+                        </td>
                     {% if loop.index % 5 == 0 %}
                         </tr>
                     {% endif %}
@@ -46,7 +48,7 @@
             {% endfor %}
         {% else %}
             <tr>
-                <td colspan="8">No students found</td>
+                <td>No students found</td>
             </tr>
         {% endif %}
     </table>
