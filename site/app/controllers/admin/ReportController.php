@@ -627,4 +627,21 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->renderJsonFail($debug_contents);
         }
     }
+
+    /**
+     * Generate full rainbow grades view for instructors
+     * @Route("/{_semester}/{_course}/reports/full_grades")
+     * @AccessControl(role="INSTRUCTOR")
+     */
+
+     public function displayFullGrades(){
+        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
+
+        $grade_file = null;
+        if (file_exists($grade_path)) {
+            $grade_file = file_get_contents($grade_path);
+        }
+
+        $this->core->getOutput()->renderOutput(array('submission', 'RainbowGrades'), 'showGrades', $grade_file);
+    }
 }

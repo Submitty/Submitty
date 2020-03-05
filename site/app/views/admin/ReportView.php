@@ -11,7 +11,8 @@ class ReportView extends AbstractView {
             'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
             'csv_url' => $this->core->buildCourseUrl(['reports', 'csv']),
             'rainbow_grades_customization_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
-            'grade_summaries_last_run' => $grade_summaries_last_run
+            'grade_summaries_last_run' => $grade_summaries_last_run,
+            'full_grades_url' => $this->core->buildCourseUrl(['reports', 'full_grades'])
         ]);
     }
 }
