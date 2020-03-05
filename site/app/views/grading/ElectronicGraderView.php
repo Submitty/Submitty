@@ -716,7 +716,7 @@ HTML;
         $peer = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));

@@ -119,11 +119,11 @@ CREATE TABLE IF NOT EXISTS terms (
         raise SystemExit("Error INSERTing values into terms table.\n" + str(e))
 
     # Create FK, courses table (semester) references terms table (term_id)
-    try:
-        database.execute("ALTER TABLE ONLY courses ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES terms (term_id) ON UPDATE CASCADE;")
-    except Exception as e:
-        database.execute("ROLLBACK;")
-        raise SystemExit("Error creating FK for courses(semester) references terms(term_id)\n" + str(e))
+    #try:
+    #    database.execute("ALTER TABLE ONLY courses ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES terms (term_id) ON UPDATE CASCADE;")
+    #except Exception as e:
+    #    database.execute("ROLLBACK;")
+    #    raise SystemExit("Error creating FK for courses(semester) references terms(term_id)\n" + str(e))
 
     database.execute("COMMIT;")
 # END function up()
