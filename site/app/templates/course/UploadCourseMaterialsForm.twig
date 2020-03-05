@@ -15,11 +15,10 @@
             </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
-        <div>
-            <p class="black-message">
+        <fieldset>
+            <legend class="black-message">
                 Do you want to restrict this course material to some sections?
-            </span>
-            <br>
+            </legend>
             <label class = "radio" for="all_Sections_Showing">
                 <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
                 No
@@ -51,7 +50,7 @@
                 </tr>
             {% endfor %}
           </span>
-        </div>
+        </fieldset>
         <label id="upload_dt">
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>

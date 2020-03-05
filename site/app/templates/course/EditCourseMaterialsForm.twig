@@ -3,11 +3,10 @@
 {% block title %}Edit Course Materials{% endblock %}
 {% block body %}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
-        <span id="edit_sections">
-            <span class="black-message">
+        <fieldset id="edit_sections">
+            <legend class="black-message">
                 Do you want to restrict this course material to some sections?
-            </span>
-            <br>
+            </legend>
             <label class = "radio">
                 <input id = "all-sections-showing-no" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
                 No
@@ -22,7 +21,9 @@
                 <tr>
                     <span class = "inline">
                         <td>
-                            Section {{ section['sections_registration_id'] }}
+                          <label for="section-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
+                        </td>
+                        <td>
                             <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
                         </td>
                         <td>
@@ -37,7 +38,7 @@
                     $("#show-some-section-selection-edit").toggle();
                 }
             </script>
-        </span>
+        </fieldset>
         <label>
             <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
@@ -108,7 +109,11 @@
             enableTime: true,
             enableSeconds: true,
             time_24hr: true,
-            dateFormat: "Y-m-d H:i:S"
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, fp) => {
+              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+              fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
         });
     </script>
 {% endblock %}
