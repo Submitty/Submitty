@@ -66,6 +66,15 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
+     * Gets the benchmark percentages object
+     *
+     * @return object The benchmark percentages object
+     */
+    public function getBenchmarkPercent() {
+        return $this->benchmark_percent;
+    }
+
+    /**
      * Adds a benchmark to the display_benchmarks
      * If it already exists in the array no changes are made
      *

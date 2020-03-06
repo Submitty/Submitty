@@ -297,6 +297,10 @@ $(document).ready(function () {
         $('#display_benchmarks_collapse').toggle();
     });
 
+    $('#benchmark_percents h2').click(function() {
+        $('#benchmark_percents_collapse').toggle();
+    });
+
     $('#section_labels h2').click(function() {
         $('#section_labels_collapse').toggle();
     });

@@ -213,6 +213,32 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
+     * Get benchmark percentages
+     *
+     * @return object An object which maps benchmarks to the percentage (as a decimal) that is needed to obtain that
+     *                letter grade
+     */
+    public function getBenchmarkPercent() {
+        // If RCJSON exists use the values from it
+        if(!is_null($this->RCJSON)) {
+
+            return $this->RCJSON->getBenchmarkPercent();
+
+        // Else just return a default benchmark percent object
+        } else {
+
+            return (object)
+                [
+                    'lowest_a-' => 0.9,
+                    'lowest_b-' => 0.8,
+                    'lowest_c-' => 0.7,
+                    'lowest_d' => 0.6,
+                ];
+
+        }
+    }
+
+    /**
      * Get section ids and labels
      *
      * If no customization.json file exists then this function will generate defaults
