@@ -441,18 +441,21 @@ class AutoGradingView extends AbstractView {
             }
         }
 
+        $DATE_FORMAT = "m/d/Y @ h:i A";
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'overall_comments' => $overall_comments,
             'ta_components' => $ta_component_data,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
+            'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate()->format($DATE_FORMAT),
+            'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate()->format($DATE_FORMAT),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'ta_score' => $ta_grading_earned,
             'ta_max' => $ta_max,
             'active_same_as_graded' => $active_same_as_graded,
+            'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
             'regrade_available' => $regrade_available,
             'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
             'num_decimals' => $num_decimals,
@@ -573,7 +576,7 @@ class AutoGradingView extends AbstractView {
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $grader_id);
         }
-        
+
         $id = $this->core->getUser()->getId();
 
         $uploaded_pdfs = [];
@@ -658,10 +661,12 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$user_id] = $comment;
             }
         }
-        
+
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-        
+
+
+        $DATE_FORMAT = "m/d/Y @ h:i A";
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -671,12 +676,14 @@ class AutoGradingView extends AbstractView {
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,
             'ordered_graders' => $ordered_graders,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
+            'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate()->format($DATE_FORMAT),
+            'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate()->format($DATE_FORMAT),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,
             'peer_max' => $peer_max,
             'active_same_as_graded' => $active_same_as_graded,
+            'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
             'regrade_available' => $regrade_available,
             'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
             'num_decimals' => $num_decimals,

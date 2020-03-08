@@ -46,7 +46,7 @@ function switch_feedback_modes() {
 {% else %}
     <div class="sub">
 
-        
+
         {# /Overview #}
 
         {% if (peer_score >= peer_max) %}
@@ -70,11 +70,11 @@ function switch_feedback_modes() {
                     {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
                 {% else %}
                     {{ self.renderManyPeerResults(component) }}
-                {% endif %}                
+                {% endif %}
             {% endfor %}
             {# /Peer Component boxes #}
         {% endif %}
-        
+
         {# Overview #}
         <div class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in ordered_graders if overall_comments[user] is not empty %}
@@ -86,13 +86,13 @@ function switch_feedback_modes() {
                         <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
                     </p>
                 </div>
-   
+
             {% endfor %}
         </div>
-        
+
         {% if uploaded_pdfs|length >= 1 %}
             <div class = "no-border-box">
-    
+
                 <div class="row">
                     <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
                         {% for file in files %}
@@ -122,14 +122,14 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </div>
                     <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 30%; word-break: break-word; display: inline-block">
-                        
+
                         {% if can_download %}
-                            <p style="text-align:center; vertical-align: middle;">    
+                            <p style="text-align:center; vertical-align: middle;">
                                 Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
                                     <i class="fas fa-download" title="Download zip of all files"></i></button>
                             </p>
                         {% endif %}
-                        
+
                         {% for file in uploaded_pdfs %}
                             {% if file.name in annotated_file_names %}
                                 {% if loop.index != uploaded_pdfs|length %}
@@ -316,7 +316,7 @@ function switch_feedback_modes() {
                         </p>
                     </div>
                 {% endif %}
-            
+
             {% for file in uploaded_pdfs %}
                 {% if file.name in annotated_file_names and grader in file.graders%}
                     </br>
@@ -330,9 +330,9 @@ function switch_feedback_modes() {
                 {% endif %}
 
             {% endfor %}
-            
+
             </div>
-            
+
         {% endfor %}
     </div>
 {%- endmacro -%}

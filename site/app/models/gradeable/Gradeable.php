@@ -37,7 +37,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method \DateTime getGradeReleasedDate()
  * @method \DateTime getGradeLockedDate()
  * @method int getMinGradingGroup()
- * @method \DateTime getRegradeRequestDate()
+ * @method \DateTime getGradeInquiryStartDate()
+ * @method \DateTime getGradeInquiryDueDate()
  * @method string getSyllabusBucket()
  * @method void setSyllabusBucket($bucket)
  * @method string getTaInstructions()
@@ -203,8 +204,10 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @prop @var int The number of late days allowed */
     protected $late_days = 0;
+    /** @prop @var \DateTime The Date students can start making grade inquiries */
+    protected $grade_inquiry_start_date = null;
     /** @prop @var \DateTime The deadline for submitting a grade inquiry */
-    protected $regrade_request_date = null;
+    protected $grade_inquiry_due_date = null;
     /** @prop @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
     /** @prop @var bool are grade inquiries for specific components enabled for this assignment*/
@@ -292,7 +295,8 @@ class Gradeable extends AbstractModel {
         'grade_released_date',
         'grade_locked_date',
         'team_lock_date',
-        'regrade_request_date'
+        'grade_inquiry_start_date',
+        'grade_inquiry_due_date'
     ];
 
     /**
@@ -308,7 +312,8 @@ class Gradeable extends AbstractModel {
         'grade_locked_date' => 'Grades Locked',
         'team_lock_date' => 'Teams Locked',
         'late_days' => 'Late Days',
-        'regrade_request_date' => 'Grade Inquiries Due'
+        'grade_inquiry_start_date' => 'Grade Inquiries Open',
+        'grade_inquiry_due_date' => 'Grade Inquiries Due'
     ];
 
     /**
@@ -322,7 +327,8 @@ class Gradeable extends AbstractModel {
         'grade_due_date',
         'grade_released_date',
         'grade_locked_date',
-        'regrade_request_date'
+        'grade_inquiry_start_date',
+        'grade_inquiry_due_date'
     ];
 
     /**
@@ -564,9 +570,10 @@ class Gradeable extends AbstractModel {
                 array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
             }
 
-            // Only add in grade inquiry date if its allowed & enabled
+            // Only add in grade inquiry dates if its allowed & enabled
             if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
-                $result[] = 'regrade_request_date';
+                $result[] = 'grade_inquiry_start_date';
+                $result[] = 'grade_inquiry_due_date';
             }
         }
         else {
@@ -685,7 +692,8 @@ class Gradeable extends AbstractModel {
             $this->submission_open_date = $dates['submission_open_date'];
             $this->submission_due_date = $dates['submission_due_date'];
             $this->late_days = $dates['late_days'];
-            $this->regrade_request_date = $dates['regrade_request_date'];
+            $this->grade_inquiry_start_date = $dates['grade_inquiry_start_date'];
+            $this->grade_inquiry_due_date = $dates['grade_inquiry_due_date'];
         }
         $this->modified = true;
     }
@@ -1707,7 +1715,17 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->grade_inquiry_start_date < $this->core->getDateTimeNow() && $this->grade_inquiry_due_date > $this->core->getDateTimeNow())) {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * return true if the grade-inquiry is about to start for the students, false otherwise
+     * @return bool
+     */
+    public function isGradeInquiryYetToStart() {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_start_date > $this->core->getDateTimeNow()) {
             return true;
         }
         return false;
