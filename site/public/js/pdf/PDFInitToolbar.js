@@ -98,7 +98,7 @@ window.onbeforeunload = function() {
     function rotate(){
         window.RENDER_OPTIONS.rotate += 90;
         localStorage.setItem('rotate', window.RENDER_OPTIONS.rotate);
-        render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.RENDER_OPTIONS.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+        render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
     }
 
     function zoom(option, custom_val){
