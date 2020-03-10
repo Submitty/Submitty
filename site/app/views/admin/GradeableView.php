@@ -27,3 +27,4 @@ class GradeableView extends AbstractView {
         ]);
     }
 }
+GradeableView.php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
