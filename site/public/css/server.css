@@ -536,8 +536,8 @@ td>a.active-sort {
 
 .submission-page-total-header {
   padding: 6px;
-  color: var(--text-white);
-  background-color: var(--actionable-blue);
+  color: var(--text-black);
+  background-color: var(--standard-light-gray);
 }
 
 .viewed_post{
@@ -579,6 +579,13 @@ td>a.active-sort {
 
 .box-title > h4 {
     margin-left: 20px;
+}
+
+.box-title-total > h4 {
+    margin-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+
 }
 
 .grade-results {
