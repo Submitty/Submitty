@@ -108,7 +108,11 @@
             }
         }
         if(!iframe.hasClass("full_panel")){
-            if (!iframe.hasClass('shown')) {
+            if (url_file.substring(url_file.length - 3) === "pdf") {
+                iframe.removeClass('shown');
+                $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-minus-circle').addClass('fa-plus-circle');
+            }
+            else if (!iframe.hasClass('shown')) {
                 iframe.show();
                 iframe.addClass('shown');
                 $($($(iframe.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-plus-circle').addClass('fa-minus-circle');
