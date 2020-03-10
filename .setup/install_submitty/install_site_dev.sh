@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 
-##
-## This script is aimed to become gated behind a `--fast` flag for running
-## the existing INSTALL_SUBMITTY_HELPER_SITE.sh script. It achieves a much
-## lower runtime by only doing operations related to the files that rsync
-## actually updates instead of running over all files. For the moment, it
-## lives separately and will be more properly integrated after the first
-## big steps of the install rewrite happen for issue #4011
-##
 
-## TODO:
-##  1. create comparison script to ensure permissions after running this script
-##      match that of running normal install script
-##  2. fold into INSTALL_SUBMITTY_HELPER_SITE.sh in some way behind flag
+################################################################################################
+### DEVELOPMENTAL SITE INSTALLER
+#
+# This is a new, developmental site installer. This script looks at the result of the rsync
+# command to tell what files have been updated, and uses that list to see if:
+#   - if package.json or package-lock.json was modified, run NPM
+#   - if composer.json or composer.lock was modified, run composer
+#   - only set permissions appropriate for modified files
+#
+# This is more efficient by orders of magnitude than install_site_prod.sh, but at the cost
+# of being more complicated to get right. As such, this script is currently set to only
+# run when the debugging_enabled flag is set, which should largely only affect vagrant
+# users, and which gives us a good picture of stability before eventual production rollout
+# in a number of months.
+################################################################################################
 
 set_permissions () {
     local fullpath=$1
