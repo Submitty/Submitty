@@ -79,7 +79,7 @@ if [ ! -d ${SUBMITTY_INSTALL_DIR}/site/node_modules ]; then
     result=$(echo -e "${result}\n>f+++++++++ site/package.json")
 fi
 
-readarray -t result_array <<<"${result}"
+readarray -t result_array <<< "${result}"
 
 # clear old twig cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
@@ -107,35 +107,22 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
     chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/vendor
 fi
 
-# set the permissions of all files
-# $PHP_USER can read & execute all directories and read all files
-#chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
-#find ${SUBMITTY_INSTALL_DIR}/site ! -name \*.html -exec chmod 440 {} \;
-
-# "other" can cd into all subdirectories
-#find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
-
 # Set proper read/execute for "other" on files with certain extensions
 # so apache can properly handle them
 echo "Set permissions"
-readarray -t directories <<<$(echo "${result_array}" | grep "^.d")
-for directory in "${directories[@]}"; do
-    if [ ! -z "${directory}" ]; then
-        chmod 551 ${SUBMITTY_INSTALL_DIR}/${directory:12}
-    fi
-done
-
-readarray -t files <<<$(echo "${result_array}" | grep "^.f")
-for file in "${files[@]}"; do
-    if [ ! -z "${file}" ]; then
-        chmod 440 ${SUBMITTY_INSTALL_DIR}/${file:12}
-    fi
-done
-
-readarray -t public_files <<<$(echo "${files}" | grep "site/public")
-for file in "${public_files[@]}"; do
-    if [ ! -z "${file}" ]; then
-        set_permissions "${SUBMITTY_INSTALL_DIR}/${file:12}"
+for entry in "${result_array[@]}"; do
+    if echo ${entry} | grep -E -q "^.d"; then
+        if [ ! -z "${entry}" ]; then
+            chmod 551 ${SUBMITTY_INSTALL_DIR}/${entry:12}
+        fi
+    elif echo ${entry} | grep -E -q "site/public"; then
+        if [ ! -z "${entry}" ]; then
+            set_permissions "${SUBMITTY_INSTALL_DIR}/${entry:12}"
+        fi
+    elif echo ${entry} | grep -E -q "^.f"; then
+        if [ ! -z "${entry}" ]; then
+            chmod 440 ${SUBMITTY_INSTALL_DIR}/${entry:12}
+        fi
     fi
 done
 
