@@ -74,6 +74,14 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $name;
     }
 
+    public function getContactInfo() {
+        $contact_info = $this->core->getQueries()->getLastUsedContactInfo();
+        if (is_null($contact_info)) {
+            return "";
+        }
+        return $contact_info;
+    }
+
     public function getCurrentQueue() {
         return $this->current_queue;
     }
