@@ -94,7 +94,8 @@ for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
 
-# Update ownership for cache directory
+# Update permissions & ownership for cache directory
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
 chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 # Update ownership for cgi-bin to CGI_USER
@@ -130,12 +131,13 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
     su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader --no-suggest"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
 if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # Install JS dependencies and then copy them into place
@@ -223,6 +225,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     find ${VENDOR_FOLDER} -type d -exec chmod 551 {} \;
     find ${VENDOR_FOLDER} -type f | while read file; do set_permissions "$file"; done
 fi
+
+chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
