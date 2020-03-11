@@ -64,6 +64,21 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
 result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+
+# check for either of the dependency folders, and if they do not exist, pretend like
+# their respective json file was edited. Composer needs the folder to exist to even
+# run, but it could be someone just deleted the folders to try and fix some
+# weird dependency installation issue (common with npm troubleshooting).
+if [ ! -d ${SUBMITTY_INSTALL_DIR}/site/vendor ]; then
+    mkdir ${SUBMITTY_INSTALL_DIR}/site/vendor
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
+    result=$(echo -e "${result}\n>f+++++++++ site/composer.json")
+fi
+
+if [ ! -d ${SUBMITTY_INSTALL_DIR}/site/node_modules ]; then
+    result=$(echo -e "${result}\n>f+++++++++ site/package.json")
+fi
+
 readarray -t result_array <<<"${result}"
 
 # clear old twig cache
