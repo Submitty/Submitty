@@ -10,40 +10,45 @@
         {% if sections|length > 0 %}
             {% for registration, students in sections %}
                 <tr class="info">
-                    <td colspan="8" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</td>
+                    <th colspan="5" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</th>
                 </tr>
-                <tbody id="section-{{ registration }}">
+                <tbody>
+                {% set count = 4 - (students|length % 5) %}
                 {% for student in students %}
                     {% if loop.index % 5 == 1 %}
-                        <tr id="user-{{ student.getId() }}">
+                        <tr>
                     {% endif %}
-                    {% if imageData[student.getId()] is defined %}
-                        <td>{{ base64_image(imageData[student.getId()].path, student.getId()) }}
-                        <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
-                        <br />{{student.getId()}}</div>
+                        <td>
+                            {% if imageData[student.getId()] is defined %}
+                                {{ base64_image(imageData[student.getId()].path, student.getId()) }}
+                            {% else %}
+                                {% if errorImageData == '_NONE_' %}
+                                    <i><span style="color:#595959">No Image Available</span></i>
+                                {% else %}
+                                    {{ base64_image(errorImageData.path, 'No Image Available') }}
+                                {% endif %}
+                            {% endif %}
+                            <div class="name">
+                                <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
+                                <br />{{student.getId()}}
+                            </div>
                         </td>
-                    {% else %}
-                        {% if errorImageData == '_NONE_' %}
-                            <td><i><font color="gray"><img alt="No Image Available" /></font></i>
-                            <div class="name"><br />
-                        {% else %}
-                            <td>{{ base64_image(errorImageData.path, 'No Image Available') }}
-                            <div class="name"><br /><br />
-                        {% endif %}
-                        {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
-                        <br />{{student.getId()}}</div>
-                        </td>
-                    {% endif %}
                     {% if loop.index % 5 == 0 %}
                         </tr>
                     {% endif %}
                     {% flush %}
                 {% endfor %}
+                  {% if count < 4 %}
+                      {% for spacer in 0..count %}
+                          <td></td>
+                      {% endfor %}
+                      </tr>
+                  {% endif %}
                 </tbody>
             {% endfor %}
         {% else %}
             <tr>
-                <td colspan="8">No students found</td>
+                <td>No students found</td>
             </tr>
         {% endif %}
     </table>
