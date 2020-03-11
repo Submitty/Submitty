@@ -6,21 +6,21 @@
     {% endif %}
 
     <div style="text-align:center;margin:10px;padding:5px;">
-        <button type="button" id="bulk_submit_all" class="btn btn-primary" onclick="submitAll(1)">Submit All Uploaded PDFS</button>
-        <button type="button" id="bulk_delete_all" class="btn btn-default" onclick="confirmDeleteAll()">Delete All Uploaded PDFS</button>
+        <button type="button" id="bulk_submit_all" class="btn btn-primary key_to_click" tabindex="0" onclick="submitAll(1)">Submit All Uploaded PDFS</button>
+        <button type="button" id="bulk_delete_all" class="btn btn-default key_to_click" tabindex="0" onclick="confirmDeleteAll()">Delete All Uploaded PDFS</button>
     </div>
 
     <table class="table table-striped table-bordered persist-area">
         <thead>
         <tr>
-            <td width="3%"></td>
-            <td width="8%">Timestamp</td>
-            <td width="53%">PDF preview</td>
-            <td width="5%">Full PDF</td>
-            <td width="15%">User ID</td>
+            <td style="width:3%"></td>
+            <td style="width:8%">Timestamp</td>
+            <td style="width:53%">PDF preview</td>
+            <td style="width:5%">Full PDF</td>
+            <td style="width:15%">User ID</td>
             <td>Page Count</td>
-            <td width="8%">Submit</td>
-            <td width="8%">Delete</td>
+            <td style="width:8%">Submit</td>
+            <td style="width:8%">Delete</td>
         </tr>
         </thead>
         <tbody>
@@ -76,11 +76,11 @@
                         {{ file["page_count"] }}
                     </td>
                     <td>
-                        <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-primary"
+                        <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-primary key_to_click" tabindex="0"
                         onclick="uploadSplit( {{ loop.index }} )">Submit</button>
                     </td>
                     <td>
-                        <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-default" onclick="deleteSplit({{ loop.index }})">Delete</button>
+                        <button type="button" id="bulk_delete_{{ loop.index }}" class="btn btn-default key_to_click" tabindex="0" onclick="deleteSplit({{ loop.index }})">Delete</button>
                     </td>
                 </tr>
             {% endfor %}
@@ -88,7 +88,7 @@
     </table>
 </div>
 
-<script type="text/javascript">
+<script>
     var path_list = {{ count_array|json_encode|raw }};
     var num_submissions = {{ files|length }};
     var CSRF = "{{ csrf_token }}";
@@ -138,7 +138,7 @@
             if(parts[i].length > 1 && parts[i].includes('-')){
                 //handle range
                 tmp = parts[i].split('-');
-                if (tmp.length != 2){ 
+                if (tmp.length != 2){
                     continue;
                 }
 

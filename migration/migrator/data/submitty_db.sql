@@ -41,6 +41,15 @@ SET default_with_oids = false;
 -- Name: courses; Type: TABLE; Schema: public; Owner: -
 --
 
+CREATE TABLE terms (
+    term_id character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    CONSTRAINT terms_check CHECK (end_date > start_date)
+);
+
+
 CREATE TABLE courses (
     semester character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
@@ -144,6 +153,9 @@ CREATE TABLE courses_registration_sections (
 -- Name: courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY terms
+    ADD CONSTRAINT terms_pkey PRIMARY KEY (term_id);
+
 ALTER TABLE ONLY courses
     ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
 
@@ -183,6 +195,8 @@ ALTER TABLE ONLY users
 ALTER TABLE ONLY courses_registration_sections
     ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id);
 
+ALTER TABLE ONLY courses
+    ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES terms (term_id) ON UPDATE CASCADE;
 
 ALTER TABLE ONLY mapped_courses
     ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES courses(semester, course) ON UPDATE CASCADE;

@@ -100,7 +100,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'default_student_late_days' => 0,
                 'zero_rubric_grades' => false,
                 'upload_message' => "",
-                'keep_previous_files' => false,
                 'display_rainbow_grades_summary' => false,
                 'display_custom_message' => false,
                 'course_email' => 'Please contact your TA or instructor to submit a grade inquiry.',
@@ -108,13 +107,17 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'vcs_type' => 'git',
                 'private_repository' => '',
                 'forum_enabled' => true,
+                'forum_create_thread_message' => '',
                 'regrade_enabled' => false,
                 'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => "",
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
-            )
+            ),
+            'feature_flags' => [
+
+            ]
         );
 
         $config = array_replace_recursive($config, $extra);
@@ -199,7 +202,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertEquals("", $config->getUploadMessage());
         $this->assertFalse($config->displayCustomMessage());
-        $this->assertFalse($config->keepPreviousFiles());
         $this->assertFalse($config->displayRainbowGradesSummary());
         $this->assertEquals(
             FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
@@ -233,7 +235,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'default_student_late_days' => 0,
             'zero_rubric_grades' => false,
             'upload_message' => '',
-            'keep_previous_files' => false,
             'display_rainbow_grades_summary' => false,
             'display_custom_message' => false,
             'course_email' => 'Please contact your TA or instructor to submit a grade inquiry.',
@@ -253,7 +254,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'default_student_late_days' => 0,
                     'zero_rubric_grades' => false,
                     'upload_message' => "",
-                    'keep_previous_files' => false,
                     'display_rainbow_grades_summary' => false,
                     'display_custom_message' => false,
                     'course_email' => 'Please contact your TA or instructor to submit a grade inquiry.',
@@ -261,16 +261,19 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'vcs_type' => 'git',
                     'private_repository' => '',
                     'forum_enabled' => true,
+                    'forum_create_thread_message' => '',
                     'regrade_enabled' => false,
                     'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
-                ]
+                ],
+                'feature_flags' => []
             ],
             'course_loaded' => true,
             'forum_enabled' => true,
+            'forum_create_thread_message' => '',
             'institution_homepage' => 'https://rpi.edu',
             'institution_name' => 'RPI',
             'private_repository' => '',
@@ -288,7 +291,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
             'verified_submitty_admin_user' => null,
-            'queue_enabled' => true
+            'queue_enabled' => true,
+            'feature_flags' => []
         );
         $actual = $config->toArray();
 
@@ -459,9 +463,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $settings = [
             'course_details' => [
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
-                'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
+                'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id', 'queue_enabled'
+                'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id', 'queue_enabled'
             ],
         ];
         $return = array();
@@ -555,5 +559,50 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testFeatureFlagTrueDebug() {
+        $extra = ['debugging_enabled' => true];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core);
+        $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
+
+        $this->assertTrue($config->isDebug());
+        $this->assertTrue($config->checkFeatureFlagEnabled('non_existing_name'));
+    }
+
+    public function testFeatureFlagEnabled() {
+        $extra = ['feature_flags' => ['feature_1' => true, 'feature_2' => false]];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core);
+        $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
+
+        $this->assertFalse($config->isDebug());
+        $this->assertFalse($config->checkFeatureFlagEnabled('non_existing_name'));
+        $this->assertTrue($config->checkFeatureFlagEnabled('feature_1'));
+        $this->assertFalse($config->checkFeatureFlagEnabled('feature_2'));
+    }
+
+    public function testNonexistingFeatureFlagConfig() {
+        $extra = ['feature_flags' => null];
+        $this->createConfigFile($extra);
+
+        $config = new Config($this->core);
+        $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
+
+        $this->assertFalse($config->isDebug());
+        $this->assertFalse($config->checkFeatureFlagEnabled('non_existing_name'));
+        $this->assertFalse($config->checkFeatureFlagEnabled('feature_1'));
     }
 }

@@ -1,31 +1,31 @@
-<script type="text/javascript">
+<script>
     $(function() {
         $("[name='rotating_type']").change(function() {
             if ($(this).val() == "alphabetically") {
                 $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
-				
+
             }
             else {
                 $("[name='fewest']").attr('onclick', '').removeClass('disabled');
             }
         });
-		
+
         $("[name='sort_type']").change(function() {
             var val = $(this).val();
 			if (val != "redo") {
 				$('#redo-data').hide();
-			}	
+			}
             else {
 				$('#redo-data').show();
             }
         });
     });
 
-	
+
     $(document).ready(function() {
        $('#redo-data').hide();
     });
-	
+
 </script>
 <div class="content">
     <h1>Manage Registration Sections</h1>
@@ -49,7 +49,6 @@
                 <h2>Current Registration Section Counts</h2>
                 {# This is a data table #}
                 <table class="table table-bordered table-striped">
-                    <caption />
                     <thead>
                         <tr>
                             <th>Section</th>
@@ -89,22 +88,24 @@
                 <div class="option">
                     <div class="option-input"><input type="text" name="add_reg_section" id="add_reg_section" value="" placeholder="Eg: 3" /></div>
                     <div class="option-desc">
-                    	<label for="add_reg_section">
-							<div class="option-title">Add Registration Section</div>
-							<div class="option-alt">
+            <label for="add_reg_section">
+							<span class="option-title">Add Registration Section</span>
+              <br>
+							<span class="option-alt">
 								Enter a registration section which is not already a registration section.
-							</div>
+							</span>
 						</label>
                     </div>
                 </div>
                 <div class="option">
                     <div class="option-input"><input type="text" name="delete_reg_section" id="delete_reg_section" value="" placeholder="Eg: 3" /></div>
                     <div class="option-desc">
-                    	<label for="delete_reg_section">
-							<div class="option-title">Delete a Registration Section</div>
-							<div class="option-alt">
+            <label for="delete_reg_section">
+							<span class="option-title">Delete a Registration Section</span>
+              <br>
+							<span class="option-alt">
 								Registration Section to be deleted should not have any student enrolled in it and no grader should be assigned to grade the section.
-							</div>
+							</span>
 						</label>
                     </div><br />
                     <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
@@ -195,7 +196,7 @@
                     <label>
                         Number of sections:
                         <input type="number" name="sections" />
-                    </label> 
+                    </label>
                     <label>
                         Sort students:
                         <select name="rotating_type">

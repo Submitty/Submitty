@@ -39,13 +39,13 @@ class ConfigurationController extends AbstractController {
             'default_student_late_days'      => $this->core->getConfig()->getDefaultStudentLateDays(),
             'zero_rubric_grades'             => $this->core->getConfig()->shouldZeroRubricGrades(),
             'upload_message'                 => $this->core->getConfig()->getUploadMessage(),
-            'keep_previous_files'            => $this->core->getConfig()->keepPreviousFiles(),
             'display_rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'display_custom_message'         => $this->core->getConfig()->displayCustomMessage(),
             'course_email'                   => $this->core->getConfig()->getCourseEmail(),
             'vcs_base_url'                   => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
+            'forum_create_thread_message'    => $this->core->getConfig()->getForumCreateThreadMessage(),
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
@@ -54,7 +54,6 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
         );
-        $categoriesCreated = empty($this->core->getQueries()->getCategories());
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
         if ($this->core->getConfig()->isSubmittyAdminUserVerified()) {
@@ -87,7 +86,6 @@ class ConfigurationController extends AbstractController {
                     'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
                     'in_course' => $admin_in_course,
                 ],
-                $categoriesCreated,
                 $this->core->getCsrfToken()
             )
         );
@@ -138,7 +136,6 @@ class ConfigurationController extends AbstractController {
                 $name,
                 [
                     'zero_rubric_grades',
-                    'keep_previous_files',
                     'display_rainbow_grades_summary',
                     'display_custom_message',
                     'forum_enabled',
@@ -151,7 +148,6 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name === 'queue_enabled') {
             $entry = $entry === "true" ? true : false;
-            $this->core->getQueries()->genQueueSettings();
         }
         elseif ($name === 'upload_message') {
             $entry = nl2br($entry);
@@ -185,17 +181,12 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true" ? true : false;
         }
 
-        if ($name === 'forum_enabled') {
-            if ($entry == 1) {
-                if ($this->core->getAccess()->canI("forum.modify_category")) {
-                    $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
-                    $rows = $this->core->getQueries()->getCategories();
-
-                    foreach ($categories as $category) {
-                        if (ForumUtils::isValidCategories($rows, -1, array($category))) {
-                            $this->core->getQueries()->addNewCategory($category);
-                        }
-                    }
+        if ($name === 'forum_enabled' && $entry == 1) {
+            // Only create default categories when there is no existing categories (only happens when first enabled)
+            if (empty($this->core->getQueries()->getCategories())) {
+                $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
+                foreach ($categories as $category) {
+                    $this->core->getQueries()->addNewCategory($category);
                 }
             }
         }

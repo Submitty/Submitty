@@ -24,7 +24,7 @@ class GradedComponentContainer extends AbstractModel {
     /** @var TaGradedGradeable The TaGradedGradeable all grades belong to */
     private $ta_graded_gradeable = null;
 
-    /** @property @var GradedComponent[] The graded components for this Component */
+    /** @prop @var GradedComponent[] The graded components for this Component */
     protected $graded_components = [];
 
     /**
@@ -87,7 +87,7 @@ class GradedComponentContainer extends AbstractModel {
      * @return GradedComponent|null The graded component instance or null if not found
      * @throws \InvalidArgumentException If $grader is null and ($component is peer or $generate is true)
      */
-    public function getOrCreateGradedComponent($grader = null, $generate = false) {
+    public function getOrCreateGradedComponent(User $grader = null, $generate = false) {
         $grades_exist = $this->anyGradedComponents();
         if ($grader === null) {
             // If the grader is null and its a peer component, we can't do anything useful
@@ -156,7 +156,7 @@ class GradedComponentContainer extends AbstractModel {
      * @param User|null $grader The grader for this component
      * @return GradedComponent|null
      */
-    public function getGradedComponent($grader = null) {
+    public function getGradedComponent(User $grader = null) {
         return $this->getOrCreateGradedComponent($grader, false);
     }
 
@@ -207,16 +207,23 @@ class GradedComponentContainer extends AbstractModel {
      *  to the precision of the gradeable
      * @return float
      */
-    public function getTotalScore() {
+    public function getTotalScore(User $grader = null) {
         $points_earned = 0.0;
+        $number_of_graders = 0;
         // TODO: how should peer grades be calculated: now its an average
         /** @var GradedComponent $graded_component */
         foreach ($this->graded_components as $graded_component) {
+            // If there is a grader, we are only computing their total score rather than the total score for all peers.
+            if ($grader !== null && $graded_component->getGrader()->getId() !== $grader->getId()) {
+                continue;
+            }
             $points_earned += $graded_component->getTotalScore();
+            $number_of_graders += 1;
         }
+
         // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
         // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
-        $points_earned = Utils::safeCalcPercent($points_earned, max(1, count($this->graded_components)));
+        $points_earned = Utils::safeCalcPercent($points_earned, max(1, $number_of_graders));
         return NumberUtils::roundPointValue($points_earned, $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->getPrecision());
     }
 
@@ -260,11 +267,18 @@ class GradedComponentContainer extends AbstractModel {
      * @param Mark $mark
      * @return int
      */
-    public function getMarkMultiplicity(Mark $mark) {
+    public function getMarkMultiplicity(Mark $mark, User $grader = null) {
         $count = 0;
         foreach ($this->graded_components as $graded_component) {
             if ($graded_component->hasMark($mark)) {
-                $count++;
+                if ($grader === null) {
+                    $count++;
+                }
+                else {
+                    if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                        return 1;
+                    }
+                }
             }
         }
         return $count;
@@ -275,8 +289,8 @@ class GradedComponentContainer extends AbstractModel {
      * @param Mark $mark
      * @return bool
      */
-    public function hasMark(Mark $mark) {
-        return $this->getMarkMultiplicity($mark) > 0;
+    public function hasMark(Mark $mark, User $grader = null) {
+        return $this->getMarkMultiplicity($mark, $grader) > 0;
     }
 
     /**

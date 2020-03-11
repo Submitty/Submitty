@@ -6,6 +6,7 @@ use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DatabaseUtils;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 
@@ -19,6 +20,7 @@ use app\libraries\GradeableType;
 class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
+    private $bucket_counts = [];               // Keep track of how many items are in each bucket
     private $customization_data = [];
     private $has_error;
     private $error_messages;
@@ -68,6 +70,7 @@ class RainbowCustomization extends AbstractModel {
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
         foreach (self::syllabus_buckets as $bucket) {
             $this->customization_data[$bucket] = [];
+            $this->bucket_counts[$bucket] = 0;
         }
 
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
@@ -84,7 +87,9 @@ class RainbowCustomization extends AbstractModel {
              * confused when the grade distribution shifts around.
              */
 
-            $max_score = $gradeable->getTAPoints();
+            // Update bucket count
+            $this->bucket_counts[$bucket]++;
+            $max_score = $gradeable->getManualGradingPoints();
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()) {
                 $last_index = count($this->customization_data[$bucket]) - 1;
@@ -94,7 +99,8 @@ class RainbowCustomization extends AbstractModel {
             $this->customization_data[$bucket][] = [
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
-                "max_score" => $max_score
+                "max_score" => $max_score,
+                "grade_release_date" => DateUtils::dateTimeToString($gradeable->getGradeReleasedDate())
             ];
         }
 
@@ -102,9 +108,18 @@ class RainbowCustomization extends AbstractModel {
         if (!is_null($this->RCJSON)) {
             $json_gradeables = $this->RCJSON->getGradeables();
 
-            // Place those buckets in $this->used_buckets
             foreach ($json_gradeables as $json_gradeable) {
+                // Place those buckets in $this->used_buckets
                 $this->used_buckets[] = $json_gradeable->type;
+
+                // When preparing the count of how many items are in the bucket, if the instructor has previously
+                // entered a value which was greater than the number of gradeables in the database, we should use the
+                // instructor entered value instead
+                $bucket = $json_gradeable->type;
+
+                if ($json_gradeable->count > $this->bucket_counts[$bucket]) {
+                    $this->bucket_counts[$bucket] = $json_gradeable->count;
+                }
             }
         }
 
@@ -146,6 +161,10 @@ class RainbowCustomization extends AbstractModel {
         }
 
         return $retArray;
+    }
+
+    public function getBucketCounts() {
+        return $this->bucket_counts;
     }
 
     public function getCustomizationData() {

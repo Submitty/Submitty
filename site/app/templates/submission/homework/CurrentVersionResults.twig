@@ -12,7 +12,7 @@
 
                 {# download icon if student can download files #}
                 {% if can_download %}
-                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                    <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
                         <i class="fas fa-download" title="Download the file"></i></button>
                 {% endif %}
 
@@ -23,7 +23,7 @@
             {% if can_download and files|length > 1 %}
                 <br />
                 <br />
-                Download all files: <a onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download zip of all files"><i class="fas fa-download" title="Download zip of all files"></i></a>
+                Download all files: <a onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download zip of all files" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download zip of all files"></i></a>
             {% endif %}
         </div>
         <div class="box col-md-6">
@@ -57,40 +57,3 @@
     <span hidden id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
 {% endif %}
 {# /Submitted files #}
-
-<div class="sub">
-    {% if show_testcases %}
-        <h4>Autograding Results</h4>
-    {% endif %}
-
-    {# Actual results #}
-    {% if in_queue or grading %}
-        {% if grading %}
-            <p class="red-message">
-                This submission is currently being graded.
-            </p>
-        {% else %}
-            <p class="red-message">
-                This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
-            </p>
-        {% endif %}
-        <script type="text/javascript">
-            checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
-        </script>
-    {% elseif results is not defined %}
-        <p class="red-message">
-            Something has gone wrong with grading this submission. Please contact your instructor about this.
-        </p>
-    {% else %}
-        {# Has results! #}
-        {% if show_incentive_message %}
-            <script type="text/javascript">
-                (function() {
-                    ('#incentive_message').show();
-                })();
-            </script>
-        {% endif %}
-    {% endif %}
-
-    {{ result_text|raw }}
-</div>

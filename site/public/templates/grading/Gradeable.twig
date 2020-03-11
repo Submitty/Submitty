@@ -2,7 +2,7 @@
     {% block header_content %}
     {% endblock %}
 {# Components #}
-    {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+    {# twig.js doesn't support blocks inside of for loops ... ANNOYING #}
     <div id="component-list">
         {% block components_block %}
         {% endblock %}
@@ -13,7 +13,7 @@
     {% endblock %}
 </div>
 
-<script type="text/javascript">
+<script>
     //
     // This is needed to resolve conflicts between Chrome and other browsers
     //   where Chrome can only do synchronous ajax calls on 'onbeforeunload'

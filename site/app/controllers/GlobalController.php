@@ -21,6 +21,7 @@ class GlobalController extends AbstractController {
         }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
+        $page_name = $this->core->getOutput()->getPageName();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
 
@@ -95,10 +96,10 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getConfig()->isQueueEnabled()) {
-                if ($this->core->getQueries()->isQueueOpen()) {
+                if ($this->core->getQueries()->isAnyQueueOpen()) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours",
+                        "title" => "Office Hours/Lab queue",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-queue",
                         "icon" => "fa-door-open"
@@ -107,7 +108,7 @@ class GlobalController extends AbstractController {
                 else {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours",
+                        "title" => "Office Hours/Lab Queue",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-queue",
                         "icon" => "fa-door-closed"
@@ -269,13 +270,17 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-grade-override",
                     "icon" => "fa-eraser"
                 ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildCourseUrl(['plagiarism']),
-                    "title" => "Plagiarism Detection",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-plagiarism",
-                    "icon" => "fa-exclamation-triangle"
-                ]);
+
+                if ($this->core->getConfig()->checkFeatureFlagEnabled('plagiarism')) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildCourseUrl(['plagiarism']),
+                        "title" => "Plagiarism Detection",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-plagiarism",
+                        "icon" => "fa-exclamation-triangle"
+                    ]);
+                }
+
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['reports']),
                     "title" => "Grade Reports",
@@ -364,7 +369,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
     }
 
     public function footer() {

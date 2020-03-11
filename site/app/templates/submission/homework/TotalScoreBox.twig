@@ -1,0 +1,18 @@
+{% import 'functions/Badge.twig' as Badge %}
+
+{% if total_complete == true  and active_same_as_graded == true %}
+    <canvas id="confetti_canvas"></canvas>
+    <div class="content">
+        <div class="box submission-page-total-header">
+            <div class="box-title-total"
+                {% if total_score >= total_max %}
+                    onclick="addConfetti();"
+                    style="cursor:pointer;"
+                {% endif %}
+            >
+                {{ Badge.render(total_score, total_max, false) }}
+                <h4>Total</h4>
+            </div>
+        </div>
+    </div>
+{% endif %}

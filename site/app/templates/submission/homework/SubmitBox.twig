@@ -11,7 +11,14 @@
 
 <div class="content">
     <header id="gradeable-info">
-        <h1>New submission for: {{ gradeable_name }}</h1>
+        <h1>
+            New submission for: {{ gradeable_name }}
+            {% if gradeable_url|trim != "" %}
+                <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            {% endif %}
+        </h1>
         {% if has_due_date %}
             <h2>Due: {{ formatted_due_date }}</h2>
         {% endif %}
@@ -85,7 +92,7 @@
             </div>
         </form>
 
-        <script type="text/javascript">
+        <script>
             $(function() {
                 students_full = {{ students_full|json_encode|raw }};
                 $('#qr_prefix').prop('hidden', true);
@@ -274,7 +281,7 @@
                                      class="codebox"
                                      data-initial_value="{{ cell.initial_value }}"
                                      data-recent_submission="{{ cell.recent_submission }}"
-                                     onKeyPress="handle_input_keypress();">
+                                     onkeyup="handle_input_keypress();">
                                 </div>
 
                                 <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
@@ -290,32 +297,15 @@
                                         }
                                     );
 
-                                    {# Populate codebox initially #}
-                                    {% if core.getConfig().keepPreviousFiles() %}
-                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                                    {% else %}
-                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                                    {% endif %}
-
-                                    {# Hide recent button if no previous submissions #}
+                                    {# Populate codebox and set state of buttons initially #}
                                     {% if highest_version == 0 %}
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
-                                    {% endif %}
-
-                                    {# Setup init state of buttons #}
-                                    {% if core.getConfig().keepPreviousFiles() %}
-
-                                        {% if highest_version == 0 %}
-                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                        {% else %}
-                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                        {% endif %}
-
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
                                         document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = false;
-
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
                                     {% endif %}
                                 </script>
                             {% set num_codeboxes = num_codeboxes + 1 %}
@@ -323,7 +313,11 @@
 
                     {# Handle if cell is multiple choice #}
                     {% elseif cell.type == "multiple_choice" %}
-
+                        {% if cell.randomize_order == true %}
+                            {% set choices_indices = numberUtils.getRandomIndices(cell.choices|length, student_id, gradeable_id ) %}
+                        {% else %}
+                            {% set choices_indices = numberUtils.getIndices(cell.choices) %}
+                        {% endif %}
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
                                   {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
@@ -338,15 +332,15 @@
 
                                 {{ self.render_testcase_messages(cell, testcase_messages) }}
 
-                                {% for choice in cell.choices %}
+                                {% for idx in choices_indices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-                                        <input type="checkbox"
+                                        <input type="checkbox" class="key_to_click" tabindex="0"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                               value="{{ choice.value }}"
+                                               value="{{ cell.choices[idx].value }}"
                                                onclick="handle_input_keypress();"
                                         />
-                                        {{ choice.description | markdown }}
+                                        {{ cell.choices[idx].description | markdown }}
                                     </label>
                                 {% endfor %}
                             {% else %}
@@ -360,15 +354,15 @@
 
                                 {{ self.render_testcase_messages(cell, testcase_messages) }}
 
-                                {% for choice in cell.choices %}
+                                {% for idx in choices_indices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-                                        <input type="radio"
+                                        <input type="radio" class="key_to_click" tabindex="0"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                               value="{{ choice.value }}"
+                                               value="{{ cell.choices[idx].value }}"
                                                onclick="handle_input_keypress();"
                                         />
-                                        {{ choice.description | markdown }}
+                                        {{ cell.choices[idx].description | markdown }}
                                     </label>
                                 {% endfor %}
                             {% endif %}
@@ -380,28 +374,17 @@
 
                         <script>
                             {# Populate checkboxes initially #}
-                            {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
+                            {% if cell.recent_submission is defined %}
                                 setMultipleChoices("mc_field_{{ num_multiple_choice }}");
                             {% endif %}
 
-                            {# Hide button if no previous submissions #}
-                            {% if cell.recent_submission is not defined %}
-                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
-                            {% endif %}
-
                             {# Configure initial state for the button #}
-                            {% if core.getConfig().keepPreviousFiles() %}
-
-                                {% if highest_version == 0 %}
-                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                                {% else %}
-                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
-                                {% endif %}
-
-                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
+                            {% if highest_version == 0 %}
+                                $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
                             {% else %}
-                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                                $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                             {% endif %}
                         </script>
 
@@ -465,9 +448,7 @@
 
             {% if display_version == highest_version and display_version > 0 %}
                 <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
-
-                {% if core.getConfig().keepPreviousFiles() %}
-                <script type="text/javascript">
+                <script>
                     $(function() {
                         setUsePrevious();
                         {% for file in old_files %}
@@ -476,11 +457,10 @@
                         {% endfor %}
                     });
                 </script>
-                {% endif %}
             {% endif %}
         {% endif %}
 
-        <script type="text/javascript">
+        <script>
             $(function() {
                 setButtonStatus();
             });
@@ -528,7 +508,7 @@
     {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
-<script type="text/javascript">
+<script>
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
@@ -691,12 +671,12 @@
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
-                    {% if core.getConfig().keepPreviousFiles() %}
+                    {% if short_answer.recent_submission|length  %}
                         value="{{ short_answer.recent_submission }}"
                     {% else %}
                         value="{{ short_answer.initial_value }}"
                     {% endif %}
-                    onKeyPress="handle_input_keypress();"
+                    onkeyup="handle_input_keypress();"
                 />
             </label>
         {% else %}
@@ -721,8 +701,8 @@
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
-                    onKeyPress="handle_input_keypress()"
-                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
+                    onkeyup="handle_input_keypress()"
+                >{% if short_answer.recent_submission|length  %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
@@ -738,23 +718,13 @@
         <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
         <script>
 
-            {% if version == 0 %}
-                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
-            {% endif %}
-
             // Setup init state of buttons
-            {% if core.getConfig().keepPreviousFiles() %}
-
-                {% if version == 0 %}
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                {% else %}
-                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                {% endif %}
-
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-            {% else %}
+            {% if version == 0 %}
                 document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% else %}
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
             {% endif %}
 
         </script>
