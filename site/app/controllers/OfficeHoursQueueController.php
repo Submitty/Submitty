@@ -121,7 +121,8 @@ class OfficeHoursQueueController extends AbstractController {
                 return Response::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
                 );
-            }else {
+            }
+            else {
                 $contact_info = $_POST['contact_info'];
             }
         }

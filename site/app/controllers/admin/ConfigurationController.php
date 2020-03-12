@@ -149,7 +149,8 @@ class ConfigurationController extends AbstractController {
         }
         elseif ($name === 'queue_enabled') {
             $entry = $entry === "true" ? true : false;
-        }elseif ($name === 'queue_contact_info') {
+        }
+        elseif ($name === 'queue_contact_info') {
             $entry = $entry === "true" ? true : false;
         }
         elseif ($name === 'upload_message') {
