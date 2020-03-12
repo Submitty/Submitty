@@ -169,7 +169,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return preg_replace('/_/', ' ', $value);
     }
 
-    public function isContactInfoEnabled(){
-      return $this->core->getConfig()->getQueueContactInfo();
+    public function isContactInfoEnabled() {
+        return $this->core->getConfig()->getQueueContactInfo();
     }
 }
