@@ -117,10 +117,11 @@ $( document ).ready(function() {
 
         {% if peer_components | length > 0 %}
             <div class="box submission-page-total-header">
-                <div class="box-title"
+                <div class="box-title-total"
                     {% if peer_score >= peer_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
                     {% endif %}>
+
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
@@ -142,7 +143,7 @@ $( document ).ready(function() {
                             {# This is a layout table #}
                             <table class="mobile-table">
                                  <thead>
-                                    <tr> 
+                                    <tr>
                                         {% for grader in component.peer_ids %}
                                             <th class="peer-table-header">
                                                 {{ peer_aliases[grader] }}

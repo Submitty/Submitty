@@ -12,14 +12,16 @@
         <hr>
 
         <label for="course-name" class="config-row">
-            <div class="option-title">Full Course Name</div>
-            <div class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</div>
+            <span class="option-title">Full Course Name</span>
+            <br>
+            <span class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</span>
         </label>
         <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" />
 
         <label for="course-home-url" class="config-row">
-            <div class="option-title">Course Home URL</div>
-            <div class="option-alt">Input the url that will link to your course page from the Course Name</div>
+            <span class="option-title">Course Home URL</span>
+            <br>
+            <span class="option-alt">Input the url that will link to your course page from the Course Name</span>
         </label>
         <input class="config-row" type="text" name="course_home_url" id="course-home-url" value="{{ fields['course_home_url'] }}" />
 
@@ -28,14 +30,17 @@
         <div id="forum-enabled-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="forum_enabled" id="forum-enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
             <label for="forum-enabled">
-                <div class="option-title">Enable Discussion Forum</div>
-                <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
+                <span class="option-title">Enable Discussion Forum</span>
+                <br>
+                <span class="option-alt">Choose whether to enable a forum for this course.</span>
+                <br>
+                <a id="forum-enabled-message" href="{{ manage_categories_url }}" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
             </label>
         </div>
         <label for="create-thread-message" class="config-row">
-            <div class="option-title">Create Thread Default Message</div>
-            <div class="option-alt">Input a message that would be shown in the thread creation page.</div>
+            <span class="option-title">Create Thread Default Message</span>
+            <br>
+            <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
         <textarea class="config-row" name="forum_create_thread_message" id="create-thread-message" rows="4"/>{{ fields['forum_create_thread_message'] }}</textarea>
 
@@ -44,8 +49,9 @@
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} />
             <label for="queue-enabled">
-                <div class="option-title">Enable Office Hours/Lab Queue</div>
-                <div class="option-alt">Choose whether to enable an office hours/lab queue for this course.</div>
+                <span class="option-title">Enable Office Hours/Lab Queue</span>
+                <br>
+                <span class="option-alt">Choose whether to enable an office hours/lab queue for this course.</span>
             </label>
         </div>
 
@@ -53,26 +59,29 @@
         <hr>
 
         <label for="upload-message" class="config-row">
-            <div class="option-title">Upload Message</div>
-            <div class="option-alt">
+            <span class="option-title">Upload Message</span>
+            <br>
+            <span class="option-alt">
                 What is the message that should be shown to students above the upload area on the submission page.
-            </div>
+            </span>
         </label>
         <textarea class="config-row" name="upload_message" id="upload-message">{{ fields['upload_message'] }}</textarea>
 
         <label for="private-repository" class="config-row">
-            <div class="option-title">Course Autograding Config Directory</div>
-            <div class="option-alt">
+            <span class="option-title">Course Autograding Config Directory</span>
+            <br>
+            <span class="option-alt">
                 Use your own directories for storing gradeable configs. Will appear in the create/edit gradeable page.
                 To enter multiple directories, type the full paths separated by a comma.
                 Leave blank if you do not have a private repository for gradeable configurations.
-            </div>
+            </span>
         </label>
         <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" />
         <fieldset class="config-row">
             <legend>
-                <div class="option-title">Version Control System (VCS) Type</div>
-                <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
+                <span class="option-title">Version Control System (VCS) Type</span>
+                <br>
+                <span class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</span>
             </legend>
             <div id="vcs-options" class="option-input flex-row">
                 <label for="vcs-type-git">
@@ -87,12 +96,13 @@
         </fieldset>
 
         <label for="vcs-base-url" class="config-row">
-            <div class="option-title">Version Control System (VCS) Base URL</div>
-            <div class="option-alt">
+            <span class="option-title">Version Control System (VCS) Base URL</span>
+            <br>
+            <span class="option-alt">
                 Base URL if students are submitting via VCS repository.<br />
                 external ex. <kbd>https://github.com/test-course</kbd><br />
                 internal ex. <kbd>ssh+svn://192.168.56.101/test-course</kbd>
-            </div>
+            </span>
         </label>
         <input class="config-row" type="text" name="vcs_base_url" id="vcs-base-url" value="{{ fields['vcs_base_url'] }}" />
 
@@ -100,21 +110,23 @@
         <hr>
 
         <label for="default-student-late-days" class="config-row">
-            <div class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</div>
-            <div class="option-alt">
+            <span class="option-title">Initial Allowed Late Days (Per Student, Per Semester)</span>
+            <br>
+            <span class="option-alt">
                 Number of allowed late days given to each student when they are added to
                 the course.  Additional late days can be granted (e.g., as incentives)
                 using the "Late Days Allowed" form.
-            </div>
+            </span>
         </label>
         <input class="config-row" type="number" name="default_student_late_days" id="default-student-late-days" value="{{ fields['default_student_late_days'] }}" />
 
         <label for="default-hw-late-days" class="config-row">
-            <div class="option-title">Default Maximum Late Days Per Assignment</div>
-            <div class="option-alt">
+            <span class="option-title">Default Maximum Late Days Per Assignment</span>
+            <br>
+            <span class="option-alt">
                 Specify the default number of late days that may be used on a single homework.  This can be adjusted
                 per assignment on the "Create/Edit Gradeable" form.
-            </div>
+            </span>
         </label>
         <input class="config-row" type="number" name="default_hw_late_days" id="default-hw-late-days" value="{{ fields['default_hw_late_days'] }}" />
 
@@ -122,23 +134,26 @@
         <hr>
 
         <label for="course-email" class="config-row">
-            <div class="option-title">Grades Returned Message</div>
-            <div class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</div>
+            <span class="option-title">Grades Returned Message</span>
+            <br>
+            <span class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</span>
         </label>
         <textarea class="config-row" name="course_email" id="course-email">{{ fields['course_email'] }}</textarea>
 
         <div class="config-row checkbox-row">
             <input type="checkbox" name="regrade_enabled" id="regrade-enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} />
             <label for="regrade-enabled">
-                <div class="option-title">Grade Inquiries Allowed</div>
-                <div class="option-alt">Allow students to submit grade inquiries for assignments.<br>
-                Note: Grade inquiry dates and details configured per assignment.</div>
+                <span class="option-title">Grade Inquiries Allowed</span>
+                <br>
+                <span class="option-alt">Allow students to submit grade inquiries for assignments.<br>
+                Note: Grade inquiry dates and details configured per assignment.</span>
             </label>
         </div>
 
         <label for="regrade-message" class="config-row">
-            <div class="option-title">Grade Inquiry Warning Message</div>
-            <div class="option-alt">Input the warning message show to students while submitting a grade inquiry.</div>
+            <span class="option-title">Grade Inquiry Warning Message</span>
+            <br>
+            <span class="option-alt">Input the warning message show to students while submitting a grade inquiry.</span>
         </label>
         <textarea class="config-row" name="regrade_message" id="regrade-message" rows="4">{{ fields['regrade_message'] }}</textarea>
 
@@ -157,13 +172,14 @@
         <div class="config-row checkbox-row">
             <input type="checkbox" name="display_rainbow_grades_summary" id="display-rainbow-grades-summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} />
             <label for="display-rainbow-grades-summary">
-                <div class="option-title">Display Rainbow Grades Summary</div>
-                <div class="option-alt">
+                <span class="option-title">Display Rainbow Grades Summary</span>
+                <br>
+                <span class="option-alt">
                     Show Rainbow Grades summaries to students.
                     <strong>Note:</strong>
                     <a target=_blank href="http://submitty.org/instructor/rainbow_grades/">
                     You must manually run rainbow grades. <i style="font-style:normal;" class="fa-question-circle"></i></a>
-                </div>
+                </span>
             </label>
         </div>
 
@@ -173,11 +189,12 @@
                 <div class="config-row checkbox-row">
                     <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
-                        <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
-                        <div class="option-alt">
+                        <span class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</span>
+                        <br>
+                        <span class="option-alt">
                             With a valid customization.json Rainbow Grades configuration,<br>
                             a Submitty cron job will update Rainbow Grades every night at approximately 2am.
-                        </div>
+                        </span>
                     </label>
                 </div>
             {% else %}
@@ -195,8 +212,9 @@
         </div>
         {% endif %}
         <label for="room-seating-gradeable-id" class="config-row">
-            <div class="option-title">Display Room Seating Guide</div>
-            <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
+            <span class="option-title">Display Room Seating Guide</span>
+            <br>
+            <span class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</span>
         </label>
         <div id="instructor-seating" class="config-row">
             <select name="room_seating_gradeable_id" id="room-seating-gradeable-id">
@@ -217,19 +235,20 @@
             {% if not email_enabled %}
                 <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
             {% else %}
-                <button id="email-seating-assignment" class="option-alt bare-button">
+                <div id="email-seating-assignment" class="option-alt bare-button">
                     <a href="{{ email_room_seating_url }}" class="btn btn-primary">
                         Email Seating Assignments
                     </a>
-                </button>
+                </div>
             {% endif %}
         </div>
 
         <div class="config-row checkbox-row">
             <input type="checkbox" name="display_custom_message" id="display-custom-message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />
             <label for="display-custom-message">
-                <div class="option-title">Display Custom Message</div>
-                <div class="option-alt">Show a custom message to students at the top of the navigation page.</div>
+                <span class="option-title">Display Custom Message</span>
+                <br>
+                <span class="option-alt">Show a custom message to students at the top of the navigation page.</span>
             </label>
         </div>
     </div>
