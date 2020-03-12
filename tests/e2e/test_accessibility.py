@@ -48,6 +48,7 @@ class TestAccessibility(BaseTestCase):
 
     def test_w3_validator(self):
         # Uncomment this to generate a new baseline for all pages on the website
+        # Then run 'python3 -m unittest e2e.test_accessibility' from inside the tests folder
         # genBaseline(self)
 
         # Uncomment this to generate a new baseline for a specific url
@@ -79,6 +80,11 @@ def validatePages(self):
 
 
         for error in response.json()['messages']:
+            # For some reason the test fails to detect this even though when you actually look at the rendered
+            # pages this error is not there. So therefore the test is set to just ignore this error.
+            if error['message'].startswith("Start tag seen without seeing a doctype first"):
+                continue
+
             if error['message'] not in baseline[url]:
                 error['url'] = url
                 print(json.dumps(error, indent=4, sort_keys=True))
@@ -111,6 +117,11 @@ def genBaseline(self, new_url=None):
         if new_url == None or url == new_url:
             baseline[url] = {}
         for error in response.json()['messages']:
+            # For some reason the test fails to detect this even though when you actually look at the rendered
+            # pages this error is not there. So therefore the test is set to just ignore this error.
+            if error['message'].startswith("Start tag seen without seeing a doctype first"):
+                continue
+
             if error['message'] not in baseline[url]:
                 baseline[url][error['message']] = error
     with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json', 'w') as file:

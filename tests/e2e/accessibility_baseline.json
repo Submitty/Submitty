@@ -1,15 +1,5 @@
 {
     "/home": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 135,
@@ -22,16 +12,6 @@
         }
     },
     "/s20/sample": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 305,
@@ -54,16 +34,6 @@
         }
     },
     "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 317,
@@ -118,16 +88,6 @@
         }
     },
     "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 310,
@@ -151,16 +111,6 @@
         }
     },
     "/s20/sample/gradeable/future_no_tas_test/grading?view=all": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 310,
@@ -204,16 +154,6 @@
         }
     },
     "/s20/sample/gradeable/open_homework/grading/status": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 308,
@@ -226,16 +166,6 @@
         }
     },
     "/s20/sample/gradeable/open_homework/grading/details?view=all": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 309,
@@ -248,16 +178,6 @@
         }
     },
     "/s20/sample/gradeable/open_homework": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 324,
@@ -332,16 +252,6 @@
         }
     },
     "/s20/sample/gradeable/open_team_homework/team": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 306,
@@ -354,16 +264,6 @@
         }
     },
     "/s20/sample/gradeable/grades_released_homework_autota": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 324,
@@ -448,16 +348,6 @@
         }
     },
     "/s20/sample/notifications": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 308,
@@ -470,16 +360,6 @@
         }
     },
     "/s20/sample/notifications/settings": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 310,
@@ -512,16 +392,6 @@
         }
     },
     "/s20/sample/gradeable": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 312,
@@ -545,16 +415,6 @@
         }
     },
     "/s20/sample/config": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 309,
@@ -567,16 +427,6 @@
         }
     },
     "/s20/sample/theme": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 306,
@@ -589,16 +439,6 @@
         }
     },
     "/s20/sample/office_hours_queue": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 308,
@@ -621,16 +461,6 @@
         }
     },
     "/s20/sample/course_materials": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 313,
@@ -665,16 +495,6 @@
         }
     },
     "/s20/sample/forum": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 323,
@@ -910,16 +730,6 @@
         }
     },
     "/s20/sample/forum/threads/new": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 317,
@@ -1043,16 +853,6 @@
         }
     },
     "/s20/sample/forum/categories": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 314,
@@ -1096,16 +896,6 @@
         }
     },
     "http://localhost:1501/s20/sample/forum/stats": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 135,
@@ -1118,16 +908,6 @@
         }
     },
     "/s20/sample/users": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 312,
@@ -1213,16 +993,6 @@
         }
     },
     "/s20/sample/graders": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 312,
@@ -1341,16 +1111,6 @@
         }
     },
     "/s20/sample/sections": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 307,
@@ -1363,16 +1123,6 @@
         }
     },
     "/s20/sample/student_photos": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 309,
@@ -1385,16 +1135,6 @@
         }
     },
     "/s20/sample/late_days": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 314,
@@ -1418,16 +1158,6 @@
         }
     },
     "/s20/sample/extensions": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 314,
@@ -1451,16 +1181,6 @@
         }
     },
     "/s20/sample/grade_override": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 307,
@@ -1473,16 +1193,6 @@
         }
     },
     "/s20/sample/plagiarism": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 306,
@@ -1525,16 +1235,6 @@
         }
     },
     "/s20/sample/plagiarism/configuration/new": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 309,
@@ -1578,16 +1278,6 @@
         }
     },
     "/s20/sample/reports": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 306,
@@ -1600,16 +1290,6 @@
         }
     },
     "/s20/sample/late_table": {
-        "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.": {
-            "type": "error",
-            "lastLine": 1,
-            "lastColumn": 16,
-            "firstColumn": 1,
-            "message": "Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.",
-            "extract": "<html lang=\"en\"><head>",
-            "hiliteStart": 0,
-            "hiliteLength": 16
-        },
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
             "lastLine": 309,
