@@ -268,7 +268,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
-            'queue_enabled'                  => false
+            'queue_enabled'                  => false,
+            'queue_contact_info'             => false
         ];
 
         $gradeable_seating_options = [
