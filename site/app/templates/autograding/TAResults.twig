@@ -70,7 +70,7 @@ $( document ).ready(function() {
                                     <button class = 'btn btn-default key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
-                                <a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                                <a class="btn btn-primary key_to_click" tabindex="0" onclick="openFile('{{ display_original_pdf }}?dir=submissions&path={{ file.path|url_encode }}')">View Popup<i class="fas fa-window-restore"></i></a>
                             </p>
                             {% if loop.index != files|length %}
                                 <br />
