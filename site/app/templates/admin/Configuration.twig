@@ -54,6 +54,14 @@
                 <span class="option-alt">Choose whether to enable an office hours/lab queue for this course.</span>
             </label>
         </div>
+        <div id="queue-contact-info-wrapper" class="config-row checkbox-row">
+            <input type="checkbox" name="queue_contact_info" id="queue-contact-info" value="true" {{ fields['queue_contact_info'] ? 'checked': '' }} />
+            <label for="queue-contact-info">
+                <span class="option-title">Contact Info for Office Hours/Lab Queue</span>
+                <br>
+                <span class="option-alt">Choose whether students must put in their contact info when joining the queue for this course. (This should only be enabled in the case of a pandemic where office hours are being held online and not in person)</span>
+            </label>
+        </div>
 
         <h2>Submissions</h2>
         <hr>

@@ -168,4 +168,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     public function removeUnderScores($value) {
         return preg_replace('/_/', ' ', $value);
     }
+
+    public function isContactInfoEnabled(){
+      return $this->core->getConfig()->getQueueContactInfo();
+    }
 }
