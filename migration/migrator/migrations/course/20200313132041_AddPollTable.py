@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, answer TEXT NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, answer TEXT NOT NULL, open boolean NOT NULL)")
     database.execute("CREATE TABLE IF NOT EXISTS poll_options(poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL)")
     database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), response TEXT NOT NULL)")
     
@@ -46,6 +46,6 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE poll_options")
-    database.execute("DROP TABLE poll_responses")
-    database.execute("DROP TABLE polls")
+    database.execute("DROP TABLE IF EXISTS poll_options")
+    database.execute("DROP TABLE IF EXISTS poll_responses")
+    database.execute("DROP TABLE IF EXISTS polls")

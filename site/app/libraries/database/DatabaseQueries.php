@@ -23,6 +23,7 @@ use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
+use app\models\PollModel;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\CascadingIterator;
@@ -6155,12 +6156,54 @@ AND gc_id IN (
         return '';
     }
     //// BEGIN ONLINE POLLING QUERIES ////
-    public function addNewPoll($poll_name, $question, array $responses, $answer) {
-        $this->course_db->query("INSERT INTO polls(name, question, answer) VALUES (?, ?, ?)", array($poll_name, $question, $answer));
 
-        $id = $this->course_db->rows()[0]["poll_id"];
+    public function addNewPoll($poll_name, $question, array $responses, $answer) {
+        $this->course_db->query("INSERT INTO polls(name, question, answer, open) VALUES (?, ?, ?, ?) RETURNING poll_id", array($poll_name, $question, $answer, "FALSE"));
+        $this->course_db->query("SELECT max(poll_id) from polls");
+        $id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $response) {
             $this->course_db->query("INSERT INTO poll_options(poll_id, response) VALUES (?, ?)", array($id, $response));
+        }
+    }
+
+    public function setPollOpen($poll_id, $open) {
+        $this->course_db->query("UPDATE polls SET open=? where poll_id = ?", array($open, $poll_id));
+    }
+
+    public function getPolls() {
+        $polls = array();
+        $this->course_db->query("SELECT * from polls order by poll_id DESC");
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $responses = $this->getResponses($row["poll_id"]);
+            $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $row["answer"], $row["open"], $this->getUserResponse($row["poll_id"], $user));
+            $polls[] = $model;
+        }
+
+        return $polls;
+    }
+
+    public function getResponses($poll_id) {
+        $this->course_db->query("SELECT * from poll_options where poll_id = ?", array($poll_id));
+        $responses = array();
+        $responses_rows = $this->course_db->rows();
+        foreach ($responses_rows as $rep_row) {
+            $responses[] = $rep_row["response"];
+        }
+
+        return $responses;
+    }
+
+    public function getUserResponse($poll_id, $user_id) {
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ? AND student_id = ?", array($poll_id, $user_id));
+        $rows = $this->course_db->rows();
+        if (count($rows) <= 0) {
+            return null;
+        }
+        else {
+            return $rows[0]["response"];
         }
     }
 
