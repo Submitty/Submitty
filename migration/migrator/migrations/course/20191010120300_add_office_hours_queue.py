@@ -12,9 +12,9 @@ def up(config, database, semester, course):
     if config_file.is_file():
         with open(config_file, 'r') as in_file:
             j = json.load(in_file)
-
-        if 'queue_enabled' not in j['course_details']:
-            j['course_details']['queue_enabled'] = False
+        
+            if 'queue_enabled' not in j['course_details']:
+                j['course_details']['queue_enabled'] = False
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)

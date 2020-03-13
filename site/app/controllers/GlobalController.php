@@ -116,13 +116,15 @@ class GlobalController extends AbstractController {
                 }
             }
 
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildCourseUrl(['polls']),
-                "title" => "Polls",
-                "class" => "nav-row",
-                "id" => "nav-sidebar-polls",
-                "icon" => "fa-door-closed"
-            ]);
+            if ($this->core->getConfig()->isPollsEnabled()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(['polls']),
+                    "title" => "Polls",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-polls",
+                    "icon" => "fa-door-closed"
+                ]);
+            }
 
             $course_path = $this->core->getConfig()->getCoursePath();
             $course_materials_path = $course_path . "/uploads/course_materials";

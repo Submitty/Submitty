@@ -20,6 +20,9 @@ class PollController extends AbstractController {
     * @return Response
     */
     public function showPollsPage() {
+
+        $this->core->getQueries()->addNewPoll("test poll", "is this a poll?", array("yes", "no"), "yes");
+
         return Response::WebOnlyResponse(
             new WebResponse(
                 'Poll',

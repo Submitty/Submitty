@@ -63,6 +63,17 @@
             </label>
         </div>
 
+        <h2>Online Polls</h2>
+        <hr>
+        <div id="polls_enabled_wrapper" class="config-row checkbox-row">
+            <input type="checkbox" name="polls_enabled" id="polls-enabled" value="true" {{ fields['polls_enabled'] ? 'checked': '' }} />
+            <label for="polls_enabled">
+                <span class="option-title">Enable Online Polls</span>
+                <br>
+                <span class="option-alt">Choose whether to enable online polling for this course.</span>
+            </label>
+        </div>
+
         <h2>Submissions</h2>
         <hr>
 

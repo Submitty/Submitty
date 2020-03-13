@@ -6154,4 +6154,16 @@ AND gc_id IN (
         }
         return '';
     }
+    //// BEGIN ONLINE POLLING QUERIES ////
+    public function addNewPoll($poll_name, $question, array $responses, $answer) {
+        $this->course_db->query("INSERT INTO polls(name, question, answer) VALUES (?, ?, ?)", array($poll_name, $question, $answer));
+
+        $id = $this->course_db->rows()[0]["poll_id"];
+        foreach ($responses as $response) {
+            $this->course_db->query("INSERT INTO poll_options(poll_id, response) VALUES (?, ?)", array($id, $response));
+        }
+    }
+
+
+    //// END ONLINE POLLING QUERIES ////
 }
