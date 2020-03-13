@@ -41,7 +41,7 @@
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
                             <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
-                            <td><a href="" aria-label="delete user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-trash"></i></a></td>
+                            <td><a href="javascript:deleteUserForm('{{ grader.getId() }}');" aria-label="delete user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-trash"></i></a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

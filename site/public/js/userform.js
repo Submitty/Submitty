@@ -105,6 +105,12 @@ function editUserForm(user_id) {
     })
 }
 
+function deleteUserForm(user_id) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#delete-user-form");
+    form.css("display", "block");
+    captureTabInModal("delete-user-form");
+}
 
 function userFormChange() {
     var user_elem = $("select[name='user_group']")[0];
