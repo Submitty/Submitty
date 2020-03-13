@@ -15,6 +15,8 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.get(self.get_current_semester()+"/sample/config")
         if(not self.driver.find_element_by_id('queue-enabled').is_selected()):
             self.driver.find_element_by_id('queue-enabled').click()
+        if(self.driver.find_element_by_id('queue-contact-info').is_selected()):
+            self.driver.find_element_by_id('queue-contact-info').click()
 
         # Delete any old queues (this should remove anyone that was currently in the queue as well)
         deleteAllQueues(self)

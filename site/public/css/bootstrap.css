@@ -174,7 +174,7 @@ fieldset[disabled] .btn-primary.focus {
     background-color: var(--default-white);
 }
 .btn-success {
-    color: var(--text-white);
+    color: var(--text-black)!important;
     background-color: var(--good-green);
 
 }

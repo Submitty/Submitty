@@ -1760,7 +1760,7 @@ end of styles used in the admin gradeable page
 }
 
 .notification-badge {
-    background-color: red;
+    background-color: var(--danger-red);
     padding: 1px 5px;
     color: white;
     font-weight: bold;
