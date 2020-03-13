@@ -67,8 +67,13 @@
 
     var queue_rows = document.getElementsByClassName('shown_queue_row');
     var row_count = 0;
+    var real_row_count = 0;
     for (; row_count < queue_rows.length; row_count++) {
-      queue_rows[row_count].childNodes[1].innerHTML = row_count + 1;
+      if(queue_rows[row_count].classList.contains('contact_info')){
+        continue;
+      }
+      queue_rows[row_count].childNodes[1].innerHTML = real_row_count + 1;
+      real_row_count++;
     }
     if (queue_rows.length === 0) {
       $("#queue_empty_msg").show();
