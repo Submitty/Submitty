@@ -63,6 +63,15 @@
             </label>
         </div>
 
+        <label for="upload-message" class="config-row">
+            <span class="option-title">Message to students</span>
+            <br>
+            <span class="option-alt">
+                What is the message that should be shown to students before the join the queue?
+            </span>
+        </label>
+        <textarea class="config-row" name="queue_message" id="queue-message">{{ fields['queue_message'] }}</textarea>
+
         <h2>Submissions</h2>
         <hr>
 
@@ -70,7 +79,7 @@
             <span class="option-title">Upload Message</span>
             <br>
             <span class="option-alt">
-                What is the message that should be shown to students above the upload area on the submission page.
+                What is the message that should be shown to students above the upload area on the submission page?
             </span>
         </label>
         <textarea class="config-row" name="upload_message" id="upload-message">{{ fields['upload_message'] }}</textarea>
