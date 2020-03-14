@@ -2,11 +2,6 @@ aside {
     display: none;
 }
 
-/* Used to keep the page invisible just long enough for the sidebar to close */
-.invisible{
-  visibility: hidden;
-}
-
 @media (min-width: 541px) {
     aside {
         display: block;
@@ -17,7 +12,7 @@ aside {
         z-index: 1;
     }
 
-    aside:not(.preload){
+    aside{
       transition: all 0.3s ease-out;
     }
 
@@ -33,7 +28,7 @@ aside {
         margin: 0 0 0 15px;
     }
 
-    aside i:not(.preload){
+    aside i{
       transition: margin 0.3s ease-out;
     }
 
