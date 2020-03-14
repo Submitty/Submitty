@@ -874,10 +874,10 @@
             "hiliteLength": 102
         }
     },
-    "http://localhost:1501/s20/sample/forum/stats": {
+    "/s20/sample/forum/stats": {
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 135,
+            "lastLine": 311,
             "lastColumn": 38,
             "firstColumn": 17,
             "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
@@ -885,26 +885,56 @@
             "hiliteStart": 10,
             "hiliteLength": 22
         },
-        "Duplicate ID “course-list”.": {
+        "Attribute “label” not allowed on element “a” at this point.": {
             "type": "error",
-            "lastLine": 211,
-            "lastColumn": 67,
-            "firstColumn": 29,
-            "message": "Duplicate ID “course-list”.",
-            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
+            "lastLine": 547,
+            "lastColumn": 197,
+            "firstColumn": 6,
+            "message": "Attribute “label” not allowed on element “a” at this point.",
+            "extract": "\t\t\t\t\n\t\t\t\t\t<a id=\"clear_filter_button\" class=\"inline-block text-decoration-none key_to_click\" tabindex=\"0\" style=\"color: var(--actionable-blue);\" label=\"Clear Filters\" onclick=\"clearForumFilter(event);\">× Clea",
             "hiliteStart": 10,
-            "hiliteLength": 39
+            "hiliteLength": 192
         },
-        "The first occurrence of ID “course-list” was here.": {
-            "type": "info",
-            "lastLine": 186,
-            "lastColumn": 67,
-            "firstColumn": 29,
-            "subType": "warning",
-            "message": "The first occurrence of ID “course-list” was here.",
-            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 566,
+            "lastColumn": 10,
+            "firstColumn": 4,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
             "hiliteStart": 10,
-            "hiliteLength": 39
+            "hiliteLength": 7
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 570,
+            "lastColumn": 109,
+            "firstColumn": 4,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "true\">\n\t\t\t<div id=\"thread_category\" aria-label=\"Select thread category\" class=\"inline-block\" data-ays-ignore=\"true\">\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 106
+        },
+        "Attribute “sel-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 573,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “sel-id” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        },
+        "Attribute “btn-selected” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 573,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
         }
     },
     "/s20/sample/users": {
