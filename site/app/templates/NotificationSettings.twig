@@ -1,9 +1,9 @@
-<style>
-    input[type="checkbox"]:disabled {
-        background: gray;
-    }
-</style>
 <div class="content">
+  <style>
+      input[type="checkbox"]:disabled {
+          background: gray;
+      }
+  </style>
     <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div id="config">
