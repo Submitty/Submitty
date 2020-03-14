@@ -57,7 +57,7 @@ class GlobalView extends AbstractView {
             "enable_banner" => $config_data['duck_special_effects'],
             "duck_img" => $duck_img,
             "use_mobile_viewport" => $this->output->useMobileViewport(),
-            "collapse_sidebar" => array_key_exists('collapse_sidebar',$_COOKIE)?$_COOKIE['collapse_sidebar']==='true':false
+            "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) ? $_COOKIE['collapse_sidebar'] === 'true' : false
         ]);
     }
 
