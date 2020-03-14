@@ -9,6 +9,27 @@
             "extract": "          <style media=\"screen\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 22
+        },
+        "Duplicate ID “course-list”.": {
+            "type": "error",
+            "lastLine": 211,
+            "lastColumn": 67,
+            "firstColumn": 29,
+            "message": "Duplicate ID “course-list”.",
+            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 39
+        },
+        "The first occurrence of ID “course-list” was here.": {
+            "type": "info",
+            "lastLine": 186,
+            "lastColumn": 67,
+            "firstColumn": 29,
+            "subType": "warning",
+            "message": "The first occurrence of ID “course-list” was here.",
+            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 39
         }
     },
     "/s20/sample": {
@@ -57,7 +78,7 @@
         },
         "Attribute “placeholder” not allowed on element “input” at this point.": {
             "type": "error",
-            "lastLine": 1106,
+            "lastLine": 1105,
             "lastColumn": 254,
             "firstColumn": 17,
             "message": "Attribute “placeholder” not allowed on element “input” at this point.",
@@ -67,7 +88,7 @@
         },
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
             "type": "error",
-            "lastLine": 1106,
+            "lastLine": 1105,
             "lastColumn": 254,
             "firstColumn": 17,
             "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
@@ -77,7 +98,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 2279,
+            "lastLine": 2278,
             "lastColumn": 172,
             "firstColumn": 87,
             "subType": "warning",
@@ -180,7 +201,7 @@
     "/s20/sample/gradeable/open_homework": {
         "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 324,
+            "lastLine": 322,
             "lastColumn": 38,
             "firstColumn": 17,
             "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
@@ -190,7 +211,7 @@
         },
         "Bad value “true” for attribute “checked” on element “input”.": {
             "type": "error",
-            "lastLine": 559,
+            "lastLine": 557,
             "lastColumn": 96,
             "firstColumn": 21,
             "message": "Bad value “true” for attribute “checked” on element “input”.",
@@ -200,7 +221,7 @@
         },
         "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.": {
             "type": "error",
-            "lastLine": 569,
+            "lastLine": 567,
             "lastColumn": 131,
             "firstColumn": 25,
             "message": "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.",
@@ -210,45 +231,13 @@
         },
         "Bad value “text” for attribute “role” on element “div”.": {
             "type": "error",
-            "lastLine": 710,
+            "lastLine": 708,
             "lastColumn": 205,
             "firstColumn": 57,
             "message": "Bad value “text” for attribute “role” on element “div”.",
             "extract": "          <div tabindex=\"0\" id=\"upload1\" class=\"upload-box\" onkeypress=\"clicked_on_box(event)\" role=\"text\" aria-label=\"Press enter to upload your Part 1 file\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 149
-        },
-        "Attribute “fname” not allowed on element “tr” at this point.": {
-            "type": "error",
-            "lastLine": 716,
-            "firstLine": 715,
-            "lastColumn": 61,
-            "firstColumn": 79,
-            "message": "Attribute “fname” not allowed on element “tr” at this point.",
-            "extract": "-table-1\">\n                    <tr fname=\"jquery.js\" class=\"file-label\"><td>jq",
-            "hiliteStart": 10,
-            "hiliteLength": 62
-        },
-        "Bad value “text” for attribute “role” on element “i”.": {
-            "type": "error",
-            "lastLine": 716,
-            "lastColumn": 223,
-            "firstColumn": 112,
-            "message": "Bad value “text” for attribute “role” on element “i”.",
-            "extract": ">86.08KB  <i role=\"text\" aria-label=\"Press enter to remove file jquery.js\" tabindex=\"0\" class=\"fas fa-trash custom-focus\"></i></",
-            "hiliteStart": 10,
-            "hiliteLength": 112
-        },
-        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
-            "type": "info",
-            "lastLine": 1061,
-            "lastColumn": 137,
-            "firstColumn": 29,
-            "subType": "warning",
-            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
-            "extract": "          <span class=\"loading-tools-in-progress\" aria-label=\"Loading Details for Test 1 Lab 1 Checkpoint 1\" hidden=\"\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 109
         }
     },
     "/s20/sample/gradeable/open_team_homework/team": {
@@ -382,13 +371,13 @@
         },
         "Bad value “true” for attribute “checked” on element “input”.": {
             "type": "error",
-            "lastLine": 725,
-            "lastColumn": 194,
-            "firstColumn": 79,
+            "lastLine": 655,
+            "lastColumn": 239,
+            "firstColumn": 83,
             "message": "Bad value “true” for attribute “checked” on element “input”.",
-            "extract": "ng-input\"><input type=\"checkbox\" aria-label=\"Notification Team Invitation\" name=\"team_invite\" id=\"team_invite\" checked=\"true\"></div>",
+            "extract": "ng-input\"><input type=\"checkbox\" aria-label=\"Notification All Modified Threads &amp; Posts\" name=\"all_modifications_forum\" id=\"all_modifications_forum\" checked=\"true\"></div>",
             "hiliteStart": 10,
-            "hiliteLength": 116
+            "hiliteLength": 157
         }
     },
     "/s20/sample/gradeable": {
@@ -451,7 +440,7 @@
         },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 642,
+            "lastLine": 609,
             "lastColumn": 9,
             "firstColumn": 3,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -473,7 +462,7 @@
         },
         "The “type” attribute is unnecessary for JavaScript resources.": {
             "type": "info",
-            "lastLine": 1435,
+            "lastLine": 2136,
             "lastColumn": 43,
             "firstColumn": 13,
             "subType": "warning",
@@ -484,7 +473,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 1586,
+            "lastLine": 2287,
             "lastColumn": 172,
             "firstColumn": 87,
             "subType": "warning",
@@ -663,23 +652,23 @@
             "lastColumn": 112,
             "firstColumn": 21,
             "message": "Attribute “data” not allowed on element “a” at this point.",
-            "extract": "          <a href=\"http://localhost:1501/s20/sample/forum/threads/9\" class=\"thread_box_link\" data=\"9\">\n     ",
+            "extract": "          <a href=\"http://localhost:1501/s20/sample/forum/threads/1\" class=\"thread_box_link\" data=\"1\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 92
         },
         "Attribute “reply-level” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 1150,
-            "lastColumn": 108,
+            "lastLine": 1132,
+            "lastColumn": 107,
             "firstColumn": 5,
             "message": "Attribute “reply-level” not allowed on element “div” at this point.",
-            "extract": "     \n    <div class=\"post_box first_post viewed_post important\" id=\"33\" style=\"margin-left:0px;\" reply-level=\"1\">\n     ",
+            "extract": "     \n    <div class=\"post_box first_post viewed_post important\" id=\"1\" style=\"margin-left:0px;\" reply-level=\"1\">\n     ",
             "hiliteStart": 10,
-            "hiliteLength": 104
+            "hiliteLength": 103
         },
         "Attribute “post_box_id” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 1198,
+            "lastLine": 1179,
             "lastColumn": 54,
             "firstColumn": 9,
             "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
@@ -689,7 +678,7 @@
         },
         "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
             "type": "error",
-            "lastLine": 1219,
+            "lastLine": 1200,
             "lastColumn": 363,
             "firstColumn": 17,
             "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
@@ -699,23 +688,13 @@
         },
         "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 1225,
+            "lastLine": 1206,
             "lastColumn": 87,
             "firstColumn": 25,
             "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
             "extract": "          <div class=\"upload_attachment_box cursor-pointer\" id=\"upload1\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 63
-        },
-        "No “p” element in scope but a “p” end tag seen.": {
-            "type": "error",
-            "lastLine": 1413,
-            "lastColumn": 12,
-            "firstColumn": 9,
-            "message": "No “p” element in scope but a “p” end tag seen.",
-            "extract": ">\n        </p></div>",
-            "hiliteStart": 10,
-            "hiliteLength": 4
         },
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).": {
             "type": "info",
@@ -905,6 +884,27 @@
             "extract": "          <style media=\"screen\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 22
+        },
+        "Duplicate ID “course-list”.": {
+            "type": "error",
+            "lastLine": 211,
+            "lastColumn": 67,
+            "firstColumn": 29,
+            "message": "Duplicate ID “course-list”.",
+            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 39
+        },
+        "The first occurrence of ID “course-list” was here.": {
+            "type": "info",
+            "lastLine": 186,
+            "lastColumn": 67,
+            "firstColumn": 29,
+            "subType": "warning",
+            "message": "The first occurrence of ID “course-list” was here.",
+            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 39
         }
     },
     "/s20/sample/users": {

@@ -23,6 +23,11 @@
         <label for="token_box">Queue Code:</label>
         <input type="text" name="token" id="token_box" placeholder="Queue Code" style="margin:.5rem" autocomplete="on" required="required">
         <br>
+        {% if viewer.isContactInfoEnabled() %}
+          <label for="contact_info">My Contact Information (follow instructor directions):</label>
+          <input type="text" name="contact_info" id="contact_info" style="width: 500px" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" style="margin:.5rem" autocomplete="on" required="required">
+          <br>
+        {% endif %}
         <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
       </form>
     {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
