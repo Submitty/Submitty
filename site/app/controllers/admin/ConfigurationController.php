@@ -150,7 +150,7 @@ class ConfigurationController extends AbstractController {
         ) {
             $entry = $entry === "true" ? true : false;
         }
-        elseif ($name === 'upload_message' or $name === 'queue_message') {
+        elseif ($name === 'upload_message' || $name === 'queue_message') {
             $entry = nl2br($entry);
         }
         elseif ($name == "course_home_url") {

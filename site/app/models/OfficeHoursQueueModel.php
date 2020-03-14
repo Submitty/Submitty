@@ -173,7 +173,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getConfig()->getQueueContactInfo();
     }
 
-    public function getQueueMessage(){
-      return $this->core->getConfig()->getQueueMessage();
+    public function getQueueMessage() {
+        return $this->core->getConfig()->getQueueMessage();
     }
 }
