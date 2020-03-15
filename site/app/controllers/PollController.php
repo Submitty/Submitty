@@ -24,7 +24,8 @@ class PollController extends AbstractController {
             return Response::WebOnlyResponse(
                 new WebResponse(
                     'Poll',
-                    'showPollsInstructor'
+                    'showPollsInstructor',
+                    $this->core->getQueries()->getPolls()
                 )
             );
         }
@@ -32,11 +33,38 @@ class PollController extends AbstractController {
             return Response::WebOnlyResponse(
                 new WebResponse(
                     'Poll',
-                    'showPollsStudent'
+                    'showPollsStudent',
+                    $this->core->getQueries()->getPolls()
                 )
             );
         }
         
+    }
+
+    /**
+    * @Route("/{_semester}/{_course}/polls/viewPoll", methods={"POST"})
+    * @return Response
+    */
+    public function showPoll() {
+        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+        if ($this->core->getUser()->accessAdmin()) {
+            return Response::WebOnlyResponse(
+                new WebResponse(
+                    'Poll',
+                    'showPollInstructor',
+                    $poll
+                )
+            );
+        }
+        else {
+            return Response::WebOnlyResponse(
+                new WebResponse(
+                    'Poll',
+                    'showPollStudent',
+                    $poll
+                )
+            );
+        }
     }
 
     /**
@@ -82,6 +110,27 @@ class PollController extends AbstractController {
     */
     public function openPoll() {
         $this->core->getQueries()->setPollOpen($_POST["poll_id"], $_POST["open"]);
+
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['polls']))
+        );
+    }
+
+    /**
+    * @Route("/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
+    * @return Response
+    */
+    public function submitResponse() {
+        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+        if ($poll == null) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        if ($poll->isOpen()) {
+            $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answer"]);
+        }
 
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))

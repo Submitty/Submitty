@@ -42,7 +42,7 @@ class RainbowCustomization extends AbstractModel {
         'quiz', 'test', 'exam',
         'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',
         'project',
-        'participation', 'note',
+        'participation', 'poll', 'note',
         'none'];
 
 
@@ -101,6 +101,17 @@ class RainbowCustomization extends AbstractModel {
                 "title" => $gradeable->getTitle(),
                 "max_score" => $max_score,
                 "grade_release_date" => DateUtils::dateTimeToString($gradeable->getGradeReleasedDate())
+            ];
+        }
+
+        $polls = $this->core->getQueries()->getPolls();
+        foreach ($polls as $poll) {
+            $this->bucket_counts["participation"]++;
+            $this->customization_data["participation"][] = [
+                "id" => "" . $poll->getID(),
+                "title" => $poll->getName(),
+                "max_score" => 1,
+                "grade_release_date" => "1999-12-31 23:59:59-0500"
             ];
         }
 

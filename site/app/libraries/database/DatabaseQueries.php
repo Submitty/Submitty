@@ -6185,6 +6185,19 @@ AND gc_id IN (
         return $polls;
     }
 
+    public function getPoll($poll_id) {
+        $this->course_db->query("SELECT * from polls where poll_id = ?", array($poll_id));
+        $row = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+        if (count($row) <= 0) {
+            return null;
+        }
+        $row = $row[0];
+        $responses = $this->getResponses($row["poll_id"]);
+        $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $row["answer"], $row["open"], $this->getUserResponse($row["poll_id"], $user));
+        return $model;
+    }
+
     public function getResponses($poll_id) {
         $this->course_db->query("SELECT * from poll_options where poll_id = ?", array($poll_id));
         $responses = array();
@@ -6204,6 +6217,17 @@ AND gc_id IN (
         }
         else {
             return $rows[0]["response"];
+        }
+    }
+
+    public function submitResponse($poll_id, $response) {
+        $user = $this->core->getUser()->getId();
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", array($poll_id, $user));
+        if (count($this->course_db->rows()) <= 0) {
+            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, response) VALUES (?, ?, ?)", array($poll_id, $user, $response));
+        }
+        else {
+            $this->course_db->query("UPDATE poll_responses SET response=? where poll_id = ? and student_id = ?", array($response, $poll_id, $user));
         }
     }
 

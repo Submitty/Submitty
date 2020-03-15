@@ -1,5 +1,24 @@
 <div class="content">
-    <p>Hello World</p>
-    <p>this is the poll page for students</p>
-    <br/>
+    <h1> {{ poll.getName() }} </h1>
+    <form method="post" action="{{ base_url }}/submitResponse">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+        {% for response in poll.getResponses() %}
+            <div>
+                <h3> {{ response }}
+                    {% if response == poll.getUserResponse() %}
+                        <input type=radio value={{ response }} name="answer" checked/>
+                    {% elseif poll.isOpen() %}
+                        <input type=radio value={{ response }} name="answer"/>
+                    {% else %}
+                        <input type=radio value={{ response }} name="answer" disabled/>
+                    {% endif %}
+                </h3>
+                <br/>
+            </div>
+        {% endfor %}
+        {% if poll.isOpen() %}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        {% endif %}
+    </form>
 </div>
