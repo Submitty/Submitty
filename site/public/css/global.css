@@ -4,7 +4,7 @@ body {
     min-height: 100vh;
     position: relative;
     display: flex;
-    background: #f6fbfe;
+    background: var(--background-blue);
     color: var(--text-black);
 }
 
@@ -14,7 +14,7 @@ body {
 }
 
 nav {
-    background: #ffffff;
+    background: var(--default-white);
     font-size: 1.5em;
     font-weight: bold;
     min-height: min-content;
