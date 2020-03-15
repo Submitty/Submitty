@@ -27,6 +27,12 @@ input[type="color"] {
     width: auto;
 }
 
+@media (prefers-color-scheme: dark) {
+  input[type="text"], input[type="password"] {
+    color:white;
+  }
+}
+
 input.readonly {
     background-color: #f2f2f2;
     cursor: not-allowed;

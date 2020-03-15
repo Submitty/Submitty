@@ -524,7 +524,7 @@ input[type="button"].btn-block {
   font-size: 65%;
   font-weight: bold;
   line-height: 2.5;
-  color: var(--text-white);
+  color: var(--btn-text-white);
   text-align: center;
   /*white-space: nowrap;*/
   word-wrap: break-word;

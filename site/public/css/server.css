@@ -188,7 +188,7 @@ input.disabled {
     background-color: var(--standard-input-background);
 }
 
-textarea, input, input[type="checkbox"]{
+textarea, input, input[type="checkbox"], select{
   background-color: var(--standard-input-background);
 }
 
@@ -583,9 +583,6 @@ td>a.active-sort {
 .new_thread{
     background-color: var(--viewed_content);
     color: var(--text-black)
-}
-.btn-default.post_button_color{
-    background-color: inherit;
 }
 
 .box-title > h4 {
