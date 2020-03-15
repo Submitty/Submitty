@@ -180,6 +180,8 @@
     --box-shadow-slightly-transparent: rgba(0,0,0,0.20);
     --no-image-available: #595959;
     --standard-input-background: #ffffff;
+    --checkbox-black: #000000;
+    --overall-comment: #E9EFEF;
 
 
 
@@ -243,11 +245,11 @@
       --alert-border-blue: #bce8f1;
       --alert-invalid-entry-pink: #FFDDDD;
 
-      --standard-pale-blue-gray: #e8f0f7;
+      --standard-pale-blue-gray: #2a2224;
       --standard-light-blue-gray: #ddddff;
       --standard-pale-gray: #f5f5f5;
       --standard-hover-light-gray: #686868;
-      --standard-light-gray: #d3d3d3;
+      --standard-light-gray: #8a8a8a;
       --standard-light-medium-gray: #bbbbbb;
       --standard-medium-gray: #888888;
       --standard-medium-dark-gray: #666666;
@@ -276,7 +278,7 @@
       --standard-creamsicle-orange: #ff8040;
       --standard-peachpuff: rgb(153, 112, 76);
 
-      --standard-vibrant-yellow: #ffff00;
+      --standard-vibrant-yellow: #757500;
 
       --standard-vibrant-purple: #cc66ff;
       --standard-plum-purple: #72518a;
@@ -368,6 +370,9 @@
       --box-shadow-slightly-transparent: rgba(255,255,255,0.20);
       --no-image-available: #ADADAD;
       --standard-input-background: #4a4a4a;
+      --checkbox-black: #5296db;
+      --overall-comment: #4E5353;
+
 
   }
 }

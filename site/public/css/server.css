@@ -669,6 +669,7 @@ td>a.active-sort {
 
 .green-background {
     background-color: var(--standard-deep-dark-green);
+    color: var(--btn-default-white);
 }
 
 .yellow-background {
