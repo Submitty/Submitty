@@ -3,10 +3,10 @@
 {% block title %}Edit Course Materials{% endblock %}
 {% block body %}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
-        <label id="edit_sections">
-            <p class="black-message">
+        <fieldset id="edit_sections">
+            <legend class="black-message">
                 Do you want to restrict this course material to some sections?
-            </p>
+            </legend>
             <label class = "radio">
                 <input id = "all-sections-showing-no" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
                 No
@@ -15,12 +15,15 @@
                 <input id = "all-sections-showing-yes" name="show-some-section-selection-edit" type = "radio" onchange="toggleRegistrationSectionsEdit()">
                 Yes
             </label>
-            <div id = "show-some-section-selection-edit" style="display: none">
+            <br>
+            <span id = "show-some-section-selection-edit" style="display: none">
             {% for section in reg_sections %}
                 <tr>
                     <span class = "inline">
                         <td>
-                            Section {{ section['sections_registration_id'] }}
+                          <label for="section-edit-{{section['sections_registration_id']}}">Section {{ section['sections_registration_id'] }}</label>
+                        </td>
+                        <td>
                             <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
                         </td>
                         <td>
@@ -29,17 +32,17 @@
                     </span>
                 </tr>
             {% endfor %}
-            </div>
+            </span>
             <script type="text/javascript">
                 function toggleRegistrationSectionsEdit(){
                     $("#show-some-section-selection-edit").toggle();
-                } 
+                }
             </script>
-        </label>
-        <label id="upload_dt">
-            <p>
+        </fieldset>
+        <label>
+            <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
-            </p>
+            </span>
             <input id="edit-picker" class="edit-picker" type="text" size="26"/>
         </label>
         <label>
@@ -57,7 +60,7 @@
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
                 }
-                
+
                 let reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 reg_sectionArray.forEach(function(element){
                     let currentSectionEdit = '#section-edit-' +element['sections_registration_id']
@@ -70,7 +73,7 @@
                 }
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
         };
-        
+
         flatpickr('.edit-picker', {
             plugins: [ShortcutButtonsPlugin(
                 {
@@ -106,7 +109,11 @@
             enableTime: true,
             enableSeconds: true,
             time_24hr: true,
-            dateFormat: "Y-m-d H:i:S"
+            dateFormat: "Y-m-d H:i:S",
+            onReady: (a, b, fp) => {
+              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+              fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            }
         });
     </script>
 {% endblock %}
