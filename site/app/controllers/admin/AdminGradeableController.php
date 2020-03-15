@@ -1192,11 +1192,11 @@ class AdminGradeableController extends AbstractController {
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
         $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 
-        if (is_file($queued_path)) {
-            $status = 'queued';
-        }
-        elseif (is_file($rebuilding_path)) {
+        if (is_file($rebuilding_path)) {
             $status = 'processing';
+        }
+        elseif (is_file($queued_path)) {
+            $status = 'queued';
         }
         else {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);

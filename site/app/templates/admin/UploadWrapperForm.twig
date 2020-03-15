@@ -26,10 +26,10 @@
     {# This is a data table #}
     <table class="wrapper-upload">
         <tr class="wrapper_layout_header">
-            <td class="layout_th_cell">Panel</td>
-            <td class="layout_th_cell">File Type</td>
-            <td class="layout_th_cell">Upload</td>
-            <td class="layout_th_cell">Current File</td>
+            <th class="layout_th_cell">Panel</th>
+            <th class="layout_th_cell">File Type</th>
+            <th class="layout_th_cell">Upload</th>
+            <th class="layout_th_cell">Current File</th>
         </tr>
         {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar", csrf_token, upload_url, delete_url) }}
         {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar", csrf_token, upload_url, delete_url) }}

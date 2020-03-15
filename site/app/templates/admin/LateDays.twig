@@ -1,4 +1,4 @@
-<div type="hidden" id="message"></div>
+<div id="message"></div>
 <div class="content">
     <h1>Late Days Allowed</h1>
     <form id="late-day-form" class="exception-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
@@ -28,7 +28,8 @@
         <fieldset>
             <legend>
                 <span class="option-title" id="csv_upload_title">Multiple Student Entry Via CSV Upload</span>
-                <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM-DD-YYYY, late_days</div>
+                <br>
+                <span id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM-DD-YYYY, late_days</span>
             </legend>
             <label for="csv_option_overwrite_all">
                 <input type="radio" name="csv_option" id="csv_option_overwrite_all" value="csv_option_overwrite_all" checked>

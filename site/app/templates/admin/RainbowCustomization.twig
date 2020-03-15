@@ -1,5 +1,5 @@
 <div class="content">
-    <h2>Rainbow Grades Customization -- Work In Progress</h2>
+    <h1>Rainbow Grades Customization -- Work In Progress</h1>
 
     {% if limited_functionality_mode %}
         <div id="limited_func_messages">
@@ -25,17 +25,19 @@
 
     <div id="list_wrapper">
         <div id="display_benchmarks" class="customization_item">
-            <h2>Display Benchmarks</h2>
-            <div id="display_benchmarks_collapse" class="collapsible_area">
-            {% for benchmark in display_benchmarks %}
-                <p>
-                    <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
-                           {% if benchmark.isUsed == true %}checked{% endif %}
-                    >
-                    <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
-                </p>
-            {% endfor %}
-            </div>
+            <fieldset>
+              <legend><h2>Display Benchmarks</h2></legend>
+              <div id="display_benchmarks_collapse" class="collapsible_area">
+              {% for benchmark in display_benchmarks %}
+                  <p>
+                      <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
+                             {% if benchmark.isUsed == true %}checked{% endif %}
+                      >
+                      <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
+                  </p>
+              {% endfor %}
+              </div>
+            </fieldset>
         </div>
         <div id="cust_messages" class="customization_item">
             <h2>Messages</h2>

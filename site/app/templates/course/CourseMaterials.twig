@@ -82,7 +82,7 @@
             }
 
             else {
-              newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time); 
+              newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time);
             }
 
         }
@@ -92,7 +92,7 @@
     <div class="file-container">
         <div class="file-viewer">
 
-            <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
+            <i class="fas fa-file" style='vertical-align:text-bottom;'></i>
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
@@ -108,17 +108,17 @@
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
                     {% if this_hide_from_students == "on" %}
-                        <label>Sections (Hidden):
+                        <span>Sections (Hidden):
                         {{this_file_section|join(',')}}
-                        </label>
+                        </span>
                     {% else %}
-                        <label>Sections:
+                        <span>Sections:
                         {{this_file_section|join(',')}}
-                        </label>
+                        </span>
                     {% endif %}
 
                 {% endif %}
-                
+
                 <script>
 
                     function determineRelease(inputID){
@@ -189,6 +189,10 @@
                     enableSeconds: true,
                     time_24hr: true,
                     dateFormat: "Y-m-d H:i:S",
+                    onReady: (a, b, fp) => {
+                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    },
                     onOpen: handleTimeZones('{{ core.getConfig().getTimezone().getName() }}'),
                     onClose: function() {
                                             setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
