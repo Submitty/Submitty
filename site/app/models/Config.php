@@ -58,6 +58,7 @@ use app\libraries\FileUtils;
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
+ * @method bool getQueueContactInfo()
  * @method void setSemester(string $semester)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
@@ -218,6 +219,11 @@ class Config extends AbstractModel {
     protected $verified_submitty_admin_user = null;
     /** @prop @var bool */
     protected $queue_enabled;
+    /** @prop @var bool */
+    protected $queue_contact_info;
+
+    /** @prop-read @var array */
+    protected $feature_flags = [];
 
     /**
      * Config constructor.
@@ -394,7 +400,7 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled'
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -416,9 +422,13 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled");
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled", 'queue_contact_info');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
+        }
+
+        if (!empty($this->course_json['feature_flags']) && is_array($this->course_json['feature_flags'])) {
+            $this->feature_flags = $this->course_json['feature_flags'];
         }
 
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
@@ -508,5 +518,18 @@ class Config extends AbstractModel {
     public function getWrapperFiles() {
         //Return empty if not logged in because we can't access them
         return ($this->core->getUser() === null ? [] : $this->wrapper_files);
+    }
+
+    /**
+     * Checks to see if a given feature flag is enabled or not. If the site
+     * is running under debug, we assume all flags are enabled, else, the
+     * flag must exist in the course config.json file and be set to true.
+     */
+    public function checkFeatureFlagEnabled(string $flag): bool {
+        return $this->debug
+            || (
+                isset($this->feature_flags[$flag])
+                && $this->feature_flags[$flag] === true
+            );
     }
 }
