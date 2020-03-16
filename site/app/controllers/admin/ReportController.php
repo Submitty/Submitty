@@ -358,39 +358,8 @@ class ReportController extends AbstractController {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
             $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
-        foreach($polls as $poll) {
-            $bucket = ucwords("participation");
-            $user_data[$bucket][] = $this->generatePollSummary($poll, $user->getId());
-        }
-        //var_dump(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'));
+        
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
-    }
-
-    public function generatePollSummary(PollModel $poll, $user) {
-        #var_dump($poll->getScore($user));
-        $entry = [
-            'id' => "" . $poll->getId(),
-            'name' => $poll->getName(),
-            'gradeable_type' => "participation",
-            'score' => $poll->getScore($user),
-            "grade_released_date" => "1999-12-31 23:59:59 -0500",
-            "status" => "Good",
-            "overall_comment" => "lorem ipsum lodar",
-            "autograding_score" => 0,
-            "tagrading_score" => 0,
-            "note" => "none"
-        ];
-        $entry["components"] = [];
-        $inner = [
-            "title" => "Question",
-            "score" => $poll->getScore($user),
-            "default_score" => 0,
-            "upper_clamp" => 1,
-            "lower_clamp" => 0
-        ];
-        $inner["marks"] = [];
-        $entry["components"][] = $inner;
-        return $entry;
     }
 
     /**

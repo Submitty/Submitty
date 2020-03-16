@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, open boolean NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, open boolean NOT NULL, expected_release TIMESTAMP NOT NULL)")
     database.execute("CREATE TABLE IF NOT EXISTS poll_options(poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL, correct bool NOT NULL)")
     database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), response TEXT NOT NULL)")
     
