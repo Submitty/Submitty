@@ -24,6 +24,6 @@
         "auto_rainbow_grades": false,
         "queue_enabled": false,
         "queue_contact_info": false,
-        "queue_message": "Welcome to the office hours/lab queue. Choose a queue name and enter the code secret code you have been provided."
+        "queue_message": ""
     }
 }
