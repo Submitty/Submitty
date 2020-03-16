@@ -18,7 +18,7 @@
     <table>
         <tbody>
             <tr>
-                <td style="width:50%">
+                <th style="width:50%;font-weight:normal;text-align:left">
                     <p> Pushing this button will update the grade summary data used to generate the rainbow grades reports.
                     </p>
                 </td>
@@ -27,6 +27,7 @@
                     <button id="grade-summaries-button" onclick="location.href='{{ summaries_url }}'" class="btn btn-primary key_to_click" tabindex="0" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Grade Summaries</button>
                 </td>
             </tr>
+            <tr style="height:10px"><td colspan="3"></td></tr>
             <tr>
                 <td style="width:50%"> </td>
                 <td style="width:5%"> </td>
@@ -34,21 +35,21 @@
                     Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
                 </td>
             </tr>
-            <tr class="bar"></tr>
-            <tr class="bar"></tr>
+            <tr class="bar"><td colspan="3"></td></tr>
+            <tr class="bar"><td colspan="3"></td></tr>
             <tr>
-                <td style="width:50%">
+                <th style="width:50%;font-weight:normal;text-align:left">
                     <p>Pushing this button will generate a CSV file (for download) with all student grades for all gradeables. </p>
                 </td>
                 <td style="width:5%"> </td>
-                <td style="position:relative;width:45%">
+                <td style="width:45%; position:relative">
                     <button onclick="location.href='{{ csv_url }}'" class="btn btn-primary key_to_click" tabindex="0" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate CSV Report</button>
                 </td>
             </tr>
-            <tr class="bar"></tr>
-            <tr class="bar"></tr>
+            <tr class="bar"><td colspan="3"></td></tr>
+            <tr class="bar"><td colspan="3"></td></tr>
             <tr>
-                <td style="width:50%">
+                <th style="width:50%;font-weight:normal;text-align:left">
                     <p><em><b>NOTE: Work in Progress</b></em><br>Web interface for creation and customization of Rainbow Grades for this course.<br>
                     <a target=_blank href="https://submitty.org/instructor/rainbow_grades/">Rainbow Grades Documentation<i style="font-style:normal;" class="fa-question-circle"></i></a></p>
                 </td>
