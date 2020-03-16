@@ -15,8 +15,8 @@
     <br>
     <form method="post" id="open_new_queue" action="{{base_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <input type="text" id="new_queue_code" name="code" placeholder="Name" required="required">
-      <input type="text" id="new_queue_token" name="token" placeholder="Code" required="required">
+      <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required">
+      <input type="text" id="new_queue_token" name="token" placeholder="Code" aria-label="Code" required="required">
       <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-sync"></i>
       </a>
@@ -25,13 +25,13 @@
     <br>
     <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <select id="old_queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
+      <select id="old_queue_code" class="form-control" name="code" aria-label="Code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllQueues() %}
           <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
         {% endfor %}
       </select>
-      <input type="text" id="old_queue_token" name="token" placeholder="New Code" required="required">
+      <input type="text" id="old_queue_token" name="token" placeholder="New Code" aria-label="New Code" required="required">
       <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-sync"></i>
       </a>
@@ -46,7 +46,6 @@
           <th scope="col">Open/Close</th>
           <th scope="col">Empty</th>
           <th scope="col">Delete</th>
-          <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
@@ -62,10 +61,10 @@
                 onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
             </td>
             <td style="text-align: left;">
-              <b>Name:
-              </b>{{viewer.removeUnderScores(queue['code'])}}<br>
-              <b>Code:
-              </b>{{queue['token']}}</td>
+              <label for="queue_filter_{{viewer.cleanForId(queue['code'])}}">
+                <b>Name:</b>{{viewer.removeUnderScores(queue['code'])}}<br>
+                <b>Code:</b>{{queue['token']}}</td>
+              </lable>
             <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/toggle">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -92,7 +91,6 @@
                 <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn">Delete Queue</button>
               </form>
             </td>
-            <td></td>
           </tr>
         {% endfor %}
       </tbody>
@@ -100,7 +98,7 @@
   </div>
   <br>
 
-  <style media="screen">
+  <style>
     {% for color in viewer.getColors() %}
       .row_color_{{loop.index0}}{
         background: {{color}}!important;

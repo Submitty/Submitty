@@ -630,6 +630,64 @@ function generateCodeMirrorBlocks(container_element) {
     }
 }
 
+function showSplit(post_id) {
+  //If a thread was merged in the database earlier, we want to reuse the thread id and information
+  //so we don't have any loose ends
+  var url = buildCourseUrl(['forum', 'posts', 'splitinfo']);
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: {
+      post_id: post_id,
+      csrf_token: csrfToken
+    },
+    success: function(data) {
+      try {
+        var json = JSON.parse(data);
+      } catch (err) {
+        var message = '<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+        $('#messages').append(message);
+        return;
+      }
+      if(json['status'] === 'fail'){
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+        $('#messages').append(message);
+        return;
+      }
+      json = json['data'];
+      if(json['merged_thread_id'] === -1) {
+        document.getElementById("split_post_previously_merged").style.display = "none";
+        document.getElementById("split_post_submit").disabled = true;
+      } else {
+        document.getElementById("split_post_previously_merged").style.display = "block";
+        document.getElementById("split_post_submit").disabled = false;
+      }
+      document.getElementById("split_post_input").value = json['title'];
+      document.getElementById("split_post_id").value = post_id;
+      var i;
+      for(i = 0; i < json['all_categories_list'].length; i++) {
+        var id = json["all_categories_list"][i]["category_id"];
+        var target = "#split_post_category_" + id;
+        if(json["categories_list"].includes(id)) {
+          if(!($(target).hasClass("btn-selected"))) {
+            $(target).addClass("btn-selected").trigger("eventChangeCatClass");
+            $(target).find("input[type='checkbox']").prop("checked", true);
+          }
+        } else {
+          if($(target).hasClass("btn-selected")) {
+            $(target).removeClass("btn-selected").trigger("eventChangeCatClass");
+            $(target).find("input[type='checkbox']").prop("checked", false);
+          }
+        }
+      }
+      $("#popup-post-split").show();
+    },
+    error: function(){
+      window.alert("Something went wrong while trying to get post information for splitting. Try again later.");
+    }
+  });
+}
+
 function showHistory(post_id) {
     var url = buildCourseUrl(['forum', 'posts', 'history']);
     $.ajax({

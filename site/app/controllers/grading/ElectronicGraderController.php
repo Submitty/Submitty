@@ -1048,7 +1048,7 @@ class ElectronicGraderController extends AbstractController {
         if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
             while ($previousVersion) {
                 $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
-                if($prevVersionInstance == null) {
+                if ($prevVersionInstance == null) {
                     $rollbackSubmission = -1;
                     break;
                 }
@@ -1258,7 +1258,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // If it is graded at all, then send ta score information
-        $response_data['ta_grading_total'] = $gradeable->getTaPoints();
+        $response_data['ta_grading_total'] = $gradeable->getManualGradingPoints();
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
             if ($gradeable->isPeerGrading()) {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
