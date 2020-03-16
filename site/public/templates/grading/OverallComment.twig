@@ -5,7 +5,7 @@ Required Parameters:
 -overall_comment: the text to show in box
 
 #}
-<div class="box general-comment container"
+<div class="box general-comment container key_to_click" tabindex="0"
      onclick="{{ grading_disabled ? '' : 'onClickOverallComment(this)'}}">
     <div class="row">
         <div class="col">
@@ -24,7 +24,7 @@ Required Parameters:
         {% if editable %}
             <textarea id="overall-comment"
                       rows="5"
-                      class="general-comment-entry noscroll"
+                      class="general-comment-entry noscroll key_to_click" tabindex="0"
                       onclick="event.stopPropagation()"
                       onkeyup="auto_grow(this)"
                       placeholder="Overall message for student about the gradeable..."

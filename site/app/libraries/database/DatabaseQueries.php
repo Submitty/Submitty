@@ -24,7 +24,7 @@ use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueueViewer;
+use app\models\OfficeHoursQueueModel;
 use app\libraries\CascadingIterator;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedComponentContainer;
@@ -452,6 +452,62 @@ WHERE status = 1"
         return $categories_list;
     }
 
+    public function splitPost($post_id, $title, $categories_ids) {
+        $old_thread_id = -1;
+        $thread_id = -1;
+        $post = $this->core->getQueries()->getPost($post_id);
+        // Safety measure in case the database is bad for some reason
+        $counted_posts = array();
+        if (!empty($post)) {
+            if ($post["parent_id"] != -1) {
+                $old_thread_id = $post["thread_id"];
+                $this->course_db->query("SELECT id from threads where merged_post_id = ?", array($post_id));
+                $thread_id = $this->course_db->rows();
+                if (count($thread_id) > 0) {
+                    $thread_id = $thread_id[0]["id"];
+                    $this->course_db->query("UPDATE threads set merged_thread_id=-1, merged_post_id=-1 where id=?", array($thread_id));
+                    $this->course_db->query("DELETE FROM thread_categories where thread_id=?", array($thread_id));
+                }
+                else {
+                    //TODO: Update AbstractDatabase.php to work with returning syntax
+                    $this->course_db->query("INSERT INTO threads (title, created_by, is_visible, lock_thread_date) VALUES (?, ?, ?, ?)", array($title, $post["author_user_id"], true, null));
+                    $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $post["author_user_id"]));
+                    $thread_id = $this->course_db->rows()[0]["max_id"];
+                }
+                $str = "";
+                $arr = array();
+                foreach ($categories_ids as $id) {
+                    if (!empty($str)) {
+                        $str .= ", ";
+                    }
+                    $str .= "({$thread_id}, ?)";
+                    array_push($arr, $id);
+                }
+                $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES {$str}", $arr);
+                $posts = array($post);
+                while (count($posts) > 0) {
+                    $check_posts = array();
+                    $str = "";
+                    foreach ($posts as $check_post) {
+                        if (!in_array($check_post["id"], $counted_posts)) {
+                            $check_posts[] = $check_post["id"];
+                            $str .= "?, ";
+                            $counted_posts[] = $check_post["id"];
+                            $this->course_db->query("UPDATE posts set thread_id = ? where parent_id = ?", array($thread_id, $check_post["id"]));
+                        }
+                    }
+                    if (strlen($str) > 0) {
+                        $str = substr($str, 0, -2);
+                    }
+                    $this->course_db->query("SELECT id from posts where parent_id in (" . $str . ")", $check_posts);
+                    $posts = $this->course_db->rows();
+                }
+                $this->course_db->query("UPDATE posts set thread_id=?, parent_id=? where id=?", array($thread_id, -1, $post_id));
+            }
+        }
+        return array($old_thread_id, $thread_id, $counted_posts);
+    }
+
     public function createPost($user, $content, $thread_id, $anonymous, $type, $first, $hasAttachment, $markdown, $parent_post = -1) {
         if (!$first && $parent_post == 0) {
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", array($thread_id));
@@ -533,6 +589,19 @@ WHERE status = 1"
         return $this->course_db->rows();
     }
 
+    public function getPostOldThread($post_id) {
+        $this->course_db->query("SELECT id, merged_thread_id, title FROM threads WHERE merged_thread_id <> -1 AND merged_post_id = ?", array($post_id));
+        $rows = $this->course_db->rows();
+        if (count($rows) > 0) {
+            return $rows[0];
+        }
+        else {
+            $rows = array();
+            $rows["merged_thread_id"] = -1;
+            return $rows;
+        }
+    }
+
     public function getDeletedPostsByUser($user) {
         $this->course_db->query("SELECT * FROM posts where deleted = true AND author_user_id = ?", array($user));
         return $this->course_db->rows();
@@ -566,6 +635,10 @@ WHERE status = 1"
         return intval($this->course_db->rows()[0]['user_group']) <= 3;
     }
 
+    public function postHasHistory($post_id) {
+        $this->course_db->query("SELECT * FROM forum_posts_history WHERE post_id = ?", array($post_id));
+        return 0 !== count($this->course_db->rows());
+    }
 
     public function getUnviewedPosts($thread_id, $user_id) {
         if ($thread_id == -1) {
@@ -3122,20 +3195,12 @@ SQL;
         }
 
         $query = <<<SQL
-SELECT u.semester, u.course, u.user_group
+SELECT t.name AS term_name, u.semester, u.course, u.user_group
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+INNER JOIN terms t ON u.semester=t.term_id
 WHERE u.user_id=? ${extra}
-ORDER BY u.user_group ASC,
-CASE WHEN SUBSTRING(u.semester, 2, 2) ~ '\\d+' THEN SUBSTRING(u.semester, 2, 2)::INT
-    ELSE 0
-END DESC,
-CASE WHEN SUBSTRING(u.semester, 1, 1) = 's' THEN 2
-    WHEN SUBSTRING(u.semester, 1, 1) = 'u' THEN 3
-    WHEN SUBSTRING(u.semester, 1, 1) = 'f' THEN 4
-    ELSE 1
-END DESC,
-u.course ASC
+ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
         $return = array();
@@ -3368,13 +3433,13 @@ AND gc_id IN (
         $param_list[] = $thread_id;
         $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
         if ($option == 'alpha') {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp, posts.id;", array($thread_id));
         }
         elseif ($option == 'reverse-time') {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC ", array_reverse($param_list));
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC, id ASC", array_reverse($param_list));
         }
         else {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", array_reverse($param_list));
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp, id ASC", array_reverse($param_list));
         }
         return $this->course_db->rows();
     }
@@ -5226,13 +5291,11 @@ AND gc_id IN (
   */
 
     public function getCurrentQueue() {
-        // $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where status SIMILAR TO '_(0|1)_' order by ROW_NUMBER");
         $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where current_state IN ('waiting','being_helped') order by ROW_NUMBER");
         return $this->course_db->rows();
     }
 
     public function getPastQueue() {
-        // $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > CURRENT_DATE AND status SIMILAR TO '_2_' order by ROW_NUMBER");
         $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > CURRENT_DATE AND current_state IN ('done') order by ROW_NUMBER");
         return $this->course_db->rows();
     }
@@ -5244,47 +5307,55 @@ AND gc_id IN (
     }
 
 
-    public function openQueue($code) {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($code));
+    public function openQueue($queue_code, $token) {
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($queue_code));
 
         //cannot have more than one queue with the same code
         if (0 < count($this->course_db->rows())) {
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (TRUE, TRIM(?))", array($code));
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token) VALUES (TRUE, TRIM(?), TRIM(?))", array($queue_code,$token));
         return true;
     }
 
-    public function toggleQueue($code, $state) {
+    public function toggleQueue($queue_code, $state) {
         if ($state === "1") {
             $state = 'false';
         }
         else {
             $state = 'true';
         }
-        $this->course_db->query("UPDATE queue_settings SET open = ? where UPPER(TRIM(code)) = UPPER(TRIM(?))", array($state, $code));
+        $this->course_db->query("UPDATE queue_settings SET open = ? where UPPER(TRIM(code)) = UPPER(TRIM(?))", array($state, $queue_code));
     }
 
-    public function deleteQueue($code) {
-        $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($code));
+    public function deleteQueue($queue_code) {
+        $this->emptyQueue($queue_code);
+        $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($queue_code));
     }
 
-    public function isValidCode($code) {
-        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($code));
+    public function isValidCode($queue_code, $token = null) {
+        if (is_null($token)) {
+            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($queue_code));
+        }
+        else {
+            $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND UPPER(TRIM(token)) = UPPER(TRIM(?)) AND open = true", array($queue_code, $token));
+        }
         if (0 < count($this->course_db->rows())) {
             return $this->course_db->rows()[0]['code'];
         }
         return false;
     }
 
-    public function alreadyInAQueue() {
-        // $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND status SIMILAR TO '_(0|1)_'", array($this->core->getUser()->getId()));
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", array($this->core->getUser()->getId()));
+    public function alreadyInAQueue($user_id = null) {
+        if (is_null($user_id)) {
+            $user_id = $this->core->getUser()->getId();
+        }
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", array($user_id));
         return 0 < count($this->course_db->rows());
     }
 
-    public function addToQueue($code, $user_id, $name) {
+    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -5297,7 +5368,8 @@ AND gc_id IN (
                 time_out,
                 added_by,
                 help_started_by,
-                removed_by
+                removed_by,
+                contact_info
             ) VALUES (
                 'waiting',
                 NULL,
@@ -5309,17 +5381,17 @@ AND gc_id IN (
                 NULL,
                 ?,
                 NULL,
-                NULL
-            )", array($code,$user_id,$name,$user_id));
+                NULL,
+                ?
+            )", array($queue_code,$user_id,$name,$user_id,$contact_info));
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
         $status_code = null;
-        if ($remove_type === 'self') {//user removeing themselves
+        if ($remove_type !== 'self') {//user removeing themselves
             $status_code = 'being_helped';//dont allow removing yourself if you are being helped
         }
 
-        // $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO ?", array($user_id, $queue_code, $status_code));
         $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting', ?)", array($user_id, $queue_code, $status_code));
         if (count($this->course_db->rows()) <= 0) {
             if ($remove_type === 'self') {
@@ -5335,13 +5407,10 @@ AND gc_id IN (
             return false;
         }
 
-        // $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_(0|1)_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND current_state IN ('waiting','being_helped')", array($remove_type,$this->core->getUser()->getId(), $user_id, $queue_code));
-        $this->core->addSuccessMessage("Removed from queue");
     }
 
     public function startHelpUser($user_id, $queue_code) {
-        // $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_0_'", array($user_id, $queue_code));
         $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting')", array($user_id, $queue_code));
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("User not in queue");
@@ -5364,6 +5433,27 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = 'emptied', removed_by = ?, time_out = current_timestamp where current_state IN ('waiting','being_helped') and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($this->core->getUser()->getId(), $queue_code));
     }
 
+    public function entryIdToUserId($entry_id) {
+        $this->course_db->query("SELECT * FROM queue WHERE entry_id = ?", array($entry_id));
+        if (count($this->course_db->rows()) <= 0) {
+            $this->core->addErrorMessage("Invalid Entry ID");
+            return;
+        }
+        return $this->course_db->rows()[0]['user_id'];
+    }
+
+    public function restoreUserToQueue($entry_id) {
+        $user_id = $this->entryIdToUserId($entry_id);
+        if (is_null($user_id)) {
+            return;
+        }
+        if ($this->alreadyInAQueue($user_id)) {
+            $this->core->addErrorMessage("Cannot restore a user that is currently in the queue. Please remove them first.");
+            return;
+        }
+        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null where entry_id = ?", array($entry_id));
+        $this->core->addSuccessMessage("Student restored");
+    }
 
     public function getAllQueues() {
         $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
@@ -5382,7 +5472,7 @@ AND gc_id IN (
     }
 
     public function firstTimeInQueue($id, $queue_code) {
-        $this->course_db->query("SELECT count(*) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
+        $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
         return $this->course_db->rows()[0]['count'] <= 0;
     }
 
@@ -5394,9 +5484,26 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['name'];
     }
 
+    public function getLastUsedContactInfo() {
+        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", array($this->core->getUser()->getId()));
+        if (count($this->course_db->rows()) <= 0) {
+            return null;
+        }
+        return $this->course_db->rows()[0]['contact_info'];
+    }
+
     public function getCurrentQueueState() {
         $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", array($this->core->getUser()->getId()));
         return $this->course_db->rows()[0];
+    }
+
+    public function changeQueueToken($token, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", array($token, $queue_code));
+    }
+
+    public function getLastQueueUpdate() {
+        $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
+        return $this->course_db->rows()[0]['change_count'];
     }
 
 

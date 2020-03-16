@@ -6,10 +6,9 @@ use app\views\AbstractView;
 use app\libraries\Utils;
 
 class GradeOverrideView extends AbstractView {
-    public function displayOverriddenGrades($gradeables) {
+    public function displayOverriddenGrades(array $gradeables, array $students) {
         $this->core->getOutput()->addBreadcrumb('Grades Override');
 
-        $students = $this->core->getQueries()->getAllUsers();
         $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("admin/GradeOverride.twig", [

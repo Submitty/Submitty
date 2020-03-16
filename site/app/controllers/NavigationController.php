@@ -81,7 +81,9 @@ class NavigationController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone);
+        $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone, $gradeable_ids_and_titles);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
         $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
     }

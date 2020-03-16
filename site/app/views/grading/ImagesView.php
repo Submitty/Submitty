@@ -16,6 +16,7 @@ class ImagesView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
+        $this->core->getOutput()->enableMobileViewport();
 
         $image_data = [];
         $error_image_data = '_NONE_';
