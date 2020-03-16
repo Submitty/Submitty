@@ -193,8 +193,8 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add a benchmark percent
      *
-     * @param $benchmark string The benchmark - this is the key for this json field
-     * @param $percent float The percent - this is the value for this json field
+     * @param string $benchmark The benchmark - this is the key for this json field
+     * @param float $percent The percent - this is the value for this json field
      * @throws BadArgumentException The passed in percent was empty
      */
     public function addBenchmarkPercent($benchmark, $percent) {
