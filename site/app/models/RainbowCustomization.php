@@ -219,18 +219,17 @@ class RainbowCustomization extends AbstractModel {
      *                letter grade
      */
     public function getBenchmarkPercent() {
-        if(!is_null($this->RCJSON)) {
+        if (!is_null($this->RCJSON)) {
             $percent_obj = $this->RCJSON->getBenchmarkPercent();
 
             // If the RCJSON was found and it contains the benchmark percent fields then return it
-            if ($percent_obj != (object)[]) {
+            if ($percent_obj != (object) []) {
                 return $percent_obj;
             }
         }
 
         // Otherwise return a default benchmark percent object
-        return (object)
-            [
+        return (object) [
                 'lowest_a-' => 0.9,
                 'lowest_b-' => 0.8,
                 'lowest_c-' => 0.7,

@@ -201,7 +201,7 @@ class RainbowCustomizationJSON extends AbstractModel {
             throw new BadArgumentException('The benchmark percent may not be empty.');
         }
 
-        $this->benchmark_percent->$benchmark = (float)$percent;
+        $this->benchmark_percent->$benchmark = (float) $percent;
     }
 
     /**
