@@ -19,6 +19,7 @@ class PollView extends AbstractView {
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'polls' => $polls,
+            'user_id' => $this->core->getUser()->getId(),
           ]);
     }
 
@@ -33,7 +34,8 @@ class PollView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("polls/PollPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'poll' => $poll
+            'poll' => $poll,
+            'user_id' => $this->core->getUser()->getId(),
           ]);
     }
 }

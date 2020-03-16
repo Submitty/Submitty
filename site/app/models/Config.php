@@ -60,6 +60,8 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool getQueueContactInfo()
  * @method bool isPollsEnabled()
+ * @method float getPollsPtsForCorrect()
+ * @method float getPollsPtsForIncorrect()
  * @method void setSemester(string $semester)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
@@ -224,6 +226,10 @@ class Config extends AbstractModel {
     protected $queue_contact_info;
     /** @prop @var bool */
     protected $polls_enabled;
+    /** @prop @var float */
+    protected $polls_pts_for_correct;
+    /** @prop @var float */
+    protected $polls_pts_for_incorrect;
 
     /** @prop-read @var array */
     protected $feature_flags = [];
@@ -403,7 +409,8 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'polls_enabled'
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'polls_enabled', 'polls_pts_for_correct',
+            'polls_pts_for_incorrect'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 

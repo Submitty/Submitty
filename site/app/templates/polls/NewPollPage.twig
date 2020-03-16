@@ -1,7 +1,7 @@
 <div class="content">
     <h1> Add a New Poll </h1>
 
-    <form method="post" action="{{base_url}}">
+    <form method="post" action="{{base_url}}/newPoll">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="response_count" id="response-count" value="0"/>
 
@@ -41,7 +41,7 @@
         $("#responses").append(`
             <div id="response_${count}_wrapper">
                 <input type=text class="poll_response" name="response_${count}"/> 
-                <input type=radio value=${count} name="answer"/>
+                <input type=checkbox name="is_correct_${count}"/>
                 <br/>
             </div>
         `);
@@ -52,8 +52,8 @@
     function removeResponse() {
         console.log("removing")
         count = $(".poll_response").length
-        $(`#response_${count-1}_wrapper`).remove()
         count -= 1
+        $(`#response_${count}_wrapper`).remove()
         $("#response-count").val("" + count)
     }
 

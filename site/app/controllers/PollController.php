@@ -90,13 +90,14 @@ class PollController extends AbstractController {
     public function addNewPoll() {
         $response_count = $_POST["response_count"];
         $responses = array();
+        $answers = array();
         for ($i = 0; $i < $response_count; $i++) {
-            $responses[$i] = $_POST["response_" . $i];
+            $responses[] = $_POST["response_" . $i];
+            if ($_POST["is_correct_" . $i] == "on") {
+                $answers[] = $_POST["response_" . $i];
+            }
         }
-        $ans_index = (int)$_POST["answer"];
-        var_dump($ans_index);
-        $answer = $responses[$ans_index];
-        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $responses[$ans_index]);
+        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers);
 
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))

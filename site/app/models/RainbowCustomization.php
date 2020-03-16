@@ -42,7 +42,7 @@ class RainbowCustomization extends AbstractModel {
         'quiz', 'test', 'exam',
         'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',
         'project',
-        'participation', 'poll', 'note',
+        'participation', 'note',
         'none'];
 
 
@@ -110,7 +110,7 @@ class RainbowCustomization extends AbstractModel {
             $this->customization_data["participation"][] = [
                 "id" => "" . $poll->getID(),
                 "title" => $poll->getName(),
-                "max_score" => 1,
+                "max_score" => $this->core->getConfig()->getPollsPtsForCorrect(),
                 "grade_release_date" => "1999-12-31 23:59:59-0500"
             ];
         }

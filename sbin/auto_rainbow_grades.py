@@ -55,8 +55,8 @@ with open(users_config_file, 'r') as file:
 
 
 # Confirm that submitty_daemon user is running this script
-if data['daemon_user'] != getpass.getuser():
-    raise Exception('ERROR: This script must be run by the submitty_daemon user')
+#if data['daemon_user'] != getpass.getuser():
+    #raise Exception('ERROR: This script must be run by the submitty_daemon user')
 
 
 # Configure variables

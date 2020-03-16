@@ -10,21 +10,19 @@ class PollModel extends AbstractModel {
     protected $name;
     protected $question;
     protected $responses;
-    protected $answer;
+    protected $answers;
     protected $open;
     protected $user_response;
-    protected $submitter;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, $answer, $open, $user_response) {
+    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $open, array $user_responses) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
         $this->question = $question;
         $this->responses = $responses;
-        $this->answer = $answer;
+        $this->answers = $answers;
         $this->open = $open;
-        $this->user_response = $user_response;
-        $this->submitter = $this->core->getUser()->getId();
+        $this->user_responses = $user_responses;
     }
 
     public function getID() {
@@ -43,25 +41,26 @@ class PollModel extends AbstractModel {
         return $this->responses;
     }
 
-    public function getAnswer() {
-        return $this->answer;
+    public function getAnswers() {
+        return $this->answers;
     }
 
     public function isOpen() {
         return $this->open;
     }
 
-    public function getUserResponse() {
-        return $this->user_response;
+    public function getUserResponses() {
+        return $this->user_responses;
     }
 
-    public function getScore() {
-        return 1.0;
+    public function getUserResponse($user_id) {
+        return $this->user_responses[$user_id];
     }
 
-    public function getSubmitter() {
-        return $this->submitter;
+    public function getScore($user_id) {
+        if (!isset($this->user_responses[$user_id])){
+            return 0.0;
+        }
+        return in_array($this->getUserResponse($user_id), $this->answers) ? (float)$this->core->getConfig()->getPollsPtsForCorrect() : (float)$this->core->getConfig()->getPollsPtsForIncorrect();
     }
-
-    
 }

@@ -10,6 +10,7 @@
                 <th scope="col">Name</th>
                 <th scope="col">Toggle</th>
                 <th scope="col">Edit</th>
+                <th scope="col">View Results</th>
             </tr>
         </thead>
         <tbody>
@@ -18,7 +19,7 @@
                     <td> {{ poll.getName() }} </td>
                     {% if poll.isOpen() %}
                         <td>
-                            <form method="post" action = "{{ base_url }}/setOpen">
+                            <form method="post" action="{{ base_url }}/setOpen">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <input type="hidden" name="open" value="FALSE"/>
@@ -27,7 +28,7 @@
                         </td>
                     {% else %}
                         <td>
-                            <form method="post" action = "{{ base_url }}/setOpen">
+                            <form method="post" action="{{ base_url }}/setOpen">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <input type="hidden" name="open" value="TRUE"/>
@@ -35,7 +36,20 @@
                             </form>
                         </td>
                     {% endif %}
-                    <td> EDIT BUTTON </td>
+                    <td>
+                        <form method="post" action="{{base_url}}/viewResults">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            <button type="submit" class="btn btn-primary">Edit Poll</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{base_url}}/viewResults">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            <button type="submit" class="btn btn-primary">View Results</button>
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

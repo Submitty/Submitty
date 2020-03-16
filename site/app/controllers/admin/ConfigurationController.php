@@ -55,6 +55,8 @@ class ConfigurationController extends AbstractController {
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
+            'polls_pts_for_correct'          => $this->core->getConfig()->getPollsPtsForCorrect(),
+            'polls_pts_for_incorrect'        => $this->core->getConfig()->getPollsPtsForIncorrect(),
         );
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;

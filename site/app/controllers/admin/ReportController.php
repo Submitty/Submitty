@@ -360,18 +360,19 @@ class ReportController extends AbstractController {
         }
         foreach($polls as $poll) {
             $bucket = ucwords("participation");
-            $user_data[$bucket][] = $this->generatePollSummary($poll);
+            $user_data[$bucket][] = $this->generatePollSummary($poll, $user->getId());
         }
         //var_dump(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'));
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
 
-    public function generatePollSummary(PollModel $poll) {
+    public function generatePollSummary(PollModel $poll, $user) {
+        #var_dump($poll->getScore($user));
         $entry = [
             'id' => "" . $poll->getId(),
             'name' => $poll->getName(),
             'gradeable_type' => "participation",
-            'score' => $poll->getScore(),
+            'score' => $poll->getScore($user),
             "grade_released_date" => "1999-12-31 23:59:59 -0500",
             "status" => "Good",
             "overall_comment" => "lorem ipsum lodar",
@@ -382,9 +383,9 @@ class ReportController extends AbstractController {
         $entry["components"] = [];
         $inner = [
             "title" => "Question",
-            "score" => 2,
-            "default_score" => 2,
-            "upper_clamp" => 2,
+            "score" => $poll->getScore($user),
+            "default_score" => 0,
+            "upper_clamp" => 1,
             "lower_clamp" => 0
         ];
         $inner["marks"] = [];

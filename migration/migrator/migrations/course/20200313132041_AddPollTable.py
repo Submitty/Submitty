@@ -16,8 +16,8 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, answer TEXT NOT NULL, open boolean NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS poll_options(poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, open boolean NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS poll_options(poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL, correct bool NOT NULL)")
     database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), response TEXT NOT NULL)")
     
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
@@ -28,6 +28,8 @@ def up(config, database, semester, course):
             j = json.load(in_file)
         
         j['course_details']['polls_enabled'] = False
+        j['course_details']['polls_pts_for_correct'] = 1.0
+        j['course_details']['polls_pts_for_incorrect'] = 0.5
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)

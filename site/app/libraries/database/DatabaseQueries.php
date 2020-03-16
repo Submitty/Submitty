@@ -6157,12 +6157,16 @@ AND gc_id IN (
     }
     //// BEGIN ONLINE POLLING QUERIES ////
 
-    public function addNewPoll($poll_name, $question, array $responses, $answer) {
-        $this->course_db->query("INSERT INTO polls(name, question, answer, open) VALUES (?, ?, ?, ?) RETURNING poll_id", array($poll_name, $question, $answer, "FALSE"));
+    public function addNewPoll($poll_name, $question, array $responses, array $answers) {
+        var_dump($answers);
+        $this->course_db->query("INSERT INTO polls(name, question, open) VALUES (?, ?, ?) RETURNING poll_id", array($poll_name, $question, "FALSE"));
         $this->course_db->query("SELECT max(poll_id) from polls");
         $id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $response) {
-            $this->course_db->query("INSERT INTO poll_options(poll_id, response) VALUES (?, ?)", array($id, $response));
+            $this->course_db->query("INSERT INTO poll_options(poll_id, response, correct) VALUES (?, ?, FALSE)", array($id, $response));
+        }
+        foreach ($answers as $answer) {
+            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and response = ?", array($id, $answer));
         }
     }
 
@@ -6177,9 +6181,7 @@ AND gc_id IN (
         $user = $this->core->getUser()->getId();
 
         foreach ($polls_rows as $row) {
-            $responses = $this->getResponses($row["poll_id"]);
-            $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $row["answer"], $row["open"], $this->getUserResponse($row["poll_id"], $user));
-            $polls[] = $model;
+            $polls[] = $this->getPoll($row["poll_id"]);
         }
 
         return $polls;
@@ -6194,7 +6196,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $row["answer"], $row["open"], $this->getUserResponse($row["poll_id"], $user));
+        $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["open"], $this->getUserResponses($row["poll_id"]));
         return $model;
     }
 
@@ -6209,15 +6211,14 @@ AND gc_id IN (
         return $responses;
     }
 
-    public function getUserResponse($poll_id, $user_id) {
-        $this->course_db->query("SELECT * from poll_responses where poll_id = ? AND student_id = ?", array($poll_id, $user_id));
+    public function getUserResponses($poll_id) {
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ?", array($poll_id));
         $rows = $this->course_db->rows();
-        if (count($rows) <= 0) {
-            return null;
+        $responses = array();
+        foreach ($rows as $row) {
+            $responses[$row["student_id"]] = $row["response"]; 
         }
-        else {
-            return $rows[0]["response"];
-        }
+        return $responses;
     }
 
     public function submitResponse($poll_id, $response) {
@@ -6229,6 +6230,24 @@ AND gc_id IN (
         else {
             $this->course_db->query("UPDATE poll_responses SET response=? where poll_id = ? and student_id = ?", array($response, $poll_id, $user));
         }
+    }
+
+    public function getAnswers($poll_id) {
+        $this->course_db->query("SELECT response from poll_options where poll_id = ? and correct = TRUE", array($poll_id));
+        $answers = [];
+        foreach ($this->course_db->rows() as $row) {
+            $answers[] = $row["response"];
+        }
+        return $answers;
+    }
+
+    public function getTotalPollsScore($user_id) {
+        $polls = $this->getPolls();
+        $total = 0.0;
+        foreach ($polls as $poll) {
+            $total = $total + $poll->getScore($user_id);
+        }
+        return $total;
     }
 
 

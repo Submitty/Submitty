@@ -122,7 +122,7 @@ class GlobalController extends AbstractController {
                     "title" => "Polls",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-polls",
-                    "icon" => "fa-door-closed"
+                    "icon" => "fa-question-circle"
                 ]);
             }
 

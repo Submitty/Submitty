@@ -6,12 +6,12 @@
         {% for response in poll.getResponses() %}
             <div>
                 <h3> {{ response }}
-                    {% if response == poll.getUserResponse() %}
-                        <input type=radio value={{ response }} name="answer" checked/>
+                    {% if response == poll.getUserResponse(user_id) %}
+                        <input type=radio value="{{ response }}" name="answer" checked/>
                     {% elseif poll.isOpen() %}
-                        <input type=radio value={{ response }} name="answer"/>
+                        <input type=radio value="{{ response }}" name="answer"/>
                     {% else %}
-                        <input type=radio value={{ response }} name="answer" disabled/>
+                        <input type=radio value="{{ response }}" name="answer" disabled/>
                     {% endif %}
                 </h3>
                 <br/>
