@@ -546,3 +546,20 @@ body {min-width: 925px;}
     margin-right: 5px;
     font-size: 1.8em;
 }
+
+.forum_markdown li {
+    white-space: normal;
+}
+
+.forum_markdown ol,ul {
+    white-space: normal;
+    padding-left: 15px;
+}
+
+.forum_markdown table {
+    border-collapse: collapse;
+}
+
+.forum_markdown table, th, td {
+    border: 1px solid black;
+}
