@@ -1576,6 +1576,17 @@ function checkSidebarCollapse() {
     }
 }
 
+//Changes the theme from light to dark mode or the reverse
+function toggleTheme(){
+  if(!localStorage.getItem("theme") || localStorage.getItem("theme") == "light"){
+      localStorage.setItem("theme", "dark");
+      document.documentElement.setAttribute("data-theme", "dark");
+  }else{
+    localStorage.setItem("theme", "light");
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+}
+
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
     $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work

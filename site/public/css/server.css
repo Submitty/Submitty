@@ -5,10 +5,8 @@
     --viewed_content: #e8f0f7;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-      --viewed_content: #313335;
-  }
+[data-theme="dark"] {
+    --viewed_content: #313335;
 }
 
 a, a:hover, a:link, a:visited {

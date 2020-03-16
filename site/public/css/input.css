@@ -27,10 +27,8 @@ input[type="color"] {
     width: auto;
 }
 
-@media (prefers-color-scheme: dark) {
-  input[type="text"], input[type="password"] {
+[data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="password"]{
     color:white;
-  }
 }
 
 input.readonly {

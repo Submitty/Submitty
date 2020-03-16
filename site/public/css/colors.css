@@ -182,13 +182,13 @@
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
     --overall-comment: #E9EFEF;
+    --dark-mode-black: #202225;
 
 
 
 }
 
-@media (prefers-color-scheme: dark) {
-  :root{
+[data-theme="dark"] {
       /*master color*/
       --submitty-logo-blue: #316498;
       /*might wanna change blue borders/hover text/sidebar text to submitty blue*/
@@ -222,7 +222,7 @@
       --hover-focus-info-blue: #31b0d5;
       --hover-active-all-info-blue: #269abc;
 
-      --default-white: #202225;
+      --default-white: var(--dark-mode-black);
 
       --btn-default-white: #ffffff;
 
@@ -315,7 +315,7 @@
       --standard-light-seafoam: #a4dad5;
 
       /*the look of the webpage itself*/
-      --background-blue: #202225;
+      --background-blue: var(--dark-mode-black);
       --main-body-white: #ffffff;
       --subheading-underscore-grey: #888888;
 
@@ -372,7 +372,4 @@
       --standard-input-background: #4a4a4a;
       --checkbox-black: #5296db;
       --overall-comment: #4E5353;
-
-
-  }
 }
