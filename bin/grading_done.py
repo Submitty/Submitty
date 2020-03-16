@@ -263,7 +263,7 @@ def main():
 
             try:
                 entry = QueueItem(json_file, epoch_time)
-            except e:
+            except Exception as e:
                 print(f"Whoops: could not read for {json_file}: {e}")
                 continue
 
@@ -282,7 +282,7 @@ def main():
                 json_file = str(grading_file)
                 try:
                     entry = QueueItem(json_file, epoch_time, is_grading=True)
-                except e:
+                except Exception as e:
                     print(f"Whoops: could not read for entry {json_file}: {e}")
                     continue
 
