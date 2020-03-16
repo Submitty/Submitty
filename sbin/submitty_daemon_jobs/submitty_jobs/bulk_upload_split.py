@@ -65,8 +65,8 @@ def main(args):
             # save pdfs as images (start indexing at one)
             pdf_images = convert_from_bytes(open(output_filename, 'rb').read())
             for k in range(len(pdf_images)):
-                pdf_images[k].save(format(output_filename[:-4]) +
-                                   '_' + str(k + 1).zfill(2) + '.jpg',
+                pdf_images[k].save(output_filename[:-4] +
+                                   '_' + str(k + 1).zfill(3) + '.jpg',
                                    "JPEG", quality=100)
 
             with open(cover_filename, 'wb') as out:

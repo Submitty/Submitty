@@ -89,19 +89,19 @@
         {# Table header #}
         <thead>
             <tr>
-                <th width="20"></th>
-                <th width="70">Section</th>
-                <th width="90" style="text-align: left">
+                <th style="width:20px"></th>
+                <th style="width:70px">Section</th>
+                <th style="width:90px" style="text-align: left">
                     <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=id" aria-label="sort by ID">
                         <span class="tooltiptext" title="sort by User ID">User ID </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
-                <th width="110" style="text-align: left">
+                <th style="width:110px" style="text-align: left">
                     <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by First Name">
                         <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
-                <th width="110" style="text-align: left">
+                <th style="width:110px" style="text-align: left">
                     <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Last Name">
                         <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
                     </a>
@@ -110,7 +110,7 @@
                 {% if action == 'lab' %}
                     {% set colspan = 5 + gradeable.getComponents()|length %}
                     {% for component in gradeable.getComponents() %}
-                        <th width="150">
+                        <th style="width:150px">
                             {{ component.getTitle() }}
                         </th>
                     {% endfor %}
@@ -119,14 +119,14 @@
                     {% if components_numeric|length > 0 %}
                         {% set colspan = colspan + 1 %}
                         {% for component in components_numeric %}
-                            <th width="150" style="text-align: center">
+                            <th style="width:150px" style="text-align: center">
                                 {{ component.getTitle() }}({{ component.getMaxValue() }})
                             </th>
                         {% endfor %}
-                        <th width="60" style="text-align: center">Total</th>
+                        <th style="width:60px" style="text-align: center">Total</th>
                     {% endif %}
                     {% for component in components_text %}
-                        <th width="200" style="text-align: center">
+                        <th style="width:200px" style="text-align: center">
                             {{ component.getTitle() }}
                         </th>
                     {% endfor %}
