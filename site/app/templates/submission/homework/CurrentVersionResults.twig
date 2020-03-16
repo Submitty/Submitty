@@ -12,7 +12,7 @@
 
                 {# download icon if student can download files #}
                 {% if can_download %}
-                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                    <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
                         <i class="fas fa-download" title="Download the file"></i></button>
                 {% endif %}
 
@@ -23,7 +23,7 @@
             {% if can_download and files|length > 1 %}
                 <br />
                 <br />
-                Download all files: <a onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download zip of all files"><i class="fas fa-download" title="Download zip of all files"></i></a>
+                Download all files: <a onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download zip of all files" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download zip of all files"></i></a>
             {% endif %}
         </div>
         <div class="box col-md-6">

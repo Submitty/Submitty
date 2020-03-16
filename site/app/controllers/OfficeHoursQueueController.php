@@ -114,6 +114,19 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        $contact_info = null;
+        if ($this->core->getConfig()->getQueueContactInfo()) {
+            if (empty($_POST['contact_info'])) {
+                $this->core->addErrorMessage("Missing contact info");
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+                );
+            }
+            else {
+                $contact_info = $_POST['contact_info'];
+            }
+        }
+
         $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
         $token = preg_replace('/\s+/', '_', trim($_POST['token']));
 
@@ -132,7 +145,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name']);
+        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info);
         $this->core->addSuccessMessage("Added to queue");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))

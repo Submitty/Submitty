@@ -176,6 +176,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
                 loadingTools.find("span").hide();
                 loadingTools.find(".loading-tools-hide").show();
+                enableKeyToClick();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -224,8 +225,8 @@ function newDeleteCourseMaterialForm(path, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('[name="delete-course-material-message"]', form).html('');
-    $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).html('');
+    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -272,19 +273,19 @@ function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_stude
     let form = $("#edit-course-materials-form");
 
     let element = document.getElementById("edit-picker");
-    
+
     element._flatpickr.setDate(release_time);
-    
+
     if(this_hide_from_students == "on"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
-    
+
     else{
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
-    
+
     $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
-    
+
     if(this_file_section != null){
         for(let index = 0; index < this_file_section.length; ++index){
             $("#section-edit-" + this_file_section[index], form).prop('checked',true);
@@ -1646,4 +1647,28 @@ function resizeNoScrollTextareas() {
     $('textarea.noscroll').each(function() {
         auto_grow(this);
     })
+}
+
+$(document).ready(function() {
+  enableKeyToClick();
+});
+
+function enableKeyToClick(){
+  var key_to_click = document.getElementsByClassName("key_to_click");
+  for (var i = 0; i < key_to_click.length; i++) {
+    key_to_click[i].addEventListener('keydown', function(event) {
+      if (event.keyCode === 13) {//ENTER key
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.target).click();
+      }
+    });
+    key_to_click[i].addEventListener('keyup', function(event) {
+      if (event.keyCode === 32) { //SPACE key
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.target).click();
+      }
+    });
+  }
 }

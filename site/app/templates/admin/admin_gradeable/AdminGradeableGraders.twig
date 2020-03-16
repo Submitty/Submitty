@@ -8,11 +8,11 @@ Macros
     {% for grader in graders %}
         <tr class="{{ prefix }}">
             <th>{{ grader[1] ~ " " ~ grader[2] ~ "(" ~ grader[0] ~ ")" }}</th>
-            <td><input type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
+            <td><input class="key_to_click" tabindex="0" type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
                        aria-label="all rotating sections"
                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", 0)'/></td>
             {% for rs in section_numbers %}
-                <td><input type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
+                <td><input class="key_to_click" tabindex="0" type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
                         id="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
                         aria-label="rotating section {{ rs }}"
                         onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", {{ rs }});'

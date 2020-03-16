@@ -81,6 +81,12 @@ class WebRouter {
                     JsonResponse::getFailResponse("You don't have access to this endpoint.")
                 );
             }
+
+            if (!$router->checkFeatureFlag()) {
+                return Response::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Feature is not yet available.')
+                );
+            }
         }
         catch (ResourceNotFoundException $e) {
             return new Response(JsonResponse::getFailResponse("Endpoint not found."));
@@ -126,6 +132,13 @@ class WebRouter {
                 return new Response(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
+            }
+
+            if (!$router->checkFeatureFlag()) {
+                return new Response(
+                    JsonResponse::getFailResponse('Feature is not yet available.'),
+                    new WebResponse("Error", "errorPage", "Feature is not yet available.")
                 );
             }
         }
@@ -331,5 +344,26 @@ class WebRouter {
         }
 
         return $access;
+    }
+
+    private function checkFeatureFlag() {
+        $feature_flag = $this->reader->getMethodAnnotation(
+            new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']),
+            FeatureFlag::class
+        );
+
+        if (is_null($feature_flag)) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $feature_flag = $this->reader->getClassAnnotation(
+                new \ReflectionClass($this->parameters['_controller']),
+                FeatureFlag::class
+            );
+        }
+
+        if (is_null($feature_flag)) {
+            return true;
+        }
+
+        return $this->core->getConfig()->checkFeatureFlagEnabled($feature_flag->getFlag());
     }
 }

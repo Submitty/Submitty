@@ -536,8 +536,8 @@ td>a.active-sort {
 
 .submission-page-total-header {
   padding: 6px;
-  color: var(--text-white);
-  background-color: var(--actionable-blue);
+  color: var(--text-black);
+  background-color: var(--standard-light-gray);
 }
 
 .viewed_post{
@@ -579,6 +579,13 @@ td>a.active-sort {
 
 .box-title > h4 {
     margin-left: 20px;
+}
+
+.box-title-total > h4 {
+    margin-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+
 }
 
 .grade-results {
@@ -1565,6 +1572,11 @@ end of styles used in the admin gradeable page
     border: 1px solid var(--text-black);
 }
 
+.wrapper_layout_header > th {
+    padding: 4px;
+    border: 1px solid var(--text-black);
+}
+
 .wrapper-upload .wrapper_layout_header {
     background-color: var(--standard-pale-gray);
 }
@@ -1742,8 +1754,13 @@ end of styles used in the admin gradeable page
     display: block !important;
 }
 
+#popup_to_show_matches_id {
+  overflow:hidden;
+  border:2px solid grey;
+}
+
 .notification-badge {
-    background-color: red;
+    background-color: var(--danger-red);
     padding: 1px 5px;
     color: white;
     font-weight: bold;
