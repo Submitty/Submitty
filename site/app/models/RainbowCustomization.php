@@ -219,23 +219,23 @@ class RainbowCustomization extends AbstractModel {
      *                letter grade
      */
     public function getBenchmarkPercent() {
-        // If RCJSON exists use the values from it
         if(!is_null($this->RCJSON)) {
+            $percent_obj = $this->RCJSON->getBenchmarkPercent();
 
-            return $this->RCJSON->getBenchmarkPercent();
-
-        // Else just return a default benchmark percent object
-        } else {
-
-            return (object)
-                [
-                    'lowest_a-' => 0.9,
-                    'lowest_b-' => 0.8,
-                    'lowest_c-' => 0.7,
-                    'lowest_d' => 0.6,
-                ];
-
+            // If the RCJSON was found and it contains the benchmark percent fields then return it
+            if ($percent_obj != (object)[]) {
+                return $percent_obj;
+            }
         }
+
+        // Otherwise return a default benchmark percent object
+        return (object)
+            [
+                'lowest_a-' => 0.9,
+                'lowest_b-' => 0.8,
+                'lowest_c-' => 0.7,
+                'lowest_d' => 0.6,
+            ];
     }
 
     /**
@@ -299,6 +299,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->display_benchmark)) {
             foreach ($form_json->display_benchmark as $benchmark) {
                 $this->RCJSON->addDisplayBenchmarks($benchmark);
+            }
+        }
+
+        if (isset($form_json->benchmark_percent)) {
+            foreach ($form_json->benchmark_percent as $key => $value) {
+                $this->RCJSON->addBenchmarkPercent((string) $key, $value);
             }
         }
 

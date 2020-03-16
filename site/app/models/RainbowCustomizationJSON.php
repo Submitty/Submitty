@@ -189,6 +189,21 @@ class RainbowCustomizationJSON extends AbstractModel {
         $this->section->$sectionID = $label;
     }
 
+
+    /**
+     * Add a benchmark percent
+     *
+     * @param $benchmark The benchmark, this is the key for the field
+     * @param $percent The percent, this is the value for the field
+     */
+    public function addBenchmarkPercent($benchmark, $percent) {
+        if (empty($percent)) {
+            throw new BadArgumentException('The benchmark percent may not be empty.');
+        }
+
+        $this->benchmark_percent->$benchmark = (float)$percent;
+    }
+
     /**
      * Get the section object
      *

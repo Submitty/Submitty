@@ -187,12 +187,43 @@ function getMessages()
     return messages;
 }
 
+function getBenchmarkPercent()
+{
+    // Collect benchmark percents
+    var benchmark_percent = {};
+
+    $.each($("input[class='benchmark_percent_input']"), function(){
+
+        // Get data
+        var benchmark = this.getAttribute('data-benchmark').toString();
+        var percent = this.value;
+
+        // Verify percent is not empty
+        if(percent === "")
+        {
+            throw "All benchmarks must have a value before saving."
+        }
+
+        // Verify percent is a floating point number
+        if(isNaN(parseFloat(percent)))
+        {
+            throw "Benchmark percent input must be a floating point number."
+        }
+
+        // Add to sections
+        benchmark_percent[benchmark] = percent;
+    });
+
+    return benchmark_percent;
+}
+
 // This function constructs a JSON representation of all the form input
 function buildJSON(){
 
     // Build the overall json
     let ret = {
         'display_benchmark': getDisplayBenchmark(),
+        'benchmark_percent': getBenchmarkPercent(),
         'section' : getSection(),
         'gradeables' : getGradeableBuckets(),
         'messages' : getMessages()
