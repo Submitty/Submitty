@@ -2,7 +2,7 @@
 <div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;">
     {% block form %}
         {# This lets us center the window #}
-        <div class="popup-box">
+        <div class="popup-box"  onclick="event.stopPropagation(); closePopup();">
             {# Actual displayed window #}
             <div class="popup-window">
                 {% block title_panel %}
