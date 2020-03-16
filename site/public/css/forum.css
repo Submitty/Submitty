@@ -551,7 +551,7 @@ body {min-width: 925px;}
     white-space: normal;
 }
 
-.forum_markdown ol,ul {
+.forum_markdown ol, .forum_markdown ul {
     white-space: normal;
     padding-left: 15px;
 }
@@ -560,6 +560,6 @@ body {min-width: 925px;}
     border-collapse: collapse;
 }
 
-.forum_markdown table, th, td {
+.forum_markdown table, .forum_markdown th, .forum_markdown td {
     border: 1px solid black;
 }
