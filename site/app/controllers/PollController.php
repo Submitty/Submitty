@@ -97,7 +97,7 @@ class PollController extends AbstractController {
                 $answers[] = $_POST["response_" . $i];
             }
         }
-        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers);
+        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"]);
 
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -133,6 +133,52 @@ class PollController extends AbstractController {
             $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answer"]);
         }
 
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['polls']))
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/polls/editPoll", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return Response
+     */
+    public function editPoll() {
+        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+
+        if ($poll == null) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                'Poll',
+                'editPoll',
+                $poll
+            )
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/polls/editPoll/submitEdits", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return Response
+     */
+    public function submitEdits() {
+        $response_count = $_POST["response_count"];
+        $responses = array();
+        $answers = array();
+        for ($i = 0; $i < $response_count; $i++) {
+            $responses[] = $_POST["response_" . $i];
+            if (isset($POST["is_correct_" . $i]) and $_POST["is_correct_" . $i] == "on") {
+                $answers[] = $_POST["response_" . $i];
+            }
+        }
+        $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"]);
+        
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
         );

@@ -13,8 +13,9 @@ class PollModel extends AbstractModel {
     protected $answers;
     protected $open;
     protected $user_response;
+    protected $release_date;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $open, array $user_responses) {
+    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $open, array $user_responses, $release_date) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
@@ -23,6 +24,7 @@ class PollModel extends AbstractModel {
         $this->answers = $answers;
         $this->open = $open;
         $this->user_responses = $user_responses;
+        $this->release_date = $release_date;
     }
 
     public function getID() {
@@ -54,13 +56,24 @@ class PollModel extends AbstractModel {
     }
 
     public function getUserResponse($user_id) {
+        if (!isset($this->user_responses[$user_id])) {
+            return null;
+        }
         return $this->user_responses[$user_id];
+    }
+
+    public function getReleaseDate() {
+        return $this->release_date;
+    }
+
+    public function isCorrect($response) {
+        return in_array($response, $this->responses) and in_array($response, $this->answers);
     }
 
     public function getScore($user_id) {
         if (!isset($this->user_responses[$user_id])){
             return 0.0;
         }
-        return in_array($this->getUserResponse($user_id), $this->answers) ? (float)$this->core->getConfig()->getPollsPtsForCorrect() : (float)$this->core->getConfig()->getPollsPtsForIncorrect();
+        return $this->isCorrect($this->user_responses[$user_id]) ? (float)$this->core->getConfig()->getPollsPtsForCorrect() : (float)$this->core->getConfig()->getPollsPtsForIncorrect();
     }
 }

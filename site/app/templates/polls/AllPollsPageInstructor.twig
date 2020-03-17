@@ -37,7 +37,7 @@
                         </td>
                     {% endif %}
                     <td>
-                        <form method="post" action="{{base_url}}/viewResults">
+                        <form method="post" action="{{base_url}}/editPoll">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                             <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             <button type="submit" class="btn btn-primary">Edit Poll</button>

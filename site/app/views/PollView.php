@@ -38,4 +38,12 @@ class PollView extends AbstractView {
             'user_id' => $this->core->getUser()->getId(),
           ]);
     }
+
+    public function editPoll($poll) {
+        return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
+            'csrf_token' => $this->core->getCsrfToken(),
+            'base_url' => $this->core->buildCourseUrl() . '/polls',
+            'poll' => $poll
+          ]);
+    }
 }

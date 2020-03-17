@@ -6157,9 +6157,8 @@ AND gc_id IN (
     }
     //// BEGIN ONLINE POLLING QUERIES ////
 
-    public function addNewPoll($poll_name, $question, array $responses, array $answers) {
-        var_dump($answers);
-        $this->course_db->query("INSERT INTO polls(name, question, open) VALUES (?, ?, ?) RETURNING poll_id", array($poll_name, $question, "FALSE"));
+    public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date) {
+        $this->course_db->query("INSERT INTO polls(name, question, open, release_date) VALUES (?, ?, ?, ?)", array($poll_name, $question, "FALSE", $release_date));
         $this->course_db->query("SELECT max(poll_id) from polls");
         $id = $this->course_db->rows()[0]['max'];
         foreach ($responses as $response) {
@@ -6171,7 +6170,7 @@ AND gc_id IN (
     }
 
     public function setPollOpen($poll_id, $open) {
-        $this->course_db->query("UPDATE polls SET open=? where poll_id = ?", array($open, $poll_id));
+        $this->course_db->query("UPDATE polls SET open = ? where poll_id = ?", array($open, $poll_id));
     }
 
     public function getPolls() {
@@ -6196,7 +6195,7 @@ AND gc_id IN (
         }
         $row = $row[0];
         $responses = $this->getResponses($row["poll_id"]);
-        $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["open"], $this->getUserResponses($row["poll_id"]));
+        $model = new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["open"], $this->getUserResponses($row["poll_id"]), $row["release_date"]);
         return $model;
     }
 
@@ -6250,6 +6249,16 @@ AND gc_id IN (
         return $total;
     }
 
+    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date) {
+        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", array($poll_id));
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?", array($poll_name, $question, $release_date));
+        foreach ($responses as $response) {
+            $this->course_db->query("INSERT INTO poll_options(poll_id, response, correct) VALUES (?, ?, FALSE)", array($poll_id, $response));
+        }
+        foreach ($answers as $answer) {
+            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and response = ?", array($poll_id, $answer));
+        }
+    }
 
     //// END ONLINE POLLING QUERIES ////
 }
