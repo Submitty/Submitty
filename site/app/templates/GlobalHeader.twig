@@ -81,6 +81,9 @@
             //dark theme preferred, set document with a `data-theme` attribute
             if (theme=="dark") {
                  document.documentElement.setAttribute("data-theme", "dark");
+                 if(localStorage.getItem("black_mode") == "black"){
+                   document.documentElement.setAttribute("data-black_mode", "black");
+                 }
             }
         }
         detectColorScheme();

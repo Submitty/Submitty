@@ -188,6 +188,10 @@
 
 }
 
+[data-black_mode="black"][data-theme="dark"] {
+      --dark-mode-black: #000000;
+}
+
 [data-theme="dark"] {
       /*master color*/
       --submitty-logo-blue: #316498;

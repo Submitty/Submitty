@@ -1577,13 +1577,24 @@ function checkSidebarCollapse() {
 }
 
 //Changes the theme from light to dark mode or the reverse
-function toggleTheme(){
-  if(!localStorage.getItem("theme") || localStorage.getItem("theme") == "light"){
-      localStorage.setItem("theme", "dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-  }else{
-    localStorage.setItem("theme", "light");
-    document.documentElement.setAttribute("data-theme", "light");
+//if mode='black' it will toggle the black mode instead of the normal mode
+function toggleTheme(mode='normal'){
+  if(mode==='normal'){
+    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") != "dark") || localStorage.getItem("theme") == "light"){
+        localStorage.setItem("theme", "dark");
+        document.documentElement.setAttribute("data-theme", "dark");
+    }else{
+      localStorage.setItem("theme", "light");
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  }else if(mode === 'black'){
+    if(!localStorage.getItem("black_mode") || localStorage.getItem("black_mode") != "black"){
+        localStorage.setItem("black_mode", "black");
+        document.documentElement.setAttribute("data-black_mode", "black");
+    }else{
+      localStorage.setItem("black_mode", "");
+      document.documentElement.setAttribute("data-black_mode", "");
+    }
   }
 }
 
