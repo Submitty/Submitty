@@ -1066,6 +1066,18 @@ div.full_height {
     margin-left: 5px;
 }
 
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] .light_mode_toggle,
+.dark_mode_toggle {
+  display: block!important;
+}
+
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] .dark_mode_toggle,
+.light_mode_toggle {
+  display: none!important;
+}
+
 .td-open {
     width: 10%;
 }
