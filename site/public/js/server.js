@@ -1580,7 +1580,7 @@ function checkSidebarCollapse() {
 //if mode='black' it will toggle the black mode instead of the normal mode
 function toggleTheme(mode='normal'){
   if(mode==='normal'){
-    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") != "dark") || localStorage.getItem("theme") == "light"){
+    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") !== "dark") || localStorage.getItem("theme") === "light"){
         localStorage.setItem("theme", "dark");
         document.documentElement.setAttribute("data-theme", "dark");
     }else{
@@ -1588,7 +1588,7 @@ function toggleTheme(mode='normal'){
       document.documentElement.setAttribute("data-theme", "light");
     }
   }else if(mode === 'black'){
-    if(!localStorage.getItem("black_mode") || localStorage.getItem("black_mode") != "black"){
+    if(localStorage.getItem('black_mode') !== 'black'){
         localStorage.setItem("black_mode", "black");
         document.documentElement.setAttribute("data-black_mode", "black");
     }else{

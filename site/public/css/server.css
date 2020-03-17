@@ -1067,14 +1067,14 @@ div.full_height {
 }
 
 /* Used to pick the Submitty logo to show based on the theme */
-[data-theme="dark"] .light_mode_toggle,
-.dark_mode_toggle {
+[data-theme="dark"] #logo-submitty-light,
+#logo-submitty-dark {
   display: block!important;
 }
 
 /* Used to pick the Submitty logo to show based on the theme */
-[data-theme="dark"] .dark_mode_toggle,
-.light_mode_toggle {
+[data-theme="dark"] #logo-submitty-dark,
+#logo-submitty-light {
   display: none!important;
 }
 
@@ -1685,7 +1685,7 @@ end of styles used in the admin gradeable page
     /* TODO on mobile, different header height */
     margin: 90px 10px 10px; /* 80px for header */
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--default-white);
     text-align: center;
     width: 108px;
     border: 2px solid #2627ee;

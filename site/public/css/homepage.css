@@ -27,3 +27,17 @@
 .unblack_mode_toggle {
   display: none!important;
 }
+
+.light_mode_toggle, .unblack_mode_toggle {
+  background-color: var(--text-black);
+  color: var(--text-white);
+}
+
+.dark_mode_toggle {
+  background-color: var(--dark-mode-black);
+  color: var(--text-white);
+}
+
+.dark_mode_toggle:hover {
+  color: var(--standard-hover-light-gray);
+}
