@@ -196,18 +196,13 @@ def read_autograding_worker_json():
 # ==================================================================================
 # Removes any existing files or folders in the autograding_done folder.
 def cleanup_old_jobs():
-    autograding_done_filepath = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE")
-    print(autograding_done_filepath)
-    for filename in os.listdir(autograding_done_filepath):
-        file_path = os.path.join(folder, filename)
+    for file_path in Path(SUBMITTY_DATA_DIR, "autograding_DONE").glob("*"):
+        file_path = str(file_path)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding DONE file: " + file_path)
         try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
+            os.remove(file_path)
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, JOB_ID,trace=traceback.format_exc())
-
 
 # ==================================================================================
 
