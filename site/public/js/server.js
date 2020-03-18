@@ -902,6 +902,18 @@ function check_lichen_jobs(url, semester, course) {
 }
 
 function downloadFile(path, dir) {
+    /*$annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
+    $annotation_user_path = FileUtils::joinPaths($annotation_gradeable_path, $user_id);
+    $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
+    $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.json';
+        file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
+    */
+    console.log(path);
+    console.log(dir);
+    window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+}
+
+function downloadAnnotatedFile(path, dir){
     window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 

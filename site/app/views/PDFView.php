@@ -51,6 +51,7 @@ class PDFView extends AbstractView {
             'filename' => $params["file_name"],
             'file_path' => $params['file_path'],
             'annotation_jsons' => json_encode($params["annotation_jsons"]),
+            'showAnnotationPage' => $params['showAnnotationPage'],
             'student_popup' => $is_student,
             'page_num' => $params["page_num"],
             'pdf_url_base' => $pdf_url,
