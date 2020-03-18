@@ -1572,6 +1572,11 @@ end of styles used in the admin gradeable page
     border: 1px solid var(--text-black);
 }
 
+.wrapper_layout_header > th {
+    padding: 4px;
+    border: 1px solid var(--text-black);
+}
+
 .wrapper-upload .wrapper_layout_header {
     background-color: var(--standard-pale-gray);
 }
@@ -1755,7 +1760,7 @@ end of styles used in the admin gradeable page
 }
 
 .notification-badge {
-    background-color: red;
+    background-color: var(--danger-red);
     padding: 1px 5px;
     color: white;
     font-weight: bold;

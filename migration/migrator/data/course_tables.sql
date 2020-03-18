@@ -1237,7 +1237,8 @@ CREATE TABLE IF NOT EXISTS queue(
   time_out TIMESTAMP,
   added_by TEXT NOT NULL REFERENCES users(user_id),
   help_started_by TEXT REFERENCES users(user_id),
-  removed_by TEXT REFERENCES users(user_id)
+  removed_by TEXT REFERENCES users(user_id),
+  contact_info TEXT
 );
 CREATE TABLE IF NOT EXISTS queue_settings(
   id serial PRIMARY KEY,

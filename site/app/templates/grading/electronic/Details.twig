@@ -78,7 +78,7 @@
             <tr>
                 {% for column in columns %}
                     {% if column.sort_type %}
-                        <td width="{{ column.width }}">
+                        <td style="width:{{ column.width }}">
                             <a href="{{ details_base_url }}?view={{ (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null }}&sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
@@ -93,7 +93,7 @@
                             </a>
                         </td>
                     {% else %}
-                        <th width="{{ column.width }}">{{ column.title }}</th>
+                        <th style="width:{{ column.width }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>

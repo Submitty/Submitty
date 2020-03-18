@@ -5355,7 +5355,7 @@ AND gc_id IN (
         return 0 < count($this->course_db->rows());
     }
 
-    public function addToQueue($queue_code, $user_id, $name) {
+    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -5368,7 +5368,8 @@ AND gc_id IN (
                 time_out,
                 added_by,
                 help_started_by,
-                removed_by
+                removed_by,
+                contact_info
             ) VALUES (
                 'waiting',
                 NULL,
@@ -5380,8 +5381,9 @@ AND gc_id IN (
                 NULL,
                 ?,
                 NULL,
-                NULL
-            )", array($queue_code,$user_id,$name,$user_id));
+                NULL,
+                ?
+            )", array($queue_code,$user_id,$name,$user_id,$contact_info));
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -5480,6 +5482,14 @@ AND gc_id IN (
             return null;
         }
         return $this->course_db->rows()[0]['name'];
+    }
+
+    public function getLastUsedContactInfo() {
+        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", array($this->core->getUser()->getId()));
+        if (count($this->course_db->rows()) <= 0) {
+            return null;
+        }
+        return $this->course_db->rows()[0]['contact_info'];
     }
 
     public function getCurrentQueueState() {

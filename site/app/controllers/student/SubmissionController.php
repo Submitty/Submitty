@@ -552,10 +552,13 @@ class SubmissionController extends AbstractController {
         //get any and all images associated with this PDF if they exist.
         //images are order <original>_<split-number>_<page-number>, so grab everuthing with the same suffixes
         preg_match("/\d*$/", pathinfo($path, PATHINFO_FILENAME), $matches);
-        $split_number = count($matches) >= 1 ? reset($matches) : "-1";
         $image_files = glob(FileUtils::joinPaths(dirname($uploaded_file), "*.*"));
 
-        $regex = "/.*_{$split_number}_\d*\.\w*$/";
+
+        $combined_pdf_path = FileUtils::joinPaths(pathinfo($uploaded_file)['dirname'], pathinfo($uploaded_file)['filename']);
+        $combined_pdf_path = str_replace("/", "\/", $combined_pdf_path);
+
+        $regex = "/{$combined_pdf_path}_\d*\.\w*$/";
         $image_files = preg_grep($regex, $image_files);
 
         $image_extension = count($image_files) > 0 ? pathinfo(reset($image_files), PATHINFO_EXTENSION) : "";

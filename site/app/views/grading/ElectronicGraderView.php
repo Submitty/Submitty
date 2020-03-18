@@ -134,7 +134,7 @@ class ElectronicGraderView extends AbstractView {
                 $peer_percentage = 0;
                 $peer_total = 0;
                 $peer_graded = 0;
-                
+
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
                     $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
                     $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
@@ -273,10 +273,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
 					<tr>
-				        <td style = "cursor:pointer;" width="25%" id="user_down">User &darr;</td>
-				        <td style = "cursor:pointer;" width="25%" id="upload_down">Upload Timestamp</td>
-				        <td style = "cursor:pointer;" width="25%" id="submission_down">Submission Timestamp</td>
-				        <td style = "cursor:pointer;" width="25%" id="filepath_down">Filepath</td>
+				        <td style = "cursor:pointer;width:25%" id="user_down">User &darr;</td>
+				        <td style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</td>
+				        <td style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</td>
+				        <td style = "cursor:pointer;width:25%" id="filepath_down">Filepath</td>
 					</tr>
 HTML;
 
