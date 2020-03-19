@@ -11,6 +11,7 @@ import contextlib
 import traceback
 import tempfile
 import zipfile
+from pathlib import Path
 
 from autograder import autograding_utils
 from autograder import grade_item
