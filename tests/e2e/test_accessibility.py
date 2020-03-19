@@ -49,14 +49,14 @@ class TestAccessibility(BaseTestCase):
     def test_w3_validator(self):
         # Uncomment this to generate a new baseline for all pages on the website
         # Then run 'python3 -m unittest e2e.test_accessibility' from inside the tests folder
-        genBaseline(self)
+        # genBaseline(self)
 
         # Uncomment this to generate a new baseline for a specific url
         # url = '' # your url here
         # genBaseline(self, url)
 
 
-        # validatePages(self)
+        validatePages(self)
 
 
 

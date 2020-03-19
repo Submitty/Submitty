@@ -1,51 +1,9 @@
 {
-    "/home": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 135,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
-        "Duplicate ID “course-list”.": {
-            "type": "error",
-            "lastLine": 211,
-            "lastColumn": 67,
-            "firstColumn": 29,
-            "message": "Duplicate ID “course-list”.",
-            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 39
-        },
-        "The first occurrence of ID “course-list” was here.": {
-            "type": "info",
-            "lastLine": 186,
-            "lastColumn": 67,
-            "firstColumn": 29,
-            "subType": "warning",
-            "message": "The first occurrence of ID “course-list” was here.",
-            "extract": "          <ul id=\"course-list\" class=\"bare-list\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 39
-        }
-    },
+    "/home": {},
     "/s20/sample": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 305,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
             "type": "error",
-            "lastLine": 1427,
+            "lastLine": 1418,
             "lastColumn": 76,
             "firstColumn": 9,
             "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
@@ -55,19 +13,9 @@
         }
     },
     "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 317,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
             "type": "info",
-            "lastLine": 625,
+            "lastLine": 600,
             "lastColumn": 46,
             "firstColumn": 13,
             "subType": "warning",
@@ -78,7 +26,7 @@
         },
         "Attribute “placeholder” not allowed on element “input” at this point.": {
             "type": "error",
-            "lastLine": 1105,
+            "lastLine": 1080,
             "lastColumn": 254,
             "firstColumn": 17,
             "message": "Attribute “placeholder” not allowed on element “input” at this point.",
@@ -88,7 +36,7 @@
         },
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
             "type": "error",
-            "lastLine": 1105,
+            "lastLine": 1080,
             "lastColumn": 254,
             "firstColumn": 17,
             "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
@@ -98,7 +46,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 2278,
+            "lastLine": 2245,
             "lastColumn": 172,
             "firstColumn": 87,
             "subType": "warning",
@@ -109,20 +57,10 @@
         }
     },
     "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 310,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 3682,
-            "firstLine": 3681,
+            "lastLine": 3657,
+            "firstLine": 3656,
             "lastColumn": 31,
             "firstColumn": 25,
             "message": "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)",
@@ -132,19 +70,9 @@
         }
     },
     "/s20/sample/gradeable/future_no_tas_test/grading?view=all": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 310,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Attribute “type” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 647,
+            "lastLine": 622,
             "lastColumn": 137,
             "firstColumn": 13,
             "message": "Attribute “type” not allowed on element “div” at this point.",
@@ -154,7 +82,7 @@
         },
         "Attribute “border” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 647,
+            "lastLine": 622,
             "lastColumn": 137,
             "firstColumn": 13,
             "message": "Attribute “border” not allowed on element “div” at this point.",
@@ -164,8 +92,8 @@
         },
         "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 4488,
-            "firstLine": 4487,
+            "lastLine": 4463,
+            "firstLine": 4462,
             "lastColumn": 31,
             "firstColumn": 25,
             "message": "Element “thead” not allowed as child of element “table” in this context. (Suppressing further errors from this subtree.)",
@@ -174,44 +102,12 @@
             "hiliteLength": 32
         }
     },
-    "/s20/sample/gradeable/open_homework/grading/status": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 308,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
-    "/s20/sample/gradeable/open_homework/grading/details?view=all": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 309,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
+    "/s20/sample/gradeable/open_homework/grading/status": {},
+    "/s20/sample/gradeable/open_homework/grading/details?view=all": {},
     "/s20/sample/gradeable/open_homework": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 322,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Bad value “true” for attribute “checked” on element “input”.": {
             "type": "error",
-            "lastLine": 557,
+            "lastLine": 532,
             "lastColumn": 96,
             "firstColumn": 21,
             "message": "Bad value “true” for attribute “checked” on element “input”.",
@@ -221,7 +117,7 @@
         },
         "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.": {
             "type": "error",
-            "lastLine": 567,
+            "lastLine": 542,
             "lastColumn": 131,
             "firstColumn": 25,
             "message": "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.",
@@ -231,7 +127,7 @@
         },
         "Bad value “text” for attribute “role” on element “div”.": {
             "type": "error",
-            "lastLine": 708,
+            "lastLine": 683,
             "lastColumn": 205,
             "firstColumn": 57,
             "message": "Bad value “text” for attribute “role” on element “div”.",
@@ -240,32 +136,11 @@
             "hiliteLength": 149
         }
     },
-    "/s20/sample/gradeable/open_team_homework/team": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 306,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
+    "/s20/sample/gradeable/open_team_homework/team": {},
     "/s20/sample/gradeable/grades_released_homework_autota": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 324,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Bad value “true” for attribute “checked” on element “input”.": {
             "type": "error",
-            "lastLine": 559,
+            "lastLine": 534,
             "lastColumn": 96,
             "firstColumn": 21,
             "message": "Bad value “true” for attribute “checked” on element “input”.",
@@ -275,7 +150,7 @@
         },
         "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.": {
             "type": "error",
-            "lastLine": 569,
+            "lastLine": 544,
             "lastColumn": 131,
             "firstColumn": 25,
             "message": "Bad value “_none” for attribute “target” on element “a”: Reserved keyword “none” used.",
@@ -285,7 +160,7 @@
         },
         "Bad value “text” for attribute “role” on element “div”.": {
             "type": "error",
-            "lastLine": 710,
+            "lastLine": 685,
             "lastColumn": 205,
             "firstColumn": 57,
             "message": "Bad value “text” for attribute “role” on element “div”.",
@@ -295,8 +170,8 @@
         },
         "Attribute “fname” not allowed on element “tr” at this point.": {
             "type": "error",
-            "lastLine": 716,
-            "firstLine": 715,
+            "lastLine": 691,
+            "firstLine": 690,
             "lastColumn": 69,
             "firstColumn": 79,
             "message": "Attribute “fname” not allowed on element “tr” at this point.",
@@ -306,7 +181,7 @@
         },
         "Bad value “text” for attribute “role” on element “i”.": {
             "type": "error",
-            "lastLine": 716,
+            "lastLine": 691,
             "lastColumn": 246,
             "firstColumn": 127,
             "message": "Bad value “text” for attribute “role” on element “i”.",
@@ -314,20 +189,20 @@
             "hiliteStart": 10,
             "hiliteLength": 120
         },
-        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+        "The “type” attribute is unnecessary for JavaScript resources.": {
             "type": "info",
-            "lastLine": 1095,
-            "lastColumn": 129,
-            "firstColumn": 29,
+            "lastLine": 1010,
+            "lastColumn": 55,
+            "firstColumn": 25,
             "subType": "warning",
-            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
-            "extract": "          <span class=\"loading-tools-in-progress\" aria-label=\"Loading Details for Test 2 ./a.out 10\" hidden=\"\">\n     ",
+            "message": "The “type” attribute is unnecessary for JavaScript resources.",
+            "extract": "          <script type=\"text/javascript\">\n     ",
             "hiliteStart": 10,
-            "hiliteLength": 101
+            "hiliteLength": 31
         },
         "CSS: The value “break-word” is deprecated": {
             "type": "error",
-            "lastLine": 1167,
+            "lastLine": 1035,
             "lastColumn": 97,
             "firstColumn": 17,
             "message": "CSS: The value “break-word” is deprecated",
@@ -336,32 +211,11 @@
             "hiliteLength": 81
         }
     },
-    "/s20/sample/notifications": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 308,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
+    "/s20/sample/notifications": {},
     "/s20/sample/notifications/settings": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 310,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Element “style” not allowed as child of element “main” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 524,
+            "lastLine": 499,
             "lastColumn": 7,
             "firstColumn": 1,
             "message": "Element “style” not allowed as child of element “main” in this context. (Suppressing further errors from this subtree.)",
@@ -371,29 +225,19 @@
         },
         "Bad value “true” for attribute “checked” on element “input”.": {
             "type": "error",
-            "lastLine": 655,
-            "lastColumn": 239,
-            "firstColumn": 83,
+            "lastLine": 700,
+            "lastColumn": 194,
+            "firstColumn": 79,
             "message": "Bad value “true” for attribute “checked” on element “input”.",
-            "extract": "ng-input\"><input type=\"checkbox\" aria-label=\"Notification All Modified Threads &amp; Posts\" name=\"all_modifications_forum\" id=\"all_modifications_forum\" checked=\"true\"></div>",
+            "extract": "ng-input\"><input type=\"checkbox\" aria-label=\"Notification Team Invitation\" name=\"team_invite\" id=\"team_invite\" checked=\"true\"></div>",
             "hiliteStart": 10,
-            "hiliteLength": 157
+            "hiliteLength": 116
         }
     },
     "/s20/sample/gradeable": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 312,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
             "type": "info",
-            "lastLine": 625,
+            "lastLine": 600,
             "lastColumn": 46,
             "firstColumn": 13,
             "subType": "warning",
@@ -403,66 +247,13 @@
             "hiliteLength": 34
         }
     },
-    "/s20/sample/config": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 309,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
-    "/s20/sample/theme": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 306,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
-    "/s20/sample/office_hours_queue": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 308,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
-        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 609,
-            "lastColumn": 9,
-            "firstColumn": 3,
-            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "  <br>\n\n  <style>\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 7
-        }
-    },
+    "/s20/sample/config": {},
+    "/s20/sample/theme": {},
+    "/s20/sample/office_hours_queue": {},
     "/s20/sample/course_materials": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 313,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "The “type” attribute is unnecessary for JavaScript resources.": {
             "type": "info",
-            "lastLine": 2136,
+            "lastLine": 1269,
             "lastColumn": 43,
             "firstColumn": 13,
             "subType": "warning",
@@ -473,7 +264,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 2287,
+            "lastLine": 1420,
             "lastColumn": 172,
             "firstColumn": 87,
             "subType": "warning",
@@ -484,19 +275,9 @@
         }
     },
     "/s20/sample/forum": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 323,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Element “p” not allowed as child of element “pre” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 726,
+            "lastLine": 701,
             "lastColumn": 87,
             "firstColumn": 32,
             "message": "Element “p” not allowed as child of element “pre” in this context. (Suppressing further errors from this subtree.)",
@@ -506,7 +287,7 @@
         },
         "Element “h7” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 729,
+            "lastLine": 704,
             "lastColumn": 50,
             "firstColumn": 9,
             "message": "Element “h7” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
@@ -516,7 +297,7 @@
         },
         "Bad value “input” for attribute “type” on element “input”.": {
             "type": "error",
-            "lastLine": 767,
+            "lastLine": 742,
             "lastColumn": 179,
             "firstColumn": 9,
             "message": "Bad value “input” for attribute “type” on element “input”.",
@@ -526,7 +307,7 @@
         },
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
             "type": "error",
-            "lastLine": 767,
+            "lastLine": 742,
             "lastColumn": 179,
             "firstColumn": 9,
             "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
@@ -536,7 +317,7 @@
         },
         "The element “input” must not appear as a descendant of the “a” element.": {
             "type": "error",
-            "lastLine": 773,
+            "lastLine": 748,
             "lastColumn": 93,
             "firstColumn": 17,
             "message": "The element “input” must not appear as a descendant of the “a” element.",
@@ -546,7 +327,7 @@
         },
         "The “type” attribute is unnecessary for JavaScript resources.": {
             "type": "info",
-            "lastLine": 792,
+            "lastLine": 767,
             "lastColumn": 35,
             "firstColumn": 5,
             "subType": "warning",
@@ -557,7 +338,7 @@
         },
         "Attribute “label” not allowed on element “a” at this point.": {
             "type": "error",
-            "lastLine": 866,
+            "lastLine": 841,
             "lastColumn": 197,
             "firstColumn": 6,
             "message": "Attribute “label” not allowed on element “a” at this point.",
@@ -567,7 +348,7 @@
         },
         "Attribute “checked” not allowed on element “li” at this point.": {
             "type": "error",
-            "lastLine": 896,
+            "lastLine": 871,
             "lastColumn": 130,
             "firstColumn": 16,
             "message": "Attribute “checked” not allowed on element “li” at this point.",
@@ -577,7 +358,7 @@
         },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 908,
+            "lastLine": 883,
             "lastColumn": 10,
             "firstColumn": 4,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -587,7 +368,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 939,
+            "lastLine": 914,
             "lastColumn": 109,
             "firstColumn": 4,
             "subType": "warning",
@@ -598,7 +379,7 @@
         },
         "Attribute “cat-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 940,
+            "lastLine": 915,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “cat-id” not allowed on element “button” at this point.",
@@ -608,7 +389,7 @@
         },
         "Attribute “btn-selected” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 940,
+            "lastLine": 915,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
@@ -618,7 +399,7 @@
         },
         "Attribute “sel-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 945,
+            "lastLine": 920,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “sel-id” not allowed on element “button” at this point.",
@@ -628,7 +409,7 @@
         },
         "Attribute “prev_page” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 985,
+            "lastLine": 960,
             "lastColumn": 76,
             "firstColumn": 13,
             "message": "Attribute “prev_page” not allowed on element “div” at this point.",
@@ -638,7 +419,7 @@
         },
         "Attribute “next_page” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 985,
+            "lastLine": 960,
             "lastColumn": 76,
             "firstColumn": 13,
             "message": "Attribute “next_page” not allowed on element “div” at this point.",
@@ -648,7 +429,7 @@
         },
         "Attribute “data” not allowed on element “a” at this point.": {
             "type": "error",
-            "lastLine": 989,
+            "lastLine": 964,
             "lastColumn": 112,
             "firstColumn": 21,
             "message": "Attribute “data” not allowed on element “a” at this point.",
@@ -658,7 +439,7 @@
         },
         "Attribute “reply-level” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 1132,
+            "lastLine": 1107,
             "lastColumn": 107,
             "firstColumn": 5,
             "message": "Attribute “reply-level” not allowed on element “div” at this point.",
@@ -668,7 +449,7 @@
         },
         "Attribute “post_box_id” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 1179,
+            "lastLine": 1154,
             "lastColumn": 54,
             "firstColumn": 9,
             "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
@@ -678,7 +459,7 @@
         },
         "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
             "type": "error",
-            "lastLine": 1200,
+            "lastLine": 1175,
             "lastColumn": 363,
             "firstColumn": 17,
             "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
@@ -688,7 +469,7 @@
         },
         "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 1206,
+            "lastLine": 1181,
             "lastColumn": 87,
             "firstColumn": 25,
             "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
@@ -698,7 +479,7 @@
         },
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).": {
             "type": "info",
-            "lastLine": 303,
+            "lastLine": 293,
             "lastColumn": 99,
             "firstColumn": 69,
             "subType": "warning",
@@ -709,19 +490,9 @@
         }
     },
     "/s20/sample/forum/threads/new": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 317,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "The “align” attribute on the “div” element is obsolete. Use CSS instead.": {
             "type": "error",
-            "lastLine": 562,
+            "lastLine": 537,
             "lastColumn": 52,
             "firstColumn": 5,
             "message": "The “align” attribute on the “div” element is obsolete. Use CSS instead.",
@@ -731,7 +502,7 @@
         },
         "Attribute “rows” not allowed on element “input” at this point.": {
             "type": "error",
-            "lastLine": 567,
+            "lastLine": 542,
             "lastColumn": 215,
             "firstColumn": 17,
             "message": "Attribute “rows” not allowed on element “input” at this point.",
@@ -741,7 +512,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 576,
+            "lastLine": 551,
             "lastColumn": 122,
             "firstColumn": 21,
             "subType": "warning",
@@ -752,7 +523,7 @@
         },
         "Attribute “label” not allowed on element “a” at this point.": {
             "type": "error",
-            "lastLine": 790,
+            "lastLine": 765,
             "lastColumn": 197,
             "firstColumn": 6,
             "message": "Attribute “label” not allowed on element “a” at this point.",
@@ -762,17 +533,17 @@
         },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 809,
+            "lastLine": 784,
             "lastColumn": 10,
             "firstColumn": 4,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
+            "extract": "</div>\n\t\t\t<style>\n",
             "hiliteStart": 10,
             "hiliteLength": 7
         },
         "Attribute “cat-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 841,
+            "lastLine": 816,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “cat-id” not allowed on element “button” at this point.",
@@ -782,7 +553,7 @@
         },
         "Attribute “btn-selected” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 841,
+            "lastLine": 816,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
@@ -792,7 +563,7 @@
         },
         "Attribute “sel-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 846,
+            "lastLine": 821,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “sel-id” not allowed on element “button” at this point.",
@@ -802,7 +573,7 @@
         },
         "Attribute “post_box_id” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 859,
+            "lastLine": 834,
             "lastColumn": 54,
             "firstColumn": 9,
             "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
@@ -812,7 +583,7 @@
         },
         "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
             "type": "error",
-            "lastLine": 927,
+            "lastLine": 902,
             "lastColumn": 353,
             "firstColumn": 17,
             "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
@@ -822,7 +593,7 @@
         },
         "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 944,
+            "lastLine": 919,
             "lastColumn": 87,
             "firstColumn": 25,
             "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
@@ -832,19 +603,9 @@
         }
     },
     "/s20/sample/forum/categories": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 314,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "The “align” attribute on the “div” element is obsolete. Use CSS instead.": {
             "type": "error",
-            "lastLine": 555,
+            "lastLine": 530,
             "lastColumn": 52,
             "firstColumn": 5,
             "message": "The “align” attribute on the “div” element is obsolete. Use CSS instead.",
@@ -854,7 +615,7 @@
         },
         "Attribute “rows” not allowed on element “input” at this point.": {
             "type": "error",
-            "lastLine": 560,
+            "lastLine": 535,
             "lastColumn": 215,
             "firstColumn": 17,
             "message": "Attribute “rows” not allowed on element “input” at this point.",
@@ -864,7 +625,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 569,
+            "lastLine": 544,
             "lastColumn": 122,
             "firstColumn": 21,
             "subType": "warning",
@@ -875,19 +636,9 @@
         }
     },
     "/s20/sample/forum/stats": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 311,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Attribute “label” not allowed on element “a” at this point.": {
             "type": "error",
-            "lastLine": 547,
+            "lastLine": 522,
             "lastColumn": 197,
             "firstColumn": 6,
             "message": "Attribute “label” not allowed on element “a” at this point.",
@@ -897,7 +648,7 @@
         },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 566,
+            "lastLine": 541,
             "lastColumn": 10,
             "firstColumn": 4,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -907,7 +658,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 570,
+            "lastLine": 545,
             "lastColumn": 109,
             "firstColumn": 4,
             "subType": "warning",
@@ -918,7 +669,7 @@
         },
         "Attribute “sel-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 573,
+            "lastLine": 548,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “sel-id” not allowed on element “button” at this point.",
@@ -928,7 +679,7 @@
         },
         "Attribute “btn-selected” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 573,
+            "lastLine": 548,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
@@ -938,19 +689,9 @@
         }
     },
     "/s20/sample/users": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 312,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "A table row was 8 columns wide and exceeded the column count established by the first row (7).": {
             "type": "info",
-            "lastLine": 551,
+            "lastLine": 526,
             "lastColumn": 30,
             "firstColumn": 26,
             "subType": "warning",
@@ -961,8 +702,8 @@
         },
         "Table column 8 established by element “th” has no cells beginning in it.": {
             "type": "error",
-            "lastLine": 550,
-            "firstLine": 549,
+            "lastLine": 525,
+            "firstLine": 524,
             "lastColumn": 62,
             "firstColumn": 38,
             "message": "Table column 8 established by element “th” has no cells beginning in it.",
@@ -972,7 +713,7 @@
         },
         "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 1861,
+            "lastLine": 1836,
             "lastColumn": 91,
             "firstColumn": 58,
             "message": "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)",
@@ -982,7 +723,7 @@
         },
         "Duplicate ID “edit-user-form”.": {
             "type": "error",
-            "lastLine": 1870,
+            "lastLine": 1845,
             "lastColumn": 29,
             "firstColumn": 5,
             "message": "Duplicate ID “edit-user-form”.",
@@ -992,7 +733,7 @@
         },
         "The first occurrence of ID “edit-user-form” was here.": {
             "type": "info",
-            "lastLine": 1856,
+            "lastLine": 1831,
             "lastColumn": 67,
             "firstColumn": 1,
             "subType": "warning",
@@ -1003,7 +744,7 @@
         },
         "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 1872,
+            "lastLine": 1847,
             "lastColumn": 50,
             "firstColumn": 4,
             "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
@@ -1013,7 +754,7 @@
         },
         "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
             "type": "error",
-            "lastLine": 1871,
+            "lastLine": 1846,
             "lastColumn": 85,
             "firstColumn": 3,
             "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
@@ -1023,19 +764,9 @@
         }
     },
     "/s20/sample/graders": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 312,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "A table row was 8 columns wide and exceeded the column count established by the first row (6).": {
             "type": "info",
-            "lastLine": 549,
+            "lastLine": 524,
             "lastColumn": 34,
             "firstColumn": 30,
             "subType": "warning",
@@ -1046,8 +777,8 @@
         },
         "Duplicate ID “section-”.": {
             "type": "error",
-            "lastLine": 575,
-            "firstLine": 574,
+            "lastLine": 550,
+            "firstLine": 549,
             "lastColumn": 40,
             "firstColumn": 69,
             "message": "Duplicate ID “section-”.",
@@ -1057,8 +788,8 @@
         },
         "The first occurrence of ID “section-” was here.": {
             "type": "info",
-            "lastLine": 546,
-            "firstLine": 545,
+            "lastLine": 521,
+            "firstLine": 520,
             "lastColumn": 40,
             "firstColumn": 26,
             "subType": "warning",
@@ -1069,8 +800,8 @@
         },
         "Table columns in range 7…8 established by element “th” have no cells beginning in them.": {
             "type": "error",
-            "lastLine": 548,
-            "firstLine": 547,
+            "lastLine": 523,
+            "firstLine": 522,
             "lastColumn": 66,
             "firstColumn": 62,
             "message": "Table columns in range 7…8 established by element “th” have no cells beginning in them.",
@@ -1080,7 +811,7 @@
         },
         "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 632,
+            "lastLine": 607,
             "lastColumn": 91,
             "firstColumn": 58,
             "message": "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)",
@@ -1090,7 +821,7 @@
         },
         "Duplicate ID “edit-user-form”.": {
             "type": "error",
-            "lastLine": 641,
+            "lastLine": 616,
             "lastColumn": 29,
             "firstColumn": 5,
             "message": "Duplicate ID “edit-user-form”.",
@@ -1100,7 +831,7 @@
         },
         "The first occurrence of ID “edit-user-form” was here.": {
             "type": "info",
-            "lastLine": 627,
+            "lastLine": 602,
             "lastColumn": 67,
             "firstColumn": 1,
             "subType": "warning",
@@ -1111,7 +842,7 @@
         },
         "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 643,
+            "lastLine": 618,
             "lastColumn": 50,
             "firstColumn": 4,
             "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
@@ -1121,7 +852,7 @@
         },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 1430,
+            "lastLine": 1405,
             "lastColumn": 7,
             "firstColumn": 1,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -1131,7 +862,7 @@
         },
         "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
             "type": "error",
-            "lastLine": 642,
+            "lastLine": 617,
             "lastColumn": 85,
             "firstColumn": 3,
             "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
@@ -1140,44 +871,12 @@
             "hiliteLength": 83
         }
     },
-    "/s20/sample/sections": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 307,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
-    "/s20/sample/student_photos": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 309,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
+    "/s20/sample/sections": {},
+    "/s20/sample/student_photos": {},
     "/s20/sample/late_days": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 314,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 628,
+            "lastLine": 603,
             "lastColumn": 156,
             "firstColumn": 87,
             "subType": "warning",
@@ -1188,19 +887,9 @@
         }
     },
     "/s20/sample/extensions": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 314,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 699,
+            "lastLine": 674,
             "lastColumn": 156,
             "firstColumn": 87,
             "subType": "warning",
@@ -1210,32 +899,11 @@
             "hiliteLength": 70
         }
     },
-    "/s20/sample/grade_override": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 307,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
+    "/s20/sample/grade_override": {},
     "/s20/sample/plagiarism": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 306,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "The “center” element is obsolete. Use CSS instead.": {
             "type": "error",
-            "lastLine": 526,
+            "lastLine": 501,
             "lastColumn": 12,
             "firstColumn": 5,
             "message": "The “center” element is obsolete. Use CSS instead.",
@@ -1245,17 +913,17 @@
         },
         "Bad value “” for attribute “action” on element “form”: Must be non-empty.": {
             "type": "error",
-            "lastLine": 532,
+            "lastLine": 507,
             "lastColumn": 52,
             "firstColumn": 9,
             "message": "Bad value “” for attribute “action” on element “form”: Must be non-empty.",
-            "extract": ">\n        <form name=\"delete\" method=\"post\" action=\"\">\n     ",
+            "extract": ">\n        <form name=\"delete\" method=\"post\" action=\"\">",
             "hiliteStart": 10,
             "hiliteLength": 44
         },
         "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 542,
+            "lastLine": 517,
             "lastColumn": 55,
             "firstColumn": 28,
             "message": "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)",
@@ -1265,19 +933,9 @@
         }
     },
     "/s20/sample/plagiarism/configuration/new": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 309,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        },
         "Attribute “name” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 586,
+            "lastLine": 561,
             "lastColumn": 92,
             "firstColumn": 17,
             "message": "Attribute “name” not allowed on element “div” at this point.",
@@ -1287,7 +945,7 @@
         },
         "Attribute “name” not allowed on element “span” at this point.": {
             "type": "error",
-            "lastLine": 596,
+            "lastLine": 571,
             "lastColumn": 79,
             "firstColumn": 21,
             "message": "Attribute “name” not allowed on element “span” at this point.",
@@ -1297,7 +955,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 596,
+            "lastLine": 571,
             "lastColumn": 79,
             "firstColumn": 21,
             "subType": "warning",
@@ -1307,28 +965,6 @@
             "hiliteLength": 59
         }
     },
-    "/s20/sample/reports": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 306,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    },
-    "/s20/sample/late_table": {
-        "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 309,
-            "lastColumn": 38,
-            "firstColumn": 17,
-            "message": "Element “style” not allowed as child of element “noscript” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <style media=\"screen\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 22
-        }
-    }
+    "/s20/sample/reports": {},
+    "/s20/sample/late_table": {}
 }
