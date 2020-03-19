@@ -144,14 +144,14 @@ HTML;
 HTML;
 
         $return .= <<<HTML
-<script type="text/javascript">
+<script>
     checkRefreshLichenMainPage("{$this->core->buildCourseUrl(['plagiarism', 'check_refresh'])}" ,"{$semester}", "{$course}");
 </script>
 HTML;
         #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
         if ($refresh_page == "REFRESH_ME") {
             $return .= <<<HTML
-<script type="text/javascript">
+<script>
     var last_data= "REFRESH_ME";
     localStorage.setItem("last_data", last_data);
 </script>
@@ -203,10 +203,10 @@ HTML;
                 <select name="user_id_2">
                     <option value="">None</option>
                 </select>
-                <a name="toggle" class="btn btn-primary disabled" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
+                <a name="toggle" class="btn btn-primary" onclick="toggle();">Toggle</a>
             </span>
         </form><br />
-        <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
+        <div style="position:relative; height:80vh; overflow-y:hidden;" class="row">
         <div style="max-height: 100%; width:100%;" class="sub">
         <div style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
         <textarea id="code_box_1" name="code_box_1"></textarea>
@@ -221,7 +221,7 @@ HTML;
         $return .= <<<HTML
 </div>
 <script>
-	
+
 </script>
 HTML;
         return $return;

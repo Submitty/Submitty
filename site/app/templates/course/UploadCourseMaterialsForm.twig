@@ -8,17 +8,17 @@
             {{ folderPath~'/'~courseMaterial }}
         </p>
         <label id="cm_path">
-            <p>
+            <span>
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
                 {{ folderPath~'/'~courseMaterial }}optional/subdirectory
-            </p>
+            </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
-        <label id="upload_sections">
-            <p class="black-message">
+        <fieldset>
+            <legend class="black-message">
                 Do you want to restrict this course material to some sections?
-            </p>
+            </legend>
             <label class = "radio" for="all_Sections_Showing">
                 <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
                 No
@@ -27,24 +27,34 @@
                 <input id="all_Sections_Showing_yes" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
                 Yes
             </label>
-            <script type="text/javascript">
+            <script>
                 function toggleRegistrationSections(){
                     $("#show_Some_Section_Selection").toggle();
                 }
             </script>
-            <div id = "show_Some_Section_Selection" style="display: none">
+            <br>
+            <span id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
-                    <td>Section {{ section['sections_registration_id'] }}</td>
-                    <td><input id="section-{{ section['sections_registration_id'] }}" aria-label="Section {{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                    <span class = "inline">
+                        <td>
+                          <label for="section-{{ section['sections_registration_id'] }}">Section&nbsp;{{section['sections_registration_id']}}</label>
+                        </td>
+                        <td>
+                            <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </td>
+                    </span>
                 </tr>
             {% endfor %}
-            </div>
-        </label>
+          </span>
+        </fieldset>
         <label id="upload_dt">
-            <p>
+            <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
-            </p>
+            </span>
             <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
         </label>
         <label>
@@ -66,7 +76,7 @@
         </div>
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
-    <script type="text/javascript">
+    <script>
         function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {
             handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
         }
@@ -97,13 +107,11 @@
                     sections = null;
                 }
                 var cmPath = document.getElementById('cm_path').innerHTML;
-
                 var requestedPath = document.getElementById("input-provide-full-path").value;
                 makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
                 e.stopPropagation();
             });
         });
-
         flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
@@ -117,7 +125,6 @@
                                 {
                                     label: "End of time"
                                 }
-
                             ],
                             onClick: (index, fp) => {
                                 let date;
@@ -132,7 +139,6 @@
                                         date = new Date("9998-01-01 00:00:00");
                                         fp.setDate(date,true);
                                         break;
-
                                 }
                             }
                         }
@@ -148,7 +154,7 @@
                     }
                     });
     </script>
-    <script type="text/javascript">
+    <script>
         createArray(1);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("dragenter", draghandle, false);

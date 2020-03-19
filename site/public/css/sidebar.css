@@ -12,7 +12,7 @@ aside {
         z-index: 1;
     }
 
-    aside:not(.preload){
+    aside{
       transition: all 0.3s ease-out;
     }
 
@@ -28,7 +28,7 @@ aside {
         margin: 0 0 0 15px;
     }
 
-    aside i:not(.preload){
+    aside i{
       transition: margin 0.3s ease-out;
     }
 

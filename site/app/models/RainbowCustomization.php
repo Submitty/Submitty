@@ -89,8 +89,7 @@ class RainbowCustomization extends AbstractModel {
 
             // Update bucket count
             $this->bucket_counts[$bucket]++;
-
-            $max_score = $gradeable->getTAPoints();
+            $max_score = $gradeable->getManualGradingPoints();
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()) {
                 $last_index = count($this->customization_data[$bucket]) - 1;
@@ -214,6 +213,31 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
+     * Get benchmark percentages
+     *
+     * @return object An object which maps benchmarks to the percentage (as a decimal) that is needed to obtain that
+     *                letter grade
+     */
+    public function getBenchmarkPercent() {
+        if (!is_null($this->RCJSON)) {
+            $percent_obj = $this->RCJSON->getBenchmarkPercent();
+
+            // If the RCJSON was found and it contains the benchmark percent fields then return it
+            if ($percent_obj != (object) []) {
+                return $percent_obj;
+            }
+        }
+
+        // Otherwise return a default benchmark percent object
+        return (object) [
+                'lowest_a-' => 0.9,
+                'lowest_b-' => 0.8,
+                'lowest_c-' => 0.7,
+                'lowest_d' => 0.6,
+            ];
+    }
+
+    /**
      * Get section ids and labels
      *
      * If no customization.json file exists then this function will generate defaults
@@ -274,6 +298,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->display_benchmark)) {
             foreach ($form_json->display_benchmark as $benchmark) {
                 $this->RCJSON->addDisplayBenchmarks($benchmark);
+            }
+        }
+
+        if (isset($form_json->benchmark_percent)) {
+            foreach ($form_json->benchmark_percent as $key => $value) {
+                $this->RCJSON->addBenchmarkPercent((string) $key, $value);
             }
         }
 

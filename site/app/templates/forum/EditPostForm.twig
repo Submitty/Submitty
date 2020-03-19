@@ -18,7 +18,7 @@
         "submit_label": "Update Post",
         "categories" : categories,
     } %}
-    <script type="text/javascript">
+    <script>
         $("#thread_form").submit(function() {
             if((!$(this).prop("ignore-cat")) && $(this).find('.btn-selected').length == 0) {
                 alert("At least one category must be selected.");

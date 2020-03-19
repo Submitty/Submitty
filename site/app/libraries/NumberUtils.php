@@ -44,4 +44,46 @@ class NumberUtils {
 
         return ($qtnt_i + $shift) * $precision;
     }
+
+    /**
+     * @param int $array_length
+     * @param string $student_id
+     * @param string $gradeable_id
+     * @return array the randomized indices array
+     */
+    public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id) {
+
+        // creating an array which is holding the indices to be shuffled.
+        $randomizedIndices = array();
+        for ($i = 0; $i < $array_length; $i++) {
+            $randomizedIndices[] = $i;
+        }
+
+        $hash = str_split(hash('sha256', '' . $student_id . $gradeable_id));
+        // generating a seed value for the random function
+        $seedValue = 0;
+        foreach ($hash as $hashChar) {
+            $seedValue += ord($hashChar);
+        }
+        // setting the seed value for getting pseudo random no.
+        srand($seedValue);
+        // inspired from fisher-yates algorithm
+        for ($i = $array_length - 1; $i > 0; $i--) {
+            // Pick a random index from 0 to i
+            $j = rand() % ($i + 1);
+            $tmp = $randomizedIndices[$i];
+            $randomizedIndices[$i] = $randomizedIndices[$j];
+            $randomizedIndices[$j] = $tmp;
+        }
+
+        return $randomizedIndices;
+    }
+
+    /**
+     * @param array $array
+     * @return array indices for the given array
+     */
+    public function getIndices(array $array) {
+        return array_keys($array);
+    }
 }

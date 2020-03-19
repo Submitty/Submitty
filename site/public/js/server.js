@@ -8,6 +8,39 @@ window.addEventListener("load", function() {
 
 window.addEventListener("resize", checkSidebarCollapse);
 
+
+////////////Begin: Removed redundant link in breadcrumbs////////////////////////
+//See this pr for why we might want to remove this code at some point
+//https://github.com/Submitty/Submitty/pull/5071
+window.addEventListener("resize", function(){
+  adjustBreadcrumbLinks();
+});
+
+var mobileHomeLink = null;
+var desktopHomeLink = null;
+document.addEventListener("DOMContentLoaded", function() {
+  loadInBreadcrumbLinks();
+  adjustBreadcrumbLinks();
+});
+
+function loadInBreadcrumbLinks(){
+  mobileHomeLink = $("#home-button").attr('href');
+  desktopHomeLink = $("#desktop_home_link").attr('href');
+}
+
+function adjustBreadcrumbLinks(){
+  if($(document).width() > 528){
+    $("#home-button").attr('href', "");
+    $("#desktop_home_link").attr('href', desktopHomeLink);
+  }else{
+    $("#home-button").attr('href', mobileHomeLink);
+    $("#desktop_home_link").attr('href', "");
+  }
+}
+////////////End: Removed redundant link in breadcrumbs//////////////////////////
+
+
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  *
@@ -143,6 +176,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
                 loadingTools.find("span").hide();
                 loadingTools.find(".loading-tools-hide").show();
+                enableKeyToClick();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -154,8 +188,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
-    $('[name="delete-gradeable-message"]', form).html('');
-    $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="delete-gradeable-message"]', form).html('');
+    $('[id="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("delete-gradeable-form");
@@ -164,8 +198,8 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#close-submissions-form");
-    $('[name="close-submissions-message"]', form).html('');
-    $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[id="close-submissions-message"]', form).html('');
+    $('[id="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
     captureTabInModal("close-submissions-form");
@@ -191,8 +225,8 @@ function newDeleteCourseMaterialForm(path, file_name) {
 
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
-    $('[name="delete-course-material-message"]', form).html('');
-    $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
+    $('.delete-course-material-message', form).html('');
+    $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
     captureTabInModal("delete-course-material-form");
@@ -234,9 +268,43 @@ function newUploadCourseMaterialsForm() {
 
 }
 
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+
+    let form = $("#edit-course-materials-form");
+
+    let element = document.getElementById("edit-picker");
+
+    element._flatpickr.setDate(release_time);
+
+    if(this_hide_from_students == "on"){
+        $("#hide-materials-checkbox-edit", form).prop('checked',true);
+    }
+
+    else{
+        $("#hide-materials-checkbox-edit", form).prop('checked',false);
+    }
+
+    $('#show-some-section-selection-edit :checkbox:enabled').prop('checked', false);
+
+    if(this_file_section != null){
+        for(let index = 0; index < this_file_section.length; ++index){
+            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
+        }
+        $("#all-sections-showing-no", form).prop('checked',false);
+        $("#all-sections-showing-yes", form).prop('checked',true);
+        $("#show-some-section-selection-edit", form).show();
+    }
+    else{
+        $("#show-some-section-selection-edit", form).hide();
+        $("#all-sections-showing-yes", form).prop('checked',false);
+        $("#all-sections-showing-no", form).prop('checked',true);
+    }
+    $("#material-edit-form", form).attr('data-directory', dir);
+    form.css("display", "block");
+}
 function captureTabInModal(formName){
 
-    var form = $("#".concat(formName));
+  var form = $("#".concat(formName));
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -895,22 +963,13 @@ function openDivForCourseMaterials(num) {
     return false;
 }
 
-function openAllDivForCourseMaterials() {
-    var elem = $("[id ^= 'div_viewer_']");
-    if (elem.hasClass('open')) {
-        elem.hide();
-        elem.removeClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
-        return 'closed';
-    }
-    else {
-        elem.show();
-        elem.addClass('open');
-        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
-        return 'open';
-    }
-    return false;
+function hideEmptyCourseMaterialFolders() {
+  // fetch all the folders and remove those one which have no `file` within.
+  $('.folder-container').each(function() {
+    $(this).find('.file-container').length === 0 ? $(this).remove() : null;
+  });
 }
+
 function closeDivForCourseMaterials(num) {
     var elem = $('#div_viewer_' + num);
     elem.hide();
@@ -1505,25 +1564,23 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
-        localStorage.setItem('sidebar', 'true');
+        document.cookie = "collapse_sidebar=true;";
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        localStorage.setItem('sidebar', 'false');
+        document.cookie = "collapse_sidebar=false;";
         $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
-    localStorage.setItem('sidebar', (!shown).toString());
+    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1543,13 +1600,6 @@ $(document).ready(function() {
             }
         }
     });
-
-    //Remember sidebar preference
-    if (localStorage.getItem('sidebar') !== "") {
-        $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
-        //Once the sidebar is set the page can be unhidden
-        $("#submitty-body").css('visibility', 'visible');
-    }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
     $(document.body).resize(function() {
@@ -1588,4 +1638,28 @@ function resizeNoScrollTextareas() {
     $('textarea.noscroll').each(function() {
         auto_grow(this);
     })
+}
+
+$(document).ready(function() {
+  enableKeyToClick();
+});
+
+function enableKeyToClick(){
+  var key_to_click = document.getElementsByClassName("key_to_click");
+  for (var i = 0; i < key_to_click.length; i++) {
+    key_to_click[i].addEventListener('keydown', function(event) {
+      if (event.keyCode === 13) {//ENTER key
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.target).click();
+      }
+    });
+    key_to_click[i].addEventListener('keyup', function(event) {
+      if (event.keyCode === 32) { //SPACE key
+        event.preventDefault();
+        event.stopPropagation();
+        $(event.target).click();
+      }
+    });
+  }
 }

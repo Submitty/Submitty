@@ -119,9 +119,12 @@ HTML;
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
-                    $namespace = 'site_uploads'
+                    'site_uploads'
                 );
             }
+            $this->twig->addFunction(new \Twig\TwigFunction("feature_flag_enabled", function (string $flag): bool {
+                return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
+            }));
         }
         $engine = new ParsedownEngine();
         $engine->setSafeMode(true);
@@ -528,8 +531,8 @@ HTML;
         return $this->use_mobile_viewport;
     }
 
-    public function addBreadcrumb($string, $url = null, $external_link = false) {
-        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
+    public function addBreadcrumb($string, $url = null, $external_link = false, $use_as_heading = false) {
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link, $use_as_heading);
     }
 
     public function addRoomTemplatesTwigPath() {

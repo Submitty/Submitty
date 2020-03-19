@@ -45,6 +45,7 @@ class ConfigurationController extends AbstractController {
             'vcs_base_url'                   => $this->core->getConfig()->getVcsBaseUrl(),
             'vcs_type'                       => $this->core->getConfig()->getVcsType(),
             'forum_enabled'                  => $this->core->getConfig()->isForumEnabled(),
+            'forum_create_thread_message'    => $this->core->getConfig()->getForumCreateThreadMessage(),
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
@@ -52,6 +53,7 @@ class ConfigurationController extends AbstractController {
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
+            'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
         );
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -146,6 +148,9 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true" ? true : false;
         }
         elseif ($name === 'queue_enabled') {
+            $entry = $entry === "true" ? true : false;
+        }
+        elseif ($name === 'queue_contact_info') {
             $entry = $entry === "true" ? true : false;
         }
         elseif ($name === 'upload_message') {
