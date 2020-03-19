@@ -41,7 +41,7 @@
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
                             <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
-                            <td><a href="javascript:deleteUserForm('{{ grader.getId() }}');" aria-label="delete user {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}"><i class="fas fa-trash"></i></a></td>
+                            <td><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedFirstName() }}', '{{ student.getDisplayedLastName() }}', 'student');" aria-label="delete student {{ student.getDisplayedFirstName() }} {{ student.getDisplayedLastName() }}"><i class="fas fa-trash"></i></a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -54,3 +54,4 @@
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
+{% include('admin/users/DeleteUserForm.twig') %}

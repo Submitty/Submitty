@@ -105,11 +105,14 @@ function editUserForm(user_id) {
     })
 }
 
-function deleteUserForm(user_id) {
+function deleteUserForm(user_id, firstname, lastname, type) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-user-form");
     form.css("display", "block");
-    captureTabInModal("delete-user-form");
+    form.find('.form-body').scrollTop(0);
+    $('#user-fullname', form).html(firstname + " " + lastname);
+    $('[name="delete-user-id"]', form).val(user_id);
+    //$('[name="return"]', form).val(type);
 }
 
 function userFormChange() {
@@ -175,7 +178,7 @@ function checkValidEntries() {
             break;
         }
 
-    //disable submit button if anythiing is invalid
+    //disable submit button if anything is invalid
     var has_invalid_entry = false;
     $(":text",$("#edit-user-form")).each( function() {
         if (!this.checkValidity()) {
