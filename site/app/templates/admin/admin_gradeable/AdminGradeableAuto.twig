@@ -49,7 +49,7 @@
         <a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();" class="key_to_click" tabindex="0">
         <datalist id="path_data" style="display:none" >
         {% for path in all_config_paths %}
-            <option class="path_autofill_option" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
+            <option class="path_autofill_option" data-name="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
         {% endfor %}
         </datalist>
 
@@ -114,7 +114,7 @@
         var paths = [];
 
         $(".path_autofill_option").each(function() {
-            names.push($(this).attr("id"));
+            names.push($(this).attr("data-name"));
             paths.push($(this).attr("data-value"));
         });
 
