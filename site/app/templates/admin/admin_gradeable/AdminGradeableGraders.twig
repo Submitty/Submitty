@@ -36,12 +36,12 @@ Form
 #}
 
 {% if no_rotating_sections %}
-    <div name="grader-warning-popup edit-gradeable" id="grader-warning" hidden>
-        <p> WARNING: Rotating Sections are not set up yet.  <br />
-            All Access Grading and Grading by Rotating Section rely on rotating sections. <br />
-            To set them up, go to the Manage Sections page. <br />
-        </p>
-    </div>
+	<div name="grader-warning-popup edit-gradeable" id="grader-warning" hidden>
+		<p> WARNING: Rotating Sections are not set up yet.  <br />
+			All Access Grading and Grading by Rotating Section rely on rotating sections. <br />
+			To set them up, go to the Manage Sections page. <br />
+		</p>
+	</div>
 {% endif %}
 
 <label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
@@ -58,7 +58,7 @@ Form
         How should graders be assigned to grade this item?
         <a class="fa-question-circle" target=_blank aria-label="Help for grading by registration or rotating section" href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
-    <input type="radio" name="grader_assignment_method" value="2" id="all_access"
+	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
         {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="all_access">All Access Grading</label>
 
     <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
@@ -149,11 +149,13 @@ Form
 </div>
 
 <script>
+
     // Updates the checkboxes for all sections for a student
     //  This feature purely a front-end convenience.
     function updateCheckBoxes(prefix, id, section) {
         var base_cb_name = '#grader_' + prefix + '_';
         var base_all_cb_name = '#' + prefix + '_';
+
         // User pressed the "all" box ...
         if(section === 0) {
             // ... so update all check boxes for that user with the "all" box state
@@ -169,12 +171,16 @@ Form
                 && $(base_cb_name + {{ rs }} + '_' + id).is(':checked')
             {% endfor %}
             ;
+
             $(base_all_cb_name + 'all_' + id).prop('checked', all_checked);
         }
     }
+
     function onSectionTypeChange() {
+
         disableElementChildren('#doc_all_access', true);
         disableElementChildren('#doc_registration', true);
+
         if ($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
             disableElementChildren('#grader-warning',false);
@@ -190,9 +196,11 @@ Form
             disableElementChildren('#grader-warning',true);
         }
     }
+
     function onMinGraderChange() {
         // $('.g1').show();
         // $('.g2').show();
+
         //used by rotating sections tables and radio buttons on page documentation
         disableElementChildren('.g2', false);
         disableElementChildren('.g3', false);
@@ -216,9 +224,11 @@ Form
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
         $('[name="grader_assignment_method"]').change(onSectionTypeChange);
+
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
         $('#minimum_grading_group').change(onMinGraderChange);
+
         // update "all" check boxes
         {% for grader in graders_from_usertypes[1] %}
         updateCheckBoxes('g1', "{{ grader[0] }}", 1);
@@ -229,5 +239,7 @@ Form
         {% for grader in graders_from_usertypes[3] %}
         updateCheckBoxes('g3', "{{ grader[0] }}", 1);
         {% endfor %}
+
     });
+
 </script>
