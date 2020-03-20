@@ -2374,7 +2374,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
-    public function getLimitedGradersAllAccessGradeablesIds() {
+    public function getGradeableIdsForFullAccessLimitedGraders() {
         $this->course_db->query("SELECT g_id FROM gradeable WHERE g_min_grading_group = 3 AND g_grader_assignment_method = 2");
         return $this->course_db->rows();
     }
@@ -2391,7 +2391,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         $tmp = $this->course_db->rows();
         $sections = [];
         foreach ($tmp as $row) {
-            array_push($sections, $row['sections_rotating_id']);
+            $sections[] = $row['sections_rotating_id'];
         }
         return $sections;
     }

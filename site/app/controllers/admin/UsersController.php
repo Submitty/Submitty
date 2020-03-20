@@ -614,14 +614,14 @@ class UsersController extends AbstractController {
         //$update_graders_gradeables is all gradeables in this semester/course where
         //there's limited access graders + all access grading
         $update_graders_gradeables = [];
-        $update_graders_gradeables_ids = $this->core->getQueries()->getLimitedGradersAllAccessGradeablesIds();
+        $update_graders_gradeables_ids = $this->core->getQueries()->getGradeableIdsForFullAccessLimitedGraders();
         foreach ($update_graders_gradeables_ids as $row) {
             $g_id = $row['g_id'];
             $tmp_gradeable = $this->tryGetGradeable($g_id, false);
             if ($tmp_gradeable === false) {
                 continue;
             }
-            array_push($update_graders_gradeables, $tmp_gradeable);
+            $update_graders_gradeables[] = $tmp_gradeable;
         }
 
         $new_graders = $this->core->getQueries()->getNewGraders();
