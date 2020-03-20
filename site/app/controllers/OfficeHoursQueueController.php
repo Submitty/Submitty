@@ -374,15 +374,19 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        if (empty($_POST['token'])) {
-            $this->core->addErrorMessage("Missing secret code");
+
+        //Replace whitespace with "_"
+        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
+        $re = '/^[a-zA-Z0-9_\-]+$/m';
+        preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
+        if (count($matches_token) !== 1) {
+            $this->core->addErrorMessage('Queue secret code must only contain letters, numbers, spaces, "_", and "-"');
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
 
         $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
-        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
         $this->core->getQueries()->changeQueueToken($token, $queue_code);
         $this->core->addSuccessMessage("Queue Code Changed");
         return Response::RedirectOnlyResponse(

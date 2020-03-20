@@ -1,8 +1,14 @@
+{% if viewer.getQueueMessage()|length > 0 %}
+  <div class="content gradeable_message">
+    <p>{{viewer.getQueueMessage()}}</p>
+  </div>
+{% endif %}
 <div class="content">
   <h1>
-    Office Hours/Lab Queue
+    Office Hours Queue
   </h1>
   {% if not viewer.isGrader() %}
+
     {% if viewer.inQueue() == 0 %}
       <br>
       <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
