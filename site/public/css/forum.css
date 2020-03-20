@@ -547,19 +547,29 @@ body {min-width: 925px;}
     font-size: 1.8em;
 }
 
-.forum_markdown li {
+.post_content li {
     white-space: normal;
 }
 
-.forum_markdown ol, .forum_markdown ul {
+.post_content ol {
     white-space: normal;
     padding-left: 15px;
 }
 
-.forum_markdown table {
-    border-collapse: collapse;
+.post_content ul {
+    white-space: normal;
+    padding-left: 15px;
 }
 
-.forum_markdown table, .forum_markdown th, .forum_markdown td {
+.post_content table {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.post_content th {
+    border: 1px solid black;
+}
+
+.post_content td {
     border: 1px solid black;
 }
