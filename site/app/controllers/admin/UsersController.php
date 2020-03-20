@@ -608,14 +608,14 @@ class UsersController extends AbstractController {
             $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
         }
 
-        //update graders' access for gradeables with all access grading for limited 
+        //update graders' access for gradeables with all access grading for limited
         //access graders now that rotating sections are set up
 
         //$update_graders_gradeables is all gradeables in this semester/course where
         //there's limited access graders + all access grading
         $update_graders_gradeables = [];
         $update_graders_gradeables_ids = $this->core->getQueries()->getLimitedGradersAllAccessGradeablesIds();
-        foreach($update_graders_gradeables_ids as $row) {
+        foreach ($update_graders_gradeables_ids as $row) {
             $g_id = $row['g_id'];
             $tmp_gradeable = $this->tryGetGradeable($g_id, false);
             if ($tmp_gradeable === false) {
