@@ -29,6 +29,7 @@ class UsersView extends AbstractView {
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
             'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
+            "delete_user_url" => $this->core->buildCourseUrl(['delete_user']),
             "return_url_upload_class_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
@@ -74,6 +75,7 @@ class UsersView extends AbstractView {
             "return_url_upload_grader_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
             "return_url_assign_reg_sections" => $this->core->buildCourseUrl(['graders', 'assign_registration_sections']),
             'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
+            "delete_user_url" => $this->core->buildCourseUrl(['delete_user']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
         ]);
@@ -93,6 +95,12 @@ class UsersView extends AbstractView {
             "rot_sections" => $rot_sections,
             "action" => $action,
             "use_database" => $use_database
+        ]);
+    }
+
+    public function deleteUserForm() {
+        return $this->core->getOutput()->renderTwigTemplate("admin/users/DeleteUserForm.twig", [
+            "foo" => "bar"
         ]);
     }
 

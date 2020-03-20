@@ -105,14 +105,13 @@ function editUserForm(user_id) {
     })
 }
 
-function deleteUserForm(user_id, firstname, lastname, type) {
+function deleteUserForm(user_id, firstname, lastname) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-user-form");
-    form.css("display", "block");
-    form.find('.form-body').scrollTop(0);
+    $('[name="user-id"]', form).val(user_id);
+    $('[name="displayed-fullname"]', form).val(firstname + " " + lastname);
     $('#user-fullname', form).html(firstname + " " + lastname);
-    $('[name="delete-user-id"]', form).val(user_id);
-    //$('[name="return"]', form).val(type);
+    form.css("display", "block");
 }
 
 function userFormChange() {
