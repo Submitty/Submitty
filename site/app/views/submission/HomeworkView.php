@@ -307,7 +307,7 @@ class HomeworkView extends AbstractView {
                 /** @var GradedGradeable $gg */
                 $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
             }
-            $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
+            $students_full = json_decode(Utils::getAutoFillData($students, $students_version, true));
         }
 
         $github_user_id = '';
@@ -465,13 +465,13 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
-    private function removeLowConfidenceDigits($confidences, $id){
+    private function removeLowConfidenceDigits($confidences, $id) {
         $ret = "";
         $str_id = strval($id);
         $i = 0;
         foreach ($confidences as $confidence_val) {
-            $ret .= ($confidence_val <= .65) ? "%" : $str_id[$i];
-            $i ++;
+            $ret .= ($confidence_val <= .50) ? "_" : $str_id[$i];
+            $i++;
         }
 
         return $ret;
@@ -489,6 +489,9 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = array();
         $bulk_upload_data = [];
+        $matches = [];
+        $use_ocr = false;
+
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
@@ -571,10 +574,11 @@ class HomeworkView extends AbstractView {
 
             //decoded.json may be read before the assoicated data is written, check if key exists first
             if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
 
-                if (array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr']){
+                if ($use_ocr) {
                     $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
-                    $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+                    $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
                 }
 
                 if (array_key_exists('id', $data)) {
@@ -600,7 +604,8 @@ class HomeworkView extends AbstractView {
 
             $files[$i] += ['page_count' => $page_count,
                            'id' => $id,
-                           'valid' => $is_valid ];
+                           'valid' => $is_valid,
+                           'matches' => $matches ];
         }
 
         $semester = $this->core->getConfig()->getSemester();
@@ -612,7 +617,8 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'use_ocr' => $use_ocr
         ]);
     }
 

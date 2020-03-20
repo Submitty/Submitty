@@ -38,7 +38,7 @@ def main(args):
         i = id_index = 0
         page_count = 1
         prev_file = data = "BLANK"
-        output = {"filename": filename, "is_qr": True, "use_ocr" : use_ocr}
+        output = {"filename": filename, "is_qr": True, "use_ocr": use_ocr}
         json_file = os.path.join(split_path, "decoded.json")
 
         for page_number in range(pdfPages.numPages):
@@ -77,7 +77,6 @@ def main(args):
                     if qr_suffix != '' and suf == qr_suffix:
                         data = data[:-len(qr_suffix)]
 
-
                 # since QR splitting doesn't know the max page assume length of 3
                 prepended_index = str(i).zfill(3)
 
@@ -86,14 +85,13 @@ def main(args):
                 output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
                 output[output_filename] = {}
 
-                 # if we're looking for a student's ID, use that as the value instead
+                # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
                     data, confidences = scanner.getDigits(thresh, val)
                     buff += "Found student ID number of \'" + data + "\' on"
                     buff += " page " + str(page_number) + ", "
                     buff += "Confidences: " + str(confidences) + " "
                     output[output_filename]["confidences"] = str(confidences)
-
 
                 output[output_filename]['id'] = data
                 # save pdf
