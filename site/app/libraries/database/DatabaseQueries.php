@@ -2401,7 +2401,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * for all access grading and limited access graders gradeables,
      * top level is all graders' ids and second level is all rotating sections
      *
-     * @return 2d array
+     * @return array
      */
     public function getNewGraders() {
         $new_graders = [];
