@@ -828,7 +828,7 @@ tbody.collapse.in {
 .dropdown-menu > li > a:focus {
   color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: var(--standard-pale-blue-gray);
+  background-color: var(--btn-standard-pale-blue-gray);
 }
 
 .dropdown-menu > .disabled > a,
