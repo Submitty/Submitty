@@ -985,10 +985,10 @@ class ElectronicGraderController extends AbstractController {
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
-            $total_submitted = ($total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
         else {
-            $total_submitted = ($total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
         if ($total_submitted == 0) {
             $progress = 100;
