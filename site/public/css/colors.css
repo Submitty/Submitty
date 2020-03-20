@@ -184,6 +184,7 @@
     --checkbox-black: #000000;
     --overall-comment: #E9EFEF;
     --dark-mode-black: #202225;
+    --alternating-row-color-light: #eee;
 
 
 
@@ -378,4 +379,5 @@
       --standard-input-background: #4a4a4a;
       --checkbox-black: #5296db;
       --overall-comment: #4E5353;
+      --alternating-row-color-light: #4d4848;
 }

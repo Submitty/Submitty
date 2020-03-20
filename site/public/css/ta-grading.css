@@ -256,6 +256,7 @@ progress::-webkit-progress-value {
     position: relative;
     padding: 3px;
     margin: 1px;
+    color: var(--text-black);
 }
 
 .icon-folder-closed {
@@ -360,7 +361,7 @@ tr.is_publish {
 }
 
 #hotkeys-list tr:nth-child(even) {
-    background-color: #eee;
+    background-color: var(--alternating-row-color-light);
 }
 
 #hotkeys-list td {
