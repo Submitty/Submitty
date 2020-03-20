@@ -241,7 +241,6 @@ class ElectronicGraderController extends AbstractController {
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
-            $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
             $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
@@ -940,6 +939,7 @@ class ElectronicGraderController extends AbstractController {
 
         $graded = 0;
         $total = 0;
+        $total_submitted = 0;
         $team = $gradeable->isTeamAssignment();
         if ($peer) {
             $section_key = 'registration_section';
@@ -985,10 +985,10 @@ class ElectronicGraderController extends AbstractController {
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
-            $total_submitted = ($total_submitted ?? 0) * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents());
         }
         else {
-            $total_submitted = ($total_submitted ?? 0) * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents());
         }
         if ($total_submitted == 0) {
             $progress = 100;
