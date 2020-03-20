@@ -16,6 +16,7 @@ use tests\BaseUnitTest;
 class GradingQueueTester extends BaseUnitTest {
     private $path;
     private $queue_path;
+    private $grading_path;
     private $version = 0;
     private $time = 0;
 
@@ -24,6 +25,8 @@ class GradingQueueTester extends BaseUnitTest {
         FileUtils::createDir($this->path);
         $this->queue_path = FileUtils::joinPaths($this->path, 'to_be_graded_queue');
         FileUtils::createDir($this->queue_path);
+        $this->grading_path = FileUtils::joinPaths($this->path, 'grading');
+        FileUtils::createDir($this->grading_path);
     }
 
     public function tearDown(): void {
