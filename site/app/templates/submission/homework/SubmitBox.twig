@@ -2,7 +2,10 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
+    <div class='content gradeable_message'>
+        {{ gradeable_message | markdown }}
+        Maximum allowed number of files to be uploaded is 20.
+    </div>
 {% endif %}
 
 {% if has_overridden_grades %}
