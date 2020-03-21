@@ -335,7 +335,7 @@ class NavigationView extends AbstractView {
         $past_lock_date = $date < $gradeable->getTeamLockDate();
 
         if ($past_lock_date) {
-            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})";
+            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})" . " timezone: ". $gradeable->getTeamLockDate()->getTimezone()->getName() . ")";
         }
         else {
             $team_display_date = '';
@@ -388,8 +388,8 @@ class NavigationView extends AbstractView {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
-            "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . ")" :
-            "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
+            "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . " timezone: ". $gradeable->getSubmissionOpenDate()->getTimezone()->getName() . ")" :
+            "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . " timezone: ". $gradeable->getSubmissionDueDate()->getTimezone()->getName() . ")";
         $points_percent = NAN;
 
         $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
@@ -624,11 +624,11 @@ class NavigationView extends AbstractView {
             $grades_released = $gradeable->getGradeReleasedDate();
             if ($list_section === GradeableList::GRADING && $date < $grades_due) {
                 $title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . ')';
+                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . " timezone: ". $gradeable->getGradeDueDate()->getTimezone()->getName() . ")";
             }
             elseif ($list_section === GradeableList::GRADING && $date < $grades_released) {
                 $title = 'GRADE';
-                $date_text = '(grades will be released ' . $grades_released->format(self::DATE_FORMAT) . ')';
+                $date_text = '(grades will be released ' . $grades_released->format(self::DATE_FORMAT) . " timezone: ". $grades_released->getTimezone()->getName() . ")";
             }
             else {
                 $title = 'REGRADE';
@@ -677,7 +677,7 @@ class NavigationView extends AbstractView {
             else {
                 //Before grading has opened, only thing we can do is preview
                 $title = 'PREVIEW GRADING';
-                $date_text = '(grading starts ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
+                $date_text = '(grading starts ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT). " timezone: ". $gradeable->getGradeStartDate()->getTimezone()->getName() . ")";
             }
         }
 
