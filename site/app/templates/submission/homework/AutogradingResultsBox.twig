@@ -12,7 +12,7 @@
                     This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
                 </p>
             {% endif %}
-            <script type="text/javascript">
+            <script>
                 checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
             </script>
         {% elseif results is not defined %}
@@ -22,7 +22,7 @@
         {% else %}
             {# Has results! #}
             {% if show_incentive_message %}
-                <script type="text/javascript">
+                <script>
                     (function() {
                         ('#incentive_message').show();
                     })();
