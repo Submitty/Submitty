@@ -1564,14 +1564,13 @@ $.fn.isInViewport = function() {                                        // jQuer
 };
 
 function checkSidebarCollapse() {
-    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var size = $(document.body).width();
     if (size < 1150) {
-        localStorage.setItem('sidebar', 'true');
+        document.cookie = "collapse_sidebar=true;";
         $("aside").toggleClass("collapsed", true);
     }
     else{
-        localStorage.setItem('sidebar', 'false');
+        document.cookie = "collapse_sidebar=false;";
         $("aside").toggleClass("collapsed", false);
     }
 }
@@ -1600,11 +1599,10 @@ function toggleTheme(mode='normal'){
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    $(".preload").removeClass("preload");//.preload must be removed to allow the animation to work
     var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
-    localStorage.setItem('sidebar', (!shown).toString());
+    document.cookie = "collapse_sidebar=" + (!shown).toString() + ";";
     sidebar.toggleClass("collapsed", !shown);
 }
 
@@ -1624,13 +1622,6 @@ $(document).ready(function() {
             }
         }
     });
-
-    //Remember sidebar preference
-    if (localStorage.getItem('sidebar') !== "") {
-        $("aside").toggleClass("collapsed", localStorage.getItem('sidebar') === "true");
-        //Once the sidebar is set the page can be unhidden
-        $("#submitty-body").removeClass( "invisible" )
-    }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space
     $(document.body).resize(function() {

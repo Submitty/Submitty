@@ -39,6 +39,18 @@
               </div>
             </fieldset>
         </div>
+        <div id="benchmark_percents" class="customization_item">
+            <h2>Benchmark Percents</h2>
+            <div id="benchmark_percents_collapse" class="collapsible_area">
+                <p>You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.</p>
+                {% for benchmark, percent in benchmark_percents %}
+                    <p>
+                        <label for="benchmark_{{ benchmark }}">{{ benchmark }}</label>
+                        <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input" data-benchmark="{{ benchmark }}" value="{{ percent }}">
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
         <div id="cust_messages" class="customization_item">
             <h2>Messages</h2>
             <div id="cust_messages_collapse" class="collapsible_area">

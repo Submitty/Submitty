@@ -13,7 +13,7 @@
                             {% endif %}
                             {% set display_semester = course.display_semester %}
                             <h3> {{ display_semester }} </h3>
-                            <ul id="course-list" class="bare-list">
+                            <ul class="bare-list course-list">
                         {% endif %}
                                 <li>
                                     <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl([course['semester'], course['title']]) }}">
