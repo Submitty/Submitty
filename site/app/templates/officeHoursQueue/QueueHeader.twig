@@ -8,7 +8,10 @@
     Office Hours Queue
   </h1>
   {% if not viewer.isGrader() %}
-
+    <p>
+      For more information: <a target=_blank href="https://submitty.org/student/queue">
+      Getting Help through the Office Hours Queue <i style="font-style:normal;" class="fa-question-circle"></i></a>
+    </p>
     {% if viewer.inQueue() == 0 %}
       <br>
       <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
@@ -26,8 +29,8 @@
             {% endfor %}
           </select>
         </div>
-        <label for="token_box">Queue Code:</label>
-        <input type="text" name="token" id="token_box" placeholder="Queue Code" style="margin:.5rem" autocomplete="on" required="required">
+        <label for="token_box">Queue Access Code:</label>
+        <input type="text" name="token" id="token_box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on" required="required">
         <br>
         {% if viewer.isContactInfoEnabled() %}
           <label for="contact_info">My Contact Information (follow instructor directions):</label>
