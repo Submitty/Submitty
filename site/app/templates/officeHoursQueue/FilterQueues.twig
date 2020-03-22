@@ -1,6 +1,11 @@
 {% if viewer.isGrader()%}
   <p>
-    <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
+    For more information: <a target=_blank href="https://submitty.org/grader/queue">
+    Managing the Office Hours Queue <i style="font-style:normal;" class="fa-question-circle"></i></a>
+    <br><br>
+  </p>
+  <p>
+    <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filterSettingsCollapse').toggleClass('collapse')">
       Toggle Filter Settings
     </button>
     <button id="auto_refresh_btn" class="btn btn-default filter_btn" type="button" onclick="toggleAutoRefresh()">
@@ -10,7 +15,7 @@
       Enable Notifications
     </button>
   </p>
-  <div class="collapse" id="filgerSettingsCollapse">
+  <div class="collapse" id="filterSettingsCollapse">
 
     <br>
     <form method="post" id="open_new_queue" action="{{base_url}}">

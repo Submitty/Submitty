@@ -8,7 +8,10 @@
     Office Hours Queue
   </h1>
   {% if not viewer.isGrader() %}
-
+    <p>
+      For more information: <a target=_blank href="https://submitty.org/student/queue">
+      Getting Help through the Office Hours Queue <i style="font-style:normal;" class="fa-question-circle"></i></a>
+    </p>
     {% if viewer.inQueue() == 0 %}
       <br>
       <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
