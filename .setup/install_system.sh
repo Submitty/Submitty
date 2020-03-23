@@ -146,6 +146,10 @@ alias submitty_restart_services='submitty_restart_autograding && systemctl resta
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
+systemctl start submitty_autograding_shipper
+systemctl start submitty_autograding_worker
+systemctl start submitty_daemon_jobs_handler
+systemctl start nullsmtpd
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
