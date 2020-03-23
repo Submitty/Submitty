@@ -311,6 +311,10 @@ td>a.active-sort {
     color: var(--text-white);
 }
 
+.content.gradeable_message a{
+    color: var(--text-white);
+}
+
 .content.gradeable_message p:not(:last-child){
     padding-bottom: 20px;
 }

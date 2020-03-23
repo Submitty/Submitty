@@ -172,4 +172,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     public function isContactInfoEnabled() {
         return $this->core->getConfig()->getQueueContactInfo();
     }
+
+    public function getQueueMessage() {
+        return $this->core->getConfig()->getQueueMessage();
+    }
 }

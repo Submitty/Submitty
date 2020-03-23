@@ -314,7 +314,7 @@ function addLabel(filename, filesize, part, previous){
     fileTrashElement.setAttribute('class', 'file-trash');
 
     fileDataElement.innerHTML= filename;
-    fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
+    fileTrashElement.innerHTML= filesize + "KB  <i aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -1152,11 +1152,11 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
-    
+
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
     }
-    
+
     $.ajax({
         url: edit_url,
         data: formData,
