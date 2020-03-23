@@ -358,8 +358,8 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/delete_user", methods={"POST"})
      */
     public function deleteUser($type = 'users') {
-        $user_id = trim($_POST['user-id']);
-        $displayed_fullname = trim($_POST['displayed-fullname']);
+        $user_id = trim($_POST['user_id']);
+        $displayed_fullname = trim($_POST['displayed_fullname']);
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 

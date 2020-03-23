@@ -108,8 +108,8 @@ function editUserForm(user_id) {
 function deleteUserForm(user_id, firstname, lastname) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-user-form");
-    $('[name="user-id"]', form).val(user_id);
-    $('[name="displayed-fullname"]', form).val(firstname + " " + lastname);
+    $('[name="user_id"]', form).val(user_id);
+    $('[name="displayed_fullname"]', form).val(firstname + " " + lastname);
     $('#user-fullname', form).html(firstname + " " + lastname);
     form.css("display", "block");
 }
