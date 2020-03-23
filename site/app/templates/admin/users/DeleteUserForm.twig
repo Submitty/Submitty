@@ -3,8 +3,8 @@
 {% block title %}Delete User{% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <input type="hidden" name="user-id" />
-    <input type="hidden" name="displayed-fullname" />
+    <input type="hidden" name="user_id" />
+    <input type="hidden" name="displayed_fullname" />
     {# Javascript will fill in user's fullname within <span> #}
     <p class="black-message">Remove <span class="red-message" id="user-fullname"></span> from your course?
     <p>They must not have any recorded activity such as assignments submitted,
@@ -17,6 +17,6 @@
     </form>
 {% endblock %}
 {% block buttons %}
-    <a onclick="closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
+    {{ block('close_button') }}
     <input class="btn btn-primary" type="submit" value="Confirm" />
 {% endblock %}
