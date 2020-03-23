@@ -6154,4 +6154,30 @@ AND gc_id IN (
         }
         return '';
     }
+
+    /**
+     * Delete user from DBs identified by user_id, semester, and course.
+     *
+     * Query issues DELETE on master DB's courses_users table.  When potentially
+     * successful, trigger function will attempt to delete user from course DB.
+     * If the trigger fails, it is expected that user is also not removed from
+     * master DB.  When user cannot be deleted (probably due to referential
+     * integrity), query is expected to return 0 rows to indicate user was not
+     * deleted.
+     *
+     * @param string $user_id
+     * @param string $semester
+     * @param string $course
+     * @return bool false on failure (or 0 rows deleted), true otherwise.
+     */
+    public function deleteUser($user_id, $semester, $course) {
+        // User cannot remove themself.
+        if ($user_id === $this->core->getUser()->getId()) {
+            return false;
+        }
+
+        $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
+        $this->submitty_db->query($query, array($user_id, $semester, $course));
+        return (bool)$this->submitty_db->getRowCount();
+    }
 }
