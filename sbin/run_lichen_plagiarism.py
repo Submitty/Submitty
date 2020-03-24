@@ -37,7 +37,7 @@ def main():
     log_json = None
     with open(config_path, 'r') as j:
         json_data = json.load(j)
-        config_hash = "" if 'config_hash' not in json_data else json_data['config_hash']
+        config_hash = "" if 'hash' not in json_data else json_data['hash']
         config_regex_changed = "" if 'regex_updated' not in json_data else json_data['regex_updated']
     previous_hash = None
     try:
@@ -55,7 +55,7 @@ def main():
     end_time = time.time()
     duration = end_time - start_time
     results = {
-        'config_hash': config_data,
+        'config_hash': config_hash,
         'concat_result': concat_res,
         'tokenize_result': hash_res,
         'compare_result': compare_res,

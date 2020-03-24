@@ -317,6 +317,7 @@ class PlagiarismController extends AbstractController {
                             "file_option" => $file_option,
                             "language" =>   $language,
                             "threshold" =>  $threshold,
+                            "hash" => bin2hex(random_bytes(8)),
                             "sequence_length" => $sequence_length,
                             "prev_term_gradeables" => $prev_term_gradeables,
                             "ignore_submissions" =>   $ignore_submissions,
