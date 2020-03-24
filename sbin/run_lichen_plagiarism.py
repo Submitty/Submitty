@@ -62,7 +62,7 @@ def main():
         'duration': time.strftime("%H:%M:%S", time.gmtime(duration))
     }
     log_json.truncate()
-    log_json.write(json.dump(results))
+    log_json.write(json.dumps(results))
     log_json.close()
     print("finished running lichen plagiarism for " + config_path)
 
