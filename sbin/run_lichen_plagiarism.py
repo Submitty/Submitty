@@ -11,6 +11,7 @@ import pwd
 import time
 import subprocess
 import json
+import time
 
 
 # ------------------------------------------------------------------------
@@ -26,17 +27,43 @@ def main():
     if len(sys.argv) != 4:
         raise SystemError("ERROR!  This script must be given 3 argument which should be path of lichen config")
 
-    semester = sys.argv[1];
-    course = sys.argv[2];   
-    gradeable = sys.argv[3];
-    
-    config_path = "/var/local/submitty/courses/"+ semester + "/" +course+ "/lichen/config/lichen_"+ semester+"_"+ course+ "_" +gradeable+".json" 
+    semester = sys.argv[1]
+    course = sys.argv[2]
+    gradeable = sys.argv[3]
+    config_hash = ""
+    config_regex_changed = ""
+    config_path = "/var/local/submitty/courses/"+ semester + "/" +course+ "/lichen/config/lichen_"+ semester+"_"+ course+ "_" +gradeable+".json"
+    log_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/logs/{gradeable}/run_results.json"
+    log_json = None
+    with open(config_path, 'r') as j:
+        json_data = json.load(j)
+        config_hash = "" if 'config_hash' not in json_data else json_data['config_hash']
+        config_regex_changed = "" if 'regex_updated' not in json_data else json_data['regex_updated']
+    previous_hash = None
+    try:
+        log_json = open(log_path, 'r+')
+        previous_hash = json.load(log_json)['config_hash']
+    except OSError:
+        log_json = open(log_path, 'w+')
 
-    subprocess.call(['/usr/local/submitty/Lichen/bin/concatenate_all.py', config_path ])
-    subprocess.call(['/usr/local/submitty/Lichen/bin/tokenize_all.py', config_path ])
-    subprocess.call(['/usr/local/submitty/Lichen/bin/hash_all.py', config_path ])
-    subprocess.call(['/usr/local/submitty/Lichen/bin/compare_hashes.out', config_path ])
-
+    start_time = time.time()
+    if (previous_hash == None or (previous_hash != config_hash and config_regex_changed)):
+        concat_res = subprocess.call(['/usr/local/submitty/Lichen/bin/concatenate_all.py', config_path ])
+        tok_res = subprocess.call(['/usr/local/submitty/Lichen/bin/tokenize_all.py', config_path ])
+    hash_res = subprocess.call(['/usr/local/submitty/Lichen/bin/hash_all.py', config_path ])
+    compare_res = subprocess.call(['/usr/local/submitty/Lichen/bin/compare_hashes.out', config_path ])
+    end_time = time.time()
+    duration = end_time - start_time
+    results = {
+        'config_hash': config_data,
+        'concat_result': concat_res,
+        'tokenize_result': hash_res,
+        'compare_result': compare_res,
+        'duration': time.strftime("%H:%M:%S", time.gmtime(duration))
+    }
+    log_json.truncate()
+    log_json.write(json.dump(results))
+    log_json.close()
     print("finished running lichen plagiarism for " + config_path)
 
 
