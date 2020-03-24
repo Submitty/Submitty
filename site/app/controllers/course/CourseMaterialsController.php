@@ -122,6 +122,11 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $file_path = $file->getRealPath();
+
+                //do not download the files that store external links
+                if($json[$file_path]['external_link'] === true){
+                  continue;
+                }
                 if (!$this->core->getUser()->accessGrading()) {
                     // only add the file if the section of student is allowed and course material is released!
                     if (CourseMaterial::isSectionAllowed($this->core, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
@@ -161,6 +166,7 @@ class CourseMaterialsController extends AbstractController {
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
         $data = $_POST['fn'];
         $hide_from_students = null;
+        $external_link = false;
 
         if (!isset($newdatatime)) {
             $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -194,12 +200,15 @@ class CourseMaterialsController extends AbstractController {
                 if (isset($json[$file_name]['hide_from_students'])) {
                     $hide_from_students  = $json[$file_name]['hide_from_students'];
                 }
+                if (isset($json[$file_name]['external_link'])) {
+                    $external_link  = $json[$file_name]['external_link'];
+                }
             }
             if (!is_null($sections)) {
-                $json[$file_name] = array('release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
+                $json[$file_name] = array('release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link);
             }
             else {
-                $json[$file_name] = array('release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students);
+                $json[$file_name] = array('release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link);
             }
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
@@ -208,7 +217,7 @@ class CourseMaterialsController extends AbstractController {
 
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
-    
+
     /**
      * @Route("/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
@@ -218,34 +227,38 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sections'])) {
             $sections = $_POST['sections'] ?? null;
         }
-        
+
         if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
-        
+
         $sections_exploded = $sections;
-        
+
         if (!(is_null($sections)) && !empty($sections)) {
             $sections_exploded = explode(",", $sections);
         }
-        
+
         $hide_from_students = $_POST['hide_from_students'];
-        
+
         $requested_path = "";
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'] ?? '';
         }
-        
+
         $release_time = "";
         if (isset($_POST['release_time'])) {
             $release_time = $_POST['release_time'];
         }
-        
+
         $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');
         $json = FileUtils::readJsonFile($fp);
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
-        $json[$dst] =  array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+        $external_link = false;
+        if (isset($json[$dst]['external_link'])) {
+            $external_link = $json[$dst]['external_link'];
+        }
+        $json[$dst] =  array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link);
         FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }
