@@ -22,7 +22,7 @@
             "validation" : [
                 {
                     "method" : "custom_validator",
-                    "command" : "python3 grader.py --numbers 5",
+                    "command" : "python3 OLD_grader.py --numbers 5",
             "actual_file" : "STDOUT.txt"
                 }
             ]
