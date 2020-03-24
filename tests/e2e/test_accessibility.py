@@ -1,6 +1,7 @@
 from .base_testcase import BaseTestCase
 import requests
 import json
+import os
 
 class TestAccessibility(BaseTestCase):
     """
@@ -11,42 +12,48 @@ class TestAccessibility(BaseTestCase):
 
 
     # This should contain a url for every type of page on the webiste
+    # please replace the semester and course with '/{}/{}'
+    # So '/s20/sample/users' becomes '/{}/{}/users'
     urls = [
         '/home',
-        '/s20/sample',
-        '/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0',
-        '/s20/sample/gradeable/future_no_tas_lab/grading?view=all',
-        '/s20/sample/gradeable/future_no_tas_test/grading?view=all',
-        '/s20/sample/gradeable/open_homework/grading/status',
-        '/s20/sample/gradeable/open_homework/grading/details?view=all',
-        '/s20/sample/gradeable/open_homework',
-        '/s20/sample/gradeable/open_team_homework/team',
-        '/s20/sample/gradeable/grades_released_homework_autota',
-        '/s20/sample/notifications',
-        '/s20/sample/notifications/settings',
-        '/s20/sample/gradeable',
-        '/s20/sample/config',
-        '/s20/sample/theme',
-        '/s20/sample/office_hours_queue',
-        '/s20/sample/course_materials',
-        '/s20/sample/forum',
-        '/s20/sample/forum/threads/new',
-        '/s20/sample/forum/categories',
-        '/s20/sample/forum/stats',
-        '/s20/sample/users',
-        '/s20/sample/graders',
-        '/s20/sample/sections',
-        '/s20/sample/student_photos',
-        '/s20/sample/late_days',
-        '/s20/sample/extensions',
-        '/s20/sample/grade_override',
-        '/s20/sample/plagiarism',
-        '/s20/sample/plagiarism/configuration/new',
-        '/s20/sample/reports',
-        '/s20/sample/late_table'
+        '/{}/{}',
+        '/{}/{}/gradeable/future_no_tas_homework/update?nav_tab=0',
+        '/{}/{}/gradeable/future_no_tas_lab/grading?view=all',
+        '/{}/{}/gradeable/future_no_tas_test/grading?view=all',
+        '/{}/{}/gradeable/open_homework/grading/status',
+        '/{}/{}/gradeable/open_homework/grading/details?view=all',
+        '/{}/{}/gradeable/open_homework',
+        '/{}/{}/gradeable/open_team_homework/team',
+        '/{}/{}/gradeable/grades_released_homework_autota',
+        '/{}/{}/notifications',
+        '/{}/{}/notifications/settings',
+        '/{}/{}/gradeable',
+        '/{}/{}/config',
+        '/{}/{}/theme',
+        '/{}/{}/office_hours_queue',
+        '/{}/{}/course_materials',
+        '/{}/{}/forum',
+        '/{}/{}/forum/threads/new',
+        '/{}/{}/forum/categories',
+        '/{}/{}/forum/stats',
+        '/{}/{}/users',
+        '/{}/{}/graders',
+        '/{}/{}/sections',
+        '/{}/{}/student_photos',
+        '/{}/{}/late_days',
+        '/{}/{}/extensions',
+        '/{}/{}/grade_override',
+        '/{}/{}/plagiarism',
+        '/{}/{}/plagiarism/configuration/new',
+        '/{}/{}/reports',
+        '/{}/{}/late_table'
     ]
 
+    baseline_path = ''
+
     def test_w3_validator(self):
+        setup(self)
+
         # Uncomment this to generate a new baseline for all pages on the website
         # Then run 'python3 -m unittest e2e.test_accessibility' from inside the tests folder
         # genBaseline(self)
@@ -55,16 +62,19 @@ class TestAccessibility(BaseTestCase):
         # url = '' # your url here
         # genBaseline(self, url)
 
-
         validatePages(self)
 
+# Any code that should be run before checking for accessibility
+def setup(self):
+    self.baseline_path = f'{os.path.dirname(os.path.realpath(__file__))}/accessibility_baseline.json'
+    self.urls = [url.format(self.get_current_semester(), 'sample') for url in self.urls]
 
 
 def validatePages(self):
     self.log_out()
     self.log_in(user_id='instructor')
     self.click_class('sample')
-    with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json') as f:
+    with open(self.baseline_path) as f:
         baseline = json.load(f)
 
     foundError = False
@@ -102,7 +112,7 @@ def genBaseline(self, new_url=None):
     baseline = {}
     urls = self.urls
     if new_url:
-        with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json') as f:
+        with open(self.baseline_path) as f:
             baseline = json.load(f)
         urls = [new_url]
 
@@ -124,5 +134,5 @@ def genBaseline(self, new_url=None):
 
             if error['message'] not in baseline[url]:
                 baseline[url][error['message']] = error
-    with open('/'.join(__file__.split('/')[:-1])+'/accessibility_baseline.json', 'w') as file:
+    with open(self.baseline_path, 'w') as file:
         json.dump(baseline, file, ensure_ascii=False, indent=4)

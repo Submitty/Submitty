@@ -149,7 +149,7 @@
     "/s20/sample/course_materials": {
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 1440,
+            "lastLine": 2031,
             "lastColumn": 172,
             "firstColumn": 87,
             "subType": "warning",
