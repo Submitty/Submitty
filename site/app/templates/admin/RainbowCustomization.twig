@@ -122,16 +122,26 @@
                                 <div style="margin-top:10px">
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
-                                            <li>
+                                            <li class="gradeable-li">
                                                 <input type="text"
                                                        aria-label="{{gradeable["title"]}} max score"
                                                        value="{{ gradeable["max_score"] }}"
                                                        id="maxscore-{{ gradeable["id"] }}"
                                                        data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                       style="margin-right: 10px;display:inline;"
+                                                       style="margin-right: 10px;"
                                                        onblur="ClampPoints(this);">
-                                                {{ gradeable["title"] }}
-                                                <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
+                                                <div class="gradeable-li-right-of-input">
+                                                    <div class="gradeable-li-info">
+                                                        <i class="fas fa-chart-line fa-gradeable-curve"></i>
+                                                        {{ gradeable["title"] }}
+                                                        <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
+                                                    </div>
+                                                    <div class="gradeable-li-curve">
+                                                        <p class="gradeable-li-curve-input">
+                                                            TEST
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </li>
                                         {% endfor %}
                                     </ol>

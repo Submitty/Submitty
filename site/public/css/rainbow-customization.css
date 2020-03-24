@@ -41,6 +41,11 @@
     list-style-type: none;
 }
 
+.bucket_detail_div
+{
+    padding: 3px;
+}
+
 .bucket_detail_div:nth-child(2n){
     background-color: mediumorchid;
 }
@@ -94,4 +99,45 @@
 #limited_func_messages p
 {
     margin: 12px
+}
+
+.fa-gradeable-curve
+{
+    margin-right: 5px;
+}
+
+.fa-gradeable-curve:hover
+{
+    color: red;
+}
+
+.gradeable-li
+{
+    display: flex;
+    flex-direction: row;
+    margin: 3px;
+    align-items: center;
+}
+
+.gradeable-li-right-of-input
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.gradeable-li-info
+{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.gradeable-id
+{
+    margin-left: 5px;
+}
+
+.gradeable-li-curve-input
+{
+    display: none;
 }
