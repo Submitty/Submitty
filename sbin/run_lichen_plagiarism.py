@@ -35,6 +35,7 @@ def main():
     config_path = "/var/local/submitty/courses/"+ semester + "/" +course+ "/lichen/config/lichen_"+ semester+"_"+ course+ "_" +gradeable+".json"
     log_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/logs/{gradeable}/run_results.json"
     log_json = None
+    os.remove(f"/var/local/submitty/courses/{semester}/{course}/lichen/ranking/{gradeable}.txt")
     with open(config_path, 'r') as j:
         json_data = json.load(j)
         config_hash = "" if 'hash' not in json_data else json_data['hash']
