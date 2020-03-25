@@ -203,10 +203,12 @@
             if($(".thread-announcement-checkbox").prop("checked")){
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
+                $(".pinThread-checkbox").prop('disabled', true);
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
+                $(".pinThread-checkbox").prop('disabled', false);
             }
         });
 
