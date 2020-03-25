@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 
-##
-## This script is aimed to become gated behind a `--fast` flag for running
-## the existing INSTALL_SUBMITTY_HELPER_SITE.sh script. It achieves a much
-## lower runtime by only doing operations related to the files that rsync
-## actually updates instead of running over all files. For the moment, it
-## lives separately and will be more properly integrated after the first
-## big steps of the install rewrite happen for issue #4011
-##
 
-## TODO:
-##  1. create comparison script to ensure permissions after running this script
-##      match that of running normal install script
-##  2. fold into INSTALL_SUBMITTY_HELPER_SITE.sh in some way behind flag
+################################################################################################
+### DEVELOPMENTAL SITE INSTALLER
+#
+# This is a new, developmental site installer. This script looks at the result of the rsync
+# command to tell what files have been updated, and uses that list to see if:
+#   - if package.json or package-lock.json was modified, run NPM
+#   - if composer.json or composer.lock was modified, run composer
+#   - only set permissions appropriate for modified files
+#
+# This is more efficient by orders of magnitude than install_site_prod.sh, but at the cost
+# of being more complicated to get right. As such, this script is currently set to only
+# run when the debugging_enabled flag is set, which should largely only affect vagrant
+# users, and which gives us a good picture of stability before eventual production rollout
+# in a number of months.
+################################################################################################
 
 set_permissions () {
     local fullpath=$1
@@ -61,7 +64,22 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
 result=$(rsync -rtz -i --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
-readarray -t result_array <<<"${result}"
+
+# check for either of the dependency folders, and if they do not exist, pretend like
+# their respective json file was edited. Composer needs the folder to exist to even
+# run, but it could be someone just deleted the folders to try and fix some
+# weird dependency installation issue (common with npm troubleshooting).
+if [ ! -d ${SUBMITTY_INSTALL_DIR}/site/vendor ]; then
+    mkdir ${SUBMITTY_INSTALL_DIR}/site/vendor
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
+    result=$(echo -e "${result}\n>f+++++++++ site/composer.json")
+fi
+
+if [ ! -d ${SUBMITTY_INSTALL_DIR}/site/node_modules ]; then
+    result=$(echo -e "${result}\n>f+++++++++ site/package.json")
+fi
+
+readarray -t result_array <<< "${result}"
 
 # clear old twig cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
@@ -76,7 +94,8 @@ for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
 
-# Update ownership for cache directory
+# Update permissions & ownership for cache directory
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
 chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 # Update ownership for cgi-bin to CGI_USER
@@ -89,35 +108,22 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
     chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/vendor
 fi
 
-# set the permissions of all files
-# $PHP_USER can read & execute all directories and read all files
-#chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
-#find ${SUBMITTY_INSTALL_DIR}/site ! -name \*.html -exec chmod 440 {} \;
-
-# "other" can cd into all subdirectories
-#find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
-
 # Set proper read/execute for "other" on files with certain extensions
 # so apache can properly handle them
 echo "Set permissions"
-readarray -t directories <<<$(echo "${result_array}" | grep "^.d")
-for directory in "${directories[@]}"; do
-    if [ ! -z "${directory}" ]; then
-        chmod 551 ${SUBMITTY_INSTALL_DIR}/${directory:12}
-    fi
-done
-
-readarray -t files <<<$(echo "${result_array}" | grep "^.f")
-for file in "${files[@]}"; do
-    if [ ! -z "${file}" ]; then
-        chmod 440 ${SUBMITTY_INSTALL_DIR}/${file:12}
-    fi
-done
-
-readarray -t public_files <<<$(echo "${files}" | grep "site/public")
-for file in "${public_files[@]}"; do
-    if [ ! -z "${file}" ]; then
-        set_permissions "${SUBMITTY_INSTALL_DIR}/${file:12}"
+for entry in "${result_array[@]}"; do
+    if echo ${entry} | grep -E -q "^.d"; then
+        if [ ! -z "${entry}" ]; then
+            chmod 551 ${SUBMITTY_INSTALL_DIR}/${entry:12}
+        fi
+    elif echo ${entry} | grep -E -q "site/public"; then
+        if [ ! -z "${entry}" ]; then
+            set_permissions "${SUBMITTY_INSTALL_DIR}/${entry:12}"
+        fi
+    elif echo ${entry} | grep -E -q "^.f"; then
+        if [ ! -z "${entry}" ]; then
+            chmod 440 ${SUBMITTY_INSTALL_DIR}/${entry:12}
+        fi
     fi
 done
 
@@ -125,12 +131,13 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
     su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader --no-suggest"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
 if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # Install JS dependencies and then copy them into place
@@ -218,6 +225,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     find ${VENDOR_FOLDER} -type d -exec chmod 551 {} \;
     find ${VENDOR_FOLDER} -type f | while read file; do set_permissions "$file"; done
 fi
+
+chmod 440 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
 
 # Set cgi-bin permissions
 chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
