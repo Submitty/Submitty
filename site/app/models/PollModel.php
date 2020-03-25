@@ -76,4 +76,16 @@ class PollModel extends AbstractModel {
         }
         return $this->isCorrect($this->user_responses[$user_id]) ? (float)$this->core->getConfig()->getPollsPtsForCorrect() : (float)$this->core->getConfig()->getPollsPtsForIncorrect();
     }
+
+    public function isInPast() {
+        return date("Y-m-d") > $this->release_date;
+    }
+
+    public function isInFuture() {
+        return date("Y-m-d") < $this->release_date;
+    }
+
+    public function isToday() {
+        return date("Y-m-d") == $this->release_date;
+    }
 }

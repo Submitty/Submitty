@@ -70,8 +70,8 @@
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
                     <div id="response_{{index}}_wrapper">
-                        <input type=text class="poll_response" name="response_{{index}}" value="{{ response }}" /> 
-                        <input type=checkbox name="is_correct_{{index}}" {{ poll.isCorrect(response) ? "checked": "" }} />
+                        <input type="text" class="poll_response" name="response_{{index}}" value="{{ response }}" /> 
+                        <input type="checkbox" name="is_correct_{{index}}" {{ poll.isCorrect(response) ? "checked": "" }}>
                         <br/>
                     </div>
                     {% set index = index + 1%}
@@ -81,9 +81,7 @@
             <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
             <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
             <br/> <br/>
-
             
-
             <button type="submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
@@ -96,7 +94,7 @@
         $("#responses").append(`
             <div id="response_${count}_wrapper">
                 <input type=text class="poll_response" name="response_${count}" placeholder="Enter response here..."/> 
-                <input type=checkbox name="is_correct_${count}"/>
+                <input type=checkbox name="is_correct_${count}">
                 <br/>
             </div>
         `);

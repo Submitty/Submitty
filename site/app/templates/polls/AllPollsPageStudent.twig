@@ -3,7 +3,7 @@
     <p>this is the poll page for students</p>
     <br/>
     <hr>
-    <h2> Open Polls </h2>
+    <h2> Today's Polls </h2>
     <table class="table table-striped" style="width:100%;">
         <thead>
             <tr>
@@ -13,30 +13,32 @@
             </tr>
         </thead>
         <tbody>
-            {% for poll in polls %}
-                {% if poll.isOpen() %}
-                    <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getUserResponse(user_id) == null ? "No Response" : poll.getUserResponse(user_id) }} </td>
-                        <td> 
-                            <form method="post" action="{{ base_url }}/viewPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+            {% for poll in todays_polls %}
+                <tr>
+                    <td> {{ poll.getName() }} </td>
+                    <td> {{ poll.getUserResponse(user_id) == null ? "No Response" : poll.getUserResponse(user_id) }} </td>
+                    <td> 
+                        <form method="post" action="{{ base_url }}/viewPoll">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            {% if poll.isOpen() %}
                                 {% if poll.getUserResponse(user_id) == null %}
                                     <button type="submit" class="btn btn-success"> Answer
                                 {% else %}
                                     <button type="submit" class="btn btn-success"> Edit Answer
                                 {% endif %}
                                 </button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endif %}
+                            {% else %}
+                                Closed
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
     <hr>
-    <h2> Closed Polls </h2>
+    <h2> Older Polls </h2>
     <table class="table table-striped" style="width:100%;">
         <thead>
             <tr>
@@ -46,21 +48,19 @@
             </tr>
         </thead>
         <tbody>
-            {% for poll in polls %}
-                {% if not poll.isOpen() %}
-                    <tr>
-                        <td> {{ poll.getName() }} </td>
-                        <td> {{ poll.getUserResponse(user_id) == null ? "No Response" : poll.getUserResponse(user_id) }} </td>
-                        <td> 
-                            <form method="post" action="{{ base_url }}/viewPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary"> View Results
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endif %}
+            {% for poll in older_polls %}
+                <tr>
+                    <td> {{ poll.getName() }} </td>
+                    <td> {{ poll.getUserResponse(user_id) == null ? "No Response" : poll.getUserResponse(user_id) }} </td>
+                    <td> 
+                        <form method="post" action="{{ base_url }}/viewPoll">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                            <button type="submit" class="btn btn-primary"> View Results
+                            </button>
+                        </form>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

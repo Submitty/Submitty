@@ -1,0 +1,28 @@
+.dropdown_wrapper h2 {
+    display: inline;
+    margin: 0px;
+}
+
+.dropdown_wrapper .dropdown_arrow {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+}
+
+.dropdown_wrapper .dropdown-btn {
+    background: transparent;
+    border: none !important;
+    padding: 6px 0px 0px 0px !important;
+    float: right;
+}
+
+.dropdown_wrapper .right {
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+}
+
+.dropdown_wrapper .down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+}

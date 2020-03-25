@@ -25,7 +25,9 @@ class PollController extends AbstractController {
                 new WebResponse(
                     'Poll',
                     'showPollsInstructor',
-                    $this->core->getQueries()->getPolls()
+                    $this->core->getQueries()->getTodaysPolls(),
+                    $this->core->getQueries()->getOlderPolls(),
+                    $this->core->getQueries()->getFuturePolls()
                 )
             );
         }
@@ -34,7 +36,8 @@ class PollController extends AbstractController {
                 new WebResponse(
                     'Poll',
                     'showPollsStudent',
-                    $this->core->getQueries()->getPolls()
+                    $this->core->getQueries()->getTodaysPolls(),
+                    $this->core->getQueries()->getOlderPolls()
                 )
             );
         }
@@ -173,7 +176,7 @@ class PollController extends AbstractController {
         $answers = array();
         for ($i = 0; $i < $response_count; $i++) {
             $responses[] = $_POST["response_" . $i];
-            if (isset($POST["is_correct_" . $i]) and $_POST["is_correct_" . $i] == "on") {
+            if ($_POST["is_correct_" . $i] == "on") {
                 $answers[] = $_POST["response_" . $i];
             }
         }

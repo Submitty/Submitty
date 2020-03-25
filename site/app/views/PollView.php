@@ -6,19 +6,28 @@ use app\models\User;
 
 class PollView extends AbstractView {
 
-    public function showPollsInstructor($polls) {
+    public function showPollsInstructor($todays_polls, $older_polls, $future_polls) {
+        $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls-dropdown.js');
+        $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageInstructor.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'polls' => $polls
+            'todays_polls' => $todays_polls,
+            'older_polls' => $older_polls,
+            'future_polls' => $future_polls
           ]);
     }
 
-    public function showPollsStudent($polls) {
+    public function showPollsStudent($todays_polls, $older_polls) {
+        $this->core->getOutput()->addInternalCss('polls.css');
+        $this->core->getOutput()->addInternalJs('polls-dropdown.js');
+        $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageStudent.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'polls' => $polls,
+            'todays_polls' => $todays_polls,
+            'older_polls' => $older_polls,
             'user_id' => $this->core->getUser()->getId(),
           ]);
     }

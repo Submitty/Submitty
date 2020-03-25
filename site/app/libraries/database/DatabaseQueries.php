@@ -6186,6 +6186,45 @@ AND gc_id IN (
         return $polls;
     }
 
+    public function getTodaysPolls() {
+        $polls = array();
+        $this->course_db->query("SELECT * from polls where release_date = ? or open=true order by poll_id DESC", array(date("Y-m-d")));
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getOlderPolls() {
+        $polls = array();
+        $this->course_db->query("SELECT * from polls where release_date < ? and open=false order by poll_id DESC", array(date("Y-m-d")));
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getFuturePolls() {
+        $polls = array();
+        $this->course_db->query("SELECT * from polls where release_date > ? and open=false order by poll_id DESC", array(date("Y-m-d")));
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
     public function getPoll($poll_id) {
         $this->course_db->query("SELECT * from polls where poll_id = ?", array($poll_id));
         $row = $this->course_db->rows();
@@ -6251,7 +6290,7 @@ AND gc_id IN (
 
     public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date) {
         $this->course_db->query("DELETE FROM poll_options where poll_id = ?", array($poll_id));
-        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ?", array($poll_name, $question, $release_date));
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ? where poll_id = ?", array($poll_name, $question, $release_date, $poll_id));
         foreach ($responses as $response) {
             $this->course_db->query("INSERT INTO poll_options(poll_id, response, correct) VALUES (?, ?, FALSE)", array($poll_id, $response));
         }
