@@ -1,4 +1,31 @@
 {% import _self as self %}
+<script>
+        $('#save_annotations').on('click', function () {  
+            $('body').scrollTop(0);  
+            createPDF();  
+        });  
+        //create pdf  
+        function createPDF() {
+            console.log("CHECK");
+            getCanvas().then(function (canvas) {  
+                var  
+                 img = canvas.toDataURL("image/png"),  
+                 doc = new jsPDF({  
+                     unit: 'px',  
+                 });  
+                doc.addImage(img, 'JPEG', 20, 20);  
+                doc.save('Check.pdf');  
+            });  
+        }  
+  
+        // create canvas object  
+        function getCanvas() {  
+            return html2canvas($('#viewer'), {  
+                imageTimeout: 2000,  
+                removeContainer: true  
+            });  
+        } 
+</script>
 <div id="submission_browser" class="draggable rubric_panel">
     <div class="draggable_content">
         <div id="directory_view">
@@ -107,7 +134,7 @@
                 iframe.addClass('open');
             }
         }
-        if (!iframe.hasClass("full_panel") && url_file.substring(url_file.length - 3) !== "pdf") {
+        if(!iframe.hasClass("full_panel")){
             if (!iframe.hasClass('shown')) {
                 iframe.show();
                 iframe.addClass('shown');
@@ -227,7 +254,7 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }} key_to_click" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
