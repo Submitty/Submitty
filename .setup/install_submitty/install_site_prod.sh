@@ -63,7 +63,7 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
 fi
 
 # install composer dependencies and generate classmap
-su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader --no-suggest"
+su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader --no-suggest"
 
 # Install JS dependencies and then copy them into place
 # We need to create the node_modules folder initially if it
