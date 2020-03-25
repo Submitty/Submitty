@@ -137,7 +137,6 @@ alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias submitty_install_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
-alias submitty_install_site_dev='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/install_site_dev.sh'
 alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
@@ -146,6 +145,10 @@ alias submitty_restart_services='submitty_restart_autograding && systemctl resta
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
+systemctl start submitty_autograding_shipper
+systemctl start submitty_autograding_worker
+systemctl start submitty_daemon_jobs_handler
+systemctl start nullsmtpd
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
@@ -434,13 +437,18 @@ if [ ${WORKER} == 0 ]; then
         # comment out directory configs - should be converted to something more flexible
         sed -i '153,174s/^/#/g' /etc/apache2/apache2.conf
 
+        if ! grep -E -q "Listen 1501" /etc/apache2/ports.conf; then
+            echo "Listen 1501" >> /etc/apache2/ports.conf
+        fi
+
         # remove default sites which would cause server to mess up
         rm /etc/apache2/sites*/000-default.conf
         rm /etc/apache2/sites*/default-ssl.conf
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/Require host __your_domain__/Require ip ${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require host localhost/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/\*:80/*:${SUBMISSION_PORT}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf

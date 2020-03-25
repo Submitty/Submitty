@@ -546,7 +546,9 @@ class ElectronicGraderController extends AbstractController {
             foreach ($all_rot_sections as $i => $section) {
                 $all_rot_sections[$i] = $section[$key];
             }
-            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_reg_sections, $all_rot_sections);
+
+            $students = $this->core->getQueries()->getAllUsers();
+            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_reg_sections, $all_rot_sections, $students);
             $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'importTeamForm', $gradeable);
 
             $this->core->getOutput()->renderOutput(array('grading','ElectronicGrader'), 'randomizeButtonWarning', $gradeable);
@@ -1040,6 +1042,28 @@ class ElectronicGraderController extends AbstractController {
         else {
             $late_status = $ldi->getStatus();
         }
+        $rollbackSubmission = -1;
+        $previousVersion =  $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() - 1;
+        // check for rollback submission only if the Active version is greater than 1 and that too is late.
+        if ($previousVersion && $late_status !== LateDayInfo::STATUS_GOOD) {
+            while ($previousVersion) {
+                $prevVersionInstance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($previousVersion);
+                if ($prevVersionInstance == null) {
+                    $rollbackSubmission = -1;
+                    break;
+                }
+                $lateInfo = LateDays::fromUser($this->core, $late_days_user)->getLateDayInfoByGradeable($gradeable);
+                $daysLate = $prevVersionInstance->getDaysLate();
+
+                // If this version is a good submission then it the rollback Submision
+                if ($lateInfo == null || ($lateInfo->getStatus($daysLate) == LateDayInfo::STATUS_GOOD)) {
+                    $rollbackSubmission = $previousVersion;
+                    break;
+                }
+                // applying same condition for previous version. i.e going back one version
+                $previousVersion -= 1;
+            }
+        }
 
         $logger_params = array(
             "course_semester" => $this->core->getConfig()->getSemester(),
@@ -1057,7 +1081,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $sort, $direction, $who_id);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
@@ -1167,6 +1191,15 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
+        
+        $section = null;
+        
+        if ($gradeable->isGradeByRegistration()) {
+            $section = $this->core->getQueries()->getSubmitterById($submitter_id)->getRegistrationSection();
+        }
+        else {
+            $section = $this->core->getQueries()->getSubmitterById($submitter_id)->getRotatingSection();
+        }
 
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
@@ -1175,7 +1208,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get graded gradeable');
             return;
         }
@@ -1225,9 +1258,14 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // If it is graded at all, then send ta score information
-        $response_data['ta_grading_total'] = $gradeable->getTaPoints();
+        $response_data['ta_grading_total'] = $gradeable->getManualGradingPoints();
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
-            $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
+            if ($gradeable->isPeerGrading()) {
+                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
+            }
+            else {
+                $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);
+            }
         }
 
         $response_data['anon_id'] = $graded_gradeable->getSubmitter()->getAnonId();

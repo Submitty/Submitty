@@ -14,7 +14,7 @@
 			<p id="user-form-already-exists-error-message">
 				User is already in this course. Click to edit:
 				<td>
-					<a id="redirect-link-icon" onclick="redirectToEdit();" aria-label="edit entered user">
+					<a id="redirect-link-icon" class="key_to_click" tabindex="0" onclick="redirectToEdit();" aria-label="edit entered user">
 						<i class="fas fa-pencil-alt"></i>
 					</a>
 				</td>
@@ -105,6 +105,6 @@
     </form>
 {% endblock %}
 {% block buttons %}
-    <a onclick="closeButton()" class="btn btn-default close-button">Close</a>
+    <a onclick="closeButton()" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
     <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" />
 {% endblock %}

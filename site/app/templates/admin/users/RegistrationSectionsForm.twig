@@ -1,5 +1,5 @@
 {% import _self as self %} {# Required to use macros in same template #}
-{# 
+{#
 Macros
 #}
 {# Display the checkboxes for a given set of graders at a grader level #}
@@ -10,9 +10,9 @@ Macros
             <td>
 				<label>
 					<span class="screen-reader">Can {{ grader.getId() }} grade all sections</span>
-					<input type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all" 
-						{{ grader.getGradingRegistrationSections()|length == reg_sections|length ? 'checked' : ''}} 
-						onclick="fixCheckBoxes('{{ grader.getId() }}',true);" 
+					<input class="key_to_click" tabindex="0" type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all"
+						{{ grader.getGradingRegistrationSections()|length == reg_sections|length ? 'checked' : ''}}
+						onclick="fixCheckBoxes('{{ grader.getId() }}',true);"
 					/>
 				</label>
 			</td>
@@ -20,9 +20,9 @@ Macros
 			<td>
 				<label>
 					<span class="screen-reader">Can {{ grader.getId() }} grade section {{ section['sections_registration_id'] }}</span>
-					<input type="checkbox" name="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
-						id="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
-						{{ section['sections_registration_id'] in grader.getGradingRegistrationSections() ? 'checked' : ''}} 
+					<input class="key_to_click" tabindex="0" type="checkbox" name="{{ grader.getId() }}_{{section['sections_registration_id']}}"
+						id="{{ grader.getId() }}_{{section['sections_registration_id']}}"
+						{{ section['sections_registration_id'] in grader.getGradingRegistrationSections() ? 'checked' : ''}}
 						onclick="fixCheckBoxes('{{ grader.getId() }}',false);"
 					/>
 				</label>
@@ -63,7 +63,7 @@ Macros
 			{{ self.display_graders(graders[3], reg_sections) }}
 		{% elseif num_rotating_sections == 0 %}
 			<p><b>
-				Rotating Sections have not been set up yet. <br/> 
+				Rotating Sections have not been set up yet. <br/>
 				You can set up Rotating Sections using the "Manage Sections" option on the sidebar.
 			</b></p>
 		{% endif %}

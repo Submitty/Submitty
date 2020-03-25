@@ -65,7 +65,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: #FFF;
+    color: var(--text-white);
     font-size: 18px;
     font-weight: 900
 }

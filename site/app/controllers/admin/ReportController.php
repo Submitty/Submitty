@@ -549,8 +549,10 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
+                'bucket_counts' => $customization->getBucketCounts(),
                 "used_buckets" => $customization->getUsedBuckets(),
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
