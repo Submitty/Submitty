@@ -151,11 +151,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$peer_grade_set might not be defined\\.$#"
-			count: 3
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Variable \\$my_grading might not be defined\\.$#"
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -203,11 +198,6 @@ parameters:
 		-
 			message: "#^Variable \\$goToStudent might not be defined\\.$#"
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Variable \\$total_submitted might not be defined\\.$#"
-			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-

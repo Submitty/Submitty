@@ -1,31 +1,4 @@
-{% import _self as self %}
-<script>
-        $('#save_annotations').on('click', function () {  
-            $('body').scrollTop(0);  
-            createPDF();  
-        });  
-        //create pdf  
-        function createPDF() {
-            console.log("CHECK");
-            getCanvas().then(function (canvas) {  
-                var  
-                 img = canvas.toDataURL("image/png"),  
-                 doc = new jsPDF({  
-                     unit: 'px',  
-                 });  
-                doc.addImage(img, 'JPEG', 20, 20);  
-                doc.save('Check.pdf');  
-            });  
-        }  
-  
-        // create canvas object  
-        function getCanvas() {  
-            return html2canvas($('#viewer'), {  
-                imageTimeout: 2000,  
-                removeContainer: true  
-            });  
-        } 
-</script>
+{% import _self as self %} 
 <div id="submission_browser" class="draggable rubric_panel">
     <div class="draggable_content">
         <div id="directory_view">

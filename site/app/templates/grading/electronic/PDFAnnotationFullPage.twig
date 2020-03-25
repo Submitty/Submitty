@@ -82,8 +82,23 @@
             width: 100%;
         }
     </style>
+    
+<script>
+        $('#save_annotations').on('click', function () {  
+           html2canvas($("#viewer"), {
+            onrendered: function(canvas) {         
+                var imgData = canvas.toDataURL(
+                    'image/png');              
+                var doc = new jsPDF('p', 'mm');
+                doc.addImage(imgData, 'PNG', 10, 10);
+                doc.save('sample-file.pdf');
+                }
+            });
+        }); 
+</script>
 </head>
 <body>
+    <input type="button" id="save_annotations" value="Generate PDF"> 
 <div class="toolbar">
     <button class="cursor" type="button" title="Cursor" data-tooltype="cursor">➚</button>
 
