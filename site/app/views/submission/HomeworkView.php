@@ -415,7 +415,7 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
 
-        $DATE_FORMAT = "m/d/Y @ h:i A";
+        $DATE_FORMAT = "m/d/Y @ h:i A T";
         $numberUtils = new NumberUtils();
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
@@ -1060,7 +1060,7 @@ class HomeworkView extends AbstractView {
                     $content = $post['content'];
                     $posts[] = [
                         'is_staff' => $is_staff,
-                        'date' => date_format($date, 'm/d/Y g:i A'),
+                        'date' => date_format($date, 'm/d/Y g:i A T'),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,

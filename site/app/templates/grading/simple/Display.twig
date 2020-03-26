@@ -252,7 +252,7 @@
             {% set total = total + component_grade.getScore() %}
             <td class="option-small-input">
                 <input
-                    class="option-small-box cell-grade key_to_click" tabindex="0"
+                    class="option-small-box cell-grade" tabindex="0"
                     style="text-align: center; {{ component_grade.getScore() == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
                         {{ component_grade.getScore() == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
@@ -284,7 +284,7 @@
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
             <input
-                class="option-small-box cell-grade key_to_click" tabindex="0"
+                class="option-small-box cell-grade" tabindex="0"
                 type="text"
                 id="cell-{{ index }}-{{ text_start + loop.index0 }}"
                 value="{{ component_grade.getComment() }}"
