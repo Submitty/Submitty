@@ -36,7 +36,7 @@
                         {% endif %}
 
                         Submission Number: {{ active_version }} / {{ highest_version }}<br/>
-                        Submitted: {{ submission_time|date("m/d/Y H:i:s") }}<br/>
+                        Submitted: {{ submission_time|date("m/d/Y H:i:s T") }}<br/>
                     </b>
                 </div>
                 {% for table in tables %}
