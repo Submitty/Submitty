@@ -129,8 +129,12 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueNumberAheadOfYou($queue_code);
     }
 
-    public function firstTimeInQueue($id, $queue_code) {
-        return $this->core->getQueries()->firstTimeInQueue($id, $queue_code);
+    public function firstTimeInQueueToday($id, $queue_code) {
+        return $this->core->getQueries()->firstTimeInQueueToday($id, $queue_code);
+    }
+
+    public function firstTimeInQueueThisWeek($id, $queue_code) {
+        return $this->core->getQueries()->firstTimeInQueueThisWeek($id, $queue_code);
     }
 
     public function inQueue() {
@@ -171,5 +175,9 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function isContactInfoEnabled() {
         return $this->core->getConfig()->getQueueContactInfo();
+    }
+
+    public function getQueueMessage() {
+        return $this->core->getConfig()->getQueueMessage();
     }
 }

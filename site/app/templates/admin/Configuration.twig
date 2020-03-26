@@ -49,19 +49,29 @@
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} />
             <label for="queue-enabled">
-                <span class="option-title">Enable Office Hours/Lab Queue</span>
+                <span class="option-title">Enable Office Hours Queue</span>
                 <br>
-                <span class="option-alt">Choose whether to enable an office hours/lab queue for this course.</span>
+                <span class="option-alt">Choose whether to enable an Office Hours Queue for this course.</span>
             </label>
         </div>
         <div id="queue-contact-info-wrapper" class="config-row checkbox-row">
             <input type="checkbox" name="queue_contact_info" id="queue-contact-info" value="true" {{ fields['queue_contact_info'] ? 'checked': '' }} />
             <label for="queue-contact-info">
-                <span class="option-title">Contact Info for Office Hours/Lab Queue</span>
+                <span class="option-title">Contact Info for Office Hours Queue</span>
                 <br>
                 <span class="option-alt">Check this box to require that students specify their contact information for office hours help (e.g., email address, video chat, virtual meeting URL, phone number).  This setting should only be enabled if the queue is used for remote or online instruction and tutoring.</san>
             </label>
         </div>
+
+        <label for="upload-message" class="config-row">
+            <span class="option-title">Office Hours Queue Welcome Message (Optional)</span>
+            <br>
+            <span class="option-alt">
+                What message that should be shown to students before they join the queue?<br>
+                If the queue is used for remote or online instruction and tutoring, you may explain the connection requirements and establish student expectations with this message.
+            </span>
+        </label>
+        <textarea class="config-row" name="queue_message" id="queue-message">{{ fields['queue_message'] }}</textarea>
 
         <h2>Submissions</h2>
         <hr>
@@ -70,7 +80,7 @@
             <span class="option-title">Upload Message</span>
             <br>
             <span class="option-alt">
-                What is the message that should be shown to students above the upload area on the submission page.
+                What is the message that should be shown to students above the upload area on the submission page?
             </span>
         </label>
         <textarea class="config-row" name="upload_message" id="upload-message">{{ fields['upload_message'] }}</textarea>
