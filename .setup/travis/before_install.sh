@@ -38,3 +38,11 @@ sudo sed -i -e "s?secure_path=\"?secure_path=\"${PATH}:?g" /etc/sudoers
 
 sudo ln -s $(which python3) /usr/local/bin/python
 sudo ln -s $(which python3) /usr/local/bin/python3
+
+# Set GH token for Composer so that it does not have API problems. This is a new issue that
+# has come up with Travis for whatever reason, and unfortunately, does mean that building
+# forks and PRs from external collaborators might have issues.
+if [ -n "${GH_TOKEN}" ]; then
+    echo "Set GH token for composer"
+    composer config --global github-oauth.github.com ${GH_TOKEN}
+fi
