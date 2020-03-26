@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
+use app\libraries\GradingQueue;
 use app\libraries\Logger;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -1546,7 +1547,7 @@ class SubmissionController extends AbstractController {
             $gradeable_id,
             $submitter_id,
             $gradeable_version
-        ) == GradingQueue::NOT_QUEUED) &&
+        ) === GradingQueue::NOT_QUEUED) &&
             $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
                 $gradeable_id,
                 $gradeable_version,
