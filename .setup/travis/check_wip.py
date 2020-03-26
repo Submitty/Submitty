@@ -19,6 +19,8 @@ def main():
     args = parse_args()
     url = "https://api.github.com/repos/{0}/pulls/{1}".format(args.slug, args.pr)
     print('URL => {}'.format(url))
+    if 'GH_TOKEN' in environ:
+        print('Using GH token')
     exc_errors = 0
     req_errors = 0
     while exc_errors < 5 and req_errors < 20:
@@ -26,7 +28,7 @@ def main():
             headers = {}
             if 'GH_TOKEN' in environ:
                 headers['Authorization'] = 'token {}'.format(environ.get('GH_TOKEN'))
-            res = requests.get(url, timeout=10)
+            res = requests.get(url, headers=headers, timeout=10)
             if res.status_code == 200:
                 json = res.json()
                 title = json['title'].lower()
