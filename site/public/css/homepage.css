@@ -13,31 +13,10 @@
     word-wrap: break-word;
 }
 
-[data-theme="dark"] .light_mode_toggle,
-.dark_mode_toggle,
-[data-black_mode="black"][data-theme="dark"] .unblack_mode_toggle,
-.black_mode_toggle{
-  display: block!important;
-  margin: 0px;
+[data-theme="dark"] .light_mode_hide{
+  display: inline-block!important;
 }
 
-[data-theme="dark"] .dark_mode_toggle,
-.light_mode_toggle,
-[data-black_mode="black"] .black_mode_toggle,
-.unblack_mode_toggle {
+.light_mode_hide {
   display: none!important;
-}
-
-.light_mode_toggle, .unblack_mode_toggle {
-  background-color: var(--text-black);
-  color: var(--text-white);
-}
-
-.dark_mode_toggle {
-  background-color: var(--dark-mode-black);
-  color: var(--text-white);
-}
-
-.dark_mode_toggle:hover {
-  color: var(--standard-hover-light-gray);
 }

@@ -1596,6 +1596,14 @@ function toggleTheme(mode='normal'){
     }
   }
 }
+$(document).ready(function() {
+  if(localStorage.getItem("theme") === "dark"){
+    $('#theme_change').prop('checked', true);
+  }
+  if(localStorage.getItem("black_mode") === "black"){
+    $('#theme_change_black').prop('checked', true);
+  }
+});
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
