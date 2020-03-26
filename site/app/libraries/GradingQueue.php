@@ -93,7 +93,7 @@ class GradingQueue {
     }
 
     /**
-     * Gets the position of the provided AutoGradedVersion from the queue (with the variables expanded out)
+     * Gets the position of the provided autograding Gradeable from the queue
      * @param string $gradeableId
      * @param string $submitterId
      * @param int $version
