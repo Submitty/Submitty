@@ -13,6 +13,7 @@
             <caption>Students Enrolled</caption>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Registration Section</th>
                     <th>User ID</th>
                     <th>First Name</th>
@@ -33,6 +34,7 @@
                             {% set class = "access-grading" %}
                         {% endif %}
                         <tr id="user-{{ student.getId() }}" class="{{ class }}">
+                            <td></td>
                             <td>{{ registration }}</td>
                             <td class="align-left">{{ student.getId() }}</td>
                             <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
