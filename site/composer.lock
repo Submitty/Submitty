@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "03690bb608e82760de0cadf2cb6c30ed",
+    "content-hash": "47c5a7b1f47b82cff65c9b7a06d6cf99",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1022,16 +1022,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.4.5",
+            "version": "v4.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "4124d621d0e445732520037f888a0456951bde8c"
+                "reference": "bd92312650007d29bbabf00795c591b975a0b9a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/4124d621d0e445732520037f888a0456951bde8c",
-                "reference": "4124d621d0e445732520037f888a0456951bde8c",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/bd92312650007d29bbabf00795c591b975a0b9a6",
+                "reference": "bd92312650007d29bbabf00795c591b975a0b9a6",
                 "shasum": ""
             },
             "require": {
@@ -1094,7 +1094,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2020-02-25T12:41:09+00:00"
+            "time": "2020-03-16T11:24:17+00:00"
         },
         {
             "name": "twig/twig",
