@@ -388,7 +388,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
         $this->core->getQueries()->changeQueueToken($token, $queue_code);
-        $this->core->addSuccessMessage("Queue Code Changed");
+        $this->core->addSuccessMessage("Queue Access Code Changed");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );

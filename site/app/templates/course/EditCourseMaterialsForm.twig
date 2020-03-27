@@ -33,7 +33,7 @@
                 </tr>
             {% endfor %}
             </span>
-            <script type="text/javascript">
+            <script>
                 function toggleRegistrationSectionsEdit(){
                     $("#show-some-section-selection-edit").toggle();
                 }
@@ -51,7 +51,7 @@
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
-    <script type="text/javascript">
+    <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
                 let cmTime = document.getElementById("edit-picker").value;

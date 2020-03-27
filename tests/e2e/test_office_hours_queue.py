@@ -121,9 +121,9 @@ def goToQueuePage(self):
 
 def openFilterSettings(self):
     goToQueuePage(self)
-    self.assertEqual(True,self.driver.execute_script("return $('#filgerSettingsCollapse').is(':hidden')"))
+    self.assertEqual(True,self.driver.execute_script("return $('#filterSettingsCollapse').is(':hidden')"))
     self.driver.find_element_by_id('toggle_filter_settings').click()
-    self.assertEqual(False,self.driver.execute_script("return $('#filgerSettingsCollapse').is(':hidden')"))
+    self.assertEqual(False,self.driver.execute_script("return $('#filterSettingsCollapse').is(':hidden')"))
 
 
 def deleteAllQueues(self):
