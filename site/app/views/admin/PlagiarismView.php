@@ -230,7 +230,7 @@ HTML;
     public function deletePlagiarismResultAndConfigForm() {
         return <<<HTML
     <div class="popup-form"  style="display: none;" id="delete-plagiarism-result-and-config-form">
-        <form name="delete" method="post" action="">
+        <form name="delete" method="post">
             <div class="popup-box">
                 <div class="popup-window ui-draggable ui-draggable-handle" style="position: relative;">
                     <div class="form-title">

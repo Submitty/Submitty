@@ -552,6 +552,7 @@ class ReportController extends AbstractController {
                 'bucket_counts' => $customization->getBucketCounts(),
                 "used_buckets" => $customization->getUsedBuckets(),
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
