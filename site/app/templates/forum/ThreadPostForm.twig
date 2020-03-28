@@ -38,44 +38,44 @@
             <input class="date_picker" placeholder="Lock Thread Date" name="lock_thread_date" id="lock_thread_date" type="text">
         </label>
         <script>
-            $(document).ready(function () {
-                        flatpickr(".date_picker", {
-                            plugins: [ShortcutButtonsPlugin(
-                                    {
-                                        button: [
-                                            {
-                                                label: "Now"
-                                            },
-                                            {
-                                                label: "End of time"
-                                            }
-                                        ],
-                                        label: "or",
-                                        onClick: (index, fp) => {
-                                            let date;
-                                            switch (index) {
-                                                case 0:
-                                                    date = new Date();
-                                                    break;
-                                                case 1:
-                                                    date = new Date("9998-01-01 00:00:00");
-                                                    break;
-                                            }
-                                            fp.setDate(date, true);
-                                        }
-                                    }
-                                )],
-                            allowInput: true,
-                            enableTime: true,
-                            enableSeconds: true,
-                            time_24hr: true,
-                            dateFormat: "Y-m-d H:i:S",
-                            onReady: (a, b, fp) => {
-                              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                              fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            $(document).ready(() => {
+                flatpickr(".date_picker", {
+                    plugins: [
+                        ShortcutButtonsPlugin({
+                            button: [
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+                            ],
+                            label: "or",
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        date = new Date();
+                                        break;
+                                    case 1:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        break;
+                                }
+                                fp.setDate(date, true);
                             }
-                        });
-            })
+                        })
+                    ],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    onReady: (a, b, fp) => {
+                        fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                        fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    }
+                });
+            });
         </script>
 
     {% endif %}
