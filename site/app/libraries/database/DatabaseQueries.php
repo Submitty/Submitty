@@ -2374,6 +2374,48 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    public function getGradeableIdsForFullAccessLimitedGraders() {
+        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_min_grading_group = 3 AND g_grader_assignment_method = 2");
+        return $this->course_db->rows();
+    }
+
+    /**
+     * returns array of all rotating sections in course
+     *
+     * @return array
+     */
+    public function getAllRotatingSections() {
+
+        $this->course_db->query("SELECT sections_rotating_id FROM sections_rotating ORDER BY sections_rotating_id");
+
+        $tmp = $this->course_db->rows();
+        $sections = [];
+        foreach ($tmp as $row) {
+            $sections[] = $row['sections_rotating_id'];
+        }
+        return $sections;
+    }
+
+     /**
+     * returns 2d array of new graders after rotating sections set up
+     * for all access grading and limited access graders gradeables,
+     * top level is all graders' ids and second level is all rotating sections
+     *
+     * @return array
+     */
+    public function getNewGraders() {
+        $new_graders = [];
+        $all_sections = $this->core->getQueries()->getAllRotatingSections();
+        $this->course_db->query("SELECT user_id FROM users WHERE user_group < 4");
+        $tmp = $this->course_db->rows();
+        foreach ($tmp as $row) {
+            $new_graders[$row['user_id']] = $all_sections;
+        }
+        $final_new_graders = array();
+
+        return $new_graders;
+    }
+
     /**
      * gets ids of all electronic gradeables excluding assignments that will be bulk
      * uploaded by TA or instructor.
