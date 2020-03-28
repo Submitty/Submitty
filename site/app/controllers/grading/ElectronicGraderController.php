@@ -241,7 +241,6 @@ class ElectronicGraderController extends AbstractController {
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
-            $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
             $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
@@ -329,7 +328,7 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($peer) {
                 $sections['stu_grad'] = array(
-                    'total_components' => $num_components * $peer_grade_set,
+                    'total_components' => $num_components,
                     'graded_components' => $my_grading,
                     'graders' => array()
                 );
@@ -342,10 +341,10 @@ class ElectronicGraderController extends AbstractController {
                     if ($key == 'NULL') {
                         continue;
                     }
-                    $sections['all']['total_components'] += $value * $num_components * $peer_grade_set;
+                    $sections['all']['total_components'] += $value * $num_components;
                     $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
                 }
-                $sections['all']['total_components'] -= $peer_grade_set * $num_components;
+                $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
             }
             else {
@@ -409,7 +408,6 @@ class ElectronicGraderController extends AbstractController {
         else {
             $total_students_submitted = 0;
         }
-
         $this->core->getOutput()->renderOutput(
             array('grading', 'ElectronicGrader'),
             'statusPage',
@@ -464,6 +462,7 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
@@ -940,6 +939,7 @@ class ElectronicGraderController extends AbstractController {
 
         $graded = 0;
         $total = 0;
+        $total_submitted = 0;
         $team = $gradeable->isTeamAssignment();
         if ($peer) {
             $section_key = 'registration_section';
@@ -985,10 +985,10 @@ class ElectronicGraderController extends AbstractController {
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
         else {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
         if ($total_submitted == 0) {
             $progress = 100;
@@ -998,7 +998,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
 
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
@@ -1093,13 +1093,12 @@ class ElectronicGraderController extends AbstractController {
      */
     public function ajaxGetGradeableRubric($gradeable_id) {
         $grader = $this->core->getUser();
-
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
         }
-
+        
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
@@ -1124,15 +1123,15 @@ class ElectronicGraderController extends AbstractController {
             'id' => $gradeable->getId(),
             'precision' => $gradeable->getPrecision()
         ];
-
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
             return $component->toArray();
-        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable) {
-            return $this->core->getAccess()->canUser($grader, 'grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+        }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
+            return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
-        // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
+        //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
+        $return['components'] = array_values($return['components']);
         return $return;
     }
 
@@ -1146,6 +1145,8 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
+        
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
 
         // Get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
@@ -1214,10 +1215,10 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Check if user has permission to view all peer grades
-        if ($all_peers && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        /*if ($all_peers) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get view peer panel');
             return;
-        }
+        }*/
 
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
@@ -1462,6 +1463,7 @@ class ElectronicGraderController extends AbstractController {
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
 
+        // Use 'page_number' since 'page' is used in the router
         $page = $_POST['page_number'] ?? '';
 
         // Validate required parameters
@@ -1534,6 +1536,7 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
             ]);
             $component->setPage($page);
+
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
         }
@@ -1667,7 +1670,7 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    /**
+/**
      * Route for adding a new component to a gradeable
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
      */
@@ -1677,7 +1680,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
+        
         $peer = $_POST['peer'] === 'true';
 
         // checks if user has permission

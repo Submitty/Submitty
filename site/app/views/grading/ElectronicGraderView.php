@@ -389,7 +389,7 @@ HTML;
         $columns = [];
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
-            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
+            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
 
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
@@ -510,7 +510,11 @@ HTML;
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
-                if ($graded_component === null) {
+                
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                    $info["graded_groups"][] = 4;
+                }
+                elseif ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
                 }
@@ -647,7 +651,6 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -713,7 +716,7 @@ HTML;
         $peer = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
-        if ($gradeable->isPeerGrading() && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
@@ -727,7 +730,7 @@ HTML;
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
-        if ($gradeable->isPeerGrading() && $this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPeerPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
@@ -802,12 +805,17 @@ HTML;
         $prev_ungraded_student_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'true']);
         $next_ungraded_student_url =  $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'true']);
 
+        $i_am_a_peer = false;
+        if ($peer && $this->core->getUser()->getGroup() == 4) {
+            $i_am_a_peer = true;
+        }
+        
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,
             // WIP. Replace this with a better function call once there is a definitive way to determine my peer-ness.
             // For now, I am a peer if I cannot access the peer panel.
-            "i_am_a_peer" => !$this->core->getAccess()->canI("grading.electronic.peer_panel"),
+            "i_am_a_peer" => $i_am_a_peer,
             "prev_student_url" => $prev_student_url,
             "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
