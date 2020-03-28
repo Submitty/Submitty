@@ -65,7 +65,7 @@ aside {
     }
 
     aside a .icon-title:hover {
-        color: #002334;
+        color: var(--sidebar-hover-text);
     }
 
     aside a .icon-title:active {
