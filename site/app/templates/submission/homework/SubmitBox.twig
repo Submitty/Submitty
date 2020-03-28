@@ -2,7 +2,7 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
+    <div class='content gradeable_message'>{{ gradeable_message | markdown }}Maximum allowed number of files to be uploaded is {{ max_file_upload}}.</div>
 {% endif %}
 
 {% if has_overridden_grades %}
@@ -532,7 +532,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ max_file_upload }}
             );
         }
         else {
@@ -551,7 +552,8 @@
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
-                clobber
+                clobber,
+                {{ max_file_upload }}
             );
         }
     }

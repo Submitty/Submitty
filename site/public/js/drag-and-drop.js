@@ -16,7 +16,7 @@ var previous_files = [];    // contains names of files selected from previous su
 var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
-
+var total_files_added = 0;
 var empty_inputs = true;
 
 var student_ids = [];           // all student ids
@@ -78,6 +78,7 @@ function drop(e){
     var part = get_part_number(e);
     for(var i=0; i<filestream.length; i++){
         addFileWithCheck(filestream[i], part); // check for folders
+        total_files_added++;
     }
 }
 
@@ -88,6 +89,7 @@ function dropWithMultipleZips(e){
     var part = get_part_number(e);
     for(var i=0; i<filestream.length; i++){
         addFileWithCheck(filestream[i], part, false); // check for folders
+        total_files_added++;
     }
 }
 
@@ -120,6 +122,7 @@ function addFilesFromInput(part, check_duplicate_zip=true){
     var filestream = document.getElementById("input-file" + part).files;
     for(var i=0; i<filestream.length; i++){
         addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+        total_files_added++;
     }
     $('#input-file' + part).val("");
 }
@@ -233,6 +236,7 @@ function deleteSingleFile(filename, part, previous) {
                 previous_files[part-1].splice(i, 1);
                 label_array[part-1].splice(i, 1);
                 changed = true;
+                total_files_added--;
                 break;
             }
         }
@@ -243,6 +247,7 @@ function deleteSingleFile(filename, part, previous) {
             if (file_array[part-1][j].name == filename) {
                 file_array[part-1].splice(j, 1);
                 label_array[part-1].splice(j, 1);
+                total_files_added--;
                 break;
             }
         }
@@ -834,12 +839,17 @@ function gatherInputAnswersByType(type){
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, max_files=20) {
     $("#submit").prop("disabled", true);
     var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
     var return_url = buildCourseUrl(['gradeable', gradeable_id]);
 
     var message = "";
+    if(total_files_added > max_files)
+    {
+        alert("You have uploaded " + total_files_added + " files.  You are allowed to upload only " + max_files + ".");
+        return;
+    }
     // check versions used
     if(versions_used >= versions_allowed) {
         message = "You have already made " + versions_used + " submissions.  You are allowed " + versions_allowed + " submissions before a small point penalty will be applied. Are you sure you want to continue?";
