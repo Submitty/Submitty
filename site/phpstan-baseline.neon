@@ -696,26 +696,6 @@ parameters:
 			path: app/models/Notification.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$event\\)\\: Unexpected token \"\\$event\", expected type at offset 18$#"
-			count: 2
-			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$recipients\\)\\: Unexpected token \"\\$recipients\", expected type at offset 39$#"
-			count: 2
-			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$event$#"
-			count: 1
-			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$recipients$#"
-			count: 1
-			path: app/models/NotificationFactory.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected type at offset 67$#"
 			count: 1
 			path: app/models/RainbowCustomizationJSON.php
@@ -889,4 +869,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
