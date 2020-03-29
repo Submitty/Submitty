@@ -157,7 +157,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: var(--default-white);
+    color: var(--btn-default-white);
     font-size: 18px;
     font-weight: 900
 }
@@ -233,7 +233,7 @@ table tr.table-header {
     background: var(--default-white);
 }
 
-.table>thead>tr {
+.table>thead>tr, .table>tfoot>tr {
     background: var(--standard-hover-light-gray);
 }
 
@@ -826,7 +826,7 @@ tbody.collapse.in {
   clear: both;
   font-weight: normal;
   line-height: 1.42857143;
-  color: var(--standard-deep-dark-gray);
+  color: var(--text-black);
   white-space: nowrap;
 }
 .dropdown-menu > li > a:hover,
