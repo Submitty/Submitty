@@ -121,6 +121,7 @@ input[type="color"] {
 input.readonly {
     background-color: var(--standard-pale-gray);
     cursor: not-allowed;
+    color: var(--btn-text-black);
 }
 
 select {
