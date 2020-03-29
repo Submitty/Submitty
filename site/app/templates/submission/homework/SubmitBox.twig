@@ -4,7 +4,7 @@
 {% if has_gradeable_message %}
     <div class='content gradeable_message'>
         {{ gradeable_message | markdown }}
-        Maximum allowed number of files to be uploaded is 20.
+        Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.
     </div>
 {% endif %}
 
@@ -466,6 +466,7 @@
         <script>
             $(function() {
                 setButtonStatus();
+                initMaxNoFiles({{ max_file_uploads }});
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD

@@ -18,7 +18,7 @@ var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
 var total_files_added = 0;
-const MAX_NO_OF_FILES = 20;
+var MAX_NO_OF_FILES;
 
 var empty_inputs = true;
 
@@ -77,12 +77,16 @@ function draghandle(e){
 // check if adding a file is valid (not exceeding the limit)
 function addIsValid(files_to_add, total_added_files) {
   if (files_to_add+total_added_files > MAX_NO_OF_FILES){
-    alert('Exceeded allowable number of files.');
+    alert('Exceeded allowable number of files.\nPlease package your files in a single .zip file if it is necessary for you to submit more than this limit.');
     return false;
   }
   return true;
 }
 
+//initialize maximum no of files with that of the php_ini value
+function initMaxNoFiles(max_no_of_files) {
+  MAX_NO_OF_FILES = max_no_of_files;
+}
 
 // add files dragged
 function drop(e){
