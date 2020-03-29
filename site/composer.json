@@ -34,5 +34,10 @@
     "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
     "php-mock/php-mock-phpunit": "2.6.0",
     "phpstan/phpstan": "0.12.18"
+  },
+  "scripts": {
+    "test": "phpunit -c tests/phpunit.xml",
+    "lint": "phpcs --standard=tests/ruleset.xml",
+    "static-analysis": "phpstan analyze app"
   }
 }
