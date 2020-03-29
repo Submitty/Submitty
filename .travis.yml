@@ -261,7 +261,7 @@ jobs:
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
-        - sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
+        - sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
         - TEST_URL="http://localhost" python3 -m unittest tests.e2e.test_login
         - SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         - sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
