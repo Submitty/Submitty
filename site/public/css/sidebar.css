@@ -104,7 +104,7 @@ aside {
         margin: 12px 0 0 32px;
     }
 
-    aside ul {
+    [data-theme="dark"] aside ul {
       background-color: var(--background-blue);
     }
 }
