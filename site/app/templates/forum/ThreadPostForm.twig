@@ -173,9 +173,11 @@
         </select>
         {% endif %}
         {% if show_announcement and core.getUser().accessFullGrading() %}
-            {% set announcement_text = email_enabled ? "Announcement?(w/ notification and email)" : "Announcement?(w/ notification)" %}
+            {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+            <label class="inline-block" for="Announcement">{{ "Pin Thread" }}</label>
+            <input type="checkbox" class="pinThread-checkbox" name="pinThread" value="pinThread" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
@@ -198,6 +200,28 @@
     $(function(){
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
+        });
+
+        $(".thread-announcement-checkbox").click(function (){
+            if($(".thread-announcement-checkbox").prop("checked")){
+                $(".thread-announcement-checkbox").prop("checked", true);
+                $(".pinThread-checkbox").prop("checked", true);
+                $(".pinThread-checkbox").prop('disabled', true);
+                $("#thread_status").val(0);
+            } else {
+                $(".thread-announcement-checkbox").prop("checked", false);
+                $(".pinThread-checkbox").prop("checked", false);
+                $(".pinThread-checkbox").prop('disabled', false);
+            }
+        });
+
+        $(".pinThread-checkbox").click(function (){
+            if($(".pinThread-checkbox").prop("checked")){
+                $(".pinThread-checkbox").prop("checked", true);
+                $("#thread_status").val(0);
+            } else {
+                $(".pinThread-checkbox").prop("checked", false);
+            }
         });
     });
 

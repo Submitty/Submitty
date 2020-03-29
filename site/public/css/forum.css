@@ -408,7 +408,7 @@ body {min-width: 925px;}
     margin: 0 2px
 }
 
-.thread-anon-checkbox, #thread_status, .thread-announcement-checkbox{
+.thread-anon-checkbox, #thread_status, .thread-announcement-checkbox, .pinThread-checkbox{
     margin-right:15px;
     display:inline-block;
 }
