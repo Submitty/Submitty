@@ -408,7 +408,7 @@ body {min-width: 925px;}
     margin: 0 2px
 }
 
-.thread-anon-checkbox, #thread_status, .thread-announcement-checkbox{
+.thread-anon-checkbox, #thread_status, .thread-announcement-checkbox, .pinThread-checkbox{
     margin-right:15px;
     display:inline-block;
 }
@@ -545,4 +545,31 @@ body {min-width: 925px;}
     color: var(--standard-tangerine-yellow);
     margin-right: 5px;
     font-size: 1.8em;
+}
+
+.post_content li {
+    white-space: normal;
+}
+
+.post_content ol {
+    white-space: normal;
+    padding-left: 15px;
+}
+
+.post_content ul {
+    white-space: normal;
+    padding-left: 15px;
+}
+
+.post_content table {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.post_content th {
+    border: 1px solid black;
+}
+
+.post_content td {
+    border: 1px solid black;
 }

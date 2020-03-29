@@ -314,7 +314,7 @@ function addLabel(filename, filesize, part, previous){
     fileTrashElement.setAttribute('class', 'file-trash');
 
     fileDataElement.innerHTML= filename;
-    fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
+    fileTrashElement.innerHTML= filesize + "KB  <i aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -849,13 +849,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         }
     }
     // check due date
-    if (days_late > 0 && days_late <= late_days_allowed) {
+    if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
     }
-    else if (days_late > 0) {
+    else if (days_late > 0 && days_late > late_days_allowed) {
         message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
@@ -1153,11 +1153,11 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
-    
+
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
     }
-    
+
     $.ajax({
         url: edit_url,
         data: formData,

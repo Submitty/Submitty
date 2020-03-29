@@ -54,6 +54,7 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
+            'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
         );
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -141,20 +142,13 @@ class ConfigurationController extends AbstractController {
                     'display_custom_message',
                     'forum_enabled',
                     'regrade_enabled',
-                    'seating_only_for_instructor'
+                    'seating_only_for_instructor',
+                    'queue_enabled',
+                    'queue_contact_info'
                 ]
             )
         ) {
             $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'queue_enabled') {
-            $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'queue_contact_info') {
-            $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'upload_message') {
-            $entry = nl2br($entry);
         }
         elseif ($name == "course_home_url") {
             if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {
