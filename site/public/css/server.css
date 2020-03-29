@@ -1072,12 +1072,12 @@ div.full_height {
 
 /* Used to pick the Submitty logo to show based on the theme */
 [data-theme="dark"] #logo-submitty-light,
-#logo-submitty-dark {
+#logo-submitty {
   display: block!important;
 }
 
 /* Used to pick the Submitty logo to show based on the theme */
-[data-theme="dark"] #logo-submitty-dark,
+[data-theme="dark"] #logo-submitty,
 #logo-submitty-light {
   display: none!important;
 }
