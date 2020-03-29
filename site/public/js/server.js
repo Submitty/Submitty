@@ -1597,7 +1597,7 @@ function toggleTheme(mode='normal'){
   }
 }
 $(document).ready(function() {
-  if(localStorage.getItem("theme") === "dark"){
+  if(localStorage.getItem("theme") === "dark" || window.matchMedia("(prefers-color-scheme: dark)").matches){
     $('#theme_change').prop('checked', true);
   }
   if(localStorage.getItem("black_mode") === "black"){
