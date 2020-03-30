@@ -75,7 +75,7 @@ class DockerInterfaceController extends AbstractController {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return Response::JsonOnlyResponse(
-                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                JsonResponse::getFailResponse("You don't have access to this endpoint.")
             );
         }
 
