@@ -1,0 +1,39 @@
+<div class="content">
+	<div style="float:right">
+		<button onclick="updateDockerData()" id="refresh-docker-interface">Refresh Docker Information </button>
+		<p id = "docker-update-info"><em>(Last updated on : {{ last_updated | default("") }})</em></p>
+	</div>
+
+	<h1>Submitty Docker Interface</h1>
+
+	<h2>System Wide information:</h2>
+	{% if docker_info is not null %}
+		<p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
+		<p>Architecture : {{ docker_info['Architecture'] }}</p>
+		<p>Total Memory : {{ docker_info['MemTotal']}}</p>
+		<p>Name : {{ docker_info['Name'] }}</p>
+		<p>OS : {{ docker_info['OperatingSystem'] }}</p>
+	{% endif %}
+</div>
+
+<div class="content">
+	<h2> Docker Images </h2>
+
+	{% if docker_images is not null %}
+	<div id="docker-images-container">
+		{% for key, value in docker_images %}
+			<div class="shadow">
+				<h2>{{ value['Repository'] }}</h2>
+				<p> ID : &nbsp {{ value['ID'] }} </p>
+				<p> Size : &nbsp {{ value['Size'] }} 
+					&nbsp &nbsp <em> (Virtual Size : {{ value['VirtualSize'] }} ) </em> 
+				</p>
+				<p> Tag &nbsp : &nbsp {{ value['Tag'] }} </p>
+				<br>
+				<p> Created {{ value['CreatedSince'] }} on &nbsp {{ value['CreatedAt'] }} </p>
+			</div>
+		{% endfor %}
+	</div>
+	{% endif %}
+
+</div>

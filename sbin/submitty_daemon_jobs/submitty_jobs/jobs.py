@@ -322,6 +322,59 @@ class BulkUpload(CourseJob):
         os.chdir(current_path)
 
 
+class UpdateDockerData(AbstractJob):
+    '''
+    Performs the commands 'docker info' & 'docker images' and saves the 
+    results to a json file where the PHP user can read the data, used for
+    the submitty docker interface
+    '''
+    def run_job(self):
+
+        tgt_path = Path(DATA_DIR, 'docker_data', 'submitty_docker.json')
+        log_path = Path(DATA_DIR, 'logs', 'docker_interface_logs')
+
+        today = datetime.datetime.now()
+        log_file_path = os.path.join(log_path, 
+                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
+                                today.day))
+        full_time = today.strftime("%d/%m/%Y %H:%M:%S")
+
+        try:
+            docker_info = subprocess.run(["docker", "info", "--format", "{{json .}}"], stdout=subprocess.PIPE)
+            docker_images = subprocess.run(["docker", "images", "--format", "{{json .}}"], stdout=subprocess.PIPE)
+
+            if docker_info.returncode != 0 or docker_images.returncode != 0:
+                raise Exception("Failed to run docker subprocesses")
+
+            docker_info = docker_info.stdout.decode("utf-8")
+            docker_images = docker_images.stdout.decode("utf-8")
+
+            docker_info = json.loads(docker_info)
+
+            #each image is its own dictionary, stitch them together
+            docker_images = docker_images.split('\n')
+            images = []
+            for image in docker_images:
+                try:
+                    tmp = json.loads(image)
+                except ValueError:
+                    continue
+
+                images.append(tmp)
+
+            docker_images = images
+            data = {"docker_info" : docker_info, "docker_images" : docker_images, "update_time" : full_time}
+
+            with tgt_path.open("w") as output:
+                json.dump(data, output, indent=4, sort_keys=True)
+
+        except Exception as e:
+            logger.write_to_log(log_file_path, e)
+
+
+        logger.write_to_log(log_file_path, "Update docker data on: " + full_time)
+
+
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):

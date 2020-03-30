@@ -254,6 +254,7 @@ class WebRouter {
                 if (
                     $this->parameters['_method'] !== 'logout'
                     && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                    && !Utils::endsWith($this->parameters['_controller'], 'DockerInterfaceController')
                 ) {
                     return Response::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))

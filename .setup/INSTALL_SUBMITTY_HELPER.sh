@@ -206,6 +206,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/courses
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
+    mkdir -p ${SUBMITTY_DATA_DIR}/docker_data
 fi
 
 
@@ -226,6 +227,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/docker_interface_logs
 fi
 # ------------------------------------------------------------------------
 
@@ -241,6 +243,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
     chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs/git
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
+    chown  ${DAEMON_USER}:${PHP_USER}                 ${SUBMITTY_DATA_DIR}/docker_data
+    chmod  770                                        ${SUBMITTY_DATA_DIR}/docker_data
 fi
 
 # ------------------------------------------------------------------------
