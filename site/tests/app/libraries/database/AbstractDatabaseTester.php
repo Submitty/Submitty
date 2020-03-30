@@ -323,7 +323,7 @@ SELECT * FROM test ORDER BY pid");
         $this->assertEquals(1, $database->getRowCount());
         $database->query("SELECT * FROM test");
         $this->assertEquals($database->rows()[0]["val_bool"], true);
-        $this->assertEquals($database->rows()[0]["val_date"], $now->format("Y-m-d H:i:sO"));
+        $this->assertEquals($database->rows()[0]["val_date"], $now->format("Y-m-d H:i:sO") . " " . $now->getTimezone()->getName());
         $database->disconnect();
     }
 
