@@ -29,7 +29,7 @@ class DockerInterfaceController extends AbstractController {
     /**
     * @Route("/admin/docker/update", methods={"GET"})
     * @Route("/api/docker/update", methods={"GET"})
-    * @return JsonOnlyResponse
+    * @return Response
     *
     * Creates a json file under the top level dir "docker_data"
     * containing information about the current docker config
@@ -74,9 +74,8 @@ class DockerInterfaceController extends AbstractController {
     public function checkJobStatus() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
-            return new Response(
+            return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
 
