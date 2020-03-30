@@ -40,6 +40,9 @@ def initialize(test):
     subprocess.call(["cp",
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "custom_validation_code", "grader.py"),
                      os.path.join(test.testcase_path, "build/custom_validation_code")])
+    subprocess.call(["cp",
+                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "custom_validation_code", "OLD_grader.py"),
+                     os.path.join(test.testcase_path, "build/custom_validation_code")])
 
 
 ############################################################################
@@ -68,6 +71,9 @@ def correct(test):
     subprocess.call(["cp",
                      os.path.join(test.testcase_path, "build","custom_validation_code","grader.py"),
                      os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["cp",
+                     os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
+                     os.path.join(test.testcase_path, "data/")])
     test.run_validator()
     test.diff("grade.txt","grade.txt_correct","-b")
     test.json_diff("results.json","results.json_correct")
@@ -86,6 +92,9 @@ def missing_label(test):
     subprocess.call(["cp",
                  os.path.join(test.testcase_path, "build","custom_validation_code","grader.py"),
                  os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["cp",
+                     os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
+                     os.path.join(test.testcase_path, "data/")])
     test.run_validator()
     test.diff("grade.txt","grade.txt_missing_label","-b")
     test.json_diff("results.json","results.json_missing_label")
@@ -103,6 +112,9 @@ def wrong_num(test):
     test.run_run()
     subprocess.call(["cp",
                      os.path.join(test.testcase_path, "build","custom_validation_code","grader.py"),
+                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["cp",
+                     os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
                      os.path.join(test.testcase_path, "data/")])
     test.run_validator()
     test.diff("grade.txt","grade.txt_wrong_num","-b")
@@ -122,6 +134,9 @@ def wrong_total(test):
     subprocess.call(["cp",
                      os.path.join(test.testcase_path, "build","custom_validation_code","grader.py"),
                      os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["cp",
+                     os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
+                     os.path.join(test.testcase_path, "data/")])
     test.run_validator()
     test.diff("grade.txt","grade.txt_wrong_total","-b")
     test.json_diff("results.json","results.json_wrong_total")
@@ -140,6 +155,9 @@ def not_random(test):
     subprocess.call(["cp",
                      os.path.join(test.testcase_path, "build","custom_validation_code","grader.py"),
                      os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["cp",
+                     os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
+                     os.path.join(test.testcase_path, "data/")])
     test.run_validator()
     test.diff("grade.txt","grade.txt_not_random","-b")
     test.json_diff("results.json","results.json_not_random")
@@ -157,6 +175,9 @@ def all_bugs(test):
     test.run_run()
     subprocess.call(["cp",
                      os.path.join(test.testcase_path, "build","custom_validation_code","grader.py"),
+                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(["cp",
+                     os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
                      os.path.join(test.testcase_path, "data/")])
     test.run_validator()
     test.diff("grade.txt","grade.txt_all_bugs","-b")
