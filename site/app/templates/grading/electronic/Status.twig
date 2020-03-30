@@ -164,7 +164,7 @@
         <div class="sub">
             No Grading To Be Done! :)
         </div>
-    {% else %}
+    {% elseif core.getUser().getGroup() < 4 %}
         <div class = "tab">
             <div class =tab-bar-wrapper">
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
@@ -574,28 +574,29 @@
                             </ul>
                             <br/>
                         {% endif %}
-
-                        {% if team_assignment %}
+                        {% if core.getUser().getGroup() < 4 %}
+                            {% if team_assignment %}
+                                <br/>
+                                <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
+                                <br/>
+                                <br/>
+                                <b>Number of teams:</b> {{ total_submissions }}
+                                <br/>
+                                <br/>
+                                <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                            {% else %}
+                                <br/>
+                                <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                <br/>
+                                <br/>
+                                <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                            {% endif %}
+                        
                             <br/>
-                            <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
                             <br/>
-                            <br/>
-                            <b>Number of teams:</b> {{ total_submissions }}
-                            <br/>
-                            <br/>
-                            <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                        {% else %}
-                            <br/>
-                            <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                            <br/>
-                            <br/>
-                            <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
                         {% endif %}
-
-                        <br/>
-                        <br/>
                         {% if peer %}
-                            <b>Current percentage of students grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
+                            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                         {% else %}
                             <b>By Grading Sections:</b>
                             <div style="margin-left: 20px">
@@ -706,6 +707,8 @@
 
             </div>
         </div>
+    {% else %}
+        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}

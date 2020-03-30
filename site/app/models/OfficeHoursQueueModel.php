@@ -74,6 +74,14 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $name;
     }
 
+    public function getContactInfo() {
+        $contact_info = $this->core->getQueries()->getLastUsedContactInfo();
+        if (is_null($contact_info)) {
+            return "";
+        }
+        return $contact_info;
+    }
+
     public function getCurrentQueue() {
         return $this->current_queue;
     }
@@ -121,8 +129,12 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueNumberAheadOfYou($queue_code);
     }
 
-    public function firstTimeInQueue($id, $queue_code) {
-        return $this->core->getQueries()->firstTimeInQueue($id, $queue_code);
+    public function firstTimeInQueueToday($id, $queue_code) {
+        return $this->core->getQueries()->firstTimeInQueueToday($id, $queue_code);
+    }
+
+    public function firstTimeInQueueThisWeek($id, $queue_code) {
+        return $this->core->getQueries()->firstTimeInQueueThisWeek($id, $queue_code);
     }
 
     public function inQueue() {
@@ -159,5 +171,13 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function removeUnderScores($value) {
         return preg_replace('/_/', ' ', $value);
+    }
+
+    public function isContactInfoEnabled() {
+        return $this->core->getConfig()->getQueueContactInfo();
+    }
+
+    public function getQueueMessage() {
+        return $this->core->getConfig()->getQueueMessage();
     }
 }

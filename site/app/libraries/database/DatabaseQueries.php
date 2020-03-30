@@ -2374,6 +2374,48 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    public function getGradeableIdsForFullAccessLimitedGraders() {
+        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_min_grading_group = 3 AND g_grader_assignment_method = 2");
+        return $this->course_db->rows();
+    }
+
+    /**
+     * returns array of all rotating sections in course
+     *
+     * @return array
+     */
+    public function getAllRotatingSections() {
+
+        $this->course_db->query("SELECT sections_rotating_id FROM sections_rotating ORDER BY sections_rotating_id");
+
+        $tmp = $this->course_db->rows();
+        $sections = [];
+        foreach ($tmp as $row) {
+            $sections[] = $row['sections_rotating_id'];
+        }
+        return $sections;
+    }
+
+     /**
+     * returns 2d array of new graders after rotating sections set up
+     * for all access grading and limited access graders gradeables,
+     * top level is all graders' ids and second level is all rotating sections
+     *
+     * @return array
+     */
+    public function getNewGraders() {
+        $new_graders = [];
+        $all_sections = $this->core->getQueries()->getAllRotatingSections();
+        $this->course_db->query("SELECT user_id FROM users WHERE user_group < 4");
+        $tmp = $this->course_db->rows();
+        foreach ($tmp as $row) {
+            $new_graders[$row['user_id']] = $all_sections;
+        }
+        $final_new_graders = array();
+
+        return $new_graders;
+    }
+
     /**
      * gets ids of all electronic gradeables excluding assignments that will be bulk
      * uploaded by TA or instructor.
@@ -3126,7 +3168,50 @@ SQL;
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
-
+    
+    /**
+     * Removes all peer grading pairs from a given assignment
+     *
+     * @param string $gradeable_id
+     */
+    public function clearPeerGradingAssignment($gradeable_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ?", array($gradeable_id));
+    }
+    
+    /**
+     * Adds an assignment for someone to get all the peer grading pairs for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerGradingAssignment($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id FROM peer_assign WHERE g_id = ? ORDER BY grader_id", array($gradeable_id));
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            if (!array_key_exists($id['grader_id'], $return)) {
+                $return[$id['grader_id']] = array();
+            }
+            array_push($return[$id['grader_id']], $id['user_id']);
+        }
+        return $return;
+    }
+    
+    /**
+     * Get all assignments a student is assigned to peer grade
+     *
+     * @param string $grader_id
+     */
+    public function getPeerGradingAssignmentsForGrader($grader_id) {
+        $this->course_db->query("SELECT g_id, user_id FROM peer_assign WHERE grader_id = ? ORDER BY g_id", array($grader_id));
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            if (!array_key_exists($id['g_id'], $return)) {
+                $return[$id['g_id']] = array();
+            }
+            array_push($return[$id['g_id']], $id['user_id']);
+        }
+        return $return;
+    }
+     
     /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
@@ -5312,7 +5397,7 @@ AND gc_id IN (
         return 0 < count($this->course_db->rows());
     }
 
-    public function addToQueue($queue_code, $user_id, $name) {
+    public function addToQueue($queue_code, $user_id, $name, $contact_info) {
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -5325,7 +5410,8 @@ AND gc_id IN (
                 time_out,
                 added_by,
                 help_started_by,
-                removed_by
+                removed_by,
+                contact_info
             ) VALUES (
                 'waiting',
                 NULL,
@@ -5337,8 +5423,9 @@ AND gc_id IN (
                 NULL,
                 ?,
                 NULL,
-                NULL
-            )", array($queue_code,$user_id,$name,$user_id));
+                NULL,
+                ?
+            )", array($queue_code,$user_id,$name,$user_id,$contact_info));
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -5426,8 +5513,13 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function firstTimeInQueue($id, $queue_code) {
+    public function firstTimeInQueueToday($id, $queue_code) {
         $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
+        return $this->course_db->rows()[0]['count'] <= 0;
+    }
+
+    public function firstTimeInQueueThisWeek($id, $queue_code) {
+        $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE - interval '4' day AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
         return $this->course_db->rows()[0]['count'] <= 0;
     }
 
@@ -5437,6 +5529,14 @@ AND gc_id IN (
             return null;
         }
         return $this->course_db->rows()[0]['name'];
+    }
+
+    public function getLastUsedContactInfo() {
+        $this->course_db->query("SELECT * from queue where user_id = ? order by time_in desc limit 1", array($this->core->getUser()->getId()));
+        if (count($this->course_db->rows()) <= 0) {
+            return null;
+        }
+        return $this->course_db->rows()[0]['contact_info'];
     }
 
     public function getCurrentQueueState() {

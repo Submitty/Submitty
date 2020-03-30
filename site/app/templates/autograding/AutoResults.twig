@@ -18,14 +18,18 @@
     {% if num_visible_testcases > 0 %}
         {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
 
-        <div class="box-title submission-page-total-header key_to_click" tabindex="0"
+
+        <div class="box submission-page-total-header key_to_click" tabindex="0"
             {% if nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
                 onclick="addConfetti();"
                 style="cursor:pointer;"
             {% endif %}
          >
-            {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-            <h4>Autograding Total {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
+
+            <div class="box-title-total">
+                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
+                <h4>Autograding Total {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
+            </div>
         </div>
         {% if show_hidden_breakdown %}
             <div class="box submission-page-total-header key_to_click" tabindex="0"
@@ -34,7 +38,7 @@
                     style="cursor:pointer;"
                 {% endif %}
             >
-                <div class="box-title">
+                <div class="box-title-total">
                     {{ Badge.render(hidden_earned, hidden_max, false) }}
                     <h4>Autograding Total <i>(With Hidden Points)</i></h4>
                 </div>
@@ -47,8 +51,10 @@
             {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
                 {% set can_view = (not testcase.hidden or show_hidden) %}
                 {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
-                <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
+
+                <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#e5e5e5;'" : "" }}>
                     <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"
+
                             {% if can_view_details and testcase.has_extra_results %}
                                 style="cursor: pointer"
                                 onclick="loadTestcaseOutput('testcase_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ submitter_id }}', '{{ loop.index0 }}', {{ display_version }});"
