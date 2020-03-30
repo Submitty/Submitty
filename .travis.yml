@@ -192,6 +192,7 @@ jobs:
             - google-chrome-stable
             - libpam-passwdqc
             - libboost-all-dev
+            - jq
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - phpenv config-rm xdebug.ini
