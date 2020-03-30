@@ -5,6 +5,10 @@
     --viewed_content: #e8f0f7;
 }
 
+[data-theme="dark"] {
+    --viewed_content: #313335;
+}
+
 a, a:hover, a:link, a:visited {
     cursor: pointer;
 }
@@ -42,18 +46,18 @@ a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
 
-    color: var(--text-white);
+    color: var(--btn-text-white);
 
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: var(--text-white);
+    color: var(--btn-text-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
-    color: var(--text-white);
+    color: var(--btn-text-white);
 }
 
 a.btn-default,
@@ -74,7 +78,7 @@ a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: var(--text-black);
+    color: var(--btn-text-black);
 }
 
 a.btn, a.icon {
@@ -179,7 +183,11 @@ input[type="checkbox"]:checked:before {
 select.disabled,
 textarea.disabled,
 input.disabled {
-    background-color: var(--standard-light-gray);
+    background-color: var(--standard-input-background);
+}
+
+textarea, input, input[type="checkbox"], select{
+  background-color: var(--standard-input-background);
 }
 
 /****************************
@@ -576,9 +584,7 @@ td>a.active-sort {
 
 .new_thread{
     background-color: var(--viewed_content);
-}
-.btn-default.post_button_color{
-    background-color: inherit;
+    color: var(--text-black)
 }
 
 .box-title > h4 {
@@ -662,6 +668,7 @@ td>a.active-sort {
 
 .green-background {
     background-color: var(--standard-deep-dark-green);
+    color: var(--btn-default-white);
 }
 
 .yellow-background {
@@ -825,7 +832,7 @@ tbody.collapse.in {
 .dropdown-menu > li > a:focus {
   color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: var(--standard-pale-blue-gray);
+  background-color: var(--btn-standard-pale-blue-gray);
 }
 
 .dropdown-menu > .disabled > a,
@@ -1061,6 +1068,18 @@ div.full_height {
 
 .nav-buttons a {
     margin-left: 5px;
+}
+
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] #logo-submitty-light,
+#logo-submitty-dark {
+  display: block!important;
+}
+
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] #logo-submitty-dark,
+#logo-submitty-light {
+  display: none!important;
 }
 
 .td-open {
@@ -1670,7 +1689,7 @@ end of styles used in the admin gradeable page
     /* TODO on mobile, different header height */
     margin: 90px 10px 10px; /* 80px for header */
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--default-white);
     text-align: center;
     width: 108px;
     border: 2px solid #2627ee;

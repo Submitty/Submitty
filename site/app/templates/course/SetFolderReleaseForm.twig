@@ -47,13 +47,13 @@
             var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
 
             if (new Date(nDT).getTime() <= new Date(currentDT).getTime()) {
-                return "#87db88";
+                return "var(--date-picker-green)";
             }
             else if(new Date(nDT).getTime()>=new Date(neverDT).getTime()){
-                return "#f76c6c";
+                return "var(--date-picker-red)";
             }
             else {
-                return "#ffeb54";
+                return "var(--date-picker-yellow)";
             }
         }
         function setChildPerm(dirArr,handleData){

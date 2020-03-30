@@ -16,7 +16,9 @@ Required inputs:
 {% block component_click %}
     {{ grading_disabled ? '' : 'onClickComponent(this)' }}
 {% endblock %}
-
+ 
+{# This is causing a lot of console errros in edit gradeable #}
+ 
 {% block header_block %}
     {% include 'GradingComponentHeader.twig' %}
 {% endblock %}
