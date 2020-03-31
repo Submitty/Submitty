@@ -389,7 +389,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find config directory: .*\/config\/database.json/');
+        $this->expectExceptionMessageMatches('/Could not find config directory: .*\/config\/database.json/');
         $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
     }
 
