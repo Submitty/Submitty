@@ -89,7 +89,8 @@ class DockerInterfaceController extends AbstractController {
                     break;
                 }
             }
-        }catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
