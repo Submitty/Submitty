@@ -75,11 +75,7 @@ def correct(test):
                      os.path.join(test.testcase_path, "build","custom_validation_code","OLD_grader.py"),
                      os.path.join(test.testcase_path, "data/")])
     test.run_validator()
-    test.diff("grade.txt","grade.txt_correct","-b")
-    test.json_diff("results.json","results.json_correct")
 
-    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_correct","-b")
-    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_correct","-b")
     test.diff("validation_stderr_2_0.txt","validation_stderr_2_0.txt_correct","-b")
     test.diff("validation_stderr_3_0.txt","validation_stderr_3_0.txt_correct","-b")
     test.diff("validation_stderr_4_0.txt","validation_stderr_4_0.txt_correct","-b")
@@ -88,6 +84,11 @@ def correct(test):
     test.json_diff("validation_results_3_0.json","validation_results_3_0.json_correct")
     test.json_diff("validation_results_4_0.json","validation_results_4_0.json_correct")
 
+    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_correct","-b")
+    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_correct","-b")
+
+    test.diff("grade.txt","grade.txt_correct","-b")
+    test.json_diff("results.json","results.json_correct")
 
 @testcase
 def missing_label(test):
@@ -109,8 +110,6 @@ def missing_label(test):
     test.diff("grade.txt","grade.txt_missing_label","-b")
     test.json_diff("results.json","results.json_missing_label")
 
-    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_missing_label","-b")
-    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_missing_label","-b")
     test.diff("validation_stderr_2_0.txt","validation_stderr_2_0.txt_missing_label","-b")
     test.diff("validation_stderr_3_0.txt","validation_stderr_3_0.txt_missing_label","-b")
     test.diff("validation_stderr_4_0.txt","validation_stderr_4_0.txt_missing_label","-b")
@@ -118,6 +117,9 @@ def missing_label(test):
     test.json_diff("validation_results_2_0.json","validation_results_2_0.json_missing_label")
     test.json_diff("validation_results_3_0.json","validation_results_3_0.json_missing_label")
     test.json_diff("validation_results_4_0.json","validation_results_4_0.json_missing_label")
+
+    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_missing_label","-b")
+    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_missing_label","-b")
 
 
 @testcase
@@ -140,8 +142,6 @@ def wrong_num(test):
     test.diff("grade.txt","grade.txt_wrong_num","-b")
     test.json_diff("results.json","results.json_wrong_num")
 
-    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_wrong_num","-b")
-    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_wrong_num","-b")
     test.diff("validation_stderr_2_0.txt","validation_stderr_2_0.txt_wrong_num","-b")
     test.diff("validation_stderr_3_0.txt","validation_stderr_3_0.txt_wrong_num","-b")
     test.diff("validation_stderr_4_0.txt","validation_stderr_4_0.txt_wrong_num","-b")
@@ -149,6 +149,9 @@ def wrong_num(test):
     test.json_diff("validation_results_2_0.json","validation_results_2_0.json_wrong_num")
     test.json_diff("validation_results_3_0.json","validation_results_3_0.json_wrong_num")
     test.json_diff("validation_results_4_0.json","validation_results_4_0.json_wrong_num")
+
+    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_wrong_num","-b")
+    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_wrong_num","-b")
 
 
 @testcase
@@ -171,8 +174,6 @@ def wrong_total(test):
     test.diff("grade.txt","grade.txt_wrong_total","-b")
     test.json_diff("results.json","results.json_wrong_total")
 
-    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_wrong_total","-b")
-    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_wrong_total","-b")
     test.diff("validation_stderr_2_0.txt","validation_stderr_2_0.txt_wrong_total","-b")
     test.diff("validation_stderr_3_0.txt","validation_stderr_3_0.txt_wrong_total","-b")
     test.diff("validation_stderr_4_0.txt","validation_stderr_4_0.txt_wrong_total","-b")
@@ -181,6 +182,8 @@ def wrong_total(test):
     test.json_diff("validation_results_3_0.json","validation_results_3_0.json_wrong_total")
     test.json_diff("validation_results_4_0.json","validation_results_4_0.json_wrong_total")
 
+    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_wrong_total","-b")
+    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_wrong_total","-b")
 
 @testcase
 def not_random(test):
@@ -202,8 +205,6 @@ def not_random(test):
     test.diff("grade.txt","grade.txt_not_random","-b")
     test.json_diff("results.json","results.json_not_random")
 
-    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_not_random","-b")
-    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_not_random","-b")
     test.diff("validation_stderr_2_0.txt","validation_stderr_2_0.txt_not_random","-b")
     test.diff("validation_stderr_3_0.txt","validation_stderr_3_0.txt_not_random","-b")
     test.diff("validation_stderr_4_0.txt","validation_stderr_4_0.txt_not_random","-b")
@@ -212,6 +213,8 @@ def not_random(test):
     test.json_diff("validation_results_3_0.json","validation_results_3_0.json_not_random")
     test.json_diff("validation_results_4_0.json","validation_results_4_0.json_not_random")
 
+    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_not_random","-b")
+    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_not_random","-b")
 
 @testcase
 def all_bugs(test):
@@ -233,11 +236,12 @@ def all_bugs(test):
     test.diff("grade.txt","grade.txt_all_bugs","-b")
     test.json_diff("results.json","results.json_all_bugs")
 
-    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_all_bugs","-b")
-    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_all_bugs","-b")
     test.diff("validation_stderr_2_0.txt","validation_stderr_2_0.txt_all_bugs","-b")
     test.diff("validation_stderr_3_0.txt","validation_stderr_3_0.txt_all_bugs","-b")
     test.diff("validation_stderr_4_0.txt","validation_stderr_4_0.txt_all_bugs","-b")
+
+    test.diff("validation_logfile_3_0.txt","validation_logfile_3_0.txt_all_bugs","-b")
+    test.diff("validation_logfile_4_0.txt","validation_logfile_4_0.txt_all_bugs","-b")
 
     test.json_diff("validation_results_2_0.json","validation_results_2_0.json_all_bugs")
     test.json_diff("validation_results_3_0.json","validation_results_3_0.json_all_bugs")
