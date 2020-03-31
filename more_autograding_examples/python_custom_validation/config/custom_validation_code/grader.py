@@ -58,7 +58,7 @@ def log_line(line):
   mode = 'a' if os.path.exists('validation_logfile.txt') else 'w'
 
   with open('validation_logfile.txt', mode) as outfile:
-    outfile.write(f"{line}\n")
+    outfile.write(line+"\n")
 
 def return_result(score, message, status):
   """
@@ -207,7 +207,7 @@ def do_the_grading():
 
   # For every student file
   for file in actual_files:
-    log_line(f"Processing {file}")
+    log_line("Processing " + file)
 
     # Make sure that the output in the file sums correctly
     data = grade_a_single_file(file, number_of_numbers)
