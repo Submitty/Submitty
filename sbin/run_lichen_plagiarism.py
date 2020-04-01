@@ -12,6 +12,7 @@ import time
 import subprocess
 import json
 import time
+from shutil import rmtree
 
 
 # ------------------------------------------------------------------------
@@ -36,8 +37,18 @@ def main():
     log_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/logs/{gradeable}/run_results.json"
     log_json = None
     rank_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/ranking/{gradeable}.txt"
+    matches_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/matches/{gradeable}"
+    hashes_path = f"/var/local/submitty/courses/{semester}/{course}/lichen/hashes/{gradeable}"
     if os.path.exists(rank_path):
         os.remove(rank_path)
+    # Clear hashes/matches from previous run...
+    if os.path.isdir(matches_path):
+        rmtree(matches_path)
+        os.mkdir(matches_path)
+    if os.path.isdir(hashes_path):
+        rmtree(hashes_path)
+        os.mkdir(hashes_path)
+
     with open(config_path, 'r') as j:
         json_data = json.load(j)
         config_hash = "" if 'hash' not in json_data else json_data['hash']
