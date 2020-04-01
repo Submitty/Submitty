@@ -328,15 +328,19 @@ class PlagiarismController extends AbstractController {
         }
         $old_config = file_get_contents($json_file);
         if ($old_config !== false) {
-        	$old_array = json_decode($old_config, true);
-        	$regex_in_old = in_array("regex", $old_array);
-        	$regex_in_new = in_array("regex", $json_data);
-        	$json_data["regex_updated"] = false;
-        	if ( ($regex_in_old && !$regex_in_new) || 
-        		 (!$regex_in_old && $regex_in_new) ||
-        		 ($old_array['regex'] != $json_data['regex'])) {
-        		 	$json_data["regex_updated"] = true;
-        		 }
+            $old_array = json_decode($old_config, true);
+            $regex_in_old = in_array("regex", $old_array);
+            $regex_in_new = in_array("regex", $json_data);
+            $json_data["regex_updated"] = false;
+            if (
+                ($regex_in_old
+                && !$regex_in_new)
+                 || (!$regex_in_old
+                 && $regex_in_new)
+                 || ($old_array['regex'] != $json_data['regex'])
+            ) {
+                    $json_data["regex_updated"] = true;
+            }
         }
         if ($instructor_provided_code == true) {
             $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;
