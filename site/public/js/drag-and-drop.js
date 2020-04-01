@@ -17,8 +17,8 @@ var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
-var total_files_added = 0;
-var MAX_NO_OF_FILES;
+let total_files_added = 0;
+let MAX_NUM_OF_FILES;
 
 var empty_inputs = true;
 
@@ -76,7 +76,7 @@ function draghandle(e){
 //========================================================================================
 // check if adding a file is valid (not exceeding the limit)
 function addIsValid(files_to_add, total_added_files) {
-  if (files_to_add+total_added_files > MAX_NO_OF_FILES){
+  if (files_to_add+total_added_files > MAX_NUM_OF_FILES){
     alert('Exceeded allowable number of files.\nPlease package your files in a single .zip file if it is necessary for you to submit more than this limit.');
     return false;
   }
@@ -85,7 +85,7 @@ function addIsValid(files_to_add, total_added_files) {
 
 //initialize maximum no of files with that of the php_ini value
 function initMaxNoFiles(max_no_of_files) {
-  MAX_NO_OF_FILES = max_no_of_files;
+  MAX_NUM_OF_FILES = max_no_of_files;
 }
 
 // add files dragged
@@ -96,7 +96,7 @@ function drop(e){
         var part = get_part_number(e);
         for(var i=0; i<filestream.length; i++){
             addFileWithCheck(filestream[i], part); // check for folders
-            total_files_added ++;
+            total_files_added++;
         }
     }
 }
@@ -109,7 +109,7 @@ function dropWithMultipleZips(e){
         var part = get_part_number(e);
         for(var i=0; i<filestream.length; i++){
             addFileWithCheck(filestream[i], part, false); // check for folders
-            total_files_added ++;
+            total_files_added++;
         }
     }
 }
@@ -144,7 +144,7 @@ function addFilesFromInput(part, check_duplicate_zip=true){
     if (addIsValid(filestream.length, total_files_added)){
         for(var i=0; i<filestream.length; i++){
           addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
-          total_files_added ++;
+          total_files_added++;
         }
         $('#input-file' + part).val("");
     }
@@ -246,7 +246,7 @@ function deleteFiles(part) {
     var labels = dropzone.getElementsByClassName("file-label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
-        total_files_added --;
+        total_files_added--;
     }
     label_array[part-1] = [];
     changed = true;
