@@ -357,16 +357,6 @@ function updateCookies(){
     document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
 
-function changeEditorStyle(newStyle){
-    if(newStyle === 'style_light'){
-        localStorage.setItem("codeDisplayStyle", "light");
-    }
-    else {
-        localStorage.setItem("codeDisplayStyle", "dark");
-    }
-    window.location.reload();
-}
-
 //-----------------------------------------------------------------------------
 // Student navigation
 function gotoPrevStudent(to_ungraded = false) {

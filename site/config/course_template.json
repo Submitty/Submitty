@@ -23,6 +23,7 @@
         "room_seating_gradeable_id": "",
         "auto_rainbow_grades": false,
         "queue_enabled": false,
-        "queue_contact_info": false
+        "queue_contact_info": false,
+        "queue_message": ""
     }
 }

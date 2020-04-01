@@ -1,25 +1,23 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-user-form{% endblock %}
 {% block title %}
-	<div id="edit-grader-modal-title">Edit Grader</div>
-	<div id="new-grader-modal-title">New Grader</div>
-	<div id="edit-student-modal-title">Edit Student</div>
-	<div id="new-student-modal-title">New Student</div>
+	<span id="edit-grader-modal-title">Edit Grader</span>
+	<span id="new-grader-modal-title">New Grader</span>
+	<span id="edit-student-modal-title">Edit Student</span>
+	<span id="new-student-modal-title">New Student</span>
 {% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="edit_user" value="false" />
-    <div id="edit-user-form">
-		<label for="user-form-already-exists-error-message" class="red-message full-width">
+    <div id="edit-user-form-content">
+		<a id="redirect-link-icon" class="red-message full-width key_to_click" tabindex="0" onclick="redirectToEdit();" aria-label="edit entered user">
 			<p id="user-form-already-exists-error-message">
 				User is already in this course. Click to edit:
 				<td>
-					<a id="redirect-link-icon" class="key_to_click" tabindex="0" onclick="redirectToEdit();" aria-label="edit entered user">
 						<i class="fas fa-pencil-alt"></i>
-					</a>
 				</td>
 			</p>
-		</label>
+		</a>
 		<label for="user_id">
             User ID:
             <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" placeholder="(Required)" autocomplete="off"/>
@@ -88,15 +86,15 @@
                 <option value="4">Student</option>
             </select>
         </label>
-        <div id="user-form-assigned-sections" class="full-width" hidden>
-            <h3>Assigned Registration Sections for Grading</h3>
+        <fieldset id="user-form-assigned-sections" class="full-width" hidden>
+            <legend style="font-weight:bold;font-size:16pt">Assigned Registration Sections for Grading</legend>
             {% for section in reg_sections %}
                 <label for="grs_{{ section.sections_registration_id }}">
                     <input type="checkbox" id="grs_{{ section.sections_registration_id }}" name="grading_registration_section[]" value="{{ section.sections_registration_id }}">
                     Section {{ section.sections_registration_id }}
                 </label>
             {% endfor %}
-        </div>
+        </fieldset>
     </div>
 {% endblock %}
 {% block form %}

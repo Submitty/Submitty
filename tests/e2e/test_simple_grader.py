@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 
 class TestSimpleGrader(BaseTestCase):
-    
+
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
@@ -19,8 +19,8 @@ class TestSimpleGrader(BaseTestCase):
             return "0.5"
         else:
             return "0"
-            
-    
+
+
     # remove the need to pass pesky arguments from func
     # simplifies the writing of test cases, as variable names can be used instead of accessing kwargs
     def insert_kwargs(self, func, **kwargs):
@@ -40,7 +40,7 @@ class TestSimpleGrader(BaseTestCase):
                 func()
                 self.click_header_link_text("sample", (By.XPATH, "//h1[text()='Gradeables']"))
             return wrapped_func if func is not None else lambda *args: None
-        
+
         for user in users:
             self.log_in(user_id=user[0], user_name=user[1])
             self.click_class("sample", "SAMPLE")
@@ -84,7 +84,10 @@ class TestSimpleGrader(BaseTestCase):
                 self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
                 preceding_removed = td_elem.text.strip()[len(expected_text)+1:]
                 if preceding_removed != "NULL":
-                    section_num = int(preceding_removed)
+                    section_num = preceding_removed.split()[0]
+                    if(section_num == "NULL"):
+                        continue
+                    section_num = int(section_num)
                     if prev_section_num is not None:
                         # check that the ordering is correct
                         self.assertTrue(prev_section_num < section_num)

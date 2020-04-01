@@ -4,25 +4,28 @@
 
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
-                <a class="active-thread-remove-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to remove this thread as an announcement?', 0, '{{ csrf_token }}')" title="Remove Announcement" aria-label="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
+
+                <a class="active-thread-remove-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Unpin Thread" aria-label="Unpin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
-                <i class="fas fa-star active-thread-announcement" title = "Announcement" aria-label="Announcement"></i>
+                <i class="fas fa-thumbtack active-thread-announcement" title = "Pin Thread" aria-label="Pin Thread"></i>
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
-                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to make this thread an announcement?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Make Announcement"><i class="fas fa-star" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
+
+                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
 
             {% endif %}
 
             {% if isCurrentFavorite %}
 
-                <a class="current-favorite key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '0');" title="Pin Thread" aria-label="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
+
+                <a class="current-favorite key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
 
             {% else %}
 
-                <a class="pinned-thread key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '1');" title="Pin Thread" aria-label="Pin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
+                <a class="pinned-thread key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
 
             {% endif %}
 

@@ -116,10 +116,9 @@ function prepGradedComponent(component, graded_component) {
  */
 
 function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
-    if (graded_gradeable.graded_components === undefined) {
+    if (graded_gradeable.graded_components === undefined || graded_gradeable.graded_components === null) {
         graded_gradeable.graded_components = {};
     }
-
     // Calculate the total scores
     gradeable.components.forEach(function (component) {
         graded_gradeable.graded_components[component.id]
