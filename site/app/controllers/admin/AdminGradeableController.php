@@ -244,9 +244,11 @@ class AdminGradeableController extends AbstractController {
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
-            'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
+            'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'peer' => $gradeable->isPeerGrading(),
+            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
@@ -1192,11 +1194,11 @@ class AdminGradeableController extends AbstractController {
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
         $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 
-        if (is_file($queued_path)) {
-            $status = 'queued';
-        }
-        elseif (is_file($rebuilding_path)) {
+        if (is_file($rebuilding_path)) {
             $status = 'processing';
+        }
+        elseif (is_file($queued_path)) {
+            $status = 'queued';
         }
         else {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);

@@ -4,7 +4,8 @@ body {
     min-height: 100vh;
     position: relative;
     display: flex;
-    background: #f6fbfe;
+    background: var(--background-blue);
+    color: var(--text-black);
 }
 
 #submitty-body {
@@ -13,7 +14,7 @@ body {
 }
 
 nav {
-    background: #ffffff;
+    background: var(--default-white);
     font-size: 1.5em;
     font-weight: bold;
     min-height: min-content;
@@ -23,7 +24,7 @@ nav {
 nav a,
 nav a:link,
 nav a:visited {
-    color: #000;
+    color: var(--text-black);
     text-decoration: underline;
 }
 
@@ -31,8 +32,8 @@ nav a:hover {
     text-decoration: none;
 }
 
-nav a > i.fa, 
-nav a > i.fas, 
+nav a > i.fa,
+nav a > i.fas,
 nav a > i.f {
     font-size: 20px;
 }
@@ -64,12 +65,16 @@ nav a > i.f {
     padding-left: 7px;
 }
 
+.breadcrumb_heading{
+  font-size: 24px
+}
+
 #logout-button {
     margin: 15px;
     text-decoration: none;
 }
 
-#logo-submitty {
+#logo-box {
     display: none;
 }
 
@@ -124,9 +129,12 @@ footer .footer-separator {
         display: none;
     }
 
-    #logo-submitty {
+    #logo-box {
         display: block;
-        height: 80px;
+    }
+
+    #logo-submitty, #logo-submitty-light {
+      height: 80px;
     }
 
     /* specificity less than no @media since :not stated (for speed) */

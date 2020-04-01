@@ -3,6 +3,7 @@
 namespace app\views\submission;
 
 use app\libraries\DateUtils;
+use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
@@ -10,6 +11,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
+use app\models\gradeable\SubmissionMultipleChoice;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
@@ -31,6 +33,7 @@ class HomeworkView extends AbstractView {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalCss('table.css');
 
         // The number of days late this gradeable would be if submitted now (including exceptions)
         $late_days_use = 0;
@@ -86,6 +89,32 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
+        // Determine how many grading "parts" there are (e.g. peer grading, ta grading, autograding).
+        $num_parts = 0;
+        if ($gradeable->isPeerGrading()) {
+            $num_parts++;
+        }
+        if ($gradeable->isTaGrading()) {
+            $num_parts++;
+        }
+
+        if ($version_instance !== null && $version_instance->isAutogradingComplete()) {
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $num_parts++;
+                    break;
+                }
+            }
+        }
+
+        if ($submission_count > 0 && $num_parts > 1) {
+            $return .= $this->renderTotalScoreBox($graded_gradeable, $version_instance, $show_hidden_testcases);
+        }
+
+        if ($submission_count > 0) {
+            $return .= $this->renderAutogradingBox($graded_gradeable, $version_instance, $show_hidden_testcases);
+        }
+
         $regrade_available = $this->core->getConfig()->isRegradeEnabled()
             && $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
@@ -101,6 +130,10 @@ class HomeworkView extends AbstractView {
             && $active_version !== 0
         ) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
+
+            if ($gradeable->isPeerGrading()) {
+                $return .= $this->renderPeerResultsBox($graded_gradeable, $regrade_available);
+            }
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable, $can_inquiry);
@@ -352,6 +385,12 @@ class HomeworkView extends AbstractView {
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
+        $student_id = '';
+        if (!is_null($graded_gradeable)) {
+            $student_id = ($graded_gradeable->getSubmitter()->isTeam()) ?
+                $graded_gradeable->getSubmitter()->getTeam()->getLeaderId() :
+                $graded_gradeable->getSubmitter()->getId();
+        }
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
@@ -376,8 +415,8 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
 
-        $DATE_FORMAT = "m/d/Y @ h:i A";
-
+        $DATE_FORMAT = "m/d/Y @ h:i A T";
+        $numberUtils = new NumberUtils();
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
@@ -407,6 +446,9 @@ class HomeworkView extends AbstractView {
             'highest_version' => $highest_version,
             'student_page' => $student_page,
             'students_full' => $students_full,
+            'team_assignment' => $gradeable->isTeamAssignment(),
+            'student_id' => $student_id,
+            'numberUtils' => $numberUtils,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
@@ -570,35 +612,142 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
-    /**
+     /**
      * @param GradedGradeable $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param bool $show_hidden
      * @return string
      */
+    private function renderTotalScoreBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
+        $gradeable = $graded_gradeable->getGradeable();
+        $autograding_config = $gradeable->getAutogradingConfig();
+        $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
+        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        $active_version = $auto_graded_gradeable->getActiveVersion();
 
-    /**
+        // Get the Total Score
+        $total_score = $ta_graded_gradeable->getTotalScore();
+        $total_max = $gradeable->getManualGradingPoints();
+
+        if ($version_instance !== null) {
+            $total_score += $version_instance->getTotalPoints();
+            if ($show_hidden) {
+                $total_max += $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
+            }
+            else {
+                $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+            }
+        }
+        //Clamp full gradeable score to zero
+        $total_score = max($total_score, 0);
+        $total_score = NumberUtils::roundPointValue($total_score, $gradeable->getPrecision());
+
+        //Get the Peer / TA Grading Score
+
+        $peer_grading_max = $gradeable->getPeerPoints();
+        $ta_grading_max   = $gradeable->getTaPoints();
+        
+        $ta_grading_earned = 0;
+        $peer_grading_earned = 0;
+
+        foreach ($gradeable->getComponents() as $component) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            if ($component->isPeer()) {
+                $peer_grading_earned += $container->getTotalScore();
+            }
+            else {
+                $ta_grading_earned += $container->getTotalScore();
+            }
+        }
+
+        // Get Autograding Score
+        $autograding_earned = 0;
+        $autograding_max = 0;
+        if ($version_instance !== null) {
+            if ($show_hidden) {
+                $autograding_earned = $version_instance->getTotalPoints();
+                $autograding_max = $autograding_config->getTotalNonExtraCredit();
+            }
+            else {
+                $autograding_earned = $version_instance->getNonHiddenPoints();
+                $autograding_max = $autograding_config->getTotalNonHiddenNonExtraCredit();
+            }
+        }
+
+        // Find which parts of grading are complete
+        $autograding_complete = $version_instance !== null ? $version_instance->isAutogradingComplete() : false;
+        $peer_grading_complete = true;
+        $ta_grading_complete = true;
+        $active_same_as_graded = true;
+
+        foreach ($gradeable->getComponents() as $component) {
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            if (!$container->isComplete()) {
+                // TODO: For now, peer and ta grading completeness are equivalent.
+                $ta_grading_complete = false;
+                $peer_grading_complete = false;
+                continue;
+            }
+
+            if ($container->getGradedVersion() !== $active_version) {
+                $active_same_as_graded = false;
+            }
+        }
+
+        // Get the number of visible testcases (needed to see if there is autograding)
+        $num_visible_testcases = 0;
+        if ($autograding_complete) {
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $num_visible_testcases++;
+                }
+            }
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate(
+            'submission/homework/TotalScoreBox.twig',
+            [
+                // Total Information
+                'total_complete' => $autograding_complete && $ta_grading_complete
+                                    && $peer_grading_complete && $gradeable->isTaGradeReleased(),
+                'total_score' => $total_score,
+                'total_max'   => $total_max,
+                // Autograding Information
+                // autograding_max > 0 if there are normal points, $autograding_earned > 0 if we  earned extra credit
+                'has_autograding' => $num_visible_testcases > 0 && ($autograding_max > 0 || $autograding_earned > 0),
+                'autograding_complete' => $autograding_complete,
+                'autograding_earned' => $autograding_earned,
+                'autograding_max' => $autograding_max,
+                // Is there a version conflict?
+                'active_same_as_graded' => $active_same_as_graded,
+                // Ta Grading Information
+                'has_ta_grading' => $gradeable->isTaGrading() && ($ta_grading_max > 0 || $ta_grading_earned > 0),
+                'ta_grading_complete' => $ta_grading_complete,
+                'ta_grading_earned' => $ta_grading_earned,
+                'ta_grading_max' => $ta_grading_max,
+                // Peer Grading Information
+                'has_peer_grading' => $gradeable->isPeerGrading() && ($peer_grading_max > 0 || $peer_grading_earned > 0),
+                'peer_grading_complete' => $peer_grading_complete,
+                'peer_grading_earned' => $peer_grading_earned,
+                'peer_grading_max' => $peer_grading_max,
+                // Have grades been released yet?
+                'ta_grades_released' => $gradeable->isTaGradeReleased()
+            ]
+        );
+    }
+
+     /**
      * @param GradedGradeable $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param bool $show_hidden
      * @return string
      */
-    private function renderVersionBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
+    private function renderAutogradingBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
         $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
         $display_version = 0;
-
-        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
-            return [
-                'points' => $version->getNonHiddenPoints(),
-                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
-            ];
-        }, $auto_graded_gradeable->getAutoGradedVersions());
-
-        //sort array by version number after values have been mapped
-        ksort($version_data);
 
         $param = [];
         $show_testcases = false;
@@ -624,17 +773,116 @@ class HomeworkView extends AbstractView {
                 && $version_instance->getEarlyIncentivePoints() >= $autograding_config->getEarlySubmissionMinimumPoints()
                 && $version_instance->getDaysEarly() > $autograding_config->getEarlySubmissionMinimumDaysEarly();
 
-            $files = $version_instance->getFiles();
-
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
                 'grading' => $version_instance->isGrading(),
+                'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
+            ]);
+
+            if ($history !== null) {
+                $param = array_merge($param, [
+                    'results' => 0,
+                ]);
+            }
+
+            if ($version_instance->isQueued()) {
+                $param = array_merge($param, [
+                    'queue_pos' => $version_instance->getQueuePosition(),
+                    'queue_total' => $this->core->getGradingQueue()->getQueueCount()
+                ]);
+            }
+        }
+
+        $check_refresh_submission_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+
+
+        // Get the number of visible testcases (needed to see if there is autograding)
+        $num_visible_testcases = 0;
+        if ($version_instance !== null && $version_instance->isAutogradingComplete()) {
+            foreach ($version_instance->getTestcases() as $testcase) {
+                if ($testcase->canView()) {
+                    $num_visible_testcases++;
+                }
+            }
+        }
+        // If there are 0 visible testcases and autograding is complete,
+        // there is no autograding for this assignment.
+        if ($version_instance !== null) {
+            $no_autograding = $num_visible_testcases == 0 && $version_instance->isAutogradingComplete();
+        }
+        else {
+            $no_autograding = true;
+        }
+        
+        // If there is no autograding at all, only explicitly let the student know that before
+        // TA grades are released.
+        if (
+            $no_autograding
+            && $gradeable->isTaGrading()
+            && $graded_gradeable->isTaGradingComplete()
+            && $gradeable->isTaGradeReleased()
+        ) {
+            return "";
+        }
+
+
+        $param = array_merge($param, [
+            'gradeable_id' => $gradeable->getId(),
+            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
+            'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
+            'display_version' => $display_version,
+            'check_refresh_submission_url' => $check_refresh_submission_url,
+            'show_testcases' => $show_testcases,
+            'show_incentive_message' => $show_incentive_message
+        ]);
+
+        $this->core->getOutput()->addInternalJs('confetti.js');
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/AutogradingResultsBox.twig', $param);
+    }
+
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion|null $version_instance
+     * @param bool $show_hidden
+     * @return string
+     */
+    private function renderVersionBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
+        $gradeable = $graded_gradeable->getGradeable();
+        $autograding_config = $gradeable->getAutogradingConfig();
+        $auto_graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+        $active_version_number = $auto_graded_gradeable->getActiveVersion();
+        $display_version = 0;
+
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
+            return [
+                'points' => $version->getNonHiddenPoints(),
+                'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
+            ];
+        }, $auto_graded_gradeable->getAutoGradedVersions());
+
+        //sort array by version number after values have been mapped
+        ksort($version_data);
+
+        $param = [];
+        $show_incentive_message = false;
+        $history = null;
+
+        if ($version_instance !== null) {
+            $display_version = $version_instance->getVersion();
+
+            if ($version_instance->isAutogradingComplete()) {
+                $history = $version_instance->getLatestHistory();
+            }
+
+            $files = $version_instance->getFiles();
+
+            $param = array_merge($param, [
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
                 'display_version_days_late' => $version_instance->getDaysLate(),
-                'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
 
             if ($history !== null) {
@@ -644,13 +892,6 @@ class HomeworkView extends AbstractView {
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'revision' => $history->getVcsRevision(),
-                ]);
-            }
-
-            if ($version_instance->isQueued()) {
-                $param = array_merge($param, [
-                    'queue_pos' => $version_instance->getQueuePosition(),
-                    'queue_total' => $this->core->getGradingQueue()->getQueueCount()
                 ]);
             }
         }
@@ -666,20 +907,15 @@ class HomeworkView extends AbstractView {
         }
 
         $cancel_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version' ,'0']);
-
         $change_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $display_version]);
-
         $view_version_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/';
-
-        $check_refresh_submission_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
-
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
             'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
             'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
+            'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             // TODO: change this to submitter ID when the MiscController uses new model
             'user_id' => $this->core->getUser()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
@@ -689,7 +925,6 @@ class HomeworkView extends AbstractView {
             'cancel_url' => $cancel_url,
             'change_version_url' => $change_version_url,
             'view_version_url' => $view_version_url,
-            'check_refresh_submission_url' => $check_refresh_submission_url,
             'versions' => $version_data,
             'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
             'allowed_late_days' => $gradeable->getLateDays(),
@@ -698,9 +933,7 @@ class HomeworkView extends AbstractView {
             'can_download' => $can_download,
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
-            'show_testcases' => $show_testcases,
             'active_same_as_graded' => $active_same_as_graded,
-            'show_incentive_message' => $show_incentive_message,
             "csrf_token" => $this->core->getCsrfToken()
         ]);
 
@@ -735,6 +968,32 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
+     * @param bool $regrade_available
+     * @return string
+     */
+    private function renderPeerResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+
+        $rendered_peer_results = '';
+        $been_peer_graded = false;
+        // TODO: For now, Peer and TA grading completeness are synonymous.
+        if ($graded_gradeable->isTaGradingComplete()) {
+            $been_peer_graded = true;
+            $rendered_peer_results = $this->core->getOutput()->renderTemplate(
+                'AutoGrading',
+                'showPeerResults',
+                $graded_gradeable->getTaGradedGradeable(),
+                $regrade_available,
+                $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles()
+            );
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/PeerResultsBox.twig', [
+            'been_peer_graded' => $been_peer_graded,
+            'rendered_peer_results' => $rendered_peer_results]);
+    }
+
+    /**
+     * @param GradedGradeable $graded_gradeable
      * @param bool $can_inquiry
      * @return string
      */
@@ -752,6 +1011,7 @@ class HomeworkView extends AbstractView {
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+        $is_inquiry_open = $graded_gradeable->getGradeable()->isRegradeOpen();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         $request_regrade_url = $this->core->buildCourseUrl([
             'gradeable',
@@ -800,7 +1060,7 @@ class HomeworkView extends AbstractView {
                     $content = $post['content'];
                     $posts[] = [
                         'is_staff' => $is_staff,
-                        'date' => date_format($date, 'm/d/Y g:i A'),
+                        'date' => date_format($date, 'm/d/Y g:i A T'),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,
@@ -859,6 +1119,7 @@ class HomeworkView extends AbstractView {
             'g_id' => $graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
+            'is_inquiry_open' => $is_inquiry_open,
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'gradeable_components' => $components_twig_array,

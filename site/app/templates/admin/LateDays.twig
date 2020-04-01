@@ -1,6 +1,4 @@
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-
-<div type="hidden" id="message"></div>
+<div id="message"></div>
 <div class="content">
     <h1>Late Days Allowed</h1>
     <form id="late-day-form" class="exception-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
@@ -30,7 +28,8 @@
         <fieldset>
             <legend>
                 <span class="option-title" id="csv_upload_title">Multiple Student Entry Via CSV Upload</span>
-                <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM-DD-YYYY, late_days</div>
+                <br>
+                <span id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM-DD-YYYY, late_days</span>
             </legend>
             <label for="csv_option_overwrite_all">
                 <input type="radio" name="csv_option" id="csv_option_overwrite_all" value="csv_option_overwrite_all" checked>
@@ -68,8 +67,8 @@
                         <td>{{ user.getAllowedLateDays() }}</td>
                         <td>{{ user.getSinceTimestamp() }}</td>
                         <td>
-                            <a 
-                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}' 
+                            <a
+                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >
                                 <i class="fas fa-trash"></i>
@@ -91,7 +90,7 @@
                         button: [
                             {
                                 label: "Now"
-                            }, 
+                            },
                             {
                                 label: "End of time"
                             }
@@ -100,10 +99,10 @@
                         onClick: (index, fp) => {
                             let date;
                             switch (index) {
-                                case 0: 
+                                case 0:
                                     date = new Date();
                                     break;
-                                case 1: 
+                                case 1:
                                     date = new Date("01/01/9998");
                                     break;
                             }
@@ -112,7 +111,10 @@
                     }
                 )],
             allowInput: true,
-            dateFormat: "Y-m-d"
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
         });
 
 </script>

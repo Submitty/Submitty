@@ -293,7 +293,7 @@ function setButtonStatus() {
 function removeLabel(filename, part){
     var dropzone = document.getElementById("file-upload-table-" + part);
     var labels = dropzone.getElementsByClassName("file-label");
-    debugger;
+
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
@@ -314,7 +314,7 @@ function addLabel(filename, filesize, part, previous){
     fileTrashElement.setAttribute('class', 'file-trash');
 
     fileDataElement.innerHTML= filename;
-    fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
+    fileTrashElement.innerHTML= filesize + "KB  <i aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -326,7 +326,7 @@ function addLabel(filename, filesize, part, previous){
     };
     fileTrashElement.onmouseout = function(e){
         e.stopPropagation();
-        this.style.color = "black";
+        this.style.color = "var(--text-black)";
     };
     // remove file and label-row in table on click event
     fileTrashElement.onclick = function(e){
@@ -848,13 +848,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         }
     }
     // check due date
-    if (days_late > 0 && days_late <= late_days_allowed) {
+    if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
     }
-    else if (days_late > 0) {
+    else if (days_late > 0 && days_late > late_days_allowed) {
         message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
@@ -1111,7 +1111,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (filesToBeAdded == false){
         return;
     }
-
     $.ajax({
         url: submit_url,
         data: formData,
@@ -1132,6 +1131,52 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+                console.log(data);
+            }
+        },
+        error: function(data) {
+            window.location.href = buildCourseUrl(['course_materials']);
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+
+function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime) {
+    var edit_url = buildCourseUrl(['course_materials', 'edit']);
+    var return_url = buildCourseUrl(['course_materials']);
+    var formData = new FormData();
+    formData.append('csrf_token', csrf_token);
+    formData.append('hide_from_students', hide_from_students);
+    formData.append('requested_path', requested_path);
+    formData.append('release_time',cmTime);
+
+    if(sectionsEdit !== null){
+        formData.append('sections', sectionsEdit);
+    }
+
+    $.ajax({
+        url: edit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                var jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were editting. - [handleEditCourseMaterials]");
                 console.log(data);
             }
         },

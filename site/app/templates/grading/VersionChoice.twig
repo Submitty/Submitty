@@ -1,4 +1,4 @@
-<select style="margin: 0 10px;{{ formatting|default('')|raw }}"
+<select aria-label="Submission Version Select" style="margin: 0 10px;{{ formatting|default('')|raw }}"
         name="submission_version" onChange="{{ on_change|default('')|raw }}" id="submission-version-select">
 
     {% if active_version == 0 %}

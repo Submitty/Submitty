@@ -9,15 +9,16 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    {# TODO, eventually remove these form individual twig files and enable this one
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    #}
+    {# TODO, eventually this wont need an if statement and will work on every page #}
+    {% if use_mobile_viewport %}
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {% endif %}
 
     {% for js_ref in js %}
-    <script type='text/javascript' src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}'></script>
     {% endfor %}
 
-    <script type="text/javascript">
+    <script>
         function ducky() {
             var duck = document.getElementById("duckdiv");
             var banner = document.getElementById("submitty-banner");
@@ -59,10 +60,36 @@
             }
         }
 
+        var onAjaxInit;
+
+
+        //determines if the user has a set theme
+        function detectColorScheme(){
+            let theme="light";    //default to light
+            //local storage is used to override OS theme settings
+            if(localStorage.getItem("theme")){
+                if(localStorage.getItem("theme") === "dark"){
+                    theme = "dark";
+                }
+            } else if(!window.matchMedia) {
+                //matchMedia method not supported
+                return false;
+            } else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                //OS theme setting detected as dark
+                theme = "dark";
+            }
+            //dark theme preferred, set document with a `data-theme` attribute
+            if (theme === "dark") {
+                 document.documentElement.setAttribute("data-theme", "dark");
+                 if(localStorage.getItem("black_mode") === "black"){
+                   document.documentElement.setAttribute("data-black_mode", "black");
+                 }
+            }
+        }
+        detectColorScheme();
     </script>
 
 </head>
-<script>var onAjaxInit;</script>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <a id="skip-nav" href="#main">Skip to main content</a>
     {% if wrapper_urls['top_bar.html'] != null %}
@@ -74,10 +101,10 @@
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
         {# separates our content from user custom bars #}
-        <div id="submitty-body" class="flex-col" style="visibility: hidden;">
+        <div id="submitty-body" class="flex-col">
             <div id="mobile-menu">
                 <div id="menu-header" class="flex-row">
-                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><h1>Submitty</h1></a>
+                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
                     <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
                 </div>
                 <ul>
@@ -99,7 +126,7 @@
                         <img id="submitty-mascot-home-btn"
                          src="{{ base_url }}/img/{{ duck_img }}"
                          alt="Submitty's duck mascot!"
-                         height = "50px"
+                         height = "50"
                          />
                      </a>
                     <div id="breadcrumbs">
@@ -109,7 +136,9 @@
                             {% endif %}
                             <div class="breadcrumb">
                                 {% if b.getUrl() is not empty and not loop.last %}
-                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                    <a {% if loop.first %}id="desktop_home_link"{% endif %} href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                {% elseif b.useAsHeading() %}
+                                    <h1 class="breadcrumb_heading">{{ b.getTitle() }}</h1>
                                 {% else %}
                                     <span>{{ b.getTitle() }}</span>
                                 {% endif %}
@@ -137,6 +166,7 @@
                          height = "50"
                          {% if enable_banner %}
                             style="position:absolute; right: 10px;"
+                            class="key_to_click"
                             onclick="ducky();"
                             tabindex="0"
                          {% endif %}
@@ -157,6 +187,7 @@
 
                 <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                     <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
+                    <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
                 </a>
                 {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                 {% if sidebar_buttons|length > 2 %}
@@ -190,13 +221,13 @@
                             {% endif %}
                             {{ message.error | nl2br }}
                         </span>
-                        <a class="fas fa-times" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                        <a class="fas fa-times key_to_click" tabindex="0" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                     </div>
                 {% endfor %}
             </div>
             <div id="wrapper">
                 {% if sidebar_buttons|length > 0 %}
-                    <aside class="preload">
+                    <aside class="{{collapse_sidebar?'collapsed':''}}">
                         <ul>
                             {% for button in sidebar_buttons %}
                                 {{ self.render_sidebar_button(button, false) }}
@@ -209,7 +240,7 @@
 
 {% macro render_sidebar_button(button, mobile) %}
     {% if button.getTitle() == "" %}
-        <hr />
+        <li><hr /></li>
     {% else %}
         <li>
             {% if button.getHref() == null %}
@@ -243,7 +274,7 @@
                 >
                     <span class="flex-line"> {# col in flex-row #}
                         {% if button.getIcon() != null %}
-                            <i class="fa {{ button.getIcon() }} preload"></i>
+                            <i class="fa {{ button.getIcon() }}"></i>
                         {% endif %}
 
                         <span class="icon-title"> {{ button.getTitle() }} </span>

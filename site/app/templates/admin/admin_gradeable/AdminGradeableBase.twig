@@ -1,5 +1,5 @@
 
-<script type="text/javascript">
+<script>
     function disableElementChildren(c, dis = true) {
         dis ? $(c).hide() : $(c).show();
     }
@@ -7,15 +7,15 @@
 <div id="container-rubric" class="content" style="display:none;">
     <div id="ajax_debug" style="display: none;"></div>
     <div id="ajax_raw" style="display: none;"></div>
-    <form id="gradeable-form" class="form-signin" action="{{ submit_url }}"
-        method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
+    <form id="gradeable-form" class="form-signin" {% if submit_url %} action="{{ submit_url }}" {% endif %}
+        method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
 
         <div class="modal-header" style="overflow: auto;">
             <div>
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}<span id="modal_label_title"></span></h1>
 			</div>
             <div>
-                <b>                    
+                <b>
                     <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Need help with creating/editing a gradeable? <i style="font-style:normal;" class="fa-question-circle"></i></a>
                 </b>
                 <div style="float: right" id="save_status"></div>
@@ -23,11 +23,11 @@
         </div>
         <br/>
         <div class="tab-bar-wrapper">
-            <a class="nav-bar" id="page_0_nav" href="javascript:onChangeNavTab(0);">General</a>
-            <a class="nav-bar" id="page_1_nav" href="javascript:onChangeNavTab(1);">Submissions/Autograding</a>
-            <a class="nav-bar" id="page_2_nav" href="javascript:onChangeNavTab(2);">Rubric</a>
-            <a class="nav-bar" id="page_3_nav" href="javascript:onChangeNavTab(3);">Grader Assignment</a>
-            <a class="nav-bar" id="page_4_nav" href="javascript:onChangeNavTab(4);">Dates</a>
+            <a class="nav-bar key_to_click" id="page_0_nav" onclick="onChangeNavTab(0);">General</a>
+            <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Submissions/Autograding</a>
+            <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Rubric</a>
+            <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Grader Assignment</a>
+            <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Dates</a>
         </div>
         <br/>
         <br/>
@@ -44,13 +44,13 @@
         </div>
         <br/>
         <div id="nav-controls">
-            <!--<button class="btn btn-primary" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
-            <button class="btn btn-primary" id="prev_button" onClick="onChangeNavTab(adminGradeableNavTab-1);" style="margin-right:10px; float: right;">Previous</button>-->
+            <!--<button class="btn btn-primary key_to_click" tabindex="0" id="next_button" onClick="onChangeNavTab(adminGradeableNavTab+1);" style="margin-right:10px; float: right;">Next</button>
+            <button class="btn btn-primary key_to_click" tabindex="0" id="prev_button" onClick="onChangeNavTab(adminGradeableNavTab-1);" style="margin-right:10px; float: right;">Previous</button>-->
             <!--<button class="btn btn-primary" type="submit" style="margin-right:10px; float: right;">Discard Changes</button>-->
         </div>
     </form>
 </div>
-<script type="text/javascript">
+<script>
 
     let adminGradeableNavTab = 0;
     let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);

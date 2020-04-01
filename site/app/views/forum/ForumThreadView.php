@@ -14,14 +14,14 @@ class ForumThreadView extends AbstractView {
 
     public function searchResult($threads) {
 
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Search");
 
         $buttons = array(
             array(
                 "required_rank" => 4,
                 "display_text" => 'Create Thread',
-                "style" => 'position:relative;float:right;top:3px;',
+                "style" => 'position:absolute;top:3px;right:0px',
                 "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
                 "optional_class" => '',
                 "title" => 'Create Thread',
@@ -123,7 +123,7 @@ class ForumThreadView extends AbstractView {
         $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
 
         if (!$ajax) {
-            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
 
             //Body Style is necessary to make sure that the forum is still readable...
             $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
@@ -207,7 +207,7 @@ class ForumThreadView extends AbstractView {
             array(
                 "required_rank" => 4,
                 "display_text" => 'Create Thread',
-                "style" => 'float:right;position:relative;top:3px;',
+                "style" => 'position:absolute;top:3px;right:0px',
                 "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
                 "optional_class" => '',
                 "title" => 'Create Thread',
@@ -258,7 +258,7 @@ class ForumThreadView extends AbstractView {
         if (!$threadExists) {
             $button_params["show_threads"] = false;
             $button_params["thread_exists"] = false;
-            $button_params["show_more"] = false;
+            $button_params["show_more"] =  $this->core->getUser()->accessGrading();
         }
         else {
             $more_data = array(
@@ -358,6 +358,7 @@ class ForumThreadView extends AbstractView {
                 "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit
             ]);
         }
@@ -381,6 +382,7 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
                 "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
                 "post_content_limit" => $post_content_limit
             ]);
 
@@ -500,6 +502,14 @@ class ForumThreadView extends AbstractView {
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
+            
+            // Get first post of each thread. To be used later
+            // to obtain the content of the post to be displayed
+            // in the modal.
+            foreach ($merge_thread_list as $key => $temp_thread) {
+                $temp_first_post = $this->core->getQueries()->getFirstPostForThread($temp_thread['id']);
+                $merge_thread_list[$key]['first_post_id'] = $temp_first_post['id'];
+            }
 
             $merge_thread_content = [
                 "current_thread_date" => $current_thread_date,
@@ -529,7 +539,8 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $totalAttachments,
-                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
+                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
             ]);
         }
         else {
@@ -828,7 +839,7 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-
+        $merged_thread = false;
         if ($this->core->getUser()->getGroup() <= 2) {
             $info_name = $first_name . " " . $last_name . " (" . $post['author_user_id'] . ")";
             $visible_user_json = json_encode($visible_username);
@@ -866,6 +877,13 @@ class ForumThreadView extends AbstractView {
                     "ud_button_title" => $ud_button_title,
                     "ud_button_icon" => $ud_button_icon
                 ];
+
+                if ($this->core->getUser()->accessGrading()) {
+                    $merged_thread_query = $this->core->getQueries()->getPostOldThread($post_id);
+                    if ($merged_thread_query["merged_thread_id"] != -1) {
+                        $merged_thread = true;
+                    }
+                }
 
                 $shouldEditThread = null;
 
@@ -932,6 +950,8 @@ class ForumThreadView extends AbstractView {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
 
+        $has_history = $this->core->getQueries()->postHasHistory($post_id);
+
         return [
             "classes" => $classes,
             "post_id" => $post_id,
@@ -958,7 +978,9 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
             "parent_id" => $post_id,
-            "render_markdown" => $markdown
+            "render_markdown" => $markdown,
+            "has_history" => $has_history,
+            "thread_previously_merged" => $merged_thread
         ];
     }
 
@@ -968,7 +990,7 @@ class ForumThreadView extends AbstractView {
             return;
         }
 
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -986,6 +1008,7 @@ class ForumThreadView extends AbstractView {
         $category_colors;
 
         $categories = $this->core->getQueries()->getCategories();
+        $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
         $buttons = array(
             array(
@@ -1007,6 +1030,7 @@ class ForumThreadView extends AbstractView {
             "category_colors" => $category_colors,
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
+            "create_thread_message" => $create_thread_message,
             "form_action" => $this->core->buildCourseUrl(['forum', 'threads', 'new']),
             "manage_categories_url" => $manage_categories_url,
             "csrf_token" => $this->core->getCsrfToken(),
@@ -1022,7 +1046,7 @@ class ForumThreadView extends AbstractView {
             return;
         }
 
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildCourseUrl(['forum', 'categories']));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -1031,6 +1055,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+        $this->core->getOutput()->addInternalCss('forum.css');
 
         $categories = "";
         $category_colors;
@@ -1079,7 +1104,7 @@ class ForumThreadView extends AbstractView {
             return;
         }
 
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 
         $this->core->getOutput()->addInternalJs('forum.js');
