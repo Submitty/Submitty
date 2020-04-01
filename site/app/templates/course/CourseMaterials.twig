@@ -139,13 +139,13 @@
                         var fileDT = inputDT.value;
                         //also custom colors for this page for readability
                         if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-                            return green;
+                            return "var(--date-picker-green)";
                         }
                         else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                            return red;
+                            return "var(--date-picker-red)";
                         }
                         else{
-                            return yellow;
+                            return "var(--date-picker-yellow)";
                         }
 
                     }

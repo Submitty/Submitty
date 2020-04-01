@@ -76,7 +76,7 @@
             <div id="gradeables_collapse" class="collapsible_area">
                 <div style="width:45%;float:left;" id="buckets_used">
                     <h3>Assigned Buckets</h3>
-                    <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
+                    <ol id="buckets_used_list" style="min-height:50px;background-color:var(--standard-beige);">
                         {%  for bucket in used_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: inline;">
@@ -90,7 +90,7 @@
                 </div>
                 <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
                     <h3>Available Buckets</h3>
-                    <ol id="buckets_available_list" style="min-height:50px;background-color:lightgreen;">
+                    <ol id="buckets_available_list" style="min-height:50px;background-color:var(--standard-light-green);">
                         {%  for bucket in available_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: none;">
@@ -101,7 +101,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" style="background-color:peachpuff;margin-top:50px;width:1000px;padding:5px;">
+                <div id="gradeable_config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
                     <h2>Category/Gradeable Configuration:</h2>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}

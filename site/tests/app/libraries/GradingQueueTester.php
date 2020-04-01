@@ -74,7 +74,7 @@ class GradingQueueTester extends BaseUnitTest {
 
         $this->assertEquals(
             GradingQueue::NOT_QUEUED,
-            $queue->getQueueStatus($this->createAutogradedVersion(false))
+            $queue->getQueueStatusAGV($this->createAutogradedVersion(false))
         );
     }
 
@@ -86,7 +86,7 @@ class GradingQueueTester extends BaseUnitTest {
 
         $this->assertEquals(
             1,
-            $queue->getQueueStatus($autograded_version)
+            $queue->getQueueStatusAGV($autograded_version)
         );
     }
 
@@ -98,7 +98,7 @@ class GradingQueueTester extends BaseUnitTest {
 
         $this->assertEquals(
             GradingQueue::GRADING,
-            $queue->getQueueStatus($autograded_version)
+            $queue->getQueueStatusAGV($autograded_version)
         );
     }
 
@@ -112,16 +112,16 @@ class GradingQueueTester extends BaseUnitTest {
 
         $this->assertEquals(
             GradingQueue::GRADING,
-            $queue->getQueueStatus($autograded_version1)
+            $queue->getQueueStatusAGV($autograded_version1)
         );
 
         $this->assertEquals(
             2,
-            $queue->getQueueStatus($autograded_version2)
+            $queue->getQueueStatusAGV($autograded_version2)
         );
         $this->assertEquals(
             3,
-            $queue->getQueueStatus($autograded_version3)
+            $queue->getQueueStatusAGV($autograded_version3)
         );
     }
 
@@ -129,14 +129,14 @@ class GradingQueueTester extends BaseUnitTest {
         $queue = new GradingQueue('s18', 'csci1100', $this->path);
         $autograded_version1 = $this->createAutogradedVersion();
         $this->assertEquals(1, $queue->getQueueCount());
-        $this->assertEquals(1, $queue->getQueueStatus($autograded_version1));
+        $this->assertEquals(1, $queue->getQueueStatusAGV($autograded_version1));
         $this->assertEquals(0, $queue->getGradingCount());
         $autograded_version2 = $this->createAutogradedVersion();
         $this->assertEquals(1, $queue->getQueueCount());
-        $this->assertEquals(1, $queue->getQueueStatus($autograded_version1));
+        $this->assertEquals(1, $queue->getQueueStatusAGV($autograded_version1));
         $queue->reloadQueue();
         $this->assertEquals(2, $queue->getQueueCount());
-        $this->assertEquals(1, $queue->getQueueStatus($autograded_version1));
-        $this->assertEquals(2, $queue->getQueueStatus($autograded_version2));
+        $this->assertEquals(1, $queue->getQueueStatusAGV($autograded_version1));
+        $this->assertEquals(2, $queue->getQueueStatusAGV($autograded_version2));
     }
 }
