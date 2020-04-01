@@ -94,8 +94,7 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
 
     now = dateutils.get_current_time()
     datefile = "{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
-    if not os.path.exists(log_path):
-        os.mkdir(log_path)
+    os.makedirs(log_path, exist_ok=True)
     autograding_log_file = os.path.join(log_path, datefile)
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     batch_string = "BATCH" if is_batch else ""

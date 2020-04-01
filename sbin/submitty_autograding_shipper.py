@@ -840,8 +840,7 @@ def launch_shippers(worker_status_map):
         # Cleanup previous in-progress submissions
         worker_folders = [worker_folder(f'{name}_{i}') for i in range(thread_count)]
         for folder in worker_folders:
-            if not os.path.exists(folder):
-                os.mkdir(folder)
+            os.makedirs(folder, exist_ok=True)
             # Clear out in-progress files, as these will be re-done.
             for grading in Path(folder).glob('GRADING_*'):
                 os.remove(grading)
