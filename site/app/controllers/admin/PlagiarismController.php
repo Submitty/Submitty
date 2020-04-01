@@ -543,7 +543,7 @@ class PlagiarismController extends AbstractController {
         if ($version_user_1 == "max_matching") {
             $version_user_1 = $max_matching_version;
         }
-        $all_versions_user_1 = array_diff(scandir($course_path . "/submissions/" . $gradeable_id . "/" . $user_id_1), array(".", "..", "user_assignment_settings.json"));
+        $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), array(".", ".."));
 
         $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/submission.concatenated";
         $data = "";
