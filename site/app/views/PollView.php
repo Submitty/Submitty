@@ -55,13 +55,4 @@ class PollView extends AbstractView {
             'poll' => $poll
           ]);
     }
-
-    public function viewResults($poll, $results) {
-        return $this->core->getOutput()->renderTwigTemplate("polls/ViewPollResults.twig", [
-            'csrf_token' => $this->core->getCsrfToken(),
-            'base_url' => $this->core->buildCourseUrl() . '/polls',
-            'poll' => $poll,
-            'results' => $results
-          ]);
-    }
 }

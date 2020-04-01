@@ -8,17 +8,16 @@
             <i class="dropdown_arrow down"></i>
         </button>
         <table id="today-table" class="table table-striped" style="width:100%;">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Toggle</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
-                    <th scope="col">Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,13 +57,6 @@
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </form>
                         </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/deletePoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -81,18 +73,16 @@
             <i class="dropdown_arrow right"></i>
         </button>
         <table id="older-table" class="table table-striped" style="width:100%; display: none;">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Toggle</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
-                    <th scope="col">Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -132,13 +122,6 @@
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </form>
                         </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/deletePoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -154,17 +137,16 @@
             <i class="dropdown_arrow right"></i>
         </button>
         <table id="future-table" class="table table-striped" style="width:100%; display: none;">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
-            <col style="width: 20%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
+            <col style="width: 25%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Toggle</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
-                    <th scope="col">Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -202,13 +184,6 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form method="post" action="{{base_url}}/deletePoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-danger">Delete</button>
                             </form>
                         </td>
                     </tr>
