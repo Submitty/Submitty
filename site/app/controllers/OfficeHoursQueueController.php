@@ -400,9 +400,7 @@ class OfficeHoursQueueController extends AbstractController {
     */
     public function showCurrentQueue() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
+            return;
         }
 
         $this->core->getOutput()->useHeader(false);

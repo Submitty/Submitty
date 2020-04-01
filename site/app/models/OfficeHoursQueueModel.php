@@ -129,12 +129,16 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueNumberAheadOfYou($queue_code);
     }
 
-    public function firstTimeInQueueToday($id, $queue_code) {
-        return $this->core->getQueries()->firstTimeInQueueToday($id, $queue_code);
+    public function firstTimeInQueueToday($time) {
+        $one_day_ago = $this->core->getDateTimeNow();
+        date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
+        return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago;
     }
 
-    public function firstTimeInQueueThisWeek($id, $queue_code) {
-        return $this->core->getQueries()->firstTimeInQueueThisWeek($id, $queue_code);
+    public function firstTimeInQueueThisWeek($time) {
+        $one_week_ago = $this->core->getDateTimeNow();
+        date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
+        return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago;
     }
 
     public function inQueue() {
