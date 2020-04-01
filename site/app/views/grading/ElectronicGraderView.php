@@ -709,7 +709,6 @@ HTML;
         ]);
     }
 
-
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from) {
@@ -781,6 +780,13 @@ HTML;
             ]);
         }
 
+        // This would be more dynamic is $display_version_instance included an expected number, requires more database changes
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1){
+             $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
+                    //"color" => "var(--standard-red-orange)", // fire engine red
+                    "message" => "Multiple files within submissions"
+                ]);
+        }
         return $return;
     }
 
@@ -896,7 +902,7 @@ HTML;
      * Render the Submissions and Results Browser panel
      * @param GradedGradeable $graded_gradeable
      * @param int $display_version
-     * @return string
+     * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         $add_files = function (&$files, $new_files, $start_dir_name) {
@@ -931,7 +937,7 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
-            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            $submission_count = $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
             $add_files($results, $display_version_instance->getResultsFiles(), 'results');
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
@@ -939,7 +945,6 @@ HTML;
 
         // For PDFAnnotationBar.twig
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
