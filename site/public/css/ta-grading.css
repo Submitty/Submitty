@@ -49,7 +49,7 @@
     padding-bottom:3px;
     text-align: center;
     vertical-align: middle;
-    line-height: 25px;  
+    line-height: 25px;
     font-weight:    bold;
     background-color: var(--badge-backgroud-red);
 }
@@ -225,7 +225,7 @@ progress::-webkit-progress-value {
 .file-viewer a:link,
 .file-viewer a:visited,
 .file-viewer a:active {
-    color: #005c83;
+    color: var(--external-link-blue);
 }
 
 .file-viewer a:hover {
@@ -243,7 +243,7 @@ progress::-webkit-progress-value {
 .div-viewer a:link,
 .div-viewer a:visited,
 .div-viewer a:active {
-    color: #005c83;
+    color: var(--external-link-blue);
 }
 
 .div-viewer a:hover {
@@ -256,6 +256,7 @@ progress::-webkit-progress-value {
     position: relative;
     padding: 3px;
     margin: 1px;
+    color: var(--text-black);
 }
 
 .icon-folder-closed {
@@ -295,10 +296,10 @@ progress::-webkit-progress-value {
 }
 
 .icon-mark-stats {
-    visibility: visible; 
-    cursor: pointer; 
-    position: relative; 
-    top: 2px; 
+    visibility: visible;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
     left: 1%;
 }
 
@@ -360,7 +361,7 @@ tr.is_publish {
 }
 
 #hotkeys-list tr:nth-child(even) {
-    background-color: #eee;
+    background-color: var(--alternating-row-color-light);
 }
 
 #hotkeys-list td {
@@ -379,7 +380,7 @@ tr.is_publish {
 }
 
 .gradeable .general-comment {
-    background-color:#E9EFEF;
+    background-color:var(--overall-comment);
     cursor: pointer;
 }
 
@@ -593,16 +594,15 @@ tr.is_publish {
     width: 20px;
     height: 20px;
     margin: 2px;
-    border: 2px solid #000;
+    border: 2px solid var(--text-black);
     border-radius: 4px;
-    color: #888;
     font-size: 14px;
     text-align: center;
 }
 
 .gradeable .mark-selector.mark-selected {
-    color: #ccc;
-    background-color: #000;
+    color: var(--text-white);
+    background-color: var(--checkbox-black);
 }
 
 .gradeable .mark-selector.hidden {

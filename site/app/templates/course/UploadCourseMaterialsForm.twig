@@ -8,17 +8,17 @@
             {{ folderPath~'/'~courseMaterial }}
         </p>
         <label id="cm_path">
-            <p>
+            <span>
                 <strong>Optional: amend the above path to use a sub directory</strong><br />
                 e.g. "optional/subdirectory" makes the full path:<br />
                 {{ folderPath~'/'~courseMaterial }}optional/subdirectory
-            </p>
+            </span>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
-        <div>
-            <p class="black-message">
+        <fieldset>
+            <legend class="black-message">
                 Do you want to restrict this course material to some sections?
-            </p>
+            </legend>
             <label class = "radio" for="all_Sections_Showing">
                 <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
                 No
@@ -32,7 +32,8 @@
                     $("#show_Some_Section_Selection").toggle();
                 }
             </script>
-            <div id = "show_Some_Section_Selection" style="display: none">
+            <br>
+            <span id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
                     <span class = "inline">
@@ -48,12 +49,12 @@
                     </span>
                 </tr>
             {% endfor %}
-            </div>
-        </div>
+          </span>
+        </fieldset>
         <label id="upload_dt">
-            <p>
+            <span>
                 <strong>Choose a time to release the files being uploaded:</strong>
-            </p>
+            </span>
             <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
         </label>
         <label>

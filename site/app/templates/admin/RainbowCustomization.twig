@@ -1,5 +1,5 @@
 <div class="content">
-    <h2>Rainbow Grades Customization -- Work In Progress</h2>
+    <h1>Rainbow Grades Customization -- Work In Progress</h1>
 
     {% if limited_functionality_mode %}
         <div id="limited_func_messages">
@@ -25,16 +25,30 @@
 
     <div id="list_wrapper">
         <div id="display_benchmarks" class="customization_item">
-            <h2>Display Benchmarks</h2>
-            <div id="display_benchmarks_collapse" class="collapsible_area">
-            {% for benchmark in display_benchmarks %}
-                <p>
-                    <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
-                           {% if benchmark.isUsed == true %}checked{% endif %}
-                    >
-                    <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
-                </p>
-            {% endfor %}
+            <fieldset>
+              <legend><h2>Display Benchmarks</h2></legend>
+              <div id="display_benchmarks_collapse" class="collapsible_area">
+              {% for benchmark in display_benchmarks %}
+                  <p>
+                      <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
+                             {% if benchmark.isUsed == true %}checked{% endif %}
+                      >
+                      <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
+                  </p>
+              {% endfor %}
+              </div>
+            </fieldset>
+        </div>
+        <div id="benchmark_percents" class="customization_item">
+            <h2>Benchmark Percents</h2>
+            <div id="benchmark_percents_collapse" class="collapsible_area">
+                <p>You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.</p>
+                {% for benchmark, percent in benchmark_percents %}
+                    <p>
+                        <label for="benchmark_{{ benchmark }}">{{ benchmark }}</label>
+                        <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input" data-benchmark="{{ benchmark }}" value="{{ percent }}">
+                    </p>
+                {% endfor %}
             </div>
         </div>
         <div id="cust_messages" class="customization_item">
@@ -62,7 +76,7 @@
             <div id="gradeables_collapse" class="collapsible_area">
                 <div style="width:45%;float:left;" id="buckets_used">
                     <h3>Assigned Buckets</h3>
-                    <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
+                    <ol id="buckets_used_list" style="min-height:50px;background-color:var(--standard-beige);">
                         {%  for bucket in used_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: inline;">
@@ -76,7 +90,7 @@
                 </div>
                 <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
                     <h3>Available Buckets</h3>
-                    <ol id="buckets_available_list" style="min-height:50px;background-color:lightgreen;">
+                    <ol id="buckets_available_list" style="min-height:50px;background-color:var(--standard-light-green);">
                         {%  for bucket in available_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: none;">
@@ -87,7 +101,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" style="background-color:peachpuff;margin-top:50px;width:1000px;padding:5px;">
+                <div id="gradeable_config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
                     <h2>Category/Gradeable Configuration:</h2>
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
