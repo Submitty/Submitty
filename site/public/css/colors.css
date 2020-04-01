@@ -145,6 +145,7 @@
     --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /*is also for star color*/
+    --attachment-box-color: #f5f5f5;
 
 
         /*these differ from the colors on the posts for some reason?
@@ -317,7 +318,7 @@
       --standard-beige: rgb(119, 119, 106);
       --standard-light-gold: #fff3cd;
       --standard-light-green: #427742;
-      --standard-pastel-blue: #d9edf7;
+      --standard-pastel-blue: #2f6580;
       --standard-light-blue: #99ccff;
       --standard-light-seafoam: #a4dad5;
 
@@ -341,6 +342,7 @@
       --viewed-discussion-post-blue: #e8f0f7;
       --deleted-discussion-post-grey: #dcdcdc;
       --important-post: #ffd700; /*is also for star color*/
+      --attachment-box-color: #4a4a4a;
 
 
           /*these differ from the colors on the posts for some reason?
@@ -353,7 +355,7 @@
 
       /*links*/
       --external-link-blue: #8888F2;
-      --external-link-hover: #131399;
+      --external-link-hover: #a1a1ec;
       --external-link-disabled: #888888;
       --external-link-active: #991313;
 
