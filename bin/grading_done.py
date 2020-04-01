@@ -188,12 +188,12 @@ class QueueItem:
         # the 'GRADING_' file.
         if is_grading:
             base, tail = os.path.split(json_file)
-            assert(tail[:8] == 'GRADING_')
-            grading_json_file = json_file
-            json_file = os.path.join(base, tail[8:])
-
-            with open(grading_json_file, 'r') as infile:
+            assert(tail.startswith('GRADING_'))
+            
+            with open(json_file, 'r') as infile:
                 self.grading_queue_obj = json.load(infile)
+
+            json_file = os.path.join(base, tail[8:])
 
         self.start_time = os.path.getmtime(json_file)
         self.elapsed_time = epoch_time - self.start_time
