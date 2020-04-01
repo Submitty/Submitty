@@ -783,7 +783,6 @@ HTML;
         // This would be more dynamic is $display_version_instance included an expected number, requires more database changes
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1){
              $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
-                    //"color" => "var(--standard-red-orange)", // fire engine red
                     "message" => "Multiple files within submissions"
                 ]);
         }
@@ -937,7 +936,7 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
-            $submission_count = $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
             $add_files($results, $display_version_instance->getResultsFiles(), 'results');
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
