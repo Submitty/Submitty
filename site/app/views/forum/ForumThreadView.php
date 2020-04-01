@@ -1055,6 +1055,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+        $this->core->getOutput()->addInternalCss('forum.css');
 
         $categories = "";
         $category_colors;
