@@ -176,7 +176,7 @@ class PollController extends AbstractController {
         $answers = array();
         for ($i = 0; $i < $response_count; $i++) {
             $responses[] = $_POST["response_" . $i];
-            if ($_POST["is_correct_" . $i] == "on") {
+            if (isset($_POST["is_correct_" . $i]) and $_POST["is_correct_" . $i] == "on") {
                 $answers[] = $_POST["response_" . $i];
             }
         }
@@ -184,6 +184,37 @@ class PollController extends AbstractController {
         
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return Response
+     */
+    public function deletePoll() {
+        $this->core->getQueries()->deletePoll($_POST["poll_id"]);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['polls']))
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/polls/viewResults", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return Response
+     */
+    public function viewResults() {
+        $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+        $results = $this->core->getQueries()->getResults($_POST["poll_id"]);
+        //var_dump($results);
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                'Poll',
+                'viewResults',
+                $poll,
+                $results
+            )
         );
     }
 }

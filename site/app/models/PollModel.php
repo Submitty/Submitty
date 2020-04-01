@@ -15,14 +15,14 @@ class PollModel extends AbstractModel {
     protected $user_response;
     protected $release_date;
 
-    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $open, array $user_responses, $release_date) {
+    public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date) {
         parent::__construct($core);
         $this->id = $id;
         $this->name = $name;
         $this->question = $question;
         $this->responses = $responses;
         $this->answers = $answers;
-        $this->open = $open;
+        $this->status = $status;
         $this->user_responses = $user_responses;
         $this->release_date = $release_date;
     }
@@ -48,7 +48,15 @@ class PollModel extends AbstractModel {
     }
 
     public function isOpen() {
-        return $this->open;
+        return $this->status == "open";
+    }
+
+    public function isClosed() {
+        return $this->status == "closed";
+    }
+
+    public function hasEnded() {
+        return $this->status == "ended";
     }
 
     public function getUserResponses() {
