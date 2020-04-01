@@ -192,6 +192,7 @@ jobs:
             - google-chrome-stable
             - libpam-passwdqc
             - libboost-all-dev
+            - jq
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - phpenv config-rm xdebug.ini
@@ -260,7 +261,11 @@ jobs:
         - sudo apache2ctl -t
         - sudo service apache2 restart
       script:
-        - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
+        - echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+        - TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
+        - sudo sed -ie "s/Pam/Database/g" /usr/local/submitty/config/database.json
+        - echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
+        - TEST_URL="http://localhost" python3 -m unittest tests.e2e.test_login
         - SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         - sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         - pushd /tmp
@@ -284,14 +289,6 @@ jobs:
         - sudo chown -R ${USER}:${USER} ${HOME}/.composer/cache
     - <<: *03-e2e
       php: 7.3
-      if: branch = master OR type = pull_request
-    - <<: *03-e2e
-      php: 7.2
-      env: AUTH_METHOD=2
-      if: branch = master OR type = pull_request
-    - <<: *03-e2e
-      php: 7.3
-      env: AUTH_METHOD=2
       if: branch = master OR type = pull_request
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for

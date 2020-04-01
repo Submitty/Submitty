@@ -120,6 +120,21 @@ class GradedGradeable extends AbstractModel {
     public function isTaGradingComplete() {
         return $this->hasTaGradingInfo() && $this->ta_graded_gradeable->isComplete();
     }
+    
+    /**
+     * Gets whether a peer grader has graded all of the peer components for this submitter/gradeable
+     * Later this will take in a userId and determine if that user graded all components
+     * @return bool
+     */
+    public function isPeerGradingComplete() {
+        foreach ($this->ta_graded_gradeable->getGradedComponentContainers() as $container) {
+            if (!$container->isComplete() && $container->getComponent() != null && $container->getComponent()->isPeer()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Sets the grade inquiry for this graded gradeable
