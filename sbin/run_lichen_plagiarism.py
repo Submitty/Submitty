@@ -57,7 +57,7 @@ def main():
     try:
         log_json = open(log_path, 'r+')
         previous_hash = json.load(log_json)['config_hash']
-    except OSError:
+    except:
         log_json = open(log_path, 'w+')
 
     start_time = time.time()
