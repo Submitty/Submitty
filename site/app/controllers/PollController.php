@@ -41,7 +41,6 @@ class PollController extends AbstractController {
                 )
             );
         }
-        
     }
 
     /**
@@ -176,7 +175,7 @@ class PollController extends AbstractController {
         $answers = array();
         for ($i = 0; $i < $response_count; $i++) {
             $responses[] = $_POST["response_" . $i];
-            if (isset($_POST["is_correct_" . $i]) and $_POST["is_correct_" . $i] == "on") {
+            if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
                 $answers[] = $_POST["response_" . $i];
             }
         }
