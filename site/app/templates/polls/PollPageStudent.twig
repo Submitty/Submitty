@@ -1,21 +1,33 @@
+<style>
+    .radio p {
+        display: inline;
+    }
+</style>
+
 <div class="content">
     <h1> {{ poll.getName() }} </h1>
+    <p> {{ poll.getQuestion() | markdown}} </p>
+    <br/>
     <form method="post" action="{{ base_url }}/submitResponse">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+        {% set index = 0%}
         {% for response in poll.getResponses() %}
             <div>
-                <h3> {{ response }}
+                <label class="radio" for="answer-{{index}}">
                     {% if response == poll.getUserResponse(user_id) %}
-                        <input type=radio value="{{ response }}" name="answer" checked/>
+                        <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}" checked/>
                     {% elseif poll.isOpen() %}
-                        <input type=radio value="{{ response }}" name="answer"/>
+                        <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}"/>
                     {% else %}
-                        <input type=radio value="{{ response }}" name="answer" disabled/>
+                        <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}" disabled/>
                     {% endif %}
-                </h3>
+                    {{ poll.getResponseString(response) | markdown}}
+                </label>
+                <br/>
                 <br/>
             </div>
+        {% set index = index + 1%}
         {% endfor %}
         {% if poll.isOpen() %}
             <button type="submit" class="btn btn-primary">Submit</button>

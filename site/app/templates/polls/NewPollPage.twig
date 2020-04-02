@@ -7,19 +7,25 @@
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
             <label for="poll-name">
-                <span> Poll Name: </span>
+                <h3> Poll Name: </h3>
             </label>
-            <input type="text" name="name" id="poll-name"/>
-            <br/>
+            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            <br/> <br/>
 
             <label for="poll-question">
-                <span> Question: </span>
+                <h3> Question: </h3>
             </label>
-            <input type="text" name="question" id="poll-question"/>
-            <br/>
+            <textarea
+                id="poll-question"
+                name="question"
+                style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
+                rows="10" cols="30"
+                placeholder="Enter question here..."
+                maxlength="5000"></textarea>
+            <br/><br/>
 
             <label for="poll-time">
-                <span> Expected release date: </span>
+                <h3> Expected release date: </h3>
             </label>
             <input type="date" name="release_date" id="poll-date"/>
             <br/>
@@ -47,31 +53,47 @@
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
             <label for="poll-name">
-                <span> Poll Name: </span>
+                <h3> Poll Name: </h3>
             </label>
             <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
-            <br/>
+            <br/> <br/>
 
             <label for="poll-question">
-                <span> Question: </span>
+                <h3> Question: </h3>
             </label>
-            <input type="text" name="question" id="poll-question" value="{{ poll.getQuestion() }}"/>
-            <br/>
+            <textarea
+                id="poll-question"
+                name="question"
+                style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
+                rows="10" cols="30"
+                maxlength="5000">{{ poll.getQuestion() }}</textarea>
+            <br/><br/>
 
             <label for="poll-time">
-                <span> Expected release date: </span>
+                <h3> Expected release date: </h3>
             </label>
             <input type="date" name="release_date" id="poll-date" value="{{ poll.getReleaseDate() }}"/>
             <br/>
-
             <hr>
             <h2> Responses: </h2>
             <div id="responses">
                 {% set index = 0%}
                 {% for response in poll.getResponses() %}
-                    <div id="response_{{index}}_wrapper">
-                        <input type="text" class="poll_response" name="response_{{index}}" value="{{ response }}" /> 
-                        <input type="checkbox" name="is_correct_{{index}}" {{ poll.isCorrect(response) ? "checked": "" }}>
+                    <div id="response_{{response}}_wrapper">
+                        <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
+                        <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
+                        <input type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
+                        <textarea class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                        rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
+                        <button type="button" class="move-btn up-btn">
+                            <i class="move-arrow up"></i>
+                        </button>
+                        <button type="button" class="move-btn down-btn">
+                            <i class="move-arrow down"></i>
+                        </button>
+                        <button type="button" class="move-btn delete-btn">
+                            <i class="fa fa-lg fa-trash"></i>
+                        </button>
                         <br/>
                     </div>
                     {% set index = index + 1%}
@@ -91,13 +113,76 @@
 <script>
     function addResponse() {
         count = $(".poll_response").length
+        first_free_id = 0
+        while($(`.option_id[value="${first_free_id}"]`).length != 0){
+            console.log("still looking")
+            first_free_id++;
+        }
         $("#responses").append(`
             <div id="response_${count}_wrapper">
-                <input type=text class="poll_response" name="response_${count}" placeholder="Enter response here..."/> 
+                <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
+                <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
                 <input type=checkbox name="is_correct_${count}">
+                <textarea class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                rows="10" cols="30"></textarea>
+                <button type="button" class="move-btn up-btn">
+                    <i class="move-arrow up"></i>
+                </button>
+                <button type="button" class="move-btn down-btn">
+                    <i class="move-arrow down"></i>
+                </button>
+                <button type="button" class="move-btn delete-btn">
+                    <i class="fa fa-lg fa-trash"></i>
+                </button>
                 <br/>
             </div>
         `);
+        $(`#response_${count}_wrapper`).children(".up-btn").on("click", function() {
+            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == 0) {
+                return;
+            }
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(`#response_${count}_wrapper`).children(".down-btn").on("click", function() {
+            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == $(".poll_response").length - 1) {
+                return;
+            }
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(`#response_${count}_wrapper`).children(".delete-btn").on("click", function() {
+            count = $(".poll_response").length
+            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            for(i=curr_pos + 1; i < count; i++) {
+                $(".order-" + i).attr("value", i - 1)
+                $(".order-" + i).addClass("order-" + (i - 1));
+                $(".order-" + i).removeClass("order-" + i);
+            }
+            for(i=wrapper_id + 1; i < count; i++) {
+                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
+                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+            }
+            $(this).parent().remove()
+            count -= 1
+            $("#response-count").val("" + count)
+        })
         count += 1
         $("#response-count").val("" + count)
     }
@@ -108,5 +193,54 @@
         $(`#response_${count}_wrapper`).remove()
         $("#response-count").val("" + count)
     }
+
+    $(document).ready(function() {
+        $(".up-btn").on("click", function() {
+            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == 0) {
+                return;
+            }
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(".down-btn").on("click", function() {
+            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == $(".poll_response").length - 1) {
+                return;
+            }
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(".delete-btn").on("click", function() {
+            count = $(".poll_response").length
+            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            for(i=curr_pos + 1; i < count; i++) {
+                $(".order-" + i).attr("value", i - 1)
+                $(".order-" + i).addClass("order-" + (i - 1));
+                $(".order-" + i).removeClass("order-" + i);
+            }
+            for(i=wrapper_id + 1; i < count; i++) {
+                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
+                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+            }
+            $(this).parent().remove()
+            count -= 1
+            $("#response-count").val("" + count)
+        })
+    });
 
 </script>

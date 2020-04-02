@@ -40,7 +40,7 @@ class PollModel extends AbstractModel {
     }
 
     public function getResponses() {
-        return $this->responses;
+        return array_keys($this->responses);
     }
 
     public function getAnswers() {
@@ -55,7 +55,7 @@ class PollModel extends AbstractModel {
         return $this->status == "closed";
     }
 
-    public function hasEnded() {
+    public function isEnded() {
         return $this->status == "ended";
     }
 
@@ -70,19 +70,26 @@ class PollModel extends AbstractModel {
         return $this->user_responses[$user_id];
     }
 
+    public function getResponseString($response_id) {
+        if (isset($this->responses[$response_id])) {
+            return $this->responses[$response_id];
+        }
+        return "No Response";
+    }
+
     public function getReleaseDate() {
         return $this->release_date;
     }
 
     public function isCorrect($response) {
-        return in_array($response, $this->responses) and in_array($response, $this->answers);
+        return in_array($response, $this->getResponses()) and in_array($response, $this->answers);
     }
 
     public function getScore($user_id) {
-        if (!isset($this->user_responses[$user_id])){
+        if (!isset($this->user_responses[$user_id])) {
             return 0.0;
         }
-        return $this->isCorrect($this->user_responses[$user_id]) ? (float)$this->core->getConfig()->getPollsPtsForCorrect() : (float)$this->core->getConfig()->getPollsPtsForIncorrect();
+        return $this->isCorrect($this->user_responses[$user_id]) ? (float) $this->core->getConfig()->getPollsPtsForCorrect() : (float) $this->core->getConfig()->getPollsPtsForIncorrect();
     }
 
     public function isInPast() {

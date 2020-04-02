@@ -160,7 +160,7 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true" ? true : false;
         }
         elseif ($name === 'polls_enabled') {
-            $entry = $entry === "true" ? true: false;
+            $entry = $entry === "true" ? true : false;
         }
         elseif ($name === 'upload_message') {
             $entry = nl2br($entry);

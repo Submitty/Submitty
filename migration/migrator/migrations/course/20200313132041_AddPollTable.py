@@ -17,8 +17,8 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, status TEXT NOT NULL, release_date DATE NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS poll_options(option_id SERIAL PRIMARY KEY, poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL, correct bool NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), response TEXT NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS poll_options(option_id integer, order_id integer, poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL, correct bool NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), option_id integer NOT NULL)")
     
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     # add boolean to course config

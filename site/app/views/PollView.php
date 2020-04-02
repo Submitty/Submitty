@@ -33,6 +33,7 @@ class PollView extends AbstractView {
     }
 
     public function showNewPollPage() {
+        $this->core->getOutput()->addInternalCss('polls.css');
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
@@ -49,6 +50,7 @@ class PollView extends AbstractView {
     }
 
     public function editPoll($poll) {
+        $this->core->getOutput()->addInternalCss('polls.css');
         return $this->core->getOutput()->renderTwigTemplate("polls/NewPollPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
