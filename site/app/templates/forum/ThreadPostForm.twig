@@ -31,7 +31,7 @@
             <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -82,7 +82,7 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}"
+        <textarea name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
         onkeydown="submitNearestForm(event,$(this))"></textarea>
     </div>
 <br/>
@@ -91,21 +91,19 @@
 {% if show_categories %}
 
     <div id="category-selection-container" class="form-group row thread-category-container inline-block">
-        <p id="cat_label">Categories</p>
-
         {% if categories | length == 0 %}
             <span class='category-list-no-element' >
                 No categories exists please create one.
             </span>
         {% endif %}
-        <div id='categories-pick-list'>
-
-        {% for category in categories %}
-            <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
-            </div>
-        {% endfor %}
-    </div>
+        <fieldset id='categories-pick-list'>
+          <legend id="cat_label">Categories</legend>
+          {% for category in categories %}
+              <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
+                  <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+              </div>
+          {% endfor %}
+        </fieldset>
     <script>
     $(function() {
         refreshCategories();
@@ -115,7 +113,7 @@
 {% endif %}
 <div class="form-group row thread-attachment-container">
     {% if post_box_id %}
-        <span class="inline-block">
+        <div class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
@@ -123,9 +121,9 @@
                 </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
-                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
+                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
             </div>
-        </span>
+        </div>
         <br style="margin-right:1rem;">
 
         {% if attachment_script %}
@@ -163,7 +161,8 @@
             </script>
         {% endif %}
     {% endif %}
-    <span class="inline-block right-zero">
+    <fieldset class="inline-block right-zero">
+      <legend style="display:none">Settings:</legend>
         {% if show_anon %}
             <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
         {% endif %}
@@ -194,7 +193,7 @@
             <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
             <input type="submit" name="post_and_unresolve" class="submit_unresolve btn btn-primary inline-block" {{ post_box_id | length > 0 ? "post_box_id=" ~ post_box_id : ""  }} value="{{ submit_label }} and Unresolve" />
         {% endif %}
-    </span>
+    </fieldset>
 </div>
 <br>
 </div>

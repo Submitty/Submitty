@@ -4,8 +4,7 @@
 
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
-
-                <a class="active-thread-remove-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Unpin Thread" aria-label="Unpin Thread"><i class="fas fa-thumbtack" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
+                <a class="active-thread-remove-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to unpin this thread?', 0, '{{ csrf_token }}')" title="Unpin Thread" aria-label="Unpin Thread"><i class="fas fa-thumbtack reverse_golden_hover"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
@@ -13,19 +12,17 @@
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
-
-                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack" title = "Make Announcement" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
+                <a class="not-active-thread-announcement key_to_click" tabindex="0" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to pin this thread to the top?', 1, '{{ csrf_token }}')" title="Make thread an announcement" aria-label="Pin Thread"><i class="fas fa-thumbtack golden_hover" title = "Make Announcement"></i></a>
 
             {% endif %}
 
             {% if isCurrentFavorite %}
 
-
-                <a class="current-favorite key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')"></i></a>
+                <a class="current-favorite key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '0');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark reverse_golden_hover"></i></a>
 
             {% else %}
 
-                <a class="pinned-thread key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark" onmouseleave="changeColor(this, '#e0e0e0')" onmouseover="changeColor(this, 'gold')"></i></a>
+                <a class="pinned-thread key_to_click" tabindex="0" onClick="pinThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover"></i></a>
 
             {% endif %}
 
@@ -87,13 +84,13 @@
             {% endif %}
         {% endif %}
 
-        <h7 class="last-edit">
+        <span class="last-edit">
 			<strong class="post_user_id">{{ visible_username }}</strong>
 			{{ post_date }}
             {% if edit_date is not null %}
                 (<i>Last edit at {{ edit_date }}</i>)
             {% endif %}
-        </h7>
+        </span>
     </span>
 
     {% if post_attachment.exist == true %}
@@ -129,4 +126,3 @@
 
     </form>
 {% endif %}
-
