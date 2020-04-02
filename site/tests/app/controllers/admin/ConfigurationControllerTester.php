@@ -104,12 +104,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
             'queue_enabled'                  => false,
-<<<<<<< HEAD
-            'queue_contact_info'             => false
-=======
             'queue_contact_info'             => false,
             'queue_message'                  => 'Welcome to the OH/Lab queue'
->>>>>>> 91c7d3c8992b30a082201c8f21d65ce1658ad481
         ];
 
         $gradeable_seating_options = [
@@ -188,12 +184,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
             'queue_enabled'                  => false,
-<<<<<<< HEAD
-            'queue_contact_info'             => false
-=======
             'queue_contact_info'             => false,
             'queue_message'                  => 'Welcome to the OH/Lab queue'
->>>>>>> 91c7d3c8992b30a082201c8f21d65ce1658ad481
         ];
 
         $gradeable_seating_options = [
@@ -279,12 +271,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor'    => false,
             'auto_rainbow_grades'            => false,
             'queue_enabled'                  => false,
-<<<<<<< HEAD
-            'queue_contact_info'             => false
-=======
             'queue_contact_info'             => false,
             'queue_message'                  => 'Welcome to the OH/Lab queue'
->>>>>>> 91c7d3c8992b30a082201c8f21d65ce1658ad481
         ];
 
         $gradeable_seating_options = [

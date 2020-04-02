@@ -59,12 +59,9 @@ use app\libraries\FileUtils;
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
  * @method bool getQueueContactInfo()
-<<<<<<< HEAD
  * @method bool isPollsEnabled()
  * @method float getPollsPtsForCorrect()
  * @method float getPollsPtsForIncorrect()
-=======
->>>>>>> 91c7d3c8992b30a082201c8f21d65ce1658ad481
  * @method void setSemester(string $semester)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
@@ -415,12 +412,8 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-<<<<<<< HEAD
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'polls_enabled', 'polls_pts_for_correct',
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'polls_enabled', 'polls_pts_for_correct',
             'polls_pts_for_incorrect'
-=======
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message'
->>>>>>> 91c7d3c8992b30a082201c8f21d65ce1658ad481
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
