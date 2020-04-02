@@ -31,6 +31,9 @@ def up(config, database, semester, course):
         j['course_details']['polls_pts_for_correct'] = 1.0
         j['course_details']['polls_pts_for_incorrect'] = 0.5
 
+        if 'queue_enabled' not in j['course_details']:
+            j['course_details']['queue_enabled'] = False
+
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
 
