@@ -435,11 +435,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'display_rainbow_grades_summary',
-<<<<<<< HEAD
             'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled", 'queue_contact_info', 'polls_enabled');
-=======
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled", 'queue_contact_info');
->>>>>>> 91c7d3c8992b30a082201c8f21d65ce1658ad481
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
