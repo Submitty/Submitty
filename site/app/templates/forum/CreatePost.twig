@@ -50,15 +50,15 @@
         {% endif %}
         {% if userGroup <= 3 and has_history %}
             <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
-            {% if (isThreadLocked != 1 or accessFullGrading) and first != 1 %}
-                <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
-                {% if thread_previously_merged %}
-                    Unmerge Thread
-                {% else %}
-                    Split Post
-                {% endif %}
-                </a>
+        {% endif %}
+        {% if (isThreadLocked != 1 or accessFullGrading) and first != 1 %}
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showSplit({{ post.id }})">
+            {% if thread_previously_merged %}
+                Unmerge Thread
+            {% else %}
+                Split Post
             {% endif %}
+            </a>
         {% endif %}
 
     {% endif %}
