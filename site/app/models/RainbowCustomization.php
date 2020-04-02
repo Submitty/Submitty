@@ -104,17 +104,6 @@ class RainbowCustomization extends AbstractModel {
             ];
         }
 
-        $polls = $this->core->getQueries()->getPolls();
-        foreach ($polls as $poll) {
-            $this->bucket_counts["participation"]++;
-            $this->customization_data["participation"][] = [
-                "id" => "" . $poll->getID(),
-                "title" => $poll->getName(),
-                "max_score" => $this->core->getConfig()->getPollsPtsForCorrect(),
-                "grade_release_date" => "1999-12-31 23:59:59-0500"
-            ];
-        }
-
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
             $json_gradeables = $this->RCJSON->getGradeables();
