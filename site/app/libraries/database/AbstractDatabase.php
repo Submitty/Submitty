@@ -149,7 +149,7 @@ abstract class AbstractDatabase {
                 }
                 elseif (gettype($parameter) === "object") {
                     if (get_class($parameter) === "DateTime") {
-                        $parameter = $parameter->format("Y-m-d H:i:sO") . " " . $parameter->getTimezone()->getName();
+                        $parameter = $parameter->format("Y-m-d H:i:sO");
                     }
                 }
             }
