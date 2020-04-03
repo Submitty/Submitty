@@ -70,10 +70,11 @@ class PDFController extends AbstractController {
      */
     public function savePDFAnnotation($gradeable_id) {
         //Save the annotation layer to a folder.
-        $annotation_layer = $_POST['annotation_layer'];
-        $annotation_info = $_POST['GENERAL_INFORMATION'];
+        $annotation_layer = json_decode($_POST['annotation_layer'], true);
+        $annotation_info = json_decode($_POST['GENERAL_INFORMATION'], true);
         $grader_id = $this->core->getUser()->getId();
         $course_path = $this->core->getConfig()->getCoursePath();
+        //echo(strval($_POST['GENERAL_INFORMATION']));
         $user_id = $annotation_info['user_id'];
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -87,6 +88,8 @@ class PDFController extends AbstractController {
         }
 
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        
+        $pdf_gradeable_path = FileUtils::joinPaths($course_path, 'pdfs', $annotation_info['gradeable_id']);
 
         $annotation_gradeable_path = FileUtils::joinPaths($course_path, 'annotations', $annotation_info['gradeable_id']);
         if (!is_dir($annotation_gradeable_path) && !FileUtils::createDir($annotation_gradeable_path)) {
@@ -106,7 +109,14 @@ class PDFController extends AbstractController {
         }
 
         $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.json';
+        $new_file_pdf_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.pdf';
+        if(!file_exists($pdf_gradeable_path)){
+           mkdir($pdf_gradeable_path, 0777, true); 
+        }
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
+        if($_POST['pdf'] != null){
+            file_put_contents(FileUtils::joinPaths($pdf_gradeable_path, $new_file_pdf_name), base64_decode($_POST['pdf']));
+        }
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
     }

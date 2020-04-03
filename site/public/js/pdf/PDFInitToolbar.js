@@ -146,29 +146,60 @@ window.onbeforeunload = function() {
     }
 
     function saveFile(){
-        let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
-        let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
+        let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: {
-                annotation_layer,
-                GENERAL_INFORMATION,
-                'csrf_token': csrfToken
-            },
-            success: function(data){
-                let response = JSON.parse(data);
-                if(response.status == "success"){
-                    $('#save_status').text("Saved");
-                    $('#save_status').css('color', 'black');
+        let doc = null;
+        html2canvas(document.querySelector(`div#pageContainer${1}`), {
+            onrendered: function(canvas) {
+                let ctx = canvas.getContext('2d');
+                let children = document.querySelector(`div#pageContainer${1} svg.annotationLayer`).children;
+                for (var i = 0; i < children.length; i++) {
+                    let annotation = children[i];
+                    if(annotation.getAttribute("data-pdf-annotate-type") == "drawing"){
+                        let path2 = new Path2D(annotation.getAttribute("d"));
+                        ctx.stroke(path2);
+                        //ctx.drawImage(annotation, 0, 0);
+                    }
                 }
-                else {
-                    alert(data.message);
-                }
-            },
-            error: function(){
-                alert("Something went wrong, please contact a administrator.");
+                let imgData = canvas.toDataURL(
+                    'image/png');              
+                doc = new jsPDF('p', 'mm');
+                doc.addImage(imgData, 'PNG', 10, 10);
+                doc.save('sample-file.pdf');
+                var fd = new FormData();
+                var pdf = btoa(doc.output());
+                fd.append('annotation_layer', JSON.stringify(annotation_layer));
+                fd.append('GENERAL_INFORMATION', JSON.stringify(GENERAL_INFORMATION));
+                fd.append('csrf_token', csrfToken);
+                fd.append('pdf', pdf);
+                
+                /*var a = document.createElement('a');
+                // toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
+                a.href = canvas.toDataURL("image/png");
+                a.download = 'somefilename.png';
+                a.click();*/
+                let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
+                console.log(typeof annotation_layer);
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    success: function(data){
+                        let response = JSON.parse(data);
+                        if(response.status == "success"){
+                            $('#save_status').text("Saved");
+                            $('#save_status').css('color', 'black');
+                        }
+                        else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function(){
+                        alert("Something went wrong, please contact a administrator.");
+                    }
+                });
             }
         });
     }
