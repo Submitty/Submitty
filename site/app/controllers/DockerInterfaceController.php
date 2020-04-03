@@ -79,24 +79,11 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue", "updateDockerInfo.json");
 
-        $found = false;
-        try {
-            foreach (scandir($path) as $job) {
-                if (strpos($job, 'updateDockerInfo') !== false) {
-                    $found = true;
-                    break;
-                }
-            }
-        }
-        catch (\Exception $e) {
-            return Response::JsonOnlyResponse(
-                JsonResponse::getFailResponse($e->getMessage())
-            );
-        }
-
-        return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(["found" => $found]));
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse(["found" => file_exists($path)])
+        );
     }
 
     /**
@@ -115,15 +102,14 @@ class DockerInterfaceController extends AbstractController {
 
         $this->core->getOutput()->addInternalCss('docker_interface.css');
         $this->core->getOutput()->addInternalJs('docker_interface.js');
-
         $this->core->getOutput()->enableMobileViewport();
 
         $path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "docker_data", "submitty_docker.json");
 
         
-        $docker_info = json_decode(@file_get_contents($path), true);
+        $docker_info = FileUtils::readJsonFile($path);
         $json_response = JsonResponse::getSuccessResponse($docker_info);
-        if (is_null($docker_info)) {
+        if ($docker_info === false) {
             $err_msg = "Failed to parse submitty docker information";
             $this->core->addErrorMessage($err_msg);
             $json_response = JsonResponse::getFailResponse($err_msg);
