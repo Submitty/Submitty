@@ -283,7 +283,7 @@ function clearUserFormInformation() {
       if (type === "text") {
         formElement.value = "";
       } else if (type === "select-one") {
-        formElement.value = "null";
+        formElement.selectedIndex = 0;
       } else if (type === "checkbox") {
           // clear the checkbox for all the checkboxes other than manual_registration
           formElement.checked = name === "manual_registration";
@@ -300,6 +300,13 @@ function clearValidityWarnings() {
 }
 
 function closeButton() {
+  let form = document.querySelectorAll('form')[0];
+  // edit from manage page
+  if($('[name="edit_user"]', form).val() === "true"){
+    clearUserFormInformation();
+    $('#edit-user-form').css('display', 'none');
+    return;
+  }
   // If form contain some data, prompt the user for data loss
   if(!isUserFormEmpty()){
     if (confirm('Changes to the form will be lost!')) {
