@@ -106,7 +106,12 @@
     margin-right: 5px;
 }
 
-.fa-gradeable-curve:hover
+.fa-rb
+{
+    color: black
+}
+
+.fa-rb:hover
 {
     color: red;
 }
@@ -137,7 +142,12 @@
     margin-left: 5px;
 }
 
-.gradeable-li-curve-input
+.gradeable-li-curve
 {
     display: none;
+}
+
+.gradeable-li-curve input
+{
+    width: 50px;
 }

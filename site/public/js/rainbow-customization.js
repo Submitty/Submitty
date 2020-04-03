@@ -357,6 +357,11 @@ $(document).ready(function () {
         displayChangeDetectedMessage();
     });
 
+    $('.fa-gradeable-curve').click(function(event) {
+        var id = jQuery(this).attr("id").split('-')[3];
+        $('#gradeable-curve-div-' + id).toggle();
+    });
+
     // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
     // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     // select the target node

@@ -132,14 +132,29 @@
                                                        onblur="ClampPoints(this);">
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-chart-line fa-gradeable-curve"></i>
+                                                        <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
                                                     </div>
-                                                    <div class="gradeable-li-curve">
-                                                        <p class="gradeable-li-curve-input">
-                                                            TEST
-                                                        </p>
+                                                    <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
+                                                        <label for="">A-: </label>
+                                                        <input type="text">
+                                                        <label for="">B-: </label>
+                                                        <input type="text">
+                                                        <label for="">C-: </label>
+                                                        <input type="text">
+                                                        <label for="">D: </label>
+                                                        <input type="text">
+                                                        <i class="far fa-question-circle fa-rb" title="You may apply a curve
+on a per gradeable basis.
+
+Values should be entered as a decimal.
+
+For example, to adjust the minimum grade
+required for a student to obtain an A- to 85%,
+you would enter .85 in the 'A-' box.
+
+You must enter values in all 4 boxes."></i>
                                                     </div>
                                                 </div>
                                             </li>
