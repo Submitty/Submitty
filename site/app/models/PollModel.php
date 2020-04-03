@@ -82,7 +82,7 @@ class PollModel extends AbstractModel {
     }
 
     public function isCorrect($response) {
-        return in_array($response, $this->getResponses()) and in_array($response, $this->answers);
+        return in_array($response, $this->getResponses()) && in_array($response, $this->answers);
     }
 
     public function getScore($user_id) {
