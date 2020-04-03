@@ -62,7 +62,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
@@ -92,7 +92,7 @@
 	        {% if core.getUser().accessGrading() %}
               <li class="dropdown-divider"></li>
               <li title="Click to edit categories" class='dropdown-item' role="menuitem">
-            	<a href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
+            	<a href ="{{ manage_categories_url }}" title="Edit Forum Categories" target="_blank" >Edit Categories</a>
 			{% endif %}
 			{% if thread_exists %}
 	          <li class="dropdown-divider"></li>
