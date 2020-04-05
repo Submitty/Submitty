@@ -129,7 +129,7 @@ class DateUtils {
      * @param $core Core core
      * @return array
      */
-    public static function getServerTimeJson($core): array {
+    public static function getServerTimeJson(Core $core): array {
         $time = new \DateTime('now', $core->getConfig()->getTimezone());
 
         return [
