@@ -175,6 +175,7 @@ div.btn-container {
 #rebuild-status-panel {
     display: inline-block;
     background-color: lightgrey;
+    color: var(--btn-text-black);
 
     position: relative;
     top: 5px;

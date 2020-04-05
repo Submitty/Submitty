@@ -143,6 +143,16 @@ abstract class AbstractDatabase {
     public function query($query, $parameters = array()) {
         try {
             $this->query_count++;
+            foreach ($parameters as &$parameter) {
+                if (gettype($parameter) === "boolean") {
+                    $parameter = $this->convertBoolean($parameter);
+                }
+                elseif (gettype($parameter) === "object") {
+                    if (get_class($parameter) === "DateTime") {
+                        $parameter = $parameter->format("Y-m-d H:i:sO");
+                    }
+                }
+            }
             $this->all_queries[] = array($query, $parameters);
             $statement = $this->link->prepare($query);
             $result = $statement->execute($parameters);

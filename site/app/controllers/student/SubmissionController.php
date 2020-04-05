@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
+use app\libraries\GradingQueue;
 use app\libraries\Logger;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -1542,12 +1543,17 @@ class SubmissionController extends AbstractController {
         $results_json_exists = file_exists($filepath);
 
         // if the results json exists, check the database to make sure that the autograding results are there.
-        $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+        $has_results = $results_json_exists && ($this->core->getGradingQueue()->getQueueStatus(
             $gradeable_id,
-            $gradeable_version,
-            $user_id,
-            $team_id
-        );
+            $submitter_id,
+            $gradeable_version
+        ) === GradingQueue::NOT_QUEUED) &&
+            $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+                $gradeable_id,
+                $gradeable_version,
+                $user_id,
+                $team_id
+            );
 
         if ($has_results) {
             $refresh_string = "REFRESH_ME";
