@@ -22,19 +22,16 @@
         return data;
     }
     function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
-        if(increment<1){
-            increment = 1;
-        }
-        var loop = Math.ceil(range/increment);
-        var tracking = min;
+        let loop = Math.ceil(range/increment);
+        let tracking = min;
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
-            tracking+=increment;
-            if(i==(loop-1)){
-                xBuckets.push(tracking-increment+" to <="+max);
+            tracking = +parseFloat(tracking+increment).toPrecision(4);
+            if(i===(loop-1)){
+                xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <="+max);
             }
             else{
-               xBuckets.push(tracking-increment+" to <"+tracking);
+               xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <"+tracking);
             }
         }
         var maxMin = tracking-increment;
@@ -42,7 +39,7 @@
         for(i = 0;i<xValue.length;i++){
            ct++;
            for(var [key,value] of betterBuckets){
-                if(key==maxMin){
+                if(key===maxMin){
                     if(xValue[i]>=key&&xValue[i]<=max){
                        betterBuckets.set(key,value+1);
                    }
@@ -74,7 +71,12 @@
         modeCount=0;
         {% if overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
-                mode=fillBuckets(rangeT,parseInt(bucketInputTotal.value),betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
+                let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
+                if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return;
+                }
+                mode=fillBuckets(rangeT,bucketInputTotalValue,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
                 var dataTotal=tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
@@ -86,8 +88,13 @@
             }
         {% endif %}
         {% if autograded_average != null or autograded_average.getCount() != 0  %}
+            let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
             if(bucketInputAuto.value!=''){
-                mode=fillBuckets(range,parseInt(bucketInputAuto.value),betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+                if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return ;
+                }
+                mode=fillBuckets(range,bucketInputAutoValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
                 var dataAuto = tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputAuto.value='';

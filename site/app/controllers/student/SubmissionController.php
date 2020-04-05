@@ -10,7 +10,7 @@ use app\libraries\GradingQueue;
 use app\libraries\Logger;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
@@ -1358,14 +1358,14 @@ class SubmissionController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
      */
-    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): Response {
+    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): MultiResponse {
         $ta = $ta === "true" ?? false;
         if ($ta !== false) {
             // make sure is full grader
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                return new Response(
+                return new MultiResponse(
                     JsonResponse::getFailResponse($msg),
                     null,
                     new RedirectResponse($this->core->buildCourseUrl())
@@ -1378,7 +1378,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($this->core->buildCourseUrl())
@@ -1393,7 +1393,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1404,7 +1404,7 @@ class SubmissionController extends AbstractController {
         if ($new_version < 0) {
             $msg = "Cannot set the version below 0.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1415,7 +1415,7 @@ class SubmissionController extends AbstractController {
         if ($new_version > $highest_version) {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1425,7 +1425,7 @@ class SubmissionController extends AbstractController {
         if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1446,7 +1446,7 @@ class SubmissionController extends AbstractController {
         if ($json === false) {
             $msg = "Failed to open settings file.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1461,7 +1461,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]))
@@ -1498,7 +1498,7 @@ class SubmissionController extends AbstractController {
             ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse(['version' => $new_version, 'message' => $msg]),
             null,
             new RedirectResponse($url)
