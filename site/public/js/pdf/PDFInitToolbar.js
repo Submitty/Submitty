@@ -149,23 +149,40 @@ window.onbeforeunload = function() {
         let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         let doc = null;
-        html2canvas(document.querySelector(`div#pageContainer${1}`), {
+        let annotationPages = document.getElementsByClassName("annotationLayer");
+        for(page in annotationPages){
+            page.style.display = "none";
+        }
+        
+        html2canvas(document.querySelector(`div#viewer`), {
             onrendered: function(canvas) {
                 let ctx = canvas.getContext('2d');
-                let children = document.querySelector(`div#pageContainer${1} svg.annotationLayer`).children;
-                for (var i = 0; i < children.length; i++) {
-                    let annotation = children[i];
-                    if(annotation.getAttribute("data-pdf-annotate-type") == "drawing"){
-                        let path2 = new Path2D(annotation.getAttribute("d"));
-                        ctx.stroke(path2);
-                        //ctx.drawImage(annotation, 0, 0);
+                for (let i=0; i<NUM_PAGES; i++) {
+                    let children = document.querySelector(`div#pageContainer${i+1} svg.annotationLayer`).children;
+                    for (let j = 0; j < children.length; j++) {
+                        let annotation = children[j];
+                        if(annotation.getAttribute("data-pdf-annotate-type") == "drawing"){
+                            let path2 = new Path2D(annotation.getAttribute("d"));
+                            ctx.strokeStyle = annotation.getAttribute("stroke");
+                            //ctx.stroke(path2);
+                        }
+                        if(annotation.getAttribute("data-pdf-annotate-type") == "textbox"){
+                            let textChild = annotation.children[0];
+                            //console.log(textChild);
+                            ctx.font = textChild.getAttribute("font-size") + "px sans-serif";
+                            ctx.fillStyle = textChild.getAttribute("fill");
+                            let text = annotation.textContent;
+                            if(text != null){
+                                ctx.fillText(text, textChild.getAttribute("x"), textChild.getAttribute("y"));
+                            }
+                        }
                     }
                 }
                 let imgData = canvas.toDataURL(
                     'image/png');              
                 doc = new jsPDF('p', 'mm');
                 doc.addImage(imgData, 'PNG', 10, 10);
-                doc.save('sample-file.pdf');
+                //doc.save('sample-file.pdf');
                 var fd = new FormData();
                 var pdf = btoa(doc.output());
                 fd.append('annotation_layer', JSON.stringify(annotation_layer));
@@ -180,6 +197,9 @@ window.onbeforeunload = function() {
                 a.click();*/
                 let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
                 console.log(typeof annotation_layer);
+                for(page in annotationPages){
+                    page.style.display = "none";
+                }
                 $.ajax({
                     type: 'POST',
                     url: url,

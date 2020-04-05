@@ -115,11 +115,6 @@ class MiscController extends AbstractController {
                     return false;
                 }
             }
-
-            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                $this->core->getOutput()->showError("Your section may not access this file.");
-                return false;
-            }
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
@@ -187,10 +182,10 @@ class MiscController extends AbstractController {
         // security check
         $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
 
-       /* if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
             return false;
-        }*/
+        }
 
         // If attempting to obtain course materials
         if ($dir == 'course_materials') {
@@ -205,16 +200,16 @@ class MiscController extends AbstractController {
             }
         }
 
-        /*if ($dir == 'submissions') {
+        if ($dir == 'submissions') {
             //cannot download scanned images for bulk uploads
             if (
                 strpos(basename($path), "upload_page_") !== false
-                //&& FileUtils::getContentType($path) !== "application/pdf"
+                && FileUtils::getContentType($path) !== "application/pdf"
             ) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
-        }*/
+        }
 
         $filename = pathinfo($path, PATHINFO_BASENAME);
         $this->core->getOutput()->useHeader(false);
