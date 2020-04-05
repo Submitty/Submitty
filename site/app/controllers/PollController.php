@@ -114,7 +114,20 @@ class PollController extends AbstractController {
     * @return Response
     */
     public function openPoll() {
-        $this->core->getQueries()->setPollOpen($_POST["poll_id"], $_POST["open"]);
+        $this->core->getQueries()->openPoll($_POST["poll_id"]);
+
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['polls']))
+        );
+    }
+
+    /**
+    * @Route("/{_semester}/{_course}/polls/setEnded", methods={"POST"})
+    * @AccessControl(role="INSTRUCTOR")
+    * @return Response
+    */
+    public function endPoll() {
+        $this->core->getQueries()->endPoll($_POST["poll_id"]);
 
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))

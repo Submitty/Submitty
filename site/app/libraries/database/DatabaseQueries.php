@@ -6312,7 +6312,7 @@ AND gc_id IN (
 
     public function getFuturePolls() {
         $polls = array();
-        $this->course_db->query("SELECT * from polls where release_date > ? and status='closed' order by poll_id DESC", array(date("Y-m-d")));
+        $this->course_db->query("SELECT * from polls where release_date > ? and status!='open' order by poll_id DESC", array(date("Y-m-d")));
         $polls_rows = $this->course_db->rows();
         $user = $this->core->getUser()->getId();
 
