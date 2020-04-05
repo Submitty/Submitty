@@ -12,8 +12,9 @@ class PollModel extends AbstractModel {
     protected $responses;
     protected $answers;
     protected $open;
-    protected $user_response;
+    protected $user_responses;
     protected $release_date;
+    protected $status;
 
     public function __construct(Core $core, $id, $name, $question, array $responses, array $answers, $status, array $user_responses, $release_date) {
         parent::__construct($core);

@@ -93,13 +93,15 @@ class PollController extends AbstractController {
         $response_count = $_POST["response_count"];
         $responses = array();
         $answers = array();
+        $orders = array();
         for ($i = 0; $i < $response_count; $i++) {
-            $responses[] = $_POST["response_" . $i];
-            if ($_POST["is_correct_" . $i] == "on") {
-                $answers[] = $_POST["response_" . $i];
+            $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
+            $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
+            if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
+                $answers[] = $_POST["option_id_" . $i];
             }
         }
-        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"]);
+        $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
 
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -173,13 +175,15 @@ class PollController extends AbstractController {
         $response_count = $_POST["response_count"];
         $responses = array();
         $answers = array();
+        $orders = array();
         for ($i = 0; $i < $response_count; $i++) {
-            $responses[] = $_POST["response_" . $i];
+            $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
+            $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
             if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
-                $answers[] = $_POST["response_" . $i];
+                $answers[] = $_POST["option_id_" . $i];
             }
         }
-        $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"]);
+        $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
         
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
