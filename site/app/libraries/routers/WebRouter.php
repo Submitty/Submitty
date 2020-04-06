@@ -3,7 +3,7 @@
 namespace app\libraries\routers;
 
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Config\FileLocator;
@@ -54,7 +54,7 @@ class WebRouter {
     /**
      * @param Request $request
      * @param Core $core
-     * @return Response|mixed should be of type Response only in the future
+     * @return MultiResponse|mixed should be of type Response only in the future
      */
     public static function getApiResponse(Request $request, Core $core) {
         try {
@@ -68,34 +68,34 @@ class WebRouter {
                 !$logged_in
                 && !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')
             ) {
-                return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
+                return new MultiResponse(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
             if ($logged_in && !$core->getUser()->accessFaculty()) {
-                return new Response(JsonResponse::getFailResponse("API is open to faculty only."));
+                return new MultiResponse(JsonResponse::getFailResponse("API is open to faculty only."));
             }
 
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint.")
                 );
             }
 
             if (!$router->checkFeatureFlag()) {
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Feature is not yet available.')
                 );
             }
         }
         catch (ResourceNotFoundException $e) {
-            return new Response(JsonResponse::getFailResponse("Endpoint not found."));
+            return new MultiResponse(JsonResponse::getFailResponse("Endpoint not found."));
         }
         catch (MethodNotAllowedException $e) {
-            return new Response(JsonResponse::getFailResponse("Method not allowed."));
+            return new MultiResponse(JsonResponse::getFailResponse("Method not allowed."));
         }
         catch (\Exception $e) {
-            return new Response(JsonResponse::getErrorResponse($e->getMessage()));
+            return new MultiResponse(JsonResponse::getErrorResponse($e->getMessage()));
         }
 
         $core->getOutput()->disableRender();
@@ -106,7 +106,7 @@ class WebRouter {
     /**
      * @param Request $request
      * @param Core $core
-     * @return Response|mixed should be of type Response only in the future
+     * @return MultiResponse|mixed should be of type Response only in the future
      * @throws \ReflectionException|\Exception
      */
     public static function getWebResponse(Request $request, Core $core) {
@@ -118,25 +118,25 @@ class WebRouter {
             $logged_in = $core->isWebLoggedIn();
 
             $login_check_response = $router->loginRedirectCheck($logged_in);
-            if ($login_check_response instanceof Response) {
+            if ($login_check_response instanceof MultiResponse || $login_check_response instanceof WebResponse) {
                 return $login_check_response;
             }
 
             $csrf_check_response = $router->csrfCheck();
-            if ($csrf_check_response instanceof Response) {
+            if ($csrf_check_response instanceof MultiResponse || $login_check_response instanceof WebResponse) {
                 return $csrf_check_response;
             }
 
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
-                return new Response(
+                return new MultiResponse(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
                 );
             }
 
             if (!$router->checkFeatureFlag()) {
-                return new Response(
+                return new MultiResponse(
                     JsonResponse::getFailResponse('Feature is not yet available.'),
                     new WebResponse("Error", "errorPage", "Feature is not yet available.")
                 );
@@ -145,12 +145,12 @@ class WebRouter {
         catch (ResourceNotFoundException | MethodNotAllowedException $e) {
             // redirect to login page or home page
             if (!$logged_in) {
-                return Response::RedirectOnlyResponse(
+                return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['authentication', 'login']))
                 );
             }
             else {
-                return Response::RedirectOnlyResponse(
+                return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );
             }
@@ -219,7 +219,7 @@ class WebRouter {
     /**
      * Check if the user needs a redirection depending on their login status.
      * @param $logged_in
-     * @return Response|bool
+     * @return MultiResponse|bool
      */
     private function loginRedirectCheck($logged_in) {
         if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
@@ -232,7 +232,7 @@ class WebRouter {
 
             $query_string = empty($filtered_query_obj) ? null : '?' . http_build_query($filtered_query_obj);
 
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse(
                     $this->core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url . $query_string)
                 )
@@ -244,7 +244,7 @@ class WebRouter {
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess'
         ) {
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['no_access']))
             );
         }
@@ -255,13 +255,13 @@ class WebRouter {
                     $this->parameters['_method'] !== 'logout'
                     && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
                 ) {
-                    return Response::RedirectOnlyResponse(
+                    return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );
                 }
             }
             elseif (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                return Response::RedirectOnlyResponse(
+                return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
                 );
             }
@@ -272,7 +272,7 @@ class WebRouter {
 
     /**
      * Check if the request carries a valid CSRF token for all POST requests.
-     * @return Response|bool
+     * @return MultiResponse|bool
      */
     private function csrfCheck() {
         if (
@@ -282,7 +282,7 @@ class WebRouter {
         ) {
             $msg = "Invalid CSRF token.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($this->core->buildUrl())
