@@ -311,6 +311,18 @@ CREATE TABLE gradeable_data (
     gd_user_viewed_date timestamp(6) with time zone DEFAULT NULL
 );
 
+--
+-- Name: gradeable_comments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gradeable_overall_comment (
+    g_id character varying(255) NOT NULL,
+    goc_user_id character varying(255),
+    goc_team_id character varying(255),
+    goc_grader_id character varying(255) NOT NULL,
+    goc_overall_comment character varying NOT NULL
+);
+
 
 --
 -- Name: gradeable_data_gd_id_seq; Type: SEQUENCE; Schema: public; Owner: -
@@ -722,6 +734,13 @@ ALTER TABLE ONLY gradeable_component_mark_data
 ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_pkey PRIMARY KEY (gd_id);
 
+--
+-- Name: gradeable_overall_comment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_overall_comment
+    ADD CONSTRAINT gradeable_overall_comment_pkey PRIMARY KEY (g_id, goc_user_id, goc_team_id, goc_grader_id);
+
 
 --
 -- Name: gradeable_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -989,6 +1008,34 @@ ALTER TABLE ONLY gradeable_data
 ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_gd_team_id_fkey FOREIGN KEY (gd_team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
+--
+-- Name: gradeable_overall_comment_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_overall_comment
+    ADD CONSTRAINT gradeable_overall_comment_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+--
+-- Name: gradeable_overall_comment_goc_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_overall_comment
+    ADD CONSTRAINT gradeable_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+
+--
+-- Name: gradeable_overall_comment_goc_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_overall_comment
+    ADD CONSTRAINT gradeable_overall_comment_goc_team_id_fkey FOREIGN KEY (goc_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_overall_comment_goc_grader_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gradeable_overall_comment
+    ADD CONSTRAINT gradeable_overall_comment_goc_grader_id FOREIGN KEY (goc_grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
 -- Name: grading_registration_sections_registration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

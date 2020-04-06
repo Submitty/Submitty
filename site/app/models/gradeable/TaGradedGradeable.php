@@ -22,8 +22,8 @@ class TaGradedGradeable extends AbstractModel {
     private $graded_gradeable = null;
     /** @prop @var int The id of this gradeable data */
     protected $id = 0;
-    /** @prop @var string The grader's overall comment */
-    protected $overall_comment = "";
+    /** @prop @var string[] indexed by user_id. Overall comment made by each grader. */
+    protected $overall_comment = [];
     /** @prop @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
     /** @prop @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
@@ -50,6 +50,10 @@ class TaGradedGradeable extends AbstractModel {
         $this->setIdFromDatabase($details['id'] ?? 0);
         $this->setOverallComment($details['overall_comment'] ?? '');
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
+
+        foreach($details['array_overall_comment'] as $item) {
+            $overall_comment[$item['goc_grader_id']] = $item['goc_overall_comment'];
+        }
 
         // Default to all blank components
         foreach ($graded_gradeable->getGradeable()->getComponents() as $component) {
@@ -334,6 +338,27 @@ class TaGradedGradeable extends AbstractModel {
     public function clearDeletedGradedComponents() {
         $this->deleted_graded_components = [];
     }
+
+    /**
+     * Retrieves a mapping of grader id to overall comment. If grader is passed in, returns only
+     * the key, value pair for that grader. 
+     * @param Component $component The component to delete the grade for
+     * @param User|null $grader The grader to delete the grade for, or null to delete all grades
+     */
+    public function getOverallComment(User $grader = null) {
+        if ($grader === null) {
+            return $this->overall_comment;
+        }
+        else {
+            if (array_key_exists($grader->getId(), $this->overall_comment)) {
+                return array($grader->getId() => $this->overall_comment[$grader->getId()]);;
+            }
+            else {
+                return null;
+            }
+        }
+    }
+
 
     /**
      * Deletes the GradedComponent(s) associated with the provided Component and grader

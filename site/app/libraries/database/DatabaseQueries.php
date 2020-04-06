@@ -5040,6 +5040,43 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
+    private function updateOverallComments(TaGradedGradeable $ta_graded_gradeable) {
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment ) {
+            $this->updateOverallComment($ta_graded_gradeable, $user_id, $comment );
+        }
+    }
+
+    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $grader_id, $comment){
+        $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
+        $user_id = NULL;
+        $team_id = NULL;
+        if ($ta_graded_gradeable->getGradedGradeable->gradeable->isTeamAssignment()) {
+            $user_id = $ta_graded_gradeable->getGradedGradeable->getSubmitter()
+        }
+        else {
+            $team_id = $ta_graded_gradeable->getGradedGradeable->getSubmitter()
+        }
+
+        $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment, $g_id, $user_id, $team_id, $grader_id];
+        $query = "
+            INSERT INTO gradeable_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (g_id, goc_user_id, goc_team_id, goc_grader_id)
+                DO 
+                    UPDATE 
+                        SET 
+                            goc.goc_overall_comment = ?
+                        FROM 
+                            gradeable_overall_comment as goc
+                        WHERE
+                            goc.g_id=? AND
+                            goc.goc_user_id=? AND
+                            goc.goc_team_id=? AND
+                            goc.goc_grader_id=?;
+        ";
+        $this->course_db->query($query, $params);
+    }
+
     /**
      * Update/create the components/marks for a gradeable.
      *
@@ -5085,7 +5122,6 @@ AND gc_id IN (
             $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId(),
             $is_team ? null : $submitter_id,
             $is_team ? $submitter_id : null,
-            $ta_graded_gradeable->getOverallComment(),
             $ta_graded_gradeable->getUserViewedDate() !== null ?
                 DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
         ];
@@ -5094,9 +5130,8 @@ AND gc_id IN (
                 g_id,
                 gd_user_id,
                 gd_team_id,
-                gd_overall_comment,
                 gd_user_viewed_date)
-            VALUES(?, ?, ?, ?, ?)";
+            VALUES(?, ?, ?, ?)";
         $this->course_db->query($query, $params);
 
         // Setup the graded gradeable with its new id
@@ -5104,6 +5139,8 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+        // And to separately update the overall comments
+        $this->updateOverallComments($ta_graded_gradeable);
     }
 
     /**
@@ -5115,14 +5152,12 @@ AND gc_id IN (
         // If the grade has been modified, then update its properties
         if ($ta_graded_gradeable->isModified()) {
             $params = [
-                $ta_graded_gradeable->getOverallComment(),
                 $ta_graded_gradeable->getUserViewedDate() !== null ?
                     DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
                 $ta_graded_gradeable->getId()
             ];
             $query = "
                 UPDATE gradeable_data SET
-                  gd_overall_comment=?,
                   gd_user_viewed_date=?
                 WHERE gd_id=?";
             $this->course_db->query($query, $params);
@@ -5130,6 +5165,8 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+        // And to update the overall comment
+        $this->updateOverallComment($ta_graded_gradeable);
     }
 
     /**
@@ -5748,8 +5785,10 @@ AND gc_id IN (
 
               /* Gradeable Data */
               gd.gd_id AS id,
-              gd.gd_overall_comment AS overall_comment,
               gd.gd_user_viewed_date AS user_viewed_date,
+
+              /* get the overall comment */
+              goc.array_overall_comment AS array_overall_comment,
 
               /* Aggregate Gradeable Component Data */
               gcd.array_comp_id,
@@ -5811,6 +5850,15 @@ AND gc_id IN (
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+              LEFT JOIN (
+                SELECT 
+                    json_agg(goc_grader_id, goc_overall_comment) as array_overall_comment,
+                    g_id,
+                    goc_{$submitter_type}
+                FROM gradeable_overall_comment
+                GROUP BY g_id, goc_grader_id, goc_{$submitter_type}
+              ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
               LEFT JOIN (
