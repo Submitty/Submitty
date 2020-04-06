@@ -4,7 +4,7 @@
     "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": {
         "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
             "type": "info",
-            "lastLine": 620,
+            "lastLine": 647,
             "lastColumn": 46,
             "firstColumn": 13,
             "subType": "warning",
@@ -15,7 +15,7 @@
         },
         "Attribute “placeholder” not allowed on element “input” at this point.": {
             "type": "error",
-            "lastLine": 1101,
+            "lastLine": 1128,
             "lastColumn": 254,
             "firstColumn": 17,
             "message": "Attribute “placeholder” not allowed on element “input” at this point.",
@@ -25,7 +25,7 @@
         },
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
             "type": "error",
-            "lastLine": 1101,
+            "lastLine": 1128,
             "lastColumn": 254,
             "firstColumn": 17,
             "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
@@ -35,7 +35,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 2274,
+            "lastLine": 2311,
             "lastColumn": 156,
             "firstColumn": 87,
             "subType": "warning",
@@ -52,7 +52,7 @@
     "/s20/sample/gradeable/open_homework": {
         "Bad value “text” for attribute “role” on element “div”.": {
             "type": "error",
-            "lastLine": 708,
+            "lastLine": 735,
             "lastColumn": 205,
             "firstColumn": 57,
             "message": "Bad value “text” for attribute “role” on element “div”.",
@@ -65,7 +65,7 @@
     "/s20/sample/gradeable/grades_released_homework_autota": {
         "Bad value “text” for attribute “role” on element “div”.": {
             "type": "error",
-            "lastLine": 705,
+            "lastLine": 732,
             "lastColumn": 205,
             "firstColumn": 57,
             "message": "Bad value “text” for attribute “role” on element “div”.",
@@ -75,8 +75,8 @@
         },
         "Attribute “fname” not allowed on element “tr” at this point.": {
             "type": "error",
-            "lastLine": 711,
-            "firstLine": 710,
+            "lastLine": 738,
+            "firstLine": 737,
             "lastColumn": 69,
             "firstColumn": 79,
             "message": "Attribute “fname” not allowed on element “tr” at this point.",
@@ -86,7 +86,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 711,
+            "lastLine": 738,
             "lastColumn": 234,
             "firstColumn": 127,
             "subType": "warning",
@@ -97,7 +97,7 @@
         },
         "CSS: The value “break-word” is deprecated": {
             "type": "error",
-            "lastLine": 1166,
+            "lastLine": 1193,
             "lastColumn": 97,
             "firstColumn": 17,
             "message": "CSS: The value “break-word” is deprecated",
@@ -110,7 +110,7 @@
     "/s20/sample/notifications/settings": {
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 520,
+            "lastLine": 547,
             "lastColumn": 9,
             "firstColumn": 3,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -122,7 +122,7 @@
     "/s20/sample/gradeable": {
         "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
             "type": "info",
-            "lastLine": 620,
+            "lastLine": 647,
             "lastColumn": 46,
             "firstColumn": 13,
             "subType": "warning",
@@ -137,7 +137,7 @@
     "/s20/sample/office_hours_queue": {
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 582,
+            "lastLine": 636,
             "lastColumn": 9,
             "firstColumn": 3,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -149,7 +149,7 @@
     "/s20/sample/course_materials": {
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 2031,
+            "lastLine": 2058,
             "lastColumn": 172,
             "firstColumn": 87,
             "subType": "warning",
@@ -160,49 +160,9 @@
         }
     },
     "/s20/sample/forum": {
-        "Element “p” not allowed as child of element “pre” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 721,
-            "lastColumn": 87,
-            "firstColumn": 32,
-            "message": "Element “p” not allowed as child of element “pre” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "re_forum\"><p class=\"post_content\" style=\"white-space: pre-wrap; \"></p></",
-            "hiliteStart": 10,
-            "hiliteLength": 56
-        },
-        "Element “h7” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 724,
-            "lastColumn": 50,
-            "firstColumn": 9,
-            "message": "Element “h7” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
-            "extract": ">\n        <h7 style=\"position:relative; right:5px;\"><stron",
-            "hiliteStart": 10,
-            "hiliteLength": 42
-        },
-        "Bad value “input” for attribute “type” on element “input”.": {
-            "type": "error",
-            "lastLine": 762,
-            "lastColumn": 179,
-            "firstColumn": 9,
-            "message": "Bad value “input” for attribute “type” on element “input”.",
-            "extract": ">\n        <input type=\"input\" id=\"split_post_input\" name=\"split_post_input\" oninput=\"disableIfEmpty(this, 'split_post_submit')\" placeholder=\"Name of new thread\" style=\"width: 100%\">\n    <",
-            "hiliteStart": 10,
-            "hiliteLength": 171
-        },
-        "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
-            "type": "error",
-            "lastLine": 762,
-            "lastColumn": 179,
-            "firstColumn": 9,
-            "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
-            "extract": ">\n        <input type=\"input\" id=\"split_post_input\" name=\"split_post_input\" oninput=\"disableIfEmpty(this, 'split_post_submit')\" placeholder=\"Name of new thread\" style=\"width: 100%\">\n    <",
-            "hiliteStart": 10,
-            "hiliteLength": 171
-        },
         "The element “input” must not appear as a descendant of the “a” element.": {
             "type": "error",
-            "lastLine": 768,
+            "lastLine": 816,
             "lastColumn": 93,
             "firstColumn": 17,
             "message": "The element “input” must not appear as a descendant of the “a” element.",
@@ -210,19 +170,9 @@
             "hiliteStart": 10,
             "hiliteLength": 77
         },
-        "Attribute “label” not allowed on element “a” at this point.": {
-            "type": "error",
-            "lastLine": 861,
-            "lastColumn": 197,
-            "firstColumn": 6,
-            "message": "Attribute “label” not allowed on element “a” at this point.",
-            "extract": "\t\t\t\t\n\t\t\t\t\t<a id=\"clear_filter_button\" class=\"inline-block text-decoration-none key_to_click\" tabindex=\"0\" style=\"color: var(--actionable-blue);\" label=\"Clear Filters\" onclick=\"clearForumFilter(event);\">× Clea",
-            "hiliteStart": 10,
-            "hiliteLength": 192
-        },
         "Attribute “checked” not allowed on element “li” at this point.": {
             "type": "error",
-            "lastLine": 891,
+            "lastLine": 939,
             "lastColumn": 130,
             "firstColumn": 16,
             "message": "Attribute “checked” not allowed on element “li” at this point.",
@@ -232,7 +182,7 @@
         },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 903,
+            "lastLine": 951,
             "lastColumn": 10,
             "firstColumn": 4,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -242,7 +192,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 934,
+            "lastLine": 982,
             "lastColumn": 109,
             "firstColumn": 4,
             "subType": "warning",
@@ -253,7 +203,7 @@
         },
         "Attribute “cat-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 935,
+            "lastLine": 983,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “cat-id” not allowed on element “button” at this point.",
@@ -263,7 +213,7 @@
         },
         "Attribute “btn-selected” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 935,
+            "lastLine": 983,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
@@ -273,7 +223,7 @@
         },
         "Attribute “sel-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 940,
+            "lastLine": 988,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “sel-id” not allowed on element “button” at this point.",
@@ -283,7 +233,7 @@
         },
         "Attribute “prev_page” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 980,
+            "lastLine": 1028,
             "lastColumn": 76,
             "firstColumn": 13,
             "message": "Attribute “prev_page” not allowed on element “div” at this point.",
@@ -293,7 +243,7 @@
         },
         "Attribute “next_page” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 980,
+            "lastLine": 1028,
             "lastColumn": 76,
             "firstColumn": 13,
             "message": "Attribute “next_page” not allowed on element “div” at this point.",
@@ -303,27 +253,27 @@
         },
         "Attribute “data” not allowed on element “a” at this point.": {
             "type": "error",
-            "lastLine": 984,
+            "lastLine": 1032,
             "lastColumn": 112,
             "firstColumn": 21,
             "message": "Attribute “data” not allowed on element “a” at this point.",
-            "extract": "          <a href=\"http://localhost:1501/s20/sample/forum/threads/1\" class=\"thread_box_link\" data=\"1\">\n     ",
+            "extract": "          <a href=\"http://localhost:1501/s20/sample/forum/threads/6\" class=\"thread_box_link\" data=\"6\">\n     ",
             "hiliteStart": 10,
             "hiliteLength": 92
         },
         "Attribute “reply-level” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 1127,
-            "lastColumn": 107,
+            "lastLine": 1563,
+            "lastColumn": 98,
             "firstColumn": 5,
             "message": "Attribute “reply-level” not allowed on element “div” at this point.",
-            "extract": "     \n    <div class=\"post_box first_post viewed_post important\" id=\"1\" style=\"margin-left:0px;\" reply-level=\"1\">\n     ",
+            "extract": "     \n    <div class=\"post_box first_post viewed_post\" id=\"16\" style=\"margin-left:0px;\" reply-level=\"1\">\n     ",
             "hiliteStart": 10,
-            "hiliteLength": 103
+            "hiliteLength": 94
         },
         "Attribute “post_box_id” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 1174,
+            "lastLine": 1612,
             "lastColumn": 54,
             "firstColumn": 9,
             "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
@@ -331,39 +281,9 @@
             "hiliteStart": 10,
             "hiliteLength": 46
         },
-        "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
-            "type": "error",
-            "lastLine": 1195,
-            "lastColumn": 363,
-            "firstColumn": 17,
-            "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
-            "extract": "          <textarea name=\"thread_post_content\" class=\"fill-available post_content_reply thread_post_content\" style=\"resize: none; min-height: 100px; max-height: 300px; height: 0px;\" rows=\"10\" cols=\"30\" placeholder=\"Enter your reply to Quinn I. here...\" required=\"\" aria-label=\"Thread Post Textarea\" maxlength=\"\" onkeydown=\"submitNearestForm(event,$(this))\"></text",
-            "hiliteStart": 10,
-            "hiliteLength": 347
-        },
-        "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 1201,
-            "lastColumn": 87,
-            "firstColumn": 25,
-            "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <div class=\"upload_attachment_box cursor-pointer\" id=\"upload1\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 63
-        },
-        "Element “p” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 1447,
-            "lastColumn": 66,
-            "firstColumn": 64,
-            "message": "Element “p” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "pre-wrap\"><p><a hre",
-            "hiliteStart": 10,
-            "hiliteLength": 3
-        },
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).": {
             "type": "info",
-            "lastLine": 303,
+            "lastLine": 329,
             "lastColumn": 99,
             "firstColumn": 69,
             "subType": "warning",
@@ -376,7 +296,7 @@
     "/s20/sample/forum/threads/new": {
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 571,
+            "lastLine": 598,
             "lastColumn": 122,
             "firstColumn": 21,
             "subType": "warning",
@@ -385,19 +305,9 @@
             "hiliteStart": 10,
             "hiliteLength": 102
         },
-        "Attribute “label” not allowed on element “a” at this point.": {
-            "type": "error",
-            "lastLine": 785,
-            "lastColumn": 197,
-            "firstColumn": 6,
-            "message": "Attribute “label” not allowed on element “a” at this point.",
-            "extract": "\t\t\t\t\n\t\t\t\t\t<a id=\"clear_filter_button\" class=\"inline-block text-decoration-none key_to_click\" tabindex=\"0\" style=\"color: var(--actionable-blue);\" label=\"Clear Filters\" onclick=\"clearForumFilter(event);\">× Clea",
-            "hiliteStart": 10,
-            "hiliteLength": 192
-        },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 804,
+            "lastLine": 831,
             "lastColumn": 10,
             "firstColumn": 4,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -407,7 +317,7 @@
         },
         "Attribute “cat-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 836,
+            "lastLine": 863,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “cat-id” not allowed on element “button” at this point.",
@@ -417,7 +327,7 @@
         },
         "Attribute “btn-selected” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 836,
+            "lastLine": 863,
             "lastColumn": 116,
             "firstColumn": 10,
             "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
@@ -427,7 +337,7 @@
         },
         "Attribute “sel-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 841,
+            "lastLine": 868,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “sel-id” not allowed on element “button” at this point.",
@@ -437,39 +347,19 @@
         },
         "Attribute “post_box_id” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 854,
+            "lastLine": 881,
             "lastColumn": 54,
             "firstColumn": 9,
             "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
             "extract": "\n\n        <div class=\"thread-post-form\" post_box_id=\"1\">\n\n<div",
             "hiliteStart": 10,
             "hiliteLength": 46
-        },
-        "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.": {
-            "type": "error",
-            "lastLine": 922,
-            "lastColumn": 353,
-            "firstColumn": 17,
-            "message": "Bad value “” for attribute “maxlength” on element “textarea”: The empty string is not a valid non-negative integer.",
-            "extract": "          <textarea name=\"thread_post_content\" class=\"fill-available post_content_reply thread_post_content\" style=\"resize: none; min-height: 40vmin; max-height: 300px; height: 358px;\" rows=\"10\" cols=\"30\" placeholder=\"Enter your post here...\" required=\"\" aria-label=\"Thread Post Textarea\" maxlength=\"\" onkeydown=\"submitNearestForm(event,$(this))\"></text",
-            "hiliteStart": 10,
-            "hiliteLength": 337
-        },
-        "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 939,
-            "lastColumn": 87,
-            "firstColumn": 25,
-            "message": "Element “div” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "          <div class=\"upload_attachment_box cursor-pointer\" id=\"upload1\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 63
         }
     },
     "/s20/sample/forum/categories": {
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 564,
+            "lastLine": 592,
             "lastColumn": 122,
             "firstColumn": 21,
             "subType": "warning",
@@ -480,19 +370,9 @@
         }
     },
     "/s20/sample/forum/stats": {
-        "Attribute “label” not allowed on element “a” at this point.": {
-            "type": "error",
-            "lastLine": 542,
-            "lastColumn": 197,
-            "firstColumn": 6,
-            "message": "Attribute “label” not allowed on element “a” at this point.",
-            "extract": "\t\t\t\t\n\t\t\t\t\t<a id=\"clear_filter_button\" class=\"inline-block text-decoration-none key_to_click\" tabindex=\"0\" style=\"color: var(--actionable-blue);\" label=\"Clear Filters\" onclick=\"clearForumFilter(event);\">× Clea",
-            "hiliteStart": 10,
-            "hiliteLength": 192
-        },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 561,
+            "lastLine": 588,
             "lastColumn": 10,
             "firstColumn": 4,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
@@ -502,7 +382,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 565,
+            "lastLine": 592,
             "lastColumn": 109,
             "firstColumn": 4,
             "subType": "warning",
@@ -513,7 +393,7 @@
         },
         "Attribute “sel-id” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 568,
+            "lastLine": 595,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “sel-id” not allowed on element “button” at this point.",
@@ -523,7 +403,7 @@
         },
         "Attribute “btn-selected” not allowed on element “button” at this point.": {
             "type": "error",
-            "lastLine": 568,
+            "lastLine": 595,
             "lastColumn": 104,
             "firstColumn": 5,
             "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
@@ -532,187 +412,17 @@
             "hiliteLength": 100
         }
     },
-    "/s20/sample/users": {
-        "A table row was 8 columns wide and exceeded the column count established by the first row (7).": {
-            "type": "info",
-            "lastLine": 546,
-            "lastColumn": 30,
-            "firstColumn": 26,
-            "subType": "warning",
-            "message": "A table row was 8 columns wide and exceeded the column count established by the first row (7).",
-            "extract": "     </th></tr>\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 5
-        },
-        "Table column 8 established by element “th” has no cells beginning in it.": {
-            "type": "error",
-            "lastLine": 545,
-            "firstLine": 544,
-            "lastColumn": 62,
-            "firstColumn": 38,
-            "message": "Table column 8 established by element “th” has no cells beginning in it.",
-            "extract": "ss=\"info\">\n                        <th class=\"section-break\" colspan=\"8\">Studen",
-            "hiliteStart": 10,
-            "hiliteLength": 63
-        },
-        "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 1856,
-            "lastColumn": 91,
-            "firstColumn": 58,
-            "message": "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "     <h1>\t<div id=\"edit-grader-modal-title\">Edit G",
-            "hiliteStart": 10,
-            "hiliteLength": 34
-        },
-        "Duplicate ID “edit-user-form”.": {
-            "type": "error",
-            "lastLine": 1865,
-            "lastColumn": 29,
-            "firstColumn": 5,
-            "message": "Duplicate ID “edit-user-form”.",
-            "extract": "lse\">\n    <div id=\"edit-user-form\">\n\t\t<la",
-            "hiliteStart": 10,
-            "hiliteLength": 25
-        },
-        "The first occurrence of ID “edit-user-form” was here.": {
-            "type": "info",
-            "lastLine": 1851,
-            "lastColumn": 67,
-            "firstColumn": 1,
-            "subType": "warning",
-            "message": "The first occurrence of ID “edit-user-form” was here.",
-            "extract": "   </div>\n<div class=\"popup-form\" id=\"edit-user-form\" style=\"display: none;\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 67
-        },
-        "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 1867,
-            "lastColumn": 50,
-            "firstColumn": 4,
-            "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "idth\">\n\t\t\t<p id=\"user-form-already-exists-error-message\">\n\t\t\t\tU",
-            "hiliteStart": 10,
-            "hiliteLength": 47
-        },
-        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
-            "type": "error",
-            "lastLine": 1866,
-            "lastColumn": 85,
-            "firstColumn": 3,
-            "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
-            "extract": "-form\">\n\t\t<label for=\"user-form-already-exists-error-message\" class=\"red-message full-width\">\n\t\t\t<p",
-            "hiliteStart": 10,
-            "hiliteLength": 83
-        }
-    },
+    "/s20/sample/users": {},
     "/s20/sample/graders": {
-        "A table row was 8 columns wide and exceeded the column count established by the first row (6).": {
-            "type": "info",
-            "lastLine": 544,
-            "lastColumn": 34,
-            "firstColumn": 30,
-            "subType": "warning",
-            "message": "A table row was 8 columns wide and exceeded the column count established by the first row (6).",
-            "extract": "     </th></tr>\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 5
-        },
-        "Duplicate ID “section-”.": {
-            "type": "error",
-            "lastLine": 570,
-            "firstLine": 569,
-            "lastColumn": 40,
-            "firstColumn": 69,
-            "message": "Duplicate ID “section-”.",
-            "extract": "  </tbody>\n\t\t\t                <tbody id=\"section-\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 41
-        },
-        "The first occurrence of ID “section-” was here.": {
-            "type": "info",
-            "lastLine": 541,
-            "firstLine": 540,
-            "lastColumn": 40,
-            "firstColumn": 26,
-            "subType": "warning",
-            "message": "The first occurrence of ID “section-” was here.",
-            "extract": "r></thead>\n\t\t\t                <tbody id=\"section-\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 41
-        },
-        "Table columns in range 7…8 established by element “th” have no cells beginning in them.": {
-            "type": "error",
-            "lastLine": 543,
-            "firstLine": 542,
-            "lastColumn": 66,
-            "firstColumn": 62,
-            "message": "Table columns in range 7…8 established by element “th” have no cells beginning in them.",
-            "extract": "ss=\"info\">\n                            <th class=\"section-break\" colspan=\"8\">Instru",
-            "hiliteStart": 10,
-            "hiliteLength": 67
-        },
-        "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 627,
-            "lastColumn": 91,
-            "firstColumn": 58,
-            "message": "Element “div” not allowed as child of element “h1” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "     <h1>\t<div id=\"edit-grader-modal-title\">Edit G",
-            "hiliteStart": 10,
-            "hiliteLength": 34
-        },
-        "Duplicate ID “edit-user-form”.": {
-            "type": "error",
-            "lastLine": 636,
-            "lastColumn": 29,
-            "firstColumn": 5,
-            "message": "Duplicate ID “edit-user-form”.",
-            "extract": "lse\">\n    <div id=\"edit-user-form\">\n\t\t<la",
-            "hiliteStart": 10,
-            "hiliteLength": 25
-        },
-        "The first occurrence of ID “edit-user-form” was here.": {
-            "type": "info",
-            "lastLine": 622,
-            "lastColumn": 67,
-            "firstColumn": 1,
-            "subType": "warning",
-            "message": "The first occurrence of ID “edit-user-form” was here.",
-            "extract": "   </div>\n<div class=\"popup-form\" id=\"edit-user-form\" style=\"display: none;\">\n     ",
-            "hiliteStart": 10,
-            "hiliteLength": 67
-        },
-        "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)": {
-            "type": "error",
-            "lastLine": 638,
-            "lastColumn": 50,
-            "firstColumn": 4,
-            "message": "Element “p” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
-            "extract": "idth\">\n\t\t\t<p id=\"user-form-already-exists-error-message\">\n\t\t\t\tU",
-            "hiliteStart": 10,
-            "hiliteLength": 47
-        },
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 1425,
+            "lastLine": 1459,
             "lastColumn": 7,
             "firstColumn": 1,
             "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
             "extract": "</table>\n\n<style>\n\t.gra",
             "hiliteStart": 10,
             "hiliteLength": 7
-        },
-        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.": {
-            "type": "error",
-            "lastLine": 637,
-            "lastColumn": 85,
-            "firstColumn": 3,
-            "message": "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.",
-            "extract": "-form\">\n\t\t<label for=\"user-form-already-exists-error-message\" class=\"red-message full-width\">\n\t\t\t<p",
-            "hiliteStart": 10,
-            "hiliteLength": 83
         }
     },
     "/s20/sample/sections": {},
@@ -720,34 +430,34 @@
     "/s20/sample/late_days": {
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 623,
-            "lastColumn": 156,
+            "lastLine": 650,
+            "lastColumn": 169,
             "firstColumn": 87,
             "subType": "warning",
             "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
-            "extract": "ontainer\"><span class=\"flatpickr-day \" aria-label=\"March 1, 2020\" tabindex=\"-1\">1</spa",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"March 29, 2020\" tabindex=\"-1\">29</sp",
             "hiliteStart": 10,
-            "hiliteLength": 70
+            "hiliteLength": 83
         }
     },
     "/s20/sample/extensions": {
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 694,
-            "lastColumn": 156,
+            "lastLine": 721,
+            "lastColumn": 169,
             "firstColumn": 87,
             "subType": "warning",
             "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
-            "extract": "ontainer\"><span class=\"flatpickr-day \" aria-label=\"March 1, 2020\" tabindex=\"-1\">1</spa",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"March 29, 2020\" tabindex=\"-1\">29</sp",
             "hiliteStart": 10,
-            "hiliteLength": 70
+            "hiliteLength": 83
         }
     },
     "/s20/sample/grade_override": {},
     "/s20/sample/plagiarism": {
         "The “center” element is obsolete. Use CSS instead.": {
             "type": "error",
-            "lastLine": 521,
+            "lastLine": 548,
             "lastColumn": 12,
             "firstColumn": 5,
             "message": "The “center” element is obsolete. Use CSS instead.",
@@ -757,7 +467,7 @@
         },
         "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)": {
             "type": "error",
-            "lastLine": 537,
+            "lastLine": 564,
             "lastColumn": 55,
             "firstColumn": 28,
             "message": "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)",
@@ -769,7 +479,7 @@
     "/s20/sample/plagiarism/configuration/new": {
         "Attribute “name” not allowed on element “div” at this point.": {
             "type": "error",
-            "lastLine": 581,
+            "lastLine": 608,
             "lastColumn": 92,
             "firstColumn": 17,
             "message": "Attribute “name” not allowed on element “div” at this point.",
@@ -779,7 +489,7 @@
         },
         "Attribute “name” not allowed on element “span” at this point.": {
             "type": "error",
-            "lastLine": 591,
+            "lastLine": 618,
             "lastColumn": 79,
             "firstColumn": 21,
             "message": "Attribute “name” not allowed on element “span” at this point.",
@@ -789,7 +499,7 @@
         },
         "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
             "type": "info",
-            "lastLine": 591,
+            "lastLine": 618,
             "lastColumn": 79,
             "firstColumn": 21,
             "subType": "warning",

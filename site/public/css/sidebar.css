@@ -9,7 +9,6 @@ aside {
         padding-top: 30px;
         width: 250px;
         min-width: 250px;
-        z-index: 1;
     }
 
     aside{
@@ -65,7 +64,7 @@ aside {
     }
 
     aside a .icon-title:hover {
-        color: #002334;
+        color: var(--sidebar-hover-text);
     }
 
     aside a .icon-title:active {
@@ -103,5 +102,9 @@ aside {
         font-size: 12px;
         position: absolute;
         margin: 12px 0 0 32px;
+    }
+
+    [data-theme="dark"] aside ul {
+      background-color: var(--background-blue);
     }
 }

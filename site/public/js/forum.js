@@ -736,8 +736,8 @@ function showHistory(post_id) {
                 if(!author_user_id){
                   user_button_code = ""
                 }
-                box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
-                box.find("h7").before(user_button_code);
+                box.find("span.edit_author").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                box.find("span.edit_author").before(user_button_code);
                 $("#popup-post-history .form-body").prepend(box);
             }
             generateCodeMirrorBlocks($("#popup-post-history")[0]);
@@ -1371,4 +1371,46 @@ function checkUnread(){
     else{
         return false;
     }
+}
+
+// Used to update thread content in the "Merge Thread"
+// modal.
+
+function updateSelectedThreadContent(selected_thread_first_post_id){
+    var url = buildCourseUrl(['forum', 'posts', 'get']);
+    $.ajax({
+        url : url,
+        type : "POST",
+        data : {
+            post_id : selected_thread_first_post_id,
+            csrf_token: csrfToken
+        },
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err) {
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again. Error is ' + err +'</div>';
+                $('#messages').append(message);
+                return;
+            }
+
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            
+            json = json['data'];
+            $("#thread-content").html(json['post']);
+            if (json.markdown === true) {
+                $('#thread-content').addClass('markdown-active');
+            }
+            else {
+                $('#thread-content').removeClass('markdown-active');
+            }
+        },
+        error: function(){
+            window.alert("Something went wrong while trying to fetch content. Please try again.");
+        }
+    });
 }

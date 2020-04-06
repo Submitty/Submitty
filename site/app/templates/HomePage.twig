@@ -56,6 +56,15 @@
                     </a>
                 </li>
             {% endif %}
+            <li>
+                <br>
+                <input id="theme_change" type="checkbox" title="Enable Dark Mode" class="key_to_click" onclick="toggleTheme();"></input>
+                <label for="theme_change">Enable Dark Mode</label>
+            </li>
+            <li class="light_mode_hide">
+                <input id="theme_change_black" type="checkbox" title="Enable Black Mode" class="key_to_click" onclick="toggleTheme('black');"></input>
+                <label for="theme_change_black">Enable Black Mode</label>
+            </li>
         </ul>
     </div>
 </div>

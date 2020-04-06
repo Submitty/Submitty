@@ -12,3 +12,11 @@
     white-space: normal;
     word-wrap: break-word;
 }
+
+[data-theme="dark"] .light_mode_hide{
+  display: inline-block!important;
+}
+
+.light_mode_hide {
+  display: none!important;
+}
