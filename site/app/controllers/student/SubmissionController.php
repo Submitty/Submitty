@@ -110,6 +110,46 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
+            Logger::logAccess(
+                $this->core->getUser()->getId(),
+                $_COOKIE['submitty_token'],
+                "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+            );
+
+            $who_id = $this->core->getUser()->getId();
+            if ($gradeable->isTeamAssignment() && $graded_gradeable !== null) {
+                $team = $graded_gradeable->getSubmitter()->getTeam();
+                if ($team !== null) {
+                    $who_id = $team->getId();
+                }
+            }
+
+            $gradeable_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                "submissions",
+                $gradeable->getId()
+            );
+            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+            FileUtils::createDir($user_path, true);
+            $file_path = FileUtils::joinPaths($user_path, "user_assignment_access.json");
+
+            $fh = fopen($file_path, "a+");
+            flock($fh, LOCK_EX);
+            fseek($fh, 0);
+            $contents = fread($fh, max(filesize($file_path), 1));
+            $json = json_decode(((strlen($contents) > 0) ? $contents : '{}'), true);
+            if (!isset($json['page_load_history'])) {
+                $json['page_load_history'] = [];
+            }
+            $json['page_load_history'][] = [
+                'time' => $now->format('m-d-Y H:i:sO'),
+                'who' => $this->core->getUser()->getId()
+            ];
+            ftruncate($fh, 0);
+            fwrite($fh, FileUtils::encodeJson($json));
+            flock($fh, LOCK_UN);
+            fclose($fh);
+
             $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
