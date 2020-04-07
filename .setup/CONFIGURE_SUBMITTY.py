@@ -467,6 +467,8 @@ if not args.worker:
       os.chmod(file, 0o460)
 
 
+    os.chown(CONTAINERS_JSON, 'root', PHP_USER )
+
 ##############################################################################
 # Write database json
 

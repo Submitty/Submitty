@@ -372,9 +372,6 @@ class UpdateDockerData(AbstractJob):
             logger.write_to_log(log_file_path, e)
 
 
-        logger.write_to_log(log_file_path, "Update docker data on: " + full_time)
-
-
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
