@@ -779,7 +779,7 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ]);
         }
-        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
             // This would be more dynamic is $display_version_instance included an expected number, requires more database changes
             $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
                 "message" => "Multiple files within submissions"
