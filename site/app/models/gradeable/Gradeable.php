@@ -1557,10 +1557,21 @@ class Gradeable extends AbstractModel {
      * @return GradingSection[]
      */
     public function getGradingSectionsForUser(User $user) {
-        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT && !$this->isTeamAssignment()) {
+        if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
+            if ($this->isTeamAssignment()) {
+                $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
+                $teams = [];
+                foreach ($users as $u) {
+                    $teamToAdd = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                    $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                }
+                $g_section = new GradingSection($this->core, false, "Peer", [$user], null, $teams);
+                return [$g_section];
+            }
             $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
             //TODO: Peer grading team assignments
-            return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
+            $g_section = new GradingSection($this->core, false, "Peer", [$user], $users, null);
+            return [$g_section];
         }
         elseif ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
             $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));

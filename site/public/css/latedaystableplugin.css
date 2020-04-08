@@ -25,19 +25,19 @@ fieldset > * {
 #late-day-table td:nth-of-type(6):before { content: "Status"; }
 #late-day-table td:nth-of-type(7):before { content: "Late days used here"; }
 
-@media (min-width: 831px) {   
+@media (min-width: 831px) {
     #late-day-table {
         margin: 1em 0 0;
     }
-        
+
     #late-day-table thead tr {
-        background: var(--standard-light-gray);
+        background: var(--standard-hover-light-gray);
     }
-    
+
     #late-day-table tbody tr:nth-child(even) {
         background: var(--standard-hover-light-gray);
     }
-    
+
     #late-day-table td:before {
         content: none !important;
     }

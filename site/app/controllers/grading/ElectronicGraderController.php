@@ -468,6 +468,7 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
@@ -990,10 +991,10 @@ class ElectronicGraderController extends AbstractController {
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
         else {
-            $total_submitted = $total_submitted * count($gradeable->getComponents());
+            $total_submitted = ($total_submitted * count($gradeable->getComponents()));
         }
         if ($total_submitted == 0) {
             $progress = 100;
@@ -1220,10 +1221,10 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Check if user has permission to view all peer grades
-        if ($all_peers && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        /*if ($all_peers) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get view peer panel');
             return;
-        }
+        }*/
 
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();

@@ -1,8 +1,8 @@
 #courses h2 {
     margin: 0;
 }
-    
-#course-list li {
+
+.course-list li {
     margin: 3px 0;
 }
 
@@ -11,4 +11,12 @@
     padding: 6px 10px;
     white-space: normal;
     word-wrap: break-word;
+}
+
+[data-theme="dark"] .light_mode_hide{
+  display: inline-block!important;
+}
+
+.light_mode_hide {
+  display: none!important;
 }

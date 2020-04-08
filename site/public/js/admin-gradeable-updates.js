@@ -251,25 +251,26 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
         reader.onload = function() {
             var lines=reader.result.split("\n");
             var headers = lines[0].split(",");
-            
-            var students_lines_present = 0;
-            var graders_lines_present = 0;
+            var students_lines_index = -1;
+            var graders_lines_index = -1;
             
             for(var k=0;k<headers.length;k++){
                 if(headers[k].toLowerCase().trim() == "student"){
-                    students_lines_present++;
+                    students_lines_index = k;
+                    console.log(students_lines_index);
                 }
                 else if(headers[k].toLowerCase().trim() == "grader"){
-                    graders_lines_present++;
+                    graders_lines_index = k;
+                    console.log(graders_lines_index);
                 }
             }
             
-            if(students_lines_present != 1){
+            if(students_lines_index == -1){
                 alert("Cannot Proccess file, requires exactly one labelled 'student' column");
                 return;
             }
             
-            if(graders_lines_present != 1){
+            if(graders_lines_index == -1){
                 alert("Cannot Proccess file, requires exactly one labelled 'grader' column");
                 return;
             }
@@ -282,9 +283,13 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 for(var j=0;j<cells.length;j++){
                     if(cells[j].trim() != ''){
                         built_line[headers[j].trim()]= cells[j].trim();
+                        console.log(j);
                     }
                 }
+                //built_line[headers[0].trim()]= cells[students_lines_index].trim();
+                //built_line[headers[1].trim()]= cells[graders_lines_index].trim();
                 jsonFile[i-1] = built_line;
+                console.log(built_line);
             }
             let container = $('#container-rubric');
             if (container.length === 0) {
@@ -318,6 +323,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                         alert('Internal server error');
                         console.error(response.message);
                     }
+                    location.reload();
                 },
                 error: function (response) {
                     setGradeableUpdateComplete();

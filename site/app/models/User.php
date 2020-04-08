@@ -221,7 +221,7 @@ class User extends AbstractModel {
     public function setPassword($password) {
         if (!empty($password)) {
             $info = password_get_info($password);
-            if ($info['algo'] === 0) {
+            if (empty($info['algo'])) {
                 $this->password = password_hash($password, PASSWORD_DEFAULT);
             }
             else {

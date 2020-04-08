@@ -2374,6 +2374,48 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $this->course_db->rows();
     }
 
+    public function getGradeableIdsForFullAccessLimitedGraders() {
+        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_min_grading_group = 3 AND g_grader_assignment_method = 2");
+        return $this->course_db->rows();
+    }
+
+    /**
+     * returns array of all rotating sections in course
+     *
+     * @return array
+     */
+    public function getAllRotatingSections() {
+
+        $this->course_db->query("SELECT sections_rotating_id FROM sections_rotating ORDER BY sections_rotating_id");
+
+        $tmp = $this->course_db->rows();
+        $sections = [];
+        foreach ($tmp as $row) {
+            $sections[] = $row['sections_rotating_id'];
+        }
+        return $sections;
+    }
+
+     /**
+     * returns 2d array of new graders after rotating sections set up
+     * for all access grading and limited access graders gradeables,
+     * top level is all graders' ids and second level is all rotating sections
+     *
+     * @return array
+     */
+    public function getNewGraders() {
+        $new_graders = [];
+        $all_sections = $this->core->getQueries()->getAllRotatingSections();
+        $this->course_db->query("SELECT user_id FROM users WHERE user_group < 4");
+        $tmp = $this->course_db->rows();
+        foreach ($tmp as $row) {
+            $new_graders[$row['user_id']] = $all_sections;
+        }
+        $final_new_graders = array();
+
+        return $new_graders;
+    }
+
     /**
      * gets ids of all electronic gradeables excluding assignments that will be bulk
      * uploaded by TA or instructor.
@@ -4340,7 +4382,7 @@ AND gc_id IN (
             $mark->getPoints(),
             $mark->getTitle(),
             $mark->getOrder(),
-            $this->course_db->convertBoolean($mark->isPublish())
+            $mark->isPublish()
         ];
         $this->course_db->query(
             "
@@ -4369,7 +4411,7 @@ AND gc_id IN (
             $mark->getPoints(),
             $mark->getTitle(),
             $mark->getOrder(),
-            $this->course_db->convertBoolean($mark->isPublish()),
+            $mark->isPublish(),
             $mark->getId()
         ];
         $this->course_db->query(
@@ -4425,9 +4467,9 @@ AND gc_id IN (
             $component->getDefault(),
             $component->getMaxValue(),
             $component->getUpperClamp(),
-            $this->course_db->convertBoolean($component->isText()),
+            $component->isText(),
             $component->getOrder(),
-            $this->course_db->convertBoolean($component->isPeer()),
+            $component->isPeer(),
             $component->getPage()
         ];
         $this->course_db->query(
@@ -4507,9 +4549,9 @@ AND gc_id IN (
                 $component->getDefault(),
                 $component->getMaxValue(),
                 $component->getUpperClamp(),
-                $this->course_db->convertBoolean($component->isText()),
+                $component->isText(),
                 $component->getOrder(),
-                $this->course_db->convertBoolean($component->isPeer()),
+                $component->isPeer(),
                 $component->getPage(),
                 $component->getId()
             ];
@@ -4623,28 +4665,28 @@ AND gc_id IN (
                 $gradeable->getId(),
                 DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                 DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
-                $this->course_db->convertBoolean($gradeable->isVcs()),
+                $gradeable->isVcs(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsHostType(),
-                $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
+                $gradeable->isTeamAssignment(),
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
-                $this->course_db->convertBoolean($gradeable->isTaGrading()),
-                $this->course_db->convertBoolean($gradeable->isScannedExam()),
-                $this->course_db->convertBoolean($gradeable->isStudentView()),
-                $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
-                $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                $this->course_db->convertBoolean($gradeable->hasDueDate()),
+                $gradeable->isTaGrading(),
+                $gradeable->isScannedExam(),
+                $gradeable->isStudentView(),
+                $gradeable->isStudentViewAfterGrades(),
+                $gradeable->isStudentSubmit(),
+                $gradeable->hasDueDate(),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
-                $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
+                $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
-                $this->course_db->convertBoolean($gradeable->isPeerGrading()),
+                $gradeable->isPeerGrading(),
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                $gradeable->isRegradeAllowed(),
                 $gradeable->getDiscussionThreadId(),
-                $this->course_db->convertBoolean($gradeable->isDiscussionBased())
+                $gradeable->isDiscussionBased()
             ];
             $this->course_db->query(
                 "
@@ -4769,29 +4811,29 @@ AND gc_id IN (
                 $params = [
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
-                    $this->course_db->convertBoolean($gradeable->isVcs()),
+                    $gradeable->isVcs(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsHostType(),
-                    $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
+                    $gradeable->isTeamAssignment(),
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
-                    $this->course_db->convertBoolean($gradeable->isTaGrading()),
-                    $this->course_db->convertBoolean($gradeable->isScannedExam()),
-                    $this->course_db->convertBoolean($gradeable->isStudentView()),
-                    $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
-                    $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                    $this->course_db->convertBoolean($gradeable->hasDueDate()),
+                    $gradeable->isTaGrading(),
+                    $gradeable->isScannedExam(),
+                    $gradeable->isStudentView(),
+                    $gradeable->isStudentViewAfterGrades(),
+                    $gradeable->isStudentSubmit(),
+                    $gradeable->hasDueDate(),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
-                    $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
+                    $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    $this->course_db->convertBoolean($gradeable->isPeerGrading()),
+                    $gradeable->isPeerGrading(),
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                    $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
-                    $this->course_db->convertBoolean($gradeable->isGradeInquiryPerComponentAllowed()),
+                    $gradeable->isRegradeAllowed(),
+                    $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
-                    $this->course_db->convertBoolean($gradeable->isDiscussionBased()),
+                    $gradeable->isDiscussionBased(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -5471,8 +5513,13 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function firstTimeInQueue($id, $queue_code) {
+    public function firstTimeInQueueToday($id, $queue_code) {
         $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
+        return $this->course_db->rows()[0]['count'] <= 0;
+    }
+
+    public function firstTimeInQueueThisWeek($id, $queue_code) {
+        $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE - interval '4' day AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
         return $this->course_db->rows()[0]['count'] <= 0;
     }
 

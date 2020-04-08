@@ -259,18 +259,36 @@ function completeUserFormInformation(user) {
     }
 }
 
+function isUserFormEmpty() {
+  let form = document.querySelectorAll('form')[0];
+  let isFormEmpty = true;
+  for (const formElement of form.elements) {
+    const {name, value, type, checked} = formElement;
+    // skipping all the hidden fields, user-group and manual-registration
+    if (type === 'hidden' || name === 'user_group' || name === 'manual_registration') {
+      continue;
+    }
+    else if ((type === "text" && value.length) || (type === "select-one" && value !=='null') || checked){
+      isFormEmpty = false;
+      break;
+    }
+  }
+  return isFormEmpty;
+}
+
 function clearUserFormInformation() {
-    var form = $("#edit-user-form");
-    $('[name="user_numeric_id"]', form).val("");
-    $('[name="user_firstname"]', form).val("");
-    $('[name="user_preferred_firstname"]', form).val("");
-    $('[name="user_lastname"]', form).val("");
-    $('[name="user_preferred_lastname"]', form).val("");
-    $('[name="user_email"]', form).val("");
-    $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="manual_registration"]', form).prop('checked', true);
-    $("[name='grading_registration_section[]']").prop('checked', false);
+    let form = document.querySelectorAll('form')[0];
+    for (const formElement of form.elements) {
+      const {name, value, type, checked} = formElement;
+      if (type === "text") {
+        formElement.value = "";
+      } else if (type === "select-one") {
+        formElement.value = "null";
+      } else if (type === "checkbox") {
+          // clear the checkbox for all the checkboxes other than manual_registration
+          formElement.checked = name === "manual_registration";
+      }
+    }
     clearValidityWarnings();
 }
 
@@ -282,11 +300,15 @@ function clearValidityWarnings() {
 }
 
 function closeButton() {
-    $('#edit-user-form').css('display', 'none');
-    if($('[name="edit_user"]').val() == 'true') {
-        $('[name="user_id"]', $("#edit-user-form")).val("");
-        clearUserFormInformation();
+  // If form contain some data, prompt the user for data loss
+  if(!isUserFormEmpty()){
+    if (confirm('Changes to the form will be lost!')) {
+      clearUserFormInformation();
+      $('#edit-user-form').css('display', 'none');
     }
+  } else {
+    $('#edit-user-form').css('display', 'none');
+  }
 }
 
 function redirectToEdit() {
