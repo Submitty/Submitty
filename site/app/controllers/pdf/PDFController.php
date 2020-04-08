@@ -103,7 +103,7 @@ class PDFController extends AbstractController {
         
         $pdf_gradeable_path = FileUtils::joinPaths($course_path, 'annotated_pdfs', $annotation_info['gradeable_id']);
         if (!is_dir($pdf_gradeable_path) && !FileUtils::createDir($pdf_gradeable_path)) {
-            return $this->core->getOutput()->renderJsonFail('Creating pdf gradeable folder failed'); 
+            return $this->core->getOutput()->renderJsonFail('Creating pdf gradeable folder failed');
         }
         
         $pdf_user_path = FileUtils::joinPaths($pdf_gradeable_path, $user_id);
@@ -123,7 +123,7 @@ class PDFController extends AbstractController {
         $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.json';
         $new_file_pdf_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.pdf';
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
-        if($_POST['pdf'] != null){
+        if ($_POST['pdf'] != null) {
             file_put_contents(FileUtils::joinPaths($pdf_version_path, $new_file_pdf_name), base64_decode($_POST['pdf']));
         }
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
