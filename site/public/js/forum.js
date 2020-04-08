@@ -736,8 +736,8 @@ function showHistory(post_id) {
                 if(!author_user_id){
                   user_button_code = ""
                 }
-                box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
-                box.find("h7").before(user_button_code);
+                box.find("span.edit_author").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                box.find("span.edit_author").before(user_button_code);
                 $("#popup-post-history .form-body").prepend(box);
             }
             generateCodeMirrorBlocks($("#popup-post-history")[0]);
