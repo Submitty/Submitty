@@ -16,10 +16,13 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage() {
+        // remove the badge from course_material nav-link by updating DB
+        $user = $this->core->getUser();
+        $this->core->getQueries()->markUserCourseMaterialAsSeen($user->getId());
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
             'listCourseMaterials',
-            $this->core->getUser()
+            $user
         );
     }
 
@@ -58,9 +61,11 @@ class CourseMaterialsController extends AbstractController {
         // remove entry from json file
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-
+        $flattened_files_deleted = [];
         if ($json != false) {
             $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
+            // indexing with 'path' is required to keep structure of flattened_files_deleted consistent
+            $flattened_files_deleted = is_dir($path) ? FileUtils::getAllFiles($path, [], true) : [['path' => $path]];
             foreach ($all_files as $file) {
                 if (is_array($file)) {
                     $this->deleteHelper($file, $json);
@@ -80,6 +85,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         if ($success) {
+            $this->notifyCourseMaterialEvent('FILES_DELETE', $flattened_files_deleted);
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
         else {
@@ -160,7 +166,7 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
-        $data = $_POST['fn'];
+        $files = json_decode($filenames); // course material files to be modified
         $hide_from_students = null;
 
         if (!isset($newdatatime)) {
@@ -179,12 +185,12 @@ class CourseMaterialsController extends AbstractController {
         $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
         $new_data_time = DateUtils::dateTimeToString($new_data_time);
 
-        //only one will not iterate correctly
-        if (is_string($data)) {
-            $data = [$data];
+        // Check if the $files data is correct
+        if (is_null($files) || !count($files)) {
+            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted filename data", false);
         }
 
-        foreach ($data as $filename) {
+        foreach ($files as $filename) {
             if (!isset($filename)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
@@ -212,7 +218,7 @@ class CourseMaterialsController extends AbstractController {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
             }
         }
-
+        $this->notifyCourseMaterialEvent('RELEASE_TIME_MODIFIED', $files, null, $new_data_time);
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
 
@@ -262,6 +268,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         FileUtils::writeJsonFile($fp, $json);
+        $this->notifyCourseMaterialEvent('FILES_MODIFIED', $files_to_modify, $sections_exploded, $release_time);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }
 
@@ -361,6 +368,8 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $count_item = count($status);
+        // tracks the files being uploaded for the notification(badge) purpose
+        $files_uploaded = [];
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
                 if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
@@ -368,7 +377,7 @@ class CourseMaterialsController extends AbstractController {
 
                     $is_zip_file = false;
 
-                    if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                    if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) === "application/zip") {
                         if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                             return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                         }
@@ -392,6 +401,7 @@ class CourseMaterialsController extends AbstractController {
                         for ($i = 0; $i < $zip->numFiles; $i++) {
                             $entries[] = $zip->getNameIndex($i);
                         }
+                        // filter out the disallowed files and folders within the zip upload
                         $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                             $name = strtolower($entry);
                             foreach ($disallowed_folders as $folder) {
@@ -413,9 +423,10 @@ class CourseMaterialsController extends AbstractController {
                         });
 
                         $zip->extractTo($upload_path, $entries);
-
                         foreach ($zfiles as $zfile) {
+                            // increase the count for all the "allowed" zip files
                             $path = FileUtils::joinPaths($upload_path, $zfile);
+                            $files_uploaded[] = ['path' => $path];
                             if (!(is_null($sections))) {
                                 $sections_exploded = @explode(",", $sections);
                                 if ($sections_exploded == null) {
@@ -440,6 +451,7 @@ class CourseMaterialsController extends AbstractController {
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
                         }
                         else {
+                            $files_uploaded[] = ['path' => $dst];
                             if (!(is_null($sections))) {
                                 $sections_exploded = @explode(",", $sections);
                                 if ($sections_exploded == null) {
@@ -465,6 +477,71 @@ class CourseMaterialsController extends AbstractController {
         }
 
         FileUtils::writeJsonFile($fp, $json);
-        return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
+        if (!(is_null($sections))) {
+            $sections_exploded = @explode(",", $sections);
+            if ($sections_exploded == null) {
+                $sections_exploded = [];
+            }
+        }
+        else {
+            $sections_exploded = [];
+        }
+        $this->notifyCourseMaterialEvent('FILES_UPLOAD', $files_uploaded, $sections_exploded, $release_time);
+
+        $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
+    }
+    /**
+     * Helper function to create notification/email content and aggregate recipients
+     * @param string $actionType
+     * @param string[] | string[][] $files_array
+     * @param int[]|null $sections
+     * @param string|null $release_time
+     */
+    private function notifyCourseMaterialEvent($actionType, $files_array, $sections = null, $release_time = null) {
+        $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');
+        $json = FileUtils::readJsonFile($fp);
+        if ($actionType === 'FILES_UPLOAD' || $actionType === 'FILES_MODIFIED') {
+            $allUsers = $this->core->getQueries()->getAllUsers();
+            if (!empty($sections)) {
+                $allUsers = array_filter($allUsers, function ($user) use ($sections) {
+                    // check if this is the intended user or not
+                    return in_array($user->getRegistrationSection(), $sections) || $user->accessGrading();
+                });
+            }
+
+            if ($actionType === 'FILES_MODIFIED') {
+                $allUsersId = [];
+                foreach ($allUsers as $user) {
+                    $allUsersId[] = $user->getId();
+                }
+                foreach ($files_array as $file) {
+                    $file_path = $file['path'];
+                    // Get all the users for this file type ($prevUsers)
+                    $prevUserIds = $this->core->getQueries()->getAllUsersForACourseMaterial($file_path);
+                    //Get all the users from whom the access is revoked i.e ($prevUsers - $allUsers)
+                    $removeUsersCourseInfo = array_diff($prevUserIds, $allUsersId);
+                    // remove the course_info for the rows with these users and filePath
+                    $this->core->getQueries()->deleteUsersForACourseMaterial($removeUsersCourseInfo, $file_path);
+                }
+            }
+            // For each student update the DB
+            foreach ($allUsers as $user) {
+                foreach ($files_array as $file) {
+                    $file_path = $file['path'];
+                    $updated_release_time = empty($release_time) ? $json[$file_path]['release_datetime'] : $release_time;
+                    $this->core->getQueries()->insertOrUpdateCourseMaterialInfo($user->getId(), $file_path, false, $updated_release_time);
+                }
+            }
+        }
+        elseif ($actionType === 'RELEASE_TIME_MODIFIED') {
+            foreach ($files_array as $file_modified) {
+                $this->core->getQueries()->updateCourseMaterialReleaseTimeInfo($file_modified, $release_time);
+            }
+        }
+        elseif ($actionType === 'FILES_DELETE') {
+            foreach ($files_array as $file_deleted) {
+                $this->core->getQueries()->deleteCourseMaterialInfo($file_deleted['path']);
+            }
+        }
     }
 }

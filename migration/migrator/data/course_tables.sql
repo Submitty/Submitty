@@ -611,6 +611,20 @@ CREATE TABLE notifications (
 );
 
 
+-- Begins Course Material
+
+
+--
+-- Name: course_material_info; Type: TABLE; Schema: public; Owner: -
+--
+CREATE TABLE course_material_info (
+    user_id character varying(255) NOT NULL,
+    course_file_path TEXT NOT NULL,
+    release_date timestamp with time zone NOT NULL,
+    seen BOOLEAN DEFAULT FALSE NOT NULL
+);
+
+
 -- Begins Forum
 
 --
@@ -1143,6 +1157,21 @@ ALTER TABLE ONLY late_day_exceptions
 ALTER TABLE ONLY late_days
     ADD CONSTRAINT late_days_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
+
+--
+-- Name: course_material_info_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY course_material_info
+    ADD CONSTRAINT course_material_info_pkey PRIMARY KEY (user_id, course_file_path);
+
+
+--
+-- Name: course_material_info_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY course_material_info
+    ADD CONSTRAINT course_material_info_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
 -- Name: peer_assign_g_id_fkey; Type: FK CONSTRAINT; Schma: public; Owner: -

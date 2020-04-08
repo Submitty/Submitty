@@ -3998,6 +3998,117 @@ AND gc_id IN (
     }
 
     /**
+     * Checks if the rows needs to be updated or a new record needs to be inserted
+     * for course material files for the given user and file
+     *
+     * @param string $user_id
+     * @param string $course_file_path
+     * @param bool $seen
+     * @param string $release_date
+     */
+    public function insertOrUpdateCourseMaterialInfo(string $user_id, string $course_file_path, bool $seen, string $release_date) {
+        $this->course_db->query(
+            "
+            INSERT INTO course_material_info(user_id, course_file_path, seen, release_date)
+            VALUES (?, ?, ?, ?)
+             ON CONFLICT (user_id, course_file_path)
+                DO
+                    UPDATE SET 
+                        release_date=?
+                ;",
+            [$user_id, $course_file_path, $seen, $release_date, $release_date]
+        );
+        return [$user_id, $course_file_path, $seen, $release_date];
+    }
+
+    /**
+     * Fetches the course material info for given user_id and seen status
+     * @param string $user_id
+     * @param bool $seen optional
+     * @return array
+     */
+    public function getUserCourseMaterialInfo(string $user_id, bool $seen) {
+        $seen_status_query = $seen === null ? "true" : 'seen = ?';
+        $parameters = $seen === null ? array($user_id) : array($user_id, $seen);
+        $this->course_db->query(
+            "SELECT * FROM course_material_info WHERE user_id = ? and {$seen_status_query}",
+            $parameters
+        );
+        return $rows = $this->course_db->rows();
+    }
+
+    /**
+     * Returns all the user_ids for the given course_file_path
+     * @param string $course_file_path
+     * @return array
+     */
+    public function getAllUsersForACourseMaterial(string $course_file_path) {
+        $this->course_db->query(
+            "SELECT user_id FROM course_material_info WHERE course_file_path = ?",
+            array($course_file_path)
+        );
+        return $this->rowsToArray($this->course_db->rows());
+    }
+
+    /**
+     * Returns the total number of new course files released
+     * @param string $user_id
+     * @return int
+     */
+    public function getNewCourseMaterialReleasedCount(string $user_id) {
+        $this->course_db->query(
+            "SELECT COUNT(*) FROM course_material_info WHERE user_id = ? and seen = ? and release_date <= current_timestamp",
+            array($user_id, false)
+        );
+        return $this->course_db->rows()[0]['count'];
+    }
+
+    /**
+     * Marks all the released files as seen for the given user
+     * @param string $user_id
+     */
+    public function markUserCourseMaterialAsSeen(string $user_id) {
+        $this->course_db->query(
+            "UPDATE course_material_info SET seen = ? WHERE user_id = ? and release_date <= current_timestamp",
+            array(true, $user_id)
+        );
+    }
+
+    /**
+     * Updates the datetime for the course material file
+     * @param string $file_path
+     * @param string $new_release_date
+
+     */
+    public function updateCourseMaterialReleaseTimeInfo(string $file_path, string $new_release_date) {
+        $this->course_db->query(
+            "UPDATE course_material_info SET release_date = ? WHERE course_file_path = ?",
+            array($new_release_date, $file_path)
+        );
+    }
+
+    /** Deletes the row from the table for the given course file path
+     * @param string $file_deleted
+     */
+    public function deleteCourseMaterialInfo(string $file_deleted) {
+        $this->course_db->query(
+            "DELETE FROM course_material_info WHERE course_file_path=?",
+            array($file_deleted)
+        );
+    }
+
+    /** Deletes the row from the table for the given course file path and users_ids array
+     * @param array $users_ids
+     * @param string $course_file_path
+     */
+    public function deleteUsersForACourseMaterial(array $users_ids, string $course_file_path) {
+        return $this->course_db->query(
+            "DELETE FROM course_material_info WHERE user_id IN ('" . implode("', '", $users_ids) . "') AND course_file_path=?",
+            array($course_file_path)
+        );
+    }
+
+    /**
      * Gets a single Gradeable instance by id
      *
      * @param  string $id The gradeable's id

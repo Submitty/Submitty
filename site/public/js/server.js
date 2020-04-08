@@ -1435,9 +1435,79 @@ function setChildNewDateTime(path, changeDate,handleData) {
     });
 }
 
+function updateToServerTime(fp) {
+    var url = buildUrl(['server_time']);
+
+    $.get({
+        url: url,
+        success: function(data) {
+            var time = JSON.parse(data)['data'];
+            time = new Date(parseInt(time.year),
+                            parseInt(time.month) - 1,
+                            parseInt(time.day),
+                            parseInt(time.hour),
+                            parseInt(time.minute),
+                            parseInt(time.second));
+            fp.setDate(time,true);
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+function updateToTomorrowServerTime(fp) {
+    var url = buildUrl(['server_time']);
+
+    $.get({
+        url: url,
+        success: function(data) {
+            var time = JSON.parse(data)['data'];
+            time = new Date(parseInt(time.year),
+                parseInt(time.month) - 1,
+                parseInt(time.day),
+                parseInt(time.hour),
+                parseInt(time.minute),
+                parseInt(time.second));
+            nextDay = new Date(time);
+            nextDay.setDate(time.getDate()+1);
+            fp.setDate(nextDay,true);
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+function changeNewDateTime(filename, newdatatime,handleData) {
+    // send to server to handle file date/time change
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + JSON.stringify([filename]) + '&newdatatime=' + newdatatime;
+    var tbr = false;
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'fn':filename,csrf_token: csrfToken},
+        success: function(data) {
+            var jsondata = JSON.parse(data);
+            if (jsondata.status === 'fail') {
+                alert("ERROR: Invalid date.");
+                return false;
+            }
+
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+            return true;
+        },
+        error: function(e) {
+             alert("Encounter saving the NewDateTime.");
+             return false;
+        }
+    })
+}
+
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + JSON.stringify(filenames) + '&newdatatime=' + newdatatime;
     var tbr = false;
     $.ajax({
         type: "POST",

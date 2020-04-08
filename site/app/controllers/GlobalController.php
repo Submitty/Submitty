@@ -31,7 +31,9 @@ class GlobalController extends AbstractController {
 
         $unread_notifications_count = null;
         if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
-            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
+            $user_id = $this->core->getUser()->getId();
+            $new_course_file = $this->core->getQueries()->getNewCourseMaterialReleasedCount($user_id);
+            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($user_id, null);
         }
 
         $sidebar_buttons = [];
@@ -131,6 +133,7 @@ class GlobalController extends AbstractController {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['course_materials']),
                     "title" => "Course Materials",
+                    "badge" => isset($new_course_file) ? $new_course_file : 0,
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-materials",
                     "icon" => "fa-copy"
