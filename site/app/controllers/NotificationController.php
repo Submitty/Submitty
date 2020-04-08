@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -52,12 +52,12 @@ class NotificationController extends AbstractController {
     /**
      * @param $show_all
      * @Route("/{_semester}/{_course}/notifications")
-     * @return Response
+     * @return MultiResponse
      */
     public function showNotifications($show_all = null) {
         $show_all = isset($show_all) ? true : false;
         $notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), $show_all);
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
                 'showNotifications',
@@ -73,7 +73,7 @@ class NotificationController extends AbstractController {
      * @param $nid
      * @param $seen
      * @Route("/{_semester}/{_course}/notifications/{nid}", requirements={"nid": "[1-9]\d*"})
-     * @return Response
+     * @return MultiResponse
      */
     public function openNotification($nid, $seen) {
         $user_id = $this->core->getUser()->getId();
@@ -82,7 +82,7 @@ class NotificationController extends AbstractController {
             $thread_id = Notification::getThreadIdIfExists($metadata);
             $this->core->getQueries()->markNotificationAsSeen($user_id, $nid, $thread_id);
         }
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse(Notification::getUrl($this->core, $metadata))
         );
     }
@@ -90,32 +90,32 @@ class NotificationController extends AbstractController {
     /**
      * @param $nid
      * @Route("/{_semester}/{_course}/notifications/{nid}/seen", requirements={"nid": "[1-9]\d*"})
-     * @return Response
+     * @return MultiResponse
      */
     public function markNotificationAsSeen($nid) {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 
     /**
      * @Route("/{_semester}/{_course}/notifications/seen")
-     * @return Response
+     * @return MultiResponse
      */
     public function markAllNotificationsAsSeen() {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 
     /**
      * @Route("/{_semester}/{_course}/notifications/settings", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
     public function viewNotificationSettings() {
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
@@ -126,7 +126,7 @@ class NotificationController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/notifications/settings", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function changeSettings() {
         //Change settings for the current user.
@@ -139,12 +139,12 @@ class NotificationController extends AbstractController {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse('Notification settings have been saved.')
             );
         }
         else {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.')
             );
         }
