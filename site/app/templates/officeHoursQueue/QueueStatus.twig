@@ -59,7 +59,7 @@
         {{num_ahead_week}}
         {{viewer.plurality(num_ahead_week, 'person', 'people')}}
         ahead of you in the queue who
-        {{viewer.haveOrHas(num_ahead_week, 'has', 'have')}}
+        {{viewer.plurality(num_ahead_week, 'has', 'have')}}
         not yet been helped in the last week, and
         {{num_ahead_today}}
         additional
@@ -72,7 +72,7 @@
         {{num_ahead_week}}
         {{viewer.plurality(num_ahead_week, 'person', 'people')}}
         in the queue who
-        {{viewer.haveOrHas(num_ahead_week, 'has', 'have')}}
+        {{viewer.plurality(num_ahead_week, 'has', 'have')}}
         not been helped in the last week (they may be prioritized over you), and
         {{num_ahead_today}}
         {{viewer.plurality(num_ahead_today, 'person', 'people')}}
@@ -84,7 +84,7 @@
         {{num_ahead_week}}
         {{viewer.plurality(num_ahead_week, 'person', 'people')}}
         in the queue who
-        {{viewer.haveOrHas(num_ahead_week, 'has', 'have')}}
+        {{viewer.plurality(num_ahead_week, 'has', 'have')}}
         not yet been helped in the last week, and
         {{num_ahead_today}}
         additional
