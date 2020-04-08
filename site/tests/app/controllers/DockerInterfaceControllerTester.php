@@ -21,7 +21,6 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         $user_details = ['access_faculty' => true];
         $this->core = $this->createMockCore($this->config, $user_details);
 
-
         FileUtils::createDir($config['tmp_path']);
         FileUtils::createDir($config['job_path']);
         FileUtils::createDir($config['docker_data']);
@@ -77,6 +76,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
 
         $response = ($docker->showDockerInterface());
         $api = $response->json_response->json;
-        $this->assertEquals(['status' => 'success', 'data' => ['test' => 'test']], $api);
+        $this->assertEquals(['status' => 'success',
+                             'data' => ['test' => 'test', 'autograding_containers' => false]], $api);
     }
 }
