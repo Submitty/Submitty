@@ -25,6 +25,10 @@ class OfficeHoursQueueView extends AbstractView {
         return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig");
     }
 
+    public function renderNewStatus($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/QueueStatus.twig");
+    }
+
     private function renderPart($viewer, $twig_location) {
         return $this->core->getOutput()->renderTwigTemplate($twig_location, [
           'csrf_token' => $this->core->getCsrfToken(),

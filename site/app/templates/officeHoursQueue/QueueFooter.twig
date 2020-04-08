@@ -155,6 +155,22 @@
         setNotificationState(false);
       }
     }
+  {% else %}
+    let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
+    let refreshSpeed = 1000 * 30;
+    setInterval(refreshQueue, refreshSpeed);
+    function refreshQueue() {
+      if(!$("#queue_status").length){
+        return;
+      }
+      $.get("{{base_url}}/check_updates", function(data) {
+        if (lastQueueEdit < JSON.parse(data)['data']) {
+          $.get("{{base_url}}/new_status", function(newStatus) {
+            $("#queue_status").replaceWith(newStatus);
+          });
+        }
+      });
+    }
   {% endif %}
 
   function genRandCode(id) {

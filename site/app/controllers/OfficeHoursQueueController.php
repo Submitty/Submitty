@@ -413,4 +413,24 @@ class OfficeHoursQueueController extends AbstractController {
             )
         );
     }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
+    * @return MultiResponse
+    */
+    public function showNewStatus() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return;
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'renderNewStatus',
+                new OfficeHoursQueueModel($this->core)
+            )
+        );
+    }
 }
