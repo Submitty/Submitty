@@ -17,8 +17,8 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("CREATE TABLE IF NOT EXISTS polls(poll_id SERIAL PRIMARY KEY, name TEXT NOT NULL, question TEXT NOT NULL, status TEXT NOT NULL, release_date DATE NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS poll_options(option_id integer, order_id integer, poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL, correct bool NOT NULL)")
-    database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), option_id integer NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS poll_options(option_id integer NOT NULL, order_id integer NOT NULL, poll_id integer REFERENCES polls(poll_id), response TEXT NOT NULL, correct bool NOT NULL)")
+    database.execute("CREATE TABLE IF NOT EXISTS poll_responses(poll_id integer NOT NULL REFERENCES polls(poll_id), student_id TEXT NOT NULL REFERENCES users(user_id), option_id integer NOT NULL)")
     
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     # add boolean to course config
@@ -26,10 +26,9 @@ def up(config, database, semester, course):
     if config_file.is_file():
         with open(config_file, 'r') as in_file:
             j = json.load(in_file)
-        
-        j['course_details']['polls_enabled'] = False
-        j['course_details']['polls_pts_for_correct'] = 1.0
-        j['course_details']['polls_pts_for_incorrect'] = 0.5
+            j['course_details']['polls_enabled'] = False
+            j['course_details']['polls_pts_for_correct'] = 1.0
+            j['course_details']['polls_pts_for_incorrect'] = 0.0
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
