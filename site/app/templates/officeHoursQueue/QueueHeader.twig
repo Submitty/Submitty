@@ -52,6 +52,30 @@
       <p>You are currently in:
         <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
       </p>
+
+
+     <p>
+        {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+          Because you have not yet been helped through this queue during the last week, you may be prioritized.
+        {% elseif viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+          Because you have not yet been helped through this queue today, you may be prioritized.
+        {% else %}
+          However, because you have been helped through this queue today, you may be de-prioritized.
+        {% endif %}
+      </p>
+      <p>
+        {% set num_ahead_week = viewer.numberAheadInQueueThisWeek() %}
+        {% set num_ahead_today = viewer.numberAheadInQueueToday() %}
+        {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+          There {{viewer.plurality(num_ahead_week, 'is', 'are')}} currently {{num_ahead_week}} {{viewer.plurality(num_ahead_week, 'person', 'people')}} ahead of you in the queue who {{viewer.haveOrHas(num_ahead_week, 'has', 'have')}} not yet been helped in the last week, and {{num_ahead_today}} additional {{viewer.plurality(num_ahead_today, 'person', 'people')}} ahead of you in the queue who have not yet been helped today.
+        {% elseif viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+          There {{viewer.plurality(num_ahead_week, 'is', 'are')}} currently {{num_ahead_week}} {{viewer.plurality(num_ahead_week, 'person', 'people')}} in the queue who {{viewer.haveOrHas(num_ahead_week, 'has', 'have')}} not been helped in the last week (they may be prioritized over you), and {{num_ahead_today}} {{viewer.plurality(num_ahead_today, 'person', 'people')}} ahead of you in the queue who have not yet been helped today.
+        {% else %}
+          There {{viewer.plurality(num_ahead_week, 'is', 'are')}} currently {{num_ahead_week}} {{viewer.plurality(num_ahead_week, 'person', 'people')}} in the queue who {{viewer.haveOrHas(num_ahead_week, 'has', 'have')}} not yet been helped in the last week, and {{num_ahead_today}} additional {{viewer.plurality(num_ahead_today, 'person', 'people')}} in the queue who have not yet been helped today.
+        {% endif %}
+      </p>
+
+
       <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>

@@ -5554,6 +5554,16 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['change_count'];
     }
 
+    public function numberAheadInQueueThisWeek($queue_code, $time_in){
+      $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting','being_helped') and time_in < ?", array($queue_code, $time_in));
+      return $this->course_db->rows()[0]['count'];
+    }
+
+    public function numberAheadInQueueToday($queue_code, $time_in){
+      $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE AND last_time_in_queue > CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting','being_helped') and time_in < ?", array($queue_code, $time_in));
+      return $this->course_db->rows()[0]['count'];
+    }
+
 
 /////////////////END Office Hours Queue queries//////////////////////////////////
 

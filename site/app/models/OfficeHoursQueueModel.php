@@ -130,12 +130,18 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function firstTimeInQueueToday($time) {
+        if(is_null($time)){
+          return true;
+        }
         $one_day_ago = $this->core->getDateTimeNow();
         date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
         return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago;
     }
 
     public function firstTimeInQueueThisWeek($time) {
+        if(is_null($time)){
+          return true;
+        }
         $one_week_ago = $this->core->getDateTimeNow();
         date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
         return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago;
@@ -151,6 +157,14 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getCurrentQueueStatus() {
         return $this->core->getQueries()->getCurrentQueueState()['current_state'];
+    }
+
+    public function getCurrentQueueLastHelped() {
+        return $this->core->getQueries()->getCurrentQueueState()['last_time_in_queue'];
+    }
+
+    public function getCurrentQueueTimeIn() {
+        return $this->core->getQueries()->getCurrentQueueState()['time_in'];
     }
 
     public function cleanForId($str) {
@@ -183,5 +197,34 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function getQueueMessage() {
         return $this->core->getConfig()->getQueueMessage();
+    }
+
+    public function plurality($num, $single, $plural){
+      if($num == 1){
+        return $single;
+      }
+      return $plural;
+    }
+
+    public function numberAheadInQueueThisWeek(){
+      if($this->firstTimeInQueueThisWeek($this->getCurrentQueueLastHelped())){
+        $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
+      }else{
+        //Check assuming their time_in is current time because then it assumes
+        //everyone not helped this week is in front of them
+        $time_in = $this->core->getDateTimeNow();
+      }
+      return $this->core->getQueries()->numberAheadInQueueThisWeek($this->getCurrentQueueCode(), $time_in);
+    }
+
+    public function numberAheadInQueueToday(){
+      if($this->firstTimeInQueueToday($this->getCurrentQueueLastHelped())){
+        $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
+      }else{
+        //Check assuming their time_in is current time because then it assumes
+        //everyone not helped today is in front of them
+        $time_in = $this->core->getDateTimeNow();
+      }
+      return $this->core->getQueries()->numberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);
     }
 }
