@@ -1,4 +1,4 @@
-{% import _self as self %} 
+{% import _self as self %}
 <div id="submission_browser" class="draggable rubric_panel">
     <div class="draggable_content">
         <div id="directory_view">
@@ -107,7 +107,7 @@
                 iframe.addClass('open');
             }
         }
-        if(!iframe.hasClass("full_panel")){
+        if (!iframe.hasClass("full_panel") && url_file.substring(url_file.length - 3) !== "pdf") {
             if (!iframe.hasClass('shown')) {
                 iframe.show();
                 iframe.addClass('shown');

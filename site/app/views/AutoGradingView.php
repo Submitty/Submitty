@@ -384,6 +384,9 @@ class AutoGradingView extends AbstractView {
         }
 
         $id = $this->core->getUser()->getId();
+        if ($gradeable->isTeamAssignment()) {   
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();  
+        }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
         $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);

@@ -146,7 +146,10 @@ window.onbeforeunload = function() {
     }
 
     function saveFile(){
-        let zoom_level = window.RENDER_OPTIONS.scale * 100;
+        rotateVal = window.RENDER_OPTIONS.rotate;
+        /*localStorage.setItem('rotate', 0);
+        render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+        */let zoom_level = window.RENDER_OPTIONS.scale * 100;
         let doc = new jsPDF('p', 'mm');
         console.log("C1");
         zoom("custom", 140);
@@ -154,10 +157,10 @@ window.onbeforeunload = function() {
         let sTop = document.getElementById("file_content").scrollLeft;
         document.getElementById("file_content").scrollTop = 0;
         document.getElementById("file_content").scrollLeft = 0;
-        saveFileHelper(doc,0, zoom_level, sLeft, sTop);
+        saveFileHelper(doc,0, zoom_level, sLeft, sTop, rotateVal);
     }
     
-            function saveFileHelper(doc, i, zoom_level, sLeft, sTop){
+            function saveFileHelper(doc, i, zoom_level, sLeft, sTop, rotateVal){
             i++;
             if(i > NUM_PAGES){
                 var fd = new FormData();
@@ -170,6 +173,8 @@ window.onbeforeunload = function() {
                 fd.append('pdf', pdf);
                 let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
                 console.log(i);
+                localStorage.setItem('rotate', rotateVal);
+                render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
                 $.ajax({
                     type: 'POST',
                     url: url,
@@ -206,6 +211,7 @@ window.onbeforeunload = function() {
                             if(annotation.getAttribute("data-pdf-annotate-type") == "drawing"){
                                 let path2 = new Path2D(annotation.getAttribute("d"));
                                 ctx.strokeStyle = annotation.getAttribute("stroke");
+                                ctx.lineWidth = annotation.getAttribute("stroke-width");
                                 ctx.stroke(path2);
                             }
                             if(annotation.getAttribute("data-pdf-annotate-type") == "textbox"){
@@ -226,7 +232,7 @@ window.onbeforeunload = function() {
                     if(i < NUM_PAGES ){
                         doc.addPage();
                     }
-                    saveFileHelper(doc,i++, zoom_level, sLeft, sTop);
+                    saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
                 }
             });
         }

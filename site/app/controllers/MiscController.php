@@ -115,11 +115,11 @@ class MiscController extends AbstractController {
                     return false;
                 }
             }
-        }
-        
-        if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {    
-            $this->core->getOutput()->showError("Your section may not access this file.");  
-            return false;   
+            
+            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {    
+                $this->core->getOutput()->showError("Your section may not access this file.");  
+                return false;   
+            }
         }
         
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
