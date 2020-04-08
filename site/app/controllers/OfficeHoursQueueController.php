@@ -396,7 +396,6 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
     * @Route("/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
-    * @return MultiResponse
     */
     public function showCurrentQueue() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
@@ -416,7 +415,6 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
     * @Route("/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
-    * @return MultiResponse
     */
     public function showNewStatus() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
