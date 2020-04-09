@@ -47,13 +47,14 @@
         </label>
         <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
-            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
+            Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
+                debugger;
                 let cmTime = document.getElementById("edit-picker").value;
                 let requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
                 let hideFromStudents = 'off';
