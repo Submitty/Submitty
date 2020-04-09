@@ -5542,8 +5542,8 @@ AND gc_id IN (
 
     public function getCurrentQueueState() {
         $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", array($this->core->getUser()->getId()));
-        if($this->course_db->rows()){
-          return $this->course_db->rows()[0];
+        if ($this->course_db->rows()) {
+            return $this->course_db->rows()[0];
         }
         return null;
     }
