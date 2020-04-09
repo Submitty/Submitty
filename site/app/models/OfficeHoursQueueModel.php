@@ -138,7 +138,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         if (is_null($time)) {
             return true;
         }
-        $one_day_ago = $this->core->getDateTimeNow();
+        $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
         return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago;
     }
@@ -147,7 +147,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         if (is_null($time)) {
             return true;
         }
-        $one_week_ago = $this->core->getDateTimeNow();
+        $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
         date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
         return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago;
     }
