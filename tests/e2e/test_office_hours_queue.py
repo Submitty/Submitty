@@ -244,5 +244,5 @@ def countAlertError(self):
     return len(self.driver.find_elements_by_class_name("alert-error"))
 
 def expectedAlerts(self, success=0, error=0):
-    self.assertEqual(countAlertSuccess(self), success)
     self.assertEqual(countAlertError(self), error)
+    self.assertEqual(countAlertSuccess(self), success)
