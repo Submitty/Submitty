@@ -99,8 +99,6 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(base_queue_history_count+4, queueHistoryCount(self, False))
         self.assertEqual(0, currentQueueCount(self))
         switchToStudent(self, 'student')
-        studentJoinQueue(self, 'custom code', 'new code')#this should fail as the queue is closed
-        expectedAlerts(self, 0, 1)
 
         # Students should not be able to see any of theses elements
         self.assertEqual(True, verifyElementMissing(self, 'class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
