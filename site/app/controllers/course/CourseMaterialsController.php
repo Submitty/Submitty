@@ -249,7 +249,8 @@ class CourseMaterialsController extends AbstractController {
 
         foreach ($files_to_modify as $file) {
             $file_path = $file['path'];
-            $json[$file_path] =  array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+            $file_path_release_datetime = empty($release_time) ? $json[$file_path] : $release_time;
+            $json[$file_path] =  array('release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
         }
 
         FileUtils::writeJsonFile($fp, $json);
