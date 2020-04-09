@@ -317,14 +317,30 @@ class PlagiarismController extends AbstractController {
                             "file_option" => $file_option,
                             "language" =>   $language,
                             "threshold" =>  $threshold,
+                            "hash" => bin2hex(random_bytes(8)),
                             "sequence_length" => $sequence_length,
                             "prev_term_gradeables" => $prev_term_gradeables,
                             "ignore_submissions" =>   $ignore_submissions,
                             "instructor_provided_code" =>   $instructor_provided_code,
                                         );
-
         if ($file_option == "matching_regex") {
             $json_data["regex"] = $regex_for_selecting_files;
+        }
+        $old_config = file_get_contents($json_file);
+        if ($old_config !== false) {
+            $old_array = json_decode($old_config, true);
+            $regex_in_old = in_array("regex", $old_array);
+            $regex_in_new = in_array("regex", $json_data);
+            $json_data["regex_updated"] = false;
+            if (
+                ($regex_in_old
+                && !$regex_in_new)
+                 || (!$regex_in_old
+                 && $regex_in_new)
+                 || ($old_array['regex'] != $json_data['regex'])
+            ) {
+                    $json_data["regex_updated"] = true;
+            }
         }
         if ($instructor_provided_code == true) {
             $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;
@@ -527,7 +543,7 @@ class PlagiarismController extends AbstractController {
         if ($version_user_1 == "max_matching") {
             $version_user_1 = $max_matching_version;
         }
-        $all_versions_user_1 = array_diff(scandir($course_path . "/submissions/" . $gradeable_id . "/" . $user_id_1), array(".", "..", "user_assignment_settings.json"));
+        $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), array(".", ".."));
 
         $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/submission.concatenated";
         $data = "";
