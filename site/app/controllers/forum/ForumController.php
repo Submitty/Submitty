@@ -754,7 +754,7 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1) {
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1, $thread_display_option = 'original') {
         $current_user = $this->core->getUser()->getId();
         if (!$this->isValidCategories($categories_ids)) {
             // No filter for category
@@ -764,6 +764,45 @@ class ForumController extends AbstractController {
         $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
 
         $ordered_threads = $thread_block['threads'];
+
+        // The following sorts the threads according to the parameter
+        // 'original' is the original order
+        // 'time' sorts the threads from earliest to latest by the timestamp
+        // of the first post
+        // 'reverse-time' sorts the threads from latest to earliest by the timestamp
+        // of the first post
+        // 'alpha' sorts the threads by alphabetical order of the title of the threads
+        // 'thread-id' sorts by the IDs of the threads
+        
+        if ($thread_display_option === 'time') {
+            usort($ordered_threads, function (array $first_thread, array $second_thread) {
+
+                $first_thread_first_post_timestamp = $this->core->getQueries()->getFirstPostForThread($first_thread['id'])['timestamp'];
+                $second_thread_first_post_timestamp = $this->core->getQueries()->getFirstPostForThread($second_thread['id'])['timestamp'];
+                return ($first_thread_first_post_timestamp <=> $second_thread_first_post_timestamp);
+            });
+        }
+        elseif ($thread_display_option === 'reverse-time') {
+            usort($ordered_threads, function (array $first_thread, array $second_thread) {
+
+                $first_thread_first_post_timestamp = $this->core->getQueries()->getFirstPostForThread($first_thread['id'])['timestamp'];
+                $second_thread_first_post_timestamp = $this->core->getQueries()->getFirstPostForThread($second_thread['id'])['timestamp'];
+                return ($second_thread_first_post_timestamp <=> $first_thread_first_post_timestamp);
+            });
+        }
+        elseif ($thread_display_option === 'alpha') {
+            usort($ordered_threads, function (array $first_thread, array $second_thread) {
+
+                return strcmp($first_thread['title'], $second_thread['title']);
+            });
+        }
+        elseif ($thread_display_option === 'thread-id') {
+            usort($ordered_threads, function (array $first_thread, array $second_thread) {
+
+                return ($first_thread['id'] <=> $second_thread['id']);
+            });
+        }
+
         $blockNumber = $thread_block['block_number'];
 
         foreach ($ordered_threads as &$thread) {
@@ -905,7 +944,18 @@ class ForumController extends AbstractController {
             } while ($count > 0);
         }
         $pageNumber = 0;
-        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+
+        if (!empty($_REQUEST['threadOption'])) {
+            $thread_display_option = $_REQUEST['threadOption'];
+        }
+        elseif (!empty($_COOKIE['forum_thread_display_option'])) {
+            $thread_display_option = $_COOKIE['forum_thread_display_option'];
+        }
+        else {
+            $thread_display_option = 'original';
+        }
+        
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id, $thread_display_option);
 
         if (!empty($_REQUEST["ajax"])) {
             $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);

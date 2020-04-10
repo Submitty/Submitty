@@ -1414,3 +1414,9 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
         }
     });
 }
+
+function changeThreadDisplayOptions(option){
+    thread_id = $('#current-thread').val();
+    document.cookie = "forum_thread_display_option=" + option + ";";
+    window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]) + `?threadOption=${option}`);
+}

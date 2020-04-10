@@ -158,6 +158,27 @@
 		</div>
 	{% endif %}
 </div>
+<div class="row mt-2">
+	<div class="col-3">
+		<div class="dropright">
+			<a title="Sorting options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default btn-block dropdown-toggle" data-target="#" href="#">
+	            Sort Threads <i class="fas fa-caret-right"></i>
+	        </a>
+
+			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownLabel">
+
+			{% if thread_exists %}
+				<li title="Show posts in the original order" id="original" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeThreadDisplayOptions('original')">Original</a></li>
+	            <li title="Sort posts by thread's title" id="alpha" class='dropdown-item' role="menuitem"><a class="key_to_click"  onclick="changeThreadDisplayOptions('alpha')" href="#">Alphabetical - Title</a></li>
+	            <li title="Sort posts by thread's ID" id="thread-id" class='dropdown-item' role="menuitem"><a class="key_to_click"  onclick="changeThreadDisplayOptions('thread-id')" href="#">Thread ID</a></li>
+	            <li title="Sort posts by ascending chronological order of the first post" id="thread-time" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeThreadDisplayOptions('time')">Chronological  <i class="fas fa-angle-up"></i> </a></li>
+	            <li title="Sort posts by descending chronological order of the first post" id="thread-reverse-time" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeThreadDisplayOptions('reverse-time')">Chronological  <i class="fas fa-angle-down"></i> </a></li>
+	        {% endif %}
+	        
+	        </ul>
+	    </div>
+	</div>
+</div>
 </div>
 <hr/>
 {% if thread_exists and show_filter %}
