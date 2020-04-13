@@ -21,7 +21,7 @@
                         openAll( 'openable-element-', $(this).data('linked-type'))
                     })
 
-                    var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+                    var currentCodeStyle = localStorage.getItem('theme');
                     var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
                     $('#' + currentCodeStyleRadio).parent().addClass('active');
                     $('#' + currentCodeStyleRadio).prop('checked', true);
@@ -32,14 +32,6 @@
                 <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
             {% endif %}
 
-            <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
-                <label class="btn btn-secondary">
-                    <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
-                </label>
-                <label class="btn btn-secondary">
-                    <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
-                </label>
-            </div>
             <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             <br />
             {# Files #}

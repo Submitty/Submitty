@@ -269,7 +269,7 @@ class ForumThreadView extends AbstractView {
                     "display_text" => $show_merged_thread_title,
                     "id" => 'merge_thread',
                     "optional_class" => array(!empty($show_merged_thread_class), $show_merged_thread_class),
-                    "title" => $show_merged_thread_title,
+                    "title" => $show_merged_thread_title . " on Forum",
                     "onclick" => array(true, $show_merged_thread_action),
                     "link" => '#',
                     "required_rank" => 4
@@ -278,7 +278,7 @@ class ForumThreadView extends AbstractView {
                     "display_text" => $show_deleted_thread_title,
                     "optional_class" => array(!empty($show_deleted_class), $show_deleted_class),
                     "id" => 'delete',
-                    "title" => $show_deleted_thread_title,
+                    "title" => $show_deleted_thread_title . " on Forum",
                     "link" => '#',
                     "onclick" => array(true, $show_deleted_action),
                     "required_rank" => 3
@@ -502,6 +502,14 @@ class ForumThreadView extends AbstractView {
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
+            
+            // Get first post of each thread. To be used later
+            // to obtain the content of the post to be displayed
+            // in the modal.
+            foreach ($merge_thread_list as $key => $temp_thread) {
+                $temp_first_post = $this->core->getQueries()->getFirstPostForThread($temp_thread['id']);
+                $merge_thread_list[$key]['first_post_id'] = $temp_first_post['id'];
+            }
 
             $merge_thread_content = [
                 "current_thread_date" => $current_thread_date,
@@ -1047,6 +1055,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+        $this->core->getOutput()->addInternalCss('forum.css');
 
         $categories = "";
         $category_colors;

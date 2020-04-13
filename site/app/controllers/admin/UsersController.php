@@ -7,7 +7,7 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\models\User;
 use app\libraries\routers\AccessControl;
@@ -25,7 +25,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/users", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
     public function getStudents() {
         $students = $this->core->getQueries()->getAllUsers();
@@ -61,7 +61,7 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
                 ['admin', 'Users'],
@@ -78,7 +78,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/graders", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
     public function getGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
@@ -124,7 +124,7 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
                 ['admin', 'Users'],
@@ -606,6 +606,29 @@ class UsersController extends AbstractController {
                 continue;
             }
             $this->core->getQueries()->updateUsersRotatingSection($i + 1, $update_users);
+        }
+
+        //update graders' access for gradeables with all access grading for limited
+        //access graders now that rotating sections are set up
+
+        //$update_graders_gradeables is all gradeables in this semester/course where
+        //there's limited access graders + all access grading
+        $update_graders_gradeables = [];
+        $update_graders_gradeables_ids = $this->core->getQueries()->getGradeableIdsForFullAccessLimitedGraders();
+        foreach ($update_graders_gradeables_ids as $row) {
+            $g_id = $row['g_id'];
+            $tmp_gradeable = $this->tryGetGradeable($g_id, false);
+            if ($tmp_gradeable === false) {
+                continue;
+            }
+            $update_graders_gradeables[] = $tmp_gradeable;
+        }
+
+        $new_graders = $this->core->getQueries()->getNewGraders();
+
+        foreach ($update_graders_gradeables as $update_gradeable) {
+            $update_gradeable->setRotatingGraderSections($new_graders);
+            $this->core->getQueries()->updateGradeable($update_gradeable);
         }
 
         foreach ($team_section_counts as $g_id => $counts) {

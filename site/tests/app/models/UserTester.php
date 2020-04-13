@@ -95,11 +95,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         );
         $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
-        $user->setPassword("test");
-        $hashed_password = password_hash("test", PASSWORD_DEFAULT);
-        password_verify("test", $hashed_password);
-        $user->setPassword($hashed_password);
-        password_verify("test", $hashed_password);
+        $user->setPassword("test1");
+        $this->assertTrue(password_verify("test1", $user->getPassword()));
+        $user->setPassword(password_hash("test2", PASSWORD_DEFAULT));
+        $this->assertTrue(password_verify("test2", $user->getPassword()));
     }
 
     public function testToObject() {
