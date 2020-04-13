@@ -244,6 +244,7 @@ class ElectronicGraderController extends AbstractController {
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
             $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
+            $num_gradeables = count($this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId()));
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $this->core->getUser()->getId());
             $component_averages = array();
             $autograded_average = null;
@@ -330,6 +331,7 @@ class ElectronicGraderController extends AbstractController {
                 $sections['stu_grad'] = array(
                     'total_components' => $num_components,
                     'graded_components' => $my_grading,
+                    'num_gradeables' => $num_gradeables,
                     'graders' => array()
                 );
                 $sections['all'] = array(
