@@ -22,6 +22,10 @@
         return data;
     }
     function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
+        if(increment < 1){
+            increment = 1;
+        }
+        
         let loop = Math.ceil(range/increment);
         let tracking = min;
         for(i = 0;i<loop;i++){
