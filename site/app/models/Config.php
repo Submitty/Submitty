@@ -65,6 +65,8 @@ use app\libraries\FileUtils;
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
+ * @method string getSubmittyInstallDir()
+ * @method bool isDuckBannerEnabled()
  */
 
 class Config extends AbstractModel {
@@ -224,6 +226,10 @@ class Config extends AbstractModel {
     protected $queue_contact_info;
     /** @prop @var string */
     protected $queue_message;
+    /** @prop @var string */
+    protected $submitty_install_dir;
+    /** @prop @var bool */
+    protected $duck_banner_enabled;
 
     /** @prop-read @var array */
     protected $feature_flags = [];
@@ -274,6 +280,8 @@ class Config extends AbstractModel {
 
         $this->base_url = $submitty_json['submission_url'];
         $this->submitty_path = $submitty_json['submitty_data_dir'];
+        $this->submitty_install_dir = $submitty_json['submitty_install_dir'];
+        $this->duck_banner_enabled = $submitty_json['duck_special_effects'] === true;
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
