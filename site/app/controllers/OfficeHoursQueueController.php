@@ -416,7 +416,7 @@ class OfficeHoursQueueController extends AbstractController {
     /**
     * @Route("/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
     */
-    public function showQueueHistory() {
+    public function showQueueHistory($full_history = false) {
         if (!$this->core->getConfig()->isQueueEnabled()) {
             return;
         }
@@ -427,7 +427,7 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderQueueHistory',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core, $full_history)
             )
         );
     }

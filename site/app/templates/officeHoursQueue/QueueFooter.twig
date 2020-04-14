@@ -137,7 +137,7 @@
               new Notification("A student has joined the queue");
             }
           });
-          $.get("{{base_url}}/queue_history", function(newStatus) {
+          $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {
             $("#queue_history").replaceWith(newStatus);
           });
         }
