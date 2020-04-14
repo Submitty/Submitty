@@ -25,6 +25,10 @@ class OfficeHoursQueueView extends AbstractView {
         return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig");
     }
 
+    public function renderQueueHistory($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/QueueHistory.twig");
+    }
+
     public function renderNewStatus($viewer) {
         return $this->renderPart($viewer, "officeHoursQueue/QueueStatus.twig");
     }

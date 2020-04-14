@@ -10,7 +10,7 @@
       </label>
       <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
         <option value="">Queue Name</option>
-        {% for queue in viewer.getAllQueues()if queue['open'] == 'true' %}
+        {% for queue in viewer.getAllQueues()%}
           <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
         {% endfor %}
       </select>

@@ -161,12 +161,10 @@ def switchToInstructor(self, account):
     goToQueuePage(self)
 
 def studentJoinQueue(self, queueName, queueCode, studentName=None):
-    print(self.driver.find_element_by_id('add_to_queue').get_attribute("action"))
     if(studentName):
         self.driver.find_element_by_id('name_box').send_keys(studentName)
     select = Select(self.driver.find_element_by_id('queue_code'))
     select.select_by_visible_text(queueName)
-    print(self.driver.find_element_by_id('add_to_queue').get_attribute("action"))
     self.driver.find_element_by_id('token_box').send_keys(queueCode)
     self.driver.find_element_by_id('join_queue_btn').click()
 
