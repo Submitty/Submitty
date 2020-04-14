@@ -238,6 +238,7 @@ class ElectronicGraderController extends AbstractController {
         $num_unsubmitted = 0;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
+        $num_gradeables = 1;
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
