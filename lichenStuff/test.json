@@ -1,0 +1,91 @@
+[
+    {
+        "end": 5,
+        "others": [
+            {
+                "matchingpositions": [
+                    {
+                        "end": 5,
+                        "start": 1
+                    }
+                ],
+                "username": "jastm",
+                "version": 2
+            }
+        ],
+        "start": 1,
+        "type": "match"
+    },
+    {
+        "end": 6,
+        "others": [
+            {
+                "matchingpositions": [
+                    {
+                        "end": 6,
+                        "start": 2
+                    }
+                ],
+                "username": "jastm",
+                "version": 2
+            }
+        ],
+        "start": 2,
+        "type": "match"
+    },
+    {
+        "end": 7,
+        "others": [
+            {
+                "matchingpositions": [
+                    {
+                        "end": 7,
+                        "start": 3
+                    }
+                ],
+                "username": "jastm",
+                "version": 2
+            },
+            {
+                "matchingpositions": [
+                    {
+                        "end": 9,
+                        "start": 5
+                    }
+                ],
+                "username": "ruecke",
+                "version": 2
+            },
+            {
+                "matchingpositions": [
+                    {
+                        "end": 7,
+                        "start": 3
+                    }
+                ],
+                "username": "weissf",
+                "version": 2
+            }
+        ],
+        "start": 3,
+        "type": "match"
+    },
+    {
+        "end": 27,
+        "others": [
+            {
+                "matchingpositions": [
+                    {
+                        "end": 7,
+                        "start": 3
+                    }
+                ],
+                "username": "weissf",
+                "version": 2
+            }
+        ],
+        "start": 23,
+        "type": "match"
+      }
+]
+
