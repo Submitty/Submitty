@@ -77,7 +77,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "username_change_text" => "Submitty welcomes all students.",
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
-            'system_message' => "Some system message"
+            'system_message' => "Some system message",
+            "duck_special_effects" => false
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -236,6 +237,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'default_hw_late_days' => 0,
             'default_student_late_days' => 0,
             'zero_rubric_grades' => false,
+            'submitty_install_dir' => $this->temp_dir,
+            'duck_banner_enabled' => false,
             'upload_message' => '',
             'display_rainbow_grades_summary' => false,
             'display_custom_message' => false,
