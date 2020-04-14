@@ -1,0 +1,972 @@
+object(Interval)#636 (3) {
+  ["start":"Interval":private]=>
+  int(333)
+  ["end":"Interval":private]=>
+  int(559)
+  ["user_matches":"Interval":private]=>
+  array(39) {
+    [0]=>
+    object(Submission)#637 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hartmj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#638 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#640 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kerluh"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [3]=>
+    object(Submission)#684 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "feestj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [4]=>
+    object(Submission)#697 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "pagaca"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [5]=>
+    object(Submission)#698 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schims"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [6]=>
+    object(Submission)#700 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "trompa"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [7]=>
+    object(Submission)#726 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "shielo"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [8]=>
+    object(Submission)#732 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kshles"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [9]=>
+    object(Submission)#744 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "bauchg"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [10]=>
+    object(Submission)#755 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hoegea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [11]=>
+    object(Submission)#764 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hettim"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [12]=>
+    object(Submission)#789 (2) {
+      ["userId":"Submission":private]=>
+      string(5) "kocht"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [13]=>
+    object(Submission)#820 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "lakinh"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [14]=>
+    object(Submission)#830 (2) {
+      ["userId":"Submission":private]=>
+      string(2) "ta"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [15]=>
+    object(Submission)#832 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "adamss"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [16]=>
+    object(Submission)#833 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "glovem"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [17]=>
+    object(Submission)#856 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "mullem"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [18]=>
+    object(Submission)#858 (2) {
+      ["userId":"Submission":private]=>
+      string(4) "vonm"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [19]=>
+    object(Submission)#880 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "bechta"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [20]=>
+    object(Submission)#883 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "keelia"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [21]=>
+    object(Submission)#885 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "willia"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [22]=>
+    object(Submission)#897 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "bartec"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [23]=>
+    object(Submission)#899 (2) {
+      ["userId":"Submission":private]=>
+      string(3) "ta3"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [24]=>
+    object(Submission)#910 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hamill"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [25]=>
+    object(Submission)#940 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hayesk"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [26]=>
+    object(Submission)#942 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "wilkic"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [27]=>
+    object(Submission)#945 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "mcculc"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [28]=>
+    object(Submission)#946 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "moscit"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [29]=>
+    object(Submission)#971 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schadd"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [30]=>
+    object(Submission)#974 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sauerd"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [31]=>
+    object(Submission)#976 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "spinko"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [32]=>
+    object(Submission)#1043 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kessle"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [33]=>
+    object(Submission)#1077 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "rogahl"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [34]=>
+    object(Submission)#1080 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "ortizr"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [35]=>
+    object(Submission)#1083 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kessll"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [36]=>
+    object(Submission)#1084 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "morisf"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [37]=>
+    object(Submission)#1124 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "jakubr"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [38]=>
+    object(Submission)#1126 (2) {
+      ["userId":"Submission":private]=>
+      string(7) "student"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}
+object(Interval)#601 (3) {
+  ["start":"Interval":private]=>
+  int(312)
+  ["end":"Interval":private]=>
+  int(332)
+  ["user_matches":"Interval":private]=>
+  array(6) {
+    [0]=>
+    object(Submission)#602 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#610 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schowb"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#613 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "joness"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [3]=>
+    object(Submission)#614 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "mckenh"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [4]=>
+    object(Submission)#633 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "borerd"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [5]=>
+    object(Submission)#634 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "mullem"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+  }
+}
+object(Interval)#522 (3) {
+  ["start":"Interval":private]=>
+  int(276)
+  ["end":"Interval":private]=>
+  int(309)
+  ["user_matches":"Interval":private]=>
+  array(13) {
+    [0]=>
+    object(Submission)#523 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#535 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sengec"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [2]=>
+    object(Submission)#537 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "trompa"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [3]=>
+    object(Submission)#543 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "medhug"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [4]=>
+    object(Submission)#544 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "reingn"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [5]=>
+    object(Submission)#559 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kiehnr"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [6]=>
+    object(Submission)#564 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schims"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [7]=>
+    object(Submission)#566 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "towneo"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [8]=>
+    object(Submission)#574 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "bruenl"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [9]=>
+    object(Submission)#581 (2) {
+      ["userId":"Submission":private]=>
+      string(7) "grader2"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [10]=>
+    object(Submission)#582 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "gutmai"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [11]=>
+    object(Submission)#593 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "jakubr"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [12]=>
+    object(Submission)#594 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kundeb"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+  }
+}
+object(Interval)#511 (3) {
+  ["start":"Interval":private]=>
+  int(268)
+  ["end":"Interval":private]=>
+  int(274)
+  ["user_matches":"Interval":private]=>
+  array(3) {
+    [0]=>
+    object(Submission)#512 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "grader"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#513 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schowb"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#514 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}
+object(Interval)#397 (3) {
+  ["start":"Interval":private]=>
+  int(212)
+  ["end":"Interval":private]=>
+  int(264)
+  ["user_matches":"Interval":private]=>
+  array(18) {
+    [0]=>
+    object(Submission)#398 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "trembb"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [1]=>
+    object(Submission)#400 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "harbel"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#401 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "lindgf"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [3]=>
+    object(Submission)#402 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [4]=>
+    object(Submission)#403 (2) {
+      ["userId":"Submission":private]=>
+      string(4) "vonm"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [5]=>
+    object(Submission)#414 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kundeb"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [6]=>
+    object(Submission)#438 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hartmj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [7]=>
+    object(Submission)#444 (2) {
+      ["userId":"Submission":private]=>
+      string(5) "metza"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [8]=>
+    object(Submission)#449 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hammef"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [9]=>
+    object(Submission)#463 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "douglg"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [10]=>
+    object(Submission)#467 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "heanec"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [11]=>
+    object(Submission)#471 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kessle"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [12]=>
+    object(Submission)#472 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sengec"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [13]=>
+    object(Submission)#474 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "trompa"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [14]=>
+    object(Submission)#484 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kovaco"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [15]=>
+    object(Submission)#486 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "whitel"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [16]=>
+    object(Submission)#500 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sauere"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [17]=>
+    object(Submission)#505 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "marvic"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+  }
+}
+object(Interval)#385 (3) {
+  ["start":"Interval":private]=>
+  int(193)
+  ["end":"Interval":private]=>
+  int(202)
+  ["user_matches":"Interval":private]=>
+  array(1) {
+    [0]=>
+    object(Submission)#386 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}
+object(Interval)#288 (3) {
+  ["start":"Interval":private]=>
+  int(146)
+  ["end":"Interval":private]=>
+  int(191)
+  ["user_matches":"Interval":private]=>
+  array(12) {
+    [0]=>
+    object(Submission)#289 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schowb"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#290 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#291 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "ullril"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [3]=>
+    object(Submission)#309 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "lubowc"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [4]=>
+    object(Submission)#312 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "aufded"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [5]=>
+    object(Submission)#313 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hammef"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [6]=>
+    object(Submission)#332 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kovaco"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [7]=>
+    object(Submission)#334 (2) {
+      ["userId":"Submission":private]=>
+      string(14) "submitty-admin"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [8]=>
+    object(Submission)#335 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "wilkic"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [9]=>
+    object(Submission)#363 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "morisf"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [10]=>
+    object(Submission)#364 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "reichb"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [11]=>
+    object(Submission)#383 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "klingd"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}
+object(Interval)#187 (3) {
+  ["start":"Interval":private]=>
+  int(97)
+  ["end":"Interval":private]=>
+  int(143)
+  ["user_matches":"Interval":private]=>
+  array(11) {
+    [0]=>
+    object(Submission)#188 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hartmj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#189 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kovaco"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#190 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [3]=>
+    object(Submission)#216 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "jacobs"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [4]=>
+    object(Submission)#217 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "lindgf"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [5]=>
+    object(Submission)#226 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "russec"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [6]=>
+    object(Submission)#228 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "uptonr"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [7]=>
+    object(Submission)#236 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "botsfj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [8]=>
+    object(Submission)#237 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hammef"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [9]=>
+    object(Submission)#263 (2) {
+      ["userId":"Submission":private]=>
+      string(5) "metzv"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [10]=>
+    object(Submission)#274 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "schowb"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}
+object(Interval)#120 (3) {
+  ["start":"Interval":private]=>
+  int(62)
+  ["end":"Interval":private]=>
+  int(96)
+  ["user_matches":"Interval":private]=>
+  array(6) {
+    [0]=>
+    object(Submission)#121 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#129 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "bartec"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#130 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "borerd"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [3]=>
+    object(Submission)#131 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "leuscj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [4]=>
+    object(Submission)#163 (2) {
+      ["userId":"Submission":private]=>
+      string(5) "mrazt"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [5]=>
+    object(Submission)#185 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "cronar"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}
+object(Interval)#1 (3) {
+  ["start":"Interval":private]=>
+  int(1)
+  ["end":"Interval":private]=>
+  int(52)
+  ["user_matches":"Interval":private]=>
+  array(17) {
+    [0]=>
+    object(Submission)#2 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "ortizr"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [1]=>
+    object(Submission)#3 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sporea"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [2]=>
+    object(Submission)#10 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "trompa"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [3]=>
+    object(Submission)#12 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "lubowc"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [4]=>
+    object(Submission)#29 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "feestj"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [5]=>
+    object(Submission)#30 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "harric"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [6]=>
+    object(Submission)#32 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "wilkic"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [7]=>
+    object(Submission)#42 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "lindgf"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [8]=>
+    object(Submission)#49 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "bruenl"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [9]=>
+    object(Submission)#51 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sengec"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [10]=>
+    object(Submission)#64 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "hayesk"
+      ["versionId":"Submission":private]=>
+      int(3)
+    }
+    [11]=>
+    object(Submission)#65 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "kessll"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [12]=>
+    object(Submission)#68 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "gottlj"
+      ["versionId":"Submission":private]=>
+      int(4)
+    }
+    [13]=>
+    object(Submission)#70 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "sauere"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [14]=>
+    object(Submission)#95 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "grader"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [15]=>
+    object(Submission)#97 (2) {
+      ["userId":"Submission":private]=>
+      string(14) "submitty-admin"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+    [16]=>
+    object(Submission)#104 (2) {
+      ["userId":"Submission":private]=>
+      string(6) "labadc"
+      ["versionId":"Submission":private]=>
+      int(2)
+    }
+  }
+}

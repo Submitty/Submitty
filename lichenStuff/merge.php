@@ -130,6 +130,8 @@ function mergeIntervals($iArr) {
   $index = 0;
   $stack = new Stack();
   $stack->push($iArr[0]);
+  ob_flush();
+  ob_start();
   for ($i = 1; $i < count($iArr); $i++) {
     $cI = $stack->top();
     if ($cI->getEnd() < $iArr[$i]->getStart()) {
@@ -149,10 +151,10 @@ function mergeIntervals($iArr) {
     var_dump($i);
     $stack->pop();
   }
-
+  file_put_contents("dump.txt", ob_get_flush());
 }
 
-$result = constructIntervals('test.json');
+$result = constructIntervals('matches.json');
 
 mergeIntervals($result);
 
