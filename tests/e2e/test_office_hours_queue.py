@@ -166,6 +166,8 @@ def studentJoinQueue(self, queueName, queueCode, studentName=None):
     select = Select(self.driver.find_element_by_id('queue_code'))
     select.select_by_visible_text(queueName)
     self.driver.find_element_by_id('token_box').send_keys(queueCode)
+    self.assertIn("_".join(queueName.split()), self.driver.find_element_by_id('add_to_queue').get_attribute('action'))
+    self.assertEqual(queueCode, self.driver.find_element_by_id('token_box').get_attribute('value'))
     self.driver.find_element_by_id('join_queue_btn').click()
 
 def studentRemoveSelfFromQueue(self):
@@ -252,5 +254,5 @@ def countAlertError(self, text=[]):
     return len(alerts)
 
 def expectedAlerts(self, success=0, error=0, success_text=[], error_text=[]):
-    self.assertEqual(countAlertSuccess(self, success_text), success)
     self.assertEqual(countAlertError(self, error_text), error)
+    self.assertEqual(countAlertSuccess(self, success_text), success)
