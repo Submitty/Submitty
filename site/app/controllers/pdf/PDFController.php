@@ -66,7 +66,6 @@ class PDFController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/annotations", methods={"POST"})
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function savePDFAnnotation($gradeable_id) {
         //Save the annotation layer to a folder.
@@ -114,7 +113,6 @@ class PDFController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function showGraderPDFEmbedded($gradeable_id) {
         // This is the embedded pdf annotator that we built.
