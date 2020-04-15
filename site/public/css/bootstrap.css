@@ -521,7 +521,7 @@ input[type="button"].btn-block {
 .label_forum {
   display: inline;
   padding: .2em .6em .3em;
-  font-size: 65%;
+  font-size: 70%;
   font-weight: bold;
   line-height: 2.5;
   color: var(--btn-text-white);

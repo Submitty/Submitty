@@ -1191,7 +1191,7 @@ function enableTabsInTextArea(jQuerySelector) {
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
             // focus to the next control in the list.
-            var controls = $(":input").filter(":visible");
+            var controls = $(":tabbable").filter(":visible");
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
