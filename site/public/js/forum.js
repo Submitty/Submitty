@@ -341,7 +341,7 @@ function readCategoryValues(){
     var categories_value = [];
     $('#thread_category button').each(function(){
         if($(this).data("btn-selected")==="true"){
-            categories_value.push($(this).attr("data-cat_id"));
+            categories_value.push($(this).data("cat_id"));
         }
     });
     return categories_value;
@@ -351,7 +351,7 @@ function readThreadStatusValues(){
     var thread_status_value = [];
     $('#thread_status_select button').each(function(){
         if($(this).data("btn-selected")==="true"){
-            thread_status_value.push($(this).attr("data-sel_id"));
+            thread_status_value.push($(this).data("sel_id"));
         }
     });
     return thread_status_value;
@@ -1166,7 +1166,7 @@ function loadThreadHandler(){
     $("a.thread_box_link").click(function(event){
         event.preventDefault();
         var obj = this;
-        var thread_id = $(obj).attr("data-thread_id");
+        var thread_id = $(obj).data("thread_id");
 
         var url = buildCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
