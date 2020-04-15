@@ -129,7 +129,7 @@ class AdminGradeableController extends AbstractController {
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
         // These are hard coded default config options.
-        $install_dir = $this->core->getConfig()->getSubmittyInstallDir();
+        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
         $default_config_paths = [
             ['PROVIDED: upload_only (1 mb maximum total student file submission)',
             FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
@@ -749,7 +749,7 @@ class AdminGradeableController extends AbstractController {
                 'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
                 'ta_instructions' => '',
                 'autograding_config_path' =>
-                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallDir(), 'more_autograding_examples/upload_only/config'),
+                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
@@ -838,7 +838,7 @@ class AdminGradeableController extends AbstractController {
                 'team_size_max' => $details['team_size_max'],
                 'regrade_allowed' => $regrade_allowed,
                 'autograding_config_path' =>
-                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallDir(), 'more_autograding_examples/upload_only/config'),
+                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
 
@@ -891,7 +891,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
             $gradeable->setAutogradingConfigPath(
-                FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallDir(), 'more_autograding_examples/pdf_exam/config')
+                FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
             );
             $gradeable->setHasDueDate(false);
         }
