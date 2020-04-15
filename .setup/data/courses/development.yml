@@ -338,7 +338,7 @@ gradeables:
   eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
-- gradeable_config: paragraph_textboxes
+- gradeable_config: notebook_basic
   components:
   - gc_lower_clamp: 0
     gc_default: 5
