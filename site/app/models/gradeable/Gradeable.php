@@ -488,7 +488,7 @@ class Gradeable extends AbstractModel {
             });
             $this->core->addErrorMessage($msg);
         }
-        else{
+        else {
             $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
             foreach ($input as $row_num => $vals) {
                 $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
