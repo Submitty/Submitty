@@ -2,11 +2,13 @@
 Required Parameters:
 -grading_disabled: if the the element should be inactive
 -editable: if the element is in edit mode
--overall_comment: the text to show in box
+-overall_comment: array with the following keys/values:
+  - overall_comment["logged_in_user"]["user_id"],
+  - overall_comment["logged_in_user"]["comment"]
+  - overall_comment["other_graders"][<user_id>] = <comment>
 
 #}
-<div class="box general-comment container key_to_click" tabindex="0"
-     onclick="{{ grading_disabled ? '' : 'onClickOverallComment(this)'}}">
+<div class="box general-comment container key_to_click" tabindex="0">
     <div class="row">
         <div class="col">
             <b>Overall Comment</b>
@@ -21,16 +23,30 @@ Required Parameters:
         {% endif %}
     </div>
     <div class="row">
-        {% if editable %}
-            <textarea id="overall-comment"
-                      rows="5"
-                      class="general-comment-entry noscroll key_to_click" tabindex="0"
-                      onclick="event.stopPropagation()"
-                      onkeyup="auto_grow(this)"
-                      placeholder="Overall message for student about the gradeable..."
-            >{{ overall_comment|escape }}</textarea>
-        {% else %}
-            <span id="overall-comment-collapsed">{{ overall_comment|nl2br }}</span>
-        {% endif %}
+        <div class="tab-bar-wrapper" id="overall-comment-tabs">
+            <a class="nav-bar key_to_click normal-btn active-btn" id="overall-comment-tab-{{overall_comment["logged_in_user"]["user_id"]|escape}}" onclick="open_overall_comment_tab('{{overall_comment["logged_in_user"]["user_id"]|escape}}');">{{overall_comment["logged_in_user"]["user_id"]|escape}}</a>
+
+            {% for user, comment in overall_comment["other_graders"] %}
+                <a class="nav-bar key_to_click normal-btn" id="overall-comment-tab-{{user}}" onclick="open_overall_comment_tab('{{user}}');">{{user}}</a>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row" id="overall-comments">
+        <textarea
+                id="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}"
+                rows="5"
+                class="general-comment-entry noscroll key_to_click" tabindex="0"
+                onclick="event.stopPropagation()"
+                onkeyup="auto_grow(this)"
+                onchange="{{ grading_disabled ? '' : 'onChangeOverallComment()'}}"
+                placeholder="Overall message for student about the gradeable...">{{overall_comment["logged_in_user"]["comment"]|escape }}</textarea>
+
+        {% for user, comment in overall_comment["other_graders"] %}
+            <textarea disabled
+                    id="overall-comment-{{user | escape }}"
+                    style="display:none;"
+                    rows="5"
+                    class="general-comment-entry noscroll key_to_click" tabindex="0">{{comment|escape }}</textarea>
+        {% endfor %}
     </div>
 </div>
