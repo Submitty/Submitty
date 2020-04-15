@@ -487,13 +487,14 @@ class Gradeable extends AbstractModel {
                 $msg .= " {$val}";
             });
             $this->core->addErrorMessage($msg);
-            return;
         }
-        $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
-        foreach ($input as $row_num => $vals) {
-            $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
-            $this->modified = true;
-            $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+        else{
+            $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
+            foreach ($input as $row_num => $vals) {
+                $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
+                $this->modified = true;
+                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+            }
         }
     }
 
