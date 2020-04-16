@@ -176,6 +176,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir . "/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir . "/logs", $config->getLogPath());
+
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
@@ -237,7 +238,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'default_hw_late_days' => 0,
             'default_student_late_days' => 0,
             'zero_rubric_grades' => false,
-            'submitty_install_dir' => $this->temp_dir,
             'duck_banner_enabled' => false,
             'upload_message' => '',
             'display_rainbow_grades_summary' => false,
@@ -301,7 +301,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled' => true,
             'queue_contact_info' => true,
             'queue_message' => '',
-            'feature_flags' => []
+            'feature_flags' => [],
+            'submitty_install_path' => $this->temp_dir,
         );
         $actual = $config->toArray();
 

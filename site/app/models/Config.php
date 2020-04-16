@@ -323,11 +323,11 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
-        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
-
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
+
+        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
         foreach (array('submitty_path', 'submitty_log_path', 'submitty_install_path') as $path) {
