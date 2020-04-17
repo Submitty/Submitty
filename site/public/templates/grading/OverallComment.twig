@@ -9,18 +9,13 @@ Required Parameters:
 
 #}
 <div class="box general-comment container key_to_click" tabindex="0">
-    <div class="row">
-        <div class="col">
+    <div class="row overall-comment-top-row">
+        <div class="col-9">
             <b>Overall Comment</b>
         </div>
-        {% if not grading_disabled %}
-            <div class="col-no-gutters">
-                {% include "SavingTools.twig" with {
-                    'show_save_tools': editable,
-                    'cancel_on_click': 'onCancelOverallComment(this)'
-                } only %}
-            </div>
-        {% endif %}
+        <div class="col-3 overall-comment-status" id="overall-comment-status">
+          Saved!
+        </div>
     </div>
     <div class="row">
         <div class="tab-bar-wrapper" id="overall-comment-tabs">
@@ -36,7 +31,6 @@ Required Parameters:
                 id="overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}"
                 rows="5"
                 class="general-comment-entry noscroll key_to_click" tabindex="0"
-                onclick="event.stopPropagation()"
                 onkeyup="auto_grow(this)"
                 onchange="{{ grading_disabled ? '' : 'onChangeOverallComment()'}}"
                 placeholder="Overall message for student about the gradeable...">{{overall_comment["logged_in_user"]["comment"]|escape }}</textarea>
@@ -49,4 +43,11 @@ Required Parameters:
                     class="general-comment-entry noscroll key_to_click" tabindex="0">{{comment|escape }}</textarea>
         {% endfor %}
     </div>
+    <script type="application/javascript">
+      $(document).on('input','#overall-comment-{{overall_comment["logged_in_user"]["user_id"] | escape }}',function () { 
+        $(".overall-comment-status").text("Unsaved Changes");
+      });
+    </script>
 </div>
+
+

@@ -956,21 +956,6 @@ function setComponentInProgress(component_id, show = true) {
 }
 
 /**
- * Shows the 'in progress' indicator for the overall comment
- * @param {boolean} show
- */
-function setOverallCommentInProgress(show = true) {
-    let domElement = getOverallCommentJQuery();
-    domElement.find('.save-tools span').hide();
-    if (show) {
-        domElement.find('.save-tools-in-progress').show();
-    }
-    else {
-        domElement.find('.save-tools :not(.save-tools-in-progress)').show();
-    }
-}
-
-/**
  * Enables reordering on marks in an edit-mode component
  * @param {int} component_id
  */
@@ -1844,6 +1829,8 @@ function onCancelComponent(me) {
 function onChangeOverallComment() {
     // Get the current grader so that we can get their comment from the dom.
     var grader = getGraderId();
+    // Set the overall comment status to "Saving..."
+    $(".overall-comment-status").text("Saving...");
     return ajaxGetOverallComment(getGradeableId(), getAnonId(), grader).then((lastSavedOverallCommentObj) => {
         // Get the saved version of the overall comment
         let lastSavedOverallComment = lastSavedOverallCommentObj[grader];
@@ -1853,6 +1840,10 @@ function onChangeOverallComment() {
             // If anything has changed, save the changes.
             return ajaxSaveOverallComment(getGradeableId(), getAnonId(), domComment);
         }
+    }).then( () => {
+        $(".overall-comment-status").text("Saved");
+    }).catch( function() {
+        $(".overall-comment-status").text("Error Saving Comment");
     });
 }
 
