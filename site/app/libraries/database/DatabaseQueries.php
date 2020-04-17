@@ -5127,14 +5127,16 @@ AND gc_id IN (
             $is_team ? $submitter_id : null,
             $ta_graded_gradeable->getUserViewedDate() !== null ?
                 DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
+            ""
         ];
         $query = "
             INSERT INTO gradeable_data (
                 g_id,
                 gd_user_id,
                 gd_team_id,
-                gd_user_viewed_date)
-            VALUES(?, ?, ?, ?)";
+                gd_user_viewed_date,
+                gd_overall_comment)
+            VALUES(?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
 
         // Setup the graded gradeable with its new id
@@ -6005,10 +6007,12 @@ AND gc_id IN (
                 $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"]);
                 $row["array_overall_comments"] = json_decode($row["array_overall_comments"]);
                 $row["overall_comments"] = [];
-                for($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
-                  $commenter = $row["array_commenter_ids"][$i];
-                  $comment   = $row["array_overall_comments"][$i];
-                  $row["overall_comments"][$commenter] = $comment;
+                if ($row["array_commenter_ids"] !== NULL) {
+                    for($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
+                      $commenter = $row["array_commenter_ids"][$i];
+                      $comment   = $row["array_overall_comments"][$i];
+                      $row["overall_comments"][$commenter] = $comment;
+                    }
                 }
                 $ta_graded_gradeable = new TaGradedGradeable($this->core, $graded_gradeable, $row);
                 $graded_gradeable->setTaGradedGradeable($ta_graded_gradeable);
