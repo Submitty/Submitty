@@ -556,6 +556,7 @@ class ReportController extends AbstractController {
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                'per_gradeable_curves' => $customization->getPerGradeableCurves(),
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                     $this->core->getConfig()->getCourse(),

@@ -127,6 +127,45 @@ class RainbowCustomization extends AbstractModel {
         $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
     }
 
+    // TODO: Move this function to the RCJSON class instead of here
+    /**
+     * Gets curve data for each gradeable
+     *
+     * In the case no rainbow grades customization.json was found the return value will be an empty array.
+     * In the case a customization.json was found the return array will have the form
+     * $retArray[bucket_id][gradeable_id] = curve_values
+     *
+     * If no curve values were found for gradeable_id then gradeable_id will not be present in the return array
+     *
+     * @return array
+     */
+    public function getPerGradeableCurves() {
+        $retArray = [];
+
+        if (!is_null($this->RCJSON)) {
+            $json_buckets = $this->RCJSON->getGradeableBuckets();
+
+            foreach ($json_buckets as $json_bucket) {
+                $retArray[$json_bucket->type] = [];
+
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'curve')) {
+                        $curve_data = $json_gradeable->curve;
+
+                        // Validate curve_data
+                        if(count($curve_data) != 4) {
+                            throw new ValidationException("Malformed curve data detected for gradeable $json_gradeable->id in rainbow grades customization.json.  The gradeable curve array must contain exactly 4 values.", $this->error_messages);
+                        }
+
+                        $retArray[$json_bucket->type][$json_gradeable->id] = $curve_data;
+                    }
+                }
+            }
+        }
+
+        return $retArray;
+    }
+
     /**
      * Get an array containing what percentage of the grade the bucket counts toward.  The key is the name of the
      * bucket and the value is the percentage which has been cast back to a whole number integer.  This differs
