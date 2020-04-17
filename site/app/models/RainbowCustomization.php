@@ -106,19 +106,19 @@ class RainbowCustomization extends AbstractModel {
 
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
-            $json_gradeables = $this->RCJSON->getGradeables();
+            $json_buckets = $this->RCJSON->getGradeableBuckets();
 
-            foreach ($json_gradeables as $json_gradeable) {
+            foreach ($json_buckets as $json_bucket) {
                 // Place those buckets in $this->used_buckets
-                $this->used_buckets[] = $json_gradeable->type;
+                $this->used_buckets[] = $json_bucket->type;
 
                 // When preparing the count of how many items are in the bucket, if the instructor has previously
                 // entered a value which was greater than the number of gradeables in the database, we should use the
                 // instructor entered value instead
-                $bucket = $json_gradeable->type;
+                $bucket = $json_bucket->type;
 
-                if ($json_gradeable->count > $this->bucket_counts[$bucket]) {
-                    $this->bucket_counts[$bucket] = $json_gradeable->count;
+                if ($json_bucket->count > $this->bucket_counts[$bucket]) {
+                    $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
             }
         }
@@ -144,16 +144,16 @@ class RainbowCustomization extends AbstractModel {
         $retArray = [];
 
         if (!is_null($this->RCJSON)) {
-            $json_gradeables = $this->RCJSON->getGradeables();
+            $json_buckets = $this->RCJSON->getGradeableBuckets();
 
             $sum = 0;
 
-            foreach ($json_gradeables as $json_gradeable) {
+            foreach ($json_buckets as $json_bucket) {
                 // Get percentage, cast back to whole number integer
-                $retArray[$json_gradeable->type] = (int) ($json_gradeable->percent * 100);
+                $retArray[$json_bucket->type] = (int) ($json_bucket->percent * 100);
 
                 // Keep track of the sum
-                $sum += $retArray[$json_gradeable->type];
+                $sum += $retArray[$json_bucket->type];
             }
 
             // Save the sum of used percentages to special key in array

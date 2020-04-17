@@ -28,7 +28,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     private $messages = [];
     private $display = [];
     private $benchmark_percent;         // Init in constructor
-    private $gradeables = [];
+    private $gradeable_buckets = [];
 
     const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'iclicker', 'final_grade',
         'exam_seating', 'display_rank_to_individual', 'display_benchmark', 'benchmark_percent', 'section', 'messages',
@@ -48,12 +48,12 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Get gradeables array
+     * Get gradeable buckets array
      *
      * @return array
      */
-    public function getGradeables() {
-        return $this->gradeables;
+    public function getGradeableBuckets() {
+        return $this->gradeable_buckets;
     }
 
     /**
@@ -154,7 +154,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         if (isset($json->gradeables)) {
-            $this->gradeables = $json->gradeables;
+            $this->gradeable_buckets = $json->gradeables;
         }
     }
 
@@ -228,7 +228,7 @@ class RainbowCustomizationJSON extends AbstractModel {
             throw new BadArgumentException('Gradeable may not be empty.');
         }
 
-        $this->gradeables[] = $gradeable;
+        $this->gradeable_buckets[] = $gradeable;
     }
 
     /**
