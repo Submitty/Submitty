@@ -111,11 +111,14 @@ class TaGradedGradeable extends AbstractModel {
         $details["ta_grading_overall_comments"]["logged_in_user"]["comment"] = $current_user_comment;
         $details["ta_grading_overall_comments"]["other_graders"] = [];
 
-        foreach($this->overall_comment as $commenter => $comment) {
-            if ($commenter === $current_user_id) {
-                continue;
+        // Students (peers) are not allowed to see other graders' comments.
+        if ($this->core->getUser()->getGroup() < 4) {
+            foreach($this->overall_comment as $commenter => $comment) {
+                if ($commenter === $current_user_id) {
+                    continue;
+                }
+                $details["ta_grading_overall_comments"]["other_graders"][$commenter] = $comment;
             }
-            $details["ta_grading_overall_comments"]["other_graders"][$commenter] = $comment;
         }
 
         // Uncomment this block if we want to serialize these values all the time
