@@ -369,8 +369,7 @@ class TaGradedGradeable extends AbstractModel {
     /**
      * Retrieves a mapping of grader id to overall comment. If grader is passed in, returns only
      * the key, value pair for that grader.
-     * @param Component $component The component to delete the grade for
-     * @param User|null $grader The grader to delete the grade for, or null to delete all grades
+     * @param User|null $grader The grader to retrieve a comment for. Optional.
      */
     public function getOverallComment(User $grader = null) {
         if ($grader === null) {
