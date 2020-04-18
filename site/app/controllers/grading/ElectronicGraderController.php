@@ -1678,9 +1678,9 @@ class ElectronicGraderController extends AbstractController {
 
 /**
      * Route for adding a new component to a gradeable
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/{peer}/new", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
      */
-    public function ajaxAddComponent($gradeable_id, $peer) {
+    public function ajaxAddComponent($gradeable_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
