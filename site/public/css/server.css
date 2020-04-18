@@ -191,6 +191,13 @@ textarea, input[type="text"], input[type="number"], input[type="date"], input[ty
   background-color: var(--standard-input-background);
 }
 
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+}
+
 /****************************
  * TABLE STYLES
  ***************************/

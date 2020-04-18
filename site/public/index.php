@@ -6,7 +6,7 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
-use app\libraries\response\Response;
+use app\libraries\response\ResponseInterface;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -124,7 +124,7 @@ else {
     $response = WebRouter::getWebResponse($request, $core);
 }
 
-if ($response instanceof Response) {
+if ($response instanceof ResponseInterface) {
     $response->render($core);
 }
 
