@@ -426,11 +426,6 @@ parameters:
 			path: app/libraries/FileUtils.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 637$#"
-			count: 1
-			path: app/libraries/FileUtils.php
-
-		-
 			message: "#^PHPDoc tag @param for parameter \\$type with type app\\\\libraries\\\\GradeableType\\|int is not subtype of native type int\\.$#"
 			count: 1
 			path: app/libraries/GradeableType.php
