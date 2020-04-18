@@ -257,13 +257,10 @@ class BulkUpload(CourseJob):
         logger.write_to_log(log_file_path, log_msg)
         #create paths
         try:
-            with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
-                CONFIG = json.loads(data_file.read())
-
             current_path = os.path.dirname(os.path.realpath(__file__))
-            uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
-            bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
-            split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+            uploads_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads")
+            bulk_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
+            split_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
         except Exception:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
