@@ -409,7 +409,6 @@ class SubmissionController extends AbstractController {
             $qr_prefix = rawurlencode($_POST['qr_prefix']);
             $qr_suffix = rawurlencode($_POST['qr_suffix']);
 
-            $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"));
             //create a new job to split but uploads via QR
             for ($i = 0; $i < $count; $i++) {
                 $qr_upload_data = [

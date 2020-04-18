@@ -21,6 +21,7 @@
         var data = [trace1];
         return data;
     }
+
     function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
         let loop = Math.ceil(range/increment);
         let tracking = min;
@@ -60,6 +61,18 @@
         }
         return mode;
     }
+
+
+    function fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
+        let bucketSize = Math.floor(range / 10);
+        if (bucketSize === 0) {
+            bucketSize = range / 10;
+        }
+
+        return fillBuckets(range,bucketSize,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+    }
+
+
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
         var bucketInputTotal = document.getElementById("bucket-size-total");
         var bucketInputAuto = document.getElementById("bucket-size-auto");
@@ -105,8 +118,7 @@
                 return mode;
             }
         {% endif %}
-        var bucketSize = Math.floor(range/10);
-        mode=fillBuckets(range,bucketSize,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+        mode=fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
         return  mode;
     }
 </script>
@@ -288,8 +300,7 @@
                         }
                     }
 
-                    var bucketSize = Math.floor(rangeT/10);
-                    mode = fillBuckets(rangeT, bucketSize, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
+                    mode = fillBucketsForRange(rangeT, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
 
                     if (maxT==0 && minT==50) {
                         minT=0;
@@ -495,8 +506,7 @@
                             rangeA = maxA-minA;
                         }
 
-                        var bucketSize = Math.floor(rangeA/10);
-                        mode = fillBuckets(rangeA,bucketSize,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
+                        mode = fillBucketsForRange(rangeA,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
 
                         if (minA==50 && maxA==0) {
                             minA=0;
