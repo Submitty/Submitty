@@ -5041,19 +5041,19 @@ AND gc_id IN (
     }
 
     private function updateOverallComments(TaGradedGradeable $ta_graded_gradeable) {
-        foreach ($ta_graded_gradeable->getOverallComment() as $user_id => $comment ) {
-            $this->updateOverallComment($ta_graded_gradeable, $user_id, $comment );
+        foreach ($ta_graded_gradeable->getOverallComment() as $user_id => $comment) {
+            $this->updateOverallComment($ta_graded_gradeable, $user_id, $comment);
         }
     }
 
-    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $grader_id, $comment){
+    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $grader_id, $comment) {
         $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
-        $user_id = NULL;
-        $team_id = NULL;
+        $user_id = null;
+        $team_id = null;
 
-        // TODO: replace this with a single upsert when postgres can do an on conflict on 
+        // TODO: replace this with a single upsert when postgres can do an on conflict on
         //   multiple constraints (gradeable_overall_comment_user_unique, gradeable_overall_comment_team_unique)
-        if ($ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment()){
+        if ($ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment()) {
             $team_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
             $query = "
             INSERT INTO gradeable_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
@@ -6007,11 +6007,11 @@ AND gc_id IN (
                 $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"]);
                 $row["array_overall_comments"] = json_decode($row["array_overall_comments"]);
                 $row["overall_comments"] = [];
-                if ($row["array_commenter_ids"] !== NULL) {
-                    for($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
-                      $commenter = $row["array_commenter_ids"][$i];
-                      $comment   = $row["array_overall_comments"][$i];
-                      $row["overall_comments"][$commenter] = $comment;
+                if ($row["array_commenter_ids"] !== null) {
+                    for ($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
+                        $commenter = $row["array_commenter_ids"][$i];
+                        $comment   = $row["array_overall_comments"][$i];
+                        $row["overall_comments"][$commenter] = $comment;
                     }
                 }
                 $ta_graded_gradeable = new TaGradedGradeable($this->core, $graded_gradeable, $row);

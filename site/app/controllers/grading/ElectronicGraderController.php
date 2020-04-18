@@ -2204,7 +2204,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Route for getting the overall comment for the currently logged in user.
      * @param $gradeable_id
-     * @param $anon_id, the anonymous id of the student 
+     * @param $anon_id, the anonymous id of the student
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"GET"})
      */
     public function ajaxGetOverallComment($gradeable_id, $anon_id = '') {

@@ -51,7 +51,7 @@ class TaGradedGradeable extends AbstractModel {
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
 
         if (array_key_exists("overall_comments", $details)) {
-            foreach($details['overall_comments'] as $commenter => $comment) {
+            foreach ($details['overall_comments'] as $commenter => $comment) {
                 $this->overall_comment[$commenter] = $comment;
             }
         }
@@ -113,7 +113,7 @@ class TaGradedGradeable extends AbstractModel {
 
         // Students (peers) are not allowed to see other graders' comments.
         if ($this->core->getUser()->getGroup() < 4) {
-            foreach($this->overall_comment as $commenter => $comment) {
+            foreach ($this->overall_comment as $commenter => $comment) {
                 if ($commenter === $current_user_id) {
                     continue;
                 }
@@ -358,17 +358,17 @@ class TaGradedGradeable extends AbstractModel {
     }
 
     /**
-     * Sets the overall comment for a grader. Access should be checked before calling this function. 
+     * Sets the overall comment for a grader. Access should be checked before calling this function.
      * @param string $comment. The comment to be saved.
      * @param string $grader_id. The grader that made the comment.
      */
-    public function setOverallComment($comment, $grader_id){
+    public function setOverallComment($comment, $grader_id) {
         $this->overall_comment[$grader_id] = $comment;
     }
 
     /**
      * Retrieves a mapping of grader id to overall comment. If grader is passed in, returns only
-     * the key, value pair for that grader. 
+     * the key, value pair for that grader.
      * @param Component $component The component to delete the grade for
      * @param User|null $grader The grader to delete the grade for, or null to delete all grades
      */
