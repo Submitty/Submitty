@@ -300,20 +300,18 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
 }
 
 /**
- * ajax call to fetch the overall comment for the gradeable
+ * ajax call to fetch the overall comment for the gradeable for the logged in user
  * @param {string} gradeable_id
  * @param {string} anon_id
  * @return {Promise} Rejects except when the response returns status 'success'
  */
-function ajaxGetOverallComment(gradeable_id, anon_id, commenter='') {
+function ajaxGetOverallComment(gradeable_id, anon_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']) + `?anon_id=${anon_id}`,
-            data: {
-                "commenter_id" : commenter
-            },
+            data: null,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable comment: ' + response.message);
@@ -1831,10 +1829,10 @@ function onChangeOverallComment() {
     var grader = getGraderId();
     // Set the overall comment status to "Saving..."
     $(".overall-comment-status").text("Saving...");
-    return ajaxGetOverallComment(getGradeableId(), getAnonId(), grader).then((lastSavedOverallCommentObj) => {
+    return ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallCommentObj) => {
         // Get the saved version of the overall comment
         let lastSavedOverallComment = lastSavedOverallCommentObj[grader];
-        let domComment = getOverallCommentFromDOM(grader)
+        let domComment = getOverallCommentFromDOM(grader);
         // See if anything has changed between the dom version and the saved version of the overall comment
         if (domComment !== lastSavedOverallComment && domComment !== undefined) {
             // If anything has changed, save the changes.
@@ -1842,7 +1840,7 @@ function onChangeOverallComment() {
         }
     }).then( () => {
         $(".overall-comment-status").text("Saved");
-    }).catch( function() {
+    }).catch( function(error) {
         $(".overall-comment-status").text("Error Saving Comment");
     });
 }

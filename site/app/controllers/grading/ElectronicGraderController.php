@@ -2202,7 +2202,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * Route for getting the overall comment for the graded gradeable
+     * Route for getting the overall comment for the currently logged in user.
      * @param $gradeable_id
      * @param $anon_id, the anonymous id of the student 
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"GET"})
@@ -2218,8 +2218,8 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
-        //The id of the commenter whose comment should be retrieved. Optional.
-        $commenter_id = $_POST['commenter_id'] ?? '';
+        // This function always retrieves the overall comment for the currently logged in grader.
+        $commenter = $this->core->getUser();
 
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
@@ -2235,8 +2235,6 @@ class ElectronicGraderController extends AbstractController {
 
         // Get / create the TA grade
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-
-        $commenter = $commenter_id !== null && $commenter_id !== "" ?  $this->core->getQueries()->getUsersById($commenter_id) : null;
 
         // Once we've parsed the inputs and checked permissions, perform the operation
         $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComment($commenter));

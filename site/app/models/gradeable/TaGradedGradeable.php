@@ -378,10 +378,10 @@ class TaGradedGradeable extends AbstractModel {
         }
         else {
             if (array_key_exists($grader->getId(), $this->overall_comment)) {
-                return array($grader->getId() => $this->overall_comment[$grader->getId()]);;
+                return array($grader->getId() => $this->overall_comment[$grader->getId()]);
             }
             else {
-                return null;
+                return array($grader->getId() => null);
             }
         }
     }
