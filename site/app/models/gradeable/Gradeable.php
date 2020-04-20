@@ -1563,7 +1563,7 @@ class Gradeable extends AbstractModel {
                 $teams = [];
                 foreach ($users as $u) {
                     $teamToAdd = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
-                    if($this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId()) !== null){
+                    if ($this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId()) !== null) {
                         $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
                     }
                 }

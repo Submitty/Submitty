@@ -389,7 +389,7 @@ HTML;
         $columns = [];
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
-            if($gradeable->isTeamAssignment()){
+            if ($gradeable->isTeamAssignment()) {
                 $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
             }
             else {
