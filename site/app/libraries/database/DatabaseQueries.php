@@ -5397,13 +5397,13 @@ AND gc_id IN (
         return 0 < count($this->course_db->rows());
     }
 
-    public function lastTimeInQueue($user_id, $queue_code) {
+    public function getLastTimeInQueue($user_id, $queue_code) {
         $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL) ", array($user_id, $queue_code));
         return $this->course_db->rows()[0]['max'];
     }
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info) {
-        $last_time_in_queue = $this->lastTimeInQueue($user_id, $queue_code);
+        $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -5483,7 +5483,7 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = 'emptied', removed_by = ?, time_out = current_timestamp where current_state IN ('waiting','being_helped') and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($this->core->getUser()->getId(), $queue_code));
     }
 
-    public function entryToRow($entry_id) {
+    public function getQueueFromEntryId($entry_id) {
         $this->course_db->query("SELECT * FROM queue WHERE entry_id = ?", array($entry_id));
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("Invalid Entry ID");
@@ -5493,7 +5493,7 @@ AND gc_id IN (
     }
 
     public function restoreUserToQueue($entry_id) {
-        $row = $this->entryToRow($entry_id);
+        $row = $this->getQueueFromEntryId($entry_id);
         $user_id = $row['user_id'];
         $queue_code = $row['queue_code'];
         if (is_null($user_id)) {
@@ -5503,7 +5503,7 @@ AND gc_id IN (
             $this->core->addErrorMessage("Cannot restore a user that is currently in the queue. Please remove them first.");
             return;
         }
-        $last_time_in_queue = $this->lastTimeInQueue($user_id, $queue_code);
+        $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null, last_time_in_queue = ? where entry_id = ?", array($last_time_in_queue, $entry_id));
         $this->core->addSuccessMessage("Student restored");
     }
@@ -5557,12 +5557,12 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['change_count'];
     }
 
-    public function numberAheadInQueueThisWeek($queue_code, $time_in) {
+    public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", array($queue_code, $time_in));
         return $this->course_db->rows()[0]['count'];
     }
 
-    public function numberAheadInQueueToday($queue_code, $time_in) {
+    public function getNumberAheadInQueueToday($queue_code, $time_in) {
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE AND last_time_in_queue > CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", array($queue_code, $time_in));
         return $this->course_db->rows()[0]['count'];
     }

@@ -396,10 +396,13 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
     * @Route("/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
+    * @return MultiResponse
     */
     public function showCurrentQueue() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return;
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
         }
 
         $this->core->getOutput()->useHeader(false);
@@ -415,10 +418,13 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
     * @Route("/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
+    * @return MultiResponse
     */
     public function showQueueHistory($full_history = false) {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return;
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
         }
 
         $this->core->getOutput()->useHeader(false);
@@ -434,10 +440,13 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
     * @Route("/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
+    * @return MultiResponse
     */
     public function showNewStatus() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return;
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
         }
 
         $this->core->getOutput()->useHeader(false);

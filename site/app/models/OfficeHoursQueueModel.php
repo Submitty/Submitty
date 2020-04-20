@@ -204,14 +204,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getConfig()->getQueueMessage();
     }
 
-    public function plurality($num, $single, $plural) {
-        if ($num == 1) {
-            return $single;
-        }
-        return $plural;
-    }
-
-    public function numberAheadInQueueThisWeek() {
+    public function getNumberAheadInQueueThisWeek() {
         if ($this->firstTimeInQueueThisWeek($this->getCurrentQueueLastHelped())) {
             $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
         }
@@ -220,10 +213,10 @@ class OfficeHoursQueueModel extends AbstractModel {
           //everyone not helped this week is in front of them
             $time_in = $this->core->getDateTimeNow();
         }
-        return $this->core->getQueries()->numberAheadInQueueThisWeek($this->getCurrentQueueCode(), $time_in);
+        return $this->core->getQueries()->getNumberAheadInQueueThisWeek($this->getCurrentQueueCode(), $time_in);
     }
 
-    public function numberAheadInQueueToday() {
+    public function getNumberAheadInQueueToday() {
         if ($this->firstTimeInQueueToday($this->getCurrentQueueLastHelped())) {
             $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
         }
@@ -232,6 +225,6 @@ class OfficeHoursQueueModel extends AbstractModel {
           //everyone not helped today is in front of them
             $time_in = $this->core->getDateTimeNow();
         }
-        return $this->core->getQueries()->numberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);
+        return $this->core->getQueries()->getNumberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);
     }
 }
