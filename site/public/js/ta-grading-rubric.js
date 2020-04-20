@@ -1833,7 +1833,7 @@ function onChangeOverallComment() {
     if (currentOverallComment !== previousOverallComment && currentOverallComment !== undefined) {
         $(".overall-comment-status").text("Saving Changes...");
         // If anything has changed, save the changes.
-        ajaxSaveOverallComment(getGradeableId(), getAnonId(), currentOverallComment).then( () => 
+        ajaxSaveOverallComment(getGradeableId(), getAnonId(), currentOverallComment).then( () =>
         {
             $(".overall-comment-status").text("All Changes Saved");
             // Update the current comment in the DOM.
