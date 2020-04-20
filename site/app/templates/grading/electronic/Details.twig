@@ -343,9 +343,9 @@
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif (not(graded_gradeable.isTaGradingComplete()) or not( graded_gradeable.isPeerGradingComplete())) %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() or core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}

@@ -346,6 +346,12 @@ class ElectronicGraderController extends AbstractController {
                 }
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
+                if ($gradeable->isTeamAssignment()) {
+                        $sections['stu_grad']['no_team'] = 0;
+                        $sections['stu_grad']['team'] = 0;
+                        $sections['all']['no_team'] = 0;
+                        $sections['all']['team'] = 0;
+                }
             }
             else {
                 foreach ($total_users as $key => $value) {
@@ -469,7 +475,7 @@ class ElectronicGraderController extends AbstractController {
         $section_key = $order->getSectionKey();
         $graders = $order->getSectionGraders();
         $sections = $order->getSectionNames();
-
+                
         $student_ids = [];
         foreach ($section_submitters as $section) {
             $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
