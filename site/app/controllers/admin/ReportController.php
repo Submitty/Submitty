@@ -411,6 +411,7 @@ class ReportController extends AbstractController {
 
                 // Add score breakdown
                 $ta_gg = $gg->getOrCreateTaGradedGradeable();
+                // an array where keys are userids and values are overall comments
                 $entry['overall_comment'] = $ta_gg->getOverallComment();
 
                 // Only split up scores if electronic gradeables

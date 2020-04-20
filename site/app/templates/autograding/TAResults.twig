@@ -22,20 +22,22 @@ $( document ).ready(function() {
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
-
         {# Overview #}
-        <div class="box half" style="padding: 10px; width: 30%; word-break: break-word;">
+        <div class="box" style="padding: 10px; word-break: break-word;">
             <p>Version #{{ ta_graded_version }}</p>
             {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
-            <p>
-                {% if overall_comment|length != 0 %}
-            <hr>
-            Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
-            {% endif %}
-            </p>
+            {% for user in overall_comments | keys | sort %}
+                <div class="overall-comment-box">
+                    <p class="overall-comment-author">
+                        Overall note from {{user}}:
+                    </p>
+                    <p class="overall-comment">
+                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                    </p>
+                </div>
+            {% endfor %}
         </div>
 
         {% if uploaded_pdfs|length >= 1 %}

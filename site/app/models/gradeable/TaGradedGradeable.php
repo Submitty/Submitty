@@ -22,8 +22,8 @@ class TaGradedGradeable extends AbstractModel {
     private $graded_gradeable = null;
     /** @prop @var int The id of this gradeable data */
     protected $id = 0;
-    /** @prop @var string The grader's overall comment */
-    protected $overall_comment = "";
+    /** @prop @var string[] indexed by user_id. Overall comment made by each grader. */
+    protected $overall_comment = [];
     /** @prop @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
     /** @prop @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
@@ -48,8 +48,13 @@ class TaGradedGradeable extends AbstractModel {
         $this->graded_gradeable = $graded_gradeable;
 
         $this->setIdFromDatabase($details['id'] ?? 0);
-        $this->setOverallComment($details['overall_comment'] ?? '');
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
+
+        if (array_key_exists("overall_comments", $details)) {
+            foreach ($details['overall_comments'] as $commenter => $comment) {
+                $this->overall_comment[$commenter] = $comment;
+            }
+        }
 
         // Default to all blank components
         foreach ($graded_gradeable->getGradeable()->getComponents() as $component) {
@@ -96,6 +101,23 @@ class TaGradedGradeable extends AbstractModel {
                 $details["peer_scores"][$container->getComponent()->getId()] = $container->getTotalScore();
                 $details['graded_components'][$container->getComponent()->getId()] = $container->toArray();
                 $graded_components = array_merge($graded_components, $container->getGradedComponents());
+            }
+        }
+
+        $current_user_id = $this->core->getUser()->getId();
+        $current_user_comment = array_key_exists($current_user_id, $this->overall_comment) ? $this->overall_comment[$current_user_id] : "";
+        $details["ta_grading_overall_comments"] = [];
+        $details["ta_grading_overall_comments"]["logged_in_user"]["user_id"] = $current_user_id;
+        $details["ta_grading_overall_comments"]["logged_in_user"]["comment"] = $current_user_comment;
+        $details["ta_grading_overall_comments"]["other_graders"] = [];
+
+        // Students (peers) are not allowed to see other graders' comments.
+        if ($this->core->getUser()->getGroup() < 4) {
+            foreach ($this->overall_comment as $commenter => $comment) {
+                if ($commenter === $current_user_id) {
+                    continue;
+                }
+                $details["ta_grading_overall_comments"]["other_graders"][$commenter] = $comment;
             }
         }
 
@@ -334,6 +356,36 @@ class TaGradedGradeable extends AbstractModel {
     public function clearDeletedGradedComponents() {
         $this->deleted_graded_components = [];
     }
+
+    /**
+     * Sets the overall comment for a grader. Access should be checked before calling this function.
+     * @param string $comment. The comment to be saved.
+     * @param string $grader_id. The grader that made the comment.
+     */
+    public function setOverallComment($comment, $grader_id) {
+        $this->overall_comment[$grader_id] = $comment;
+    }
+
+    /**
+     * Retrieves a mapping of grader id to overall comment. If grader is passed in, returns only
+     * the key, value pair for that grader.
+     * @param Component $component The component to delete the grade for
+     * @param User|null $grader The grader to delete the grade for, or null to delete all grades
+     */
+    public function getOverallComment(User $grader = null) {
+        if ($grader === null) {
+            return $this->overall_comment;
+        }
+        else {
+            if (array_key_exists($grader->getId(), $this->overall_comment)) {
+                return array($grader->getId() => $this->overall_comment[$grader->getId()]);
+            }
+            else {
+                return array($grader->getId() => null);
+            }
+        }
+    }
+
 
     /**
      * Deletes the GradedComponent(s) associated with the provided Component and grader

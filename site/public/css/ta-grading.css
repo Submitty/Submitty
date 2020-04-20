@@ -379,9 +379,16 @@ tr.is_publish {
     margin: 15px;
 }
 
+.overall-comment-top-row {
+    margin-bottom: 10px;
+}
+
+.overall-comment-status {
+    text-align: right
+}
+
 .gradeable .general-comment {
     background-color:var(--overall-comment);
-    cursor: pointer;
 }
 
 .gradeable .general-comment-entry {
