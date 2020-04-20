@@ -251,7 +251,6 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
         reader.onload = function() {
             var lines=reader.result.split("\n");
             var headers = lines[0].split(",");
-            
             var students_lines_index = -1;
             var graders_lines_index = -1;
             

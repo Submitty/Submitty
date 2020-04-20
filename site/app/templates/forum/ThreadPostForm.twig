@@ -1,6 +1,6 @@
 <div class="thread-post-form"
     {% if post_box_id %}
-        post_box_id="{{ post_box_id }}"
+        data-post_box_id="{{ post_box_id }}"
     {% endif %}
 >
 
@@ -191,7 +191,7 @@
 
         {% if thread_resolve_state == 1 and show_unresolve %}
             <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
-            <input type="submit" name="post_and_unresolve" class="submit_unresolve btn btn-primary inline-block" {{ post_box_id | length > 0 ? "post_box_id=" ~ post_box_id : ""  }} value="{{ submit_label }} and Unresolve" />
+            <input type="submit" name="post_and_unresolve" class="submit_unresolve btn btn-primary inline-block" {{ post_box_id | length > 0 ? "data-post_box_id=" ~ post_box_id : ""  }} value="{{ submit_label }} and Unresolve" />
         {% endif %}
     </fieldset>
 </div>
