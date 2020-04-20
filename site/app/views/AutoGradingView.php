@@ -356,7 +356,6 @@ class AutoGradingView extends AbstractView {
             ];
         }, $ta_graded_components);
 
-
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
@@ -516,7 +515,6 @@ class AutoGradingView extends AbstractView {
                     return $grader->getId();
                 }, $container->getGraders())),
                 'marks' => $component_marks,
-                    
             ];
         }, $peer_graded_components);
 
