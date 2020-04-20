@@ -12,7 +12,7 @@ use app\models\User;
  * Class TaGradedGradeable
  * @package app\models\gradeable
  *
- * @method string getOverallComment()
+ * @method string getOverallComments()
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
@@ -23,7 +23,7 @@ class TaGradedGradeable extends AbstractModel {
     /** @prop @var int The id of this gradeable data */
     protected $id = 0;
     /** @prop @var string[] indexed by user_id. Overall comment made by each grader. */
-    protected $overall_comment = [];
+    protected $overall_comments = [];
     /** @prop @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
     /** @prop @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
@@ -51,9 +51,7 @@ class TaGradedGradeable extends AbstractModel {
         $this->setUserViewedDate($details['user_viewed_date'] ?? null);
 
         if (array_key_exists("overall_comments", $details)) {
-            foreach ($details['overall_comments'] as $commenter => $comment) {
-                $this->overall_comment[$commenter] = $comment;
-            }
+            $this->overall_comments = $details['overall_comments'];
         }
 
         // Default to all blank components
@@ -95,7 +93,7 @@ class TaGradedGradeable extends AbstractModel {
         }
         else {
             // Grab the total peer score for each component here rather than computing on the site.
-            $details["peer_scores"] = array();
+            $details["peer_scores"] = [];
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
                 $details["peer_scores"][$container->getComponent()->getId()] = $container->getTotalScore();
@@ -105,7 +103,7 @@ class TaGradedGradeable extends AbstractModel {
         }
 
         $current_user_id = $this->core->getUser()->getId();
-        $current_user_comment = array_key_exists($current_user_id, $this->overall_comment) ? $this->overall_comment[$current_user_id] : "";
+        $current_user_comment = array_key_exists($current_user_id, $this->overall_comments) ? $this->overall_comments[$current_user_id] : "";
         $details["ta_grading_overall_comments"] = [];
         $details["ta_grading_overall_comments"]["logged_in_user"]["user_id"] = $current_user_id;
         $details["ta_grading_overall_comments"]["logged_in_user"]["comment"] = $current_user_comment;
@@ -113,7 +111,7 @@ class TaGradedGradeable extends AbstractModel {
 
         // Students (peers) are not allowed to see other graders' comments.
         if ($this->core->getUser()->getGroup() < 4) {
-            foreach ($this->overall_comment as $commenter => $comment) {
+            foreach ($this->overall_comments as $commenter => $comment) {
                 if ($commenter === $current_user_id) {
                     continue;
                 }
@@ -363,7 +361,7 @@ class TaGradedGradeable extends AbstractModel {
      * @param string $grader_id. The grader that made the comment.
      */
     public function setOverallComment($comment, $grader_id) {
-        $this->overall_comment[$grader_id] = $comment;
+        $this->overall_comments[$grader_id] = $comment;
     }
 
     /**
@@ -371,16 +369,16 @@ class TaGradedGradeable extends AbstractModel {
      * the key, value pair for that grader.
      * @param User|null $grader The grader to retrieve a comment for. Optional.
      */
-    public function getOverallComment(User $grader = null) {
+    public function getOverallComments(User $grader = null) {
         if ($grader === null) {
-            return $this->overall_comment;
+            return $this->overall_comments;
         }
         else {
-            if (array_key_exists($grader->getId(), $this->overall_comment)) {
-                return array($grader->getId() => $this->overall_comment[$grader->getId()]);
+            if (array_key_exists($grader->getId(), $this->overall_comments)) {
+                return [$grader->getId() => $this->overall_comments[$grader->getId()]];
             }
             else {
-                return array($grader->getId() => null);
+                return [$grader->getId() => null];
             }
         }
     }

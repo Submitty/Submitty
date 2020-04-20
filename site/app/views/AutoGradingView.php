@@ -410,16 +410,20 @@ class AutoGradingView extends AbstractView {
         }
 
         // Update overall comments to have display names
-        $overall_comments = array();
-        foreach ($ta_graded_gradeable->getOverallComment() as $user_name => $comment) {
+        $overall_comments = [];
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_name => $comment) {
             $comment_user = $this->core->getQueries()->getUserById($user_name);
             $display_name = $comment_user->getDisplayedFirstName();
 
             // Skip peers.
-            if ($gradeable->isPeerGrading() && $comment_user->getGroup() >= 4) {
+            if ($gradeable->isPeerGrading() && !$comment_user->accessGrading()) {
                 continue;
             }
-            $overall_comments[$display_name] = $comment;
+
+            // Skip empty comments
+            if (strlen(trim($comment)) > 0) {
+                $overall_comments[$display_name] = $comment;
+            }
         }
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
@@ -484,8 +488,8 @@ class AutoGradingView extends AbstractView {
             $num_decimals = min(3, count($precision_parts));
         }
 
-        $graders_found = array();
-        $peer_aliases = array();
+        $graders_found = [];
+        $peer_aliases = [];
         $peer_grading_earned = 0;
 
         // Get just the peer components.
@@ -534,13 +538,13 @@ class AutoGradingView extends AbstractView {
         }, $peer_graded_components);
 
         $unique_graders = array_unique($graders_found);
-        $peer_aliases = array();
+        $peer_aliases = [];
         $num_peers = 0;
         // Sort the graders ids so that peer alias assignment stays mostly consistent.
         // TODO: Eventually we want to move to having a students anonid be displayable
         // So that we don't have to do this (e.g. Anonymous Moose).
         sort($unique_graders);
-        $ordered_graders = array();
+        $ordered_graders = [];
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
@@ -601,15 +605,19 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
-        $overall_comments = array();
-        foreach ($ta_graded_gradeable->getOverallComment() as $user_id => $comment) {
+        $overall_comments = [];
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment) {
             $comment_user = $this->core->getQueries()->getUserById($user_id);
 
             // Skip non-peers.
-            if ($gradeable->isPeerGrading() && $comment_user->getGroup() < 4) {
+            if ($gradeable->isPeerGrading() && $comment_user->accessGrading()) {
                 continue;
             }
-            $overall_comments[$user_id] = $comment;
+
+            // Skip empty comments
+            if (strlen(trim($comment)) > 0) {
+                $overall_comments[$user_id] = $comment;
+            }
         }
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [

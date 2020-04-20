@@ -2236,7 +2236,7 @@ class ElectronicGraderController extends AbstractController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         // Once we've parsed the inputs and checked permissions, perform the operation
-        $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComment($commenter));
+        $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComments($commenter));
     }
 
     /**

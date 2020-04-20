@@ -1827,22 +1827,21 @@ function onCancelComponent(me) {
 function onChangeOverallComment() {
     // Get the current grader so that we can get their comment from the dom.
     var grader = getGraderId();
-    // Set the overall comment status to "Saving..."
-    $(".overall-comment-status").text("Saving...");
-    return ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallCommentObj) => {
-        // Get the saved version of the overall comment
-        let lastSavedOverallComment = lastSavedOverallCommentObj[grader];
-        let domComment = getOverallCommentFromDOM(grader);
-        // See if anything has changed between the dom version and the saved version of the overall comment
-        if (domComment !== lastSavedOverallComment && domComment !== undefined) {
-            // If anything has changed, save the changes.
-            return ajaxSaveOverallComment(getGradeableId(), getAnonId(), domComment);
-        }
-    }).then( () => {
-        $(".overall-comment-status").text("Saved");
-    }).catch( function(error) {
-        $(".overall-comment-status").text("Error Saving Comment");
-    });
+    var currentOverallComment  = $('textarea#overall-comment-' + grader).val();
+    var previousOverallComment = $('textarea#overall-comment-' + grader).data("previous-comment");
+
+    if (currentOverallComment !== previousOverallComment && currentOverallComment !== undefined) {
+        $(".overall-comment-status").text("Saving Changes...");
+        // If anything has changed, save the changes.
+        ajaxSaveOverallComment(getGradeableId(), getAnonId(), currentOverallComment).then( () => 
+        {
+            $(".overall-comment-status").text("All Changes Saved");
+            // Update the current comment in the DOM.
+            $('textarea#overall-comment-' + grader).data("previous-comment", currentOverallComment);
+        }).catch( function(error) {
+            $(".overall-comment-status").text("Error Saving Changes");
+        });
+    }
 }
 
 /**

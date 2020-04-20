@@ -5041,12 +5041,12 @@ AND gc_id IN (
     }
 
     private function updateOverallComments(TaGradedGradeable $ta_graded_gradeable) {
-        foreach ($ta_graded_gradeable->getOverallComment() as $user_id => $comment) {
-            $this->updateOverallComment($ta_graded_gradeable, $user_id, $comment);
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment) {
+            $this->updateOverallComment($ta_graded_gradeable, $comment, $user_id);
         }
     }
 
-    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $grader_id, $comment) {
+    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
         $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
         $user_id = null;
         $team_id = null;
@@ -5055,26 +5055,21 @@ AND gc_id IN (
         //   multiple constraints (gradeable_data_overall_comment_user_unique, gradeable_data_overall_comment_team_unique)
         if ($ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment()) {
             $team_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
-            $query = "
-            INSERT INTO gradeable_data_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (g_id, goc_team_id, goc_grader_id)
-                DO
-                    UPDATE SET 
-                        goc_overall_comment=?;
-            ";
+            $conflict_clause = "(g_id, goc_team_id, goc_grader_id)";
         }
         else {
             $user_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
-            $query = "
+            $conflict_clause = "(g_id, goc_user_id, goc_grader_id)";
+        }
+
+        $query = "
             INSERT INTO gradeable_data_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
                 VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (g_id, goc_user_id, goc_grader_id)
+                ON CONFLICT {$conflict_clause}
                 DO
                     UPDATE SET 
                         goc_overall_comment=?;
             ";
-        }
 
         $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
         $this->course_db->query($query, $params);
