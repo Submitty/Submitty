@@ -315,7 +315,7 @@ CREATE TABLE gradeable_data (
 -- Name: gradeable_comments; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE gradeable_overall_comment (
+CREATE TABLE gradeable_data_overall_comment (
     goc_id integer NOT NULL,
     g_id character varying(255) NOT NULL,
     goc_user_id character varying(255),
@@ -338,10 +338,10 @@ CREATE SEQUENCE gradeable_data_gd_id_seq
     CACHE 1;
 
 --
--- Name: gradeable_overall_comment_goc_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_goc_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE gradeable_overall_comment_goc_id_seq
+CREATE SEQUENCE gradeable_data_overall_comment_goc_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -372,10 +372,10 @@ ALTER SEQUENCE gradeable_component_mark_gcm_id_seq OWNED BY gradeable_component_
 ALTER SEQUENCE gradeable_data_gd_id_seq OWNED BY gradeable_data.gd_id;
 
 --
--- Name: gradeable_overall_comment_goc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_goc_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE gradeable_overall_comment_goc_id_seq OWNED BY gradeable_overall_comment.goc_id;
+ALTER SEQUENCE gradeable_data_overall_comment_goc_id_seq OWNED BY gradeable_data_overall_comment.goc_id;
 
 --
 -- Name: grading_registration; Type: TABLE; Schema: public; Owner: -
@@ -698,7 +698,7 @@ ALTER TABLE ONLY gradeable_data ALTER COLUMN gd_id SET DEFAULT nextval('gradeabl
 -- Name: goc_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY gradeable_overall_comment ALTER COLUMN goc_id SET DEFAULT nextval('gradeable_overall_comment_goc_id_seq'::regclass);
+ALTER TABLE ONLY gradeable_data_overall_comment ALTER COLUMN goc_id SET DEFAULT nextval('gradeable_data_overall_comment_goc_id_seq'::regclass);
 
 --
 -- Name: gcm_id; Type: DEFAULT; Schema: public; Owner: -
@@ -759,11 +759,11 @@ ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_pkey PRIMARY KEY (gd_id);
 
 --
--- Name: gradeable_overall_comment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY gradeable_overall_comment
-    ADD CONSTRAINT gradeable_overall_comment_pkey PRIMARY KEY (goc_id);
+ALTER TABLE ONLY gradeable_data_overall_comment
+    ADD CONSTRAINT gradeable_data_overall_comment_pkey PRIMARY KEY (goc_id);
 
 
 --
@@ -782,14 +782,14 @@ ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_unqiue UNIQUE (g_id, gd_user_id);
 
 --
--- Name: gradeable_overall_comment_user_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_user_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
-ALTER TABLE ONLY gradeable_overall_comment ADD CONSTRAINT gradeable_overall_comment_user_unique UNIQUE (g_id, goc_user_id, goc_grader_id);
+ALTER TABLE ONLY gradeable_data_overall_comment ADD CONSTRAINT gradeable_data_overall_comment_user_unique UNIQUE (g_id, goc_user_id, goc_grader_id);
 
 --
--- Name: gradeable_overall_comment_team_unique; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_team_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
-ALTER TABLE ONLY gradeable_overall_comment ADD CONSTRAINT gradeable_overall_comment_team_unique UNIQUE (g_id, goc_team_id, goc_grader_id);
+ALTER TABLE ONLY gradeable_data_overall_comment ADD CONSTRAINT gradeable_data_overall_comment_team_unique UNIQUE (g_id, goc_team_id, goc_grader_id);
 
 --
 -- Name: grading_registration_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -1042,33 +1042,33 @@ ALTER TABLE ONLY gradeable_data
     ADD CONSTRAINT gradeable_data_gd_team_id_fkey FOREIGN KEY (gd_team_id) REFERENCES gradeable_teams(team_id) ON UPDATE CASCADE;
 
 --
--- Name: gradeable_overall_comment_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY gradeable_overall_comment
-    ADD CONSTRAINT gradeable_overall_comment_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+ALTER TABLE ONLY gradeable_data_overall_comment
+    ADD CONSTRAINT gradeable_data_overall_comment_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
 
 --
--- Name: gradeable_overall_comment_goc_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_goc_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY gradeable_overall_comment
-    ADD CONSTRAINT gradeable_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES users(user_id) ON DELETE CASCADE;
+ALTER TABLE ONLY gradeable_data_overall_comment
+    ADD CONSTRAINT gradeable_data_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
--- Name: gradeable_overall_comment_goc_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_goc_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY gradeable_overall_comment
-    ADD CONSTRAINT gradeable_overall_comment_goc_team_id_fkey FOREIGN KEY (goc_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
+ALTER TABLE ONLY gradeable_data_overall_comment
+    ADD CONSTRAINT gradeable_data_overall_comment_goc_team_id_fkey FOREIGN KEY (goc_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
 
 
 --
--- Name: gradeable_overall_comment_goc_grader_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: gradeable_data_overall_comment_goc_grader_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY gradeable_overall_comment
-    ADD CONSTRAINT gradeable_overall_comment_goc_grader_id FOREIGN KEY (goc_grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
+ALTER TABLE ONLY gradeable_data_overall_comment
+    ADD CONSTRAINT gradeable_data_overall_comment_goc_grader_id FOREIGN KEY (goc_grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
 -- Name: grading_registration_sections_registration_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

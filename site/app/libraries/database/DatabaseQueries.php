@@ -5052,11 +5052,11 @@ AND gc_id IN (
         $team_id = null;
 
         // TODO: replace this with a single upsert when postgres can do an on conflict on
-        //   multiple constraints (gradeable_overall_comment_user_unique, gradeable_overall_comment_team_unique)
+        //   multiple constraints (gradeable_data_overall_comment_user_unique, gradeable_data_overall_comment_team_unique)
         if ($ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment()) {
             $team_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
             $query = "
-            INSERT INTO gradeable_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
+            INSERT INTO gradeable_data_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT (g_id, goc_team_id, goc_grader_id)
                 DO
@@ -5067,7 +5067,7 @@ AND gc_id IN (
         else {
             $user_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
             $query = "
-            INSERT INTO gradeable_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
+            INSERT INTO gradeable_data_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT (g_id, goc_user_id, goc_grader_id)
                 DO
@@ -5863,7 +5863,7 @@ AND gc_id IN (
                     json_agg(goc_overall_comment) as overall_comments,
                     g_id,
                     goc_{$submitter_type}
-                FROM gradeable_overall_comment
+                FROM gradeable_data_overall_comment
                 GROUP BY g_id, goc_{$submitter_type}
               ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 

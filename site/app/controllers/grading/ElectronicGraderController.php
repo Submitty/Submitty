@@ -2218,7 +2218,6 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
-        // This function always retrieves the overall comment for the currently logged in grader.
         $commenter = $this->core->getUser();
 
         // Get the graded gradeable

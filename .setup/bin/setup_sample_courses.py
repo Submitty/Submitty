@@ -809,7 +809,7 @@ class Course(object):
         gradeable_data = Table("gradeable_data", self.metadata, autoload=True)
         gradeable_component_data = Table("gradeable_component_data", self.metadata, autoload=True)
         gradeable_component_mark_data = Table('gradeable_component_mark_data', self.metadata, autoload=True)
-        gradeable_overall_comment = Table('gradeable_overall_comment', self.metadata, autoload=True)
+        gradeable_data_overall_comment = Table('gradeable_data_overall_comment', self.metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", self.metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
         for gradeable in self.gradeables:
@@ -981,7 +981,7 @@ class Course(object):
                             if gradeable.type !=0 or gradeable.use_ta_grading:
                                 skip_grading = random.random()
                                 if skip_grading > 0.3 and random.random() > 0.01:
-                                    ins = gradeable_overall_comment.insert().values(**overall_comment_values)
+                                    ins = gradeable_data_overall_comment.insert().values(**overall_comment_values)
                                     res = self.conn.execute(ins)
                                 for component in gradeable.components:
                                     if random.random() < 0.01 and skip_grading < 0.3:

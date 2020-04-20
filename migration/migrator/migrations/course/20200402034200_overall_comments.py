@@ -18,7 +18,7 @@ def up(config, database, semester, course):
     # Create overall comment table
     database.execute(
         """
-       CREATE TABLE IF NOT EXISTS gradeable_overall_comment (
+       CREATE TABLE IF NOT EXISTS gradeable_data_overall_comment (
             goc_id integer NOT NULL,
             g_id character varying(255) NOT NULL,
             goc_user_id character varying(255),
@@ -31,53 +31,53 @@ def up(config, database, semester, course):
     )
 
 
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_pkey")
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_pkey")
     database.execute(
         """
-        ALTER TABLE ONLY gradeable_overall_comment
-            ADD CONSTRAINT gradeable_overall_comment_pkey PRIMARY KEY (goc_id);
+        ALTER TABLE ONLY gradeable_data_overall_comment
+            ADD CONSTRAINT gradeable_data_overall_comment_pkey PRIMARY KEY (goc_id);
         """
     )
     
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_g_id_fkey")
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_g_id_fkey")
     database.execute(
         """
-        ALTER TABLE ONLY gradeable_overall_comment
-            ADD CONSTRAINT gradeable_overall_comment_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+        ALTER TABLE ONLY gradeable_data_overall_comment
+            ADD CONSTRAINT gradeable_data_overall_comment_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
         """
     )
 
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_goc_user_id_fkey")
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_goc_user_id_fkey")
     database.execute(
         """
-        ALTER TABLE ONLY gradeable_overall_comment
-            ADD CONSTRAINT gradeable_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES users(user_id) ON DELETE CASCADE;
-
-        """
-    )
-
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_goc_team_id_fkey")
-    database.execute(
-        """
-        ALTER TABLE ONLY gradeable_overall_comment
-            ADD CONSTRAINT gradeable_overall_comment_goc_team_id_fkey FOREIGN KEY (goc_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
+        ALTER TABLE ONLY gradeable_data_overall_comment
+            ADD CONSTRAINT gradeable_data_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
         """
     )
 
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_goc_grader_id")
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_goc_team_id_fkey")
     database.execute(
         """
-        ALTER TABLE ONLY gradeable_overall_comment
-            ADD CONSTRAINT gradeable_overall_comment_goc_grader_id FOREIGN KEY (goc_grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
+        ALTER TABLE ONLY gradeable_data_overall_comment
+            ADD CONSTRAINT gradeable_data_overall_comment_goc_team_id_fkey FOREIGN KEY (goc_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
+
         """
     )
 
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_user_unique")
-    database.execute("ALTER TABLE ONLY gradeable_overall_comment ADD CONSTRAINT gradeable_overall_comment_user_unique UNIQUE (g_id, goc_user_id, goc_grader_id);")
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_goc_grader_id")
+    database.execute(
+        """
+        ALTER TABLE ONLY gradeable_data_overall_comment
+            ADD CONSTRAINT gradeable_data_overall_comment_goc_grader_id FOREIGN KEY (goc_grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
+        """
+    )
 
-    database.execute("ALTER TABLE gradeable_overall_comment DROP CONSTRAINT IF EXISTS gradeable_overall_comment_team_unique")
-    database.execute("ALTER TABLE ONLY gradeable_overall_comment ADD CONSTRAINT gradeable_overall_comment_team_unique UNIQUE (g_id, goc_team_id, goc_grader_id);")
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_user_unique")
+    database.execute("ALTER TABLE ONLY gradeable_data_overall_comment ADD CONSTRAINT gradeable_data_overall_comment_user_unique UNIQUE (g_id, goc_user_id, goc_grader_id);")
+
+    database.execute("ALTER TABLE gradeable_data_overall_comment DROP CONSTRAINT IF EXISTS gradeable_data_overall_comment_team_unique")
+    database.execute("ALTER TABLE ONLY gradeable_data_overall_comment ADD CONSTRAINT gradeable_data_overall_comment_team_unique UNIQUE (g_id, goc_team_id, goc_grader_id);")
 
 
 
@@ -87,7 +87,7 @@ def up(config, database, semester, course):
 
     database.execute(
         """
-        CREATE SEQUENCE IF NOT EXISTS gradeable_overall_comment_goc_id_seq
+        CREATE SEQUENCE IF NOT EXISTS gradeable_data_overall_comment_goc_id_seq
             START WITH 1
             INCREMENT BY 1
             NO MINVALUE
@@ -95,8 +95,8 @@ def up(config, database, semester, course):
             CACHE 1;
         """)
 
-    database.execute("ALTER SEQUENCE gradeable_overall_comment_goc_id_seq OWNED BY gradeable_overall_comment.goc_id;")
-    database.execute("ALTER TABLE ONLY gradeable_overall_comment ALTER COLUMN goc_id SET DEFAULT nextval('gradeable_overall_comment_goc_id_seq'::regclass);")
+    database.execute("ALTER SEQUENCE gradeable_data_overall_comment_goc_id_seq OWNED BY gradeable_data_overall_comment.goc_id;")
+    database.execute("ALTER TABLE ONLY gradeable_data_overall_comment ALTER COLUMN goc_id SET DEFAULT nextval('gradeable_data_overall_comment_goc_id_seq'::regclass);")
 
 
 
@@ -116,7 +116,7 @@ def up(config, database, semester, course):
 
     for g_id, user_id, team_id, comment in rows:
         query = '''
-            INSERT INTO gradeable_overall_comment
+            INSERT INTO gradeable_data_overall_comment
                 (
                     g_id,
                     goc_user_id,
