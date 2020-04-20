@@ -392,7 +392,7 @@ HTML;
             if($gradeable->isTeamAssignment()){
                 $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
             }
-            else{
+            else {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
             }
             if ($gradeable->isTaGrading()) {
