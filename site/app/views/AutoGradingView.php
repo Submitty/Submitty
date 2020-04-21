@@ -356,7 +356,6 @@ class AutoGradingView extends AbstractView {
             ];
         }, $ta_graded_components);
 
-
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
@@ -484,8 +483,8 @@ class AutoGradingView extends AbstractView {
             $num_decimals = min(3, count($precision_parts));
         }
 
-        $graders_found = array();
-        $peer_aliases = array();
+        $graders_found = [];
+        $peer_aliases = [];
         $peer_grading_earned = 0;
 
         // Get just the peer components.
@@ -529,12 +528,11 @@ class AutoGradingView extends AbstractView {
                     return $grader->getId();
                 }, $container->getGraders())),
                 'marks' => $component_marks,
-                    
             ];
         }, $peer_graded_components);
 
         $unique_graders = array_unique($graders_found);
-        $peer_aliases = array();
+        $peer_aliases = [];
         $num_peers = 0;
         // Sort the graders ids so that peer alias assignment stays mostly consistent.
         // TODO: Eventually we want to move to having a students anonid be displayable

@@ -12,7 +12,7 @@ use app\models\User;
  * Class TaGradedGradeable
  * @package app\models\gradeable
  *
- * @method string getOverallComment()
+ * @method string getOverallComments()
  * @method void setOverallComment($comment)
  * @method int getId()
  * @method \DateTime|null getUserViewedDate()
@@ -95,7 +95,7 @@ class TaGradedGradeable extends AbstractModel {
         }
         else {
             // Grab the total peer score for each component here rather than computing on the site.
-            $details["peer_scores"] = array();
+            $details["peer_scores"] = [];
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
                 $details["peer_scores"][$container->getComponent()->getId()] = $container->getTotalScore();

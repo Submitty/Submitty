@@ -11,7 +11,7 @@ This message will appear in a blue box at the top of the page.",
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
         "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
         "submission_to_validation" : [ "*.txt", "*.png" ],
-        "work_to_details" : [ "*.txt", "*.png" ]
+        "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
     },
     "notebook" : [
         {

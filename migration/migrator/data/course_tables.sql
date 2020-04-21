@@ -1318,7 +1318,8 @@ CREATE TABLE IF NOT EXISTS queue(
   added_by TEXT NOT NULL REFERENCES users(user_id),
   help_started_by TEXT REFERENCES users(user_id),
   removed_by TEXT REFERENCES users(user_id),
-  contact_info TEXT
+  contact_info TEXT,
+  last_time_in_queue TIMESTAMP WITH TIME ZONE
 );
 CREATE TABLE IF NOT EXISTS queue_settings(
   id serial PRIMARY KEY,

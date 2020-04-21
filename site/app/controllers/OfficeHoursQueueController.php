@@ -415,4 +415,48 @@ class OfficeHoursQueueController extends AbstractController {
             )
         );
     }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
+    * @return MultiResponse
+    */
+    public function showQueueHistory($full_history = false) {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'renderQueueHistory',
+                new OfficeHoursQueueModel($this->core, $full_history)
+            )
+        );
+    }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
+    * @return MultiResponse
+    */
+    public function showNewStatus() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'renderNewStatus',
+                new OfficeHoursQueueModel($this->core)
+            )
+        );
+    }
 }
