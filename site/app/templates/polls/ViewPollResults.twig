@@ -2,7 +2,7 @@
     window.onload = function() {
         dataPoints = [];
         {% for answer, number in results %}
-            string = "{{ poll.getResponseString(answer}}"
+            string = "{{ poll.getResponseString(answer) }}"
             dataPoints.push({ y: {{ number }}, label: string}),
         {% endfor %}
         title = "{{ poll.getName() }}"
