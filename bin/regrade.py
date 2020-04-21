@@ -54,6 +54,18 @@ def is_active_version(directory):
     return this_version == active_version
 
 
+def load_config_for(semester, course, gradeable):
+    config_path = os.path.join(SUBMITTY_DATA_DIR,
+                               "courses",
+                               semester,
+                               course,
+                               "build",
+                               gradeable,
+                               "config_no_comments.json")
+    with open(config_path) as f:
+        return json.load(f)
+
+
 # For the specified interval, walks over the log file and creates
 # queue files for these submissions.
 def replay(starttime,endtime):
@@ -73,6 +85,7 @@ def replay(starttime,endtime):
     # file the correct file
     file = '/var/local/submitty/logs/autograding/{:d}{:02d}{:02d}.txt'.format(starttime.year,starttime.month,starttime.day)
     with open(file,'r') as lines:
+        cached_configs = {}
         for line in lines:
             things = line.split('|')
             original_time = dateutils.read_submitty_date(things[0])
@@ -102,11 +115,18 @@ def replay(starttime,endtime):
             pause.until(pause_time)
             queue_time = dateutils.write_submitty_date()
             print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)
+            semester = what[0]
+            course = what[1]
+            gradeable = what[3]
+            config_key = (semester, course, gradeable)
+            if config_key not in cached_configs:
+                cached_configs[config_key] = load_config_for(semester, course, gradeable)
+
             # FIXME : This will need to be adjust for team assignments
             # and assignments with special required capabilities!
-            item = {"semester": what[0],
-                    "course": what[1],
-                    "gradeable": what[3],
+            item = {"semester": semester,
+                    "course": course,
+                    "gradeable": gradeable,
                     "user": what[4],
                     "team": "",
                     "who": what[4],
@@ -115,7 +135,8 @@ def replay(starttime,endtime):
                     "required_capabilities": "default",
                     "queue_time": queue_time,
                     "regrade": True,
-                    "max_possible_grading_time" : -1 }
+                    "max_possible_grading_time" : -1,
+                    "autograde_count": len(cached_configs[config_key]['testcases']) }
             file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
             file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
             with open(file_name, "w") as open_file:
@@ -179,6 +200,8 @@ def main():
 
         print("pattern: ",pattern)
 
+        cached_configs = {}
+
         # Find all matching submissions
         for d in Path(data_dir).glob(pattern):
             d = str(d)
@@ -217,6 +240,12 @@ def main():
                     my_team = my_who
                     my_is_team = True
 
+                config_key = (my_semester, my_course, my_gradeable)
+                if config_key not in cached_configs:
+                    cached_configs[config_key] = load_config_for(my_semester, my_course, my_gradeable)
+                
+                testcases = cached_configs[config_key]["testcases"]
+
                 # FIXME: Set this value appropriately
                 is_vcs_checkout = False
 
@@ -232,7 +261,8 @@ def main():
                                     "required_capabilities" : required_capabilities,
                                     "queue_time":queue_time,
                                     "regrade":True,
-                                    "max_possible_grading_time" : max_grading_time})
+                                    "max_possible_grading_time" : max_grading_time,
+                                    "autograde_count": len(testcases)})
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:
