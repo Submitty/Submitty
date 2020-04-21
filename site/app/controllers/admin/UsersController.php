@@ -7,7 +7,7 @@ use app\controllers\AbstractController;
 use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\models\User;
 use app\libraries\routers\AccessControl;
@@ -25,7 +25,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/users", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
     public function getStudents() {
         $students = $this->core->getQueries()->getAllUsers();
@@ -61,7 +61,7 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
                 ['admin', 'Users'],
@@ -78,7 +78,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/graders", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
     public function getGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
@@ -124,7 +124,7 @@ class UsersController extends AbstractController {
             ]);
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
                 ['admin', 'Users'],

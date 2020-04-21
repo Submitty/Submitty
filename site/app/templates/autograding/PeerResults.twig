@@ -24,19 +24,21 @@ $( document ).ready(function() {
     <div class="sub">
 
         {# Overview #}
-        <div class="box half" style="padding: 10px; width: 30%; word-break: break-word;">
+        <div class="box" style="padding: 10px; word-break: break-word;">
             <p>Version #{{ ta_graded_version }}</p>
             {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
-            {# Peer graders can not yet make overall comments. #}
-            {# <p>
-                {% if overall_comment|length != 0 %}
-            <hr>
-            Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
-            {% endif %}
-            </p> #}
+            {% for user in ordered_graders if overall_comments[user] is not empty %}
+                <div class="overall-comment-box">
+                    <p class="overall-comment-author">
+                        Overall note from {{peer_aliases[user]}}:
+                    </p>
+                    <p class="overall-comment">
+                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                    </p>
+                </div>
+            {% endfor %}
         </div>
 
         {% if uploaded_pdfs|length >= 1 %}
@@ -144,7 +146,7 @@ $( document ).ready(function() {
                             <table class="mobile-table">
                                  <thead>
                                     <tr>
-                                        {% for grader in component.peer_ids %}
+                                        {% for grader in ordered_graders if grader in component.peer_ids %}
                                             <th class="peer-table-header">
                                                 {{ peer_aliases[grader] }}
                                             </th>
@@ -156,7 +158,7 @@ $( document ).ready(function() {
                                 <tbody>
                                     {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                                         <tr>
-                                            {% for grader in component.peer_ids %}
+                                            {% for grader in ordered_graders if grader in component.peer_ids %}
                                                 <td class="peer-table-data">
                                                     {% if mark.earned[grader] %}
                                                         <div class="col-no-gutters indicator">

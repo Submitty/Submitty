@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Class Response
  * @package app\libraries\response
  */
-class Response extends AbstractResponse {
+class MultiResponse implements ResponseInterface {
     /** @var null|WebResponse  */
     public $web_response = null;
 
@@ -36,25 +36,25 @@ class Response extends AbstractResponse {
 
     /**
      * @param WebResponse $web_response
-     * @return Response
+     * @return MultiResponse
      */
-    public static function WebOnlyResponse(WebResponse $web_response): Response {
+    public static function webOnlyResponse(WebResponse $web_response): MultiResponse {
         return new self(null, $web_response, null);
     }
 
     /**
      * @param JsonResponse $json_response
-     * @return Response
+     * @return MultiResponse
      */
-    public static function JsonOnlyResponse(JsonResponse $json_response): Response {
+    public static function JsonOnlyResponse(JsonResponse $json_response): MultiResponse {
         return new self($json_response, null, null);
     }
 
     /**
      * @param RedirectResponse $redirect_response
-     * @return Response
+     * @return MultiResponse
      */
-    public static function RedirectOnlyResponse(RedirectResponse $redirect_response): Response {
+    public static function RedirectOnlyResponse(RedirectResponse $redirect_response): MultiResponse {
         return new self(null, null, $redirect_response);
     }
 
@@ -65,10 +65,8 @@ class Response extends AbstractResponse {
      * of responses exist, check if rendering web view is enabled,
      * if so, render the web view; if not, render JSON. Note that
      * the latter case normally occurs in an API call.
-     *
-     * @param Core $core
      */
-    public function render(Core $core) {
+    public function render(Core $core): void {
         $web_response = $this->redirect_response ? $this->redirect_response : $this->web_response;
         if ($web_response && is_null($this->json_response)) {
             $web_response->render($core);

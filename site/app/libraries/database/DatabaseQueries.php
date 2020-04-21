@@ -1744,6 +1744,11 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getUsersByRotatingSections($sections, $orderBy = "rotating_section") {
         $return = array();
         if (count($sections) > 0) {
+            $orderBy = str_replace(
+                "Peer",
+                1,
+                $orderBy
+            );
             $placeholders = $this->createParamaterList(count($sections));
             $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
@@ -3168,7 +3173,7 @@ SQL;
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
-    
+
     /**
      * Removes all peer grading pairs from a given assignment
      *
@@ -3177,7 +3182,7 @@ SQL;
     public function clearPeerGradingAssignment($gradeable_id) {
         $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ?", array($gradeable_id));
     }
-    
+
     /**
      * Adds an assignment for someone to get all the peer grading pairs for a given gradeable
      *
@@ -3194,7 +3199,7 @@ SQL;
         }
         return $return;
     }
-    
+
     /**
      * Get all assignments a student is assigned to peer grade
      *
@@ -3211,7 +3216,7 @@ SQL;
         }
         return $return;
     }
-     
+
     /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
@@ -4382,7 +4387,7 @@ AND gc_id IN (
             $mark->getPoints(),
             $mark->getTitle(),
             $mark->getOrder(),
-            $this->course_db->convertBoolean($mark->isPublish())
+            $mark->isPublish()
         ];
         $this->course_db->query(
             "
@@ -4411,7 +4416,7 @@ AND gc_id IN (
             $mark->getPoints(),
             $mark->getTitle(),
             $mark->getOrder(),
-            $this->course_db->convertBoolean($mark->isPublish()),
+            $mark->isPublish(),
             $mark->getId()
         ];
         $this->course_db->query(
@@ -4467,9 +4472,9 @@ AND gc_id IN (
             $component->getDefault(),
             $component->getMaxValue(),
             $component->getUpperClamp(),
-            $this->course_db->convertBoolean($component->isText()),
+            $component->isText(),
             $component->getOrder(),
-            $this->course_db->convertBoolean($component->isPeer()),
+            $component->isPeer(),
             $component->getPage()
         ];
         $this->course_db->query(
@@ -4549,9 +4554,9 @@ AND gc_id IN (
                 $component->getDefault(),
                 $component->getMaxValue(),
                 $component->getUpperClamp(),
-                $this->course_db->convertBoolean($component->isText()),
+                $component->isText(),
                 $component->getOrder(),
-                $this->course_db->convertBoolean($component->isPeer()),
+                $component->isPeer(),
                 $component->getPage(),
                 $component->getId()
             ];
@@ -4665,28 +4670,28 @@ AND gc_id IN (
                 $gradeable->getId(),
                 DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                 DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
-                $this->course_db->convertBoolean($gradeable->isVcs()),
+                $gradeable->isVcs(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsHostType(),
-                $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
+                $gradeable->isTeamAssignment(),
                 $gradeable->getTeamSizeMax(),
                 DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
-                $this->course_db->convertBoolean($gradeable->isTaGrading()),
-                $this->course_db->convertBoolean($gradeable->isScannedExam()),
-                $this->course_db->convertBoolean($gradeable->isStudentView()),
-                $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
-                $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                $this->course_db->convertBoolean($gradeable->hasDueDate()),
+                $gradeable->isTaGrading(),
+                $gradeable->isScannedExam(),
+                $gradeable->isStudentView(),
+                $gradeable->isStudentViewAfterGrades(),
+                $gradeable->isStudentSubmit(),
+                $gradeable->hasDueDate(),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
-                $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
+                $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
-                $this->course_db->convertBoolean($gradeable->isPeerGrading()),
+                $gradeable->isPeerGrading(),
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                $gradeable->isRegradeAllowed(),
                 $gradeable->getDiscussionThreadId(),
-                $this->course_db->convertBoolean($gradeable->isDiscussionBased())
+                $gradeable->isDiscussionBased()
             ];
             $this->course_db->query(
                 "
@@ -4811,29 +4816,29 @@ AND gc_id IN (
                 $params = [
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
                     DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
-                    $this->course_db->convertBoolean($gradeable->isVcs()),
+                    $gradeable->isVcs(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsHostType(),
-                    $this->course_db->convertBoolean($gradeable->isTeamAssignment()),
+                    $gradeable->isTeamAssignment(),
                     $gradeable->getTeamSizeMax(),
                     DateUtils::dateTimeToString($gradeable->getTeamLockDate()),
-                    $this->course_db->convertBoolean($gradeable->isTaGrading()),
-                    $this->course_db->convertBoolean($gradeable->isScannedExam()),
-                    $this->course_db->convertBoolean($gradeable->isStudentView()),
-                    $this->course_db->convertBoolean($gradeable->isStudentViewAfterGrades()),
-                    $this->course_db->convertBoolean($gradeable->isStudentSubmit()),
-                    $this->course_db->convertBoolean($gradeable->hasDueDate()),
+                    $gradeable->isTaGrading(),
+                    $gradeable->isScannedExam(),
+                    $gradeable->isStudentView(),
+                    $gradeable->isStudentViewAfterGrades(),
+                    $gradeable->isStudentSubmit(),
+                    $gradeable->hasDueDate(),
                     $gradeable->getAutogradingConfigPath(),
                     $gradeable->getLateDays(),
-                    $this->course_db->convertBoolean($gradeable->isLateSubmissionAllowed()),
+                    $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    $this->course_db->convertBoolean($gradeable->isPeerGrading()),
+                    $gradeable->isPeerGrading(),
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
-                    $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
-                    $this->course_db->convertBoolean($gradeable->isGradeInquiryPerComponentAllowed()),
+                    $gradeable->isRegradeAllowed(),
+                    $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
-                    $this->course_db->convertBoolean($gradeable->isDiscussionBased()),
+                    $gradeable->isDiscussionBased(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -5040,6 +5045,41 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
+    private function updateOverallComments(TaGradedGradeable $ta_graded_gradeable) {
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment) {
+            $this->updateOverallComment($ta_graded_gradeable, $comment, $user_id);
+        }
+    }
+
+    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
+        $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
+        $user_id = null;
+        $team_id = null;
+
+        // TODO: replace this with a single upsert when postgres can do an on conflict on
+        //   multiple constraints (gradeable_data_overall_comment_user_unique, gradeable_data_overall_comment_team_unique)
+        if ($ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment()) {
+            $team_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
+            $conflict_clause = "(g_id, goc_team_id, goc_grader_id)";
+        }
+        else {
+            $user_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
+            $conflict_clause = "(g_id, goc_user_id, goc_grader_id)";
+        }
+
+        $query = "
+            INSERT INTO gradeable_data_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT {$conflict_clause}
+                DO
+                    UPDATE SET 
+                        goc_overall_comment=?;
+            ";
+
+        $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
+        $this->course_db->query($query, $params);
+    }
+
     /**
      * Update/create the components/marks for a gradeable.
      *
@@ -5085,17 +5125,17 @@ AND gc_id IN (
             $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId(),
             $is_team ? null : $submitter_id,
             $is_team ? $submitter_id : null,
-            $ta_graded_gradeable->getOverallComment(),
             $ta_graded_gradeable->getUserViewedDate() !== null ?
                 DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
+            ""
         ];
         $query = "
             INSERT INTO gradeable_data (
                 g_id,
                 gd_user_id,
                 gd_team_id,
-                gd_overall_comment,
-                gd_user_viewed_date)
+                gd_user_viewed_date,
+                gd_overall_comment)
             VALUES(?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
 
@@ -5104,6 +5144,8 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+        // And to separately update the overall comments
+        $this->updateOverallComments($ta_graded_gradeable);
     }
 
     /**
@@ -5115,14 +5157,12 @@ AND gc_id IN (
         // If the grade has been modified, then update its properties
         if ($ta_graded_gradeable->isModified()) {
             $params = [
-                $ta_graded_gradeable->getOverallComment(),
                 $ta_graded_gradeable->getUserViewedDate() !== null ?
                     DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
                 $ta_graded_gradeable->getId()
             ];
             $query = "
                 UPDATE gradeable_data SET
-                  gd_overall_comment=?,
                   gd_user_viewed_date=?
                 WHERE gd_id=?";
             $this->course_db->query($query, $params);
@@ -5130,6 +5170,8 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+        // And to update the overall comment
+        $this->updateOverallComments($ta_graded_gradeable);
     }
 
     /**
@@ -5397,7 +5439,13 @@ AND gc_id IN (
         return 0 < count($this->course_db->rows());
     }
 
+    public function getLastTimeInQueue($user_id, $queue_code) {
+        $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL) ", array($user_id, $queue_code));
+        return $this->course_db->rows()[0]['max'];
+    }
+
     public function addToQueue($queue_code, $user_id, $name, $contact_info) {
+        $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $this->course_db->query("INSERT INTO queue
             (
                 current_state,
@@ -5411,7 +5459,8 @@ AND gc_id IN (
                 added_by,
                 help_started_by,
                 removed_by,
-                contact_info
+                contact_info,
+                last_time_in_queue
             ) VALUES (
                 'waiting',
                 NULL,
@@ -5424,8 +5473,9 @@ AND gc_id IN (
                 ?,
                 NULL,
                 NULL,
+                ?,
                 ?
-            )", array($queue_code,$user_id,$name,$user_id,$contact_info));
+            )", array($queue_code,$user_id,$name,$user_id,$contact_info,$last_time_in_queue));
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
@@ -5475,17 +5525,19 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = 'emptied', removed_by = ?, time_out = current_timestamp where current_state IN ('waiting','being_helped') and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($this->core->getUser()->getId(), $queue_code));
     }
 
-    public function entryIdToUserId($entry_id) {
+    public function getQueueFromEntryId($entry_id) {
         $this->course_db->query("SELECT * FROM queue WHERE entry_id = ?", array($entry_id));
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("Invalid Entry ID");
             return;
         }
-        return $this->course_db->rows()[0]['user_id'];
+        return $this->course_db->rows()[0];
     }
 
     public function restoreUserToQueue($entry_id) {
-        $user_id = $this->entryIdToUserId($entry_id);
+        $row = $this->getQueueFromEntryId($entry_id);
+        $user_id = $row['user_id'];
+        $queue_code = $row['queue_code'];
         if (is_null($user_id)) {
             return;
         }
@@ -5493,7 +5545,8 @@ AND gc_id IN (
             $this->core->addErrorMessage("Cannot restore a user that is currently in the queue. Please remove them first.");
             return;
         }
-        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null where entry_id = ?", array($entry_id));
+        $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
+        $this->course_db->query("UPDATE queue SET current_state = 'waiting', removal_type = null, removed_by = null, time_out = null, time_help_start = null, help_started_by = null, last_time_in_queue = ? where entry_id = ?", array($last_time_in_queue, $entry_id));
         $this->core->addSuccessMessage("Student restored");
     }
 
@@ -5511,16 +5564,6 @@ AND gc_id IN (
             $this->course_db->query("SELECT count(*) FROM queue WHERE current_state IN ('waiting')");
         }
         return $this->course_db->rows()[0]['count'];
-    }
-
-    public function firstTimeInQueueToday($id, $queue_code) {
-        $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
-        return $this->course_db->rows()[0]['count'] <= 0;
-    }
-
-    public function firstTimeInQueueThisWeek($id, $queue_code) {
-        $this->course_db->query("SELECT count(*) FROM queue WHERE time_in > CURRENT_DATE - interval '4' day AND user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'removed', 'emptied', 'self_helped') OR help_started_by IS NOT NULL)", array($id, $queue_code));
-        return $this->course_db->rows()[0]['count'] <= 0;
     }
 
     public function getLastUsedQueueName() {
@@ -5541,7 +5584,10 @@ AND gc_id IN (
 
     public function getCurrentQueueState() {
         $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND current_state IN ('waiting','being_helped')", array($this->core->getUser()->getId()));
-        return $this->course_db->rows()[0];
+        if ($this->course_db->rows()) {
+            return $this->course_db->rows()[0];
+        }
+        return null;
     }
 
     public function changeQueueToken($token, $queue_code) {
@@ -5551,6 +5597,16 @@ AND gc_id IN (
     public function getLastQueueUpdate() {
         $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
         return $this->course_db->rows()[0]['change_count'];
+    }
+
+    public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
+        $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", array($queue_code, $time_in));
+        return $this->course_db->rows()[0]['count'];
+    }
+
+    public function getNumberAheadInQueueToday($queue_code, $time_in) {
+        $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < CURRENT_DATE AND last_time_in_queue > CURRENT_DATE - interval '4' day AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", array($queue_code, $time_in));
+        return $this->course_db->rows()[0]['count'];
     }
 
 
@@ -5748,8 +5804,11 @@ AND gc_id IN (
 
               /* Gradeable Data */
               gd.gd_id AS id,
-              gd.gd_overall_comment AS overall_comment,
               gd.gd_user_viewed_date AS user_viewed_date,
+
+              /* get the overall comment */
+              goc.commenter_ids AS array_commenter_ids,
+              goc.overall_comments AS array_overall_comments,
 
               /* Aggregate Gradeable Component Data */
               gcd.array_comp_id,
@@ -5811,6 +5870,16 @@ AND gc_id IN (
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+              LEFT JOIN (
+                SELECT 
+                    json_agg(goc_grader_id) as commenter_ids,
+                    json_agg(goc_overall_comment) as overall_comments,
+                    g_id,
+                    goc_{$submitter_type}
+                FROM gradeable_data_overall_comment
+                GROUP BY g_id, goc_{$submitter_type}
+              ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
               LEFT JOIN (
@@ -5948,6 +6017,17 @@ AND gc_id IN (
 
             // This will be false if there is no manual grade yet
             if (isset($row['id'])) {
+                // prepare overall comments
+                $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"]);
+                $row["array_overall_comments"] = json_decode($row["array_overall_comments"]);
+                $row["overall_comments"] = [];
+                if ($row["array_commenter_ids"] !== null) {
+                    for ($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
+                        $commenter = $row["array_commenter_ids"][$i];
+                        $comment   = $row["array_overall_comments"][$i];
+                        $row["overall_comments"][$commenter] = $comment;
+                    }
+                }
                 $ta_graded_gradeable = new TaGradedGradeable($this->core, $graded_gradeable, $row);
                 $graded_gradeable->setTaGradedGradeable($ta_graded_gradeable);
             }

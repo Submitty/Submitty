@@ -288,10 +288,9 @@
                                 <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
                                 <script>
-
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
-                                            "mode": "{{ cell.programming_language }}",
+                                            "mode": "{{- cell.codemirror_mode | escape('js') -}}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
                                         }
