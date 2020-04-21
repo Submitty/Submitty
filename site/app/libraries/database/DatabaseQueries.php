@@ -1744,6 +1744,11 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getUsersByRotatingSections($sections, $orderBy = "rotating_section") {
         $return = array();
         if (count($sections) > 0) {
+            $orderBy = str_replace(
+                "Peer",
+                1,
+                $orderBy
+            );
             $placeholders = $this->createParamaterList(count($sections));
             $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
