@@ -23,11 +23,11 @@
               <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                {% if viewer.firstTimeInQueueThisWeek(entry['user_id'], entry['queue_code']) %}
+                {% if viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week">
                     <i class="fas fa-star"></i>
                     Help</button>
-                {% elseif viewer.firstTimeInQueueToday(entry['user_id'], entry['queue_code']) %}
+                {% elseif viewer.firstTimeInQueueToday(entry['last_time_in_queue']) %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue today">
                     <i class="fas fa-star-half"></i>
                     Help</button>
