@@ -1745,7 +1745,7 @@ ORDER BY g.sections_rotating_id, g.user_id",
         $return = array();
         if (count($sections) > 0) {
             $placeholders = $this->createParamaterList(count($sections));
-            $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders}", $sections);
+            $this->course_db->query("SELECT * FROM users AS u WHERE rotating_section IN {$placeholders} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
