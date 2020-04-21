@@ -268,7 +268,6 @@ class SimpleGraderController extends AbstractController {
             }
         }
 
-        $ta_graded_gradeable->setOverallComment('');
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
         return MultiResponse::JsonOnlyResponse(
@@ -360,7 +359,6 @@ class SimpleGraderController extends AbstractController {
                 }
 
                 // Reset the overall comment because we're overwriting the grade anyway
-                $ta_graded_gradeable->setOverallComment('');
                 $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
                 $return_data[] = $temp_array;
