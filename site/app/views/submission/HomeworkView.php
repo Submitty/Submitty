@@ -314,6 +314,8 @@ class HomeworkView extends AbstractView {
         $github_repo_id = '';
 
         $image_data = [];
+
+
         if (!$gradeable->isVcs()) {
             // Prepare notebook image data for displaying
             foreach ($notebook as $cell) {
@@ -398,6 +400,16 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
         $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
+
+        if ( isset($graded_gradeable) ){
+            //replace items with the actual notebook values
+            $notebook_data = $graded_gradeable->populateNotebookItemPool($notebook_data);   
+
+             //remove the item pool
+            unset($notebook_data['item_pool']);
+        }
+
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
         // Import custom stylesheet to style notebook items

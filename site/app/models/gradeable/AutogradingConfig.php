@@ -6,6 +6,7 @@ use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
+use app\libraries\FileUtils;
 
 /**
  * Class AutogradingConfig
@@ -147,6 +148,19 @@ class AutogradingConfig extends AbstractModel {
 
         // Setup $this->notebook
         $actual_input = array();
+
+        $details = FileUtils::readJsonFile  ("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
+        $this->notebook = $details;
+        if (isset($details['item_pool'])){
+            $item_pool = ["item_pool" => []];
+            for ($i=0; $i < count($details['item_pool']); $i++) { 
+                $item_cell = $details['item_pool'][$i];
+
+                $item_pool["item_pool"][] = $item_cell;
+            }
+            $this->notebook[] = $item_pool;
+        }
+
         if (isset($details['notebook'])) {
             // For each item in the notebook array inside the $details collect data and assign to variables in
             // $this->notebook

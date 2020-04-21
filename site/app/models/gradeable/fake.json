@@ -1,23 +1,7 @@
 {
-
-    "hide_submitted_files" : true,
-//    "hide_version_and_test_details" : true,
-    
-    "assignment_message" : "#Welcome To My Favorite Notebook Gradeable\n  \
-\n  \
-This message will appear in a blue box at the top of the page.",
-
-    "autograding" : {
-        "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
-        "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
-        "submission_to_validation" : [ "*.txt", "*.png" ],
-        "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
-    },
-
-
     "item_pool":
     [
-        // ===================================================
+    
         { "item_name" : "math_1",
           "notebook" : [
               {
@@ -44,7 +28,7 @@ This message will appear in a blue box at the top of the page.",
                                  "failure_message":"Incorrect Answer" } ] }
           ]
         },
-        // ===================================================
+       
         { "item_name" : "math_2",
           "notebook" : [
               {
@@ -71,7 +55,6 @@ This message will appear in a blue box at the top of the page.",
                                  "failure_message":"Incorrect Answer" } ] }
           ]
         },
-        // ===================================================
         { "item_name" : "math_3",
           "notebook" : [
               {
@@ -98,7 +81,6 @@ This message will appear in a blue box at the top of the page.",
                                  "failure_message":"Incorrect Answer" } ] }
           ]
         },
-        // ===================================================
         { "item_name" : "animal_1",
           "notebook" : [
               {
@@ -125,7 +107,6 @@ This message will appear in a blue box at the top of the page.",
                                  "failure_message":"Incorrect Answer (note: make sure your answer is lowercase)" } ] }
           ]
         },
-        // ===================================================
         { "item_name" : "animal_2",
           "notebook" : [
               {
@@ -153,7 +134,6 @@ This message will appear in a blue box at the top of the page.",
                                  "failure_message":"Incorrect Answer (note: make sure your answer is lowercase)" } ] }
           ]
         },
-        // ===================================================
         { "item_name" : "animal_3",
           "notebook" : [
               {
@@ -180,7 +160,6 @@ This message will appear in a blue box at the top of the page.",
                                  "failure_message":"Incorrect Answer (note: make sure your answer is lowercase)" } ] }
           ]
         },    
-        // ===================================================
         { "item_name" : "author",
           "notebook" : [
               {
@@ -199,8 +178,7 @@ This message will appear in a blue box at the top of the page.",
           "notebook" : [
               {
                   "type": "markdown",
-                  "markdown_string": "###Write a haiku:\n  \
-Wikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
+                  "markdown_string": "###Write a haiku:\nWikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
               },
               {
                   "type": "short_answer",
@@ -212,7 +190,6 @@ Wikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
           "testcases" : [
           ]
         },   
-        // ===================================================
         { "item_name" : "cpp_code",
           "notebook" : [
               {
@@ -226,16 +203,7 @@ Wikipedia: [Haiku in English](https://en.wikipedia.org/wiki/Haiku_in_English)"
                   "rows" : 10,
                   "programming_language": "cpp",
                   "filename": "cpp_codebox.cpp",
-                  "initial_value": "\
-#include <iostream>\n\
-int main() {\n\
-  for (int i = 2; i < 100; i++) {\n\
-\n\
-\n\
-\n\
-    std::cout << i << std::endl;\n\
-  }\n\
-}"
+                  "initial_value": "#include <iostream>\nint main() {\nfor (int i = 2; i < 100; i++) {\n\n\n\nstd::cout << i << std::endl;\n}\n}"
               }
           ],
           "testcases" : [
@@ -259,7 +227,6 @@ int main() {\n\
               }
           ]
         },
-        // ===================================================
         { "item_name" : "python_code",
           "notebook" : [
               {
@@ -271,12 +238,7 @@ int main() {\n\
                   "type": "short_answer",
                   "programming_language": "python",
                   "filename": "python_codebox.py",
-                  "initial_value": "\
-for i in range(2, 100):\n\
-\n\
-\n\
-\n\
-    print(i)"
+                  "initial_value": "for i in range(2, 100):\n\n\n\nprint(i)"
               }
           ],
           "testcases" : [
@@ -296,46 +258,52 @@ for i in range(2, 100):\n\
 
         
     ],
-    // ===================================================              
     "notebook" : [
         {
             "type": "markdown",
-            "markdown_string": "#Instructions\n  \
-\n  \
-Here's a short list of instructions:\n  \
-* This is an open-book quiz.\n  \
-* You have 20 minutes to submit your answers.\n"
+            "markdown_string": "#Instructions\n\nHere's a short list of instructions:\n* This is an open-book quiz.\n* You have 20 minutes to submit your answers.\n"
         },
-        // ======================================================================================================
         {
             "type": "markdown",
             "markdown_string": "#Let's do Math!"
         },
         {
             "type" : "item",
-            "item_pool" : ["math_1", "math_2", "math_3"],
+            "item_pool" : ["math_1"],
             "points" : 3
         },
-        // ======================================================================================================
+        {
+            "type" : "item",
+            "item_pool" : ["math_2"],
+            "points" : 3
+        },
+        {
+            "type" : "item",
+            "item_pool" : ["math_3"],
+            "points" : 3
+        },
         {
             "type": "markdown",
             "markdown_string": "#At the Zoo!"
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_1", "animal_2", "animal_3"],
+            "item_pool" : ["animal_1"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_1", "animal_2", "animal_3"],
+            "item_pool" : ["animal_2"],
             "points" : 2
         },
-        // ======================================================================================================
+        {
+            "type" : "item",
+            "item_pool" : ["animal_3"],
+            "points" : 2
+        },
         {
             "type": "markdown",
-            "markdown_string": "#Story Time!\n  \
-*Note: the problems in this section will not be auto-graded*"
+            "markdown_string": "#Story Time!\n*Note: the problems in this section will not be auto-graded*"
         },
         {
             "type" : "item",
@@ -345,17 +313,20 @@ Here's a short list of instructions:\n  \
             "type" : "item",
             "item_pool" : ["haiku"]
         },
-        // ======================================================================================================
         {
             "type": "markdown",
             "markdown_string": "#Hour of Code!"
         },
         {
             "type" : "item",
-            "item_pool" : ["cpp_code", "python_code"],
+            "item_pool" : ["cpp_code"],
+            "points" : 5
+        },
+        {
+            "type" : "item",
+            "item_pool" : ["python_code"],
             "points" : 5
         }
-        // ===================================================
     ],
     "testcases" : [ 
     ]
