@@ -408,11 +408,28 @@ class AutoGradingView extends AbstractView {
             }
         }
 
+        // Update overall comments to have display names
+        $overall_comments = [];
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_name => $comment) {
+            $comment_user = $this->core->getQueries()->getUserById($user_name);
+            $display_name = $comment_user->getDisplayedFirstName();
+
+            // Skip peers.
+            if ($gradeable->isPeerGrading() && !$comment_user->accessGrading()) {
+                continue;
+            }
+
+            // Skip empty comments
+            if (strlen(trim($comment)) > 0) {
+                $overall_comments[$display_name] = $comment;
+            }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
-            'overall_comment' => $ta_graded_gradeable->getOverallComment(),
+            'overall_comments' => $overall_comments,
             'ta_components' => $ta_component_data,
             'regrade_date' => DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
             'grading_complete' => $grading_complete,
@@ -470,8 +487,8 @@ class AutoGradingView extends AbstractView {
             $num_decimals = min(3, count($precision_parts));
         }
 
-        $graders_found = array();
-        $peer_aliases = array();
+        $graders_found = [];
+        $peer_aliases = [];
         $peer_grading_earned = 0;
 
         // Get just the peer components.
@@ -519,15 +536,19 @@ class AutoGradingView extends AbstractView {
         }, $peer_graded_components);
 
         $unique_graders = array_unique($graders_found);
-        $peer_aliases = array();
+        $peer_aliases = [];
         $num_peers = 0;
         // Sort the graders ids so that peer alias assignment stays mostly consistent.
         // TODO: Eventually we want to move to having a students anonid be displayable
         // So that we don't have to do this (e.g. Anonymous Moose).
         sort($unique_graders);
+        $ordered_graders = [];
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
-            $peer_aliases[$grader_id] = "Peer " . $num_peers;
+            $alias = "Peer " . $num_peers;
+            $peer_aliases[$grader_id] = $alias;
+            // Effectively sorts peers by $num_peers.
+            array_push($ordered_graders, $grader_id);
         }
 
         $uploaded_pdfs = [];
@@ -582,15 +603,30 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
+        $overall_comments = [];
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment) {
+            $comment_user = $this->core->getQueries()->getUserById($user_id);
+
+            // Skip non-peers.
+            if ($gradeable->isPeerGrading() && $comment_user->accessGrading()) {
+                continue;
+            }
+
+            // Skip empty comments
+            if (strlen(trim($comment)) > 0) {
+                $overall_comments[$user_id] = $comment;
+            }
+        }
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
-            'overall_comment' => $ta_graded_gradeable->getOverallComment(),
+            'overall_comments' => $overall_comments,
             'is_peer' => $gradeable->isPeerGrading(),
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,
+            'ordered_graders' => $ordered_graders,
             'regrade_date' => DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,

@@ -5040,6 +5040,41 @@ AND gc_id IN (
         $this->course_db->query($query, $params);
     }
 
+    private function updateOverallComments(TaGradedGradeable $ta_graded_gradeable) {
+        foreach ($ta_graded_gradeable->getOverallComments() as $user_id => $comment) {
+            $this->updateOverallComment($ta_graded_gradeable, $comment, $user_id);
+        }
+    }
+
+    private function updateOverallComment(TaGradedGradeable $ta_graded_gradeable, $comment, $grader_id) {
+        $g_id = $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId();
+        $user_id = null;
+        $team_id = null;
+
+        // TODO: replace this with a single upsert when postgres can do an on conflict on
+        //   multiple constraints (gradeable_data_overall_comment_user_unique, gradeable_data_overall_comment_team_unique)
+        if ($ta_graded_gradeable->getGradedGradeable()->getGradeable()->isTeamAssignment()) {
+            $team_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
+            $conflict_clause = "(g_id, goc_team_id, goc_grader_id)";
+        }
+        else {
+            $user_id = $ta_graded_gradeable->getGradedGradeable()->getSubmitter()->getId();
+            $conflict_clause = "(g_id, goc_user_id, goc_grader_id)";
+        }
+
+        $query = "
+            INSERT INTO gradeable_data_overall_comment (g_id, goc_user_id, goc_team_id, goc_grader_id, goc_overall_comment)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT {$conflict_clause}
+                DO
+                    UPDATE SET 
+                        goc_overall_comment=?;
+            ";
+
+        $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
+        $this->course_db->query($query, $params);
+    }
+
     /**
      * Update/create the components/marks for a gradeable.
      *
@@ -5085,17 +5120,17 @@ AND gc_id IN (
             $ta_graded_gradeable->getGradedGradeable()->getGradeable()->getId(),
             $is_team ? null : $submitter_id,
             $is_team ? $submitter_id : null,
-            $ta_graded_gradeable->getOverallComment(),
             $ta_graded_gradeable->getUserViewedDate() !== null ?
                 DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
+            ""
         ];
         $query = "
             INSERT INTO gradeable_data (
                 g_id,
                 gd_user_id,
                 gd_team_id,
-                gd_overall_comment,
-                gd_user_viewed_date)
+                gd_user_viewed_date,
+                gd_overall_comment)
             VALUES(?, ?, ?, ?, ?)";
         $this->course_db->query($query, $params);
 
@@ -5104,6 +5139,8 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+        // And to separately update the overall comments
+        $this->updateOverallComments($ta_graded_gradeable);
     }
 
     /**
@@ -5115,14 +5152,12 @@ AND gc_id IN (
         // If the grade has been modified, then update its properties
         if ($ta_graded_gradeable->isModified()) {
             $params = [
-                $ta_graded_gradeable->getOverallComment(),
                 $ta_graded_gradeable->getUserViewedDate() !== null ?
                     DateUtils::dateTimeToString($ta_graded_gradeable->getUserViewedDate()) : null,
                 $ta_graded_gradeable->getId()
             ];
             $query = "
                 UPDATE gradeable_data SET
-                  gd_overall_comment=?,
                   gd_user_viewed_date=?
                 WHERE gd_id=?";
             $this->course_db->query($query, $params);
@@ -5130,6 +5165,8 @@ AND gc_id IN (
 
         // Also be sure to save the components
         $this->updateGradedComponents($ta_graded_gradeable);
+        // And to update the overall comment
+        $this->updateOverallComments($ta_graded_gradeable);
     }
 
     /**
@@ -5748,8 +5785,11 @@ AND gc_id IN (
 
               /* Gradeable Data */
               gd.gd_id AS id,
-              gd.gd_overall_comment AS overall_comment,
               gd.gd_user_viewed_date AS user_viewed_date,
+
+              /* get the overall comment */
+              goc.commenter_ids AS array_commenter_ids,
+              goc.overall_comments AS array_overall_comments,
 
               /* Aggregate Gradeable Component Data */
               gcd.array_comp_id,
@@ -5811,6 +5851,16 @@ AND gc_id IN (
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+              LEFT JOIN (
+                SELECT 
+                    json_agg(goc_grader_id) as commenter_ids,
+                    json_agg(goc_overall_comment) as overall_comments,
+                    g_id,
+                    goc_{$submitter_type}
+                FROM gradeable_data_overall_comment
+                GROUP BY g_id, goc_{$submitter_type}
+              ) AS goc ON goc.g_id=g.g_id AND goc.goc_{$submitter_type}={$submitter_type_ext}
 
               /* Join aggregate gradeable component data */
               LEFT JOIN (
@@ -5948,6 +5998,17 @@ AND gc_id IN (
 
             // This will be false if there is no manual grade yet
             if (isset($row['id'])) {
+                // prepare overall comments
+                $row["array_commenter_ids"] = json_decode($row["array_commenter_ids"]);
+                $row["array_overall_comments"] = json_decode($row["array_overall_comments"]);
+                $row["overall_comments"] = [];
+                if ($row["array_commenter_ids"] !== null) {
+                    for ($i = 0; $i < count($row["array_commenter_ids"]); $i++) {
+                        $commenter = $row["array_commenter_ids"][$i];
+                        $comment   = $row["array_overall_comments"][$i];
+                        $row["overall_comments"][$commenter] = $comment;
+                    }
+                }
                 $ta_graded_gradeable = new TaGradedGradeable($this->core, $graded_gradeable, $row);
                 $graded_gradeable->setTaGradedGradeable($ta_graded_gradeable);
             }
