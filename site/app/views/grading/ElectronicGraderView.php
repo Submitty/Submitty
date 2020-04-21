@@ -136,8 +136,8 @@ class ElectronicGraderView extends AbstractView {
                 $peer_graded = 0;
 
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
-                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
-                    $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
+                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / ($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables'])) * 100, 1);
+                    $peer_total =  floor(($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables']) / $peer_count);
                     $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
                 }
             }
