@@ -269,17 +269,17 @@
         },
         {
             "type" : "item",
-            "item_pool" : ["math_1"],
+            "from_pool" : ["math_1"],
             "points" : 3
         },
         {
             "type" : "item",
-            "item_pool" : ["math_2"],
+            "from_pool" : ["math_2"],
             "points" : 3
         },
         {
             "type" : "item",
-            "item_pool" : ["math_3"],
+            "from_pool" : ["math_3"],
             "points" : 3
         },
         {
@@ -288,17 +288,17 @@
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_1"],
+            "from_pool" : ["animal_1"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_2"],
+            "from_pool" : ["animal_2"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_3"],
+            "from_pool" : ["animal_3"],
             "points" : 2
         },
         {
@@ -307,11 +307,11 @@
         },
         {
             "type" : "item",
-            "item_pool" : ["author"]
+            "from_pool" : ["author"]
         },
         {
             "type" : "item",
-            "item_pool" : ["haiku"]
+            "from_pool" : ["haiku"]
         },
         {
             "type": "markdown",
@@ -319,12 +319,12 @@
         },
         {
             "type" : "item",
-            "item_pool" : ["cpp_code"],
+            "from_pool" : ["cpp_code"],
             "points" : 5
         },
         {
             "type" : "item",
-            "item_pool" : ["python_code"],
+            "from_pool" : ["python_code"],
             "points" : 5
         }
     ],

@@ -268,8 +268,6 @@ class GradedGradeable extends AbstractModel {
         return $overridden_comment;
     }
 
-    //collect items from a notebook and replace them with the actual
-    //notebook values
     public function populateNotebookItemPool($notebook){
         // foreach ($notebook as $item) {
         //     if (isset($item['type']) && $item['type'] === 'item' ) {
@@ -322,6 +320,7 @@ class GradedGradeable extends AbstractModel {
         return $copy;
     }
 
+
     /**
      * Gets a new 'notebook' which contains information about most recent submissions
      *
@@ -331,63 +330,56 @@ class GradedGradeable extends AbstractModel {
      * blank.
      */
     public function getUpdatedNotebook() {
-
-        // Get notebook
         $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
 
         foreach ($newNotebook as $notebookKey => $notebookVal) {
-            $data = null;
             if (isset($notebookVal['type'])) {
-                if ( $notebookVal['type'] === 'item'){
-                    $item = $this->getItemFromPool($notebookVal['item_pool']);
-
-                    //see if theres a matching item in the entire notebook pool
-                    $notebook_item_pool = $newNotebook['item_pool'];
-                    foreach ($notebook_item_pool as $note_book_item ) {
-                        if ( $note_book_item['item_name'] === $item ){
-                            $data = $note_book_item['notebook'];
-
-                            //for every item in that notebook, try and get its 
-                            //previous submission
-                            foreach ($data as $new_cell) {
-                                $response = $this->getNotebookPreviousSubmission($new_cell);
-                                if ( !($response === false) ){
-                                    $newNotebook[$notebookKey]['recentSubmission'] = $response;
-                                }
-
-                            }
-
-                            break;
+                if ($notebookVal['type'] == "short_answer") {
+                    // If no previous submissions set string to default initial_value
+                    if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
+                        $recentSubmission = $notebookVal['initial_value'] ?? "";
+                    }
+                    else {
+                        // Else there has been a previous submission try to get it
+                        try {
+                            // Try to get the most recent submission
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+                        }
+                        catch (AuthorizationException $e) {
+                            // If the user lacked permission then just set to default instructor provided string
+                            $recentSubmission = $notebookVal['initial_value'];
                         }
                     }
 
+                    // Add field to the array
+                    $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                }
+                elseif ($notebookVal['type'] == "multiple_choice") {
+                    // If no previous submissions do nothing, else there has been, so try and get it
+                    if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
+                        continue;
+                    }
+                    else {
+                        try {
+                            // Try to get the most recent submission
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
 
-                }else{
-                    $data = $notebookVal;
+                            // Add field to the array
+                            $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                        }
+                        catch (AuthorizationException $e) {
+                            // If failed to get the most recent submission then skip
+                            continue;
+                        }
+                    }
                 }
             }
-
-
-            if ( !isset($data) ){
-                continue;
-            }
-
-
-            $response = $this->getNotebookPreviousSubmission($data);
-            if ( !($response === false) ){
-                $newNotebook[$notebookKey]['recentSubmission'] = $response;
-            }
-            
         }
 
         // Operate on notebook to add prev_submission field to inputs
         return $newNotebook;
     }
 
-    private function getItemFromPool($pool){
-        //TODO: figure out which item in the pool to pick out
-        return $pool[0];
-    }
 
     private function getNotebookPreviousSubmission($notebookVal){
         if ($this->getAutoGradedGradeable()->getHighestVersion() == 0){

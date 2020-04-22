@@ -149,19 +149,23 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->notebook
         $actual_input = array();
 
-        $details = FileUtils::readJsonFile  ("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
-        $this->notebook = $details;
-        if (isset($details['item_pool'])){
-            $item_pool = ["item_pool" => []];
-            for ($i=0; $i < count($details['item_pool']); $i++) { 
-                $item_cell = $details['item_pool'][$i];
+        //REMOVE ME BEFORE
+        $foo = FileUtils::readJsonFile  ("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
 
-                $item_pool["item_pool"][] = $item_cell;
+        $details['notebook'] = $foo['notebook'];
+        $details['item_pool'] = $foo['item_pool'];
+
+        if (isset($details['item_pool'])){
+            $this->notebook["item_pool"] = [];
+            for ($i=0; $i < count($details['item_pool']); $i++) { 
+                $this->notebook["item_pool"][] = $details['item_pool'][$i];
             }
-            $this->notebook[] = $item_pool;
+
+            $this->replaceNotebookItemsWithQuestions($details['notebook']);
         }
 
         if (isset($details['notebook'])) {
+            $this->notebook["notebook"] = [];
             // For each item in the notebook array inside the $details collect data and assign to variables in
             // $this->notebook
             for ($i = 0; $i < count($details['notebook']); $i++) {
@@ -206,7 +210,7 @@ class AutogradingConfig extends AbstractModel {
 
                 // Add this cell $this->notebook
                 if ($do_add) {
-                    $this->notebook[] = $notebook_cell;
+                    $this->notebook["notebook"][] = $notebook_cell;
                 }
 
                 // If cell is a type of input add it to the $actual_inputs array
@@ -218,6 +222,7 @@ class AutogradingConfig extends AbstractModel {
                 }
             }
         }
+
 
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
@@ -234,6 +239,7 @@ class AutogradingConfig extends AbstractModel {
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
         }
+
 
         // defaults num of parts to 1 if value is not set
         $num_parts = count($details['part_names'] ?? [1]);
@@ -253,6 +259,52 @@ class AutogradingConfig extends AbstractModel {
                 $this->part_names[$i] = "Part " . $i;
             }
         }
+
+    }
+
+    //collect items from a notebook and replace them with the actual
+    //notebook values
+    public function replaceNotebookItemsWithQuestions($raw_notebook){
+        $new_notebook = [];
+        foreach ($raw_notebook as $notebook_cell) {
+            if ( isset($notebook_cell['type']) && $notebook_cell['type'] === 'item'){
+
+                //see if theres a target item pool and replace this with the actual notebook
+                $tgt_item = $this->getItemFromPool($notebook_cell['from_pool']);
+
+                $item_data = $this->searchForItemPool($tgt_item);
+                if(count($item_data['notebook']) > 0){
+                   // var_dump($item_data['notebook']);
+                    $new_notebook = array_merge($new_notebook,$item_data['notebook']);
+                   // var_dump($new_notebook);
+                    //TODO: figure out where testcases go
+                }
+
+            }else{
+                $new_notebook[] = $notebook_cell;
+            }
+        }
+
+        $this->notebook = $new_notebook;
+    }
+
+    private function getItemFromPool($pool){
+        //TODO: figure out which item in the pool to pick out
+        return $pool[0];
+    }
+
+    private function searchForItemPool($tgt_name){
+        $ret = ["notebook" => [], "testcases" => []];
+        foreach ($this->notebook['item_pool'] as $item) {
+            if ( $item['item_name'] === $tgt_name ){
+                
+                $ret["notebook"] = array_merge($ret["notebook"], $item["notebook"]);
+                $ret["testcases"][] = array_merge($ret["testcases"],$item["testcases"]);
+
+            }
+        }
+
+        return $ret;
     }
 
     private function getMarkdownData($cell) {

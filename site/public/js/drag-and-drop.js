@@ -916,11 +916,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     var short_answer_object    = gatherInputAnswersByType("short_answer");
     var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
     var codebox_object         = gatherInputAnswersByType("codebox");
+
+
     formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
-
+ 
     if (student_page) {
         var pages = [];
         for (var i = 0; i < num_components; i++) {
