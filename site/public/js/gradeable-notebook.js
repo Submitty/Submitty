@@ -153,41 +153,40 @@ $(document).ready(function () {
     });
 
     // Register handler to detect changes inside codeboxes and then enable buttons
-    $("div .codebox").keyup(function() {
-        // Get index of codebox so we can select appropriate buttons to enable
-        var index = this.id.substr(-1);
+    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", codebox => {
+        // Select the <div> that wraps the actual codebox element and contains
+        // the data-initial_value and data-recent_submission attributes.
+        const codeboxWrapper = codebox.getWrapperElement().parentElement;
 
-        var initial_value = this.getAttribute("data-initial_value");
-        var recent_submission = this.getAttribute("data-recent_submission");
+        var initial_value = codeboxWrapper.getAttribute("data-initial_value");
+        var recent_submission = codeboxWrapper.getAttribute("data-recent_submission");
 
-        var codebox = $("#codebox_" + index + " .CodeMirror").get(0).CodeMirror;
         var code = codebox.getValue();
-        var clear_button_id = "#codebox_" + index + "_clear_button";
-        var recent_button_id = "#codebox_" + index + "_recent_button";
+        var clear_button_id = `#${codeboxWrapper.id}_clear_button`;
+        var recent_button_id = `#${codeboxWrapper.id}_recent_button`;
 
         if(code === initial_value)
         {
-          $(clear_button_id).attr("disabled", true);
+            $(clear_button_id).attr("disabled", true);
         }
         else
         {
-          $(clear_button_id).attr("disabled", false);
+            $(clear_button_id).attr("disabled", false);
         }
 
         if(code === recent_submission)
         {
-          $(recent_button_id).attr("disabled", true);
+            $(recent_button_id).attr("disabled", true);
         }
         else
         {
-          $(recent_button_id).attr("disabled", false);
+            $(recent_button_id).attr("disabled", false);
         }
-    });
+    }));
 
-    // FIXME: Lots of horrible stuff here. Not crazy about the relative paths
-    //        thing going on here, and I'm not crazy about writing to 
-    //        LocalStorage on every keypress, either. But it should work...
-    $(".CodeMirror > div > textarea").on('input', saveToLocal);
+    // FIXME: I'm not crazy about writing to LocalStorage on every keypress, 
+    //        but it should work...
+    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", saveToLocal));
 
     // Register click handler for multiple choice buttons
     $(".mc-clear, .mc-recent").click(function() {
@@ -261,7 +260,7 @@ $(document).ready(function () {
     });
 
     // Setup keyup event for short answer boxes
-    $(".sa-box").keyup(function() {
+    $(".sa-box").on("input", function() {
 
         var index_num = this.id.split("_")[2];
 
