@@ -37,6 +37,16 @@
                     last re-autograde finished: {{ grading_finished|date('m/d/Y h:i:s A T') }}<br />
                 {% else %}
                     queue wait time: {{ wait_time }} seconds<br />
+                    {% if access_duration > 3600 %}
+                        gradeable access duration: {{ (access_duration / 3600) | number_format(0) }} hours
+                                                   {{ ((access_duration / 60) | number_format(0)) % 60 }} minutes
+                                                   {{ access_duration % 60 }} seconds<br />
+                    {% elseif access_duration > 60 %}
+                        gradeable access duration: {{ (access_duration / 60) | number_format(0) }} minutes
+                                                   {{ access_duration % 60 }} seconds<br />
+                    {% elseif access_duration > 0 %}
+                        gradeable access duration: {{ access_duration % 60 }} seconds<br />
+                    {% endif %}
                 {% endif %}
                 {% if is_vcs %}
                     git commit hash:

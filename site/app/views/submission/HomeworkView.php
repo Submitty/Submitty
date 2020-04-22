@@ -893,6 +893,7 @@ class HomeworkView extends AbstractView {
                     'grade_time' => $history->getGradeTime(),
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
+                    'access_duration' => $history->getAccessDuration(),
                     'revision' => $history->getVcsRevision(),
                 ]);
             }
