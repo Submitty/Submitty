@@ -65,6 +65,53 @@ function setCodeBox(codebox_id, state)
     }
 }
 
+/**
+ * Saves the current state of the notebook gradeable to localstorage.
+ */
+function saveToLocal() {
+    localStorage.setItem("autosave", JSON.stringify({
+        multiple_choice: gatherInputAnswersByType("multiple_choice"),
+        short_answer: gatherInputAnswersByType("short_answer"),
+        codebox: gatherInputAnswersByType("codebox")
+    }));
+}
+
+/**
+ * Restores the state of the notebook gradeable from localstorage. If no
+ * autosave data exists yet, then this function does nothing.
+ */
+function restoreFromLocal() {
+    const state = JSON.parse(localStorage.getItem("autosave"));
+    
+    if (state === null) {
+        return;
+    }
+
+    // First, we restore multiple choice answers
+    for (const id in state.multiple_choice) {
+        const values = state.multiple_choice[id];
+        const index = /multiple_choice_([0-9])+/.exec(id)[1];
+        $(`#mc_field_${index} :input`).each((_index, element) => {
+            if (values.includes(element.getAttribute("value"))) {
+                $(element).prop("checked", true);
+            } else {
+                $(element).prop("checked", false);
+            }
+        });
+    }
+    // Next, we restore short-answer boxes
+    for (const id in state.short_answer) {
+        const answer = state.short_answer[id][0];
+        $(`#${id}`).prop("value", answer);
+    }
+    // Finally, we restore codeboxes
+    for (const id in state.codebox) {
+        const answer = state.codebox[id][0];
+        const codebox = $(`#${id} .CodeMirror`).get(0).CodeMirror;
+        codebox.setValue(answer);
+    }
+}
+
 $(document).ready(function () {
 
     // If any button inside the notebook has been clicked then enable the submission button
@@ -77,6 +124,8 @@ $(document).ready(function () {
         $("#submit").attr("disabled", false);
 
     });
+
+    $("#submit").click(saveToLocal);
 
     // Register click handler for codebox clear and recent buttons
     $(".codebox-clear-reset").click(function() {
@@ -99,6 +148,8 @@ $(document).ready(function () {
             $(button_selector + "clear_button").attr("disabled", false);
             $(button_selector + "recent_button").attr("disabled", true);
         }
+
+        saveToLocal();
     });
 
     // Register handler to detect changes inside codeboxes and then enable buttons
@@ -133,6 +184,11 @@ $(document).ready(function () {
         }
     });
 
+    // FIXME: Lots of horrible stuff here. Not crazy about the relative paths
+    //        thing going on here, and I'm not crazy about writing to 
+    //        LocalStorage on every keypress, either. But it should work...
+    $(".CodeMirror > div > textarea").on('input', saveToLocal);
+
     // Register click handler for multiple choice buttons
     $(".mc-clear, .mc-recent").click(function() {
 
@@ -154,6 +210,8 @@ $(document).ready(function () {
             $("#mc_" + index + "_clear_button").attr("disabled", false);
             $("#mc_" + index + "_recent_button").attr("disabled", true);
         }
+
+        saveToLocal();
     });
 
     // Register change handler to enable buttons when multiple choice inputs change
@@ -165,6 +223,8 @@ $(document).ready(function () {
         // Enable recent button
         $("#mc_" + index + "_clear_button").attr("disabled", false);
         $("#mc_" + index + "_recent_button").attr("disabled", false);
+
+        saveToLocal();
     });
 
     // Setup click events for short answer buttons
@@ -196,6 +256,8 @@ $(document).ready(function () {
 
         // Set the data into the textbox
         $(field_id).val(data_to_set);
+
+        saveToLocal();
     });
 
     // Setup keyup event for short answer boxes
@@ -229,4 +291,5 @@ $(document).ready(function () {
         }
     });
 
+    $(".sa-box").on('input', saveToLocal);
 });

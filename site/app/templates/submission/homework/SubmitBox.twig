@@ -395,6 +395,13 @@
 
             {% endfor %}
 
+            {#
+                TODO: This is a hideous hack that needs to be better integrated with
+                      the rest of the general "workflow".
+            #}
+            <script>
+                restoreFromLocal();
+            </script>
         </div>
 
         {# File upload boxes #}
