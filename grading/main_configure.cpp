@@ -176,6 +176,7 @@ int main(int argc, char *argv[]) {
     ******************************************/
 
   nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
+  nlohmann::json::iterator itempool_definitions = config_json.find("item_pool");
   if (in_notebook_cells != config_json.end()){
 
     // Setup "notebook" items inside the 'j' json item that will be passed forward
@@ -305,6 +306,43 @@ int main(int argc, char *argv[]) {
           out_notebook_cell["choices"] = choices;
           out_notebook_cell["allow_multiple"] = allow_multiple;
           out_notebook_cell["randomize_order"] = randomize_order;
+      }
+      else if(type == "item"){
+        std::string item_label = in_notebook_cell.value("item_label", "");
+        if(itempool_definitions == config_json.end()){
+          std::cout << "ERROR: Found an \"item\" cell but no global item_pool was defined!" << std::endl;
+          throw -1;
+        }
+        //Search through the global item_pool to find if the items in this itempool exist
+        if(in_notebook_cell.find("from_pool") == in_notebook_cell.end()){
+          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label) << " does not have a from_pool" << std::endl;
+          throw -1;
+        }
+        nlohmann::json in_notebook_cell_from_pool = in_notebook_cell.value("from_pool", nlohmann::json::array());
+        //std::cout << "Checking for " << in_notebook_cell_item_pool.size() << " items among a global set of " << itempool_definitions->size() << " items" << std::endl;
+
+        if(in_notebook_cell_from_pool.size() == 0){
+          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label) << " has an empty from_pool, requires at least one item!" << std::endl;
+          throw -1;
+        }
+
+        for(int j=0; j<in_notebook_cell_from_pool.size(); j++){
+          bool found_global_itempool_item = false;
+          for(int k=0; k<itempool_definitions->size(); k++) {
+            if ((*itempool_definitions)[k]["item_name"] == in_notebook_cell_from_pool[j]) {
+              found_global_itempool_item = true;
+              break;
+            }
+          }
+          if(!found_global_itempool_item){
+            std::cout << "ERROR: item with label \"" << (item_label.empty() ? "[no label]" : item_label);
+            std::cout << "\" requested undefined item: " << in_notebook_cell_from_pool[j] << std::endl;
+            throw -1;
+          }
+          /*else{
+            std::cout << "Found global itempool item " << in_notebook_cell_from_pool[j] << " for item with label: " << (item_label.empty() ? "[no label]" : item_label) << std::endl;
+          }*/
+        }
       }
 
       // Else unknown type was passed in throw exception
