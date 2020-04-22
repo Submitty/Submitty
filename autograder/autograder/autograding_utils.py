@@ -19,7 +19,7 @@ import shutil
 import glob
 
 def just_write_grade_history(json_file,assignment_deadline,submission_time,seconds_late,
-                             access_duration,queue_time,batch_regrade,grading_began,
+                             first_access_time,access_duration,queue_time,batch_regrade,grading_began,
                              wait_time,grading_finished,grade_time,autograde_total,
                              revision):
 
@@ -44,6 +44,7 @@ def just_write_grade_history(json_file,assignment_deadline,submission_time,secon
         blob["days_late_before_extensions"] = days_late
     blob["queue_time"] = queue_time
     blob["batch_regrade"] = True if batch_regrade == "BATCH" else False
+    blob["first_access_time"] = first_access_time
     blob["access_duration"] = access_duration
     blob["grading_began"] = grading_began
     blob["wait_time"] = wait_time
@@ -426,6 +427,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
                                 gradeable_deadline_longstring,
                                 submission_longstring,
                                 seconds_late,
+                                first_access_string,
                                 access_duration,
                                 queue_obj["queue_time"],
                                 "BATCH" if is_batch_job else "INTERACTIVE",

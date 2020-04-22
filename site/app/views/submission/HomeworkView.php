@@ -879,6 +879,10 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
 
+            $my_first_access_time = "";
+            if ($history->getFirstAccessTime() !== null) {
+              $my_first_access_time = DateUtils::dateTimeToString($history->getFirstAccessTime());
+            }
             $param = array_merge($param, [
                 'submission_time' => DateUtils::dateTimeToString($version_instance->getSubmissionTime()),
                 'days_late' => $version_instance->getDaysLate(),
@@ -891,6 +895,7 @@ class HomeworkView extends AbstractView {
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
+                    'first_access_time' => $my_first_access_time,
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
                     'access_duration' => $history->getAccessDuration(),

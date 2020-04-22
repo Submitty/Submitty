@@ -40,6 +40,8 @@ class AutoGradedVersionHistory extends AbstractModel {
     protected $vcs_revision = '';
     /** @prop @var \DateTime The time of the most recent submission */
     protected $submission_time = null;
+    /** @prop @var \DateTime The time of the most recent submission */
+    protected $first_access_time = null;
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -49,6 +51,9 @@ class AutoGradedVersionHistory extends AbstractModel {
         $this->grading_began = DateUtils::parseDateTime($details['grading_began'], $timezone);
         $this->grading_finished = DateUtils::parseDateTime($details['grading_finished'], $timezone);
         $this->batch_regrade = $details['batch_regrade'] === true;
+        $this->first_access_time = null;
+        if (array_key_exists('first_access_time',$details))
+          $this->first_access_time = DateUtils::parseDateTime($details['first_access_time'], $timezone);
         $this->access_duration = $details['access_duration'] ?? '-1';
         $this->wait_time = $details['wait_time'];
         $this->grade_time = $details['grade_time'];
