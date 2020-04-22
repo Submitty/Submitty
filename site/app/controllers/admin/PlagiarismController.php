@@ -783,6 +783,5 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->getOutput()->renderString("NO_REFRESH");
-        return;
     }
 }

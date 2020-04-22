@@ -471,14 +471,14 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
-        
+
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
         $section_key = $order->getSectionKey();
         $graders = $order->getSectionGraders();
         $sections = $order->getSectionNames();
-                
+
         $student_ids = [];
         foreach ($section_submitters as $section) {
             $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
@@ -728,7 +728,6 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $this->core->redirect($return_url);
-        return;
     }
 
     /**
@@ -1107,7 +1106,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-        
+
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
@@ -1154,7 +1153,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-        
+
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
 
         // Get the component
@@ -1201,9 +1200,9 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
-        
+
         $section = null;
-        
+
         if ($gradeable->isGradeByRegistration()) {
             $section = $this->core->getQueries()->getSubmitterById($submitter_id)->getRegistrationSection();
         }
@@ -1689,7 +1688,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-        
+
         $peer = $_POST['peer'] === 'true';
 
         // checks if user has permission
