@@ -199,11 +199,7 @@
                     onOpen: handleTimeZones('{{ core.getConfig().getTimezone().getName() }}'),
                     onClose: function() {
                                             setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
-<<<<<<< HEAD
                                             changePermission('{{ path }}','1');
-=======
-                                            determineRelease('date_to_release_{{ id }}');
->>>>>>> cf2a292552d6728394f1cc714f76632223299799
                                          }
                     });
                 </script>
