@@ -82,15 +82,18 @@ Here's a short list of instructions:\n  \
 
         {
             "title":"Check Time Limit",
-            "points": 0, 
-            "penalty": -30,
-            "validation":
             "copy_access_files" : true,
+            "points": -30,  // maximum penalty -- must match below
+            "validation":
             [
                 {
+                    "actual_file" : "user_assignment_access.json",
                     "method" : "custom_validator",
                     "command" : "python3 timelimit.py --minutes 10 --penalty_per_minute -1",
-                    "actual_file" : "math_3.txt" //[ "user_assignment_access.json", "queue_file.json" ]
+                    "allowed_minutes" : 10,
+                    "penalty_per_minute" : -1,
+                    "max_penalty" : -30, // must match above
+                    "show_actual":"never"
                 }
             ]
         },

@@ -128,6 +128,12 @@ class SecureExecutionEnvironment():
     autograding_utils.pattern_copy("submission_to_runner",self.patterns["submission_to_runner"], 
                             submission_path, directory, self.tmp_logs)
 
+    # copy these three helper files for computing access duration
+    shutil.copy(self.tmp_submission+"/queue_file.json",directory)
+    shutil.copy(self.tmp_submission+"/user_assignment_settings.json",directory)
+    if os.path.exists(self.tmp_submission+"/user_assignment_access.json"):
+      shutil.copy(self.tmp_submission+"/user_assignment_access.json",directory)
+
     # Copy in checkout code.
     if self.is_vcs:
         autograding_utils.pattern_copy("checkout_to_runner",self.patterns["submission_to_runner"], 
