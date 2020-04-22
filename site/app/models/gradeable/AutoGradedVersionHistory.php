@@ -52,7 +52,7 @@ class AutoGradedVersionHistory extends AbstractModel {
         $this->grading_finished = DateUtils::parseDateTime($details['grading_finished'], $timezone);
         $this->batch_regrade = $details['batch_regrade'] === true;
         $this->first_access_time = null;
-        if (array_key_exists('first_access_time',$details))
+        if (array_key_exists('first_access_time', $details))
           $this->first_access_time = DateUtils::parseDateTime($details['first_access_time'], $timezone);
         $this->access_duration = $details['access_duration'] ?? '-1';
         $this->wait_time = $details['wait_time'];
