@@ -1,0 +1,20 @@
+{% if viewer.getQueueMessage() | length > 0 %}
+  <div class="content gradeable_message">
+    <p>{{viewer.getQueueMessage() | markdown}}</p>
+  </div>
+{% endif %}
+<div class="content">
+  <h1>
+    Office Hours Queue
+  </h1>
+  {% if not viewer.isGrader() %}
+    <p>
+      For more information:
+      <a target="_blank" href="https://submitty.org/student/queue">
+        Getting Help through the Office Hours Queue
+        <i style="font-style:normal;" class="fa-question-circle"></i>
+      </a>
+    </p>
+    {% include 'officeHoursQueue/QueueStatus.twig' %}
+    <br>
+  {% endif %}

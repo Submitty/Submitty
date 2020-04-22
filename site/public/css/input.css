@@ -27,6 +27,10 @@ input[type="color"] {
     width: auto;
 }
 
+[data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="password"]{
+    color:white;
+}
+
 input.readonly {
     background-color: #f2f2f2;
     cursor: not-allowed;
@@ -65,7 +69,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: #FFF;
+    color: var(--text-white);
     font-size: 18px;
     font-weight: 900
 }

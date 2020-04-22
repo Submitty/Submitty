@@ -6,6 +6,9 @@
 {% if not has_submission %}
     <span class="yellow-message">No Submission</span>
 {% endif %}
+{% if not is_inquiry_open %}
+    <span class="yellow-message">It is currently after grade inquiry deadline. No new grade inquiries can be made.</span>
+{% endif %}
 {% if can_inquiry and has_submission %}
     {% if grade_inquiry_per_component_allowed %}
         {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
@@ -49,6 +52,9 @@
                 {% elseif component.id == 0 %}
                     <p class="yellow-message no-post-warning" >No posts!</p>
                 {% endif %}
+                {# show form if it is before grade inquiry deadline or this is an already opened inquiry #}
+                {% if is_inquiry_open or grade_inquiries[component.id] is defined %}
+                {# show form if grade inquiry per component and (it is not the all tab or there is an unresolved inquiry that is not a component) #}
                 {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
                     <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
@@ -66,43 +72,48 @@
                         <div style="margin-right: auto">
                         {{ self.markdown_buttons() }}
                         </div>
-                            {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status is null %}
+                            {% if grade_inquiries[component.id] is not defined%}
                                 {# No request yet #}
-                                <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Submit Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == -1 and is_grading %}
                                 {# Grader view,request is open #}
-                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Respond and Resolve Grade Inquiry
                                 </button>
-                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Post Additional Information
                                 </button>
-                                <button type="button" id="grading-close gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button type="button" id="grading-close gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Close Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == -1 %}
                                 {# Request pending, we can submit new posts #}
-                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Post Additional Information
                                 </button>
-                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Close Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == 0 and is_grading %}
                                 {# Grader view, Request closed #}
-                                <button type="button" id="gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                {# Letting Instructor reply(comment) to the inquiry without reopening the grade_inquiry #}
+                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Add Comment
+                                </button>
+                                <button type="button" id="gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Reopen Grade Inquiry
                                 </button>
                             {% elseif grade_inquiries[component.id].status == 0 %}
                                 {# Request closed #}
-                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default key_to_click" tabindex="0" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Reopen Grade Inquiry
                                 </button>
                             {% endif %}
                         </div>
                     </form>
+                {% endif %}
                 {% endif %}
             </div>
         {% endfor %}
@@ -110,10 +121,36 @@
 {% endif %}
 
 {% macro markdown_buttons() %}
-    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, '#reply-text-area')" style="margin-right:10px;" class="btn btn-default">
-        Link <i class="fas fa-link fa-1x"></i>
+    <button type="button"
+            title="Insert a link"
+            onclick="addMarkdownCode(1, '#reply-text-area')"
+            style="margin-right:10px;"
+            class="btn btn-default key_to_click" tabindex="0"> Link
+            <i
+                class="fas fa-link fa-1x">
+            </i>
     </button>
-    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, '#reply-text-area')" class="btn btn-default">
-        Code <i class="fas fa-code fa-1x"></i>
+    <button title="Insert a code segment"
+            type="button"
+            onclick="addMarkdownCode(0, '#reply-text-area')"
+            class="btn btn-default key_to_click" tabindex="0"> Code
+            <i
+                class="fas fa-code fa-1x">
+            </i>
+    </button>
+    <button title="Insert bold text"
+            type="button"
+            onclick="addMarkdownCode(2, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))"
+            class="btn btn-default key_to_click" tabindex="0"> Bold
+            <i
+                class="fas fa-bold fa-1x">
+            </i>
+    </button>
+    <button title="Insert italic text"
+            type="button"
+            onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))"class="btn btn-default key_to_click" tabindex="0"> Italics
+            <i
+                class="fas fa-italic fa-1x">
+            </i>
     </button>
 {% endmacro %}

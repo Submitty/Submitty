@@ -43,7 +43,7 @@
 {% else %}
     {% if show_verify_grader %}
         <span class="verify-container col-no-gutters">
-            <input type="button" class="btn btn-default" onclick="onVerifyComponent(this); event.stopPropagation()" value="Verify Grader"/>
+            <input type="button" class="btn btn-default key_to_click" tabindex="0" onclick="onVerifyComponent(this); event.stopPropagation()" value="Verify Grader"/>
         </span>
     {% endif %}
 {% endif %}

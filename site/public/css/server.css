@@ -5,6 +5,10 @@
     --viewed_content: #e8f0f7;
 }
 
+[data-theme="dark"] {
+    --viewed_content: #313335;
+}
+
 a, a:hover, a:link, a:visited {
     cursor: pointer;
 }
@@ -42,18 +46,18 @@ a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
 
-    color: var(--default-white);
+    color: var(--btn-text-white);
 
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: var(--default-white);
+    color: var(--btn-text-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
-    color: #fff;
+    color: var(--btn-text-white);
 }
 
 a.btn-default,
@@ -74,7 +78,7 @@ a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: var(--text-black);
+    color: var(--btn-text-black);
 }
 
 a.btn, a.icon {
@@ -105,7 +109,7 @@ input[type="color"] {
     padding: 4px 6px;
     font-size: 14px;
     line-height: 20px;
-    color: #555555;
+    color: var(--standard-dark-gray);
     vertical-align: middle;
     border: 1px solid var(--standard-light-gray);
     -webkit-border-radius: 4px;
@@ -117,6 +121,7 @@ input[type="color"] {
 input.readonly {
     background-color: var(--standard-pale-gray);
     cursor: not-allowed;
+    color: var(--btn-text-black);
 }
 
 select {
@@ -152,7 +157,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: var(--default-white);
+    color: var(--btn-default-white);
     font-size: 18px;
     font-weight: 900
 }
@@ -180,6 +185,17 @@ select.disabled,
 textarea.disabled,
 input.disabled {
     background-color: var(--standard-light-gray);
+}
+
+textarea, input[type="text"], input[type="number"], input[type="date"], input[type="checkbox"], select{
+  background-color: var(--standard-input-background);
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
 }
 
 /****************************
@@ -224,7 +240,7 @@ table tr.table-header {
     background: var(--default-white);
 }
 
-.table>thead>tr {
+.table>thead>tr, .table>tfoot>tr {
     background: var(--standard-hover-light-gray);
 }
 
@@ -296,7 +312,7 @@ td>a.active-sort {
     background-color: var(--default-white);
     border-radius: 3px;
     overflow: auto;
-    margin: 10px;;
+    margin: 10px;
     padding: 30px;
     background-color: #fff;
     flex-grow: 1;
@@ -308,7 +324,11 @@ td>a.active-sort {
 
 .content.gradeable_message {
     background-color: var(--actionable-blue);
-    color: var(--default-white);
+    color: var(--text-white);
+}
+
+.content.gradeable_message a{
+    color: var(--text-white);
 }
 
 .content.gradeable_message p:not(:last-child){
@@ -534,6 +554,20 @@ td>a.active-sort {
     padding: 5px 5px 10px;
 }
 
+.overall-comment-box {
+  margin-top:10px;
+}
+
+.overall-comment-author {
+  font-weight: bold;
+}
+
+.submission-page-total-header {
+  padding: 6px;
+  color: var(--text-black);
+  background-color: var(--standard-light-gray);
+}
+
 .viewed_post{
     background-color: var(--default-white);
 }
@@ -566,18 +600,27 @@ td>a.active-sort {
 
 .new_thread{
     background-color: var(--viewed_content);
-}
-.btn-default.post_button_color{
-    background-color: inherit;
+    color: var(--text-black)
 }
 
 .box-title > h4 {
     margin-left: 20px;
 }
 
+.box-title-total > h4 {
+    margin-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+
+}
+
 .grade-results {
     display: flex;
     flex-direction: row;
+}
+
+.grading-results-area {
+  margin-bottom: 25px;
 }
 
 .box > h4 {
@@ -641,6 +684,7 @@ td>a.active-sort {
 
 .green-background {
     background-color: var(--standard-deep-dark-green);
+    color: var(--btn-default-white);
 }
 
 .yellow-background {
@@ -797,14 +841,14 @@ tbody.collapse.in {
   clear: both;
   font-weight: normal;
   line-height: 1.42857143;
-  color: var(--standard-deep-dark-gray);
+  color: var(--text-black);
   white-space: nowrap;
 }
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
   color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: var(--standard-pale-blue-gray);
+  background-color: var(--btn-standard-pale-blue-gray);
 }
 
 .dropdown-menu > .disabled > a,
@@ -1042,6 +1086,18 @@ div.full_height {
     margin-left: 5px;
 }
 
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] #logo-submitty-light,
+#logo-submitty {
+  display: block!important;
+}
+
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] #logo-submitty,
+#logo-submitty-light {
+  display: none!important;
+}
+
 .td-open {
     width: 10%;
 }
@@ -1061,7 +1117,7 @@ div.full_height {
     margin-top: 5px;
 }
 
-.cat-buttons:hover {
+.cat-buttons:hover, .cat-buttons:focus{
     opacity: 0.8;
     filter: alpha(opacity=80);
 }
@@ -1180,6 +1236,12 @@ div.full_height {
 
 .popup-form .form-button-container {
     text-align: right;
+    padding: 0.5rem;
+}
+
+.close-button {
+    margin-right: 5px;
+    border: 1px solid black !important;
 }
 
 .popup-form .form-button-container .btn {
@@ -1396,7 +1458,7 @@ end of styles used in the admin gradeable page
 
 /* color for student/peer grading */
 .grader-4 {
-    color: var(--standard-vibrant-purple) /* purple */
+    color: var(--standard-plum-purple) /* purple */
 }
 
 /* color for a limited access grader */
@@ -1470,7 +1532,7 @@ end of styles used in the admin gradeable page
 .required::-moz-placeholder { var(--error-alert-dark-red); }
 .required:-ms-input-placeholder { var(--error-alert-dark-red); }
 
-#required_type{
+.required_type{
     color: var(--error-alert-dark-red);
     display: inline;
 }
@@ -1507,6 +1569,7 @@ end of styles used in the admin gradeable page
     height: 240px;
     display: flex;
     flex-direction: column;
+    color: var(--btn-text-black);
 }
 .wrapper-example .wrapper-center {
     display: flex;
@@ -1536,15 +1599,33 @@ end of styles used in the admin gradeable page
 }
 .wrapper-body {
     background-color: var(--default-white);
+    color: var(--text-black);
 }
 .wrapper-right {
     background-color: var(--standard-light-green);
+    color: var(--text-black);
 }
 .wrapper-bottom {
     background-color: var(--standard-light-blue);
 }
+.wrapper-css {
+  background-color: var(--default-white);
+  color: var(--text-black);
+}
+#wrapper_upload {
+  color: var(--text-black);
+}
+
+.wrapper-upload {
+  color: var(--btn-text-black);
+}
 
 .wrapper-upload td {
+    padding: 4px;
+    border: 1px solid var(--text-black);
+}
+
+.wrapper_layout_header > th {
     padding: 4px;
     border: 1px solid var(--text-black);
 }
@@ -1638,7 +1719,7 @@ end of styles used in the admin gradeable page
     /* TODO on mobile, different header height */
     margin: 90px 10px 10px; /* 80px for header */
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--default-white);
     text-align: center;
     width: 108px;
     border: 2px solid #2627ee;
@@ -1663,8 +1744,8 @@ end of styles used in the admin gradeable page
 }
 
 .black-btn, .black-btn > i {
-    color: #000 !important;
-    border-color: #000 !important;
+    color: var(--text-black) !important;
+    border-color: var(--text-black) !important;
     text-decoration: none;
 }
 
@@ -1726,8 +1807,13 @@ end of styles used in the admin gradeable page
     display: block !important;
 }
 
+#popup_to_show_matches_id {
+  overflow:hidden;
+  border:2px solid grey;
+}
+
 .notification-badge {
-    background-color: red;
+    background-color: var(--danger-red);
     padding: 1px 5px;
     color: white;
     font-weight: bold;

@@ -7,7 +7,7 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\CourseMaterial;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,17 +20,14 @@ class MiscController extends AbstractController {
      * second
      *
      * @Route("/server_time")
-     * @return Response
      */
-    public function getServerTime() {
-        return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core))
-        );
+    public function getServerTime(): JsonResponse {
+        return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
     }
 
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
-     * @return Response
+     * @return MultiResponse
      */
     public function encodePDF($gradeable_id) {
         $id = $_POST['user_id'] ?? null;
@@ -40,21 +37,37 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $file_path = realpath($_POST['file_path']);
+        $directory = 'invalid';
+        if (strpos($file_path, 'submissions') !== false) {
+            $directory = 'submissions';
+        }
+        elseif (strpos($file_path, 'checkout') !== false) {
+            $directory = 'checkout';
+        }
+        $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id, $active_version);
 
+        if ($gradeable->isGradeByRegistration()) {
+            $section = $submitter->getRegistrationSection();
+        }
+        else {
+            $section = $submitter->getRotatingSection();
+        }
 
-        $dir = "submissions";
-        $path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $dir, $gradeable_id, $id, $active_version, $file_name);
+        if ($file_path !== $_POST['file_path'] || !Utils::startsWith($file_path, $check_path)) {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse("Invalid file path")
+            );
+        }
 
-        //See if we are allowed to access this path
-        $path = $this->core->getAccess()->resolveDirPath($dir, $path);
-        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-            return Response::JsonOnlyResponse(
+        if (!$this->core->getAccess()->canI("path.read", ["dir" => $directory, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You do not have access to this file")
             );
         }
 
-        $pdf64 = base64_encode(file_get_contents($path));
-        return Response::JsonOnlyResponse(
+        $pdf64 = base64_encode(file_get_contents($file_path));
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($pdf64)
         );
     }
@@ -94,7 +107,6 @@ class MiscController extends AbstractController {
                     $this->core->getOutput()->showError("You may not access this file until it is released.");
                     return false;
                 }
-
                 if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
                     $this->core->getOutput()->showError("Your section may not access this file.");
                     return false;
@@ -177,6 +189,10 @@ class MiscController extends AbstractController {
             // If the user attempting to access the file is not at least a grader then ensure the file has been released
             if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
                 $this->core->getOutput()->showError("You may not access this file until it is released.");
+                return false;
+            }
+            elseif (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
+                $this->core->getOutput()->showError("You do not have access to this file.");
                 return false;
             }
         }

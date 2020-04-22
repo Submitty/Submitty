@@ -28,6 +28,7 @@ class Output {
 
     private $output_buffer = "";
     private $breadcrumbs = array();
+    private $page_name = "";
     private $loaded_views = array();
 
     /** @var Set */
@@ -37,6 +38,7 @@ class Output {
 
     private $use_header = true;
     private $use_footer = true;
+    private $use_mobile_viewport = false;
 
     private $start_time;
 
@@ -111,15 +113,25 @@ HTML;
             throw new OutputException('Invalid path to image file');
         }, ['is_safe' => ['html']]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("plurality_picker", function ($num, $single, $plural) {
+            if ($num == 1) {
+                return $single;
+            }
+            return $plural;
+        }, ["is_safe" => ["html"]]));
+
         if ($full_load) {
             $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
                 ->setTimezone($this->core->getConfig()->getTimezone());
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
-                    $namespace = 'site_uploads'
+                    'site_uploads'
                 );
             }
+            $this->twig->addFunction(new \Twig\TwigFunction("feature_flag_enabled", function (string $flag): bool {
+                return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
+            }));
         }
         $engine = new ParsedownEngine();
         $engine->setSafeMode(true);
@@ -518,8 +530,16 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function addBreadcrumb($string, $url = null, $external_link = false) {
-        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
+    public function enableMobileViewport(): void {
+        $this->use_mobile_viewport = true;
+    }
+
+    public function useMobileViewport(): bool {
+        return $this->use_mobile_viewport;
+    }
+
+    public function addBreadcrumb($string, $url = null, $external_link = false, $use_as_heading = false) {
+        $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link, $use_as_heading);
     }
 
     public function addRoomTemplatesTwigPath() {
@@ -531,6 +551,17 @@ HTML;
      */
     public function getBreadcrumbs() {
         return $this->breadcrumbs;
+    }
+
+    public function setPageName($page_name) {
+        $this->page_name = $page_name;
+    }
+
+    public function getPageName() {
+        if (!empty($this->page_name)) {
+            return $this->page_name;
+        }
+        return end($this->breadcrumbs)->getTitle();
     }
 
     /**

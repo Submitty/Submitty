@@ -39,9 +39,6 @@ from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
-# TODO: Remove this and purely use shutil once we move totally to Python 3
-from zipfile import ZipFile
-
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join
 import yaml
 
@@ -166,12 +163,29 @@ def main():
                               user_preferred_lastname=user.preferred_lastname,
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
-    submitty_conn.close()
 
+    # INSERT term into terms table, based on today's date.
     today = datetime.today()
-    semester = 'Fall'
+    year = str(today.year)
     if today.month < 7:
-        semester = 'Spring'
+        term_id    = "s" + year[-2:]
+        term_name  = "Spring " + year
+        term_start = "01/02/" + year
+        term_end   = "06/30/" + year
+    else:
+        term_id    = "f" + year[-2:]
+        term_name  = "Fall " + year
+        term_start = "07/01/" + year
+        term_end   = "12/23/" + year
+
+    terms_table = Table("terms", submitty_metadata, autoload=True)
+    submitty_conn.execute(terms_table.insert(),
+                          term_id    = term_id,
+                          name       = term_name,
+                          start_date = term_start,
+                          end_date   = term_end)
+
+    submitty_conn.close()
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
@@ -201,6 +215,8 @@ def main():
             students[key].courses[course.code] = {"registration_section": None, "rotating_section": None}
             course.users.append(students[key])
             key += 1
+
+
 
     for course in sorted(courses.keys()):
         courses[course].instructor = users[courses[course].instructor]
@@ -486,7 +502,7 @@ def create_gradeable_submission(src, dst):
     zip file (stored in /tmp) and store the path to this newly created zip as our new source.
 
     At this point, (for all uploads), we check if our source is a zip (by just checking file extension is
-    a .zip), then we will extract the contents of the source (using ZipFile) to the destination, else we
+    a .zip), then we will extract the contents of the source (using Shutil) to the destination, else we
     just do a simple copy operation of the source file to the destination location.
 
     At this point, if we created a zip file (as part of that first step), we remove it from the /tmp directory.
@@ -503,8 +519,7 @@ def create_gradeable_submission(src, dst):
         src = zip_dst
 
     if src[-3:] == "zip":
-        with ZipFile(src, 'r') as zip_file:
-            zip_file.extractall(dst)
+        shutil.unpack_archive(src, dst)
     else:
         shutil.copy(src, dst)
 
@@ -794,6 +809,7 @@ class Course(object):
         gradeable_data = Table("gradeable_data", self.metadata, autoload=True)
         gradeable_component_data = Table("gradeable_component_data", self.metadata, autoload=True)
         gradeable_component_mark_data = Table('gradeable_component_mark_data', self.metadata, autoload=True)
+        gradeable_data_overall_comment = Table('gradeable_data_overall_comment', self.metadata, autoload=True)
         electronic_gradeable_data = Table("electronic_gradeable_data", self.metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
         for gradeable in self.gradeables:
@@ -947,11 +963,16 @@ class Course(object):
                         if gradeable.grade_released_date < NOW or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
                             status = 1 if gradeable.type != 0 or submitted else 0
                             print("Inserting {} for {}...".format(gradeable.id, user.id))
-                            values = {'g_id': gradeable.id, 'gd_overall_comment': 'lorem ipsum lodar'}
+                            # gd_overall_comment no longer does anything, and will be removed in a future update.
+                            values = {'g_id': gradeable.id, 'gd_overall_comment' : ''}
+                            overall_comment_values = {'g_id' : gradeable.id,  'goc_overall_comment': 'lorem ipsum lodar', 'goc_grader_id' : self.instructor.id}
+
                             if gradeable.team_assignment is True:
                                 values['gd_team_id'] = team_id
+                                overall_comment_values['goc_team_id'] = team_id
                             else:
                                 values['gd_user_id'] = user.id
+                                overall_comment_values['goc_user_id'] = user.id
                             if gradeable.grade_released_date < NOW and random.random() < 0.5:
                                 values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
                             ins = gradeable_data.insert().values(**values)
@@ -959,6 +980,9 @@ class Course(object):
                             gd_id = res.inserted_primary_key[0]
                             if gradeable.type !=0 or gradeable.use_ta_grading:
                                 skip_grading = random.random()
+                                if skip_grading > 0.3 and random.random() > 0.01:
+                                    ins = gradeable_data_overall_comment.insert().values(**overall_comment_values)
+                                    res = self.conn.execute(ins)
                                 for component in gradeable.components:
                                     if random.random() < 0.01 and skip_grading < 0.3:
                                         #This is used to simulate unfinished grading.
@@ -987,7 +1011,7 @@ class Course(object):
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and (gradeable.grade_released_date < NOW or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
-                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment="")
+                        res = self.conn.execute(gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id, gd_overall_comment='')
                         gd_id = res.inserted_primary_key[0]
                         skip_grading = random.random()
                         for component in gradeable.components:
@@ -1015,8 +1039,7 @@ class Course(object):
             student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
             zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
             with TemporaryDirectory() as tmpdir:
-                with ZipFile(zip_path) as open_file:
-                    open_file.extractall(tmpdir)
+                shutil.unpack_archive(zip_path, tmpdir)
                 inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))

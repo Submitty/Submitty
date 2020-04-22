@@ -116,10 +116,9 @@ function prepGradedComponent(component, graded_component) {
  */
 
 function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
-    if (graded_gradeable.graded_components === undefined) {
+    if (graded_gradeable.graded_components === undefined || graded_gradeable.graded_components === null) {
         graded_gradeable.graded_components = {};
     }
-
     // Calculate the total scores
     gradeable.components.forEach(function (component) {
         graded_gradeable.graded_components[component.id]
@@ -200,7 +199,6 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
-
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
             'component': component,
@@ -213,6 +211,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             'can_verify_graders': canVerifyGraders,
             'grader_id': grader_id,
             'component_version_conflict': componentVersionConflict,
+            'peer_component' : component.peer,
         }));
     });
 }
@@ -276,7 +275,8 @@ function renderEditComponent(component, precision, showMarkList) {
             'precision': precision,
             'show_mark_list': showMarkList,
             'edit_marks_enabled': true,
-            'decimal_precision': DECIMAL_PRECISION
+            'decimal_precision': DECIMAL_PRECISION,
+            'peer_component' : component.peer,
         }));
     });
 }

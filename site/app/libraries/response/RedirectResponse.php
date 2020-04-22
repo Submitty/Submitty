@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Class RedirectResponse
  * @package app\libraries\response
  */
-class RedirectResponse extends AbstractResponse {
+class RedirectResponse implements ResponseInterface {
     /** @var string */
     public $url;
 
@@ -24,7 +24,7 @@ class RedirectResponse extends AbstractResponse {
      * Redirect to $this->url.
      * @param Core $core
      */
-    public function render(Core $core) {
+    public function render(Core $core): void {
         $core->redirect($this->url);
     }
 }

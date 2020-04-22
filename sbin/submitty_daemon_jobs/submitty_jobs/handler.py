@@ -16,6 +16,7 @@ import time
 import multiprocessing
 from pathlib import Path
 import pwd
+import shutil
 
 from . import QUEUE_DIR, DAEMON_USER
 from . import jobs
@@ -59,9 +60,14 @@ def process_queue(queue):
             print('  Exception:', e)
         finally:
             job_file = Path(QUEUE_DIR, job)
-            if job_file.exists():
-                job_file.unlink()
             processing_file = QUEUE_DIR / ('PROCESSING_' + job)
+            if job_file.exists():
+                if processing_file.exists() \
+                        and job_file.stat().st_mtime != processing_file.stat().st_mtime:
+                    print('Job edited, rerunning job: ', job)
+                    queue.put(job)
+                else:
+                    job_file.unlink()
             if processing_file.exists():
                 processing_file.unlink()
 
@@ -78,13 +84,14 @@ def process_job(job):
 
     processing_job = QUEUE_DIR / ('PROCESSING_' + job)
 
-    Path(QUEUE_DIR, job).rename(processing_job)
+    shutil.copy2(job, processing_job)
+
     try:
         job_class = getattr(jobs, job_details['job'])(job_details)
         if not job_class.has_required_keys():
             print("Missing some details for job:", job)
             return
-        if not  job_class.validate_job_details():
+        if not job_class.validate_job_details():
             print("Failed to validate details for job:", job)
             return
         job_class.run_job()
@@ -117,8 +124,8 @@ def cleanup_job(job):
 def main():
     """
     Main runner function for the daemon process. It sets up our queue for incoming jobs
-    (processing any json files that were saved while the daemon wasn't running), and then
-    kicks off WatchDog to monitor for new files in the queue directory.
+    (processing any json files that were saved while the daemon wasn't running), and
+    then kicks off WatchDog to monitor for new files in the queue directory.
     """
     if pwd.getpwuid(os.getuid()).pw_name != DAEMON_USER:
         raise SystemExit('ERROR! This script must be run by the submitty daemon user!')
@@ -143,7 +150,7 @@ def main():
     pool = multiprocessing.Pool(5, process_queue, (queue, ))
     try:
         while True:
-            #print("current queue size ", queue.qsize())
+            # print("current queue size ", queue.qsize())
             time.sleep(1)
     finally:
         pool.terminate()
@@ -154,4 +161,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

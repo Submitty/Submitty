@@ -8,5 +8,5 @@
     {{ parent() }}
 {% endblock %}
 {% block buttons %}
-    <a onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="float-right btn btn-default close-button">Close</a>
+    <a onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="float-right btn btn-default close-button key_to_click" tabindex="0">Close</a>
 {% endblock %}

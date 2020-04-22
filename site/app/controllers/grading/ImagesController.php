@@ -16,11 +16,11 @@ class ImagesController extends AbstractController {
         $user_group = $this->core->getUser()->getGroup();
         $images_course_path = $this->core->getConfig()->getCoursePath();
         // FIXME: this code is duplicated in GlobalController.php
-        $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
-        $common_images_path_1 = Fileutils::joinPaths("/var/local/submitty/student_images");
+        $images_path = FileUtils::joinPaths($images_course_path, "uploads/student_images");
+        $common_images_path_1 = FileUtils::joinPaths("/var/local/submitty/student_images");
         $term = explode('/', $this->core->getConfig()->getCoursePath());
         $term = $term[count($term) - 2];
-        $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images", $term);
+        $common_images_path_2 = FileUtils::joinPaths("/var/local/submitty/student_images", $term);
         // FIXME: consider searching through the common location for matches to my students
         // (but this would be expensive)
         $any_images_files = array_merge(
@@ -28,7 +28,7 @@ class ImagesController extends AbstractController {
             FileUtils::getAllFiles($common_images_path_1, array(), true),
             FileUtils::getAllFiles($common_images_path_2, array(), true)
         );
-        if ($user_group === USER::GROUP_STUDENT || (($user_group === USER::GROUP_FULL_ACCESS_GRADER || $user_group === USER::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
+        if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
             $this->core->redirect($this->core->buildCourseUrl());
             return;
@@ -36,12 +36,12 @@ class ImagesController extends AbstractController {
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
 
         //limited-access graders with no assigned sections have no permissions to view images
-        if ($user_group === USER::GROUP_LIMITED_ACCESS_GRADER && empty($grader_sections)) {
+        if ($user_group === User::GROUP_LIMITED_ACCESS_GRADER && empty($grader_sections)) {
             $this->core->addErrorMessage("You have no assigned sections and no permissions to see images.");
             return;
         }
 
-        if ($user_group !== USER::GROUP_LIMITED_ACCESS_GRADER) {
+        if ($user_group !== User::GROUP_LIMITED_ACCESS_GRADER) {
             $grader_sections = array();  //reset grader section to nothing so permission for every image
         }
         else {
@@ -49,7 +49,7 @@ class ImagesController extends AbstractController {
                 return;
             }
         }
-        $instructor_permission = ($user_group === USER::GROUP_INSTRUCTOR);
+        $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
         $students = $this->core->getQueries()->getAllUsers();
         $this->core->getOutput()->renderOutput(array('grading', 'Images'), 'listStudentImages', $students, $grader_sections, $instructor_permission);
     }
@@ -75,7 +75,7 @@ class ImagesController extends AbstractController {
             return $this->core->getOutput()->renderResultMessage("No files to be submitted.", false);
         }
 
-        $status = Fileutils::validateUploadedFiles($_FILES["files1"]);
+        $status = FileUtils::validateUploadedFiles($_FILES["files1"]);
         //check if we couldn't validate the uploaded files
         if (array_key_exists("failed", $status)) {
             return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
