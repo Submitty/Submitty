@@ -313,7 +313,7 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-			"item_label" : "Math Problem",
+            "item_label" : "Math Problem",
             "from_pool" : ["math_1", "math_2", "math_3"],
             "points" : 3
         },
