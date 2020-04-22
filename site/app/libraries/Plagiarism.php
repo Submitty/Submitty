@@ -1,5 +1,7 @@
 <?php
 
+namespace app\libraries;
+
 class Interval {
 
   private $start = 0;
@@ -134,11 +136,8 @@ class Stack {
 }
 
 function mergeIntervals($iArr) {
-  $index = 0;
   $stack = new Stack();
   $stack->push($iArr[0]);
-  ob_flush();
-  ob_start();
   for ($i = 1; $i < count($iArr); $i++) {
     $cI = $stack->top();
     if ($cI->getEnd() < $iArr[$i]->getStart()) {
@@ -152,17 +151,5 @@ function mergeIntervals($iArr) {
       $stack->push($cI);
     }
   }
-
-  while(!$stack->isEmpty()) {
-    $i = $stack->top();
-    var_dump($i);
-    $stack->pop();
-  }
-  file_put_contents("dumpTest.txt", ob_get_flush());
+  return $stack;
 }
-
-$result = constructIntervals('test.json');
-
-mergeIntervals($result);
-
-?>
