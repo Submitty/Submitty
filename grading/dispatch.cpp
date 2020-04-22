@@ -1001,6 +1001,55 @@ TestResults* dispatch::errorIfEmpty_doit (const TestCase &tc, const nlohmann::js
 
 // ==============================================================================
 // ==============================================================================
+/**
+* Used by custom_doit to retrieve message status pairs from a custom validator's result.json
+*/
+std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> getAllCustomValidatorMessages(const nlohmann::json& j) {
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> messages;
+  
+  if (j["data"]["message"].is_string()) {
+    messages.push_back(dispatch::getCustomValidatorMessage(j["data"]));
+  }
+  else {
+    for(typename nlohmann::json::const_iterator itr = j["data"]["message"].begin(); itr != j["data"]["message"].end(); itr++) {
+      messages.push_back(dispatch::getCustomValidatorMessage(*itr));
+    }
+  }
+  return messages;
+}
+
+/**
+* Gets a message/status pair from a json object. 
+* On failure returns the empty string for the message, and MESSAGE_INFORMATION for status and prints errors to stdout.
+*/
+std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> getCustomValidatorMessage(const nlohmann::json& j) {
+  std::string message = "";
+  std::string status_string = "";
+  TEST_RESULTS_MESSAGE_TYPE status = MESSAGE_INFORMATION;
+
+  // If message is a string, then it has an associated status at this level.
+  if(j["message"].is_string()){
+      message = j["message"];
+  }else{
+    std::cout << "Message was not a string or was not found." << std::endl;
+  }
+
+  if(j["status"].is_string()){
+    status_string = j["status"];
+  }else{
+    std::cout << "Status was not a string or was not found." << std::endl;
+  }
+
+  if(status_string == "failure"){
+    status = MESSAGE_FAILURE;
+  }else if(status_string == "warning"){
+    status = MESSAGE_WARNING;
+  }else if(status_string == "success"){
+    status = MESSAGE_SUCCESS;
+  }//else it stays information.
+
+  return std::make_pair(status, message);
+}
 
 TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username){
 
@@ -1088,30 +1137,9 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     score = 0;
   }
 
-  std::string message = "";
-  if(result["data"]["message"].is_string()){
-      message = result["data"]["message"];
-  }else{
-    std::cout << "Message was not a string or was not found." << std::endl;
-  }
-
-  std::string status_string = "";
-  if(result["data"]["status"].is_string()){
-    status_string = result["data"]["status"];
-  }else{
-    std::cout << "Status was not a string or was not found." << std::endl;
-  }
-
-  TEST_RESULTS_MESSAGE_TYPE status = MESSAGE_INFORMATION;
-
-  if(status_string == "failure"){
-    status = MESSAGE_FAILURE;
-  }else if(status_string == "warning"){
-    status = MESSAGE_WARNING;
-  }else if(status_string == "success"){
-    status = MESSAGE_SUCCESS;
-  }//else it stays information.
-  return new TestResults(score, {std::make_pair(status, message)});
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> messages = dispatch::getAllCustomValidatorMessages(result);
+  
+  return new TestResults(score, messages);
 }
 
 // ==============================================================================
