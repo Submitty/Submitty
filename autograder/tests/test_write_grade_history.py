@@ -28,6 +28,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:59-0400",
                 "2019-05-23 20:39:12-0400",
                 0,
+                10, # access_duration
                 "2019-05-23 20:39:12-0400",
                 "",
                 "2019-05-23 20:39:32-0400",
@@ -67,6 +68,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:59-0400",
                 "2019-05-23 20:47:12-0400",
                 0,
+                10, # access_duration
                 "2019-05-23 20:47:12-0400",
                 "",
                 "2019-05-23 20:47:32-0400",
@@ -113,6 +115,7 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:59-0400",
                 "2019-05-28 20:39:12-0400",
                 301451,  # 3 days, 11 hours, 44 minutes, 11 seconds
+                10, # access_duration
                 "2019-05-28 20:39:12-0400",
                 "",
                 "2019-05-28 20:39:32-0400",
