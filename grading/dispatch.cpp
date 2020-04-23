@@ -1010,7 +1010,7 @@ std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> dispatch::getAllC
   if (j["data"].find("message") != j["data"].end() && j["data"]["message"].is_string()) {
     messages.push_back(dispatch::getCustomValidatorMessage(j["data"]));
   }
-  else if (j["data"].find("message") != j["data"].end() && j["data"]["message"].is_string()){
+  else if (j["data"].find("message") != j["data"].end() && j["data"]["message"].is_array()){
     for(typename nlohmann::json::const_iterator itr = j["data"]["message"].begin(); itr != j["data"]["message"].end(); itr++) {
       messages.push_back(dispatch::getCustomValidatorMessage(*itr));
     }
