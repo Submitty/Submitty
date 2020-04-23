@@ -309,20 +309,27 @@ int main(int argc, char *argv[]) {
       }
       else if(type == "item"){
         std::string item_label = in_notebook_cell.value("item_label", "");
+
+        // Update the complete_config if we had a blank label
+        config_json["notebook"][i]["item_label"] = "";
+
         if(itempool_definitions == config_json.end()){
           std::cout << "ERROR: Found an \"item\" cell but no global item_pool was defined!" << std::endl;
           throw -1;
         }
         //Search through the global item_pool to find if the items in this itempool exist
         if(in_notebook_cell.find("from_pool") == in_notebook_cell.end()){
-          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label) << " does not have a from_pool" << std::endl;
+          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label)
+                    << " does not have a from_pool" << std::endl;
           throw -1;
         }
         nlohmann::json in_notebook_cell_from_pool = in_notebook_cell.value("from_pool", nlohmann::json::array());
-        //std::cout << "Checking for " << in_notebook_cell_item_pool.size() << " items among a global set of " << itempool_definitions->size() << " items" << std::endl;
+        //std::cout << "Checking for " << in_notebook_cell_item_pool.size() << " items among a global set of "
+        //          << itempool_definitions->size() << " items" << std::endl;
 
         if(in_notebook_cell_from_pool.size() == 0){
-          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label) << " has an empty from_pool, requires at least one item!" << std::endl;
+          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label)
+                    << " has an empty from_pool, requires at least one item!" << std::endl;
           throw -1;
         }
 
@@ -340,8 +347,17 @@ int main(int argc, char *argv[]) {
             throw -1;
           }
           /*else{
-            std::cout << "Found global itempool item " << in_notebook_cell_from_pool[j] << " for item with label: " << (item_label.empty() ? "[no label]" : item_label) << std::endl;
+            std::cout << "Found global itempool item " << in_notebook_cell_from_pool[j] << " for item with label: "
+                      << (item_label.empty() ? "[no label]" : item_label) << std::endl;
           }*/
+        }
+
+        // Write the empty string if no label provided, otherwise pass forward item_label
+        out_notebook_cell["item_label"] = item_label;
+        // Pass forward other items
+        out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
+        if(in_notebook_cell.find("points") != in_notebook_cell.end()){
+          out_notebook_cell["points"] = in_notebook_cell["points"];
         }
       }
 
@@ -351,6 +367,7 @@ int main(int argc, char *argv[]) {
       }
 
       // Add this newly validated notebook cell to the one being sent forward
+      assert(type != "item" || out_notebook_cell.find("item_label") != out_notebook_cell.end());
       j["notebook"].push_back(out_notebook_cell);
 
     }

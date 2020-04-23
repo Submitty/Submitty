@@ -190,7 +190,7 @@ This message will appear in a blue box at the top of the page.",
               {
                   "type": "short_answer",
                   "filename": "author.txt"
-              },
+              }
           ],
           "testcases" : [
           ]
@@ -292,7 +292,7 @@ for i in range(2, 100):\n\
                              ]
               }
           ]
-        },
+        }
 
         
     ],
