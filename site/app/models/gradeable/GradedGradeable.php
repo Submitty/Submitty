@@ -268,58 +268,6 @@ class GradedGradeable extends AbstractModel {
         return $overridden_comment;
     }
 
-    public function populateNotebookItemPool($notebook){
-        // foreach ($notebook as $item) {
-        //     if (isset($item['type']) && $item['type'] === 'item' ) {
-                
-        //         $selected_item = $this->getItemFromPool($item['item_pool']);
-        //         foreach ($notebook['item_pool'] as $notebook_item) {
-        //             if ( $notebook_item['item_name'] === $selected_item ){
-        //                 $item['type'] = "TEST";
-        //                 $notebook[] = $notebook_item['notebook'];
-        //                 break;
-        //             }
-
-        //         }
-
-
-        //     }
-        // }
-        $copy = $notebook;
-        $copy_index = 0;
-        for ($i=0; $i < count($notebook['notebook']); $i++) { 
-            $item = $notebook['notebook'][$i];
-
-            if ( $item['type'] === 'item'){
-                $selected_item = $this->getItemFromPool($item['item_pool']);
-                foreach ($notebook['item_pool'] as $notebook_item) {
-                    if ( $notebook_item['item_name'] === $selected_item ){
-                        
-                        // $notebook['notebook'][$i] = $notebook_item['notebook'];
-                        
-                        //collect each item
-                        foreach ($notebook_item['notebook'] as $new_item) {
-                           // var_dump($new_item);
-                            array_splice($copy, $copy_index, 0, array($new_item));
-
-                            $copy_index ++;
-                        }
-
-
-                        break;
-                    }
-
-                }
-
-            }
-
-            $copy_index ++;
-        }
-
-
-        return $copy;
-    }
-
 
     /**
      * Gets a new 'notebook' which contains information about most recent submissions

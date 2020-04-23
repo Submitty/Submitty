@@ -161,11 +161,13 @@ class AutogradingConfig extends AbstractModel {
                 $this->notebook["item_pool"][] = $details['item_pool'][$i];
             }
 
-            $this->replaceNotebookItemsWithQuestions($details['notebook']);
+            $details['notebook'] = $this->replaceNotebookItemsWithQuestions($details['notebook']);
         }
 
+       // var_dump($details['notebook']);
+
         if (isset($details['notebook'])) {
-            $this->notebook["notebook"] = [];
+            $this->notebook = [];
             // For each item in the notebook array inside the $details collect data and assign to variables in
             // $this->notebook
             for ($i = 0; $i < count($details['notebook']); $i++) {
@@ -210,7 +212,7 @@ class AutogradingConfig extends AbstractModel {
 
                 // Add this cell $this->notebook
                 if ($do_add) {
-                    $this->notebook["notebook"][] = $notebook_cell;
+                    $this->notebook[] = $notebook_cell;
                 }
 
                 // If cell is a type of input add it to the $actual_inputs array
@@ -236,6 +238,8 @@ class AutogradingConfig extends AbstractModel {
                 }
             }
             elseif ($actual_input[$i]['type'] == 'multiple_choice') {
+                $actual_input[$i]['allow_multiple'] = $actual_input[$i]['allow_multiple'] ?? false;
+
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
         }
@@ -260,6 +264,7 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
+        var_dump($this->notebook);
     }
 
     //collect items from a notebook and replace them with the actual
@@ -285,7 +290,7 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
-        $this->notebook = $new_notebook;
+        return $new_notebook;
     }
 
     private function getItemFromPool($pool){
