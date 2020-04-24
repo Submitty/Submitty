@@ -112,11 +112,11 @@ class AutogradingConfig extends AbstractModel {
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
 
-        //REMOVE ME BEFORE
-        $foo = FileUtils::readJsonFile("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
+         $foo = FileUtils::readJsonFile("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
 
         $details['notebook'] = $foo['notebook'];
         $details['item_pool'] = $foo['item_pool'];
+
 
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase_details) {
@@ -161,7 +161,7 @@ class AutogradingConfig extends AbstractModel {
         if (isset($details['notebook'])) {
             $this->notebook = [
                 'notebook' => $details['notebook'],
-                'item_pool' => $details['item_pool']
+                'item_pool' => []
             ];
 
             $this->notebook_gradeable = true;
@@ -193,6 +193,9 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->notebook
         $actual_input = array();
         $this->notebook = [];
+
+        var_dump($details);
+
         // For each item in the notebook array inside the $details collect data and assign to variables in
         // $this->notebook
         for ($i = 0; $i < count($details['notebook']); $i++) {
@@ -250,7 +253,6 @@ class AutogradingConfig extends AbstractModel {
         }
         
 
-
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
@@ -292,12 +294,38 @@ class AutogradingConfig extends AbstractModel {
                 $this->part_names[$i] = "Part " . $i;
             }
         }
-    }
 
 
-    private function parseNotebookTestCases($details) {
-        //TODO: once config/build/build_{gradeable_name}.json can be built
-        //with the autograding configs
+        $this->testcases = [];
+        if (isset($details['testcases'])) {
+            foreach ($details['testcases'] as $idx => $testcase_details) {
+                $testcase = new AutogradingTestcase($this->core, $testcase_details, $idx);
+
+                // Accumulate only the positive points
+                $points = $testcase->getPoints();
+                if ($points >= 0.0) {
+                    if ($testcase->isHidden()) {
+                        if ($testcase->isExtraCredit()) {
+                            $this->total_hidden_extra_credit += $points;
+                        }
+                        else {
+                            $this->total_hidden_non_extra_credit += $points;
+                        }
+                    }
+                    else {
+                        if ($testcase->isExtraCredit()) {
+                            $this->total_non_hidden_extra_credit += $points;
+                        }
+                        else {
+                            $this->total_non_hidden_non_extra_credit += $points;
+                        }
+                    }
+                }
+
+                $this->testcases[$idx] = $testcase;
+            }
+        }
+
     }
 
 
@@ -355,9 +383,12 @@ class AutogradingConfig extends AbstractModel {
             $user_id
         );
 
-        $this->parseNotebook(['notebook' => $notebook_model->getNotebook()]);
-        $this->parseNotebookTestCases(['testcases' => $notebook_model->getTestCases()]);
-        return $this->notebook;
+        $this->parseNotebook([
+            'notebook' => $notebook_model->getNotebookConfig(),
+            'testcases' => $notebook_model->getTestCases()
+        ]);
+
+        return $notebook_model;
     }
 
     /**

@@ -4,25 +4,30 @@ namespace app\models\notebook;
 
 use app\libraries\Core;
 use app\libraries\Utils;
+use app\libraries\FileUtils;
 use app\models\AbstractModel;
 
 /**
- * Class Notebook
+ * Class UserSpecificNotebook
  * @package app\models\notebook
  *
- * @method array getNotebook()
+ * @method array getNotebookConfig()
  * @method array getTestCases()
+ * @method array getHashes()
+ * @method array getSelectedQuestions()
  */
 
 class UserSpecificNotebook extends AbstractModel {
 
-    protected $item_pool;
+    /** @prop @var array array of items where the notebook selects from */
+    protected $item_pool = [];
     /** @prop @var array notebook config */
-    protected $notebook;
+    protected $notebook_config;
     /** @prop @var array testcases config */
     protected $test_cases = [];
-    /** @prop @var int numeric */
+    /** @prop @var array hashes generated for student's notebook */
     protected $hashes = [];
+    /** @prop @var array of item_pool names selected */
     protected $selected_questions = [];
 
     private $gradeable_id;
@@ -32,12 +37,18 @@ class UserSpecificNotebook extends AbstractModel {
 
         parent::__construct($core);
 
-        if (isset($details['item_pool'])) {
-            $this->item_pool = $details['item_pool'];
-            unset($details['item_pool']);
+        $tgt_dir = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "config/complete_config",
+            "complete_config_" . $gradeable_id . ".json"
+        );
+        $json = FileUtils::readJsonFile($tgt_dir);
+
+        if ( $json !== false && isset($json['item_pool']) ){
+            $this->item_pool = $json['item_pool'];
         }
 
-        $this->notebook = $this->replaceNotebookItemsWithQuestions($details);
+        $this->notebook_config = $this->replaceNotebookItemsWithQuestions($details);
     }
 
 
@@ -63,15 +74,18 @@ class UserSpecificNotebook extends AbstractModel {
         }
         $this->test_cases = $tests;
 
+
         return $new_notebook;
     }
 
 
     private function getItemFromPool($item) {
-        //in the future this should be guaranteed to exist when the config is built
-        $item_label = $item['item_label'] ?? "";
+        $item_label = $item['item_label'];
         $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
-        return $item['from_pool'][$selected];
+        $item_from_pool = $item['from_pool'][$selected];
+        $this->selected_questions[] = $item_from_pool;
+
+        return $item_from_pool;
     }
 
     private function getNotebookHash($item_label, $from_pool_count) {
@@ -86,7 +100,6 @@ class UserSpecificNotebook extends AbstractModel {
 
         $selected = $hash % $from_pool_count;
         $this->hashes[] = $hash;
-        $this->selected_questions[] = $selected;
 
         return $selected;
     }

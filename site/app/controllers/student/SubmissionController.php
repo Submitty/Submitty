@@ -879,11 +879,6 @@ class SubmissionController extends AbstractController {
         );
                    
 
-        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
-            //need to force re-parse the notebook serverside again
-            $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $user_id);
-        }
-
         /*
          * Perform checks on the following folders (and whether or not they exist):
          * 1) the assignment folder in the submissions directory
@@ -921,6 +916,20 @@ class SubmissionController extends AbstractController {
 
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
+        }
+
+        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+            //need to force re-parse the notebook serverside again
+            $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $who_id);
+
+            //save the notebook hashes and item selected
+            $json = [
+                "hashes" => $notebook->getHashes(),
+                "item_pools_selected" => $notebook->getSelectedQuestions()
+            ];
+
+            $tgt = FileUtils::joinPaths($version_path, ".submit.notebook");
+            file_put_contents($tgt, FileUtils::encodeJson($json));
         }
 
         $this->upload_details['version_path'] = $version_path;
