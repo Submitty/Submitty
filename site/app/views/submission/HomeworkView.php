@@ -283,8 +283,12 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
+
+        //TODO: refactor notebooks to use MVC
+        $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable->getId(), $this->core->getUser()->getId());
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
-        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
+
+
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
@@ -315,8 +319,6 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
 
-
-        //var_dump($notebook);
 
         if (!$gradeable->isVcs()) {
             // Prepare notebook image data for displaying
@@ -386,6 +388,7 @@ class HomeworkView extends AbstractView {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
+
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
@@ -401,10 +404,7 @@ class HomeworkView extends AbstractView {
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
-        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
-
-
-      //  var_dump($notebook_data);
+        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook($notebook) : array();
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
@@ -425,6 +425,7 @@ class HomeworkView extends AbstractView {
 
         $DATE_FORMAT = "m/d/Y @ h:i A T";
         $numberUtils = new NumberUtils();
+
 
         // TODO: go through this list and remove the variables that are not used
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [

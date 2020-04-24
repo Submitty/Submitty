@@ -269,6 +269,7 @@
         },
         {
             "type" : "item",
+            "item_label" : "Math problem",
             "from_pool" : ["math_1"],
             "points" : 3
         },

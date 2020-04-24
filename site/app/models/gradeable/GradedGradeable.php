@@ -277,9 +277,7 @@ class GradedGradeable extends AbstractModel {
      * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
      * blank.
      */
-    public function getUpdatedNotebook() {
-        $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
-
+    public function getUpdatedNotebook($newNotebook) {
         foreach ($newNotebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
@@ -326,24 +324,6 @@ class GradedGradeable extends AbstractModel {
 
         // Operate on notebook to add prev_submission field to inputs
         return $newNotebook;
-    }
-
-
-    private function getNotebookPreviousSubmission($notebookVal){
-        if ($this->getAutoGradedGradeable()->getHighestVersion() == 0){
-            return $notebookVal['initial_value'] ?? false;
-        }else{
-            try {
-                // Try to get the most recent submission
-                $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
-
-                return $recentSubmission;
-            }
-            catch (AuthorizationException $e) {
-                // If failed to get the most recent submission then skip
-                return $notebookVal['initial_value'] ?? false;
-            }
-        }
     }
 
 

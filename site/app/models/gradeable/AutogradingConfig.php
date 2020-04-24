@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
 use app\libraries\FileUtils;
+use app\models\notebook\UserSpecificNotebook;
 
 /**
  * Class AutogradingConfig
@@ -29,6 +30,7 @@ use app\libraries\FileUtils;
  * @method int getTotalHiddenNonExtraCredit()
  * @method int getTotalHiddenExtraCredit()
  * @method bool getOnePartyOnly()
+ * @method bool isNotebookGradeable()
  */
 class AutogradingConfig extends AbstractModel {
 
@@ -70,6 +72,8 @@ class AutogradingConfig extends AbstractModel {
     protected $early_submission_minimum_points = 0;
     /** @prop @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
     protected $early_submission_test_cases = [];
+    /** @prop @var bool */
+    protected $notebook_gradeable = false;
 
 
     /* Properties accumulated from the AutogradingTestcases */
@@ -82,6 +86,7 @@ class AutogradingConfig extends AbstractModel {
     protected $total_hidden_non_extra_credit = 0;
     /** @prop @var int Total number of hidden extra-credit points for all test cases */
     protected $total_hidden_extra_credit = 0;
+
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -106,6 +111,12 @@ class AutogradingConfig extends AbstractModel {
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
+
+        //REMOVE ME BEFORE
+        $foo = FileUtils::readJsonFile("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
+
+        $details['notebook'] = $foo['notebook'];
+        $details['item_pool'] = $foo['item_pool'];
 
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase_details) {
@@ -146,84 +157,98 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
-        // Setup $this->notebook
-        $actual_input = array();
-
-        //REMOVE ME BEFORE
-        $foo = FileUtils::readJsonFile  ("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
-
-        $details['notebook'] = $foo['notebook'];
-        $details['item_pool'] = $foo['item_pool'];
-
-        if (isset($details['item_pool'])){
-            $this->notebook["item_pool"] = [];
-            for ($i=0; $i < count($details['item_pool']); $i++) { 
-                $this->notebook["item_pool"][] = $details['item_pool'][$i];
-            }
-
-            $details['notebook'] = $this->replaceNotebookItemsWithQuestions($details['notebook']);
-        }
-
-       // var_dump($details['notebook']);
 
         if (isset($details['notebook'])) {
-            $this->notebook = [];
-            // For each item in the notebook array inside the $details collect data and assign to variables in
-            // $this->notebook
-            for ($i = 0; $i < count($details['notebook']); $i++) {
-                $notebook_cell = $details['notebook'][$i];
-                $do_add = true;
+            $this->notebook = [
+                'notebook' => $details['notebook'],
+                'item_pool' => $details['item_pool']
+            ];
 
-                // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
-                // markdown forward as 'data' as opposed to 'string' or 'file'
-                if (
-                    isset($notebook_cell['type'])
-                    && $notebook_cell['type'] === 'markdown'
-                ) {
-                    $markdown = $this->getMarkdownData($notebook_cell);
+            $this->notebook_gradeable = true;
+        }
 
-                    // Remove string or file from $notebook_cell
-                    unset($notebook_cell['markdown_string']);
-                    unset($notebook_cell['markdown_file']);
+        // defaults num of parts to 1 if value is not set
+        $num_parts = count($details['part_names'] ?? [1]);
+        $this->one_part_only = $details['one_part_only'] ?? false;
 
-                    // Read as data
-                    $notebook_cell['markdown_data'] = $markdown;
-
-                    // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
-                    if ($i < count($details['notebook']) - 1) {
-                        $next_cell = &$details['notebook'][$i + 1];
-                        if (
-                            isset($next_cell['type'])
-                            && ($next_cell['type'] == 'short_answer' || $next_cell['type'] == 'multiple_choice')
-                        ) {
-                            $next_cell['label'] = $markdown;
-                            // Do not add current cell to notebook, since it is embedded in the label
-                            $do_add = false;
-                        }
-                    }
-                }
-                elseif (
-                    $notebook_cell['type'] === 'short_answer'
-                    && !empty($notebook_cell['programming_language'])
-                    && empty($notebook_cell['codemirror_mode'])
-                ) {
-                    $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
-                }
-
-                // Add this cell $this->notebook
-                if ($do_add) {
-                    $this->notebook[] = $notebook_cell;
-                }
-
-                // If cell is a type of input add it to the $actual_inputs array
-                if (
-                    isset($notebook_cell['type'])
-                    && ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice')
-                ) {
-                    $actual_input[] = $notebook_cell;
-                }
+        // Get all of the part names
+        for ($i = 1; $i <= $num_parts; $i++) {
+            $j = $i - 1;
+            if (
+                isset($details['part_names'])
+                && isset($details['part_names'][$j])
+                && trim($details['part_names'][$j]) !== ""
+            ) {
+                $this->part_names[$i] = $details['part_names'][$j];
+            }
+            else {
+                $this->part_names[$i] = "Part " . $i;
             }
         }
+    }
+
+
+    //TODO: remove once we can store notebook in its own model
+    public function parseNotebook($details) {
+        // Setup $this->notebook
+        $actual_input = array();
+        $this->notebook = [];
+        // For each item in the notebook array inside the $details collect data and assign to variables in
+        // $this->notebook
+        for ($i = 0; $i < count($details['notebook']); $i++) {
+            $notebook_cell = $details['notebook'][$i];
+            $do_add = true;
+
+            // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
+            // markdown forward as 'data' as opposed to 'string' or 'file'
+            if (
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'markdown'
+            ) {
+                $markdown = $this->getMarkdownData($notebook_cell);
+
+                // Remove string or file from $notebook_cell
+                unset($notebook_cell['markdown_string']);
+                unset($notebook_cell['markdown_file']);
+
+                // Read as data
+                $notebook_cell['markdown_data'] = $markdown;
+
+                // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
+                if ($i < count($details['notebook']) - 1) {
+                    $next_cell = &$details['notebook'][$i + 1];
+                    if (
+                        isset($next_cell['type'])
+                        && ($next_cell['type'] == 'short_answer' || $next_cell['type'] == 'multiple_choice')
+                    ) {
+                        $next_cell['label'] = $markdown;
+                        // Do not add current cell to notebook, since it is embedded in the label
+                        $do_add = false;
+                    }
+                }
+            }
+            elseif (
+                $notebook_cell['type'] === 'short_answer'
+                && !empty($notebook_cell['programming_language'])
+                && empty($notebook_cell['codemirror_mode'])
+            ) {
+                $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+            }
+
+            // Add this cell $this->notebook
+            if ($do_add) {
+                $this->notebook[] = $notebook_cell;
+            }
+
+            // If cell is a type of input add it to the $actual_inputs array
+            if (
+                isset($notebook_cell['type'])
+                && ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice')
+            ) {
+                $actual_input[] = $notebook_cell;
+            }
+        }
+        
 
 
         // Setup $this->inputs
@@ -245,6 +270,10 @@ class AutogradingConfig extends AbstractModel {
         }
 
 
+        if (isset($details['item_pool'])) {
+            $this->notebook['item_pool'] = $details['item_pool'];
+        }
+
         // defaults num of parts to 1 if value is not set
         $num_parts = count($details['part_names'] ?? [1]);
         $this->one_part_only = $details['one_part_only'] ?? false;
@@ -263,54 +292,14 @@ class AutogradingConfig extends AbstractModel {
                 $this->part_names[$i] = "Part " . $i;
             }
         }
-
-        var_dump($this->notebook);
     }
 
-    //collect items from a notebook and replace them with the actual
-    //notebook values
-    public function replaceNotebookItemsWithQuestions($raw_notebook){
-        $new_notebook = [];
-        foreach ($raw_notebook as $notebook_cell) {
-            if ( isset($notebook_cell['type']) && $notebook_cell['type'] === 'item'){
 
-                //see if theres a target item pool and replace this with the actual notebook
-                $tgt_item = $this->getItemFromPool($notebook_cell['from_pool']);
-
-                $item_data = $this->searchForItemPool($tgt_item);
-                if(count($item_data['notebook']) > 0){
-                   // var_dump($item_data['notebook']);
-                    $new_notebook = array_merge($new_notebook,$item_data['notebook']);
-                   // var_dump($new_notebook);
-                    //TODO: figure out where testcases go
-                }
-
-            }else{
-                $new_notebook[] = $notebook_cell;
-            }
-        }
-
-        return $new_notebook;
+    private function parseNotebookTestCases($details) {
+        //TODO: once config/build/build_{gradeable_name}.json can be built
+        //with the autograding configs
     }
 
-    private function getItemFromPool($pool){
-        //TODO: figure out which item in the pool to pick out
-        return $pool[0];
-    }
-
-    private function searchForItemPool($tgt_name){
-        $ret = ["notebook" => [], "testcases" => []];
-        foreach ($this->notebook['item_pool'] as $item) {
-            if ( $item['item_name'] === $tgt_name ){
-                
-                $ret["notebook"] = array_merge($ret["notebook"], $item["notebook"]);
-                $ret["testcases"][] = array_merge($ret["testcases"],$item["testcases"]);
-
-            }
-        }
-
-        return $ret;
-    }
 
     private function getMarkdownData($cell) {
         // If markdown_string is set then just return that
@@ -354,7 +343,20 @@ class AutogradingConfig extends AbstractModel {
         return $this->inputs;
     }
 
-    public function getNotebook() {
+    public function getNotebook($gradeable_id = null, $user_id = null) {
+        if (!isset($gradeable_id)) {
+            return $this->notebook;
+        }
+
+        $notebook_model = new UserSpecificNotebook(
+            $this->core,
+            $this->notebook,
+            $gradeable_id,
+            $user_id
+        );
+
+        $this->parseNotebook(['notebook' => $notebook_model->getNotebook()]);
+        $this->parseNotebookTestCases(['testcases' => $notebook_model->getTestCases()]);
         return $this->notebook;
     }
 

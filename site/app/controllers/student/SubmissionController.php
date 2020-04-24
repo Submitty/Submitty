@@ -877,6 +877,12 @@ class SubmissionController extends AbstractController {
             "submissions",
             $gradeable->getId()
         );
+                   
+
+        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+            //need to force re-parse the notebook serverside again
+            $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $user_id);
+        }
 
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -966,6 +972,7 @@ class SubmissionController extends AbstractController {
                 }
             }
 
+
             if (count($errors) > 0) {
                 $error_text = implode("\n", $errors);
                 return $this->uploadResult("Upload Failed: " . $error_text, false);
@@ -1032,7 +1039,6 @@ class SubmissionController extends AbstractController {
                     }
                 }
             }
-
 
             if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);
