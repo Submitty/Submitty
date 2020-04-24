@@ -194,8 +194,6 @@ class AutogradingConfig extends AbstractModel {
         $actual_input = array();
         $this->notebook = [];
 
-        var_dump($details);
-
         // For each item in the notebook array inside the $details collect data and assign to variables in
         // $this->notebook
         for ($i = 0; $i < count($details['notebook']); $i++) {
