@@ -191,6 +191,13 @@ textarea, input[type="text"], input[type="number"], input[type="date"], input[ty
   background-color: var(--standard-input-background);
 }
 
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+}
+
 /****************************
  * TABLE STYLES
  ***************************/
@@ -545,6 +552,14 @@ td>a.active-sort {
     background: var(--default-white);
     box-shadow: 2px 2px 4px -3px var(--standard-light-gray);
     padding: 5px 5px 10px;
+}
+
+.overall-comment-box {
+  margin-top:10px;
+}
+
+.overall-comment-author {
+  font-weight: bold;
 }
 
 .submission-page-total-header {

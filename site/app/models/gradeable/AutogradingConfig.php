@@ -182,10 +182,17 @@ class AutogradingConfig extends AbstractModel {
                         }
                     }
                 }
+                elseif (
+                    $notebook_cell['type'] === 'short_answer'
+                    && !empty($notebook_cell['programming_language'])
+                    && empty($notebook_cell['codemirror_mode'])
+                ) {
+                    $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+                }
 
                 // Add this cell $this->notebook
                 if ($do_add) {
-                    array_push($this->notebook, $notebook_cell);
+                    $this->notebook[] = $notebook_cell;
                 }
 
                 // If cell is a type of input add it to the $actual_inputs array
@@ -193,7 +200,7 @@ class AutogradingConfig extends AbstractModel {
                     isset($notebook_cell['type'])
                     && ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice')
                 ) {
-                    array_push($actual_input, $notebook_cell);
+                    $actual_input[] = $notebook_cell;
                 }
             }
         }

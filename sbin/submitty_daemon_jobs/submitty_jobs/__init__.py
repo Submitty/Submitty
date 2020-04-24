@@ -6,7 +6,13 @@ import os
 import json
 from pathlib import Path
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', 'config')
+CONFIG_PATH = os.path.join(os.path.dirname(
+    os.path.realpath(__file__)),
+    '..',
+    '..',
+    '..',
+    'config'
+)
 
 with open(str(Path(CONFIG_PATH, 'submitty.json'))) as open_file:
     JSON_FILE = json.load(open_file)

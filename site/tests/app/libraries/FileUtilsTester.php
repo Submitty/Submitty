@@ -394,7 +394,7 @@ STRING;
         $this->assertEquals($expected, $actual);
     }
 
-    public function fileExtensions() {
+    public function contentTypeDataProvider(): array {
         return [
             ['test.pdf', 'application/pdf'],
             ['test.png', 'image/png'],
@@ -420,12 +420,10 @@ STRING;
     }
 
     /**
-     * @dataProvider fileExtensions
-     * @param $filename
-     * @param $expected
+     * @dataProvider contentTypeDataProvider
      */
-    public function testContentType($filename, $expected) {
-        $this->assertEquals($expected, FileUtils::getContentType($filename));
+    public function testContentType(?string $filename, ?string $expected): void {
+        $this->assertSame($expected, FileUtils::getContentType($filename));
     }
 
     public function testRecursiveChmod() {

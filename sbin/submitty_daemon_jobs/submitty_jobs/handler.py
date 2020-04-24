@@ -62,7 +62,8 @@ def process_queue(queue):
             job_file = Path(QUEUE_DIR, job)
             processing_file = QUEUE_DIR / ('PROCESSING_' + job)
             if job_file.exists():
-                if processing_file.exists() and (job_file.stat().st_mtime != processing_file.stat().st_mtime):
+                if processing_file.exists() \
+                        and job_file.stat().st_mtime != processing_file.stat().st_mtime:
                     print('Job edited, rerunning job: ', job)
                     queue.put(job)
                 else:
@@ -123,8 +124,8 @@ def cleanup_job(job):
 def main():
     """
     Main runner function for the daemon process. It sets up our queue for incoming jobs
-    (processing any json files that were saved while the daemon wasn't running), and then
-    kicks off WatchDog to monitor for new files in the queue directory.
+    (processing any json files that were saved while the daemon wasn't running), and
+    then kicks off WatchDog to monitor for new files in the queue directory.
     """
     if pwd.getpwuid(os.getuid()).pw_name != DAEMON_USER:
         raise SystemExit('ERROR! This script must be run by the submitty daemon user!')
