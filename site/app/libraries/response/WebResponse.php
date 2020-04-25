@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Class WebResponse
  * @package app\libraries\response
  */
-class WebResponse extends AbstractResponse {
+class WebResponse implements ResponseInterface {
     /** @var string|array */
     public $view_class;
 
@@ -39,7 +39,7 @@ class WebResponse extends AbstractResponse {
      *
      * @param Core $core
      */
-    public function render(Core $core) {
+    public function render(Core $core): void {
         $core->getOutput()->renderOutput($this->view_class, $this->view_function, ...$this->parameters);
     }
 }

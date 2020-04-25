@@ -8,7 +8,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\Logger;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -42,7 +42,7 @@ class AuthenticationController extends AbstractController {
      * is not strictly necessary, but still good to tidy up.
      *
      * @Route("/authentication/logout")
-     * @return Response
+     * @return MultiResponse
      */
     public function logout() {
         if ($this->core->removeCurrentSession()) {
@@ -58,7 +58,7 @@ class AuthenticationController extends AbstractController {
         }
 
 
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
         );
     }
@@ -69,10 +69,10 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/login")
      *
      * @var string $old the url to redirect to after login
-     * @return Response
+     * @return MultiResponse
      */
     public function loginForm($old = null) {
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse('Authentication', 'loginForm', $old)
         );
     }
@@ -86,14 +86,14 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/check_login")
      *
      * @var string $old the url to redirect to after login
-     * @return Response
+     * @return MultiResponse
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
             $old = urldecode($old);
         }
         if ($this->logged_in) {
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($old)
             );
         }
@@ -102,7 +102,7 @@ class AuthenticationController extends AbstractController {
             $msg = 'Cannot leave user id or password blank';
 
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($old)
@@ -115,7 +115,7 @@ class AuthenticationController extends AbstractController {
             $msg = "Successfully logged in as " . htmlentities($_POST['user_id']);
 
             $this->core->addSuccessMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]),
                 null,
                 new RedirectResponse($old)
@@ -126,7 +126,7 @@ class AuthenticationController extends AbstractController {
 
             $this->core->addErrorMessage($msg);
             $this->core->redirect($old);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($old)
@@ -137,44 +137,44 @@ class AuthenticationController extends AbstractController {
     /**
      * @Route("/api/token", methods={"POST"})
      *
-     * @return Response
+     * @return MultiResponse
      */
     public function getToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         $token = $this->core->authenticateJwt();
         if ($token) {
-            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['token' => $token]));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['token' => $token]));
         }
         else {
             $msg = "Could not login using that user id or password";
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
     }
 
     /**
      * @Route("/api/token/invalidate", methods={"POST"})
      *
-     * @return Response
+     * @return MultiResponse
      */
     public function invalidateToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         $success = $this->core->invalidateJwt();
         if ($success) {
-            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
         }
         else {
             $msg = "Could not login using that user id or password";
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
     }
 
@@ -187,7 +187,7 @@ class AuthenticationController extends AbstractController {
      * gradeable in that course.
      *
      * @Route("{_semester}/{_course}/authentication/vcs_login")
-     * @return Response
+     * @return MultiResponse
      */
     public function vcsLogin() {
         if (
@@ -198,23 +198,23 @@ class AuthenticationController extends AbstractController {
             || !$this->core->getConfig()->isCourseLoaded()
         ) {
             $msg = 'Missing value for one of the fields';
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->getAuthentication()->authenticate() !== true) {
             $msg = "Could not login using that user id or password";
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
         if ($user === null) {
             $msg = "Could not find that user for that course";
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         elseif ($user->accessFullGrading()) {
             $msg = "Successfully logged in as {$_POST['user_id']}";
-            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
         }
 
         try {
@@ -227,15 +227,15 @@ class AuthenticationController extends AbstractController {
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";
-                return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+                return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
             }
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
             $msg = "This user cannot check out that repository.";
-            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
-        return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
+        return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
     }
 }

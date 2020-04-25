@@ -180,6 +180,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
+                console.log(e);
+                displayAjaxError(e);
             }
         })
     }
@@ -1191,7 +1193,7 @@ function enableTabsInTextArea(jQuerySelector) {
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
             // focus to the next control in the list.
-            var controls = $(":input").filter(":visible");
+            var controls = $(":tabbable").filter(":visible");
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
@@ -1574,6 +1576,38 @@ function checkSidebarCollapse() {
         $("aside").toggleClass("collapsed", false);
     }
 }
+
+//Changes the theme from light to dark mode or the reverse
+//if mode='black' it will toggle the black mode instead of the normal mode
+function toggleTheme(mode='normal'){
+  if(mode==='normal'){
+    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") !== "dark") || localStorage.getItem("theme") === "light"){
+        localStorage.setItem("theme", "dark");
+        document.documentElement.setAttribute("data-theme", "dark");
+    }else{
+      localStorage.setItem("theme", "light");
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  }else if(mode === 'black'){
+    if(localStorage.getItem('black_mode') !== 'black'){
+        localStorage.setItem("black_mode", "black");
+        document.documentElement.setAttribute("data-black_mode", "black");
+    }else{
+      localStorage.setItem("black_mode", "");
+      document.documentElement.setAttribute("data-black_mode", "");
+    }
+  }
+}
+$(document).ready(function() {
+  if(localStorage.getItem("theme") === "dark"){
+    $('#theme_change').prop('checked', true);
+  }else if(localStorage.getItem("theme") === null && window.matchMedia("(prefers-color-scheme: dark)").matches){
+    $('#theme_change').prop('checked', true);
+  }
+  if(localStorage.getItem("black_mode") === "black"){
+    $('#theme_change_black').prop('checked', true);
+  }
+});
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {

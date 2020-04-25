@@ -82,6 +82,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $config->setSubmittyPath($this->config['tmp_path']);
         $this->core->setConfig($config);
         $this->core->getOutput()->loadTwig();
+        $this->core->loadGradingQueue();
 
         $highest_version = 0;
         $num_parts = 1;

@@ -4,7 +4,7 @@ body {
     min-height: 100vh;
     position: relative;
     display: flex;
-    background: #f6fbfe;
+    background: var(--background-blue);
     color: var(--text-black);
 }
 
@@ -14,7 +14,7 @@ body {
 }
 
 nav {
-    background: #ffffff;
+    background: var(--default-white);
     font-size: 1.5em;
     font-weight: bold;
     min-height: min-content;
@@ -74,7 +74,7 @@ nav a > i.f {
     text-decoration: none;
 }
 
-#logo-submitty {
+#logo-box {
     display: none;
 }
 
@@ -129,9 +129,12 @@ footer .footer-separator {
         display: none;
     }
 
-    #logo-submitty {
+    #logo-box {
         display: block;
-        height: 80px;
+    }
+
+    #logo-submitty, #logo-submitty-light {
+      height: 80px;
     }
 
     /* specificity less than no @media since :not stated (for speed) */
