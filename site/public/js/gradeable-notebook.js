@@ -291,4 +291,6 @@ $(document).ready(function () {
     });
 
     $(".sa-box").on('input', saveToLocal);
+
+    restoreFromLocal();
 });
