@@ -386,8 +386,6 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,random
     return True
 
 def generate_random_string(length):
-  if length < 1:
-    return ''
   return ''.join(random.choice(string.ascii_uppercase) for i in range(length))
 
 # ==================================================================================
