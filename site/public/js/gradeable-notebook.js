@@ -65,11 +65,13 @@ function setCodeBox(codebox_id, state)
     }
 }
 
+const AUTOSAVE_KEY = `${window.location.pathname}-autosave`;
+
 /**
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveToLocal() {
-    localStorage.setItem("autosave", JSON.stringify({
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
         multiple_choice: gatherInputAnswersByType("multiple_choice"),
         short_answer: gatherInputAnswersByType("short_answer"),
         codebox: gatherInputAnswersByType("codebox")
@@ -81,7 +83,7 @@ function saveToLocal() {
  * autosave data exists yet, then this function does nothing.
  */
 function restoreFromLocal() {
-    const state = JSON.parse(localStorage.getItem("autosave"));
+    const state = JSON.parse(localStorage.getItem(AUTOSAVE_KEY));
     
     if (state === null) {
         return;
