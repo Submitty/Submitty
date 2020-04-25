@@ -94,22 +94,22 @@ function restoreFromLocal() {
         const values = state.multiple_choice[id];
         const index = /multiple_choice_([0-9])+/.exec(id)[1];
         $(`#mc_field_${index} :input`).each((_index, element) => {
-            if (values.includes(element.getAttribute("value"))) {
-                $(element).prop("checked", true);
-            } else {
-                $(element).prop("checked", false);
-            }
+            $(element).prop('checked', values.includes(element.val())).change();
         });
     }
     // Next, we restore short-answer boxes
     for (const id in state.short_answer) {
         const answer = state.short_answer[id][0];
-        $(`#${id}`).prop("value", answer);
+        // Restore the answer and trigger change events (for setting button states)
+        // (see https://stackoverflow.com/questions/4672505/why-does-the-jquery-change-event-not-trigger-when-i-set-the-value-of-a-select-us)
+        $(`#${id}`).val(answer).trigger('input');
     }
     // Finally, we restore codeboxes
     for (const id in state.codebox) {
         const answer = state.codebox[id][0];
         const codebox = $(`#${id} .CodeMirror`).get(0).CodeMirror;
+        // This automatically triggers the event handler for the clear and
+        // recent buttons.
         codebox.setValue(answer);
     }
 }
