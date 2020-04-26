@@ -1,7 +1,13 @@
 """
-NEW FEATURES:
-  1. Score ouptut is now dumped to validation_results.json
-  2. Custom instructor log lines can now be dumped to validation_logfile.txt
+DEPRECATED FEATURES:
+  This grader writes its results to stdout, a feature which is now deprecated and will be
+  removed in a following release. Output should now be dumped to validation_results.json.
+  See the updated_grader.py for example usage.
+
+UNUSED FEATURE:
+  This grader does not write a logfile to the instructor, a new feature released on Submitty
+  in a recent patch. For an example, see updated_grader.py.
+
 
 This file presents an example of a python custom validator for use in your Submitty assignment.
 
@@ -51,15 +57,6 @@ def parse_args():
 Helper functions for returning a score to the student.
 """
 
-def log_line(line):
-  """
-  Write a line to an instructor log file.
-  """
-  mode = 'a' if os.path.exists('validation_logfile.txt') else 'w'
-
-  with open('validation_logfile.txt', mode) as outfile:
-    outfile.write(line+"\n")
-
 def return_result(score, message, status):
   """
   Return a non-error result to the student.
@@ -82,9 +79,8 @@ def return_result(score, message, status):
                         'status':status
                       }
           }
-  # Dump the results to validation_results.json as expected by Submitty.
-  with open('validation_results.json', 'w') as outfile:
-    json.dump(result, outfile, indent=4)
+  # Print the result json to stdout so that it can be read by submitty.
+  print(json.dumps(result, indent=4))
   # End the program, because we have returned a result.
   sys.exit(0)
 
@@ -104,8 +100,7 @@ def return_error(error_message):
               'message':error_message
            }
   # Print the result json to stdout so that it can be read by submitty.
-  with open('validation_results.json', 'w') as outfile:
-    json.dump(result, outfile, indent=4)
+  print(json.dumps(result, indent=4))
   # End the program, because we have returned a result.
   sys.exit(0)
 
@@ -207,8 +202,6 @@ def do_the_grading():
 
   # For every student file
   for file in actual_files:
-    log_line("Processing " + file)
-
     # Make sure that the output in the file sums correctly
     data = grade_a_single_file(file, number_of_numbers)
     # If we are on the first file, save the this output so that we can check that the next
@@ -228,5 +221,4 @@ if __name__ == '__main__':
   """
   If this script is invoked directly, call the "do_the_grading" function (above).
   """
-  log_line("In this new version of the grader, we can now write to a logfile! This is helpful for debugging!")
   do_the_grading()
