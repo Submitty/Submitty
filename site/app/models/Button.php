@@ -60,7 +60,7 @@ class Button extends AbstractModel {
     /** @prop @var string|null $icon */
     protected $icon;
      /** @prop @var bool $disabled */
-    protected $prefix = 'fa';
+    protected $prefix;
 
     /**
      * @param Core $core
@@ -83,7 +83,7 @@ class Button extends AbstractModel {
         $this->aria_label = $details["aria_label"] ?? null;
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
-        $this->append_fa = $details["append_fa"] ?? true;
+        $this->prefix = $details["prefix"] ?? "fa";
     }
 
     /**
