@@ -286,24 +286,6 @@ class HomeworkView extends AbstractView {
 
         //TODO: refactor notebooks to use MVC
         $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable->getId(), $this->core->getUser()->getId())->getNotebookConfig();
-
-        $t = $gradeable->getAutogradingConfig();
-        //var_dump($t->testcases);
-        $n = $gradeable->getAutogradingConfig()->getNotebook($gradeable->getId(), $this->core->getUser()->getId());
-        var_dump($n->getHashes());
-
-        $json = [
-                "hashes" => $n->getHashes(),
-                "item_pools_selected" => $n->getSelectedQuestions()
-            ];
-
-            $gradeable_path = FileUtils::joinPaths(
-                $this->core->getConfig()->getCoursePath(),
-                "submissions",
-                $gradeable->getId()
-            );
-        file_put_contents($gradeable_path . "/test.txt", FileUtils::encodeJson($json));
-
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
 
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
