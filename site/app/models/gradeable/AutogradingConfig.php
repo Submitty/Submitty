@@ -59,7 +59,7 @@ class AutogradingConfig extends AbstractModel {
     /** @prop @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
     private $inputs = [];
     /** @prop @var AutogradingTestcase[] Cut-down information about autograding test cases*/
-    private $testcases = [];
+    public $testcases = [];
 
     /* Properties if early submission incentive enabled */
     /** @prop @var bool If there is an early submission incentive */
@@ -87,6 +87,8 @@ class AutogradingConfig extends AbstractModel {
     /** @prop @var int Total number of hidden extra-credit points for all test cases */
     protected $total_hidden_extra_credit = 0;
 
+    private $is_notebook_parsed = false;
+
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -112,12 +114,7 @@ class AutogradingConfig extends AbstractModel {
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
 
-         $foo = FileUtils::readJsonFile("/usr/local/submitty/GIT_CHECKOUT/Submitty/site/app/models/gradeable/fake.json");
-
-        $details['notebook'] = $foo['notebook'];
-        $details['item_pool'] = $foo['item_pool'];
-
-
+    
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase_details) {
                 $testcase = new AutogradingTestcase($this->core, $testcase_details, $idx);
@@ -169,7 +166,6 @@ class AutogradingConfig extends AbstractModel {
 
         // defaults num of parts to 1 if value is not set
         $num_parts = count($details['part_names'] ?? [1]);
-        $this->one_part_only = $details['one_part_only'] ?? false;
 
         // Get all of the part names
         for ($i = 1; $i <= $num_parts; $i++) {
@@ -294,7 +290,6 @@ class AutogradingConfig extends AbstractModel {
         }
 
 
-        $this->testcases = [];
         if (isset($details['testcases'])) {
             foreach ($details['testcases'] as $idx => $testcase_details) {
                 $testcase = new AutogradingTestcase($this->core, $testcase_details, $idx);
@@ -323,7 +318,6 @@ class AutogradingConfig extends AbstractModel {
                 $this->testcases[$idx] = $testcase;
             }
         }
-
     }
 
 
@@ -370,7 +364,7 @@ class AutogradingConfig extends AbstractModel {
     }
 
     public function getNotebook($gradeable_id = null, $user_id = null) {
-        if (!isset($gradeable_id)) {
+        if (!isset($gradeable_id) || $this->is_notebook_parsed) {
             return $this->notebook;
         }
 
@@ -385,6 +379,13 @@ class AutogradingConfig extends AbstractModel {
             'notebook' => $notebook_model->getNotebookConfig(),
             'testcases' => $notebook_model->getTestCases()
         ]);
+
+        $this->is_notebook_parsed = true;
+
+        //now the autogradingconfig has reparsed the notebook,
+        //update the model's representation
+        $notebook_model->setNotebookConfig($this->notebook);
+        $this->notebook = $notebook_model;
 
         return $notebook_model;
     }

@@ -15,6 +15,7 @@ use app\models\AbstractModel;
  * @method array getTestCases()
  * @method array getHashes()
  * @method array getSelectedQuestions()
+ * @method void setNotebookConfig($new_notebook)
  */
 
 class UserSpecificNotebook extends AbstractModel {
@@ -44,7 +45,7 @@ class UserSpecificNotebook extends AbstractModel {
         );
         $json = FileUtils::readJsonFile($tgt_dir);
 
-        if ( $json !== false && isset($json['item_pool']) ){
+        if ($json !== false && isset($json['item_pool'])) {
             $this->item_pool = $json['item_pool'];
         }
 
