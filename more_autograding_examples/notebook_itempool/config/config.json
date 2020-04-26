@@ -190,7 +190,7 @@ This message will appear in a blue box at the top of the page.",
               {
                   "type": "short_answer",
                   "filename": "author.txt"
-              },
+              }
           ],
           "testcases" : [
           ]
@@ -292,7 +292,7 @@ for i in range(2, 100):\n\
                              ]
               }
           ]
-        },
+        }
 
         
     ],
@@ -313,17 +313,18 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["math_1"],
+            "item_label" : "Math Problem",
+            "from_pool" : ["math_1"],
             "points" : 3
         },
         {
             "type" : "item",
-            "item_pool" : ["math_2"],
+            "from_pool" : ["math_2"],
             "points" : 3
         },
         {
             "type" : "item",
-            "item_pool" : ["math_3"],
+            "from_pool" : ["math_3"],
             "points" : 3
         },
         // ======================================================================================================
@@ -333,17 +334,17 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_1"],
+            "from_pool" : ["animal_1"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_2"],
+            "from_pool" : ["animal_2"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_3"],
+            "from_pool" : ["animal_3"],
             "points" : 2
         },
         // ======================================================================================================
@@ -354,11 +355,11 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["author"]
+            "from_pool" : ["author"]
         },
         {
             "type" : "item",
-            "item_pool" : ["haiku"]
+            "from_pool" : ["haiku"]
         },
         // ======================================================================================================
         {
@@ -367,12 +368,12 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["cpp_code"],
+            "from_pool" : ["cpp_code"],
             "points" : 5
         },
         {
             "type" : "item",
-            "item_pool" : ["python_code"],
+            "from_pool" : ["python_code"],
             "points" : 5
         }
         // ===================================================
