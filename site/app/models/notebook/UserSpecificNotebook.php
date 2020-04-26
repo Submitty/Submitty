@@ -50,6 +50,9 @@ class UserSpecificNotebook extends AbstractModel {
         }
 
         $this->notebook_config = $this->replaceNotebookItemsWithQuestions($details);
+
+        $this->gradeable_id = $gradeable_id;
+        $this->user_id = $user_id;
     }
 
 
