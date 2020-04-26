@@ -177,6 +177,22 @@ body {min-width: 925px;}
     -webkit-text-stroke: 1px black;
 }
 
+.golden_hover{
+  color:#e0e0e0!important;
+}
+
+.golden_hover:hover{
+  color:gold!important;
+}
+
+.reverse_golden_hover{
+  color:gold!important;
+}
+
+.reverse_golden_hover:hover{
+  color:#e0e0e0!important;
+}
+
 .text-decoration-none{
     text-decoration: none !important;
 }
@@ -231,7 +247,7 @@ body {min-width: 925px;}
 }
 
 .create-thread-title{
-    margin-left: 15px; 
+    margin-left: 15px;
     margin-bottom: 10px;
 }
 

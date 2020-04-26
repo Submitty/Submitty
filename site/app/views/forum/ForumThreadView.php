@@ -269,7 +269,7 @@ class ForumThreadView extends AbstractView {
                     "display_text" => $show_merged_thread_title,
                     "id" => 'merge_thread',
                     "optional_class" => array(!empty($show_merged_thread_class), $show_merged_thread_class),
-                    "title" => $show_merged_thread_title,
+                    "title" => $show_merged_thread_title . " on Forum",
                     "onclick" => array(true, $show_merged_thread_action),
                     "link" => '#',
                     "required_rank" => 4
@@ -278,7 +278,7 @@ class ForumThreadView extends AbstractView {
                     "display_text" => $show_deleted_thread_title,
                     "optional_class" => array(!empty($show_deleted_class), $show_deleted_class),
                     "id" => 'delete',
-                    "title" => $show_deleted_thread_title,
+                    "title" => $show_deleted_thread_title . " on Forum",
                     "link" => '#',
                     "onclick" => array(true, $show_deleted_action),
                     "required_rank" => 3

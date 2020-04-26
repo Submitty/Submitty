@@ -417,6 +417,8 @@ class HomeworkView extends AbstractView {
 
         $DATE_FORMAT = "m/d/Y @ h:i A T";
         $numberUtils = new NumberUtils();
+
+        // TODO: go through this list and remove the variables that are not used
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
@@ -550,7 +552,7 @@ class HomeworkView extends AbstractView {
                 continue;
             }
             elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
             }
 
             $page_count = 0;
@@ -646,7 +648,7 @@ class HomeworkView extends AbstractView {
 
         $peer_grading_max = $gradeable->getPeerPoints();
         $ta_grading_max   = $gradeable->getTaPoints();
-        
+
         $ta_grading_earned = 0;
         $peer_grading_earned = 0;
 
@@ -814,7 +816,7 @@ class HomeworkView extends AbstractView {
         else {
             $no_autograding = true;
         }
-        
+
         // If there is no autograding at all, only explicitly let the student know that before
         // TA grades are released.
         if (

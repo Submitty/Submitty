@@ -6,7 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -28,10 +28,10 @@ class WrapperController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/theme")
-     * @return Response
+     * @return MultiResponse
      */
     public function uploadWrapperPage() {
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Wrapper'],
                 'displayPage',
@@ -42,21 +42,21 @@ class WrapperController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/theme/upload", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function processUploadHTML() {
         $filename = $_POST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
         if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
-            return Response::WebOnlyResponse(
+            return MultiResponse::webOnlyResponse(
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
 
         if (empty($_FILES) || !isset($_FILES['wrapper_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
@@ -64,53 +64,53 @@ class WrapperController extends AbstractController {
 
         if (!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
         if (!@copy($upload['tmp_name'], $location)) {
             $this->core->addErrorMessage("Upload failed: Could not copy file");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
         $this->core->addSuccessMessage("Uploaded " . $upload['name'] . " as " . $filename);
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
     }
 
     /**
      * @Route("/{_semester}/{_course}/theme/delete", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function deleteUploadedHTML() {
         $filename = $_POST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
         if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
-            return Response::WebOnlyResponse(
+            return MultiResponse::webOnlyResponse(
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
 
         if (!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Delete failed: Invalid filename");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
         if (!@unlink($location)) {
             $this->core->addErrorMessage("Deletion failed: Could not unlink file");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
         $this->core->addSuccessMessage("Deleted " . $filename);
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
     }

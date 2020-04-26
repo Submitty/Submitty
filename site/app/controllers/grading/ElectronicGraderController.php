@@ -238,12 +238,14 @@ class ElectronicGraderController extends AbstractController {
         $num_unsubmitted = 0;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
+        $num_gradeables = 1;
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
             $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
+            $num_gradeables = count($this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId()));
             $my_grading = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $this->core->getUser()->getId());
             $component_averages = array();
             $autograded_average = null;
@@ -330,6 +332,7 @@ class ElectronicGraderController extends AbstractController {
                 $sections['stu_grad'] = array(
                     'total_components' => $num_components,
                     'graded_components' => $my_grading,
+                    'num_gradeables' => $num_gradeables,
                     'graders' => array()
                 );
                 $sections['all'] = array(
@@ -346,6 +349,12 @@ class ElectronicGraderController extends AbstractController {
                 }
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
+                if ($gradeable->isTeamAssignment()) {
+                        $sections['stu_grad']['no_team'] = 0;
+                        $sections['stu_grad']['team'] = 0;
+                        $sections['all']['no_team'] = 0;
+                        $sections['all']['team'] = 0;
+                }
             }
             else {
                 foreach ($total_users as $key => $value) {
@@ -462,7 +471,7 @@ class ElectronicGraderController extends AbstractController {
         $show_all = $view_all && $can_show_all;
 
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
-        
+
         $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
@@ -719,7 +728,6 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $this->core->redirect($return_url);
-        return;
     }
 
     /**
@@ -1098,7 +1106,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-        
+
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
@@ -1145,7 +1153,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-        
+
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
 
         // Get the component
@@ -1192,9 +1200,9 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
-        
+
         $section = null;
-        
+
         if ($gradeable->isGradeByRegistration()) {
             $section = $this->core->getQueries()->getSubmitterById($submitter_id)->getRegistrationSection();
         }
@@ -1680,7 +1688,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-        
+
         $peer = $_POST['peer'] === 'true';
 
         // checks if user has permission
@@ -2073,6 +2081,7 @@ class ElectronicGraderController extends AbstractController {
     public function ajaxSaveOverallComment($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
         $comment = $_POST['overall_comment'] ?? '';
+        $grader = $this->core->getUser();
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -2103,7 +2112,7 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveOverallComment($ta_graded_gradeable, $comment);
+            $this->saveOverallComment($ta_graded_gradeable, $comment, $grader);
             $this->core->getOutput()->renderJsonSuccess();
         }
         catch (\InvalidArgumentException $e) {
@@ -2114,9 +2123,9 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function saveOverallComment(TaGradedGradeable $ta_graded_gradeable, string $comment) {
+    public function saveOverallComment(TaGradedGradeable $ta_graded_gradeable, string $comment, User $grader) {
         // Set the comment
-        $ta_graded_gradeable->setOverallComment($comment);
+        $ta_graded_gradeable->setOverallComment($comment, $grader->getId());
 
         // New info, so reset the user viewed date
         $ta_graded_gradeable->resetUserViewedDate();
@@ -2201,7 +2210,9 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * Route for getting the overall comment for the graded gradeable
+     * Route for getting the overall comment for the currently logged in user.
+     * @param string $gradeable_id
+     * @param string $anon_id, the anonymous id of the student
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"GET"})
      */
     public function ajaxGetOverallComment($gradeable_id, $anon_id = '') {
@@ -2215,6 +2226,7 @@ class ElectronicGraderController extends AbstractController {
         if ($submitter_id === false) {
             return;
         }
+        $commenter = $this->core->getUser();
 
         // Get the graded gradeable
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
@@ -2232,7 +2244,7 @@ class ElectronicGraderController extends AbstractController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         // Once we've parsed the inputs and checked permissions, perform the operation
-        $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComment());
+        $this->core->getOutput()->renderJsonSuccess($ta_graded_gradeable->getOverallComments($commenter));
     }
 
     /**

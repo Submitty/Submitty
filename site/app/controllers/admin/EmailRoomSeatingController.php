@@ -6,7 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\models\Email;
@@ -37,10 +37,10 @@ Please email your instructor with any questions or concerns.';
 
     /**
      * @Route("/{_semester}/{_course}/email_room_seating")
-     * @return Response
+     * @return MultiResponse
      */
     public function renderEmailTemplate() {
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'EmailRoomSeating'],
                 'displayPage',
@@ -52,7 +52,7 @@ Please email your instructor with any questions or concerns.';
 
     /**
      * @Route("/{_semester}/{_course}/email_room_seating/send", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function emailSeatingAssignments() {
         $seating_assignment_subject = $_POST["room_seating_email_subject"];
@@ -83,7 +83,7 @@ Please email your instructor with any questions or concerns.';
         }
         $this->core->getNotificationFactory()->sendEmails($seating_assignment_emails);
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl())
         );
     }
