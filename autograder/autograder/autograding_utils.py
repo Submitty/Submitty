@@ -177,7 +177,6 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     copy_contents_into(job_id, generated_output_path, tmp_work_generated_output, tmp_logs, log_path, stack_trace_log_path)
 
     # Copy in instructor solution code.
-    # TODO: Is this necessary?
     instructor_solution = os.path.join(tmp_autograding, 'instructor_solution')
     copy_contents_into(job_id, instructor_solution, tmp_work_instructor_solution, tmp_logs, log_path, stack_trace_log_path)
 
@@ -405,6 +404,11 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
                 print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
                 log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
                 log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+
+        # Rescue custom validator files
+        pattern_copy("rescue_custom_validator_validation_jsons", [os.path.join(tmp_work, 'validation_results_*.json'),], tmp_work, tmp_results, tmp_logs)
+        pattern_copy("rescue_custom_validator_logs", [os.path.join(tmp_work, 'validation_logfile_*.txt'),], tmp_work, tmp_results, tmp_logs)
+        pattern_copy("rescue_custom_validator_errors", [os.path.join(tmp_work, 'validation_stderr_*.txt'),], tmp_work, tmp_results, tmp_logs)
 
         just_write_grade_history(history_file,
                                 gradeable_deadline_longstring,

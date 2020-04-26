@@ -1002,7 +1002,7 @@ TestResults* dispatch::errorIfEmpty_doit (const TestCase &tc, const nlohmann::js
 // ==============================================================================
 // ==============================================================================
 
-TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username){
+TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username, int autocheck_number) {
 
   std::string command = j["command"];
   std::vector<nlohmann::json> actions;
@@ -1011,8 +1011,16 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   nlohmann::json test_case_limits = tc.get_test_case_limits();
   nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
-  std::string output_file_name = "temporary_custom_validator_output.json";
-  std::string input_file_name = "custom_validator_input.json";
+  std::string validator_stdout_filename = "validation_stdout.json";
+  std::string validator_error_filename = "validation_stderr.txt";
+  std::string validator_log_filename    = "validation_logfile.txt";
+  std::string validator_json_filename   = "validation_results.json";
+  std::string final_validator_log_filename    = "validation_logfile_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_error_filename    = "validation_stderr_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_json_filename   = "validation_results_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".json";
+  std::string input_file_name           = "custom_validator_input.json";
+
+
 
   //Add the testcase prefix to j for use by the validator.
   nlohmann::json copy_j = j;
@@ -1024,17 +1032,61 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   input_file << copy_j;
   input_file.close();
 
-  command = command + " 1>" + output_file_name;
+  command = command + " 1>" + validator_stdout_filename + " 2>" + validator_error_filename;
   int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT",
                     tc.has_timestamped_stdout());
   std::remove(input_file_name.c_str());
 
-  std::ifstream ifs(output_file_name);
+  std::ifstream validator_json(validator_json_filename);
+  // If we cannot use the validator.json (it doesn't exist), use the stdout.json instead.
+  if(!validator_json.good()){
+    std::ifstream stdout_reader(validator_stdout_filename);
+    // If we can open the stdout file, archive it.
+    if(stdout_reader.good()){
+      std::ofstream dest( final_validator_json_filename, std::ios::binary );
+      dest << stdout_reader.rdbuf();
+      dest.close();
+    }
+    stdout_reader.close();
+  } 
+  // If we can use the validator json, archive it.
+  else {
+    std::ofstream dest( final_validator_json_filename, std::ios::binary );
+    dest << validator_json.rdbuf();
+    dest.close();
+  }
+  validator_json.close();
+
+  // If the validator log exists, archive it.
+  std::ifstream validator_log(validator_log_filename);
+  if(validator_log.good()) {
+    std::ofstream dest( final_validator_log_filename, std::ios::binary );
+    dest << validator_log.rdbuf();
+    dest.close();
+  }
+  validator_log.close();
+
+  // If the validator error file exists, archive it.
+  std::ifstream validator_error(validator_error_filename);
+  if(validator_error.good()) {
+    std::ofstream dest( final_validator_error_filename, std::ios::binary );
+    dest << validator_error.rdbuf();
+    dest.close();
+  }
+  validator_error.close();
+
+  // Now that the files have been copied to permanent positions/loaded into memory, delete them.
+  std::remove(validator_stdout_filename.c_str());
+  std::remove(validator_log_filename.c_str());
+  std::remove(validator_json_filename.c_str());
+  std::remove(validator_error_filename.c_str());
+
+  std::ifstream ifs(final_validator_json_filename);
 
   if(!ifs.good()){
-    std::cout << "ERROR: Could not open the JSON output by the validator to stdout" <<std::endl;
+    std::cout << "ERROR: Could not open the JSON output by the validator." <<std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation did not return a result.")});
   }
 
@@ -1043,11 +1095,9 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   try{
     result = nlohmann::json::parse(ifs);
   }catch(const std::exception& e){
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
   }
-  std::remove(output_file_name.c_str());
 
   std::string validator_status = "fail";
   if(result["status"].is_string()){
