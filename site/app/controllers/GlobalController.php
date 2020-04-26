@@ -68,8 +68,8 @@ class GlobalController extends AbstractController {
                     "title" => "Docker UI",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-docker-link",
-                    "icon" => "fab fa-docker",
-                    "append_fa" => false,
+                    "icon" => "fa-docker",
+                    "prefix" => "fab",
                 ]);
             }
 

@@ -12,6 +12,7 @@ import stat
 import traceback
 import datetime
 import fcntl
+import docker
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
@@ -328,6 +329,21 @@ class UpdateDockerData(AbstractJob):
     results to a json file where the PHP user can read the data, used for
     the submitty docker interface
     '''
+    def format_bytes(size):
+        power = 2**10
+        n = 0
+        power_labels = {0 : '', 1: 'KB', 2: 'MB', 3: 'GB', 4: 'TB'}
+        while size > power:
+            size /= power
+            n += 1
+        
+        ret = str(math.floor(size))
+        if n in power_labels:
+            ret += power_labels[n]
+
+        return ret
+
+
     def run_job(self):
 
         tgt_path = Path(DATA_DIR, 'docker_data', 'submitty_docker.json')
@@ -337,32 +353,46 @@ class UpdateDockerData(AbstractJob):
         log_file_path = os.path.join(log_path, 
                                 "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
                                 today.day))
-        full_time = today.strftime("%d/%m/%Y %H:%M:%S")
+        full_time = today.strftime("%m/%d/%Y %H:%M:%S")
 
+        docker_client = docker.from_env()
         try:
-            docker_info = subprocess.run(["docker", "info", "--format", "{{json .}}"], stdout=subprocess.PIPE)
-            docker_images = subprocess.run(["docker", "images", "--format", "{{json .}}"], stdout=subprocess.PIPE)
+            docker_info = docker_client.info()
+            dokcer_client = docker.APIClient(base_url='unix://var/run/docker.sock')
+            images = docker_client.images()
 
-            if docker_info.returncode != 0 or docker_images.returncode != 0:
-                raise Exception("Failed to run docker subprocesses")
-
-            docker_info = docker_info.stdout.decode("utf-8")
-            docker_images = docker_images.stdout.decode("utf-8")
-
+            #format images closer to output of 'docker images'
             docker_info = json.loads(docker_info)
+            docker_images = json.loads(docker_images)
+            
+            for x in docker_images:
+                created_date = datetime.datetime.fromtimestamp(x['Created'])
 
-            #each image is its own dictionary, stitch them together
-            docker_images = docker_images.split('\n')
-            images = []
-            for image in docker_images:
-                try:
-                    tmp = json.loads(image)
-                except ValueError:
-                    continue
+                diff = today - created_date
+                print(diff.days, math.floor( diff.days/30))
 
-                images.append(tmp)
+                if (diff.days/ (30*12) > 0):
+                    x['CreatedSince'] = str(math.floor(diff.days/(30*12))) + " years ago"
+                elif (diff.days/30 > 0):
+                    x['CreatedSince'] = str(math.floor(diff.days/30)) + " months ago"
+                else:
+                    x['CreatedSince'] = str(diff.days) + " days ago"
 
-            docker_images = images
+
+                x['CreatedAt'] = created_date.strftime("%m-%d-%Y %H:%M:%S")
+                name = x['RepoTags'][0].split(':')
+
+                x['Repository'] = name[0]
+                x['Tag'] = name[1]
+
+                x['Size'] = format_bytes(x['Size'])
+                x['VirtualSize'] = format_bytes(x['VirtualSize'])
+                x['Id'] = x['Id'].split(':')[1][:10]
+
+                del(x['RepoTags'])
+                del(x['RepoDigests'])
+                del(x['Created'])
+
             data = {"docker_info" : docker_info, "docker_images" : docker_images, "update_time" : full_time}
 
             with tgt_path.open("w") as output:

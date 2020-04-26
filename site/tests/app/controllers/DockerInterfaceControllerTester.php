@@ -30,9 +30,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         $this->assertTrue(FileUtils::recursiveRmdir($this->config['tmp_path']));
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+
     public function testUpdateDockerData() {
 
         $docker = new DockerInterfaceController($this->core);
@@ -43,9 +41,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         $this->assertTrue(file_exists(FileUtils::joinPaths($this->config['job_path'], 'updateDockerInfo.json')));
     }
 
-     /**
-     * @runInSeparateProcess
-     */
+
     public function testCheckJobStatus() {
         $docker = new DockerInterfaceController($this->core);
         $response = ($docker->checkJobStatus())->json_response->json;
@@ -76,7 +72,6 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
 
         $response = ($docker->showDockerInterface());
         $api = $response->json_response->json;
-        $this->assertEquals(['status' => 'success',
-                             'data' => ['test' => 'test', 'autograding_containers' => false]], $api);
+        $this->assertEquals(['status' => 'success', 'data' => ['test' => 'test']], $api);
     }
 }

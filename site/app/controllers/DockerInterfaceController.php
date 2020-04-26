@@ -107,15 +107,17 @@ class DockerInterfaceController extends AbstractController {
         $path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "docker_data", "submitty_docker.json");
         $docker_info = FileUtils::readJsonFile($path);
 
+
+        $container_json = FileUtils::readJsonFile("/usr/local/submitty/config/autograding_containers.json");
+
         if ($docker_info === false) {
             $err_msg = "Failed to parse submitty docker information";
             $this->core->addErrorMessage($err_msg);
-            return new MultiResponse(JsonResponse::getFailResponse($err_msg));
+            $json_response = JsonResponse::getFailResponse($err_msg);
         }
-
-        $container_json = FileUtils::readJsonFile("/usr/local/submitty/config/autograding_containers.json");
-        $docker_info['autograding_containers'] = $container_json;
-        $json_response = JsonResponse::getSuccessResponse($docker_info);
+        else {
+            $json_response = JsonResponse::getSuccessResponse($docker_info);
+        }
 
         return new MultiResponse(
             $json_response,
