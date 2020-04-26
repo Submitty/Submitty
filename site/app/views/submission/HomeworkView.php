@@ -552,7 +552,7 @@ class HomeworkView extends AbstractView {
                 continue;
             }
             elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
             }
 
             $page_count = 0;
