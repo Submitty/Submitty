@@ -131,6 +131,7 @@ class SecureExecutionEnvironment():
     # copy these three helper files for computing access duration
     shutil.copy(self.tmp_submission+"/queue_file.json",directory)
     shutil.copy(self.tmp_submission+"/user_assignment_settings.json",directory)
+    shutil.copy(self.tmp_submission+"/submission/.submit.timestamp",directory)
     if os.path.exists(self.tmp_submission+"/user_assignment_access.json"):
       shutil.copy(self.tmp_submission+"/user_assignment_access.json",directory)
 

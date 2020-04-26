@@ -1,11 +1,12 @@
 {
-    "assignment_message" : "#Welcome to a Timed Notebook Gradeable\n  \
-\n  \
-Here's a short list of instructions:\n  \
-* This is an open-book quiz.\n  \
-* You have 10 minutes to submit your answers.\n  \
-\n  \
-*NOTE: If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.  You may submit this assignment multiple times, but you will lose 1 point for each submission in excess of 5.*",
+    "assignment_message" : "#Welcome to a Timed Notebook Gradeable  \n\
+  \n\
+Here's a short list of instructions:  \n\
+* This is an open-book quiz.  \n\
+* You have 10 minutes to submit your answers.  \n\
+&nbsp;  \n\
+*NOTE 1: If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.*  \n\
+*NOTE 2: You may submit this assignment multiple times, but you will lose 1 point for each submission in excess of 5.*",
 
     "autograding" : {
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
@@ -80,6 +81,12 @@ Here's a short list of instructions:\n  \
                            "show_expected":"never","show_actual":"never",
                            "failure_message":"Incorrect Answer" } ] },
 
+
+        // ==========================================================
+        // NOTE: Currently implemented as an instructor provided
+        // custom validator, but will likely be available as a built
+        // in validation option in the future.
+        // ==========================================================
         {
             "title":"Check Time Limit",
             "copy_access_files" : true,
@@ -93,7 +100,15 @@ Here's a short list of instructions:\n  \
                     "allowed_minutes" : 10,
                     "penalty_per_minute" : -1,
                     "max_penalty" : -30, // must match above
-                    "show_actual":"never"
+                    "show_actual":"never",
+
+                    // optional field to list specific users with different time limits
+                    "override" :
+                    [
+                        { "user" : "instructor", "allowed_minutes" : 20 },
+                        { "user" : "student",    "allowed_minutes" : 15 },
+                        { "user" : "aphacker",   "allowed_minutes" : 5 }
+                    ]
                 }
             ]
         },
