@@ -66,9 +66,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
 
         //create the file
         $tgt_file = FileUtils::joinPaths($this->config['docker_data'], 'submitty_docker.json');
-        $tgt_data = '{ "test" : "test" }';
-        $f = fopen($tgt_file, "w");
-        fwrite($f, $tgt_data);
+        file_put_contents($tgt_file, '{"test": "test"}');
 
         $response = ($docker->showDockerInterface());
         $api = $response->json_response->json;
