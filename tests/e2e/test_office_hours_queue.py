@@ -1,5 +1,6 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 
 class TestOfficeHoursQueue(BaseTestCase):
     """
@@ -24,66 +25,66 @@ class TestOfficeHoursQueue(BaseTestCase):
         base_queue_history_count = queueHistoryCount(self, False)
 
         openQueue(self, "custom code", "this queue rocks")
-        expectedAlerts(self, 1, 0)
-        openQueue(self, "custom code", "same name new code")#should fails
-        expectedAlerts(self, 0, 1)
+        expectedAlerts(self, 1, 0, success_text=['New queue added'], error_text=[])
+        openQueue(self, "custom code", "same name new code")
+        expectedAlerts(self, 0, 1, success_text=[], error_text=['Unable to add queue. Make sure you have a unique queue name'])
         openQueue(self, "random code")
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['New queue added'], error_text=[])
 
         changeQueueCode(self, "random code")
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Queue Access Code Changed'], error_text=[])
         changeQueueCode(self, "custom code", "new code")
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Queue Access Code Changed'], error_text=[])
 
         switchToStudent(self, 'student')
         base_queue_history_count_student = queueHistoryCount(self, False)
         studentJoinQueue(self, 'custom code', 'new code')
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Added to queue'], error_text=[])
         studentRemoveSelfFromQueue(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Removed from queue'], error_text=[])
         self.assertEqual(base_queue_history_count_student+1, queueHistoryCount(self, False))
         studentJoinQueue(self, 'custom code', 'new code')
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Added to queue'], error_text=[])
         switchToInstructor(self, 'instructor')
 
         self.assertEqual(1, currentQueueCount(self))
         helpFirstStudent(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Started helping student'], error_text=[])
         self.assertEqual(1, currentQueueCount(self))
 
         switchToStudent(self, 'student')
         studentFinishHelpSelf(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Finished helping student'], error_text=[])
         self.assertEqual(base_queue_history_count_student+2, queueHistoryCount(self, False))
         studentJoinQueue(self, 'custom code', 'new code')
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Added to queue'], error_text=[])
         switchToStudent(self, 'aphacker')
         base_queue_history_count_aphacker = queueHistoryCount(self, False)
         studentJoinQueue(self, 'custom code', 'new code', 'nick name hacker')
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Added to queue'], error_text=[])
         switchToInstructor(self, 'instructor')
         self.assertEqual(2, currentQueueCount(self))
         helpFirstStudent(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Started helping student'], error_text=[])
         self.assertEqual(base_queue_history_count+2, queueHistoryCount(self, False))
         finishHelpFirstStudent(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Finished helping student'], error_text=[])
         self.assertEqual(base_queue_history_count+3, queueHistoryCount(self, False))
         self.assertEqual(1, currentQueueCount(self))
         removeFirstStudent(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Removed from queue'], error_text=[])
         self.assertEqual(base_queue_history_count+4, queueHistoryCount(self, False))
         self.assertEqual(0, currentQueueCount(self))
         restoreFirstStudent(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Student restored'], error_text=[])
         self.assertEqual(base_queue_history_count+3, queueHistoryCount(self, False))
         self.assertEqual(1, currentQueueCount(self))
         restoreFirstStudent(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Student restored'], error_text=[])
         self.assertEqual(base_queue_history_count+2, queueHistoryCount(self, False))
         self.assertEqual(2, currentQueueCount(self))
         restoreFirstStudent(self)#should fail because the student is already in the queue
-        expectedAlerts(self, 0, 1)
+        expectedAlerts(self, 0, 1, success_text=[], error_text=['Cannot restore a user that is currently in the queue. Please remove them first.'])
         self.assertEqual(base_queue_history_count+2, queueHistoryCount(self, False))
         self.assertEqual(2, currentQueueCount(self))
         openFilterSettings(self)
@@ -92,15 +93,13 @@ class TestOfficeHoursQueue(BaseTestCase):
         toggleQueueFilter(self, 'custom code')#turn it back on
         self.assertEqual(2, currentQueueCount(self))
         closeFirstQueue(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Closed queue: "custom_code"'], error_text=[])
         openFilterSettings(self)
         emptyFirstQueue(self)
-        expectedAlerts(self, 1, 0)
+        expectedAlerts(self, 1, 0, success_text=['Queue emptied'], error_text=[])
         self.assertEqual(base_queue_history_count+4, queueHistoryCount(self, False))
         self.assertEqual(0, currentQueueCount(self))
         switchToStudent(self, 'student')
-        studentJoinQueue(self, 'custom code', 'new code')#this should fail as the queue is closed
-        expectedAlerts(self, 0, 1)
 
         # Students should not be able to see any of theses elements
         self.assertEqual(True, verifyElementMissing(self, 'class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
@@ -164,8 +163,11 @@ def switchToInstructor(self, account):
 def studentJoinQueue(self, queueName, queueCode, studentName=None):
     if(studentName):
         self.driver.find_element_by_id('name_box').send_keys(studentName)
-    self.driver.find_element_by_xpath(f'//*[@id="queue_code"]/option[text()="{queueName}"]').click()
+    select = Select(self.driver.find_element_by_id('queue_code'))
+    select.select_by_visible_text(queueName)
     self.driver.find_element_by_id('token_box').send_keys(queueCode)
+    self.assertIn("_".join(queueName.split()), self.driver.find_element_by_id('add_to_queue').get_attribute('action'))
+    self.assertEqual(queueCode, self.driver.find_element_by_id('token_box').get_attribute('value'))
     self.driver.find_element_by_id('join_queue_btn').click()
 
 def studentRemoveSelfFromQueue(self):
@@ -239,12 +241,18 @@ def verifyElementMissing(self, type, values):
             exit(1)
     return True
 
-def countAlertSuccess(self):
-    return len(self.driver.find_elements_by_class_name("alert-success"))
+def countAlertSuccess(self, text=[]):
+    alerts = self.driver.find_elements_by_class_name("alert-success")
+    alerts = [ x.text for x in alerts ]
+    self.assertEqual(set(alerts), set(text))
+    return len(alerts)
 
-def countAlertError(self):
-    return len(self.driver.find_elements_by_class_name("alert-error"))
+def countAlertError(self, text=[]):
+    alerts = self.driver.find_elements_by_class_name("alert-error")
+    alerts = [ x.text for x in alerts ]
+    self.assertEqual(set(alerts), set(text))
+    return len(alerts)
 
-def expectedAlerts(self, success=0, error=0):
-    self.assertEqual(countAlertSuccess(self), success)
-    self.assertEqual(countAlertError(self), error)
+def expectedAlerts(self, success=0, error=0, success_text=[], error_text=[]):
+    self.assertEqual(countAlertError(self, error_text), error)
+    self.assertEqual(countAlertSuccess(self, success_text), success)

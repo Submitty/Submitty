@@ -7,11 +7,9 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import json
 import stat
 import traceback
 import datetime
-import fcntl
 import docker
 from urllib.parse import unquote
 from . import bulk_qr_split
@@ -202,7 +200,7 @@ class DeleteLichenResult(CourseGradeableJob):
             for folder in ['provided_code', 'tokenized', 'concatenated', 'hashes', 'matches']:
                 shutil.rmtree(str(Path(lichen_dir, folder, gradeable)), ignore_errors=True)
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
-            open_file.write(msg) 
+            open_file.write(msg)
 
 class BulkUpload(CourseJob):
     required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
@@ -230,7 +228,7 @@ class BulkUpload(CourseJob):
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
             msg = "did not pass in qr prefix or suffix"
             print(msg)
-            return 
+            return
 
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
@@ -244,7 +242,7 @@ class BulkUpload(CourseJob):
 
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
-        log_file_path = os.path.join(log_path, 
+        log_file_path = os.path.join(log_path,
                                 "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
                                 today.day))
 
@@ -254,17 +252,14 @@ class BulkUpload(CourseJob):
             log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
         else:
             log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
-        
+
         logger.write_to_log(log_file_path, log_msg)
         #create paths
         try:
-            with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
-                CONFIG = json.loads(data_file.read())
-
             current_path = os.path.dirname(os.path.realpath(__file__))
-            uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
-            bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
-            split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
+            uploads_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads")
+            bulk_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
+            split_path = os.path.join(DATA_DIR,"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
         except Exception:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
@@ -304,7 +299,7 @@ class BulkUpload(CourseJob):
         try:
             if is_qr:
                 bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
-            else: 
+            else:
                 bulk_upload_split.main([filename, split_path, num, log_file_path])
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"

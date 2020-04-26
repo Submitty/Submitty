@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 
 def get_timezone():
     """
-    Grab the system timezone, should generally only be used when we don't have any further
-    information on what timezone we should be using
+    Grab the system timezone, should generally only be used when we don't have any
+    further information on what timezone we should be using
 
     :return:
     :rtype: pytz.tzinfo.DstTzInfo
@@ -23,7 +23,7 @@ def get_current_time():
     return datetime.now(get_timezone())
 
 
-def write_submitty_date(d=get_current_time(),microseconds=False):
+def write_submitty_date(d=None, microseconds=False):
     """
     Converts a datetime object to a string with a timezone. If the datetime object
     does not have a timezone, it'll use the server's timezone.
@@ -33,6 +33,8 @@ def write_submitty_date(d=get_current_time(),microseconds=False):
 
     FIXME: We should not be printing anything out here
     """
+    if d is None:
+        d = get_current_time()
     if not isinstance(d, datetime):
         print("ERROR:  ", d, " is not a datetime object, it is of type ", type(d))
         return d
@@ -74,21 +76,22 @@ def read_submitty_date(s):
             try:
                 # hoping to find timezone -04
                 thedatetime = thedatetime+"00"
-                print ("dateutils read_submitty_date -- added '00' to ",thedatetime)
+                print("dateutils read_submitty_date -- added '00' to ", thedatetime)
                 with_timezone = datetime.strptime(thedatetime, '%Y-%m-%d %H:%M:%S%z')
             except ValueError:
-                print ("DATE PROBLEM",s)
+                print("DATE PROBLEM", s)
                 raise SystemExit("ERROR:  invalid date format %s" % s)
     return with_timezone
 
 
 def parse_datetime(date_string):
     """
-    Given a string that should either represent an absolute date or an arbitrary date, parse this
-    into a datetime object that is then used. Absolute dates should be in the format of
-    YYYY-MM-DD HH:MM:SS while arbitrary dates are of the format "+/-# day(s) [at HH:MM:SS]" where
-    the last part is optional. If the time is omitted, then it uses midnight of whatever day was
-    specified. Datetimew without timezones assume local timezone
+    Given a string that should either represent an absolute date or an arbitrary date,
+    parse this into a datetime object that is then used. Absolute dates should be in
+    the format of YYYY-MM-DD HH:MM:SS while arbitrary dates are of the format
+    "+/-# day(s) [at HH:MM:SS]" where the last part is optional. If the time is
+    omitted, then it uses midnight of whatever day was specified. Datetimew without
+    timezones assume local timezone
 
     Examples of allowed strings:
     2016-10-14
@@ -115,21 +118,38 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S%z').replace(hour=23, minute=59, second=59)
+        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S%z').replace(
+            hour=23,
+            minute=59,
+            second=59
+        )
     except ValueError:
         pass
 
-    m = re.search('([+|\-][0-9]+) (days|day) at [0-2][0-9]:[0-5][0-9]:[0-5][0-9]', date_string)
+    m = re.search(
+        '([+|-][0-9]+) (days|day) at [0-2][0-9]:[0-5][0-9]:[0-5][0-9]',
+        date_string
+    )
     if m is not None:
         hour = int(m.group(2))
         minu = int(m.group(3))
         sec = int(m.group(4))
         days = int(m.group(1))
-        return get_current_time().replace(hour=hour, minute=minu, second=sec, microsecond=0) + timedelta(days=days)
+        return get_current_time().replace(
+            hour=hour,
+            minute=minu,
+            second=sec,
+            microsecond=0
+        ) + timedelta(days=days)
 
-    m = re.search('([+|\-][0-9]+) (days|day)', date_string)
+    m = re.search('([+|-][0-9]+) (days|day)', date_string)
     if m is not None:
         days = int(m.group(1))
-        return get_current_time().replace(hour=23, minute=59, second=59, microsecond=0) + timedelta(days=days)
+        return get_current_time().replace(
+            hour=23,
+            minute=59,
+            second=59,
+            microsecond=0
+        ) + timedelta(days=days)
 
     raise ValueError("Invalid string for date parsing: " + str(date_string))
