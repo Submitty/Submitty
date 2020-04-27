@@ -433,9 +433,10 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
                 log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
         # Rescue custom validator files
-        pattern_copy("rescue_custom_validator_validation_jsons", [os.path.join(tmp_work, 'validation_results_*.json'),], tmp_work, tmp_results, tmp_logs)
-        pattern_copy("rescue_custom_validator_logs", [os.path.join(tmp_work, 'validation_logfile_*.txt'),], tmp_work, tmp_results, tmp_logs)
-        pattern_copy("rescue_custom_validator_errors", [os.path.join(tmp_work, 'validation_stderr_*.txt'),], tmp_work, tmp_results, tmp_logs)
+        custom_validator_output_directory = os.path.join(tmp_results, "custom_validator_output")
+        pattern_copy("rescue_custom_validator_validation_jsons", [os.path.join(tmp_work, 'validation_results_*.json'),], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_logs", [os.path.join(tmp_work, 'validation_logfile_*.txt'),], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_errors", [os.path.join(tmp_work, 'validation_stderr_*.txt'),], tmp_work, custom_validator_output_directory, tmp_logs)
 
         just_write_grade_history(history_file,
                                 gradeable_deadline_longstring,
