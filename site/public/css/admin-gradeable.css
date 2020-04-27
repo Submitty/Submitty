@@ -59,6 +59,11 @@ select {
     height: 35px;
 }
 
+.peer-button {
+    background-color: var(--standard-plum-purple);
+    color: white;
+}
+
 a.nav-bar {
     padding: 6px 12px;
     text-decoration: none;
