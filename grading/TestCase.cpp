@@ -230,7 +230,7 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else if (method == "errorIfNotEmpty")            { return dispatch::errorIfNotEmpty_doit(*this,grader);               }
   else if (method == "errorIfEmpty")               { return dispatch::errorIfEmpty_doit(*this,grader);                  }
   else if (method == "ImageDiff")                  { return dispatch::ImageDiff_doit(*this,grader, autocheck_number);   }
-  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config, username); }
+  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config, username, autocheck_number); }
   else                                             { return custom_dispatch(grader);                                    }
 }
 
