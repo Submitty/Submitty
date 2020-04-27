@@ -246,7 +246,8 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
 
     if os.path.exists(user_assignment_access_json):
         shutil.copy(user_assignment_access_json,  os.path.join(tmp_submission,"user_assignment_access.json"))
-    shutil.copy(user_assignment_settings_json,os.path.join(tmp_submission,"user_assignment_settings.json"))
+    if os.path.exists(user_assignment_settings_json):
+        shutil.copy(user_assignment_settings_json,os.path.join(tmp_submission,"user_assignment_settings.json"))
 
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     with open(os.path.join(tmp_submission,".grading_began"), 'w') as f:
