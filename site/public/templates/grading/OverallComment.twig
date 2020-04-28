@@ -44,7 +44,7 @@ Required Parameters:
                     class="general-comment-entry noscroll key_to_click" tabindex="0">{{comment|escape }}</textarea>
         {% endfor %}
     </div>
-    <script type="application/javascript">
+    <script>
         var grader = "{{overall_comment["logged_in_user"]["user_id"] | escape('js') }}";
         $(document).on('input','#overall-comment-' + grader,function () {
             var currentOverallComment  = $('textarea#overall-comment-' + grader).val();
