@@ -779,11 +779,25 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ]);
         }
+
         elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
-            // This would be more dynamic is $display_version_instance included an expected number, requires more database changes
-            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
+
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern_match_flag = false;
+            foreach($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key)) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if($pattern_match_flag == true) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
                 "message" => "Multiple files within submissions"
             ]);
+            }
         }
         return $return;
     }
