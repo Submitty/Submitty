@@ -81,7 +81,7 @@ class PDFController extends AbstractController {
             return false;
         }
         
-        if ($gradeable->isPeerGrading() && $this->core->getQueries()->getUserById($grader_id)->getGroup() == 4) {
+        if ($gradeable->isPeerGrading() && $this->core->getQueries()->getUserById($grader_id)->getGroup() === User::GROUP_STUDENT) {
             $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
         
             if (!in_array($user_id, $user_ids)) {
