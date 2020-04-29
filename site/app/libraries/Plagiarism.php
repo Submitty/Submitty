@@ -22,9 +22,13 @@ class Interval {
   }
 
   public function addUser($sub) {
-    if (!in_array($sub, $this->user_matches)) {
-      $this->user_matches[] = $sub;
+    foreach($this->user_matches as $s) {
+      if($sub->getUid() == $s->getUid() && $sub->getVid() == $s->getVid()) {
+        
+        return;
+      }
     }
+    $this->user_matches[] = $sub;
   }
 
   public function updateStart($newS) {
