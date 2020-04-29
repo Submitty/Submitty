@@ -66,30 +66,6 @@ class Submission {
 
 }
 
-function compareInterval($intervalOne, $intervalTwo) {
-  return $intervalOne->getStart() > $intervalTwo->getStart();
-}
-
-/** Constructs an array of interval objects from matches
- *  @param filename - path to matches json
- *  @return list containing intervals
- */
-function constructIntervals($filename) {
-  $content = file_get_contents($filename);
-  $arr = json_decode($content,true);
-  $resultArray = [];
-  foreach ($arr as $match) {
-    $i = new \Interval($match['start'], $match['end']);
-    foreach ($match['others'] as $o) {
-      $s = new Submission($o['username'], $o['version'], $o['matchingpositions']);
-      $i->addUser($s);
-    }
-    $resultArray[] = $i;
-  }
-  usort($resultArray, "compareInterval");
-  return $resultArray;
-}
-
 /**
  * Taken from: https://stackoverflow.com/questions/20210324/php-stack-implementation
  */
@@ -98,28 +74,18 @@ class Stack {
     protected $stack;
     protected $limit;
 
-    public function __construct($limit = 10, $initial = array()) {
+    public function __construct($initial = array()) {
         // initialize the stack
         $this->stack = $initial;
-        // stack can only contain this many items
-        $this->limit = $limit;
     }
 
     public function push($item) {
         // trap for stack overflow
-        if (count($this->stack) < $this->limit) {
-            // prepend item to the start of the array
-            array_unshift($this->stack, $item);
-        } else {
-            throw new RunTimeException('Stack is full!');
-        }
+        array_unshift($this->stack, $item);
     }
 
     public function pop() {
-        if ($this->isEmpty()) {
-            // trap for stack underflow
-            throw new RunTimeException('Stack is empty!');
-        } else {
+        if (!$this->isEmpty()) {
             // pop item from the start of the array
             return array_shift($this->stack);
         }
@@ -135,21 +101,49 @@ class Stack {
 
 }
 
-function mergeIntervals($iArr) {
-  $stack = new Stack();
-  $stack->push($iArr[0]);
-  for ($i = 1; $i < count($iArr); $i++) {
-    $cI = $stack->top();
-    if ($cI->getEnd() < $iArr[$i]->getStart()) {
-      $stack->push($iArr[$i]);
-    } else if ($cI->getEnd() < $iArr[$i]->getEnd()) {
-      $cI->updateEnd($iArr[$i]->getEnd());
-      foreach ($iArr[$i]->getUsers() as $u) {
-        $cI->addUser($u);
-      }
-      $stack->pop();
-      $stack->push($cI);
-    }
+class PlagiarismUtils {
+
+  public static function compareInterval($intervalOne, $intervalTwo) {
+    return $intervalOne->getStart() > $intervalTwo->getStart();
   }
-  return $stack;
+
+  /** Constructs an array of interval objects from matches
+   *  @param filename - path to matches json
+   *  @return list containing intervals
+   */
+  public static function constructIntervals($filename) {
+    $content = file_get_contents($filename);
+    $arr = json_decode($content,true);
+    $resultArray = [];
+    foreach ($arr as $match) {
+      $i = new Interval($match['start'], $match['end']);
+      foreach ($match['others'] as $o) {
+        $s = new Submission($o['username'], $o['version'], $o['matchingpositions']);
+        $i->addUser($s);
+      }
+      $resultArray[] = $i;
+    }
+    usort($resultArray, "self::compareInterval");
+    return $resultArray;
+  }
+
+  public static function mergeIntervals($iArr) {
+    $stack = new Stack();
+    $stack->push($iArr[0]);
+    for ($i = 1; $i < count($iArr); $i++) {
+      $cI = $stack->top();
+      if ($cI->getEnd() < $iArr[$i]->getStart()) {
+        $stack->push($iArr[$i]);
+      } else if ($cI->getEnd() < $iArr[$i]->getEnd()) {
+        $cI->updateEnd($iArr[$i]->getEnd());
+        foreach ($iArr[$i]->getUsers() as $u) {
+          $cI->addUser($u);
+        }
+        $stack->pop();
+        $stack->push($cI);
+      }
+    }
+    return $stack;
+  }
+
 }

@@ -4,7 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\libraries\Plagiarism;
+use app\libraries\PlagiarismUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\FeatureFlag;
 use Symfony\Component\Routing\Annotation\Route;
@@ -596,7 +596,8 @@ class PlagiarismController extends AbstractController {
             return $color_info;
         }
         else {
-            $matches = json_decode(file_get_contents($file_path), true);
+            $matches = PlagiarismUtils::mergeIntervals(PlagiarismUtils::constructIntervals($file_path));
+            //$matches = json_decode(file_get_contents($file_path), true);
             $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/tokens.json";
             $tokens_user_1 = json_decode(file_get_contents($file_path), true);
             if ($user_id_2 != "") {
@@ -604,20 +605,22 @@ class PlagiarismController extends AbstractController {
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
             }
             foreach ($matches as $match) {
-                $start_pos = $tokens_user_1[$match["start"] - 1]["char"] - 1;
-                $start_line = $tokens_user_1[$match["start"] - 1]["line"] - 1;
-                $end_pos = $tokens_user_1[$match["end"] - 1]["char"] - 1; //!!!!!
-                $end_line = $tokens_user_1[$match["end"] - 1]["line"] - 1;
-                $start_value = $tokens_user_1[$match["start"] - 1]["value"];
-                $end_value = $tokens_user_1[$match["end"] - 1]["value"];
+                $s_pos = $match->getStart();
+                $e_pos = $match->getEnd();
+                $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
+                $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
+                $end_pos = $tokens_user_1[$e_pos - 1]["char"] - 1; //!!!!!
+                $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
+                $start_value = $tokens_user_1[$s_pos - 1]["value"];
+                $end_value = $tokens_user_1[$e_pos - 1]["value"];
                 $userMatchesStarts = array();
                 $userMatchesEnds = array();
-                if ($match["type"] == "match") {
+                if (true) {
                     $segment_info["{$start_line}_{$start_pos}"] = array();
                     $orange_color = false;
-                    foreach ($match['others'] as $i => $other) {
-                        $segment_info["{$start_line}_{$start_pos}"][] = $other["username"] . "_" . $other["version"];
-                        if ($other["username"] == $user_id_2) {
+                    foreach ($match->getUsers() as $i => $other) {
+                        $segment_info["{$start_line}_{$start_pos}"][] = $other->getUid() . "_" . $other->getVid();
+                        if ($other->getUid() == $user_id_2) {
                             $orange_color = true;
                             $user_2_index_in_others = $i;
                         }
@@ -632,20 +635,20 @@ class PlagiarismController extends AbstractController {
                         $color = '#ffff00';
                     }
 
-                    if ($codebox == "2" && $user_id_2 != "" && $orange_color) {
-                        foreach ($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
-                            $start_pos_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["char"] - 1;
-                            $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["line"] - 1;
-                            $end_pos_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["char"] - 1; //!!!!
-                            $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["line"] - 1;
-                            $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["value"];
-                            $end_value_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["value"];
-                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
+                    // if ($codebox == "2" && $user_id_2 != "" && $orange_color) {
+                    //     foreach ($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
+                    //         $start_pos_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["char"] - 1;
+                    //         $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["line"] - 1;
+                    //         $end_pos_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["char"] - 1; //!!!!
+                    //         $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["line"] - 1;
+                    //         $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["value"];
+                    //         $end_value_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["value"];
+                    //         $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
 
-                            $userMatchesStarts[] = $user_2_matchingposition["start"];
-                            $userMatchesEnds[] = $user_2_matchingposition["end"];
-                        }
-                    }
+                    //         $userMatchesStarts[] = $user_2_matchingposition["start"];
+                    //         $userMatchesEnds[] = $user_2_matchingposition["end"];
+                    //     }
+                    // }
                 }
                 elseif ($match["type"] == "common") {
                     //Color is grey -- common matches among all students
