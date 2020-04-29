@@ -604,7 +604,8 @@ class PlagiarismController extends AbstractController {
                 $file_path = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $user_id_2 . "/" . $version_user_2 . "/tokens.json";
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
             }
-            foreach ($matches as $match) {
+            while (!$matches->isEmpty()) {
+                $match = $matches->top();
                 $s_pos = $match->getStart();
                 $e_pos = $match->getEnd();
                 $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
@@ -660,6 +661,7 @@ class PlagiarismController extends AbstractController {
                 }
 
                 array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
+                $matches->pop();
             }
         }
         return [$color_info, $segment_info];
