@@ -68,14 +68,46 @@ function setCodeBox(codebox_id, state)
 const AUTOSAVE_KEY = `${window.location.pathname}-autosave`;
 
 /**
+ * This value will be true if autosave is enabled for this session.
+ * 
+ * Specifically, we try to set a test value in localStorage and immediately 
+ * remove the test value. If all goes well, then localStorage is available and
+ * we can auto-save to there. Otherwise, we simply disable auto-saving.
+ * 
+ * In particular, setting an item can fail in one of two scenarios:
+ * * The local storage quota is full
+ * * The `localStorage` variable simply doesn't exist and therefore the browser doesn't support it.
+ * 
+ * The first point isn't too relevant as we don't expect to be storing a ton of
+ * data; however, Safari on iOS in Private Mode sets the quota to zero, meaning 
+ * that every attempt to write to localStorage will throw an exception. 
+ * Throwing an exception every keypress isn't great, hence the primary 
+ * motivation for this block here.
+ * 
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#Feature-detecting_localStorage|MDN} on detecting localStorage.
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Storage/setItem|Storage.setItem()} documentation.
+ */
+const autosaveEnabled = (() => {
+    try {
+        localStorage.setItem('TEST', 'TEST');
+        localStorage.removeItem('TEST');
+        return true;
+    } catch (e) {
+        return false;
+    }
+})();
+
+/**
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveToLocal() {
-    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
-        multiple_choice: gatherInputAnswersByType("multiple_choice"),
-        short_answer: gatherInputAnswersByType("short_answer"),
-        codebox: gatherInputAnswersByType("codebox")
-    }));
+    if (autosaveEnabled) {
+        localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+            multiple_choice: gatherInputAnswersByType("multiple_choice"),
+            short_answer: gatherInputAnswersByType("short_answer"),
+            codebox: gatherInputAnswersByType("codebox")
+        }));
+    }
 }
 
 /**
@@ -83,34 +115,36 @@ function saveToLocal() {
  * autosave data exists yet, then this function does nothing.
  */
 function restoreFromLocal() {
-    const state = JSON.parse(localStorage.getItem(AUTOSAVE_KEY));
-    
-    if (state === null) {
-        return;
-    }
+    if (autosaveEnabled) {
+        const state = JSON.parse(localStorage.getItem(AUTOSAVE_KEY));
+        
+        if (state === null) {
+            return;
+        }
 
-    // First, we restore multiple choice answers
-    for (const id in state.multiple_choice) {
-        const values = state.multiple_choice[id];
-        const index = /multiple_choice_([0-9])+/.exec(id)[1];
-        $(`#mc_field_${index} :input`).each((_index, element) => {
-            $(element).prop('checked', values.includes(element.value)).change();
-        });
-    }
-    // Next, we restore short-answer boxes
-    for (const id in state.short_answer) {
-        const answer = state.short_answer[id][0];
-        // Restore the answer and trigger change events (for setting button states)
-        // (see https://stackoverflow.com/questions/4672505/why-does-the-jquery-change-event-not-trigger-when-i-set-the-value-of-a-select-us)
-        $(`#${id}`).val(answer).trigger('input');
-    }
-    // Finally, we restore codeboxes
-    for (const id in state.codebox) {
-        const answer = state.codebox[id][0];
-        const codebox = $(`#${id} .CodeMirror`).get(0).CodeMirror;
-        // This automatically triggers the event handler for the clear and
-        // recent buttons.
-        codebox.setValue(answer);
+        // First, we restore multiple choice answers
+        for (const id in state.multiple_choice) {
+            const values = state.multiple_choice[id];
+            const index = /multiple_choice_([0-9])+/.exec(id)[1];
+            $(`#mc_field_${index} :input`).each((_index, element) => {
+                $(element).prop('checked', values.includes(element.value)).change();
+            });
+        }
+        // Next, we restore short-answer boxes
+        for (const id in state.short_answer) {
+            const answer = state.short_answer[id][0];
+            // Restore the answer and trigger change events (for setting button states)
+            // (see https://stackoverflow.com/questions/4672505/why-does-the-jquery-change-event-not-trigger-when-i-set-the-value-of-a-select-us)
+            $(`#${id}`).val(answer).trigger('input');
+        }
+        // Finally, we restore codeboxes
+        for (const id in state.codebox) {
+            const answer = state.codebox[id][0];
+            const codebox = $(`#${id} .CodeMirror`).get(0).CodeMirror;
+            // This automatically triggers the event handler for the clear and
+            // recent buttons.
+            codebox.setValue(answer);
+        }
     }
 }
 
