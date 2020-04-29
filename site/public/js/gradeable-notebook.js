@@ -127,7 +127,11 @@ $(document).ready(function () {
 
     });
 
-    $("#submit").click(saveToLocal);
+    $("#submit").click(() => {
+        localStorage.removeItem(AUTOSAVE_KEY);
+        // Changes have been submitted; we don't need to warn the user anymore
+        window.onbeforeunload = null;
+    });
 
     // Register click handler for codebox clear and recent buttons
     $(".codebox-clear-reset").click(function() {
@@ -183,6 +187,8 @@ $(document).ready(function () {
         else
         {
             $(recent_button_id).attr("disabled", false);
+            $("#submit").attr("disabled", false);
+            window.onbeforeunload = () => true;
         }
     }));
 
@@ -223,6 +229,8 @@ $(document).ready(function () {
 
         // Enable recent button
         $("#mc_" + index + "_clear_button").attr("disabled", false);
+        window.onbeforeunload = () => true;
+        $("#submit").attr("disabled", false);
         $("#mc_" + index + "_recent_button").attr("disabled", false);
 
         saveToLocal();
@@ -289,6 +297,8 @@ $(document).ready(function () {
         else
         {
             $(recent_button_id).attr("disabled", false);
+            window.onbeforeunload = () => true;
+            $("#submit").attr("disabled", false);
         }
     });
 
