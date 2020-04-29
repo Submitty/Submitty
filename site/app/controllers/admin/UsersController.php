@@ -888,7 +888,7 @@ class UsersController extends AbstractController {
         $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
-        if ($_FILES['upload']['name'] == "") {
+        if ($_FILES['upload']['name'] === "") {
             $this->core->addErrorMessage("No input file specified");
             $this->core->redirect($return_url);
         }
@@ -900,31 +900,39 @@ class UsersController extends AbstractController {
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_rows = array();
         foreach ($uploaded_data as $row_num => $vals) {
-            // Blacklist validation.  Validation fails if any test resolves as false.
-            switch (false) {
-                // Bounds check to ensure minimum required number of rows is present.
-                case count($vals) >= 5:
-                    // Username must contain only lowercase alpha, numbers, underscores, hyphens
-                case User::validateUserData('user_id', $vals[0]):
-                    // First and Last name must be alpha characters, white-space, or certain punctuation.
-                case User::validateUserData('user_legal_firstname', $vals[1]):
-                case User::validateUserData('user_legal_lastname', $vals[2]):
-                    // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-                case User::validateUserData('user_email', $vals[3]):
-                    // $row[4] validation varies by $list_type
-                    // "classlist" validates registration_section, and "graderlist" validates user_group
-                case $row4_validation_function():
-                    // Database password cannot be blank, no check on format.
-                    // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
-                case !$use_database || User::validateUserData('user_password', $vals[5]):
-                    // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-                    // Automatically validate if not set (this field is optional).
-                case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]):
-                    // Validation failed somewhere.  Record which row failed.
-                    // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
+            // When record contain just one field, only check for valid user_id
+            if (count($vals) === 1) {
+                if (!User::validateUserData('user_id', $vals[0])) {
                     $bad_rows[] = ($row_num + 1);
-                    break;
+                }
+            }
+            else {
+                // Blacklist validation.  Validation fails if any test resolves as false.
+                switch (false) {
+                   // Bounds check to ensure minimum required number of rows is present.
+                    case count($vals) >= 5:
+                       // Username must contain only lowercase alpha, numbers, underscores, hyphens
+                    case User::validateUserData('user_id', $vals[0]):
+                       // First and Last name must be alpha characters, white-space, or certain punctuation.
+                    case User::validateUserData('user_legal_firstname', $vals[1]):
+                    case User::validateUserData('user_legal_lastname', $vals[2]):
+                       // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+                    case User::validateUserData('user_email', $vals[3]):
+                       // $row[4] validation varies by $list_type
+                       // "classlist" validates registration_section, and "graderlist" validates user_group
+                    case $row4_validation_function():
+                       // Database password cannot be blank, no check on format.
+                       // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
+                    case !$use_database || User::validateUserData('user_password', $vals[5]):
+                       // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+                       // Automatically validate if not set (this field is optional).
+                    case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
+                    case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]):
+                       // Validation failed somewhere.  Record which row failed.
+                       // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
+                        $bad_rows[] = ($row_num + 1);
+                        break;
+                }
             }
         }
 
@@ -946,9 +954,12 @@ class UsersController extends AbstractController {
             $exists = false;
             foreach ($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
-                    // Validate if this user has any data to update.
-                    // Did student registration section or grader group change?
-                    if ($row[4] !== $get_user_registration_or_group_function($existing_user)) {
+                    if (count($row) === 1) {
+                        $users_to_update[] = $row;
+                    }
+                    elseif ($row[4] !== $get_user_registration_or_group_function($existing_user)) {
+                        // Validate if this user has any data to update.
+                        // Did student registration section or grader group change?
                         $users_to_update[] = $row;
                     }
                     $exists = true;
@@ -966,30 +977,60 @@ class UsersController extends AbstractController {
         // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
+        $users_not_found = []; // track wrong user_ids given
+
+        foreach ($users_to_add as $key => $row) {
+            // Remove the rows in which wrong or incorrect user_id is passed (only for row containing user_id)
+            if (count($row) === 1 && is_null($this->core->getQueries()->getSubmittyUser($row[0]))) {
+                $users_not_found[] = $row[0];
+                unset($users_to_add[$key]);
+            }
+        }
+        if (!empty($users_not_found)) {
+            $this->core->addErrorMessage('User(s) with following username are not found ' . implode(', ', $users_not_found));
+            $this->core->redirect($return_url);
+        }
         foreach ($users_to_add as $row) {
-            $user = new User($this->core);
-            $user->setId($row[0]);
-            $user->setLegalFirstName($row[1]);
-            $user->setLegalLastName($row[2]);
-            $user->setEmail($row[3]);
-            $set_user_registration_or_group_function($user);
-            if (isset($row[$pref_firstname_idx]) && !empty($row[$pref_firstname_idx])) {
-                $user->setPreferredFirstName($row[$pref_firstname_idx]);
+            // Auto-populate user detail if only user_id is given
+            if (count($row) === 1) {
+                $user = $this->core->getQueries()->getUserById($row[0]);
+                // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
+                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user->setGroup($user_group);
+                $insert_or_update_user_function('insert', $user);
             }
-            if (isset($row[$pref_lastname_idx]) && !empty($row[$pref_lastname_idx])) {
-                $user->setPreferredLastName($row[$pref_lastname_idx]);
+            else {
+                $user = new User($this->core);
+                $user->setId($row[0]);
+                $user->setLegalFirstName($row[1]);
+                $user->setLegalLastName($row[2]);
+                $user->setEmail($row[3]);
+                $set_user_registration_or_group_function($user);
+                if (isset($row[$pref_firstname_idx]) && !empty($row[$pref_firstname_idx])) {
+                    $user->setPreferredFirstName($row[$pref_firstname_idx]);
+                }
+                if (isset($row[$pref_lastname_idx]) && !empty($row[$pref_lastname_idx])) {
+                    $user->setPreferredLastName($row[$pref_lastname_idx]);
+                }
+                if ($use_database) {
+                    $user->setPassword($row[5]);
+                }
+                $insert_or_update_user_function('insert', $user);
             }
-            if ($use_database) {
-                $user->setPassword($row[5]);
-            }
-            $insert_or_update_user_function('insert', $user);
         }
 
         // Existing users update
         foreach ($users_to_update as $row) {
             $user = $this->core->getQueries()->getUserById($row[0]);
             //Update registration section (student) or group (grader)
-            $set_user_registration_or_group_function($user);
+            if (count($row) === 1) {
+                // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
+                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user->setGroup($user_group);
+            }
+            else {
+                $set_user_registration_or_group_function($user);
+            }
             $insert_or_update_user_function('update', $user);
         }
         $added = count($users_to_add);
