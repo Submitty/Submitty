@@ -94,7 +94,7 @@ function restoreFromLocal() {
         const values = state.multiple_choice[id];
         const index = /multiple_choice_([0-9])+/.exec(id)[1];
         $(`#mc_field_${index} :input`).each((_index, element) => {
-            $(element).prop('checked', values.includes(element.val())).change();
+            $(element).prop('checked', values.includes(element.value)).change();
         });
     }
     // Next, we restore short-answer boxes
@@ -186,8 +186,8 @@ $(document).ready(function () {
         }
     }));
 
-    // FIXME: I'm not crazy about writing to LocalStorage on every keypress, 
-    //        but it should work...
+    // Saving to LocalStorage on every keypress isn't fantastic, but some 
+    // quick-and-dirty profiling seems to indicate it's fine...
     $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", saveToLocal));
 
     // Register click handler for multiple choice buttons
