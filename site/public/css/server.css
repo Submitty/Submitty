@@ -1612,7 +1612,7 @@ end of styles used in the admin gradeable page
   background-color: var(--default-white);
   color: var(--text-black);
 }
-#wrapper_upload {
+.wrapper_upload {
   color: var(--text-black);
 }
 

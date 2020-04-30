@@ -353,7 +353,7 @@ class User extends AbstractModel {
                 //Database password cannot be blank, no check on format
                 return $data !== "";
             default:
-                //$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
+                //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
                 $ex_data = '$data:  ' . var_export(htmlentities($data), true);
                 throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
