@@ -263,9 +263,15 @@ $(document).ready(function () {
 
         // Enable recent button
         $("#mc_" + index + "_clear_button").attr("disabled", false);
-        window.onbeforeunload = () => true;
-        $("#submit").attr("disabled", false);
-        $("#mc_" + index + "_recent_button").attr("disabled", false);
+        const prev_checked_items = this.getAttribute("data-prev_checked");
+        const curr_checked_items = $(this).serializeArray().map(v => v.value).join("\n");
+        if (curr_checked_items !== prev_checked_items) {
+            window.onbeforeunload = () => true;
+            $("#submit").attr("disabled", false);
+            $("#mc_" + index + "_recent_button").attr("disabled", false);
+        } else {
+            $("#mc_" + index + "_recent_button").attr("disabled", true);
+        }
 
         saveToLocal();
     });
