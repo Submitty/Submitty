@@ -164,6 +164,21 @@ function deferredSave() {
     }
 }
 
+/**
+ * Event handler for the `onbeforeunload` event; saves unsaved changes to 
+ * localStorage (if enabled) and prompts the "Are you sure you want to exit?" 
+ * dialog box.
+ * @param {Event} e Event object for this event
+ */
+function saveAndWarnUnsubmitted(e) {
+    saveToLocal();
+    // For Firefox
+    e.preventDefault();
+    // For Chrome
+    e.returnValue = '';
+    return true;
+}
+
 $(document).ready(function () {
 
     // If any button inside the notebook has been clicked then enable the submission button
@@ -238,7 +253,7 @@ $(document).ready(function () {
         {
             $(recent_button_id).attr("disabled", false);
             $("#submit").attr("disabled", false);
-            window.onbeforeunload = () => true;
+            window.onbeforeunload = saveAndWarnUnsubmitted;
         }
     }));
 
@@ -282,7 +297,7 @@ $(document).ready(function () {
         const prev_checked_items = this.getAttribute("data-prev_checked");
         const curr_checked_items = $(this).serializeArray().map(v => v.value).join("\n");
         if (curr_checked_items !== prev_checked_items) {
-            window.onbeforeunload = () => true;
+            window.onbeforeunload = saveAndWarnUnsubmitted;
             $("#submit").attr("disabled", false);
             $("#mc_" + index + "_recent_button").attr("disabled", false);
         } else {
@@ -353,7 +368,7 @@ $(document).ready(function () {
         else
         {
             $(recent_button_id).attr("disabled", false);
-            window.onbeforeunload = () => true;
+            window.onbeforeunload = saveAndWarnUnsubmitted;
             $("#submit").attr("disabled", false);
         }
     });
