@@ -48,12 +48,16 @@ class Interval {
 class Submission {
   private $userId;
   private $versionId;
+  private $originalStartMatch;
+  private $originalEndMatch;
   private $matchingPositions;
 
-  public function __construct($uId, $vId, $pos) {
+  public function __construct($uId, $vId, $pos, $ogS, $ogE) {
     $this->userId = $uId;
     $this->versionId = $vId;
     $this->matchingPositions = $pos;
+    $this->originalStartMatch = $ogS;
+    $this->originalEndMatch = $ogE;
   }
 
   public function getUid() {
@@ -122,7 +126,7 @@ class PlagiarismUtils {
     foreach ($arr as $match) {
       $i = new Interval($match['start'], $match['end']);
       foreach ($match['others'] as $o) {
-        $s = new Submission($o['username'], $o['version'], $o['matchingpositions']);
+        $s = new Submission($o['username'], $o['version'], $o['matchingpositions'], $match['start'], $match['end']);
         $i->addUser($s);
       }
       $resultArray[] = $i;
