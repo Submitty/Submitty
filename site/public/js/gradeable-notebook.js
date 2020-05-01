@@ -148,6 +148,22 @@ function restoreFromLocal() {
     }
 }
 
+let isSaveScheduled = false;
+/**
+ * Schedules a save action for ten seconds from now if no save has been 
+ * scheduled yet. This way we don't re-write minor changes when modifying a
+ * text box answer.
+ */
+function deferredSave() {
+    if (autosaveEnabled && !isSaveScheduled) {
+        setTimeout(() => {
+            saveToLocal();
+            isSaveScheduled = false;
+        }, 10 * 1000);
+        isSaveScheduled = true;
+    }
+}
+
 $(document).ready(function () {
 
     // If any button inside the notebook has been clicked then enable the submission button
@@ -228,7 +244,7 @@ $(document).ready(function () {
 
     // Saving to LocalStorage on every keypress isn't fantastic, but some 
     // quick-and-dirty profiling seems to indicate it's fine...
-    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", saveToLocal));
+    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", deferredSave));
 
     // Register click handler for multiple choice buttons
     $(".mc-clear, .mc-recent").click(function() {
@@ -342,7 +358,7 @@ $(document).ready(function () {
         }
     });
 
-    $(".sa-box").on('input', saveToLocal);
+    $(".sa-box").on('input', deferredSave);
 
     restoreFromLocal();
 });
