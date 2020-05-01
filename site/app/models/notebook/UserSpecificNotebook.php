@@ -16,6 +16,7 @@ use app\models\AbstractModel;
  * @method array getHashes()
  * @method array getSelectedQuestions()
  * @method void setNotebookConfig($new_notebook)
+ * @method bool getWarning()
  */
 
 class UserSpecificNotebook extends AbstractModel {
@@ -30,6 +31,8 @@ class UserSpecificNotebook extends AbstractModel {
     protected $hashes = [];
     /** @prop @var array of item_pool names selected */
     protected $selected_questions = [];
+    /** @prop @var string warning if this notebook has potentially overlapping questions picked */
+    protected $warning = null;
 
     private $gradeable_id;
     private $user_id;
@@ -49,18 +52,20 @@ class UserSpecificNotebook extends AbstractModel {
             $this->item_pool = $json['item_pool'];
         }
 
-        $this->notebook_config = $this->replaceNotebookItemsWithQuestions($details);
-
         $this->gradeable_id = $gradeable_id;
         $this->user_id = $user_id;
+
+        $this->notebook_config = $this->replaceNotebookItemsWithQuestions($details);
     }
 
 
     //collect items from a notebook and replace them with the actual
     //notebook values
-    public function replaceNotebookItemsWithQuestions($raw_notebook) {
+    private function replaceNotebookItemsWithQuestions($raw_notebook) {
         $new_notebook = [];
+        $seen_items = [];
         $tests = [];
+
         foreach ($raw_notebook['notebook'] as $notebook_cell) {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
                 //see if theres a target item pool and replace this with the actual notebook
@@ -71,13 +76,26 @@ class UserSpecificNotebook extends AbstractModel {
                     $new_notebook = array_merge($new_notebook, $item_data['notebook']);
                     $tests = array_merge($tests, $item_data['testcases']);
                 }
+
+                //record if we potentially grabbed the same question
+                $seen_items = array_merge($seen_items, $notebook_cell['from_pool']);
             }
             else {
                 $new_notebook[] = $notebook_cell;
             }
         }
         $this->test_cases = $tests;
+        $multiple_selected = [];
+        foreach (array_count_values($seen_items) as $seen => $value) {
+            if ($value > 1) {
+                $multiple_selected[] = $seen;
+            }
+        }
 
+        if (count($multiple_selected) > 0) {
+            $seen = implode($multiple_selected, ",");
+            $this->warning = "Warning: The item_pool \"{$seen}\" has been selected multiple times, this could lead to notebooks with the same question given more than once.";
+        }
 
         return $new_notebook;
     }

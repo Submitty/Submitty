@@ -364,7 +364,7 @@ class AutogradingConfig extends AbstractModel {
     }
 
     public function getNotebook($gradeable_id = null, $user_id = null) {
-        if (!isset($gradeable_id) || $this->is_notebook_parsed) {
+        if (!isset($gradeable_id) || $this->is_notebook_parsed || !$this->notebook_gradeable) {
             return $this->notebook;
         }
 
