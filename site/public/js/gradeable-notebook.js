@@ -257,8 +257,6 @@ $(document).ready(function () {
         }
     }));
 
-    // Saving to LocalStorage on every keypress isn't fantastic, but some 
-    // quick-and-dirty profiling seems to indicate it's fine...
     $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", deferredSave));
 
     // Register click handler for multiple choice buttons
