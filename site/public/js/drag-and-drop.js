@@ -365,16 +365,15 @@ function openFile(url_full) {
 // moving to next input for split item submissions
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
-    var next_count = count+1;
-    var next_input = "#users_" + next_count + " :first";
-    if ($(next_input).length) {
-        $(next_input).focus();
-        $(next_input).select();
+    const next_input = $("#users_" + (count + 1)).first();
+    if (next_input) {
+        next_input.focus();
+        next_input.select();
 
-        var inputOffset = $(next_input).offset().top;
-        var inputHeight = $(next_input).height();
-        var windowHeight = $(window).height();
-        var offset;
+        const inputOffset = next_input.offset().top;
+        const inputHeight = next_input.height();
+        const windowHeight = $(window).height();
+        let offset;
 
         if (inputHeight < windowHeight) {
             offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
@@ -382,12 +381,9 @@ function moveNextInput(count) {
         else {
             offset = inputOffset;
         }
-        var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed);
+        $('html, body').animate({scrollTop: offset}, 500);
     }
 }
-
-
 
 // HANDLE SUBMISSION
 //========================================================================================
