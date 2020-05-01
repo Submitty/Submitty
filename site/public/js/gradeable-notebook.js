@@ -97,12 +97,39 @@ const autosaveEnabled = (() => {
     }
 })();
 
+function msToDays(ms) {
+    return ms / (1000 * 60 * 60 * 24);
+}
+
+/**
+ * Scans all autosaved data and deletes any entries older than thirty days.
+ */
+function cleanupAutosaveHistory() {
+    if (autosaveEnabled) {
+        const toDelete = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const { timestamp } = JSON.parse(localStorage.getItem(key));
+            
+            if (!timestamp) {
+                continue;
+            }
+
+            if (msToDays(Date.now() - timestamp) > 30) {
+                toDelete.push(key);
+            }
+        }
+        toDelete.forEach(localStorage.removeItem, localStorage);
+    }
+}
+
 /**
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveToLocal() {
     if (autosaveEnabled) {
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+            timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
             short_answer: gatherInputAnswersByType("short_answer"),
             codebox: gatherInputAnswersByType("codebox")
@@ -374,4 +401,6 @@ $(document).ready(function () {
     $(".sa-box").on('input', deferredSave);
 
     restoreFromLocal();
+
+    cleanupAutosaveHistory();
 });
