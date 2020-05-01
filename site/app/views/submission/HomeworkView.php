@@ -287,6 +287,7 @@ class HomeworkView extends AbstractView {
 
         //TODO: refactor notebooks to use MVC
         $config = $gradeable->getAutogradingConfig();
+        $notebook = null;
         if ($config->isNotebookGradeable()) {
             $notebook_model = $config->getNotebook($gradeable->getId(), $this->core->getUser()->getId());
             $notebook = $notebook_model->getNotebookConfig();
