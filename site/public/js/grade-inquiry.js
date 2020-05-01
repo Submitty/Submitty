@@ -64,7 +64,7 @@ function onGradeInquirySubmitClicked(button) {
   var text_area = $("#reply-text-area-"+component_id);
   var submit_button_id = button_clicked.attr('id');
   if (submit_button_id != null && submit_button_id.includes('grading-close')){
-    if ($.trim(text_area.val())) {
+    if (text_area.val().trim()) {
       if (!confirm("The text you entered will not be posted. Are you sure you want to close the grade inquiry?")) {
         return;
       }
