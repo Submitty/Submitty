@@ -290,6 +290,25 @@ td>a.active-sort {
 /* layout table classes  */
 /* Layout tables do not have <caption>, <thead>, and <th> tags */
 
+.layout-table-div {
+    display: table;
+    width: 100%;
+    text-align: center;
+    border: 1px solid var(--standard-medium-gray);
+}
+
+.layout-table-div-row {
+    display: table-row;
+}
+
+.layout-table-div-cell {
+    display: table-cell;
+}
+
+.layout-table-div-header {
+    background-color: var(--standard-hover-light-gray);
+}
+
 /* styling used in a <th> cell, except this is for a layout table */
 .layout_th_cell {
     font-weight: bold;
