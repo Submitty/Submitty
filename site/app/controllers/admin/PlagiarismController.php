@@ -623,7 +623,6 @@ class PlagiarismController extends AbstractController {
                     $segment_info["{$start_line}_{$start_pos}"][] = $other->getUid() . "_" . $other->getVid();
                     if ($other->getUid() == $user_id_2) {
                         $orange_color = true;
-                        $user_2_index_in_others = $i;
                         if ($codebox == "2" && $user_id_2 != "") {
                             foreach ($other->getMatchingPositions() as $pos) {
                                 $matchPosStart = $pos['start'];
