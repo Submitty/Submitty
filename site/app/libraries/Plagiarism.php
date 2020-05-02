@@ -4,78 +4,76 @@ namespace app\libraries;
 
 class Interval {
 
-  private $start = 0;
-  private $end = 0;
-  private $user_matches = [];
+    private $start = 0;
+    private $end = 0;
+    private $user_matches = [];
 
-  public function __construct($s, $e) {
-    $this->start = $s;
-    $this->end = $e;
-  }
-
-  public function getEnd() {
-    return $this->end;
-  }
-
-  public function getStart() {
-    return $this->start;
-  }
-
-  public function addUser($sub) {
-    foreach($this->user_matches as $s) {
-      if($sub->getUid() == $s->getUid() && $sub->getVid() == $s->getVid()) {
-        $s->mergeMatchingPositions($sub->getMatchingPositions());
-        return;
-      }
+    public function __construct($s, $e) {
+        $this->start = $s;
+        $this->end = $e;
     }
-    $this->user_matches[] = $sub;
-  }
 
-  public function updateStart($newS) {
-    $this->start = $newS;
-  }
+    public function getEnd() {
+        return $this->end;
+    }
 
-  public function updateEnd($newE) {
-    $this->end = $newE;
-  }
+    public function getStart() {
+        return $this->start;
+    }
 
-  public function getUsers() {
-    return $this->user_matches;
-  }
+    public function addUser($sub) {
+        foreach ($this->user_matches as $s) {
+            if ($sub->getUid() == $s->getUid() && $sub->getVid() == $s->getVid()) {
+                $s->mergeMatchingPositions($sub->getMatchingPositions());
+                return;
+            }
+        }
+        $this->user_matches[] = $sub;
+    }
 
+    public function updateStart($newS) {
+        $this->start = $newS;
+    }
+
+    public function updateEnd($newE) {
+        $this->end = $newE;
+    }
+
+    public function getUsers() {
+        return $this->user_matches;
+    }
 }
 
 class Submission {
-  private $userId;
-  private $versionId;
-  private $originalStartMatch;
-  private $originalEndMatch;
-  private $matchingPositions;
+    private $userId;
+    private $versionId;
+    private $originalStartMatch;
+    private $originalEndMatch;
+    private $matchingPositions;
 
-  public function __construct($uId, $vId, $pos, $ogS, $ogE) {
-    $this->userId = $uId;
-    $this->versionId = $vId;
-    $this->matchingPositions = $pos;
-    $this->originalStartMatch = $ogS;
-    $this->originalEndMatch = $ogE;
-  }
+    public function __construct($uId, $vId, $pos, $ogS, $ogE) {
+        $this->userId = $uId;
+        $this->versionId = $vId;
+        $this->matchingPositions = $pos;
+        $this->originalStartMatch = $ogS;
+        $this->originalEndMatch = $ogE;
+    }
 
-  public function getUid() {
-    return $this->userId;
-  }
+    public function getUid() {
+        return $this->userId;
+    }
 
-  public function getVid() {
-    return $this->versionId;
-  }
+    public function getVid() {
+        return $this->versionId;
+    }
 
-  public function getMatchingPositions() {
-    return $this->matchingPositions;
-  }
+    public function getMatchingPositions() {
+        return $this->matchingPositions;
+    }
 
-  public function mergeMatchingPositions($newPositions) {
-    $this->matchingPositions = array_merge($this->matchingPositions, $newPositions);
-  }
-
+    public function mergeMatchingPositions($newPositions) {
+        $this->matchingPositions = array_merge($this->matchingPositions, $newPositions);
+    }
 }
 
 /**
@@ -110,52 +108,50 @@ class Stack {
     public function isEmpty() {
         return empty($this->stack);
     }
-
 }
 
 class PlagiarismUtils {
 
-  public static function compareInterval($intervalOne, $intervalTwo) {
-    return $intervalOne->getStart() > $intervalTwo->getStart();
-  }
+    public static function compareInterval($intervalOne, $intervalTwo) {
+        return $intervalOne->getStart() > $intervalTwo->getStart();
+    }
 
   /** Constructs an array of interval objects from matches
    *  @param filename - path to matches json
    *  @return list containing intervals
    */
-  public static function constructIntervals($filename) {
-    $content = file_get_contents($filename);
-    $arr = json_decode($content,true);
-    $resultArray = [];
-    foreach ($arr as $match) {
-      $i = new Interval($match['start'], $match['end']);
-      foreach ($match['others'] as $o) {
-        $s = new Submission($o['username'], $o['version'], $o['matchingpositions'], $match['start'], $match['end']);
-        $i->addUser($s);
-      }
-      $resultArray[] = $i;
-    }
-    usort($resultArray, "self::compareInterval");
-    return $resultArray;
-  }
-
-  public static function mergeIntervals($iArr) {
-    $stack = new Stack();
-    $stack->push($iArr[0]);
-    for ($i = 1; $i < count($iArr); $i++) {
-      $cI = $stack->top();
-      if ($cI->getEnd() < $iArr[$i]->getStart()) {
-        $stack->push($iArr[$i]);
-      } else if ($cI->getEnd() < $iArr[$i]->getEnd()) {
-        $cI->updateEnd($iArr[$i]->getEnd());
-        foreach ($iArr[$i]->getUsers() as $u) {
-          $cI->addUser($u);
+    public static function constructIntervals($filename) {
+        $content = file_get_contents($filename);
+        $arr = json_decode($content, true);
+        $resultArray = [];
+        foreach ($arr as $match) {
+            $i = new Interval($match['start'], $match['end']);
+            foreach ($match['others'] as $o) {
+                $s = new Submission($o['username'], $o['version'], $o['matchingpositions'], $match['start'], $match['end']);
+                $i->addUser($s);
+            }
+            $resultArray[] = $i;
         }
-        $stack->pop();
-        $stack->push($cI);
-      }
+        usort($resultArray, "self::compareInterval");
+        return $resultArray;
     }
-    return $stack;
-  }
 
+    public static function mergeIntervals($iArr) {
+        $stack = new Stack();
+        $stack->push($iArr[0]);
+        for ($i = 1; $i < count($iArr); $i++) {
+            $cI = $stack->top();
+            if ($cI->getEnd() < $iArr[$i]->getStart()) {
+                $stack->push($iArr[$i]);
+            } elseif ($cI->getEnd() < $iArr[$i]->getEnd()) {
+                $cI->updateEnd($iArr[$i]->getEnd());
+                foreach ($iArr[$i]->getUsers() as $u) {
+                    $cI->addUser($u);
+                }
+                $stack->pop();
+                $stack->push($cI);
+            }
+        }
+        return $stack;
+    }
 }
