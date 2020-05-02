@@ -9,7 +9,7 @@ class PlagiarismUtils {
     }
 
   /** Constructs an array of interval objects from matches
-   *  @param filename - path to matches json
+   *  @param filename path to matches json
    *  @return list containing intervals
    */
     public static function constructIntervals($filename) {
