@@ -1827,7 +1827,7 @@ end of styles used in the admin gradeable page
 }
 
 #popup_to_show_matches_id {
-  overflow:hidden;
+  overflow-y:auto;
   border:2px solid grey;
 }
 
