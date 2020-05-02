@@ -191,6 +191,13 @@ textarea, input[type="text"], input[type="number"], input[type="date"], input[ty
   background-color: var(--standard-input-background);
 }
 
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
+}
+
 /****************************
  * TABLE STYLES
  ***************************/
@@ -282,6 +289,25 @@ td>a.active-sort {
 
 /* layout table classes  */
 /* Layout tables do not have <caption>, <thead>, and <th> tags */
+
+.layout-table-div {
+    display: table;
+    width: 100%;
+    text-align: center;
+    border: 1px solid var(--standard-medium-gray);
+}
+
+.layout-table-div-row {
+    display: table-row;
+}
+
+.layout-table-div-cell {
+    display: table-cell;
+}
+
+.layout-table-div-header {
+    background-color: var(--standard-hover-light-gray);
+}
 
 /* styling used in a <th> cell, except this is for a layout table */
 .layout_th_cell {
@@ -545,6 +571,14 @@ td>a.active-sort {
     background: var(--default-white);
     box-shadow: 2px 2px 4px -3px var(--standard-light-gray);
     padding: 5px 5px 10px;
+}
+
+.overall-comment-box {
+  margin-top:10px;
+}
+
+.overall-comment-author {
+  font-weight: bold;
 }
 
 .submission-page-total-header {
@@ -1597,7 +1631,7 @@ end of styles used in the admin gradeable page
   background-color: var(--default-white);
   color: var(--text-black);
 }
-#wrapper_upload {
+.wrapper_upload {
   color: var(--text-black);
 }
 
@@ -1793,7 +1827,7 @@ end of styles used in the admin gradeable page
 }
 
 #popup_to_show_matches_id {
-  overflow:hidden;
+  overflow-y:auto;
   border:2px solid grey;
 }
 

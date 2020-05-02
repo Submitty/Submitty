@@ -65,7 +65,7 @@
               {% elseif message['type'] == "warning" %}
                  {% set type_class = "yellow-message" %}
               {% endif %}
-              <span class="{{ type_class }}">{{ message['message'] }}</span><br />
+              <span class="{{ type_class }}">{{ message['message'] | nl2br }}</span><br />
         {% endfor %}
 
         <div id="container_{{ index }}_{{ check_index }}_{{ side }}">
@@ -109,6 +109,6 @@
       {% elseif message['type'] == "warning" %}
          {% set type_class = "yellow-message" %}
       {% endif %}
-      <span class="{{ type_class }}">{{ message['message'] }}</span><br />
+      <span class="{{ type_class }}">{{ message['message'] | nl2br }}</span><br />
    {% endfor %}
 {% endmacro %}

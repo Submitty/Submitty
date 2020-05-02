@@ -14,6 +14,7 @@ use app\models\AbstractModel;
  * @method bool isBatchRegrade()
  * @method \DateTime getGradingBegan()
  * @method int getWaitTime()
+ * @method int getAccessDuration()
  * @method \DateTime getGradingFinished()
  * @method int getGradeTime()
  * @method string getVcsRevision()
@@ -27,6 +28,8 @@ class AutoGradedVersionHistory extends AbstractModel {
     protected $batch_regrade = false;
     /** @prop @var \DateTime The time the grading began */
     protected $grading_began = null;
+    /** @prop @var int Seconds between first access and submission of this version */
+    protected $access_duration = 0;
     /** @prop @var int Seconds the version spent in the queue */
     protected $wait_time = 0;
     /** @prop @var \DateTime The time the grading finished */
@@ -37,6 +40,8 @@ class AutoGradedVersionHistory extends AbstractModel {
     protected $vcs_revision = '';
     /** @prop @var \DateTime The time of the most recent submission */
     protected $submission_time = null;
+    /** @prop @var \DateTime The time of the most recent submission */
+    protected $first_access_time = null;
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -46,6 +51,11 @@ class AutoGradedVersionHistory extends AbstractModel {
         $this->grading_began = DateUtils::parseDateTime($details['grading_began'], $timezone);
         $this->grading_finished = DateUtils::parseDateTime($details['grading_finished'], $timezone);
         $this->batch_regrade = $details['batch_regrade'] === true;
+        $this->first_access_time = null;
+        if (array_key_exists('first_access_time', $details)) {
+            $this->first_access_time = DateUtils::parseDateTime($details['first_access_time'], $timezone);
+        }
+        $this->access_duration = $details['access_duration'] ?? '-1';
         $this->wait_time = $details['wait_time'];
         $this->grade_time = $details['grade_time'];
         $this->submission_time = DateUtils::parseDateTime($details['submission_time'], $timezone);
