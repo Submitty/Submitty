@@ -24,7 +24,7 @@ class Interval {
   public function addUser($sub) {
     foreach($this->user_matches as $s) {
       if($sub->getUid() == $s->getUid() && $sub->getVid() == $s->getVid()) {
-        
+        $s->mergeMatchingPositions($sub->getMatchingPositions());
         return;
       }
     }
@@ -70,6 +70,10 @@ class Submission {
 
   public function getMatchingPositions() {
     return $this->matchingPositions;
+  }
+
+  public function mergeMatchingPositions($newPositions) {
+    $this->matchingPositions = array_merge($this->matchingPositions, $newPositions);
   }
 
 }

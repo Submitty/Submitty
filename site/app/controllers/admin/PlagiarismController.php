@@ -610,13 +610,13 @@ class PlagiarismController extends AbstractController {
                 $e_pos = $match->getEnd();
                 $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
                 $start_line = $tokens_user_1[$s_pos - 1]["line"] - 1;
-                $end_pos = $tokens_user_1[$e_pos - 1]["char"] - 1; //!!!!!
+                $end_pos = $tokens_user_1[$e_pos - 1]["char"] - 1;
                 $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
                 $start_value = $tokens_user_1[$s_pos - 1]["value"];
                 $end_value = $tokens_user_1[$e_pos - 1]["value"];
                 $userMatchesStarts = array();
                 $userMatchesEnds = array();
-                if (true) {
+                // if (match['type'] == "match") {
                     $segment_info["{$start_line}_{$start_pos}"] = array();
                     $orange_color = false;
                     foreach ($match->getUsers() as $i => $other) {
@@ -624,6 +624,22 @@ class PlagiarismController extends AbstractController {
                         if ($other->getUid() == $user_id_2) {
                             $orange_color = true;
                             $user_2_index_in_others = $i;
+                            if ($codebox == "2" && $user_id_2 != "") {
+                                foreach($other->getMatchingPositions() as $pos) {
+                                    $matchPosStart = $pos['start'];
+                                    $matchPosEnd =  $pos['end'];
+                                    $start_pos_2 = $tokens_user_2[$matchPosStart - 1]["char"] - 1;
+                                    $start_line_2 = $tokens_user_2[$matchPosStart - 1]["line"] - 1;
+                                    $end_pos_2 = $tokens_user_2[$matchPosEnd - 1]["char"] - 1;
+                                    $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
+                                    $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
+                                    $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
+                                    
+                                    $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $matchPosStart, $matchPosEnd];
+                                    $userMatchesStarts[] = $matchPosStart;
+                                    $userMatchesEnds[] = $matchPosEnd;
+                                }
+                            }
                         }
                     }
 
@@ -635,30 +651,15 @@ class PlagiarismController extends AbstractController {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
                     }
-
-                    // if ($codebox == "2" && $user_id_2 != "" && $orange_color) {
-                    //     foreach ($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
-                    //         $start_pos_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["char"] - 1;
-                    //         $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["line"] - 1;
-                    //         $end_pos_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["char"] - 1; //!!!!
-                    //         $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["line"] - 1;
-                    //         $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"] - 1]["value"];
-                    //         $end_value_2 = $tokens_user_2[$user_2_matchingposition["end"] - 1]["value"];
-                    //         $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
-
-                    //         $userMatchesStarts[] = $user_2_matchingposition["start"];
-                    //         $userMatchesEnds[] = $user_2_matchingposition["end"];
-                    //     }
-                    // }
-                }
-                elseif ($match["type"] == "common") {
-                    //Color is grey -- common matches among all students
-                    $color = '#cccccc';
-                }
-                elseif ($match["type"] == "provided") {
-                    //Color is green -- instructor provided code #b5e3b5
-                    $color = '#b5e3b5';
-                }
+                // }
+                // elseif ($match["type"] == "common") {
+                //     //Color is grey -- common matches among all students
+                //     $color = '#cccccc';
+                // }
+                // elseif ($match["type"] == "provided") {
+                //     //Color is green -- instructor provided code #b5e3b5
+                //     $color = '#b5e3b5';
+                // }
 
                 array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts : [], count($userMatchesEnds) > 0 ? $userMatchesEnds : [] ]);
                 $matches->pop();
