@@ -35,7 +35,8 @@ class PlagiarismUtils {
             $cI = $stack->top();
             if ($cI->getEnd() < $iArr[$i]->getStart()) {
                 $stack->push($iArr[$i]);
-            } elseif ($cI->getEnd() < $iArr[$i]->getEnd()) {
+            }
+            elseif ($cI->getEnd() < $iArr[$i]->getEnd()) {
                 $cI->updateEnd($iArr[$i]->getEnd());
                 foreach ($iArr[$i]->getUsers() as $u) {
                     $cI->addUser($u);
