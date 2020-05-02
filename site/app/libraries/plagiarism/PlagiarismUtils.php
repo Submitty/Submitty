@@ -8,10 +8,6 @@ class PlagiarismUtils {
         return $intervalOne->getStart() > $intervalTwo->getStart();
     }
 
-  /** Constructs an array of interval objects from matches
-   *  @param filename path to matches json
-   *  @return list containing intervals
-   */
     public static function constructIntervals($filename) {
         $content = file_get_contents($filename);
         $arr = json_decode($content, true);
