@@ -109,14 +109,27 @@ function cleanupAutosaveHistory() {
         const toDelete = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            const { timestamp } = JSON.parse(localStorage.getItem(key));
-            
-            if (!timestamp) {
-                continue;
-            }
+            try {
+                const { type, timestamp } = JSON.parse(localStorage.getItem(key));
+                
+                // Skip over non-autosave entries.
+                if (type !== "notebook-autosave") {
+                    continue;
+                }
 
-            if (msToDays(Date.now() - timestamp) > 30) {
-                toDelete.push(key);
+                if (msToDays(Date.now() - timestamp) > 30) {
+                    toDelete.push(key);
+                }
+            } catch (e) {
+                // If this item in localStorage isn't a JSON blob (possible as
+                // we use localStorage in a couple of other things), then
+                // JSON.parse() will throw a SyntaxError. We don't care about
+                // these entries, so skip over them.
+                if (e instanceof SyntaxError) {
+                    continue;
+                } else {
+                    throw e;
+                }
             }
         }
         toDelete.forEach(localStorage.removeItem, localStorage);
@@ -129,6 +142,7 @@ function cleanupAutosaveHistory() {
 function saveToLocal() {
     if (autosaveEnabled) {
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+            type: "notebook-autosave",
             timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
             short_answer: gatherInputAnswersByType("short_answer"),
