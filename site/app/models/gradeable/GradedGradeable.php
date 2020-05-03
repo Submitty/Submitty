@@ -277,7 +277,7 @@ class GradedGradeable extends AbstractModel {
      * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
      * blank.
      */
-    public function getUpdatedNotebook($newNotebook) {
+    public function getUpdatedNotebook(array $newNotebook): array {
         foreach ($newNotebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
@@ -293,7 +293,7 @@ class GradedGradeable extends AbstractModel {
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
-                            $recentSubmission = $notebookVal['initial_value'];
+                            $recentSubmission = $notebookVal['initial_value'] ?? "";
                         }
                     }
 

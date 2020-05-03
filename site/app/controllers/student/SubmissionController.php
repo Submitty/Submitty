@@ -928,8 +928,7 @@ class SubmissionController extends AbstractController {
                 "item_pools_selected" => $notebook->getSelectedQuestions()
             ];
 
-            $tgt = FileUtils::joinPaths($version_path, ".submit.notebook");
-            file_put_contents($tgt, FileUtils::encodeJson($json));
+            FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".submit.notebook"), $json);
         }
 
         $this->upload_details['version_path'] = $version_path;
@@ -999,7 +998,6 @@ class SubmissionController extends AbstractController {
             $short_answer_objects    = json_decode($short_answer_objects, true);
             $codebox_objects         = json_decode($codebox_objects, true);
             $multiple_choice_objects = json_decode($multiple_choice_objects, true);
-
             $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
 
             foreach ($this_config_inputs as $this_input) {
@@ -1012,7 +1010,15 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 elseif ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
+                    $tmp = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
+
+                    //convert list to string
+                    if ($this_input->getAllowMultiple()) {
+                        $tmp = [implode($tmp, "")];
+                    }
+
+                    $answers = $tmp;
+                  
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1027,20 +1033,19 @@ class SubmissionController extends AbstractController {
                     $empty_inputs = false;
                 }
 
-                // FIXME: add error checking
-                $file = fopen($dst, "w");
-
+                //FIXME: add error checking
                 foreach ($answers as $answer_val) {
-                    fwrite($file, $answer_val . "\n");
+                    file_put_contents($dst, $answer_val);
                 }
-                fclose($file);
             }
+
+
 
             $previous_files_src = array();
             $previous_files_dst = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
-            if (!empty($tmp)) {
+            if (!empty($tmp) && !$gradeable->getAutogradingConfig()->isNotebookGradeable()) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
                         $previous_files_src[$i + 1] = $tmp[$i];
@@ -1048,6 +1053,7 @@ class SubmissionController extends AbstractController {
                     }
                 }
             }
+
 
             if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);

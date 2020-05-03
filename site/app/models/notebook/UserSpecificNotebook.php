@@ -37,7 +37,7 @@ class UserSpecificNotebook extends AbstractModel {
     private $gradeable_id;
     private $user_id;
 
-    public function __construct(Core $core, array $details, $gradeable_id, $user_id) {
+    public function __construct(Core $core, array $details, string $gradeable_id, string $user_id) {
 
         parent::__construct($core);
 
@@ -59,9 +59,9 @@ class UserSpecificNotebook extends AbstractModel {
     }
 
 
-    //collect items from a notebook and replace them with the actual
-    //notebook values
-    private function replaceNotebookItemsWithQuestions($raw_notebook) {
+    /** Collect items from a notebook and replace them with the actual notebook values
+    */
+    private function replaceNotebookItemsWithQuestions(array $raw_notebook): array {
         $new_notebook = [];
         $seen_items = [];
         $tests = [];
@@ -101,7 +101,7 @@ class UserSpecificNotebook extends AbstractModel {
     }
 
 
-    private function getItemFromPool($item) {
+    private function getItemFromPool(array $item): string {
         $item_label = $item['item_label'];
         $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
         $item_from_pool = $item['from_pool'][$selected];
@@ -110,7 +110,7 @@ class UserSpecificNotebook extends AbstractModel {
         return $item_from_pool;
     }
 
-    private function getNotebookHash($item_label, $from_pool_count) {
+    private function getNotebookHash(string $item_label, int $from_pool_count): int {
     
         $gid = $this->gradeable_id;
         $uid = $this->user_id;

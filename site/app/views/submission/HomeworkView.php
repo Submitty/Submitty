@@ -292,6 +292,7 @@ class HomeworkView extends AbstractView {
             $notebook_model = $config->getNotebook($gradeable->getId(), $this->core->getUser()->getId());
             $notebook = $notebook_model->getNotebookConfig();
             $warning = $notebook_model->getWarning();
+            
             if (isset($warning) && $this->core->getUser()->accessGrading()) {
                 $output = $this->core->getOutput()->renderTwigTemplate(
                     'generic/Banner.twig',
@@ -424,7 +425,6 @@ class HomeworkView extends AbstractView {
         if ($config->isNotebookGradeable()) {
             $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook($notebook) : array();
         }
-
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
         // Import custom stylesheet to style notebook items

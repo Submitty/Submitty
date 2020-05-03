@@ -59,7 +59,7 @@ class AutogradingConfig extends AbstractModel {
     /** @prop @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
     private $inputs = [];
     /** @prop @var AutogradingTestcase[] Cut-down information about autograding test cases*/
-    public $testcases = [];
+    private $testcases = [];
 
     /* Properties if early submission incentive enabled */
     /** @prop @var bool If there is an early submission incentive */
@@ -86,7 +86,7 @@ class AutogradingConfig extends AbstractModel {
     protected $total_hidden_non_extra_credit = 0;
     /** @prop @var int Total number of hidden extra-credit points for all test cases */
     protected $total_hidden_extra_credit = 0;
-
+    /** @prop @var bool have we parsed the notebook config and created a userspecific notebook */
     private $is_notebook_parsed = false;
 
 
@@ -185,7 +185,7 @@ class AutogradingConfig extends AbstractModel {
 
 
     //TODO: remove once we can store notebook in its own model
-    public function parseNotebook($details) {
+    public function parseNotebook(array $details): void {
         // Setup $this->notebook
         $actual_input = array();
         $this->notebook = [];
@@ -238,10 +238,7 @@ class AutogradingConfig extends AbstractModel {
             }
 
             // If cell is a type of input add it to the $actual_inputs array
-            if (
-                isset($notebook_cell['type'])
-                && ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice')
-            ) {
+            if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
             }
         }
@@ -264,7 +261,6 @@ class AutogradingConfig extends AbstractModel {
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
         }
-
 
         if (isset($details['item_pool'])) {
             $this->notebook['item_pool'] = $details['item_pool'];
@@ -363,11 +359,16 @@ class AutogradingConfig extends AbstractModel {
         return $this->inputs;
     }
 
-    public function getNotebook($gradeable_id = null, $user_id = null) {
-        if (!isset($gradeable_id) || $this->is_notebook_parsed || !$this->notebook_gradeable) {
+    /**
+    * creates the notebook by parsing the notebook config and creating a userspecific notebook
+    * @param string $gradeable_id
+    * @param string $user_id
+    * @return UserspecificNotebook|array returns empty array if this gradeable is not a notebook gradeable
+    */
+    public function getNotebook(string $gradeable_id, string $user_id) {
+        if ($this->is_notebook_parsed || !$this->notebook_gradeable) {
             return $this->notebook;
         }
-
         $notebook_model = new UserSpecificNotebook(
             $this->core,
             $this->notebook,
