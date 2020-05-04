@@ -76,11 +76,6 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Variable \\$user_2_index_in_others might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
 			count: 6
 			path: app/controllers/admin/PlagiarismController.php
