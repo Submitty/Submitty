@@ -1014,7 +1014,7 @@ class SubmissionController extends AbstractController {
 
                     //convert list to string
                     if ($this_input->getAllowMultiple()) {
-                        $tmp = [implode($tmp, "")];
+                        $tmp = [implode($tmp, "\n")];
                     }
 
                     $answers = $tmp;
