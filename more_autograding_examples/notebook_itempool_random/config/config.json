@@ -324,11 +324,13 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
+            "item_label" : "Animal FIRST",
             "from_pool" : ["animal_1", "animal_2", "animal_3"],
             "points" : 2
         },
         {
             "type" : "item",
+            "item_label" : "Animal SECOND",
             "from_pool" : ["animal_1", "animal_2", "animal_3"],
             "points" : 2
         },
@@ -353,6 +355,7 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
+            "item_label" : "JUST CODE",
             "from_pool" : ["cpp_code", "python_code"],
             "points" : 5
         }
