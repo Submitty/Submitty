@@ -127,7 +127,7 @@ class UserSpecificNotebook extends AbstractModel {
     }
 
 
-    private function searchForItemPool($tgt_name) {
+    private function searchForItemPool(string $tgt_name): array {
         $ret = ["notebook" => [], "testcases" => []];
         foreach ($this->item_pool as $item) {
             if ($item['item_name'] === $tgt_name) {
