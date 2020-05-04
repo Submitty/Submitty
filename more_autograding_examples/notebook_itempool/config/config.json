@@ -119,7 +119,7 @@ This message will appear in a blue box at the top of the page.",
                   ],
                   "randomize_order" : true,
                   "allow_multiple": true
-              },
+              }
           ],
           "testcases" : [
               { "title":"Math 4", "testcase_label":"math_4",
