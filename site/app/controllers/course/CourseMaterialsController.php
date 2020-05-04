@@ -245,7 +245,7 @@ class CourseMaterialsController extends AbstractController {
         }
         $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');
         $json = FileUtils::readJsonFile($fp);
-        $files_to_modify = is_dir($requested_path) ? FileUtils::getAllFiles($requested_path,[],true) : [['path' => $requested_path]];
+        $files_to_modify = is_dir($requested_path) ? FileUtils::getAllFiles($requested_path, [], true) : [['path' => $requested_path]];
 
         foreach ($files_to_modify as $file) {
             $file_path = $file['path'];
