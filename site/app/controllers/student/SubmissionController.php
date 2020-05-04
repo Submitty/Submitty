@@ -1010,14 +1010,7 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 elseif ($this_input instanceof SubmissionMultipleChoice) {
-                    $tmp = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
-
-                    //convert list to string
-                    if ($this_input->getAllowMultiple()) {
-                        $tmp = [implode($tmp, "\n")];
-                    }
-
-                    $answers = $tmp;
+                    $answers = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
                   
                     $num_multiple_choice += 1;
                 }
@@ -1034,9 +1027,11 @@ class SubmissionController extends AbstractController {
                 }
 
                 //FIXME: add error checking
+                $file = fopen($dst, "w");
                 foreach ($answers as $answer_val) {
-                    file_put_contents($dst, $answer_val);
+                    fwrite($file, $answer_val . "\n");
                 }
+                fclose($file);
             }
 
 
