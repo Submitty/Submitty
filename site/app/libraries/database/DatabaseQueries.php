@@ -257,6 +257,22 @@ WHERE status = 1"
     }
 
     /**
+     * @return \Iterator<Course>
+     */
+    public function getAllUnarchivedCourses(): \Iterator {
+        $sql = <<<SQL
+SELECT t.name AS term_name, c.semester, c.course
+FROM courses AS c
+INNER JOIN terms AS t ON c.semester=t.term_id
+WHERE c.status = 1
+ORDER BY t.start_date DESC, c.course ASC
+SQL;
+        return $this->submitty_db->queryIterator($sql, [], function ($row) {
+            return new Course($this->core, $row);
+        });
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {
@@ -3971,7 +3987,7 @@ AND gc_id IN (
      *
      * @param  string[]|null        $ids       ids of the gradeables to retrieve
      * @param  string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `id` or `grade_start_date DESC`)
-     * @return \Iterator Iterates across array of Gradeables retrieved
+     * @return \Iterator<Gradeable>  Iterates across array of Gradeables retrieved
      * @throws \InvalidArgumentException If any Gradeable or Component fails to construct
      * @throws ValidationException If any Gradeable or Component fails to construct
      */
@@ -5067,7 +5083,7 @@ AND gc_id IN (
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT {$conflict_clause}
                 DO
-                    UPDATE SET 
+                    UPDATE SET
                         goc_overall_comment=?;
             ";
 
@@ -5867,7 +5883,7 @@ AND gc_id IN (
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               LEFT JOIN (
-                SELECT 
+                SELECT
                     json_agg(goc_grader_id) as commenter_ids,
                     json_agg(goc_overall_comment) as overall_comments,
                     g_id,

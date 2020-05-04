@@ -586,16 +586,6 @@ parameters:
 			path: app/libraries/response/RedirectResponse.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view_class\\)\\: Unexpected token \"\\$view_class\", expected type at offset 204$#"
-			count: 1
-			path: app/libraries/response/WebResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view_function\\)\\: Unexpected token \"\\$view_function\", expected type at offset 230$#"
-			count: 1
-			path: app/libraries/response/WebResponse.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$logged_in\\)\\: Unexpected token \"\\$logged_in\", expected type at offset 96$#"
 			count: 1
 			path: app/libraries/routers/WebRouter.php

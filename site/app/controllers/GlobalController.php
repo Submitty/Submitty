@@ -46,23 +46,47 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
-                $navigation_url = $this->core->buildCourseUrl();
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $navigation_url,
+                    "href" => $this->core->buildCourseUrl(),
                     "title" => "Gradeables",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-submitty",
                     "icon" => "fa-star"
                 ]);
             }
-            elseif ($this->core->getUser()->accessFaculty()) {
+            else {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home', 'courses', 'new']),
-                    "title" => "New Course",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-new-course",
-                    "icon" => "fa-plus-square"
+                    'href' => $this->core->buildUrl(),
+                    'title' => 'Home',
+                    'class' => 'nav-row',
+                    'id' => 'nav-sidebar-home',
+                    'icon' => 'fa-home'
                 ]);
+
+                if ($this->core->getUser()->accessFaculty()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['home', 'courses', 'new']),
+                        "title" => "New Course",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-new-course",
+                        "icon" => "fa-plus-square"
+                    ]);
+                }
+                if ($this->core->getUser()->isSuperUser()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "class" => "nav-row short-line",
+                    ]);
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['superuser', 'gradeables']),
+                        "title" => "Gradeables",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-submitty",
+                        "icon" => "fa-star"
+                    ]);
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "class" => "nav-row short-line",
+                    ]);
+                }
             }
 
             if ($unread_notifications_count !== null) {

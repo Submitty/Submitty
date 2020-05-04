@@ -134,7 +134,7 @@ class Gradeable extends AbstractModel {
      * that contains filename, file path, and the file size.
      */
     private $split_pdf_files = null;
-    
+
     /** @prop @var array */
     protected $peer_grading_pairs = [];
 
@@ -1850,5 +1850,42 @@ class Gradeable extends AbstractModel {
      */
     public function getWouldBeDaysLate() {
         return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
+    }
+
+    /**
+     * Can a given user view this gradeable
+     */
+    public function canView(User $user): bool {
+        //Remove incomplete gradeables for non-instructors
+        if (
+            !$user->accessAdmin()
+            && $this->getType() == GradeableType::ELECTRONIC_FILE
+            && !$this->hasAutogradingConfig()
+        ) {
+            return false;
+        }
+
+        // student users should only see electronic gradeables -- NOTE: for now, we might change this design later
+        if ($this->getType() !== GradeableType::ELECTRONIC_FILE && !$user->accessGrading()) {
+            return false;
+        }
+
+        // if student view false, never show
+        if (!$this->isStudentView() && !$user->accessGrading()) {
+            return false;
+        }
+
+        // if student view is true and they can only view after grades are released, filter appropriately
+        if ($this->isStudentView() && $this->isStudentViewAfterGrades() && !$user->accessGrading()) {
+            return $this->isTaGradeReleased();
+        }
+
+        //If we're not instructor and this is not open to TAs
+        $date = $this->core->getDateTimeNow();
+        if ($this->getTaViewStartDate() > $date && !$user->accessAdmin()) {
+            return false;
+        }
+
+        return true;
     }
 }

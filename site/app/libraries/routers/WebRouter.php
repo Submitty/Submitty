@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\models\User;
 
 class WebRouter {
     /** @var Core  */
@@ -45,7 +46,16 @@ class WebRouter {
         $this->reader = new AnnotationReader();
         $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
-        $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
+        $collection = new RouteCollection();
+        $special_cases = [
+            'superuser',
+            'AuthenticationController.php',
+            'HomePageController.php'
+        ];
+        foreach ($special_cases as $case) {
+            $collection->addCollection($loader->load(realpath(__DIR__ . "/../../controllers/" . $case)));
+        }
+        $collection->addCollection($loader->load(realpath(__DIR__ . "/../../controllers")));
         $context = new RequestContext();
         $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         $this->parameters = $matcher->matchRequest($this->request);
@@ -253,7 +263,8 @@ class WebRouter {
             if ($logged_in) {
                 if (
                     $this->parameters['_method'] !== 'logout'
-                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                    && $this->parameters['_controller'] !== \app\controllers\HomePageController::class
+                    && $this->parameters['_controller'] !== \app\controllers\superuser\GradeablesController::class
                 ) {
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
@@ -339,8 +350,24 @@ class WebRouter {
             }
         }
 
+        if ($access_control->getLevel()) {
+            $access_test = false;
+            switch ($access_control->getLevel()) {
+                case 'SUPERUSER':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_SUPERUSER;
+                    break;
+                case 'FACULTY':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_FACULTY;
+                    break;
+                case 'USER':
+                    $access_test = $user->getAccessLevel() === User::LEVEL_USER;
+                    break;
+            }
+            $access = $access && $access_test;
+        }
+
         if ($access_control->getPermission()) {
-            $access = $this->core->getAccess()->canI($access_control->getPermission());
+            $access = $access && $this->core->getAccess()->canI($access_control->getPermission());
         }
 
         return $access;
