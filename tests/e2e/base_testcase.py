@@ -77,6 +77,8 @@ class BaseTestCase(unittest.TestCase):
                 break
             except WebDriverException:
                 pass
+        if self.driver is None:
+            self.driver = webdriver.Chrome(options=self.options)
 
         self.driver.set_window_size(1600, 900)
         self.enable_download_in_headless_chrome(self.download_dir)
