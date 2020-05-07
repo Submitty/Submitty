@@ -41,6 +41,7 @@ class BaseTestCase(unittest.TestCase):
         self.driver = None
         """ :type driver: webdriver.Chrome """
         self.options = webdriver.ChromeOptions()
+        self.options.add_argument('--no-sandbox')
         self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
         self.options.add_argument('--hide-scrollbars')
