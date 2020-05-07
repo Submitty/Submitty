@@ -61,7 +61,7 @@ class TestForum(BaseTestCase):
         attachment_file = None
         self.switch_to_page_create_thread()
         self.driver.find_element(By.ID, "title").send_keys(title)
-        self.driver.find_element(By.CLASS_NAME, ("thread_post_content").send_keys(first_post)
+        self.driver.find_element(By.CLASS_NAME, "thread_post_content").send_keys(first_post)
         upload_button = self.driver.find_element(By.XPATH, "//input[@type='file']")
         self.select_categories(categories_list)
         if upload_attachment:
@@ -129,7 +129,7 @@ class TestForum(BaseTestCase):
             posts[0].find_element(By.XPATH, ".//a[starts-with(@id, 'button_attachments_')]").click()
             self.wait_after_ajax()
             self.wait_for_element(
-                (By.XPATH, posts_selector + "//div[contains(@class, 'attachment-well')]").format(content))
+                (By.XPATH, (posts_selector + "//div[contains(@class, 'attachment-well')]").format(content))
             )
             attachmentSrc = posts[0].find_elements(By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment))
             assert len(attachmentSrc) > 0
