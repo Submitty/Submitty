@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 
 from selenium import webdriver
 
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -68,7 +69,15 @@ class BaseTestCase(unittest.TestCase):
         self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = webdriver.Chrome(options=self.options)
+        # attempt to set-up the connection to Chrome. Repeat a handful of times
+        # in-case Chrome crashes during initialization
+        for _ in range(5):
+            try:
+                self.driver = webdriver.Chrome(options=self.options)
+                break
+            except WebDriverException:
+                pass
+
         self.driver.set_window_size(1600, 900)
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
