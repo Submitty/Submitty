@@ -6,35 +6,36 @@ use app\libraries\Utils;
 use app\views\AbstractView;
 
 class DockerView extends AbstractView {
-    public function displayDockerPage($docker_data) {
+    public function displayDockerPage($docker_data, $container_config) {
 
         $this->output->addBreadcrumb("Docker Interface");
         $this->output->setPageName('Docker Interface');
 
-        $docker_images = $docker_data['docker_images'] ?? null;
-        $docker_info = $docker_data['docker_info'] ?? null;
-        $last_updated = $docker_data['update_time'] ?? null;
+        if ($docker_data !== false) {
+            $docker_images = $docker_data['docker_images'];
+            $docker_info = $docker_data['docker_info'];
+            $last_updated = $docker_data['update_time'];
 
-        if (!is_null($docker_info)) {
             $docker_info['MemTotal'] = Utils::formatBytes("MB", $docker_info['MemTotal']);
         }
 
+    
         $found_images = [];
         $not_found = [];
-        if (!is_null($docker_data)) {
-            $autograding_containers = $docker_data['autograding_containers'];
+        if ($docker_data !== false) {
+            $autograding_containers = $container_config['default'];
 
             //figure out which images are installed and listed in the config
             foreach ($docker_data['docker_images'] as $image) {
                 $name = $image['Repository'] . ':' . $image['Tag'];
 
-                if (in_array($name, $autograding_containers['default'])) {
+                if (in_array($name, $autograding_containers)) {
                     $found_images[] = $image;
                 }
             }
 
             //figure out which images are listed in the config but not found
-            foreach ($autograding_containers['default'] as $autograding_image) {
+            foreach ($autograding_containers as $autograding_image) {
                 $found = false;
                 foreach ($docker_data['docker_images'] as $image) {
                     $name = $image['Repository'] . ':' . $image['Tag'];
@@ -57,9 +58,9 @@ class DockerView extends AbstractView {
         ];
 
         return $this->output->renderTwigTemplate("admin/Docker.twig", [
-           "docker_images" => $docker_images,
-           "docker_info" => $docker_info,
-           "last_updated" => $last_updated,
+           "docker_images" => $docker_images ?? null,
+           "docker_info" => $docker_info ?? null,
+           "last_updated" => $last_updated ?? null,
            "autograding_containers" => $autograding_containers
         ]);
     }

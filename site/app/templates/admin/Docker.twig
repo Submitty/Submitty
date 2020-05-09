@@ -8,11 +8,8 @@
 
 	<h2>System Wide information:</h2>
 	{% if docker_info is not null %}
+		{# TODO: include worker information here in the future #}
 		<p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
-		<p>Architecture : {{ docker_info['Architecture'] }}</p>
-		<p>Total Memory : {{ docker_info['MemTotal']}}</p>
-		<p>Name : {{ docker_info['Name'] }}</p>
-		<p>OS : {{ docker_info['OperatingSystem'] }}</p>
 	{% endif %}
 </div>
 
