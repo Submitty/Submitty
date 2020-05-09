@@ -920,7 +920,6 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
-
     if (student_page) {
         var pages = [];
         for (var i = 0; i < num_components; i++) {
