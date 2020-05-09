@@ -591,5 +591,5 @@ body {min-width: 925px;}
 }
 
 .category-sortable {
-  background-color: var(--btn-default-white);
+  background-color: var(--always-default-white);
 }

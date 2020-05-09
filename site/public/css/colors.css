@@ -34,7 +34,7 @@
 
     --default-white: #ffffff;
 
-    --btn-default-white: #ffffff;
+    --always-default-white: #ffffff;
 
     --badge-backgroud-red: #ff0000;
     --dark-badge-background-red: #ad3937;
@@ -57,6 +57,9 @@
 
     --standard-pale-blue-gray: #e8f0f7;
     --btn-standard-pale-blue-gray: #e8f0f7;
+    --btn-default-active: #e8f0f7;
+    --btn-default-white: #ffffff;
+    --btn-default-hover: #f5f5f5;
     --standard-light-blue-gray: #ddddff;
     --standard-pale-gray: #f5f5f5;
     --standard-hover-light-gray: #e5e5e5;
@@ -140,6 +143,7 @@
     --text-white: #ffffff; /*use on all colors*/
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
+    --btn-default-text: #2e2e2e;
 
     /*discussion forum*/
     --viewed-discussion-post-blue: #e8f0f7;
@@ -184,7 +188,7 @@
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
     --overall-comment: #E9EFEF;
-    --dark-mode-black: #202225;
+    /* --dark-mode-black: #202225; */
     --alternating-row-color-light: #eee;
 
 
@@ -192,7 +196,9 @@
 }
 
 [data-black_mode="black"][data-theme="dark"] {
-      --dark-mode-black: #000000;
+      /* --dark-mode-black: #000000; */
+      --default-white: #000000;
+      --background-blue: #000000;
 }
 
 [data-theme="dark"] {
@@ -229,9 +235,9 @@
       --hover-focus-info-blue: #31b0d5;
       --hover-active-all-info-blue: #269abc;
 
-      --default-white: var(--dark-mode-black);
+      --default-white: #36393f;
 
-      --btn-default-white: #ffffff;
+      --always-default-white: #ffffff;
 
       --badge-backgroud-red: #ff0000;
       --dark-badge-background-red: #ad3937;
@@ -254,6 +260,9 @@
 
       --standard-pale-blue-gray: #2a2224;
       --btn-standard-pale-blue-gray: #e8f0f7;
+      --btn-default-active: #6d6d6d;
+      --btn-default-white: #515151;
+      --btn-default-hover: #595959;
       --standard-light-blue-gray: #ddddff;
       --standard-pale-gray: #f5f5f5;
       --standard-hover-light-gray: #2B2B2B;
@@ -323,7 +332,7 @@
       --standard-light-seafoam: #a4dad5;
 
       /*the look of the webpage itself*/
-      --background-blue: var(--dark-mode-black);
+      --background-blue: #202225;
       --main-body-white: #ffffff;
       --subheading-underscore-grey: #888888;
 
@@ -337,6 +346,7 @@
       --text-white: #000000; /*use on all colors*/
       --btn-text-white: #ffffff;
       --btn-text-black: #000000;
+      --btn-default-text: #ffffff;
 
       /*discussion forum*/
       --viewed-discussion-post-blue: #e8f0f7;
@@ -375,8 +385,8 @@
       --date-picker-red: #953d3d;
 
       /* other */
-      --box-shadow-very-transparent: rgba(255,255,255,0.12);
-      --box-shadow-slightly-transparent: rgba(255,255,255,0.20);
+      --box-shadow-very-transparent: rgba(255,255,255,0);
+      --box-shadow-slightly-transparent: rgba(255,255,255,0);
       --no-image-available: #ADADAD;
       --standard-input-background: #4a4a4a;
       --checkbox-black: #5296db;
