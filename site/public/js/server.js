@@ -180,6 +180,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
+                console.log(e);
+                displayAjaxError(e);
             }
         })
     }
@@ -1191,7 +1193,7 @@ function enableTabsInTextArea(jQuerySelector) {
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
             // focus to the next control in the list.
-            var controls = $(":input").filter(":visible");
+            var controls = $(":tabbable").filter(":visible");
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
@@ -1598,6 +1600,8 @@ function toggleTheme(mode='normal'){
 }
 $(document).ready(function() {
   if(localStorage.getItem("theme") === "dark"){
+    $('#theme_change').prop('checked', true);
+  }else if(localStorage.getItem("theme") === null && window.matchMedia("(prefers-color-scheme: dark)").matches){
     $('#theme_change').prop('checked', true);
   }
   if(localStorage.getItem("black_mode") === "black"){
