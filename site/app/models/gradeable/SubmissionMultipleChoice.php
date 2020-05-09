@@ -11,7 +11,7 @@ use app\models\gradeable\AbstractGradeableInput;
  *
  * Information required to load multiple choice submissions on the submission page
  *
- * @method bool getAllowsMultiple()
+ * @method bool getAllowMultiple()
  * @method bool getRandomizeOrder()
  * @method array getChoices()
  */
