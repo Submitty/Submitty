@@ -240,12 +240,19 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['release_time'])) {
             $release_time = $_POST['release_time'];
         }
-        
+        if ($requested_path === '') {
+            return $this->core->getOutput()->renderResultMessage('Requested path cannot be empty');
+        }
         $fp = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json');
         $json = FileUtils::readJsonFile($fp);
-        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        $dst = FileUtils::joinPaths($upload_path, $requested_path);
-        $json[$dst] =  array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+        $files_to_modify = is_dir($requested_path) ? FileUtils::getAllFiles($requested_path, [], true) : [['path' => $requested_path]];
+
+        foreach ($files_to_modify as $file) {
+            $file_path = $file['path'];
+            $file_path_release_datetime = empty($release_time) ? $json[$file_path]['release_datetime'] : $release_time;
+            $json[$file_path] =  array('release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+        }
+
         FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }

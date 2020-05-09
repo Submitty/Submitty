@@ -402,7 +402,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find database config: .*\/config\/database.json/');
+        $this->expectExceptionMessageMatches('/Could not find database config: .*\/config\/database.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -411,7 +411,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find submitty config: .*\/config\/submitty.json/');
+        $this->expectExceptionMessageMatches('/Could not find submitty config: .*\/config\/submitty.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -436,7 +436,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find email config: .*\/config\/email.json/');
+        $this->expectExceptionMessageMatches('/Could not find email config: .*\/config\/email.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -549,7 +549,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'secrets_submitty_php.json'));
         $this->expectException(ConfigException::class);
-        $this->expectExceptionMessageRegExp('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
+        $this->expectExceptionMessageMatches('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
         $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
     }

@@ -106,6 +106,8 @@
 				        <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
 	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha')">Alphabetical</a></li>
+	              	<li title="Sort posts by author's registration section then last name" id="alpha_by_registration" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration</a></li>
+	              	<li title="Sort posts by author's rotating section then last name" id="alpha_by_rotating" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating</a></li>
 	              {% endif %}
 	        {% endif %}
 	        </ul>
