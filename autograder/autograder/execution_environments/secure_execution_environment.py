@@ -128,6 +128,25 @@ class SecureExecutionEnvironment():
     autograding_utils.pattern_copy("submission_to_runner",self.patterns["submission_to_runner"], 
                             submission_path, directory, self.tmp_logs)
 
+    # Copy these helper files for computing access duration
+    # TODO: This could/should be restricted to test cases that require these files,
+    # that have the field      "copy_access_files" : true,
+    # for example, more_autograding_examples/notebook_time_limit/config/config.json
+    shutil.copy(self.tmp_submission+"/queue_file.json",directory)
+
+    user_assignment_settings = os.path.join(self.tmp_submission, "user_assignment_settings.json")
+    submit_timestamp = os.path.join(self.tmp_submission, "submission", ".submit.timestamp")
+    user_assignment_access = os.path.join(self.tmp_submission, "user_assignment_access.json")
+
+    if os.path.exists(user_assignment_settings):
+      shutil.copy(user_assignment_settings, directory)
+
+    if os.path.exists(submit_timestamp):
+      shutil.copy(submit_timestamp, directory)
+
+    if os.path.exists(user_assignment_access):
+      shutil.copy(user_assignment_access, directory)
+
     # Copy in checkout code.
     if self.is_vcs:
         autograding_utils.pattern_copy("checkout_to_runner",self.patterns["submission_to_runner"], 

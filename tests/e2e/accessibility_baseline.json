@@ -1,0 +1,514 @@
+{
+    "/home": {},
+    "/s20/sample": {},
+    "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": {
+        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
+            "type": "info",
+            "lastLine": 647,
+            "lastColumn": 46,
+            "firstColumn": 13,
+            "subType": "warning",
+            "message": "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
+            "extract": "          <div aria-hidden=\"true\" hidden=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 34
+        },
+        "Attribute “placeholder” not allowed on element “input” at this point.": {
+            "type": "error",
+            "lastLine": 1128,
+            "lastColumn": 254,
+            "firstColumn": 17,
+            "message": "Attribute “placeholder” not allowed on element “input” at this point.",
+            "extract": "          <input style=\"width: 83%\" type=\"hidden\" id=\"input-provide-full-path\" name=\"autograding_config_path\" value=\"/usr/local/submitty/more_autograding_examples/python_simple_homework/config\" class=\"required\" placeholder=\"(Required)\" disabled=\"\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 238
+        },
+        "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.": {
+            "type": "error",
+            "lastLine": 1128,
+            "lastColumn": 254,
+            "firstColumn": 17,
+            "message": "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”.",
+            "extract": "          <input style=\"width: 83%\" type=\"hidden\" id=\"input-provide-full-path\" name=\"autograding_config_path\" value=\"/usr/local/submitty/more_autograding_examples/python_simple_homework/config\" class=\"required\" placeholder=\"(Required)\" disabled=\"\">\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 238
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 2311,
+            "lastColumn": 156,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day \" aria-label=\"March 1, 2020\" tabindex=\"-1\">1</spa",
+            "hiliteStart": 10,
+            "hiliteLength": 70
+        }
+    },
+    "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": {},
+    "/s20/sample/gradeable/future_no_tas_test/grading?view=all": {},
+    "/s20/sample/gradeable/open_homework/grading/status": {},
+    "/s20/sample/gradeable/open_homework/grading/details?view=all": {},
+    "/s20/sample/gradeable/open_homework": {
+        "Bad value “text” for attribute “role” on element “div”.": {
+            "type": "error",
+            "lastLine": 735,
+            "lastColumn": 205,
+            "firstColumn": 57,
+            "message": "Bad value “text” for attribute “role” on element “div”.",
+            "extract": "          <div tabindex=\"0\" id=\"upload1\" class=\"upload-box\" onkeypress=\"clicked_on_box(event)\" role=\"text\" aria-label=\"Press enter to upload your Part 1 file\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 149
+        }
+    },
+    "/s20/sample/gradeable/open_team_homework/team": {},
+    "/s20/sample/gradeable/grades_released_homework_autota": {
+        "Bad value “text” for attribute “role” on element “div”.": {
+            "type": "error",
+            "lastLine": 732,
+            "lastColumn": 205,
+            "firstColumn": 57,
+            "message": "Bad value “text” for attribute “role” on element “div”.",
+            "extract": "          <div tabindex=\"0\" id=\"upload1\" class=\"upload-box\" onkeypress=\"clicked_on_box(event)\" role=\"text\" aria-label=\"Press enter to upload your Part 1 file\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 149
+        },
+        "Attribute “fname” not allowed on element “tr” at this point.": {
+            "type": "error",
+            "lastLine": 738,
+            "firstLine": 737,
+            "lastColumn": 69,
+            "firstColumn": 79,
+            "message": "Attribute “fname” not allowed on element “tr” at this point.",
+            "extract": "-table-1\">\n                    <tr fname=\"fork_bomb_print.c\" class=\"file-label\"><td>fo",
+            "hiliteStart": 10,
+            "hiliteLength": 70
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 738,
+            "lastColumn": 234,
+            "firstColumn": 127,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "\">0.37KB  <i aria-label=\"Press enter to remove file fork_bomb_print.c\" tabindex=\"0\" class=\"fas fa-trash custom-focus\"></i></",
+            "hiliteStart": 10,
+            "hiliteLength": 108
+        },
+        "CSS: The value “break-word” is deprecated": {
+            "type": "error",
+            "lastLine": 1193,
+            "lastColumn": 97,
+            "firstColumn": 17,
+            "message": "CSS: The value “break-word” is deprecated",
+            "extract": "          <div class=\"box half\" style=\"padding: 10px; width: 30%; word-break: break-word;\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 81
+        }
+    },
+    "/s20/sample/notifications": {},
+    "/s20/sample/notifications/settings": {
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 547,
+            "lastColumn": 9,
+            "firstColumn": 3,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "ntent\">\n  <style>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        }
+    },
+    "/s20/sample/gradeable": {
+        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.": {
+            "type": "info",
+            "lastLine": 647,
+            "lastColumn": 46,
+            "firstColumn": 13,
+            "subType": "warning",
+            "message": "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
+            "extract": "          <div aria-hidden=\"true\" hidden=\"\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 34
+        }
+    },
+    "/s20/sample/config": {},
+    "/s20/sample/theme": {},
+    "/s20/sample/office_hours_queue": {
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 636,
+            "lastColumn": 9,
+            "firstColumn": 3,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "  <br>\n\n  <style>\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        }
+    },
+    "/s20/sample/course_materials": {
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 2058,
+            "lastColumn": 172,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"December 28, 9997\" tabindex=\"-1\">28</sp",
+            "hiliteStart": 10,
+            "hiliteLength": 86
+        }
+    },
+    "/s20/sample/forum": {
+        "The element “input” must not appear as a descendant of the “a” element.": {
+            "type": "error",
+            "lastLine": 816,
+            "lastColumn": 93,
+            "firstColumn": 17,
+            "message": "The element “input” must not appear as a descendant of the “a” element.",
+            "extract": "          <input type=\"checkbox\" name=\"cat[]\" value=\"2\" aria-label=\"Category Question\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 77
+        },
+        "Attribute “checked” not allowed on element “li” at this point.": {
+            "type": "error",
+            "lastLine": 939,
+            "lastColumn": 130,
+            "firstColumn": 16,
+            "message": "Attribute “checked” not allowed on element “li” at this point.",
+            "extract": "          <li title=\"Sort posts by reply hierarchy\" id=\"tree\" class=\"dropdown-item active\" role=\"menuitem\" checked=\"checked\"><a cla",
+            "hiliteStart": 10,
+            "hiliteLength": 115
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 951,
+            "lastColumn": 10,
+            "firstColumn": 4,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 982,
+            "lastColumn": 109,
+            "firstColumn": 4,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "true\">\n\t\t\t<div id=\"thread_category\" aria-label=\"Select thread category\" class=\"inline-block\" data-ays-ignore=\"true\">\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 106
+        },
+        "Attribute “cat-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 983,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “cat-id” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “btn-selected” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 983,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “sel-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 988,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “sel-id” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        },
+        "Attribute “prev_page” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 1028,
+            "lastColumn": 76,
+            "firstColumn": 13,
+            "message": "Attribute “prev_page” not allowed on element “div” at this point.",
+            "extract": "          <div id=\"thread_list\" class=\"col-3\" prev_page=\"0\" next_page=\"2\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 64
+        },
+        "Attribute “next_page” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 1028,
+            "lastColumn": 76,
+            "firstColumn": 13,
+            "message": "Attribute “next_page” not allowed on element “div” at this point.",
+            "extract": "          <div id=\"thread_list\" class=\"col-3\" prev_page=\"0\" next_page=\"2\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 64
+        },
+        "Attribute “data” not allowed on element “a” at this point.": {
+            "type": "error",
+            "lastLine": 1032,
+            "lastColumn": 112,
+            "firstColumn": 21,
+            "message": "Attribute “data” not allowed on element “a” at this point.",
+            "extract": "          <a href=\"http://localhost:1501/s20/sample/forum/threads/6\" class=\"thread_box_link\" data=\"6\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 92
+        },
+        "Attribute “reply-level” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 1563,
+            "lastColumn": 98,
+            "firstColumn": 5,
+            "message": "Attribute “reply-level” not allowed on element “div” at this point.",
+            "extract": "     \n    <div class=\"post_box first_post viewed_post\" id=\"16\" style=\"margin-left:0px;\" reply-level=\"1\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 94
+        },
+        "Attribute “post_box_id” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 1612,
+            "lastColumn": 54,
+            "firstColumn": 9,
+            "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
+            "extract": "\n\n        <div class=\"thread-post-form\" post_box_id=\"1\">\n\n<div",
+            "hiliteStart": 10,
+            "hiliteLength": 46
+        },
+        "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).": {
+            "type": "info",
+            "lastLine": 329,
+            "lastColumn": 99,
+            "firstColumn": 69,
+            "subType": "warning",
+            "message": "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).",
+            "extract": "          <h1 class=\"breadcrumb_heading\">Discus",
+            "hiliteStart": 10,
+            "hiliteLength": 31
+        }
+    },
+    "/s20/sample/forum/threads/new": {
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 598,
+            "lastColumn": 122,
+            "firstColumn": 21,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <i class=\"fas fa-bars handle ui-sortable-handle\" aria-label=\"Drag to reorder\" title=\"Drag to reorder\"></i>\n ",
+            "hiliteStart": 10,
+            "hiliteLength": 102
+        },
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 831,
+            "lastColumn": 10,
+            "firstColumn": 4,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "Attribute “cat-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 863,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “cat-id” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “btn-selected” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 863,
+            "lastColumn": 116,
+            "firstColumn": 10,
+            "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
+            "extract": "\n\t\t\t\t\t\t\t\t\t<button class=\"btn btn-sm filter-inactive\" type=\"button\" id=\"categoryid_2\" cat-id=\"2\" btn-selected=\"false\">Questi",
+            "hiliteStart": 10,
+            "hiliteLength": 107
+        },
+        "Attribute “sel-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 868,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “sel-id” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        },
+        "Attribute “post_box_id” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 881,
+            "lastColumn": 54,
+            "firstColumn": 9,
+            "message": "Attribute “post_box_id” not allowed on element “div” at this point.",
+            "extract": "\n\n        <div class=\"thread-post-form\" post_box_id=\"1\">\n\n<div",
+            "hiliteStart": 10,
+            "hiliteLength": 46
+        }
+    },
+    "/s20/sample/forum/categories": {
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 592,
+            "lastColumn": 122,
+            "firstColumn": 21,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <i class=\"fas fa-bars handle ui-sortable-handle\" aria-label=\"Drag to reorder\" title=\"Drag to reorder\"></i>\n ",
+            "hiliteStart": 10,
+            "hiliteLength": 102
+        }
+    },
+    "/s20/sample/forum/stats": {
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 588,
+            "lastColumn": 10,
+            "firstColumn": 4,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</div>\n\t\t\t<style>\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 592,
+            "lastColumn": 109,
+            "firstColumn": 4,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "true\">\n\t\t\t<div id=\"thread_category\" aria-label=\"Select thread category\" class=\"inline-block\" data-ays-ignore=\"true\">\n\t\t\t\t\t",
+            "hiliteStart": 10,
+            "hiliteLength": 106
+        },
+        "Attribute “sel-id” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 595,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “sel-id” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        },
+        "Attribute “btn-selected” not allowed on element “button” at this point.": {
+            "type": "error",
+            "lastLine": 595,
+            "lastColumn": 104,
+            "firstColumn": 5,
+            "message": "Attribute “btn-selected” not allowed on element “button” at this point.",
+            "extract": "rue\">\n\t\t\t\t<button class=\"btn btn-sm btn-default inline-block filter-inactive\" sel-id=\"0\" btn-selected=\"false\">Commen",
+            "hiliteStart": 10,
+            "hiliteLength": 100
+        }
+    },
+    "/s20/sample/users": {},
+    "/s20/sample/graders": {
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 1459,
+            "lastColumn": 7,
+            "firstColumn": 1,
+            "message": "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "</table>\n\n<style>\n\t.gra",
+            "hiliteStart": 10,
+            "hiliteLength": 7
+        }
+    },
+    "/s20/sample/sections": {},
+    "/s20/sample/student_photos": {},
+    "/s20/sample/late_days": {
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 650,
+            "lastColumn": 169,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"March 29, 2020\" tabindex=\"-1\">29</sp",
+            "hiliteStart": 10,
+            "hiliteLength": 83
+        }
+    },
+    "/s20/sample/extensions": {
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 721,
+            "lastColumn": 169,
+            "firstColumn": 87,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "ontainer\"><span class=\"flatpickr-day prevMonthDay\" aria-label=\"March 29, 2020\" tabindex=\"-1\">29</sp",
+            "hiliteStart": 10,
+            "hiliteLength": 83
+        }
+    },
+    "/s20/sample/grade_override": {},
+    "/s20/sample/plagiarism": {
+        "The “center” element is obsolete. Use CSS instead.": {
+            "type": "error",
+            "lastLine": 548,
+            "lastColumn": 12,
+            "firstColumn": 5,
+            "message": "The “center” element is obsolete. Use CSS instead.",
+            "extract": "sub\">\n    <center>\n    <",
+            "hiliteStart": 10,
+            "hiliteLength": 8
+        },
+        "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)": {
+            "type": "error",
+            "lastLine": 564,
+            "lastColumn": 55,
+            "firstColumn": 28,
+            "message": "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)",
+            "extract": "       <b><div name=\"gradeable_title\"></div>",
+            "hiliteStart": 10,
+            "hiliteLength": 28
+        }
+    },
+    "/s20/sample/plagiarism/configuration/new": {
+        "Attribute “name” not allowed on element “div” at this point.": {
+            "type": "error",
+            "lastLine": 608,
+            "lastColumn": 92,
+            "firstColumn": 17,
+            "message": "Attribute “name” not allowed on element “div” at this point.",
+            "extract": "          <div style=\"width:70%;float:right;overflow:auto;\" name=\"prev_gradeable_div\">      ",
+            "hiliteStart": 10,
+            "hiliteLength": 76
+        },
+        "Attribute “name” not allowed on element “span” at this point.": {
+            "type": "error",
+            "lastLine": 618,
+            "lastColumn": 79,
+            "firstColumn": 21,
+            "message": "Attribute “name” not allowed on element “span” at this point.",
+            "extract": "          <span name=\"add_more_prev_gradeable\" aria-label=\"Add more\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 59
+        },
+        "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)": {
+            "type": "info",
+            "lastLine": 618,
+            "lastColumn": 79,
+            "firstColumn": 21,
+            "subType": "warning",
+            "message": "Possible misuse of “aria-label”. (If you disagree with this warning, file an issue report or send e-mail to www-validator@w3.org.)",
+            "extract": "          <span name=\"add_more_prev_gradeable\" aria-label=\"Add more\">\n     ",
+            "hiliteStart": 10,
+            "hiliteLength": 59
+        }
+    },
+    "/s20/sample/reports": {},
+    "/s20/sample/late_table": {}
+}
