@@ -104,28 +104,27 @@ class DockerInterfaceController extends AbstractController {
         $this->core->getOutput()->addInternalJs('docker_interface.js');
         $this->core->getOutput()->enableMobileViewport();
 
-        $path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "docker_data", "submitty_docker.json");
-        $docker_info = FileUtils::readJsonFile($path);
-
-
-        $container_json = FileUtils::readJsonFile("/usr/local/submitty/config/autograding_containers.json");
-
-        if ($docker_info === false) {
-            $err_msg = "Failed to parse submitty docker information";
-            $this->core->addErrorMessage($err_msg);
-            $json_response = JsonResponse::getFailResponse($err_msg);
+        try {
+            $response = $this->core->curlRequest(
+                FileUtils::joinPaths($this->core->getConfig()->getCgiUrl(), "docker_ui.cgi")
+            );
         }
-        else {
-            $json_response = JsonResponse::getSuccessResponse($docker_info);
+        catch (CurlException $exc) {
+            $msg = "Failed to get response from CGI process, please try again";
+            return new MultiResponse(
+                JsonResponse::getFailResponse($msg),
+                new WebResponse("Error", "errorPage", $msg)
+            );
         }
+        
+        $json = json_decode($response, True);
 
         return new MultiResponse(
-            $json_response,
+            JsonResponse::getSuccessResponse($json),
             new WebResponse(
                 ['admin', 'Docker'],
                 'displayDockerPage',
-                $docker_info,
-                $container_json
+                $json
             )
         );
     }
