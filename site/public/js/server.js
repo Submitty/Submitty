@@ -1419,19 +1419,20 @@ function setNewDateTime(id, path) {
             //get the value in each file so the color can be assigned
             //based on the time chosen
             var fileDT = newDateTime;
+            fileDT = fileDT.replace(/\s/, 'T');
+            currentDT = currentDT.replace(/\s/, 'T');
+            neverDT = neverDT.replace(/\s/, 'T');
             //also custom colors for this page for readability
-            if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
+            if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
                 $('#'+id).css("backgroundColor", green);
                 return green;
-            }
-            else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                $('#'+id).css("backgroundColor", red);
+             } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
+                 $('#'+id).css("backgroundColor", red);
                 return red;
-            }
-            else{
+             } else {
                 $('#'+id).css("backgroundColor", yellow);
                 return yellow;
-            }
+             }
         },
         error: function(e) {
             console.log("Error getting server time.");
