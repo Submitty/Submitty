@@ -173,10 +173,17 @@ function restoreFromLocal() {
         // Finally, we restore codeboxes
         for (const id in state.codebox) {
             const answer = state.codebox[id][0];
-            const codebox = $(`#${id} .CodeMirror`).get(0).CodeMirror;
+            const codebox = $(`#${id} .CodeMirror`).get(0);
+            // If this box no longer exists, then don't attempt to update the
+            // answer. The autosave data is probably for an older version of
+            // the gradeable at this point, see issue #5351.
+            if (!codebox) {
+                continue;
+            }
+            const cm = codebox.CodeMirror;
             // This automatically triggers the event handler for the clear and
             // recent buttons.
-            codebox.setValue(answer);
+            cm.setValue(answer);
         }
     }
 }
