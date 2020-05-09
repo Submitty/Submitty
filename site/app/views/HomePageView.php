@@ -100,12 +100,7 @@ class HomePageView extends AbstractView {
         $this->output->addBreadcrumb("System Update");
         return $this->output->renderTwigTemplate('admin/SystemUpdate.twig', [
             "csrf_token" => $csrf_token,
-            "head_instructor" => $head_instructor,
-            "faculty" => $faculty,
-            "is_superuser" => $is_superuser,
-            "semesters" => $semesters,
-            "course_creation_url" => $this->output->buildUrl(['update']),
-            "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements()
+            "latest_tag" => $this->core->getConfig()->getLatestTag()
         ]);
     }
 }

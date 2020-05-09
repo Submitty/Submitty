@@ -302,16 +302,16 @@ class HomePageController extends AbstractController {
      */
     public function systemUpdatePage() {
         $user = $this->core->getUser();
-        if (is_null($user) || !$user->accessFaculty()) {
+        if (is_null($user) || !$user->getAccessLevel() == 1) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
         }
 
-        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
-            $faculty = $this->core->getQueries()->getAllFaculty();
-        }
+        // if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+        //     $faculty = $this->core->getQueries()->getAllFaculty();
+        // }
 
         return new MultiResponse(
             null,

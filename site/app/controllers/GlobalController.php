@@ -323,20 +323,20 @@ class GlobalController extends AbstractController {
 
             if($this->core->getUser()->getAccessLevel() == 1) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => "javascript: toggleSidebar();",
-                    "title" => "Collapse Sidebar",
+                    "href" => $this->core->buildUrl(['update']),
+                    "title" => "System Update",
                     "class" => "nav-row",
-                    "id" => "nav-sidebar-collapse",
-                    "icon" => "fa-bars"
+                    "id" => "nav-sidebar-update",
+                    "icon" => "fas fa-sync"
                 ]);
             }
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(['update']),
-                "title" => "System Update",
+                "href" => "javascript: toggleSidebar();",
+                "title" => "Collapse Sidebar",
                 "class" => "nav-row",
-                "id" => "nav-sidebar-update",
-                "icon" => "fas fa-sync"
+                "id" => "nav-sidebar-collapse",
+                "icon" => "fa-bars"
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [

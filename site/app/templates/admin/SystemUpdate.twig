@@ -1,7 +1,43 @@
 <div class="content">
     <h2>System Update</h2>
+    <h4> Current Version Installed {{ latest_tag }} </h4>
+    <a target="_blank" href="https://submitty.org/sysadmin/update">Need help with updating Submitty? <i style="font-style:normal;" class="fa-question-circle"></i></a>
+    <button class="btn btn-primary" onclick="getReleases('{{latest_tag}}');">Check for Updates</button>
+    <div class="content" id="update_status" hidden>
+        <h2 id="text"></label>
+        <h4 id="tag"></label> 
+    </div>
+
+    <div class="content" id="release_notes_container" hidden>
+        <label id="release_notes"></label>
+    </div>
 </div>
 
+
 <script>
-    
+    // "https://api.github.com/repos/Submitty/Submitty/releases"
+    function getReleases(latest_tag) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", "https://api.github.com/repos/Submitty/Submitty/releases", false ); // false for synchronous request
+        xmlHttp.send( null );
+        //console.log(xmlHttp.responseText);
+        var myArr = JSON.parse(xmlHttp.responseText);
+        console.log(myArr[0]);
+        if(myArr[0]["tag_name"] == latest_tag) {
+            document.getElementById('text').innerHTML = "Submitty is up to date!";
+
+        } else {
+            document.getElementById('text').innerHTML = "A newer version of Submitty is available";
+            document.getElementById('tag').innerHTML = "Current Version Installed: " + latest_tag + "\n" + "Most Recent Version: " + myArr[0]["tag_name"];
+        }
+
+        document.getElementById('release_notes').innerHTML = parseReleaseNotes(myArr[0]["body"]);
+        document.getElementById('release_notes_container').style.display = "block"
+        document.getElementById('update_status').style.display = "block"
+    }
+
+    function parseReleaseNotes(raw_str) {
+        str = raw_str.replace(/\n/g, "<br />").replace(/\r/g, "").replace("*", "").replace(RegExp("\[(.*?)\]"), "");
+        return str;
+    }
 </script>
