@@ -220,12 +220,9 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * Checks whether a mocked method was called or not
-     *
-     * @param string $method
-     * @return bool
+     * Asserts whether a mocked method was called or not
      */
-    public function assertMethodCalled(string $method): bool {
-        return array_key_exists($method, $this->mocked_methods) && $this->mocked_methods[$method];
+    public function assertMethodCalled(string $method): void {
+        $this->assertTrue(array_key_exists($method, $this->mocked_methods) && $this->mocked_methods[$method]);
     }
 }

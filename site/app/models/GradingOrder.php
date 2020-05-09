@@ -446,7 +446,6 @@ class GradingOrder extends AbstractModel {
             $this->all_team_ids,
             [$this->getSectionKey(), 'team_id', 'user_id']
         );
-
         $gg_idx = [];
         $unsorted = [];
         foreach ($iter as $gg) {
