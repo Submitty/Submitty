@@ -17,11 +17,11 @@ import tempfile
 import socket
 import traceback
 import subprocess
-import random
-import string
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
+
+from submitty_utils import string_utils
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -385,8 +385,6 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,random
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message=msg)
     return True
 
-def generate_random_string(length):
-  return ''.join(random.choice(string.ascii_uppercase) for i in range(length))
 
 # ==================================================================================
 def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
@@ -409,7 +407,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     try:
         # prepare the job
         shipper_counter=0
-        random_identifier = generate_random_string(64)
+        random_identifier = string_utils.generate_random_string(64)
         #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
         while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file, random_identifier):
             time.sleep(5)
