@@ -1580,7 +1580,6 @@ function checkSidebarCollapse() {
 
 function updateTheme(){
   let choice = $("#theme_change_select option:selected").val();
-  console.log(choice)
   if(choice === "system_black"){
     localStorage.removeItem("theme");
     localStorage.setItem("black_mode", "black");

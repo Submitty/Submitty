@@ -188,7 +188,6 @@
     --standard-input-background: #ffffff;
     --checkbox-black: #000000;
     --overall-comment: #E9EFEF;
-    /* --dark-mode-black: #202225; */
     --alternating-row-color-light: #eee;
 
 
@@ -196,7 +195,6 @@
 }
 
 [data-black_mode="black"][data-theme="dark"] {
-      /* --dark-mode-black: #000000; */
       --default-white: #000000;
       --background-blue: #000000;
 }
