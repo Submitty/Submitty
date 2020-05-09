@@ -59,6 +59,11 @@ select {
     height: 35px;
 }
 
+.peer-button {
+    background-color: var(--standard-plum-purple);
+    color: white;
+}
+
 a.nav-bar {
     padding: 6px 12px;
     text-decoration: none;
@@ -90,7 +95,7 @@ a.nav-bar.normal-btn {
 
 a.nav-bar.active-btn {
     background-color: var(--submitty-logo-blue);
-    color: var(--text-white);
+    color: var(--btn-text-white);
     font-weight: bold;
 }
 
@@ -175,6 +180,7 @@ div.btn-container {
 #rebuild-status-panel {
     display: inline-block;
     background-color: lightgrey;
+    color: var(--btn-text-black);
 
     position: relative;
     top: 5px;

@@ -5,7 +5,7 @@
 
 
 
-    <center>
+    <div style="margin: auto; text-align: center;">
         <label for="date_to_release">
             <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
             <script>
@@ -20,7 +20,7 @@
     <br/>
     <br/>
     <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
-    </center>
+    </div>
     <script>
 
         function getNewDateTime(id){
@@ -47,13 +47,13 @@
             var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
 
             if (new Date(nDT).getTime() <= new Date(currentDT).getTime()) {
-                return "#87db88";
+                return "var(--date-picker-green)";
             }
             else if(new Date(nDT).getTime()>=new Date(neverDT).getTime()){
-                return "#f76c6c";
+                return "var(--date-picker-red)";
             }
             else {
-                return "#ffeb54";
+                return "var(--date-picker-yellow)";
             }
         }
         function setChildPerm(dirArr,handleData){
@@ -155,6 +155,6 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirmReleaseDate()"/>
+    <input name="submit" class="btn btn-primary key_to_click" tabindex="0" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirmReleaseDate()"/>
 
 {% endblock %}

@@ -7,7 +7,7 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\CourseMaterial;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,17 +20,14 @@ class MiscController extends AbstractController {
      * second
      *
      * @Route("/server_time")
-     * @return Response
      */
-    public function getServerTime() {
-        return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core))
-        );
+    public function getServerTime(): JsonResponse {
+        return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
     }
 
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
-     * @return Response
+     * @return MultiResponse
      */
     public function encodePDF($gradeable_id) {
         $id = $_POST['user_id'] ?? null;
@@ -58,19 +55,19 @@ class MiscController extends AbstractController {
         }
 
         if ($file_path !== $_POST['file_path'] || !Utils::startsWith($file_path, $check_path)) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
         }
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $directory, "path" => $file_path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "section" => $section])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You do not have access to this file")
             );
         }
 
         $pdf64 = base64_encode(file_get_contents($file_path));
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($pdf64)
         );
     }
@@ -114,11 +111,6 @@ class MiscController extends AbstractController {
                     $this->core->getOutput()->showError("Your section may not access this file.");
                     return false;
                 }
-            }
-
-            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
-                $this->core->getOutput()->showError("Your section may not access this file.");
-                return false;
             }
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));

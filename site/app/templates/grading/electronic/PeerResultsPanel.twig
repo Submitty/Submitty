@@ -1,0 +1,21 @@
+{% import _self as self %}
+<div id="peer_results" class="draggable rubric_panel">
+    <div class="draggable_content">
+        <span class="grading_label">Peer Grading Results</span>
+        <span>Student Grader: </span>
+        <div class="inner-container_peer_results" id="grading-box-peer">
+                    {% if has_active_version %}
+                        <script>
+                            $(document).ready(function () {
+                                loadTemplates().then(function() {
+                                    return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
+                                });
+                            });
+                        </script>
+
+                    {% else %}
+                        <h4>No Submission</h4>
+                    {% endif %}
+        </div>
+    </div>
+</div>

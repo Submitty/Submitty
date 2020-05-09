@@ -5,6 +5,10 @@
     --viewed_content: #e8f0f7;
 }
 
+[data-theme="dark"] {
+    --viewed_content: #313335;
+}
+
 a, a:hover, a:link, a:visited {
     cursor: pointer;
 }
@@ -42,18 +46,18 @@ a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
 
-    color: var(--text-white);
+    color: var(--btn-text-white);
 
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: var(--text-white);
+    color: var(--btn-text-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
-    color: var(--text-white);
+    color: var(--btn-text-white);
 }
 
 a.btn-default,
@@ -74,7 +78,7 @@ a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: var(--text-black);
+    color: var(--btn-text-black);
 }
 
 a.btn, a.icon {
@@ -106,6 +110,7 @@ input[type="color"] {
     font-size: 14px;
     line-height: 20px;
     color: var(--standard-dark-gray);
+    background-color: var(--standard-input-background);
     vertical-align: middle;
     border: 1px solid var(--standard-light-gray);
     -webkit-border-radius: 4px;
@@ -117,6 +122,7 @@ input[type="color"] {
 input.readonly {
     background-color: var(--standard-pale-gray);
     cursor: not-allowed;
+    color: var(--btn-text-black);
 }
 
 select {
@@ -152,7 +158,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: var(--default-white);
+    color: var(--btn-default-white);
     font-size: 18px;
     font-weight: 900
 }
@@ -180,6 +186,13 @@ select.disabled,
 textarea.disabled,
 input.disabled {
     background-color: var(--standard-light-gray);
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: button;
 }
 
 /****************************
@@ -224,7 +237,7 @@ table tr.table-header {
     background: var(--default-white);
 }
 
-.table>thead>tr {
+.table>thead>tr, .table>tfoot>tr {
     background: var(--standard-hover-light-gray);
 }
 
@@ -274,6 +287,25 @@ td>a.active-sort {
 /* layout table classes  */
 /* Layout tables do not have <caption>, <thead>, and <th> tags */
 
+.layout-table-div {
+    display: table;
+    width: 100%;
+    text-align: center;
+    border: 1px solid var(--standard-medium-gray);
+}
+
+.layout-table-div-row {
+    display: table-row;
+}
+
+.layout-table-div-cell {
+    display: table-cell;
+}
+
+.layout-table-div-header {
+    background-color: var(--standard-hover-light-gray);
+}
+
 /* styling used in a <th> cell, except this is for a layout table */
 .layout_th_cell {
     font-weight: bold;
@@ -308,6 +340,10 @@ td>a.active-sort {
 
 .content.gradeable_message {
     background-color: var(--actionable-blue);
+    color: var(--text-white);
+}
+
+.content.gradeable_message a{
     color: var(--text-white);
 }
 
@@ -534,10 +570,18 @@ td>a.active-sort {
     padding: 5px 5px 10px;
 }
 
+.overall-comment-box {
+  margin-top:10px;
+}
+
+.overall-comment-author {
+  font-weight: bold;
+}
+
 .submission-page-total-header {
   padding: 6px;
-  color: var(--text-white);
-  background-color: var(--actionable-blue);
+  color: var(--text-black);
+  background-color: var(--standard-light-gray);
 }
 
 .viewed_post{
@@ -572,13 +616,18 @@ td>a.active-sort {
 
 .new_thread{
     background-color: var(--viewed_content);
-}
-.btn-default.post_button_color{
-    background-color: inherit;
+    color: var(--text-black)
 }
 
 .box-title > h4 {
     margin-left: 20px;
+}
+
+.box-title-total > h4 {
+    margin-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+
 }
 
 .grade-results {
@@ -651,6 +700,7 @@ td>a.active-sort {
 
 .green-background {
     background-color: var(--standard-deep-dark-green);
+    color: var(--btn-default-white);
 }
 
 .yellow-background {
@@ -807,14 +857,14 @@ tbody.collapse.in {
   clear: both;
   font-weight: normal;
   line-height: 1.42857143;
-  color: var(--standard-deep-dark-gray);
+  color: var(--text-black);
   white-space: nowrap;
 }
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
   color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: var(--standard-pale-blue-gray);
+  background-color: var(--btn-standard-pale-blue-gray);
 }
 
 .dropdown-menu > .disabled > a,
@@ -1050,6 +1100,18 @@ div.full_height {
 
 .nav-buttons a {
     margin-left: 5px;
+}
+
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] #logo-submitty-light,
+#logo-submitty {
+  display: block!important;
+}
+
+/* Used to pick the Submitty logo to show based on the theme */
+[data-theme="dark"] #logo-submitty,
+#logo-submitty-light {
+  display: none!important;
 }
 
 .td-open {
@@ -1523,6 +1585,7 @@ end of styles used in the admin gradeable page
     height: 240px;
     display: flex;
     flex-direction: column;
+    color: var(--btn-text-black);
 }
 .wrapper-example .wrapper-center {
     display: flex;
@@ -1552,15 +1615,33 @@ end of styles used in the admin gradeable page
 }
 .wrapper-body {
     background-color: var(--default-white);
+    color: var(--text-black);
 }
 .wrapper-right {
     background-color: var(--standard-light-green);
+    color: var(--text-black);
 }
 .wrapper-bottom {
     background-color: var(--standard-light-blue);
 }
+.wrapper-css {
+  background-color: var(--default-white);
+  color: var(--text-black);
+}
+.wrapper_upload {
+  color: var(--text-black);
+}
+
+.wrapper-upload {
+  color: var(--btn-text-black);
+}
 
 .wrapper-upload td {
+    padding: 4px;
+    border: 1px solid var(--text-black);
+}
+
+.wrapper_layout_header > th {
     padding: 4px;
     border: 1px solid var(--text-black);
 }
@@ -1654,7 +1735,7 @@ end of styles used in the admin gradeable page
     /* TODO on mobile, different header height */
     margin: 90px 10px 10px; /* 80px for header */
     padding: 10px;
-    background-color: #fff;
+    background-color: var(--default-white);
     text-align: center;
     width: 108px;
     border: 2px solid #2627ee;
@@ -1742,8 +1823,13 @@ end of styles used in the admin gradeable page
     display: block !important;
 }
 
+#popup_to_show_matches_id {
+  overflow-y:auto;
+  border:2px solid grey;
+}
+
 .notification-badge {
-    background-color: red;
+    background-color: var(--danger-red);
     padding: 1px 5px;
     color: white;
     font-weight: bold;

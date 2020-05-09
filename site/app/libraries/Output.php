@@ -113,15 +113,25 @@ HTML;
             throw new OutputException('Invalid path to image file');
         }, ['is_safe' => ['html']]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("plurality_picker", function ($num, $single, $plural) {
+            if ($num == 1) {
+                return $single;
+            }
+            return $plural;
+        }, ["is_safe" => ["html"]]));
+
         if ($full_load) {
             $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
                 ->setTimezone($this->core->getConfig()->getTimezone());
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
-                    $namespace = 'site_uploads'
+                    'site_uploads'
                 );
             }
+            $this->twig->addFunction(new \Twig\TwigFunction("feature_flag_enabled", function (string $flag): bool {
+                return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
+            }));
         }
         $engine = new ParsedownEngine();
         $engine->setSafeMode(true);

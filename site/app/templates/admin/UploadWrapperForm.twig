@@ -26,10 +26,10 @@
     {# This is a data table #}
     <table class="wrapper-upload">
         <tr class="wrapper_layout_header">
-            <td class="layout_th_cell">Panel</td>
-            <td class="layout_th_cell">File Type</td>
-            <td class="layout_th_cell">Upload</td>
-            <td class="layout_th_cell">Current File</td>
+            <th class="layout_th_cell">Panel</th>
+            <th class="layout_th_cell">File Type</th>
+            <th class="layout_th_cell">Upload</th>
+            <th class="layout_th_cell">Current File</th>
         </tr>
         {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar", csrf_token, upload_url, delete_url) }}
         {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar", csrf_token, upload_url, delete_url) }}
@@ -48,7 +48,7 @@
             <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                 <input type="hidden" name="location" value="{{ file }}">
-                <input type="file" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}">
+                <input type="file" class="wrapper_upload" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}">
                 <input type="submit" class="btn btn-default" value="Upload" />
             </form>
         </td>

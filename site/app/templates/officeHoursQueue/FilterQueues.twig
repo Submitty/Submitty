@@ -1,6 +1,11 @@
 {% if viewer.isGrader()%}
   <p>
-    <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
+    For more information: <a target=_blank href="https://submitty.org/grader/queue">
+    Managing the Office Hours Queue <i style="font-style:normal;" class="fa-question-circle"></i></a>
+    <br><br>
+  </p>
+  <p>
+    <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filterSettingsCollapse').toggleClass('collapse')">
       Toggle Filter Settings
     </button>
     <button id="auto_refresh_btn" class="btn btn-default filter_btn" type="button" onclick="toggleAutoRefresh()">
@@ -10,14 +15,14 @@
       Enable Notifications
     </button>
   </p>
-  <div class="collapse" id="filgerSettingsCollapse">
+  <div class="collapse" id="filterSettingsCollapse">
 
     <br>
     <form method="post" id="open_new_queue" action="{{base_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required">
-      <input type="text" id="new_queue_token" name="token" placeholder="Code" aria-label="Code" required="required">
-      <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
+      <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required">
+      <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-sync"></i>
       </a>
       <button id="open_new_queue_btn" type="submit" class="btn btn-primary">Open New Queue</button>
@@ -25,24 +30,24 @@
     <br>
     <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <select id="old_queue_code" class="form-control" name="code" aria-label="Code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
+      <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllQueues() %}
           <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
         {% endfor %}
       </select>
-      <input type="text" id="old_queue_token" name="token" placeholder="New Code" aria-label="New Code" required="required">
-      <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random code" aria-label="Generate random code" tabindex="0" style="padding:.5rem;">
+      <input type="text" id="old_queue_token" name="token" placeholder="New Access Code" aria-label="New Access Code" required="required">
+      <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
         <i class="fas fa-sync"></i>
       </a>
-      <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Code</button>
+      <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Access Code</button>
     </form>
 
     <table class="table table-striped" style="width:100%; margin-top:1rem;">
       <thead>
         <tr>
           <th scope="col">Filter</th>
-          <th scope="col">Queue Name/Code</th>
+          <th scope="col">Queue Name/Access Code</th>
           <th scope="col">Open/Close</th>
           <th scope="col">Empty</th>
           <th scope="col">Delete</th>
@@ -63,7 +68,7 @@
             <td style="text-align: left;">
               <label for="queue_filter_{{viewer.cleanForId(queue['code'])}}">
                 <b>Name:</b>{{viewer.removeUnderScores(queue['code'])}}<br>
-                <b>Code:</b>{{queue['token']}}</td>
+                <b>Access Code:</b>{{queue['token']}}</td>
               </lable>
             <td>
               <form method="post" action="{{base_url}}/{{queue['code']}}/toggle">

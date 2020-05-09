@@ -37,8 +37,6 @@ class GlobalView extends AbstractView {
             $page_title = "Submitty " . $page_name;
         }
 
-        $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"), true);
-
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
@@ -54,9 +52,10 @@ class GlobalView extends AbstractView {
             "wrapper_urls" => $wrapper_urls,
             "system_message" => $this->core->getConfig()->getSystemMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "enable_banner" => $config_data['duck_special_effects'],
+            "enable_banner" => $this->core->getConfig()->isDuckBannerEnabled(),
             "duck_img" => $duck_img,
-            "use_mobile_viewport" => $this->output->useMobileViewport()
+            "use_mobile_viewport" => $this->output->useMobileViewport(),
+            "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) ? $_COOKIE['collapse_sidebar'] === 'true' : false
         ]);
     }
 

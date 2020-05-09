@@ -13,21 +13,23 @@
         <table id="grader-table" class="table table-striped mobile-table directory-table">
             <caption>Course Graders</caption>
             <thead>
+                <th>#</th>
                 <th>User ID</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>User Group</th>
                 <th>Registration Sections</th>
-                <th>Edit Student</th>
+                <th>Edit Grader</th>
             </thead>
 			{% for grading_group in 1..3 %}
-                <tbody id="section-{{ registration }}">
+                <tbody id="section-{{ grading_group }}">
                     {% if graders[grading_group]|length > 0 %}
                         <tr class="info">
-                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</td>
+                            <th class="section-break" colspan="7">{{groups[grading_group].name}}</td>
                         </tr>
                         {% for grader in graders[grading_group] %}
                             <tr id="user-{{ grader.getId() }}">
+                                <td></td>
                                 <td class="align-left">{{ grader.getId() }}</td>
                                 <td class="align-left">{{ grader.getDisplayedFirstName() }}</td>
                                 <td class="align-left">{{ grader.getDisplayedLastName() }}</td>
@@ -38,7 +40,7 @@
                         {% endfor %}
                     {% else %}
                         <tr class="info">
-                            <td colspan="8" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
+                            <td colspan="7" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
                         </tr>
                     {% endif %}
                 </tbody>

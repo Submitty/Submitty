@@ -1,83 +1,85 @@
-<br><br>
-<h1>Today's Queue History
-  {% if viewer.getFullHistory() %}
-    <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
-      View Limited History
-    </a>
-  {% else %}
-    <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=true">
-      View Full History
-    </a>
-  {% endif %}
-</h1>
-<table class="table table-striped" style="width:100%;">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col" class="mobile-hide">ID</th>
-      <th scope="col">Name</th>
-      <th scope="col">Queue</th>
-      <th scope="col">Time Entered</th>
-      <th scope="col">Time In Queue</th>
-      <th scope="col">Time Helped</th>
-      <th scope="col" class="mobile-hide">Helped Started By</th>
-      <th scope="col" class="mobile-hide">Removed By</th>
-      {% if viewer.isGrader() %}
-        <th scope="col">Restore</th>
-      {% endif %}
-    </tr>
-  </thead>
-  <tbody>
-    {% set history_count = 0 %}
-    {% for entry in viewer.getPastQueue() if history_count < 25 or viewer.getFullHistory() %}
-      {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
-        {% set history_count = history_count + 1 %}
-        <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
-          <th scope="row">{{history_count}}</th>
-          <td class="mobile-hide">
-            <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
-              <i class="fas fa-eye"></i>
-            </a>
-          </td>
-          <td>{{ entry['name'] }}</td>
-          <td>{{ entry['queue_code'] }}</td>
-          <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
-
-          <td>{{ viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['removal_type']) }}</td>
-
-          {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
-            <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
-          {% elseif entry['removal_type'] == 'removed' %}
-            <td>Removed</td>
-          {% elseif entry['removal_type'] == 'self' %}
-            <td>Left Queue</td>
-          {% elseif entry['removal_type'] == 'emptied' %}
-            <td>Queue Emptyed</td>
-          {% else %}
-            <td>Not in queue</td>
-          {% endif %}
-
-          <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
-          {% if entry['removal_type'] == 'self' %}
+<div id="queue_history">
+  <br><br>
+  <h1>Today's History
+    {% if viewer.getFullHistory() %}
+      <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
+        View Limited History
+      </a>
+    {% else %}
+      <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=true">
+        View Full History
+      </a>
+    {% endif %}
+  </h1>
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" class="mobile-hide">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Queue</th>
+        <th scope="col">Time Entered</th>
+        <th scope="col">Time In Queue</th>
+        <th scope="col">Time Helped</th>
+        <th scope="col" class="mobile-hide">Helped Started By</th>
+        <th scope="col" class="mobile-hide">Removed By</th>
+        {% if viewer.isGrader() %}
+          <th scope="col">Restore</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% set history_count = 0 %}
+      {% for entry in viewer.getPastQueue()if history_count < 25 or viewer.getFullHistory() %}
+        {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
+          {% set history_count = history_count + 1 %}
+          <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
+            <th scope="row">{{history_count}}</th>
             <td class="mobile-hide">
-              <a onclick="unhideId(this, '{{ entry['removed_by'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
+              <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
                 <i class="fas fa-eye"></i>
               </a>
             </td>
-          {% else %}
-            <td class="mobile-hide">{{ entry['removed_by'] }}</td>
-          {% endif %}
-          {% if viewer.isGrader() %}
-            <td>
-              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
-                <button type="submit" class="btn btn-danger queue_restore_btn">Restore</button>
-              </form>
-            </td>
-          {% endif %}
-        </tr>
-      {% endif %}
-    {% endfor %}
-  </tbody>
-</table>
+            <td>{{ entry['name'] }}</td>
+            <td>{{ entry['queue_code'] }}</td>
+            <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+
+            <td>{{ viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['removal_type']) }}</td>
+
+            {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
+              <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
+            {% elseif entry['removal_type'] == 'removed' %}
+              <td>Removed</td>
+            {% elseif entry['removal_type'] == 'self' %}
+              <td>Left Queue</td>
+            {% elseif entry['removal_type'] == 'emptied' %}
+              <td>Queue Emptyed</td>
+            {% else %}
+              <td>Not in queue</td>
+            {% endif %}
+
+            <td class="mobile-hide">{{ entry['help_started_by'] }}</td>
+            {% if entry['removal_type'] == 'self' %}
+              <td class="mobile-hide">
+                <a onclick="unhideId(this, '{{ entry['removed_by'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            {% else %}
+              <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+            {% endif %}
+            {% if viewer.isGrader() %}
+              <td>
+                <form method="post" action="{{base_url}}/{{entry['queue_code']}}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
+                  <button type="submit" class="btn btn-danger queue_restore_btn">Restore</button>
+                </form>
+              </td>
+            {% endif %}
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
