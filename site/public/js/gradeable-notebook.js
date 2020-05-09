@@ -65,7 +65,7 @@ function setCodeBox(codebox_id, state)
     }
 }
 
-const AUTOSAVE_KEY = `${window.location.pathname}-autosave`;
+const AUTOSAVE_KEY = `${window.location.pathname}-notebook-autosave`;
 
 /**
  * This value will be true if autosave is enabled for this session.
@@ -109,27 +109,20 @@ function cleanupAutosaveHistory() {
         const toDelete = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            try {
-                const { type, timestamp } = JSON.parse(localStorage.getItem(key));
-                
-                // Skip over non-autosave entries.
-                if (type !== "notebook-autosave") {
-                    continue;
-                }
+            if (!key.endsWith("-notebook-autosave")) {
+                continue;
+            }
 
+            try {
+                const { timestamp } = JSON.parse(localStorage.getItem(key));
+                
                 if (msToDays(Date.now() - timestamp) > 30) {
                     toDelete.push(key);
                 }
             } catch (e) {
-                // If this item in localStorage isn't a JSON blob (possible as
-                // we use localStorage in a couple of other things), then
-                // JSON.parse() will throw a SyntaxError. We don't care about
-                // these entries, so skip over them.
-                if (e instanceof SyntaxError) {
-                    continue;
-                } else {
-                    throw e;
-                }
+                // This item has gotten corrupted somehow; let's delete it 
+                // instead of letting it linger around and taking up space.
+                toDelete.push(key);
             }
         }
         toDelete.forEach(localStorage.removeItem, localStorage);
@@ -142,7 +135,6 @@ function cleanupAutosaveHistory() {
 function saveToLocal() {
     if (autosaveEnabled) {
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
-            type: "notebook-autosave",
             timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
             short_answer: gatherInputAnswersByType("short_answer"),
