@@ -8,7 +8,7 @@
 {% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <input type="hidden" name="edit_user" value="false" />
+    <input type="hidden" name="edit_user" data-user='' value="false" />
     <div id="edit-user-form-content">
 		<a id="redirect-link-icon" class="red-message full-width key_to_click" tabindex="0" onclick="redirectToEdit();" aria-label="edit entered user">
 			<p id="user-form-already-exists-error-message">
