@@ -136,8 +136,8 @@ class ElectronicGraderView extends AbstractView {
                 $peer_graded = 0;
 
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
-                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
-                    $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
+                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / ($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables'])) * 100, 1);
+                    $peer_total =  floor(($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables']) / $peer_count);
                     $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
                 }
             }
@@ -389,8 +389,15 @@ HTML;
         $columns = [];
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
-            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
-
+            if ($gradeable->isTeamAssignment()) {
+                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
+            }
+            else {
+                $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
+            }
+            if ($gradeable->isTaGrading()) {
+                $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+            }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
@@ -712,6 +719,8 @@ HTML;
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from) {
+
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $peer = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.

@@ -6,7 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +20,7 @@ class AutogradingConfigController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
      * @param string $g_id gradeable Id
-     * @return Response
+     * @return MultiResponse
      */
     public function showConfig($g_id = '') {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
@@ -37,7 +37,7 @@ class AutogradingConfigController extends AbstractController {
                 }
             }
         }
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Gradeable'],
                 'uploadConfigForm',
@@ -52,7 +52,7 @@ class AutogradingConfigController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
      * @param string $g_id gradeable Id
-     * @return Response
+     * @return MultiResponse
      */
     public function uploadConfig($g_id = '') {
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
@@ -60,7 +60,7 @@ class AutogradingConfigController extends AbstractController {
 
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($redirect_url)
             );
         }
@@ -68,7 +68,7 @@ class AutogradingConfigController extends AbstractController {
         $upload = $_FILES['config_upload'];
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
             $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($redirect_url)
             );
         }
@@ -94,7 +94,7 @@ class AutogradingConfigController extends AbstractController {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
                 $this->core->addErrorMessage("Upload failed: {$error_message}");
-                return Response::RedirectOnlyResponse(
+                return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($redirect_url)
                 );
             }
@@ -103,13 +103,13 @@ class AutogradingConfigController extends AbstractController {
             if (!@copy($upload['tmp_name'], FileUtils::joinPaths($target_dir, $upload['name']))) {
                 FileUtils::recursiveRmdir($target_dir);
                 $this->core->addErrorMessage("Upload failed: Could not copy file");
-                return Response::RedirectOnlyResponse(
+                return MultiResponse::RedirectOnlyResponse(
                     new RedirectResponse($redirect_url)
                 );
             }
         }
         $this->core->addSuccessMessage("Gradeable config uploaded");
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($redirect_url)
         );
     }
@@ -117,7 +117,7 @@ class AutogradingConfigController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
      * @param string $g_id gradeable Id
-     * @return Response
+     * @return MultiResponse
      */
     public function renameConfig($g_id = '') {
         $config_file_path = $_POST['curr_config_name'] ?? null;
@@ -147,7 +147,7 @@ class AutogradingConfigController extends AbstractController {
         }
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($redirect_url)
         );
     }
@@ -155,7 +155,7 @@ class AutogradingConfigController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
      * @param string $g_id gradeable Id
-     * @return Response
+     * @return MultiResponse
      */
     public function deleteConfig($g_id = '') {
         $config_path = $_POST['config_path'] ?? null;
@@ -185,7 +185,7 @@ class AutogradingConfigController extends AbstractController {
         }
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($redirect_url)
         );
     }
@@ -193,7 +193,7 @@ class AutogradingConfigController extends AbstractController {
     /**
      * @param $config_path
      * @Route("/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
     public function configUsedBy($config_path = null) {
         $config_path = urldecode($config_path);
@@ -205,11 +205,11 @@ class AutogradingConfigController extends AbstractController {
                     $inuse_config[] = $gradeable->getId();
                 }
             }
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse($inuse_config)
             );
         }
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getFailResponse("Config path can't be empty.")
         );
     }
