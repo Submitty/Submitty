@@ -296,4 +296,34 @@ class HomePageController extends AbstractController {
             )
         );
     }
+
+    /**
+     * @Route("/update", methods={"GET"})
+     */
+    public function systemUpdatePage() {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $faculty = $this->core->getQueries()->getAllFaculty();
+        }
+
+        return new MultiResponse(
+            null,
+            new WebResponse(
+                ['HomePage'],
+                'showSystemUpdatePage',
+                $faculty ?? null,
+                $this->core->getUser()->getId(),
+                $this->core->getQueries()->getAllUnarchivedSemester(),
+                $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
+                $this->core->getCsrfToken()
+            )
+        );
+    }
 }
