@@ -880,11 +880,11 @@ class ForumController extends AbstractController {
                 if ($option == "alpha") {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
                 }
-                elseif ($option == "alpha1") {
-                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha1');
+                elseif ($option == "alpha_by_registration") {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha_by_registration');
                 }
-                elseif ($option == "alpha2") {
-                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha2');
+                elseif ($option == "alpha_by_rotating") {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha_by_rotating');
                 }
                 elseif ($option == "reverse-time") {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'reverse-time');
