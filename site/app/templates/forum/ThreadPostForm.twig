@@ -200,7 +200,7 @@
 <script>
     $(function(){
         $("input[name='title']").change(function () {
-            $(this).val($.trim($(this).val()));
+            $(this).val($(this).val().trim());
         });
 
         $(".thread-announcement-checkbox").click(function (){

@@ -1,0 +1,8 @@
+{
+    "status": "success",
+    "data": {
+        "score": 1.0,
+        "message": "Success: numbers summed correctly.",
+        "status": "success"
+    }
+}
