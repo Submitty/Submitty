@@ -321,11 +321,11 @@ jobs:
             - libpcre3-dev
             - unzip
             - libboost-all-dev
-      env: CLANG_VER="5.0.1"
+      env: CLANG_VER="5.0.2"
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
-        - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
+        - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
         - mkdir ${HOME}/clang+llvm
         - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
         - export PATH=${HOME}/clang+llvm/bin:${PATH}
@@ -351,9 +351,9 @@ jobs:
         - sudo bash .setup/travis/setup_test_suite.sh
       script:
         - travis_wait 45 sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
-    - <<: *04-integration
-      env: CLANG_VER="6.0.0"
-      if: branch = master OR type = pull_request
+    #- <<: *04-integration
+    #  env: CLANG_VER="6.0.0"
+    #  if: branch = master OR type = pull_request
 
 notifications:
   email: false
