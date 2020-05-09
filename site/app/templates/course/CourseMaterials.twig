@@ -137,15 +137,18 @@
                         //based on the time chosen
                         var inputDT = document.getElementById(inputID);
                         var fileDT = inputDT.value;
+
+                        fileDT = fileDT.replace(/\s/, 'T');
+                        currentDT = currentDT.replace(/\s/, 'T');
+                        neverDT = neverDT.replace(/\s/, 'T');
+
                         //also custom colors for this page for readability
-                        if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-                            return "var(--date-picker-green)";
-                        }
-                        else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                            return "var(--date-picker-red)";
-                        }
-                        else{
-                            return "var(--date-picker-yellow)";
+                        if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
+                            return green;
+                        } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
+                            return red;
+                        } else {
+                            return yellow;
                         }
 
                     }
@@ -196,7 +199,7 @@
                     onOpen: handleTimeZones('{{ core.getConfig().getTimezone().getName() }}'),
                     onClose: function() {
                                             setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
-                                            determineRelease('date_to_release_{{ id }}');
+                                            changePermission('{{ path }}','1');
                                          }
                     });
                 </script>
