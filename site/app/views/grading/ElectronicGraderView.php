@@ -792,9 +792,12 @@ HTML;
             $pattern1 = "upload.pdf";
             $pattern2 = "/upload_page_\d+/";
             $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
+
             $pattern_match_flag = false;
             foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
-                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key)) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
                     $pattern_match_flag = true;
                 }
             }
