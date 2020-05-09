@@ -1,7 +1,7 @@
 $( document ).ready(function () {
   // open last opened grade inquiry or open first component with grade inquiry
   var component_selector = localStorage.getItem('selected_tab');
-  var first_unresolved_component = $('.component-unresolved:first');
+  var first_unresolved_component = $('.component-unresolved').first();
   if (component_selector !== null) {
     $(component_selector).click();
     localStorage.removeItem('selected_tab');
@@ -10,7 +10,7 @@ $( document ).ready(function () {
     first_unresolved_component.click();
   }
   else {
-    $('.component-tab:first').click();
+    $('.component-tab').first().click();
   }
 
 
