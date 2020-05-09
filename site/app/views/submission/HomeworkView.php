@@ -605,7 +605,7 @@ class HomeworkView extends AbstractView {
             //decoded.json may be read before the assoicated data is written, check if key exists first
             if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
                 $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
-                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
 
                 if ($use_ocr) {
                     $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
