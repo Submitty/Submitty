@@ -930,7 +930,8 @@ class UsersController extends AbstractController {
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_row_details = [];
         $bad_columns = array(); //Tracks columns in which errors occured
-        // lists all the validation formats
+
+        // Mapping column with its validation formats
         $column_formats = [
             'column_count' => 'Only 5 to 7 columns are allowed',
             'user_id' => 'UserId must contain only lowercase alpha, numbers, underscores, hyphens',
@@ -1075,7 +1076,7 @@ class UsersController extends AbstractController {
             }
         }
         if (!empty($users_not_found)) {
-            $this->core->addErrorMessage('User(s) with following username are not found ' . implode(', ', $users_not_found));
+            $this->core->addErrorMessage('User(s) with following username are not found:- ' . implode(', ', $users_not_found));
             $this->core->redirect($return_url);
         }
         foreach ($users_to_add as $row) {
