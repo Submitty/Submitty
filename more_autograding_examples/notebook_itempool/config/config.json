@@ -99,6 +99,41 @@ This message will appear in a blue box at the top of the page.",
           ]
         },
         // ===================================================
+        { "item_name" : "math_4",
+          "notebook" : [
+              {
+                  "type": "markdown",
+                  "markdown_string": "###Select *all* numbers that are powers of 2:"
+              },
+              {
+                  "type": "multiple_choice",
+                  "filename": "math_4.txt",
+                  "testcase_ref" : "math_4",
+                  "choices":[
+                      {"value": "4", "description": "`4`"},
+                      {"value": "24", "description": "`24`"},
+                      {"value": "32", "description": "`32`"},
+                      {"value": "96", "description": "`96`"},
+                      {"value": "128", "description": "`128`"},
+                      {"value": "524", "description": "`524`"}
+                  ],
+                  "randomize_order" : true,
+                  "allow_multiple": true
+              }
+          ],
+          "testcases" : [
+              { "title":"Math 4", "testcase_label":"math_4",
+                "validation":[ {
+                    "method":"diff", "comparison" : "byLine", "lineSwapOk" : true,
+                    "actual_file":"math_4.txt", "expected_file":"math_4_answer.txt",
+                    "show_expected":"never","show_actual":"never"
+                    //,
+                    // FIXME, THIS ALWAYS PRINTS
+                    //"failure_message":"Incorrect Answer"
+                } ] }
+          ]
+        },
+        // ===================================================
         { "item_name" : "animal_1",
           "notebook" : [
               {
@@ -326,6 +361,11 @@ Here's a short list of instructions:\n  \
             "type" : "item",
             "from_pool" : ["math_3"],
             "points" : 3
+        },
+        {
+            "type" : "item",
+            "from_pool" : ["math_4"],
+            "points" : 5
         },
         // ======================================================================================================
         {
