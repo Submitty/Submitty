@@ -5,14 +5,14 @@
         <span>Student Grader: </span>
         <div class="inner-container_peer_results" id="grading-box-peer">
                     {% if has_active_version %}
-                        <script type="application/javascript">
+                        <script>
                             $(document).ready(function () {
                                 loadTemplates().then(function() {
                                     return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');
                                 });
                             });
                         </script>
-                    
+
                     {% else %}
                         <h4>No Submission</h4>
                     {% endif %}

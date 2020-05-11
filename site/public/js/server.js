@@ -180,6 +180,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
+                console.log(e);
+                displayAjaxError(e);
             }
         })
     }
@@ -268,7 +270,7 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_students, release_time) {
 
     let form = $("#edit-course-materials-form");
 
@@ -299,7 +301,7 @@ function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_stude
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    $("#material-edit-form", form).attr('data-directory', dir);
+    $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
 }
 function captureTabInModal(formName){
@@ -1417,19 +1419,20 @@ function setNewDateTime(id, path) {
             //get the value in each file so the color can be assigned
             //based on the time chosen
             var fileDT = newDateTime;
+            fileDT = fileDT.replace(/\s/, 'T');
+            currentDT = currentDT.replace(/\s/, 'T');
+            neverDT = neverDT.replace(/\s/, 'T');
             //also custom colors for this page for readability
-            if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
+            if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
                 $('#'+id).css("backgroundColor", green);
                 return green;
-            }
-            else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                $('#'+id).css("backgroundColor", red);
+             } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
+                 $('#'+id).css("backgroundColor", red);
                 return red;
-            }
-            else{
+             } else {
                 $('#'+id).css("backgroundColor", yellow);
                 return yellow;
-            }
+             }
         },
         error: function(e) {
             console.log("Error getting server time.");

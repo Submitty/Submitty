@@ -1,0 +1,92 @@
+{% if viewer.inQueue() == 0 %}
+  <br>
+  <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <label for="name_box">Your Name:</label>
+    <input type="text" id="name_box" name="name" maxlength="20" placeholder="Queue Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
+    <br>
+    <div class="form-group">
+      <label for="queue_code">Queue Name:
+      </label>
+      <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+        <option value="">Queue Name</option>
+        {% for queue in viewer.getAllQueues() if queue['open'] == 'true' %}
+          <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <label for="token_box">Queue Access Code:</label>
+    <input type="text" name="token" id="token_box" placeholder="Queue Access Code" style="margin:.5rem" autocomplete="on" required="required">
+    <br>
+    {% if viewer.isContactInfoEnabled() %}
+      <label for="contact_info">My Contact Information (follow instructor directions):</label>
+      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on" required="required">
+      <br>
+    {% endif %}
+    <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
+  </form>
+{% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
+  <div id="queue_status">
+    <p>
+      {% set num_ahead = viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 %}
+      There
+      {{plurality_picker(num_ahead, 'is', 'are')}}
+      currently {{ num_ahead }}
+      {{plurality_picker(num_ahead, 'person', 'people')}}
+      ahead of you in the queue
+    </p>
+
+    <p>You are currently in:
+      <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
+    </p>
+
+    <p>
+      {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+        Because you have not yet been helped through this queue during the last week, you may be prioritized.
+      {% elseif viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+        Because you have not yet been helped through this queue today, you may be prioritized.
+      {% else %}
+        However, because you have been helped through this queue today, you may be de-prioritized.
+      {% endif %}
+    </p>
+
+    <p>
+      {% set num_ahead_week = viewer.getNumberAheadInQueueThisWeek() %}
+      {% set num_ahead_today = viewer.getNumberAheadInQueueToday() %}
+      {% set queue_text = 'in the queue who' %}
+      {% set position_text = 'not yet been helped in the last week, and' %}
+      {% set end_text = 'ahead of you in the queue who have not yet been helped today' %}
+      {% if viewer.firstTimeInQueueThisWeek(viewer.getCurrentQueueLastHelped()) %}
+          {% set queue_text = 'ahead of you in the queue who' %}
+      {% elseif not viewer.firstTimeInQueueToday(viewer.getCurrentQueueLastHelped()) %}
+          {% set end_text = 'in the queue who have not yet been helped today' %}
+      {% endif %}
+      There {{plurality_picker(num_ahead_week, 'is', 'are')}} currently
+      {{num_ahead_week}} {{plurality_picker(num_ahead_week, 'person', 'people')}}
+      {{ queue_text }} {{plurality_picker(num_ahead_week, 'has', 'have')}}
+      {{ position_text }} {{num_ahead_today}} additional
+      {{plurality_picker(num_ahead_today, 'person', 'people')}} {{ end_text }}.
+    </p>
+
+    <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+      <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+      <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
+    </form>
+  </div>
+{% else %}
+  <div id="queue_status">
+    <p>You are currently being helped</p>
+    <form
+      method="post"
+      id="finish_help"
+      action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/finishHelp"
+      onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+      <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+      <button id="self_finish_help" type="submit" class="btn btn-danger">Finish Being Helped</button>
+    </form>
+  </div>
+{% endif %}
