@@ -151,7 +151,7 @@ window.onbeforeunload = function() {
         /*localStorage.setItem('rotate', 0);
         render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
         */let zoom_level = window.RENDER_OPTIONS.scale * 100;
-        let doc = new jsPDF('p', 'mm');
+        let doc = null;
         console.log("C1");
         zoom("custom", 140);
         let sLeft = document.getElementById("file_content").scrollLeft;
@@ -163,8 +163,9 @@ window.onbeforeunload = function() {
     }
     
     function saveFilePromise(doc, i, zoom_level, sLeft, sTop, rotateVal){
+        pageContainer = document.querySelector('#pageContainer'+i);
         return new Promise(resolve => {
-            html2canvas($('#pageContainer'+i+''), {
+            html2canvas(pageContainer[0]).then(canvas => {
                 onrendered: function(canvas) {
                     let ctx = canvas.getContext('2d');
                     let scale = document.querySelector(`div#pageContainer${i} svg.annotationLayer`).scale;
@@ -198,7 +199,7 @@ window.onbeforeunload = function() {
                     }
                     resolve(doc);
                 }
-            });
+            })
         })
     }
     
@@ -243,8 +244,6 @@ window.onbeforeunload = function() {
             return;
         }
         var doc = await saveFilePromise(doc, i, zoom_level, sLeft, sTop, rotateVal);
-        return promise;
-        let result = await Promise.resolve();
         saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
     }
 
