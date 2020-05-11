@@ -1,81 +1,74 @@
 <div class="content">
-	<div class="float-right">
-		<button class = "btn btn-default" onclick="updateDockerData()" id="refresh-docker-interface">Refresh Docker Information </button>
-		<p id = "docker-update-info"><em>(Last updated on : {{ last_updated | default("") }})</em></p>
-	</div>
+    <h1>Submitty Docker Interface</h1>
 
-	<h1>Submitty Docker Interface</h1>
-
-	<h2>System Wide information:</h2>
-	{% if docker_info is not null %}
-		{# TODO: include worker information here in the future #}
-		<p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
-	{% endif %}
-</div>
-
-{% if docker_images is not null %}
-<div class="content">
-	<h2 class="docker-header">Autograding Docker Images</h2>
-	<button class="btn btn-default" 
-			onclick="collapseSection('autograding-images','autograding-images-collapse')"
-			id="autograding-images-collapse">
-			Collapse
-	</button>
-
-	<div id="autograding-images" style="display:block;">
-		<p class="black-message">These are the docker images that are installed and listed under autograding_containers.json</p>
-
-		<div class="docker-images-container">
-			{{ _self.renderDockerImage(autograding_containers['found']) }}
-		</div>
-	</div>
+    <h2>System Wide information:</h2>
+    {% if docker_info is not null %}
+        {# TODO: include worker information here in the future #}
+        <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
+    {% endif %}
 </div>
 
 <div class="content">
-	<h2 class="docker-header">System Wide Docker Images </h2>
-	<button class="btn btn-default"
-			onclick="collapseSection('system-images','system-images-collapse')"
-			id="system-images-collapse">
-			Collapse
-	</button>
+    <h2 class="docker-header">Autograding Docker Images</h2>
+    <button class="btn btn-default" 
+            onclick="collapseSection('autograding-images','autograding-images-collapse')"
+            id="autograding-images-collapse">
+            Collapse
+    </button>
 
-	<div id="system-images" style="display:block;">
-		<p class="black-message">These are the docker images that are installed on the primary submitty machine</p> 
-		<div class="docker-images-container">
-			{{ _self.renderDockerImage(docker_images) }}
-		</div>
-	</div>
+    <div id="autograding-images" style="display:block;">
+        <p class="black-message">These are the docker images that are installed and listed under autograding_containers.json</p>
+
+        <div class="docker-images-container">
+            {{ _self.renderDockerImage(autograding_containers['found']) }}
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <h2 class="docker-header">System Wide Docker Images </h2>
+    <button class="btn btn-default"
+            onclick="collapseSection('system-images','system-images-collapse')"
+            id="system-images-collapse">
+            Collapse
+    </button>
+
+    <div id="system-images" style="display:block;">
+        <p class="black-message">These are the docker images that are installed on the primary submitty machine</p> 
+        <div class="docker-images-container">
+            {{ _self.renderDockerImage(autograding_containers['all_images']) }}
+        </div>
+    </div>
 </div>
 
 {% if autograding_containers['not_found'] | length > 0 %}
 <div class="content">
-	<h2 class="docker-header">Other</h2>
+    <h2 class="docker-header">Other</h2>
 
-	<p class="red-message">The following Docker images were listed in the autograding_config.json file but not found installed system wide</p>
-	<p>This could mean the image(s) are not installed yet or have been installed incorrectly </p>
+    <p class="red-message">The following Docker images were listed in the autograding_config.json file but not found installed system wide</p>
+    <p>This could mean the image(s) are not installed yet or have been installed incorrectly </p>
 
-	<br>
-		{% for image in autograding_containers['not_found'] %}
-			<p class="black-message"> {{ image }} </p>
-		{% endfor %}
+    <br>
+        {% for image in autograding_containers['not_found'] %}
+            <p class="black-message"> {{ image }} </p>
+        {% endfor %}
 
-</div>	
-{% endif %}
+</div>  
 
 {% endif %}
 
 
 {% macro renderDockerImage(data) %}
-	{% for key, value in data %}
-		<div class="shadow">
-			<h2>{{ value['Repository'] }}</h2>
-			<p> ID : &nbsp {{ value['ID'] }} </p>
-			<p> Size : &nbsp {{ value['Size'] }} 
-				&nbsp &nbsp <em> (Virtual Size : {{ value['VirtualSize'] }} ) </em> 
-			</p>
-			<p> Tag &nbsp : &nbsp {{ value['Tag'] }} </p>
-			<br>
-			<p> Created {{ value['CreatedSince'] }} on &nbsp {{ value['CreatedAt'] }} </p>
-		</div>
-	{% endfor %}
+    {% for key, value in data %}
+        <div class="shadow">
+            <h2>{{ value["name"] }}</h2>
+            <p> ID : &nbsp {{ value["short_id"] | trim("sha256:") }} </p>
+            <p> Size : &nbsp {{ value["size"] }} 
+                &nbsp &nbsp <em> (Virtual Size : {{ value["virtual_size"] }} ) </em> 
+            </p>
+            <p> Tag &nbsp : &nbsp {{ value["tag"] }} </p>
+            <br>
+            <p> Created on : {{ value["created"] }} </p>
+        </div>
+    {% endfor %}
 {% endmacro %}

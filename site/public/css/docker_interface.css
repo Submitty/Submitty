@@ -1,22 +1,22 @@
 
 .docker-header{
-	display: inline-block;
-	margin-right: 10px;
+    display: inline-block;
+    margin-right: 10px;
 }
 
 .docker-images-container > div{
-	padding: 10px;
-	margin-top: 10px;
+    padding: 10px;
+    margin-top: 10px;
 }
 
 /* desktop view */
 @media (min-width: 550px) {
-	.docker-images-container{
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(400px,1fr));
-		grid-gap: 1rem;
-	}
-	.docker-images-container > div{
-		padding: 10px;
-	}
+    .docker-images-container{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px,1fr));
+        grid-gap: 1rem;
+    }
+    .docker-images-container > div{
+        padding: 10px;
+    }
 }

@@ -10,24 +10,13 @@ def up(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    uid = pwd.getpwnam("submitty_daemon").pw_uid
-    gid = grp.getgrnam("submitty_php").gr_gid
-    tgt_dir = os.path.join(config.submitty['submitty_data_dir'], 'docker_data')
-
-    if not os.path.exists(tgt_dir):
-        os.mkdir(tgt_dir)
-        os.chmod(tgt_dir, 0o2770)
-
-        os.chown(tgt_dir, uid, gid)
-
-    tgt_dir = os.path.join(config.submitty['submitty_data_dir'], 'logs', 'docker_interface_logs')
-    
-    if not os.path.exists(tgt_dir):
-        os.mkdir(tgt_dir)
-        os.chmod(tgt_dir, 0o2770)
+   
+    #add submitty_cgi to docker group
+    os.system("usermod -a -G docker " + config.submitty_users['cgi_user'] )
+    #allow php to read the autograding container
 
     tgt_dir = os.path.join(config.submitty['submitty_install_dir'], 'config', 'autograding_containers.json')
-    os.chown(tgt_dir, uid, gid)
+    os.chown(tgt_dir, config.submitty_users['daemon_uid'], config.submitty_users['php_gid'])
 
 
 def down(config):

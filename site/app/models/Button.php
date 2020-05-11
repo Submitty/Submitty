@@ -59,7 +59,7 @@ class Button extends AbstractModel {
     protected $badge;
     /** @prop @var string|null $icon */
     protected $icon;
-     /** @prop @var bool $disabled */
+     /** @prop @var string|null $prefix */
     protected $prefix;
 
     /**
