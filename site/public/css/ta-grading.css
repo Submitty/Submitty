@@ -54,6 +54,23 @@
     background-color: var(--badge-backgroud-red);
 }
 
+.info_banner {
+    border: solid 6px var(--important-post);
+    position:relative;
+    display: block;
+    float: left;
+    width: 400px;
+    height: 25px;
+    top: 2px;
+    left: 120px;
+    padding-top:3px;
+    padding-bottom:3px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 25px;
+    font-weight:    bold;
+}
+
 .icon-auto-grading-results {
     background: url('../img/glyphicons-40-notes.png') no-repeat;
     display: inline-block;
