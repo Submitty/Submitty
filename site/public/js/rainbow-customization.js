@@ -48,7 +48,7 @@ function UpdateUsedPercentage(){
         percentage_span.css({"color":"red","font-weight":"bold"});
     }
     else{
-        percentage_span.css({"color":"black","font-weight":""});
+        percentage_span.css({"color":"var(--text-black)","font-weight":""});
     }
 }
 

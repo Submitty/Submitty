@@ -15,25 +15,25 @@ class TestForum(BaseTestCase):
 
     def init_and_enable_discussion(self):
         self.click_class('sample')
-        if len(self.driver.find_elements_by_xpath("//a[@id='nav-sidebar-forum']")) == 0:
-            self.driver.find_element_by_xpath("//a[@id='nav-sidebar-course-settings']").click()
-            self.driver.find_element_by_name("forum_enabled").click()
-            self.driver.find_element_by_xpath("//a[contains(text(),'sample')]").click()
-        self.driver.find_element_by_xpath("//a[@id='nav-sidebar-forum']").click()
+        if len(self.driver.find_elements(By.XPATH, "//a[@id='nav-sidebar-forum']")) == 0:
+            self.driver.find_element(By.XPATH, "//a[@id='nav-sidebar-course-settings']").click()
+            self.driver.find_element(By.NAME, "forum_enabled").click()
+            self.driver.find_element(By.XPATH, "//a[contains(text(),'sample')]").click()
+        self.driver.find_element(By.XPATH, "//a[@id='nav-sidebar-forum']").click()
         self.forum_page_url = self.driver.current_url
 
     def switch_to_page_create_thread(self):
         if '/threads/new' in self.driver.current_url:
             pass
         elif '/forum' in self.driver.current_url:
-            self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
+            self.driver.find_element(By.XPATH, "//a[contains(text(),'Create Thread')]").click()
         else:
             assert False
         assert '/threads/new' in self.driver.current_url
 
     def switch_to_page_view_thread(self):
         if '/threads/new' in self.driver.current_url:
-            self.driver.find_element_by_xpath("//a[contains(text(),'Back to Threads')]").click()
+            self.driver.find_element(By.XPATH, "//a[contains(text(),'Back to Threads')]").click()
         elif '/threads' in self.driver.current_url:
             pass
         else:
@@ -48,7 +48,7 @@ class TestForum(BaseTestCase):
     def select_categories(self, categories_list):
         assert '/threads/new' in self.driver.current_url
         for category, set_it in categories_list:
-            category_button = self.driver.find_element_by_xpath(
+            category_button = self.driver.find_element(By.XPATH,
                 "//div[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
             if ('cat-selected' in category_button.get_attribute('class')) ^ set_it:
                 category_button.click()
@@ -60,13 +60,13 @@ class TestForum(BaseTestCase):
             return
         attachment_file = None
         self.switch_to_page_create_thread()
-        self.driver.find_element_by_id("title").send_keys(title)
-        self.driver.find_element_by_class_name("thread_post_content").send_keys(first_post)
-        upload_button = self.driver.find_element_by_xpath("//input[@type='file']")
+        self.driver.find_element(By.ID, "title").send_keys(title)
+        self.driver.find_element(By.CLASS_NAME, "thread_post_content").send_keys(first_post)
+        upload_button = self.driver.find_element(By.XPATH, "//input[@type='file']")
         self.select_categories(categories_list)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
-        self.driver.find_element_by_xpath("//input[@value='Submit Post']").click()
+        self.driver.find_element(By.XPATH, "//input[@value='Submit Post']").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
             self.driver.switch_to.alert.accept()
@@ -84,7 +84,7 @@ class TestForum(BaseTestCase):
         thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
         while True:
             # Scroll down in thread list until required thread is found
-            divs = self.driver.find_elements_by_xpath(target_xpath)
+            divs = self.driver.find_elements(By.XPATH, target_xpath)
             if len(divs) > 0:
                 # Thread Found
                 break
@@ -96,12 +96,12 @@ class TestForum(BaseTestCase):
             if thread_count == new_thread_count:
                 break
             thread_count = new_thread_count
-        return len(self.driver.find_elements_by_xpath(target_xpath)) > 0
+        return len(self.driver.find_elements(By.XPATH, target_xpath)) > 0
 
     def view_thread(self, title, return_info=False):
         assert '/threads' in self.driver.current_url
         assert self.thread_exists(title)
-        div = self.driver.find_element_by_xpath(
+        div = self.driver.find_element(By.XPATH,
             "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
         if return_info:
             categories = []
@@ -110,7 +110,7 @@ class TestForum(BaseTestCase):
             return {'categories': categories}
         div.click()
         self.wait_after_ajax()
-        thread_title = self.driver.find_elements_by_xpath(
+        thread_title = self.driver.find_elements(By.XPATH,
             "//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h2[contains(string(),'{}')]".format(
                 title))
         assert len(thread_title) > 0
@@ -122,7 +122,7 @@ class TestForum(BaseTestCase):
         if move_to_thread is not None:
             self.view_thread(move_to_thread)
         posts_selector = "//div[contains(@class, 'post_box') and contains(string(),'{}')]"
-        posts = self.driver.find_elements_by_xpath(posts_selector.format(content))
+        posts = self.driver.find_elements(By.XPATH, posts_selector.format(content))
         if must_exists:
             assert len(posts) > 0
         if check_attachment is not None:
@@ -139,7 +139,7 @@ class TestForum(BaseTestCase):
         attachment_file = None
         post = self.find_posts(post_content)[0]
         post_id = post.get_attribute("id")
-        edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1]  # Last One
+        edit_form = self.driver.find_elements(By.XPATH, "//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1]  # Last One
         text_area = edit_form.find_element(By.XPATH, ".//textarea")
         upload_button = edit_form.find_element(By.XPATH, ".//input[@type='file']")
         submit_button = edit_form.find_element(By.XPATH, ".//input[@type='submit']")
@@ -166,7 +166,7 @@ class TestForum(BaseTestCase):
 
     def delete_thread(self, title):
         self.view_thread(title)
-        self.driver.find_elements_by_xpath("//a[@title='Remove post']")[0].click()
+        self.driver.find_elements(By.XPATH, "//a[@title='Remove post']")[0].click()
         self.driver.switch_to.alert.accept()
         # Workaround, not working without force redirection
         self.driver.get(self.forum_page_url)
@@ -180,8 +180,8 @@ class TestForum(BaseTestCase):
 
     def merge_threads(self, child_thread_title, parent_thread_title, press_cancel=False):
         self.view_thread(child_thread_title)
-        merge_threads_div = self.driver.find_element_by_id("merge-threads")
-        self.driver.find_element_by_xpath("//a[contains(text(),'Merge Threads')]").click()
+        merge_threads_div = self.driver.find_element(By.ID, "merge-threads")
+        self.driver.find_element(By.XPATH, "//a[contains(text(),'Merge Threads')]").click()
         cancel_button = merge_threads_div.find_element(By.XPATH, ".//a[contains(normalize-space(.), 'Close')]")
         assert merge_threads_div.value_of_css_property("display") == "block"
         if parent_thread_title is None:
@@ -196,7 +196,7 @@ class TestForum(BaseTestCase):
                 cancel_button.click()
             else:
                 submit_button.click()
-            assert self.driver.find_element_by_id("merge-threads").value_of_css_property("display") == "none"
+            assert self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display") == "none"
 
     def test_basic_operations_thread(self):
         title = "E2E Sample Title E2E"

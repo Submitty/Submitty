@@ -120,7 +120,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
             return false;
         }
     }
-    var post_box_id = form.find(".thread-post-form").attr("post_box_id");
+    var post_box_id = form.find(".thread-post-form").data("post_box_id");
     var formData = new FormData(form[0]);
 
     var files = testAndGetAttachments(post_box_id, false);
@@ -340,8 +340,8 @@ function changeDisplayOptions(option){
 function readCategoryValues(){
     var categories_value = [];
     $('#thread_category button').each(function(){
-        if($(this).attr("btn-selected")==="true"){
-            categories_value.push($(this).attr("cat-id"));
+        if($(this).data("btn-selected")==="true"){
+            categories_value.push($(this).data("cat_id"));
         }
     });
     return categories_value;
@@ -350,15 +350,15 @@ function readCategoryValues(){
 function readThreadStatusValues(){
     var thread_status_value = [];
     $('#thread_status_select button').each(function(){
-        if($(this).attr("btn-selected")==="true"){
-            thread_status_value.push($(this).attr("sel-id"));
+        if($(this).data("btn-selected")==="true"){
+            thread_status_value.push($(this).data("sel_id"));
         }
     });
     return thread_status_value;
 }
 
 function dynamicScrollLoadPage(element, atEnd) {
-    var load_page = $(element).attr(atEnd?"next_page":"prev_page");
+    var load_page = $(element).data(atEnd?"next_page":"prev_page");
     if(load_page == 0) {
         return false;
     }
@@ -380,10 +380,10 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_down.before(content);
             if(count == 0) {
                 // Stop further loads
-                $(element).attr("next_page", 0);
+                $(element).data("next_page", 0);
             }
             else {
-                $(element).attr("next_page", parseInt(load_page) + 1);
+                $(element).data("next_page", parseInt(load_page) + 1);
                 arrow_down.show();
             }
             dynamicScrollLoadIfScrollVisible($(element));
@@ -400,11 +400,11 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_up.after(content);
             if(count == 0) {
                 // Stop further loads
-                $(element).attr("prev_page", 0);
+                $(element).data("prev_page", 0);
             }
             else {
                 var prev_page = parseInt(load_page) - 1;
-                $(element).attr("prev_page", prev_page);
+                $(element).data("prev_page", prev_page);
                 if(prev_page >= 1) {
                     arrow_up.show();
                 }
@@ -565,8 +565,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             var jElement = $("#thread_list");
             jElement.children(":not(.fas)").remove();
             $("#thread_list .fa-caret-up").after(x);
-            jElement.attr("prev_page", page_number - 1);
-            jElement.attr("next_page", page_number + 1);
+            jElement.data("prev_page", page_number - 1);
+            jElement.data("next_page", page_number + 1);
             jElement.data("dynamic_lock_load", false);
             $("#thread_list .fa-spinner").hide();
             if(loadFirstPage) {
@@ -736,8 +736,8 @@ function showHistory(post_id) {
                 if(!author_user_id){
                   user_button_code = ""
                 }
-                box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
-                box.find("h7").before(user_button_code);
+                box.find("span.edit_author").html("<strong>"+visible_username+"</strong> "+post['post_time']);
+                box.find("span.edit_author").before(user_button_code);
                 $("#popup-post-history .form-body").prepend(box);
             }
             generateCodeMirrorBlocks($("#popup-post-history")[0]);
@@ -1166,7 +1166,7 @@ function loadThreadHandler(){
     $("a.thread_box_link").click(function(event){
         event.preventDefault();
         var obj = this;
-        var thread_id = $(obj).attr("data");
+        var thread_id = $(obj).data("thread_id");
 
         var url = buildCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
@@ -1292,7 +1292,7 @@ function clearForumFilter(){
         $('#filter_unread_btn').click();
     }
     window.filters_applied = [];
-    $('#thread_category button, #thread_status_select button').attr('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
+    $('#thread_category button, #thread_status_select button').data('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').hide();
 
@@ -1308,13 +1308,13 @@ function loadFilterHandlers(){
 
     $('#thread_category button, #thread_status_select button').mousedown(function(e) {
         e.preventDefault();
-        var current_selection = $(this).attr('btn-selected');
+        var current_selection = $(this).data('btn-selected');
 
         if(current_selection==="true"){
-            $(this).attr('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
+            $(this).data('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
         }
         else{
-            $(this).attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+            $(this).data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
         }
 
         var filter_text = $(this).text();
@@ -1343,7 +1343,7 @@ function loadFilterHandlers(){
 
 function thread_post_handler(){
     $('.submit_unresolve').click(function(event){
-        var post_box_id = $(this).attr("post_box_id");
+        var post_box_id = $(this).data("post_box_id");
         $('#thread_status_input_'+post_box_id).val(-1);
         return true;
     });
@@ -1371,4 +1371,46 @@ function checkUnread(){
     else{
         return false;
     }
+}
+
+// Used to update thread content in the "Merge Thread"
+// modal.
+
+function updateSelectedThreadContent(selected_thread_first_post_id){
+    var url = buildCourseUrl(['forum', 'posts', 'get']);
+    $.ajax({
+        url : url,
+        type : "POST",
+        data : {
+            post_id : selected_thread_first_post_id,
+            csrf_token: csrfToken
+        },
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err) {
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again. Error is ' + err +'</div>';
+                $('#messages').append(message);
+                return;
+            }
+
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            
+            json = json['data'];
+            $("#thread-content").html(json['post']);
+            if (json.markdown === true) {
+                $('#thread-content').addClass('markdown-active');
+            }
+            else {
+                $('#thread-content').removeClass('markdown-active');
+            }
+        },
+        error: function(){
+            window.alert("Something went wrong while trying to fetch content. Please try again.");
+        }
+    });
 }

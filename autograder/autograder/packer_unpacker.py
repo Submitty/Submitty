@@ -237,6 +237,18 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     with open(os.path.join(tmp_submission,"queue_file.json"),'w') as outfile:
         json.dump(obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
+    user_assignment_access_json = os.path.join(
+        SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
+        "submissions",obj["gradeable"],obj["who"],"user_assignment_access.json")
+    user_assignment_settings_json = os.path.join(
+        SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],
+        "submissions",obj["gradeable"],obj["who"],"user_assignment_settings.json")
+
+    if os.path.exists(user_assignment_access_json):
+        shutil.copy(user_assignment_access_json,  os.path.join(tmp_submission,"user_assignment_access.json"))
+    if os.path.exists(user_assignment_settings_json):
+        shutil.copy(user_assignment_settings_json,os.path.join(tmp_submission,"user_assignment_settings.json"))
+
     grading_began_longstring = dateutils.write_submitty_date(grading_began)
     with open(os.path.join(tmp_submission,".grading_began"), 'w') as f:
         print (grading_began_longstring,file=f)

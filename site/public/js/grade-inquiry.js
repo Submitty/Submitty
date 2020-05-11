@@ -1,7 +1,7 @@
 $( document ).ready(function () {
   // open last opened grade inquiry or open first component with grade inquiry
   var component_selector = localStorage.getItem('selected_tab');
-  var first_unresolved_component = $('.component-unresolved:first');
+  var first_unresolved_component = $('.component-unresolved').first();
   if (component_selector !== null) {
     $(component_selector).click();
     localStorage.removeItem('selected_tab');
@@ -10,7 +10,7 @@ $( document ).ready(function () {
     first_unresolved_component.click();
   }
   else {
-    $('.component-tab:first').click();
+    $('.component-tab').first().click();
   }
 
 
@@ -64,7 +64,7 @@ function onGradeInquirySubmitClicked(button) {
   var text_area = $("#reply-text-area-"+component_id);
   var submit_button_id = button_clicked.attr('id');
   if (submit_button_id != null && submit_button_id.includes('grading-close')){
-    if ($.trim(text_area.val())) {
+    if (text_area.val().trim()) {
       if (!confirm("The text you entered will not be posted. Are you sure you want to close the grade inquiry?")) {
         return;
       }

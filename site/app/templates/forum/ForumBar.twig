@@ -62,7 +62,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
@@ -92,7 +92,7 @@
 	        {% if core.getUser().accessGrading() %}
               <li class="dropdown-divider"></li>
               <li title="Click to edit categories" class='dropdown-item' role="menuitem">
-            	<a href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
+            	<a href ="{{ manage_categories_url }}" title="Edit Forum Categories" target="_blank" >Edit Categories</a>
 			{% endif %}
 			{% if thread_exists %}
 	          <li class="dropdown-divider"></li>
@@ -106,6 +106,8 @@
 				        <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
 	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha')">Alphabetical</a></li>
+	              	<li title="Sort posts by author's registration section then last name" id="alpha_by_registration" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_registration')">Alpha by Registration</a></li>
+	              	<li title="Sort posts by author's rotating section then last name" id="alpha_by_rotating" class='dropdown-item' role="menuitem"><a href="#" class="key_to_click" tabindex="0" onclick="changeDisplayOptions('alpha_by_rotating')">Alpha by Rotating</a></li>
 	              {% endif %}
 	        {% endif %}
 	        </ul>
@@ -147,13 +149,13 @@
 			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
 			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
 				{% for category in categories %}
-					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" cat-id="{{ category.category_id }}" btn-selected="false">{{ category.category_desc }}</button>
+					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" data-cat_id="{{ category.category_id }}" data-btn-selected="false">{{ category.category_desc }}</button>
 				{% endfor %}
 			</div>
 			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
-				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="0" data-btn-selected="false">Comment</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="-1" data-btn-selected="false">Unresolved</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="1" data-btn-selected="false">Resolved</button>
 			</div>
 		</div>
 	{% endif %}
@@ -174,15 +176,15 @@
 		$('#num_filtered').text({{ display_thread_count }});
 
 		{% for category in cookie_selected_categories %}
-		$('#thread_category button[cat-id="{{ category }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_category button[cat-id="{{ category }}"]').text(), function(e) {
-			return e === $('#thread_category button[cat-id="{{ category }}"]').text();
+		$('#thread_category button[data-cat_id="{{ category }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+		filters_applied.toggleElement($('#thread_category button[data-cat_id="{{ category }}"]').text(), function(e) {
+			return e === $('#thread_category button[data-cat_id="{{ category }}"]').text();
 		});
 		{% endfor %}
 		{% for status in cookie_selected_thread_status %}
-		$('#thread_status_select button[sel-id="{{ status }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_status_select button[cat-id="{{ status }}"]').text(), function(e) {
-			return e === $('#thread_status_select button[sel-id="{{ status }}"]').text();
+		$('#thread_status_select button[data-sel_id="{{ status }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+		filters_applied.toggleElement($('#thread_status_select button[data-cat_id="{{ status }}"]').text(), function(e) {
+			return e === $('#thread_status_select button[data-sel_id="{{ status }}"]').text();
 		});
 		{% endfor %}
 
@@ -197,9 +199,7 @@
 			$('#clear_filter_button').css('display', 'inline-block');
 		}
 
-		$("#tree").prop("checked", true);
 		{% if display_option in ['tree', 'time', 'alpha'] %}
-		$("#{{ display_option }}").attr("checked", true);
 		$("#{{display_option }}_label").addClass('active');
 		{% endif %}
 

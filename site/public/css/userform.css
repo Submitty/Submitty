@@ -1,21 +1,21 @@
-#edit-user-form {
+#edit-user-form-content {
     display: flex;
     flex-wrap: wrap;
 }
 
-#edit-user-form > label {
+#edit-user-form-content > label, #edit-user-form-content > a {
     flex: 1 0 34%;
     margin: 6px;
     min-width: 200px;
 }
 
-#edit-user-form > label.full-width {
+#edit-user-form-content > label.full-width, #edit-user-form-content > a.full-width {
     flex: 1 0 70%;
 }
 
-#edit-user-form label input[type="text"], 
-#edit-user-form label input[type="password"], 
-#edit-user-form label select {
+#edit-user-form-content label input[type="text"],
+#edit-user-form-content label input[type="password"],
+#edit-user-form-content label select {
     display: flex;
     width: 100%;
 }

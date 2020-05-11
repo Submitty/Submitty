@@ -42,7 +42,7 @@
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id}}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div class="inner-container" id="grading-box">
                     {% if has_active_version %}
-                        <script type="application/javascript">
+                        <script>
                             $(document).ready(function () {
                                 loadTemplates().then(function() {
                                     return reloadGradingRubric('{{ gradeable_id }}', '{{ anon_id }}');

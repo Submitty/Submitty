@@ -136,8 +136,8 @@ class ElectronicGraderView extends AbstractView {
                 $peer_graded = 0;
 
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
-                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
-                    $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
+                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / ($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables'])) * 100, 1);
+                    $peer_total =  floor(($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables']) / $peer_count);
                     $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
                 }
             }
@@ -389,8 +389,15 @@ HTML;
         $columns = [];
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
-            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
-
+            if ($gradeable->isTeamAssignment()) {
+                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
+            }
+            else {
+                $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
+            }
+            if ($gradeable->isTaGrading()) {
+                $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+            }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
@@ -510,7 +517,11 @@ HTML;
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
-                if ($graded_component === null) {
+                
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                    $info["graded_groups"][] = 4;
+                }
+                elseif ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
                 }
@@ -647,7 +658,6 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -706,14 +716,15 @@ HTML;
         ]);
     }
 
-
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from) {
+
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $peer = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
-        if ($gradeable->isPeerGrading() && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
@@ -727,7 +738,7 @@ HTML;
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
-        if ($gradeable->isPeerGrading() && $this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPeerPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
@@ -777,7 +788,27 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ]);
         }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
 
+            $pattern_match_flag = false;
+            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if ($pattern_match_flag == true) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
+                "message" => "Multiple files within submissions"
+                ]);
+            }
+        }
         return $return;
     }
 
@@ -802,12 +833,17 @@ HTML;
         $prev_ungraded_student_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'true']);
         $next_ungraded_student_url =  $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'true']);
 
+        $i_am_a_peer = false;
+        if ($peer && $this->core->getUser()->getGroup() == 4) {
+            $i_am_a_peer = true;
+        }
+        
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,
             // WIP. Replace this with a better function call once there is a definitive way to determine my peer-ness.
             // For now, I am a peer if I cannot access the peer panel.
-            "i_am_a_peer" => !$this->core->getAccess()->canI("grading.electronic.peer_panel"),
+            "i_am_a_peer" => $i_am_a_peer,
             "prev_student_url" => $prev_student_url,
             "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
@@ -888,7 +924,7 @@ HTML;
      * Render the Submissions and Results Browser panel
      * @param GradedGradeable $graded_gradeable
      * @param int $display_version
-     * @return string
+     * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         $add_files = function (&$files, $new_files, $start_dir_name) {
@@ -931,7 +967,6 @@ HTML;
 
         // For PDFAnnotationBar.twig
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
