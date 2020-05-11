@@ -9,4 +9,5 @@ def generate_random_string(length):
     :return:
     :rtype: string
     """
-    return ''.join(random.choice(string.ascii_letters + string.digits) for i in range(length))
+    choices = string.ascii_letters + string.digits
+    return ''.join(random.choice(choices) for i in range(length))
