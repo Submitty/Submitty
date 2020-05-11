@@ -502,7 +502,7 @@ class ForumThreadView extends AbstractView {
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-            
+
             // Get first post of each thread. To be used later
             // to obtain the content of the post to be displayed
             // in the modal.
@@ -651,18 +651,18 @@ class ForumThreadView extends AbstractView {
             }
 
             $sizeOfContent = strlen($first_post_content);
-            $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
+            $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 400) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 400), " "));
             $titleLength = strlen($thread['title']);
 
-            $titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
+            $titleDisplay = substr($titleDisplay, 0, ($titleLength < 140) ? $titleLength : strrpos(substr($titleDisplay, 0, 140), " "));
 
-            if (strlen($first_post["content"]) > 80) {
+            if (strlen($first_post["content"]) > 400) {
                 $contentDisplay .= "...";
             }
-            if (strlen($thread["title"]) > 40) {
+            if (strlen($thread["title"]) > 140) {
                 //Fix ... appearing
                 if (empty($titleDisplay)) {
-                    $titleDisplay .= substr($thread['title'], 0, 30);
+                    $titleDisplay .= substr($thread['title'], 0, 110);
                 }
                 $titleDisplay .= "...";
             }
