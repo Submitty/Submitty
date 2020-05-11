@@ -295,7 +295,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/grading
-    chmod  770                                      $SUBMITTY_DATA_DIR/grading
+    chmod  750                                      $SUBMITTY_DATA_DIR/grading
 fi
 
 
