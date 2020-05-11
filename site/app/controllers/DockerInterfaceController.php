@@ -55,15 +55,13 @@ class DockerInterfaceController extends AbstractController {
             );
         }
         $json = json_decode($response, true);
-        $autograding_containers = FileUtils::readJsonFile(
+        $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
                 "config",
                 "autograding_containers.json"
             )
         );
-
-        $json['autograding_containers'] = $autograding_containers;
 
         return new MultiResponse(
             JsonResponse::getSuccessResponse($json),
