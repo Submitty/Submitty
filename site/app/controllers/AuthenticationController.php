@@ -72,6 +72,10 @@ class AuthenticationController extends AbstractController {
      * @return MultiResponse
      */
     public function loginForm($old = null) {
+        if (!is_null($old) && !Utils::startsWith($old, $this->core->getConfig()->getBaseUrl())) {
+            $old = null;
+        }
+        header('X-Frame-Options: DENY'); // Stops clickjacking on all pages
         return MultiResponse::webOnlyResponse(
             new WebResponse('Authentication', 'loginForm', $old)
         );
@@ -89,6 +93,9 @@ class AuthenticationController extends AbstractController {
      * @return MultiResponse
      */
     public function checkLogin($old = null) {
+        if (!is_null($old) && !Utils::startsWith($old, $this->core->getConfig()->getBaseUrl())) {
+            $old = null;
+        }
         if (isset($old)) {
             $old = urldecode($old);
         }
