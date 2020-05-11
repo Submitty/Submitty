@@ -115,7 +115,7 @@ class Team extends AbstractModel {
     public function getMemberUsersSorted() {
         $ret = $this->member_users;
         usort($ret, function ($a, $b) {
-            return strcmp($a->getId(),$b->getId());
+            return strcmp($a->getId(), $b->getId());
         });
         return $ret;
     }
