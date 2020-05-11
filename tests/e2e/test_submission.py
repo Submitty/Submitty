@@ -40,9 +40,9 @@ class TestSubmission(BaseTestCase):
         if drag_and_drop:
             # create an input element of type files
             self.driver.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file', multiple:'', style: 'display: none'}).appendTo('body');")
-            upload_element = self.driver.find_element_by_id("seleniumUpload")
+            upload_element = self.driver.find_element(By.ID, "seleniumUpload")
         else:
-            upload_element = self.driver.find_element_by_id(target_id).find_element_by_xpath("//input[@type='file']")
+            upload_element = self.driver.find_element(By.ID, target_id).find_element(By.XPATH, "//input[@type='file']")
         # send all the files to the element as args
         upload_element.send_keys("\n".join(file_paths))
         if drag_and_drop:
@@ -51,7 +51,7 @@ class TestSubmission(BaseTestCase):
 
     # returns the number of submissions
     def get_submission_count(self, include_zero=False):
-        return len(self.driver.find_elements_by_xpath("//div[@class='content']/select/option"+(""if include_zero else"[not(@value='0')]")))
+        return len(self.driver.find_elements(By.XPATH, "//div[@class='content']/select/option"+(""if include_zero else"[not(@value='0')]")))
 
     def accept_alerts(self, num_alerts):
         try:
@@ -66,13 +66,13 @@ class TestSubmission(BaseTestCase):
         submission_count = self.get_submission_count()
 
         # clear the previous submission files (if any)
-        clear_btn = self.driver.find_element_by_id("startnew")
+        clear_btn = self.driver.find_element(By.ID, "startnew")
         if clear_btn.is_enabled():
             clear_btn.click()
 
         # input and submit the files
         self.input_files(file_paths, drag_and_drop, target_id)
-        self.driver.find_element_by_id("submit").click()
+        self.driver.find_element(By.ID, "submit").click()
 
         # accept submission and late day limit alerts
         self.accept_alerts(2)
@@ -85,7 +85,7 @@ class TestSubmission(BaseTestCase):
 
         # create a set of file names and compare them to the displayed submitted files
         file_names = {os.path.basename(file_path) for file_path in file_paths}
-        submitted_files_text = self.driver.find_element_by_id('submitted-files').text
+        submitted_files_text = self.driver.find_element(By.ID, 'submitted-files').text
         for submitted_file_text in submitted_files_text.strip().split("\n"):
             idx = submitted_file_text.rfind('(')
             file_name = submitted_file_text[:idx-1].strip()
@@ -105,23 +105,23 @@ class TestSubmission(BaseTestCase):
 
     def change_submission_version(self):
         # find the version selection dropdown and click
-        version_select_elem = self.driver.find_element_by_xpath("//div[@class='content']/select")
+        version_select_elem = self.driver.find_element(By.XPATH, "//div[@class='content']/select")
         version_select_elem.click()
 
         # find an unselected version and click
-        new_version_elem = version_select_elem.find_element_by_xpath("//option[not(@selected) and not(@value='0')]")
+        new_version_elem = version_select_elem.find_element(By.XPATH, "//option[not(@selected) and not(@value='0')]")
         new_version = new_version_elem.get_attribute("value")
         new_version_elem.click()
 
         # wait until the page reloads to change the selected version, then click the "Grade This Version" button
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected]".format(new_version))))
-        self.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit' and @id='version_change']").click()
+        self.driver.find_element(By.XPATH, "//div[@class='content']/form/input[@type='submit' and @id='version_change']").click()
 
         # accept late day alert
         self.accept_alerts(1)
 
         # wait until the page reloads to change the active version, completing the test
-        select = Select(self.driver.find_element_by_id('submission-version-select'))
+        select = Select(self.driver.find_element(By.ID, 'submission-version-select'))
         select_idx = -1
         for i in range(len(select.options)):
             if select.options[i].text.endswith('GRADE THIS VERSION'):
@@ -197,7 +197,7 @@ class TestSubmission(BaseTestCase):
         self.ensure_multiple_versions()
 
         # click button and wait until page reloads to cancel version
-        self.driver.find_element_by_xpath("//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
+        self.driver.find_element(By.XPATH, "//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='0' and @selected]")))
 
         # change back to a valid submission version

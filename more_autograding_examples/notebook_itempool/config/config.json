@@ -99,6 +99,41 @@ This message will appear in a blue box at the top of the page.",
           ]
         },
         // ===================================================
+        { "item_name" : "math_4",
+          "notebook" : [
+              {
+                  "type": "markdown",
+                  "markdown_string": "###Select *all* numbers that are powers of 2:"
+              },
+              {
+                  "type": "multiple_choice",
+                  "filename": "math_4.txt",
+                  "testcase_ref" : "math_4",
+                  "choices":[
+                      {"value": "4", "description": "`4`"},
+                      {"value": "24", "description": "`24`"},
+                      {"value": "32", "description": "`32`"},
+                      {"value": "96", "description": "`96`"},
+                      {"value": "128", "description": "`128`"},
+                      {"value": "524", "description": "`524`"}
+                  ],
+                  "randomize_order" : true,
+                  "allow_multiple": true
+              }
+          ],
+          "testcases" : [
+              { "title":"Math 4", "testcase_label":"math_4",
+                "validation":[ {
+                    "method":"diff", "comparison" : "byLine", "lineSwapOk" : true,
+                    "actual_file":"math_4.txt", "expected_file":"math_4_answer.txt",
+                    "show_expected":"never","show_actual":"never"
+                    //,
+                    // FIXME, THIS ALWAYS PRINTS
+                    //"failure_message":"Incorrect Answer"
+                } ] }
+          ]
+        },
+        // ===================================================
         { "item_name" : "animal_1",
           "notebook" : [
               {
@@ -190,7 +225,7 @@ This message will appear in a blue box at the top of the page.",
               {
                   "type": "short_answer",
                   "filename": "author.txt"
-              },
+              }
           ],
           "testcases" : [
           ]
@@ -292,7 +327,7 @@ for i in range(2, 100):\n\
                              ]
               }
           ]
-        },
+        }
 
         
     ],
@@ -313,18 +348,24 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["math_1"],
+            "item_label" : "Math Problem",
+            "from_pool" : ["math_1"],
             "points" : 3
         },
         {
             "type" : "item",
-            "item_pool" : ["math_2"],
+            "from_pool" : ["math_2"],
             "points" : 3
         },
         {
             "type" : "item",
-            "item_pool" : ["math_3"],
+            "from_pool" : ["math_3"],
             "points" : 3
+        },
+        {
+            "type" : "item",
+            "from_pool" : ["math_4"],
+            "points" : 5
         },
         // ======================================================================================================
         {
@@ -333,17 +374,17 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_1"],
+            "from_pool" : ["animal_1"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_2"],
+            "from_pool" : ["animal_2"],
             "points" : 2
         },
         {
             "type" : "item",
-            "item_pool" : ["animal_3"],
+            "from_pool" : ["animal_3"],
             "points" : 2
         },
         // ======================================================================================================
@@ -354,11 +395,11 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["author"]
+            "from_pool" : ["author"]
         },
         {
             "type" : "item",
-            "item_pool" : ["haiku"]
+            "from_pool" : ["haiku"]
         },
         // ======================================================================================================
         {
@@ -367,12 +408,12 @@ Here's a short list of instructions:\n  \
         },
         {
             "type" : "item",
-            "item_pool" : ["cpp_code"],
+            "from_pool" : ["cpp_code"],
             "points" : 5
         },
         {
             "type" : "item",
-            "item_pool" : ["python_code"],
+            "from_pool" : ["python_code"],
             "points" : 5
         }
         // ===================================================
