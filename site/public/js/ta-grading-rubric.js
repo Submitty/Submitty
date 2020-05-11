@@ -300,7 +300,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
 }
 
 /**
- * ajax call to fetch the overall comment for the gradeable
+ * ajax call to fetch the overall comment for the gradeable for the logged in user
  * @param {string} gradeable_id
  * @param {string} anon_id
  * @return {Promise} Rejects except when the response returns status 'success'
@@ -954,21 +954,6 @@ function setComponentInProgress(component_id, show = true) {
 }
 
 /**
- * Shows the 'in progress' indicator for the overall comment
- * @param {boolean} show
- */
-function setOverallCommentInProgress(show = true) {
-    let domElement = getOverallCommentJQuery();
-    domElement.find('.save-tools span').hide();
-    if (show) {
-        domElement.find('.save-tools-in-progress').show();
-    }
-    else {
-        domElement.find('.save-tools :not(.save-tools-in-progress)').show();
-    }
-}
-
-/**
  * Enables reordering on marks in an edit-mode component
  * @param {int} component_id
  */
@@ -1003,14 +988,6 @@ function keyPressHandler(e) {
     if (e.keyCode === 65 && e.ctrlKey) {
         e.target.select()
     }
-}
-
-/**
- * Sets the HTML contents of the overall comment container
- * @param {string} contents
- */
-function setOverallCommentContents(contents) {
-    getOverallCommentJQuery().html(contents);
 }
 
 /**
@@ -1355,17 +1332,8 @@ function getTaGradingTotal() {
  * Gets the overall comment message stored in the DOM
  * @return {string} This will always be blank in instructor edit mode
  */
-function getOverallCommentFromDOM() {
-    let staticComment = $('span#overall-comment');
-    let editComment = $('textarea#overall-comment');
-
-    if (editComment.length > 0) {
-        return editComment.val();
-    }
-    else if (editComment.length > 0) {
-        return staticComment.html();
-    }
-    return '';
+function getOverallCommentFromDOM(user) {
+    return $('textarea#overall-comment-' + user).val();
 }
 
 /**
@@ -1491,14 +1459,6 @@ function getComponentFirstMarkId(component_id) {
  */
 function isComponentOpen(component_id) {
     return !getComponentJQuery(component_id).find('.ta-rubric-table').is(':hidden');
-}
-
-/**
- * Gets if the overall comment is open
- * @return {boolean}
- */
-function isOverallCommentOpen() {
-    return $('textarea#overall-comment').length > 0;
 }
 
 /**
@@ -1862,15 +1822,26 @@ function onCancelComponent(me) {
 }
 
 /**
- * Called when the overall comment box get clicked (for opening / closing)
- * @param me DOM Element of the overall comment box
+ * Called when the overall comment box is changed
  */
-function onClickOverallComment(me) {
-    toggleOverallComment(true)
-        .catch(function (err) {
-            console.error(err);
-            alert('Error opening/closing overall comment! ' + err.message);
+function onChangeOverallComment() {
+    // Get the current grader so that we can get their comment from the dom.
+    var grader = getGraderId();
+    var currentOverallComment  = $('textarea#overall-comment-' + grader).val();
+    var previousOverallComment = $('textarea#overall-comment-' + grader).data("previous-comment");
+
+    if (currentOverallComment !== previousOverallComment && currentOverallComment !== undefined) {
+        $(".overall-comment-status").text("Saving Changes...");
+        // If anything has changed, save the changes.
+        ajaxSaveOverallComment(getGradeableId(), getAnonId(), currentOverallComment).then( () =>
+        {
+            $(".overall-comment-status").text("All Changes Saved");
+            // Update the current comment in the DOM.
+            $('textarea#overall-comment-' + grader).data("previous-comment", currentOverallComment);
+        }).catch( function(error) {
+            $(".overall-comment-status").text("Error Saving Changes");
         });
+    }
 }
 
 /**
@@ -1882,34 +1853,6 @@ function onComponentOrderChange() {
             console.error(err);
             alert('Error reordering components! ' + err.message);
         });
-}
-
-/**
- * Called when the 'cancel' button is pressed on the overall comment box
- * @param me DOM element of the cancel button
- */
-function onCancelOverallComment(me) {
-  // if the overall Comment is changed then prompt the TA for loss in comment
-  ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallComment) => {
-    if (getOverallCommentFromDOM() !== lastSavedOverallComment) {
-      if(confirm( "Are you sure you want to discard all changes to the student message?")){
-        toggleOverallComment(false)
-          .catch(function (err) {
-            console.error(err);
-            alert('Error closing overall comment! ' + err.message);
-          });
-      }
-    }
-    // The Overall Comment is same as the saved comment
-    else {
-      toggleOverallComment(false)
-        .catch(function (err) {
-          console.error(err);
-          alert('Error closing overall comment! ' + err.message);
-        });
-    }
-  });
-
 }
 
 /**
@@ -2372,13 +2315,6 @@ function openCookieComponent() {
 function closeAllComponents(save_changes) {
     let sequence = Promise.resolve();
 
-    // Overall Comment box is open, so close it
-    if (isOverallCommentOpen()) {
-        sequence = sequence.then(function () {
-            return closeOverallComment(true);
-        });
-    }
-
     // Close all open components.  There shouldn't be more than one,
     //  but just in case there is...
     getOpenComponentIds().forEach(function (id) {
@@ -2418,28 +2354,11 @@ function toggleComponent(component_id, saveChanges) {
     });
 }
 
-/**
- * Toggles a the open/close state of the overall comment
- * @param {boolean} saveChanges
- * @return {Promise}
- */
-function toggleOverallComment(saveChanges) {
-    // Overall comment open, so close it
-    if (isOverallCommentOpen()) {
-        return closeOverallComment(saveChanges);
-    }
-
-    // Close all open components.  There shouldn't be more than one,
-    //  but just in case there is...
-    let sequence = Promise.resolve();
-    getOpenComponentIds().forEach(function (id) {
-        sequence = sequence.then(function () {
-            return closeComponent(id);
-        });
-    });
-
-    // Finally, open the overall comment
-    return sequence.then(openOverallComment);
+function open_overall_comment_tab(user) {
+    $('#overall-comments').children().hide();
+    $('#overall-comment-tabs').children().removeClass('active-btn');
+    $('#overall-comment-' + user ).show();
+    $('#overall-comment-tab-' + user ).addClass('active-btn');
 }
 
 /**
@@ -2696,39 +2615,6 @@ function closeComponent(component_id, saveChanges = true) {
         .then(function () {
             setComponentInProgress(component_id, false);
         });
-}
-
-/**
- * Fetches the up-to-date overall comment and opens it for editing
- * @return {Promise}
- */
-function openOverallComment() {
-    setOverallCommentInProgress();
-    return ajaxGetOverallComment(getGradeableId(), getAnonId())
-        .then(function (comment) {
-            return injectOverallComment(comment, true);
-        });
-}
-
-/**
- * Closes and saves the overall comment
- * @param {boolean} saveChanges
- * @return {Promise}
- */
-function closeOverallComment(saveChanges = true) {
-    setOverallCommentInProgress();
-    if (saveChanges) {
-        return ajaxSaveOverallComment(getGradeableId(), getAnonId(), getOverallCommentFromDOM())
-            .then(function () {
-                return refreshOverallComment(false);
-            });
-    }
-    else {
-        return ajaxGetOverallComment(getGradeableId(), getAnonId())
-            .then(function (comment) {
-                return injectOverallComment(comment, false);
-            });
-    }
 }
 
 /**
@@ -3133,15 +3019,6 @@ function refreshComponent(component_id, showMarkList) {
 }
 
 /**
- * Re-renders the overall comment with the data in the DOM
- * @param {boolean} showEditable Whether comment should be open for editing
- * @return {Promise}
- */
-function refreshOverallComment(showEditable) {
-    return injectOverallComment(getOverallCommentFromDOM(), showEditable);
-}
-
-/**
  * Refreshes the 'total scores' box at the bottom of the gradeable
  * @return {Promise}
  */
@@ -3221,19 +3098,6 @@ function injectGradingComponentHeader(component, graded_component, showMarkList)
         })
         .then(function () {
             return refreshTotalScoreBox();
-        });
-}
-
-/**
- * Renders the overall comment
- * @param {string} comment
- * @param {boolean} editable If the comment should be rendered in edit mode
- * @return {Promise}
- */
-function injectOverallComment(comment, editable) {
-    return renderOverallComment(comment, editable)
-        .then(function (elements) {
-            setOverallCommentContents(elements);
         });
 }
 

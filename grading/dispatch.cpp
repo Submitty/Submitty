@@ -1001,8 +1001,57 @@ TestResults* dispatch::errorIfEmpty_doit (const TestCase &tc, const nlohmann::js
 
 // ==============================================================================
 // ==============================================================================
+/**
+* Used by custom_doit to retrieve message status pairs from a custom validator's result.json
+*/
+std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> dispatch::getAllCustomValidatorMessages(const nlohmann::json& j) {
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> messages;
+  
+  if (j["data"].find("message") != j["data"].end() && j["data"]["message"].is_string()) {
+    messages.push_back(dispatch::getCustomValidatorMessage(j["data"]));
+  }
+  else if (j["data"].find("message") != j["data"].end() && j["data"]["message"].is_array()){
+    for(typename nlohmann::json::const_iterator itr = j["data"]["message"].begin(); itr != j["data"]["message"].end(); itr++) {
+      messages.push_back(dispatch::getCustomValidatorMessage(*itr));
+    }
+  }
+  return messages;
+}
 
-TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username){
+/**
+* Gets a message/status pair from a json object. 
+* On failure returns the empty string for the message, and MESSAGE_INFORMATION for status and prints errors to stdout.
+*/
+std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> dispatch::getCustomValidatorMessage(const nlohmann::json& j) {
+  std::string message = "";
+  std::string status_string = "";
+  TEST_RESULTS_MESSAGE_TYPE status = MESSAGE_INFORMATION;
+
+  // If message is a string, then it has an associated status at this level.
+  if(j.find("message") != j.end() && j["message"].is_string()){
+      message = j["message"];
+  }else{
+    std::cout << "Message was not a string or was not found." << std::endl;
+  }
+
+  if(j.find("status") != j.end() && j["status"].is_string()){
+    status_string = j["status"];
+  }else{
+    std::cout << "Status was not a string or was not found." << std::endl;
+  }
+
+  if(status_string == "failure"){
+    status = MESSAGE_FAILURE;
+  }else if(status_string == "warning"){
+    status = MESSAGE_WARNING;
+  }else if(status_string == "success"){
+    status = MESSAGE_SUCCESS;
+  }//else it stays information.
+
+  return std::make_pair(status, message);
+}
+
+TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username, int autocheck_number) {
 
   std::string command = j["command"];
   std::vector<nlohmann::json> actions;
@@ -1011,8 +1060,16 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   nlohmann::json test_case_limits = tc.get_test_case_limits();
   nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
-  std::string output_file_name = "temporary_custom_validator_output.json";
-  std::string input_file_name = "custom_validator_input.json";
+  std::string validator_stdout_filename = "validation_stdout.json";
+  std::string validator_error_filename = "validation_stderr.txt";
+  std::string validator_log_filename    = "validation_logfile.txt";
+  std::string validator_json_filename   = "validation_results.json";
+  std::string final_validator_log_filename    = "validation_logfile_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_error_filename    = "validation_stderr_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_json_filename   = "validation_results_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".json";
+  std::string input_file_name           = "custom_validator_input.json";
+
+
 
   //Add the testcase prefix to j for use by the validator.
   nlohmann::json copy_j = j;
@@ -1024,17 +1081,61 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   input_file << copy_j;
   input_file.close();
 
-  command = command + " 1>" + output_file_name;
+  command = command + " 1>" + validator_stdout_filename + " 2>" + validator_error_filename;
   int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT",
                     tc.has_timestamped_stdout());
   std::remove(input_file_name.c_str());
 
-  std::ifstream ifs(output_file_name);
+  std::ifstream validator_json(validator_json_filename);
+  // If we cannot use the validator.json (it doesn't exist), use the stdout.json instead.
+  if(!validator_json.good()){
+    std::ifstream stdout_reader(validator_stdout_filename);
+    // If we can open the stdout file, archive it.
+    if(stdout_reader.good()){
+      std::ofstream dest( final_validator_json_filename, std::ios::binary );
+      dest << stdout_reader.rdbuf();
+      dest.close();
+    }
+    stdout_reader.close();
+  } 
+  // If we can use the validator json, archive it.
+  else {
+    std::ofstream dest( final_validator_json_filename, std::ios::binary );
+    dest << validator_json.rdbuf();
+    dest.close();
+  }
+  validator_json.close();
+
+  // If the validator log exists, archive it.
+  std::ifstream validator_log(validator_log_filename);
+  if(validator_log.good()) {
+    std::ofstream dest( final_validator_log_filename, std::ios::binary );
+    dest << validator_log.rdbuf();
+    dest.close();
+  }
+  validator_log.close();
+
+  // If the validator error file exists, archive it.
+  std::ifstream validator_error(validator_error_filename);
+  if(validator_error.good()) {
+    std::ofstream dest( final_validator_error_filename, std::ios::binary );
+    dest << validator_error.rdbuf();
+    dest.close();
+  }
+  validator_error.close();
+
+  // Now that the files have been copied to permanent positions/loaded into memory, delete them.
+  std::remove(validator_stdout_filename.c_str());
+  std::remove(validator_log_filename.c_str());
+  std::remove(validator_json_filename.c_str());
+  std::remove(validator_error_filename.c_str());
+
+  std::ifstream ifs(final_validator_json_filename);
 
   if(!ifs.good()){
-    std::cout << "ERROR: Could not open the JSON output by the validator to stdout" <<std::endl;
+    std::cout << "ERROR: Could not open the JSON output by the validator." <<std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation did not return a result.")});
   }
 
@@ -1043,14 +1144,12 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   try{
     result = nlohmann::json::parse(ifs);
   }catch(const std::exception& e){
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
   }
-  std::remove(output_file_name.c_str());
 
   std::string validator_status = "fail";
-  if(result["status"].is_string()){
+  if(result.find("status") != result.end() && result["status"].is_string()){
     if(result["status"] == "success"){
       validator_status = "success";
     }
@@ -1061,7 +1160,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
 
   if(validator_status != "success"){
     std::string error_message = "";
-    if(result["message"].is_string()){
+    if(result.find("message") != result.end() && result["message"].is_string()){
       error_message = result["message"];
     }
     //logs to validator_log
@@ -1069,12 +1168,12 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation failed.")});
   }
 
-  if(!result["data"].is_object()){
+  if(result.find("data") == result.end() || !result["data"].is_object()){
     std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
   
-  if(!result["data"]["score"].is_number()){
+  if(result["data"].find("score") == result["data"].end() || !result["data"]["score"].is_number()){
     std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
   }
@@ -1088,30 +1187,9 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     score = 0;
   }
 
-  std::string message = "";
-  if(result["data"]["message"].is_string()){
-      message = result["data"]["message"];
-  }else{
-    std::cout << "Message was not a string or was not found." << std::endl;
-  }
-
-  std::string status_string = "";
-  if(result["data"]["status"].is_string()){
-    status_string = result["data"]["status"];
-  }else{
-    std::cout << "Status was not a string or was not found." << std::endl;
-  }
-
-  TEST_RESULTS_MESSAGE_TYPE status = MESSAGE_INFORMATION;
-
-  if(status_string == "failure"){
-    status = MESSAGE_FAILURE;
-  }else if(status_string == "warning"){
-    status = MESSAGE_WARNING;
-  }else if(status_string == "success"){
-    status = MESSAGE_SUCCESS;
-  }//else it stays information.
-  return new TestResults(score, {std::make_pair(status, message)});
+  std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> messages = dispatch::getAllCustomValidatorMessages(result);
+  
+  return new TestResults(score, messages);
 }
 
 // ==============================================================================
