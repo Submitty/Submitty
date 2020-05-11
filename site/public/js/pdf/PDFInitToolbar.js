@@ -163,11 +163,11 @@ window.onbeforeunload = function() {
     }
     
     function saveFilePromise(doc, i, zoom_level, sLeft, sTop, rotateVal){
-        pageContainer = document.querySelector('#pageContainer'+i);
+        pageContainer = $("#pageContainer"+i)[0];
+        //pageContainer = document.querySelector('#pageContainer'+i);
         return new Promise(resolve => {
-            html2canvas(pageContainer[0]).then(canvas => {
-                onrendered: function(canvas) {
-                    let ctx = canvas.getContext('2d');
+            html2canvas(pageContainer).then(function (canvas) {
+                    /*let ctx = canvas.getContext('2d');
                     let scale = document.querySelector(`div#pageContainer${i} svg.annotationLayer`).scale;
                     let children = document.querySelector(`div#pageContainer${i} svg.annotationLayer`).children;
                     ctx.scale(zoom_level/100, zoom_level/100);
@@ -197,10 +197,9 @@ window.onbeforeunload = function() {
                     if(i < NUM_PAGES ){
                         doc.addPage();
                     }
-                    resolve(doc);
-                }
+                    resolve(doc);*/
+                })
             })
-        })
     }
     
     async function saveFileHelper(doc, i, zoom_level, sLeft, sTop, rotateVal){
