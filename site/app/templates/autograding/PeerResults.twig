@@ -245,20 +245,6 @@ $( document ).ready(function() {
                                 </td>
                             </tr>
                         {% endfor %}
-                        {# Custom comments not yet supported for peer grading yet. #}
-                        {# {% if component.custom_mark_score != 0 or component.comment != '' %}
-                            <tr>
-                                <td>
-                                    <i class="far fa-check-square fa-1g"></i>
-                                </td>
-                                <td class="mark-score">
-                                    {{ component.custom_mark_score|number_format(num_decimals) }}
-                                </td>
-                                <td>
-                                    {{ component.comment|nl2br }}
-                                </td>
-                            </tr>
-                        {% endif %} #}
                     </tbody>
                 </table>
                 </p>
