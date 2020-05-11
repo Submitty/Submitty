@@ -232,9 +232,9 @@ window.onbeforeunload = function() {
                     if(i < NUM_PAGES ){
                         doc.addPage();
                     }
-                    saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
                 }
             });
+        saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
         }
 
 
