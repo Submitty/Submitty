@@ -11,7 +11,7 @@ This message will appear in a blue box at the top of the page.",
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
         "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
         "submission_to_validation" : [ "*.txt", "*.png" ],
-        "work_to_details" : [ "*.txt", "*.png" ]
+        "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
     },
     "notebook" : [
         {
@@ -77,6 +77,27 @@ Here's a short list of instructions:\n  \
                 {"value": "c", "description": "`2 * 2 = 4`"},
                 {"value": "d", "description": "`6 / 2 = 4`"}
             ],
+            "allow_multiple": true
+        },
+
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###Select *all* numbers that are powers of 2:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "math_4.txt",
+            "testcase_ref" : "math_4",
+            "choices":[
+                {"value": "4", "description": "`4`"},
+                {"value": "24", "description": "`24`"},
+                {"value": "32", "description": "`32`"},
+                {"value": "96", "description": "`96`"},
+                {"value": "128", "description": "`128`"},
+                {"value": "524", "description": "`524`"}
+            ],
+            "randomize_order" : true,
             "allow_multiple": true
         },
 
@@ -227,6 +248,15 @@ for i in range(2, 100):\n\
           "validation":[ { "method":"diff", "actual_file":"math_3.txt", "expected_file":"math_3_answer.txt",
                            "show_expected":"never","show_actual":"never",
                            "failure_message":"Incorrect Answer" } ] },
+        { "title":"Math 4", "points":5, "testcase_label":"math_4",
+          "validation":[ {
+              "method":"diff", "comparison" : "byLine", "lineSwapOk" : true,
+              "actual_file":"math_4.txt", "expected_file":"math_4_answer.txt",
+              "show_expected":"never","show_actual":"never"
+              //,
+              // FIXME, THIS ALWAYS PRINTS
+              //"failure_message":"Incorrect Answer"
+          } ] },
 
         { "title":"Animal 1", "points":2, "testcase_label":"animal_1",
           "validation":[ { "method":"diff", "actual_file":"animal_1.txt", "expected_file":"animal_1_answer.txt",

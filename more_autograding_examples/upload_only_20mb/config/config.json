@@ -1,0 +1,6 @@
+{
+    // 20 mb maximum submission size
+    "max_submission_size" : 20000000,
+    "assignment_message" : "20 mb maximum total file upload.  \nNo automatic grading for this assignment.",
+    "testcases" : [ ] 
+}

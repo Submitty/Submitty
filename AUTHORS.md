@@ -5,37 +5,46 @@ Evan Maicus 2016-current
 
 ## Developers
 
+Mukul Kumar Jha, 2020-current, Google Summer of Code 2020  
+Marwan Atef, 2020-current, Google Summer of Code 2020  
+Harsh Joshi, 2020-current, Google Summer of Code 2020  
+Christina Lino, 2020-current  
+Stephanie Li, 2020-current  
+Jenay Barela, 2020-current  
+Herta Calvo-Faugier, 2020-current  
+Jensen Li, 2020-current  
 Eli Schiff 2019-current  
 Ben Kelly 2019-current  
+Hector Rodriguez Figueroa 2019-current  
 Saketh Dargula 2019-current  
 Kevin McKinney 2019-current  
-Jacob McKnight 2019-current  
 Alexa Orosz 2019-current  
-Maya Tung 2019-current  
 Xiao Han, 2019-current, Google Summer of Code 2019  
 Fon Noel, 2019-current, Google Summer of Code 2019  
 Drumil Patil, 2019-current, Google Summer of Code 2019  
 Anubhav Singh, 2019-current, Google Summer of Code 2019  
 Preston Carman 2019-current  
 Matthew Garber 2019-current  
-Matthew Raneri 2019-current  
 Thomas Shweh 2019-current  
-Kasra Sheik 2018-2019  
-Ryan Waddell 2018-2019  
-Victor Li 2018-2019  
-Eric Tran 2018-current  
-Kevin Mackenzie 2018-current  
-Glenn Smith 2018-current  
 Andrew Aikens 2017-current  
 Shail Patel 2018-current  
-Leon Montealegre 2017-current  
+John (Jack) Hulton 2018-current  
 Buster Holzbauer 2017-current  
 Ana Milanova 2016-current  
 Steven Lindsey 2014-current  
 Peter Bailie 2014-current  
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
-John (Jack) Hulton 2018  
+Jacob McKnight 2019  
+Maya Tung 2019  
+Matthew Raneri 2019  
+Kasra Sheik 2018-2019  
+Ryan Waddell 2018-2019   
+Victor Li 2018-2019  
+Eric Tran 2018-2019  
+Kevin Mackenzie 2018-2019  
+Glenn Smith 2018-2019  
+Leon Montealegre 2017-2019  
 Victor Nazzaro 2018  
 Joanna Ng 2018  
 Nick Roper 2018  

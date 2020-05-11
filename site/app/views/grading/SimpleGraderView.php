@@ -29,7 +29,7 @@ class SimpleGraderView extends AbstractView {
         $components_numeric = [];
         $components_text = [];
 
-        $comp_ids = array();
+        $comp_ids = [];
         foreach ($gradeable->getComponents() as $component) {
             if ($component->isText()) {
                 $components_text[] = $component;
@@ -43,7 +43,7 @@ class SimpleGraderView extends AbstractView {
         }
 
         $num_users = 0;
-        $sections = array();
+        $sections = [];
 
         // Iterate through every row
         /** @var GradedGradeable $graded_gradeable */
