@@ -383,7 +383,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,random
 
     print(msg)
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message=msg)
-    return True
+    return success
 
 
 # ==================================================================================
