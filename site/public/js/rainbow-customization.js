@@ -157,7 +157,42 @@ function getGradeableBuckets()
                 gradeable.release_date = children[0].dataset.gradeReleaseDate;
 
                 // Get gradeable id
-                gradeable.id = children[1].innerHTML;
+                gradeable.id = $(children).find(".gradeable-id")[0].innerHTML;
+
+                // Get per-gradeable curve data
+                $(children).find(".gradeable-li-curve input").each(function() {
+                    if(this.value) {
+                        if(!gradeable.hasOwnProperty('curve')) {
+                            gradeable.curve = [];
+                        }
+                        gradeable.curve.push(parseFloat(this.value));
+                    }
+                })
+
+                // Validate the set of per-gradeable curve values
+                if(gradeable.hasOwnProperty('curve')) {
+
+                    var previous = gradeable.max;
+
+                    // Has 4 values
+                    if(gradeable.curve.length !== 4) {
+                        throw "To adjust the curve for gradeable " + gradeable.id + " you must enter values in all 4 boxes";
+                    }
+
+                    gradeable.curve.forEach(function(elem) {
+                        // All values are floats
+                        if(isNaN(parseFloat(elem))) {
+                            throw "All curve inputs for gradeable " + gradeable.id + " must be floating point values";
+                        }
+
+                        // Each value is less than the previous
+                        if(elem >= previous) {
+                            throw "All curve inputs for gradeable " + gradeable.id + " must be less than the maximum points for the gradeable and also less than the previous input"
+                        }
+
+                        previous = elem;
+                    })
+                }
 
                 ids.push(gradeable);
             });
@@ -344,6 +379,19 @@ $(document).ready(function () {
         $('#cust_messages_collapse').toggle();
     });
 
+    $('.fa-gradeable-curve').click(function(event) {
+        var id = jQuery(this).attr("id").split('-')[3];
+        $('#gradeable-curve-div-' + id).toggle();
+    });
+
+    // By default, open gradeables that have curves applied to them
+    $('.gradeable-li-curve').each(function() {
+        if(this.children[1].value) {
+            var id = jQuery(this).attr("id").split('-')[3];
+            $('#gradeable-curve-div-' + id).toggle();
+        }
+    })
+
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(function() {
        displayChangeDetectedMessage();
@@ -355,11 +403,6 @@ $(document).ready(function () {
 
     $('.sections_and_labels').on("change keyup paste", function() {
         displayChangeDetectedMessage();
-    });
-
-    $('.fa-gradeable-curve').click(function(event) {
-        var id = jQuery(this).attr("id").split('-')[3];
-        $('#gradeable-curve-div-' + id).toggle();
     });
 
     // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div

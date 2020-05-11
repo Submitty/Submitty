@@ -151,3 +151,9 @@
 {
     width: 50px;
 }
+
+hr
+{
+    margin: 7px 10px;
+    border-top: 1px solid var(--viewed_content);
+}

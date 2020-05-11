@@ -122,6 +122,7 @@
                                 <div style="margin-top:10px">
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
+                                            <hr />
                                             <li class="gradeable-li">
                                                 <input type="text"
                                                        aria-label="{{gradeable["title"]}} max score"
@@ -137,24 +138,33 @@
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
                                                     </div>
                                                     <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
-                                                        <label for="">A-: </label>
-                                                        <input type="text">
-                                                        <label for="">B-: </label>
-                                                        <input type="text">
-                                                        <label for="">C-: </label>
-                                                        <input type="text">
-                                                        <label for="">D: </label>
-                                                        <input type="text">
-                                                        <i class="far fa-question-circle fa-rb" title="You may apply a curve
-on a per gradeable basis.
+                                                        {# Generate input boxes for each per-gradeable curve input #}
+                                                        {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}
 
-Values should be entered as a decimal.
+                                                        {% if per_gradeable_curves[bucket][gradeable['id']] is defined %}
+                                                            {% set curve_point_value = per_gradeable_curves[bucket][gradeable['id']] %}
+                                                        {% else %}
+                                                            {% set curve_point_value = ['', '', '', ''] %}
+                                                        {% endif %}
 
-For example, to adjust the minimum grade
-required for a student to obtain an A- to 85%,
-you would enter .85 in the 'A-' box.
+                                                        {% for i in range(0, 3) %}
+                                                            {% set html_id = 'per-gradeable-' ~ bucket ~ '-' ~ gradeable['id'] ~ '-' ~ i %}
 
-You must enter values in all 4 boxes."></i>
+                                                            <label for="{{ html_id }}">{{ curve_points[i] }} :</label>
+                                                            <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input" value="{{ curve_point_value[i] }}">
+                                                        {% endfor %}
+                                                        <i class="far fa-question-circle fa-rb" title="You may apply a curve on a per gradeable basis.
+
+These values should be entered in points, not percentages.
+
+For example, if the maximum points a student could earn
+on this gradeable was 20, and you wanted to adjust
+the minimum percent needed to earn an A- on this gradeable
+to 50%, you would enter 10 in the A- box.
+
+To curve, enter values in all 4 boxes.
+
+If you don't wish to curve this gradeable, leave all 4 boxes blank."></i>
                                                     </div>
                                                 </div>
                                             </li>

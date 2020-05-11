@@ -106,7 +106,7 @@ class RainbowCustomization extends AbstractModel {
 
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
-            $json_buckets = $this->RCJSON->getGradeableBuckets();
+            $json_buckets = $this->RCJSON->getGradeables();
 
             foreach ($json_buckets as $json_bucket) {
                 // Place those buckets in $this->used_buckets
@@ -127,7 +127,6 @@ class RainbowCustomization extends AbstractModel {
         $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
     }
 
-    // TODO: Move this function to the RCJSON class instead of here
     /**
      * Gets curve data for each gradeable
      *
@@ -143,7 +142,7 @@ class RainbowCustomization extends AbstractModel {
         $retArray = [];
 
         if (!is_null($this->RCJSON)) {
-            $json_buckets = $this->RCJSON->getGradeableBuckets();
+            $json_buckets = $this->RCJSON->getGradeables();
 
             foreach ($json_buckets as $json_bucket) {
                 $retArray[$json_bucket->type] = [];
@@ -183,7 +182,7 @@ class RainbowCustomization extends AbstractModel {
         $retArray = [];
 
         if (!is_null($this->RCJSON)) {
-            $json_buckets = $this->RCJSON->getGradeableBuckets();
+            $json_buckets = $this->RCJSON->getGradeables();
 
             $sum = 0;
 
