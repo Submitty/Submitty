@@ -152,7 +152,7 @@ class RainbowCustomization extends AbstractModel {
                         $curve_data = $json_gradeable->curve;
 
                         // Validate curve_data
-                        if(count($curve_data) != 4) {
+                        if (count($curve_data) != 4) {
                             throw new ValidationException("Malformed curve data detected for gradeable $json_gradeable->id in rainbow grades customization.json.  The gradeable curve array must contain exactly 4 values.", $this->error_messages);
                         }
 
