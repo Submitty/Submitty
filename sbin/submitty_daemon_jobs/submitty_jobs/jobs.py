@@ -10,7 +10,6 @@ import subprocess
 import stat
 import traceback
 import datetime
-import docker
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
