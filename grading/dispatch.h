@@ -32,7 +32,10 @@ namespace dispatch {
     TestResults* errorIfEmpty_doit (const TestCase &tc, const nlohmann::json& j);
 
     TestResults* ImageDiff_doit (const TestCase &tc, const nlohmann::json& j, int autocheck_num);
-    TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username);
+
+    std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string>> getAllCustomValidatorMessages(const nlohmann::json& j);
+    std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> getCustomValidatorMessage(const nlohmann::json& j);
+    TestResults* custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username, int autocheck_number);
 
     TestResults* diffLineSwapOk_doit (const nlohmann::json& j, const std::string &student_file_contents, const std::string &expected_file_contents);
 

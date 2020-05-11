@@ -105,14 +105,8 @@ class Notification extends AbstractModel {
 
     /**
      * Returns the corresponding url based on metadata
-     *
-     * @param  Core     $core
-     * @param  string   $metadata_json
-     * @return string   $url
      */
-
-    // added flag for links that go to sites handled by a router
-    public static function getUrl($core, $metadata_json) {
+    public static function getUrl(Core $core, string $metadata_json): ?string {
         $metadata = json_decode($metadata_json, true);
         if (empty($metadata)) {
             return null;
@@ -124,7 +118,7 @@ class Notification extends AbstractModel {
         return $metadata['url'];
     }
 
-    public static function getThreadIdIfExists($metadata_json) {
+    public static function getThreadIdIfExists(string $metadata_json): ?int {
         $metadata = json_decode($metadata_json, true);
         if (is_null($metadata)) {
             return null;
@@ -138,7 +132,7 @@ class Notification extends AbstractModel {
      * @param string $message
      * @return $trimmed_message
      */
-    public static function textShortner($message) {
+    public static function textShortner(string $message): string {
         $max_length = 40;
         $message = str_replace("\n", " ", $message);
         if (strlen($message) > $max_length) {
@@ -147,7 +141,7 @@ class Notification extends AbstractModel {
         return $message;
     }
 
-    public function hasEmptyMetadata() {
+    public function hasEmptyMetadata(): bool {
         return empty(json_decode($this->getNotifyMetadata()));
     }
 
