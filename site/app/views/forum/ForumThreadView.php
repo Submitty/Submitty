@@ -30,7 +30,7 @@ class ForumThreadView extends AbstractView {
             array(
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
-                "style" => 'position:relative;float:right;top:3px;margin-right:5px;',
+                "style" => 'position:relative;float:right;top:3px;margin-right:102px;',
                 "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads'])),
                 "optional_class" => '',
                 "title" => 'Back to threads',

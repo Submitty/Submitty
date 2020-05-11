@@ -24,7 +24,6 @@ class GradeOverrideControllerTester extends BaseUnitTest {
         $this->controller = new GradeOverrideController($this->core);
     }
 
-    /** @test */
     public function testQueriesAreCalledInViewOverriddenGrades() {
         $this->controller->viewOverriddenGrades();
 
