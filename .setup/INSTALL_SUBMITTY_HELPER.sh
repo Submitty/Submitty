@@ -241,8 +241,6 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
     chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs/git
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
-    #add cgi user to docker group
-    usermod -a -G "docker" ${CGI_USER}
 fi
 
 # ------------------------------------------------------------------------

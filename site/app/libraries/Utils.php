@@ -314,7 +314,7 @@ class Utils {
     public static function formatBytes(string $format, int $bytes, bool $round = false): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
         $result = $bytes / pow(1024, floor($formats[strtolower($format)]));
-        if (round($result)) {
+        if ($round) {
             $result = round($result);
         }
 

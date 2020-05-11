@@ -18,11 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
 *
 */
 class DockerInterfaceController extends AbstractController {
-   
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
-
 
     /**
      * @Route("/admin/docker", methods={"GET"})
