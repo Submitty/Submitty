@@ -1,5 +1,6 @@
 """Migration for a given Submitty course database."""
 import os
+import grp
 from pathlib import Path
 
 def up(config, database, semester, course):
@@ -15,11 +16,23 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    pdfs_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course, "annotated_pdfs")
-    # add boolean to course config
-    if not os.path.exists(pdfs_dir):
-        os.makedirs(pdfs_dir)
+    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
+    annotations_dir = Path(course_dir, 'annotated_pdfs')
+    # create the directories
+    os.makedirs(str(annotations_dir), exist_ok=True)
 
+    php_user = config.submitty_users['php_user']
+
+    # get course group
+    stat_info = os.stat(str(course_dir))
+    course_group_id = stat_info.st_gid
+    course_group = grp.getgrgid(course_group_id)[0]
+
+    # set the owner/group/permissions
+    os.system("chown -R "+php_user+":"+course_group+" "+str(annotations_dir))
+    os.system("chmod -R u+rwx "+str(annotations_dir))
+    os.system("chmod -R g+rxs "+str(annotations_dir))
+    os.system("chmod -R o-rwx "+str(annotations_dir))
 
 def down(config, database, semester, course):
     """
@@ -43,3 +56,4 @@ def down(config, database, semester, course):
                 os.remove(os.path.join(root, name))
             for name in dirs:
                 os.rmdir(os.path.join(root, name))
+    os.rmdir(pdfs_dir)

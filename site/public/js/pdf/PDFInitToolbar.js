@@ -1,3 +1,4 @@
+
 if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
@@ -158,48 +159,11 @@ window.onbeforeunload = function() {
         document.getElementById("file_content").scrollTop = 0;
         document.getElementById("file_content").scrollLeft = 0;
         saveFileHelper(doc,0, zoom_level, sLeft, sTop, rotateVal);
+        
     }
     
-            function saveFileHelper(doc, i, zoom_level, sLeft, sTop, rotateVal){
-            i++;
-            if(i > NUM_PAGES){
-                var fd = new FormData();
-                var pdf = btoa(doc.output());
-                let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
-                let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
-                fd.append('annotation_layer', JSON.stringify(annotation_layer));
-                fd.append('GENERAL_INFORMATION', JSON.stringify(GENERAL_INFORMATION));
-                fd.append('csrf_token', csrfToken);
-                fd.append('pdf', pdf);
-                let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
-                console.log(i);
-                localStorage.setItem('rotate', rotateVal);
-                render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: fd,
-                    processData: false,
-                    contentType: false,
-                    success: function(data){
-                        let response = JSON.parse(data);
-                        if(response.status == "success"){
-                            $('#save_status').text("Saved");
-                            $('#save_status').css('color', 'black');
-                        }
-                        else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function(){
-                        alert("Something went wrong, please contact a administrator.");
-                    }
-                });
-                zoom("custom", zoom_level);
-                document.getElementById("file_content").scrollLeft = sLeft;
-                document.getElementById("file_content").scrollLeft = sTop;
-                return;
-            }
+    function saveFilePromise(doc, i, zoom_level, sLeft, sTop, rotateVal){
+        return new Promise(resolve => {
             html2canvas($('#pageContainer'+i+''), {
                 onrendered: function(canvas) {
                     let ctx = canvas.getContext('2d');
@@ -232,10 +196,57 @@ window.onbeforeunload = function() {
                     if(i < NUM_PAGES ){
                         doc.addPage();
                     }
+                    resolve(doc);
                 }
             });
-        saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
+        })
+    }
+    
+    async function saveFileHelper(doc, i, zoom_level, sLeft, sTop, rotateVal){
+        i++;
+        if(i > NUM_PAGES){
+            var fd = new FormData();
+            var pdf = btoa(doc.output());
+            let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
+            let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
+            fd.append('annotation_layer', JSON.stringify(annotation_layer));
+            fd.append('GENERAL_INFORMATION', JSON.stringify(GENERAL_INFORMATION));
+            fd.append('csrf_token', csrfToken);
+            fd.append('pdf', pdf);
+            let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
+            console.log(i);
+            localStorage.setItem('rotate', rotateVal);
+            render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    let response = JSON.parse(data);
+                    if(response.status == "success"){
+                        $('#save_status').text("Saved");
+                        $('#save_status').css('color', 'black');
+                    }
+                    else {
+                        alert(data.message);
+                    }
+                },
+                error: function(){
+                    alert("Something went wrong, please contact a administrator.");
+                }
+            });
+            zoom("custom", zoom_level);
+            document.getElementById("file_content").scrollLeft = sLeft;
+            document.getElementById("file_content").scrollLeft = sTop;
+            return;
         }
+        var doc = await saveFilePromise(doc, i, zoom_level, sLeft, sTop, rotateVal);
+        return promise;
+        let result = await Promise.resolve();
+        saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
+    }
 
 
     function handleToolbarClick(e){

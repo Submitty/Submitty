@@ -100,13 +100,7 @@ class PDFController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
         
-        $pdf_gradeable = FileUtils::joinPaths($course_path, 'annotated_pdfs');
-        if (!is_dir($pdf_gradeable) && !FileUtils::createDir($pdf_gradeable)) {
-            return $this->core->getOutput()->renderJsonFail('Creating pdf folder failed');
-        }
-        
-        $pdf_gradeable_path = FileUtils::joinPaths($pdf_gradeable, "Check");
-        var_dump($pdf_gradeable_path);
+        $pdf_gradeable_path = FileUtils::joinPaths($course_path, 'annotated_pdfs', $annotation_info['gradeable_id']);
         if (!is_dir($pdf_gradeable_path) && !FileUtils::createDir($pdf_gradeable_path)) {
             return $this->core->getOutput()->renderJsonFail('Creating pdf gradeable folder failed');
         }
