@@ -149,9 +149,7 @@ window.onbeforeunload = function() {
     function saveFile(){
         rotateVal = window.RENDER_OPTIONS.rotate;
         window.html2canvas = html2canvas;
-        /*localStorage.setItem('rotate', 0);
-        render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-        */let zoom_level = window.RENDER_OPTIONS.scale * 100;
+        let zoom_level = window.RENDER_OPTIONS.scale * 100;
         let doc = new jsPDF('p', 'mm');
         zoom("custom", 140);
         let sLeft = document.getElementById("file_content").scrollLeft;
