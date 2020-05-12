@@ -109,6 +109,18 @@ class Team extends AbstractModel {
     }
 
     /**
+     * Get users of team, sorted by id
+     * @return User[]
+    */
+    public function getMemberUsersSorted() {
+        $ret = $this->member_users;
+        usort($ret, function ($a, $b) {
+            return strcmp($a->getId(), $b->getId());
+        });
+        return $ret;
+    }
+
+    /**
      * Get user ids of those invited to the team
      * @return string[]
     */
