@@ -716,7 +716,6 @@ HTML;
         ]);
     }
 
-
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from) {
@@ -789,7 +788,27 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ]);
         }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
 
+            $pattern_match_flag = false;
+            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if ($pattern_match_flag == true) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
+                "message" => "Multiple files within submissions"
+                ]);
+            }
+        }
         return $return;
     }
 
@@ -905,7 +924,7 @@ HTML;
      * Render the Submissions and Results Browser panel
      * @param GradedGradeable $graded_gradeable
      * @param int $display_version
-     * @return string
+     * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         $add_files = function (&$files, $new_files, $start_dir_name) {
@@ -948,7 +967,6 @@ HTML;
 
         // For PDFAnnotationBar.twig
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
