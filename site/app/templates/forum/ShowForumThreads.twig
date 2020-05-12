@@ -99,25 +99,6 @@
             </script>
             <div id="posts_list" style="overflow-y: auto; height:81vh;" class="d-none">
 
-                {% include "forum/GeneratePostList.twig" with {
-                    "userGroup" : generate_post_content.userGroup,
-                    "activeThread" : generate_post_content.activeThread,
-                    "activeThreadAnnouncement" : generate_post_content.activeThreadAnnouncement,
-                    "isCurrentFavorite": generate_post_content.isCurrentFavorite,
-                    "display_option" : generate_post_content.display_option,
-                    "post_data" : generate_post_content.post_data,
-                    "isThreadLocked" : generate_post_content.isThreadLocked,
-                    "accessFullGrading" : generate_post_content.accessFullGrading,
-                    "includeReply" : generate_post_content.includeReply,
-                    "thread_id" : generate_post_content.thread_id,
-                    "first_post_id" : generate_post_content.first_post_id,
-                    "form_action_link" : generate_post_content.form_action_link,
-                    "merge_thread_content" : generate_post_content.merge_thread_content,
-                    "csrf_token" : generate_post_content.csrf_token,
-                    "activeThreadTitle" : generate_post_content.activeThreadTitle,
-                    "post_box_id" : generate_post_content.post_box_id
-                } %}
-
                 <script>
                     $(function() {
                         generateCodeMirrorBlocks(document);
@@ -126,16 +107,18 @@
 
             </div>
 
-            <script>
-                $("#thread_list").click(function() {
-                  if($("#thread_list").attr("class") == "col-12"){
-                    $("#thread_list").attr("class", "col-3");
-                    $("#posts_list").attr("class", "col-9");
-                  }
-                });
-            </script>
-
         </div>
+
+        <script>
+            $("#thread_list").click(function() {
+              if($("#thread_list").attr("class") == "col-12"){
+                setTimeout(function(){
+                  $("#thread_list").attr("class", "col-3");
+                  $("#posts_list").attr("class", "col-9");
+                }, 2500);
+              }
+            });
+        </script>
 
     {% endif %}
 
