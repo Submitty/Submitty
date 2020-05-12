@@ -269,6 +269,7 @@
                         data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                     {% endif %}
                     data-num="true"
+                    aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}"
                 />
             </td>
         {% endfor %}
@@ -290,6 +291,7 @@
                 value="{{ component_grade.getComment() }}"
                 onclick="this.select()"
                 data-id="{{ component.getId() }}"
+                aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedFirstName()}} {{grade.getSubmitter().getUser().getDisplayedLastName()}}" 
             />
         </td>
     {% endfor %}

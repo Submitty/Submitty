@@ -30,7 +30,7 @@ fi
 
 # Check that there are exactly 4 command line arguments.
 if [[ $# -ne "4" ]] ; then
-    echo "Usage: create_course.sh  <term>  '<name of term>'  <start date>  <end date>"
+    echo "Usage: create_term.sh  <term>  '<name of term>'  <start date>  <end date>"
     echo "  <name of term> must be properly escaped."
     echo "  <start date> and <end date> must be in 'MM/DD/YYYY' format."
     exit 1

@@ -197,9 +197,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jquery-ui
     cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
     cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
-    # jquery-ui-timepicker-addon
-    mkdir ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
-    cp ${NODE_FOLDER}/jquery-ui-timepicker-addon/dist/*.min.* ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs

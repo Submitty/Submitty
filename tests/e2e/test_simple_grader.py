@@ -4,7 +4,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-import time
 
 class TestSimpleGrader(BaseTestCase):
 
@@ -56,9 +55,9 @@ class TestSimpleGrader(BaseTestCase):
     def test_example:
         # func is called once selenium is on the grading page: preloading kwargs means it does not need any arguments
         def template_func():
-            elem1 = self.driver.find_element_by_xpath("//div")
+            elem1 = self.driver.find_element(By.XPATH, "//div")
             self.assertEqual(elem.text, my_var1)
-            elem2 = self.driver.find_element_by_xpath("//span")
+            elem2 = self.driver.find_element(By.XPATH, "//span")
             self.assertEqual(elem.text, my_var2)
 
         # insert the kwargs for each function
@@ -78,8 +77,8 @@ class TestSimpleGrader(BaseTestCase):
     def test_header_text(self):
         def template_func():
             prev_section_num = None
-            for tbody_elem in self.driver.find_elements_by_xpath("//div[@class='content']/table/tbody[not(starts-with(@id, 'section-'))]"):
-                td_elem = tbody_elem.find_element_by_xpath("tr[@class='info']/td[1]")
+            for tbody_elem in self.driver.find_elements(By.XPATH, "//div[@class='content']/table/tbody[not(starts-with(@id, 'section-'))]"):
+                td_elem = tbody_elem.find_element(By.XPATH, "tr[@class='info']/td[1]")
                 # check that the header text is correct
                 self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
                 preceding_removed = td_elem.text.strip()[len(expected_text)+1:]
@@ -102,7 +101,7 @@ class TestSimpleGrader(BaseTestCase):
         def template_func():
             self.driver.refresh()
             # grade the first cell (as good as any other)
-            grade_elem = self.driver.find_element_by_id("cell-0-0")
+            grade_elem = self.driver.find_element(By.ID, "cell-0-0")
             # attribute where data is stored is different for lab/numeric
             attribute = "data-score" if is_lab else "value"
             score = grade_elem.get_attribute(attribute)
@@ -122,7 +121,7 @@ class TestSimpleGrader(BaseTestCase):
             WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[@id='cell-0-0' and @{}='{}']".format(attribute, next_score))))
             # if numeric, reset value so that test will continue to work as expected
             if next_score == "3.4":
-                grade_elem = self.driver.find_element_by_id("cell-0-0")
+                grade_elem = self.driver.find_element(By.ID, "cell-0-0")
                 grade_elem.clear()
                 grade_elem.send_keys("3.3")
                 grade_elem.send_keys(Keys.ARROW_RIGHT)

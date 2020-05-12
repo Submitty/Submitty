@@ -65,9 +65,6 @@ class AdminGradeableController extends AbstractController {
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
-        $this->core->getOutput()->addVendorJs(
-            FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
-        );
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
@@ -133,7 +130,15 @@ class AdminGradeableController extends AbstractController {
         $default_config_paths = [
             ['PROVIDED: upload_only (1 mb maximum total student file submission)',
             FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
-            ['PROVIDED: pdf_exam (100 mb maximum total student file submission)',
+            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
+            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
+            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
+            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
+            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
             FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
             ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
             FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
