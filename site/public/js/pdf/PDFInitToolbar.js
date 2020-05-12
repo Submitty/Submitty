@@ -148,97 +148,100 @@ window.onbeforeunload = function() {
 
     function saveFile(){
         rotateVal = window.RENDER_OPTIONS.rotate;
+        window.html2canvas = html2canvas;
         /*localStorage.setItem('rotate', 0);
         render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
         */let zoom_level = window.RENDER_OPTIONS.scale * 100;
         let doc = new jsPDF('p', 'mm');
-        console.log("C1");
         zoom("custom", 140);
         let sLeft = document.getElementById("file_content").scrollLeft;
         let sTop = document.getElementById("file_content").scrollLeft;
         document.getElementById("file_content").scrollTop = 0;
         document.getElementById("file_content").scrollLeft = 0;
-        saveFileHelper(doc,0, zoom_level, sLeft, sTop, rotateVal);
+        let errorCount = 0;
+        saveFileHelper(doc,0, zoom_level, sLeft, sTop, rotateVal, ++errorCount);
     }
     
-            function saveFileHelper(doc, i, zoom_level, sLeft, sTop, rotateVal){
-            i++;
-            if(i > NUM_PAGES){
-                var fd = new FormData();
-                var pdf = btoa(doc.output());
-                let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
-                let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
-                fd.append('annotation_layer', JSON.stringify(annotation_layer));
-                fd.append('GENERAL_INFORMATION', JSON.stringify(GENERAL_INFORMATION));
-                fd.append('csrf_token', csrfToken);
-                fd.append('pdf', pdf);
-                let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
-                console.log(i);
-                localStorage.setItem('rotate', rotateVal);
-                render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: fd,
-                    processData: false,
-                    contentType: false,
-                    success: function(data){
-                        let response = JSON.parse(data);
-                        if(response.status == "success"){
-                            $('#save_status').text("Saved");
-                            $('#save_status').css('color', 'black');
-                        }
-                        else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function(){
-                        alert("Something went wrong, please contact a administrator.");
+    function saveFileHelper(doc, i, zoom_level, sLeft, sTop, rotateVal, errorCount){
+        i++;
+        if(i > NUM_PAGES){
+            var fd = new FormData();
+            var pdf = btoa(doc.output());
+            let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
+            let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
+            fd.append('annotation_layer', JSON.stringify(annotation_layer));
+            fd.append('GENERAL_INFORMATION', JSON.stringify(GENERAL_INFORMATION));
+            fd.append('csrf_token', csrfToken);
+            fd.append('pdf', pdf);
+            let url = buildCourseUrl(['gradeable', GENERAL_INFORMATION['gradeable_id'], 'pdf', 'annotations']);
+            localStorage.setItem('rotate', rotateVal);
+            render(window.GENERAL_INFORMATION.gradeable_id, window.GENERAL_INFORMATION.user_id, window.GENERAL_INFORMATION.grader_id, window.GENERAL_INFORMATION.file_name, window.GENERAL_INFORMATION.file_path);
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    let response = JSON.parse(data);
+                    if(response.status == "success"){
+                        $('#save_status').text("Saved");
+                        $('#save_status').css('color', 'black');
                     }
-                });
-                zoom("custom", zoom_level);
-                document.getElementById("file_content").scrollLeft = sLeft;
-                document.getElementById("file_content").scrollLeft = sTop;
-                return;
-            }
-            pageContainer = document.getElementById("pageContainer"+i);
-            html2canvas(pageContainer, {
-                onrendered: function(canvas) {
-                    let ctx = canvas.getContext('2d');
-                    let annotationLayer = pageContainer.getElementsByClassName("annotationLayer")[0];
-                    let scale = annotationLayer.scale;
-                    let children = annotationLayer.children;
-                    ctx.scale(zoom_level/100, zoom_level/100);
-                        for (let j = 0; j < children.length; j++) {
-                            let annotation = children[j];
-                            if(annotation.getAttribute("data-pdf-annotate-type") == "drawing"){
-                                let path2 = new Path2D(annotation.getAttribute("d"));
-                                ctx.strokeStyle = annotation.getAttribute("stroke");
-                                ctx.lineWidth = annotation.getAttribute("stroke-width");
-                                ctx.stroke(path2);
-                            }
-                            if(annotation.getAttribute("data-pdf-annotate-type") == "textbox"){
-                                let textChild = annotation.children[0];
-                                //console.log(textChild);
-                                ctx.font = textChild.getAttribute("font-size") + "px sans-serif";
-                                ctx.fillStyle = textChild.getAttribute("fill");
-                                let text = annotation.textContent;
-                                if(text != null){
-                                    ctx.fillText(text, textChild.getAttribute("x"), textChild.getAttribute("y"));
-                                }
-                            }
-                        }
-                    let imgData = canvas.toDataURL(
-                        'image/png');              
-                    pageHeight= doc.internal.pageSize.height;
-                    doc.addImage(imgData, 'PNG', 0, 0);
-                    if(i < NUM_PAGES ){
-                        doc.addPage();
+                    else {
+                        alert(data.message);
                     }
-                    saveFileHelper(doc,i++, zoom_level, sLeft, sTop, rotateVal);
+                },
+                error: function(){
+                    alert("Something went wrong, please contact a administrator.");
                 }
             });
+            zoom("custom", zoom_level);
+            document.getElementById("file_content").scrollLeft = sLeft;
+            document.getElementById("file_content").scrollTop = sTop;
+            return;
         }
+        else {
+            pageContainer = document.getElementById("pageContainer"+i);
+            document.getElementById("file_content").scrollTop = pageContainer.offsetTop;
+            document.getElementById("file_content").scrollLeft = pageContainer.offsetLeft;
+            $(document).ready(function() {
+                html2canvas(pageContainer).then(function(canvas) {
+                        let ctx = canvas.getContext('2d');
+                        let annotationLayer = pageContainer.getElementsByClassName("annotationLayer")[0];
+                        let scale = annotationLayer.scale;
+                        let children = annotationLayer.children;
+                        ctx.scale(zoom_level/100, zoom_level/100);
+                            for (let j = 0; j < children.length; j++) {
+                                let annotation = children[j];
+                                if(annotation.getAttribute("data-pdf-annotate-type") == "drawing"){
+                                    let path2 = new Path2D(annotation.getAttribute("d"));
+                                    ctx.strokeStyle = annotation.getAttribute("stroke");
+                                    ctx.lineWidth = annotation.getAttribute("stroke-width");
+                                    ctx.stroke(path2);
+                                }
+                                if(annotation.getAttribute("data-pdf-annotate-type") == "textbox"){
+                                    let textChild = annotation.children[0];
+                                    ctx.font = textChild.getAttribute("font-size") + "px sans-serif";
+                                    ctx.fillStyle = textChild.getAttribute("fill");
+                                    let text = annotation.textContent;
+                                    if(text != null){
+                                        ctx.fillText(text, textChild.getAttribute("x"), textChild.getAttribute("y"));
+                                    }
+                                }
+                            }
+                        let imgData = canvas.toDataURL(
+                            'image/png');              
+                        pageHeight= doc.internal.pageSize.height;
+                        doc.addImage(imgData, 'PNG', 0, 0);
+                        if(i < NUM_PAGES ){
+                            doc.addPage();
+                        }
+                        saveFileHelper(doc,i, zoom_level, sLeft, sTop, rotateVal, ++errorCount);
+                });
+            });
+        }
+    }
 
 
     function handleToolbarClick(e){
