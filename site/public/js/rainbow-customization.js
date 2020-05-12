@@ -186,8 +186,8 @@ function getGradeableBuckets()
                         }
 
                         // Each value is less than the previous
-                        if(elem >= previous) {
-                            throw "All curve inputs for gradeable " + gradeable.id + " must be less than the maximum points for the gradeable and also less than the previous input"
+                        if(elem > previous) {
+                            throw "All curve inputs for gradeable " + gradeable.id + " must be less than or equal to the maximum points for the gradeable and also less than or equal to the previous input"
                         }
 
                         previous = elem;
