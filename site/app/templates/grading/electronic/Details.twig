@@ -430,7 +430,7 @@
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}
         {% else %}
-            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsers() -%}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}
