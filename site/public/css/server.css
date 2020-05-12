@@ -242,7 +242,7 @@ table tr.table-header {
 }
 
 tr.info, tr.info td, tr.info th {
-    background-color: var(--table-info);
+    background-color: var(--alert-border-blue);
 }
 
 td>a.active-sort {
@@ -523,7 +523,7 @@ td>a.active-sort {
 }
 
 .file-upload-table tr:hover {
-    background: #d1d1d1;
+    background: var(--file-upload-table-hover);
 }
 
 .green-message {
