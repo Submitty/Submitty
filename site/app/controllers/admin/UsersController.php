@@ -1057,21 +1057,36 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
     public function viewStudentGrades() {
-        $user = $this->core->getQueries()->getUserById($_POST["student_id"]);
-        if ($user === null) {
-            $this->core->addErrorMessage("Invalid Student ID \"" . $_POST["student_id"] . "\"");
-            return Response::RedirectOnlyResponse(
+        if (!isset($_POST["student_id"])) {
+            $this->core->addErrorMessage("No student ID provided");
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['users']))
             );
         }
+        $student_id = $_POST["student_id"];
+        $user = $this->core->getQueries()->getUserById($student_id);
+        if ($user === null) {
+            $this->core->addErrorMessage("Invalid Student ID \"" . $_POST["student_id"] . "\"");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['users']))
+            );
+        }
+
         $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
-            . $_POST["student_id"] . "_summary.html";
+            . $student_id . "_summary.html";
 
         $grade_file = null;
         if (file_exists($grade_path)) {
             $grade_file = file_get_contents($grade_path);
         }
 
-        $this->core->getOutput()->renderOutput(array('submission', 'RainbowGrades'), 'showGrades', $grade_file);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                array('submission', 'RainbowGrades'),
+                'showStudentToInstructor',
+                $user,
+                $grade_file
+            )
+        );
     }
 }

@@ -6,6 +6,8 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\MultiResponse;
+use app\libraries\response\WebResponse;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -632,10 +634,10 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/{_semester}/{_course}/reports/full_grades")
+     * @Route("/{_semester}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function displayFullGrades() {
+    public function displayGradebook() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
 
         $grade_file = null;
@@ -643,6 +645,12 @@ class ReportController extends AbstractController {
             $grade_file = file_get_contents($grade_path);
         }
 
-        $this->core->getOutput()->renderOutput(array('submission', 'RainbowGrades'), 'showGrades', $grade_file);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                array('admin', 'Report'),
+                'showFullGradebook',
+                $grade_file
+            )
+        );
     }
 }

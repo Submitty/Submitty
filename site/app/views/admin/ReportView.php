@@ -12,7 +12,18 @@ class ReportView extends AbstractView {
             'csv_url' => $this->core->buildCourseUrl(['reports', 'csv']),
             'rainbow_grades_customization_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
             'grade_summaries_last_run' => $grade_summaries_last_run,
-            'full_grades_url' => $this->core->buildCourseUrl(['reports', 'full_grades'])
+        ]);
+    }
+
+    public function showFullGradebook($grade_file) {
+        $this->core->getOutput()->addBreadcrumb('Gradebook');
+
+        $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
+
+        return $this->core->getOutput()->renderTwigTemplate("submission/RainbowGrades.twig", [
+            "show_summary" => $display_rainbow_grades_summary && $grade_file !== null,
+            "grade_file" => $grade_file,
+            "extra_label" => "For All Students"
         ]);
     }
 }
