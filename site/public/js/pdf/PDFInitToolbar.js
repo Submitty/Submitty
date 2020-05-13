@@ -2,7 +2,6 @@ if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
 
-var loaded = sessionStorage.getItem('toolbar_loaded');
 window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
@@ -176,9 +175,7 @@ window.onbeforeunload = function() {
     function handleToolbarClick(e){
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
-    if(!loaded){
-        document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-    }
+    document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
     sessionStorage.setItem('toolbar_loaded', true);
 })();
 
@@ -214,11 +211,9 @@ window.onbeforeunload = function() {
             document.getElementById('color_selector').style.backgroundColor = color;
         }
     }
-    if(!loaded){
-        document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
-        document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
-        document.addEventListener('colorchange', changeColor);
-    }
+    document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
+    document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+    document.addEventListener('colorchange', changeColor);
     initColors();
 })();
 
@@ -300,14 +295,12 @@ window.onbeforeunload = function() {
             PDFAnnotate.UI.setText(textSize, textColor);
         }
     }
-    if(!loaded){
-        document.addEventListener('colorchange', function(e){
-            setText(textSize, e.srcElement.getAttribute('value'));
-        });
-        document.getElementById('text_size_selector').addEventListener('change', function(e) {
-            let value = e.target.value ? e.target.value : e.srcElement.value;
-            setText(value, textColor);
-        });
-    }
+    document.addEventListener('colorchange', function(e){
+        setText(textSize, e.srcElement.getAttribute('value'));
+    });
+    document.getElementById('text_size_selector').addEventListener('change', function(e) {
+        let value = e.target.value ? e.target.value : e.srcElement.value;
+        setText(value, textColor);
+    });
     initText();
 })();
