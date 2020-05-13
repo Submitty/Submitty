@@ -38,7 +38,9 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('html2canvas', 'html2canvas.js'), 'vendor');
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
+        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.node.min'), 'vendor');
         // This initializes the toolbar and activates annotation mode
         if (!isset($is_student) || !$is_student) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
