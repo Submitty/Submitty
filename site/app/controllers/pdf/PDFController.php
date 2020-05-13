@@ -145,7 +145,7 @@ class PDFController extends AbstractController {
         }
         
         $grader_id = $this->core->getUser()->getId();
-        if ($this->core->getQueries()->getUserById($grader_id)->getGroup() === User::GROUP_STUDENT) {
+        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->isPeerGrading()) {
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
                 if (!in_array($id, $user_ids)) {
