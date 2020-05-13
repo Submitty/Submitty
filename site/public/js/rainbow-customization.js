@@ -180,9 +180,17 @@ function getGradeableBuckets()
                     }
 
                     gradeable.curve.forEach(function(elem) {
+
+                        elem = parseFloat(elem);
+
                         // All values are floats
-                        if(isNaN(parseFloat(elem))) {
+                        if(isNaN(elem)) {
                             throw "All curve inputs for gradeable " + gradeable.id + " must be floating point values";
+                        }
+
+                        // Each value is greater than 0
+                        if(elem < 0) {
+                            throw "All curve inputs for gradeable " + gradeable.id + " must be greater than or equal to 0";
                         }
 
                         // Each value is less than the previous
