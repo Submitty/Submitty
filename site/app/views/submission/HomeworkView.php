@@ -423,7 +423,7 @@ class HomeworkView extends AbstractView {
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
 
         if ($config->isNotebookGradeable()) {
-            $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook($notebook) : array();
+            $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook($notebook, $display_version) : array();
         }
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 

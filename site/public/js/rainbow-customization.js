@@ -1,3 +1,5 @@
+const curve_points_benchmarks = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
+
 function ExtractBuckets(){
     var x = [];
     var bucket_list = $("#buckets_used_list").find("li");
@@ -116,6 +118,27 @@ function getDisplayBenchmark()
     return display_benchmarks;
 }
 
+/**
+ * From the set of Display Benchmarks determine which ones are
+ * selected that are part of the subset
+ * ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d']
+ *
+ * @returns {[]}
+ */
+function getSelectedCurveBenchmarks()
+{
+    let all_selected_benchmarks = getDisplayBenchmark();
+    let result_set = [];
+
+    all_selected_benchmarks.forEach(function(elem) {
+       if(curve_points_benchmarks.includes(elem)) {
+           result_set.push(elem);
+       }
+    });
+
+    return result_set;
+}
+
 function getGradeableBuckets()
 {
     // Collect gradeable buckets
@@ -172,13 +195,12 @@ function getGradeableBuckets()
                 // Validate the set of per-gradeable curve values
                 if(gradeable.hasOwnProperty('curve')) {
 
-                    var previous = gradeable.max;
-
                     // Has 4 values
                     if(gradeable.curve.length !== 4) {
                         throw "To adjust the curve for gradeable " + gradeable.id + " you must enter values in all 4 boxes";
                     }
 
+                    var previous = gradeable.max;
                     gradeable.curve.forEach(function(elem) {
 
                         elem = parseFloat(elem);
@@ -387,18 +409,36 @@ $(document).ready(function () {
         $('#cust_messages_collapse').toggle();
     });
 
+    // Make the per-gradeable curve inputs toggle when the icon is clicked
     $('.fa-gradeable-curve').click(function(event) {
         var id = jQuery(this).attr("id").split('-')[3];
         $('#gradeable-curve-div-' + id).toggle();
     });
 
-    // By default, open gradeables that have curves applied to them
-    $('.gradeable-li-curve').each(function() {
-        if(this.children[1].value) {
-            var id = jQuery(this).attr("id").split('-')[3];
-            $('#gradeable-curve-div-' + id).toggle();
+    // Hide curve input boxes based upon which percent benchmark boxes are selected
+    $('#display_benchmarks_collapse input').change(function() {
+        let benchmark = this.value;
+        let is_checked = this.checked;
+
+        // Only care about inputs which are part of the curve_points_benchmarks
+        if(curve_points_benchmarks.includes(benchmark)) {
+            if(is_checked) {
+                $('.' + benchmark).show();
+            } else {
+                $('.' + benchmark).hide();
+            }
         }
-    })
+
+        // If all boxes are unchecked can hide benchmark percent box and all per-gradeable curve options
+        if(getSelectedCurveBenchmarks().length === 0) {
+            $('#benchmark_percents').hide();
+            $('.fa-gradeable-curve').hide();
+            $('.gradeable-li-curve').hide();
+        } else {
+            $('#benchmark_percents').show();
+            $('.fa-gradeable-curve').show();
+        }
+    });
 
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(function() {
