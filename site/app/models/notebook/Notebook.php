@@ -171,7 +171,7 @@ class Notebook extends AbstractModel {
                         // Else there has been a previous submission try to get it
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
@@ -190,7 +190,7 @@ class Notebook extends AbstractModel {
                     else {
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
 
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
@@ -218,13 +218,12 @@ class Notebook extends AbstractModel {
      * @throws IOException if there was an error reading contents from the file
      * @return string if successful returns the contents of a students most recent submission
      */
-    private function getRecentSubmissionContents($filename) {
+    private function getRecentSubmissionContents($filename, $version) {
 
         // Get items in path to student's submission folder
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradable_dir = $this->getGradeableId();
         $student_id = $this->core->getUser()->getId();
-        $version = $this->getAutoGradedGradeable()->getHighestVersion();
 
         // Join path items
         $complete_file_path = FileUtils::joinPaths(
