@@ -33,12 +33,13 @@ class PDFController extends AbstractController {
         $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '',FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
-            $annotation_file = FileUtils::joinPaths($annotation_path, $grader_id);
-            $annotation_file = $annotation_file . '.json';
-            if (is_file($annotation_file)) {
-                $annotation_jsons[$grader_id] = file_get_contents($annotation_file);
+            $dir_iter = new \DirectoryIterator(dirname($annotation_dir . '/'));
+            foreach ($dir_iter as $fileInfo) {
+                if($fileInfo->isFile() && !$fileInfo->isDot()){
+                    $annotation_jsons[preg_replace('/\\.[^.\\s]{3,4}$/', '',$fileInfo->getFilename())] = file_get_contents($fileInfo->getPathname());
                 }
             }
+        }
         $params = [
             "gradeable_id" => $gradeable_id,
             "id" => $id,

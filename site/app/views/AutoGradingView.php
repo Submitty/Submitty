@@ -389,21 +389,12 @@ class AutoGradingView extends AbstractView {
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
         $annotated_file_names = [];
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
-                            $annotated_file_names[] = $pdf_id;
-                        }
-                    }
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+            foreach ($dir_iter as $dirInfo) {
+                if ($dirInfo->isDir() && !$dirInfo->isDot() && count(scandir($dirInfo->getPathname()))) {
+                    $pdf_id = $dirInfo . '.pdf';
+                    $annotated_file_names[] = $pdf_id;
                 }
             }
         }
@@ -424,7 +415,6 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$display_name] = $comment;
             }
         }
-
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
