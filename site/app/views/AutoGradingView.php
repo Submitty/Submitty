@@ -506,7 +506,10 @@ class AutoGradingView extends AbstractView {
                     'show_mark' => $mark->isPublish() || $container->hasMark($mark),
                     'earned' => array_map(function (User $grader) use ($mark, $container) {
                                     return $container->hasMark($mark, $grader);
-                    }, $container->getGraders())
+                    }, $container->getGraders()),
+                    'num_earned' => count(array_filter($container->getGraders(), function (User $grader) use ($mark, $container) {
+                                    return $container->hasMark($mark, $grader);
+                    })),
                 ];
             }, $component->getMarks());
 
