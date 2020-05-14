@@ -277,7 +277,7 @@ class GradedGradeable extends AbstractModel {
      * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
      * blank.
      */
-    public function getUpdatedNotebook(array $newNotebook, int $version): array {
+    public function getUpdatedNotebook(array $newNotebook): array {
         foreach ($newNotebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
@@ -289,7 +289,7 @@ class GradedGradeable extends AbstractModel {
                         // Else there has been a previous submission try to get it
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
@@ -308,7 +308,7 @@ class GradedGradeable extends AbstractModel {
                     else {
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
 
                             // Add field to the array
                             $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
@@ -330,19 +330,19 @@ class GradedGradeable extends AbstractModel {
     /**
      * Get the data from the student's most recent submission
      *
-     * @param $filename string Name of the file to collect the data out of
-     * @param $version int The submission version number to select
+     * @param $filename Name of the file to collect the data out of
      * @throws AuthorizationException if the user lacks permissions to read the submissions file
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
      * @return string if successful returns the contents of a students most recent submission
      */
-    private function getRecentSubmissionContents($filename, $version) {
+    private function getRecentSubmissionContents($filename) {
 
         // Get items in path to student's submission folder
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradable_dir = $this->getGradeableId();
         $student_id = $this->core->getUser()->getId();
+        $version = $this->getAutoGradedGradeable()->getHighestVersion();
 
         // Join path items
         $complete_file_path = FileUtils::joinPaths(
