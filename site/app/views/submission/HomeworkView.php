@@ -283,8 +283,28 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
+        $output = "";
+
+        //TODO: refactor notebooks to use MVC
+        $config = $gradeable->getAutogradingConfig();
+        $notebook = null;
+        if ($config->isNotebookGradeable()) {
+            $notebook_model = $config->getNotebook($gradeable->getId(), $this->core->getUser()->getId());
+            $notebook = $notebook_model->getNotebookConfig();
+            $warning = $notebook_model->getWarning();
+            
+            if (isset($warning) && $this->core->getUser()->accessGrading()) {
+                $output = $this->core->getOutput()->renderTwigTemplate(
+                    'generic/Banner.twig',
+                    [
+                        'message' => $warning,
+                        'error' => true
+                    ]
+                );
+            }
+        }
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
-        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
+
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
@@ -314,8 +334,8 @@ class HomeworkView extends AbstractView {
         $github_repo_id = '';
 
         $image_data = [];
-        if (!$gradeable->isVcs()) {
-            // Prepare notebook image data for displaying
+
+        if ($config->isNotebookGradeable()) {
             foreach ($notebook as $cell) {
                 if (isset($cell['type']) && $cell['type'] == "image") {
                     $image_name = $cell['image'];
@@ -336,7 +356,10 @@ class HomeworkView extends AbstractView {
                     }
                 }
             }
+        }
 
+        if (!$gradeable->isVcs()) {
+            // Prepare notebook image data for displaying
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
@@ -382,6 +405,7 @@ class HomeworkView extends AbstractView {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
+
         $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
@@ -397,7 +421,10 @@ class HomeworkView extends AbstractView {
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
-        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
+
+        if ($config->isNotebookGradeable()) {
+            $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook($notebook) : array();
+        }
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
         // Import custom stylesheet to style notebook items
@@ -415,9 +442,12 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
 
-        $DATE_FORMAT = "m/d/Y @ h:i A";
+        $DATE_FORMAT = "m/d/Y @ h:i A T";
         $numberUtils = new NumberUtils();
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+
+
+        // TODO: go through this list and remove the variables that are not used
+        return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
@@ -452,9 +482,9 @@ class HomeworkView extends AbstractView {
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
-            'notebook' => $notebook_data,
+            'notebook' => $notebook_data ?? null,
             'testcase_messages' => $testcase_messages,
-            'image_data' => $image_data,
+            'image_data' => $image_data ?? null,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
@@ -550,7 +580,7 @@ class HomeworkView extends AbstractView {
                 continue;
             }
             elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
             }
 
             $page_count = 0;
@@ -646,7 +676,7 @@ class HomeworkView extends AbstractView {
 
         $peer_grading_max = $gradeable->getPeerPoints();
         $ta_grading_max   = $gradeable->getTaPoints();
-        
+
         $ta_grading_earned = 0;
         $peer_grading_earned = 0;
 
@@ -814,7 +844,7 @@ class HomeworkView extends AbstractView {
         else {
             $no_autograding = true;
         }
-        
+
         // If there is no autograding at all, only explicitly let the student know that before
         // TA grades are released.
         if (
@@ -886,11 +916,17 @@ class HomeworkView extends AbstractView {
             ]);
 
             if ($history !== null) {
+                $my_first_access_time = "";
+                if ($history->getFirstAccessTime() !== null) {
+                    $my_first_access_time = DateUtils::dateTimeToString($history->getFirstAccessTime());
+                }
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
+                    'first_access_time' => $my_first_access_time,
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
+                    'access_duration' => $history->getAccessDuration(),
                     'revision' => $history->getVcsRevision(),
                 ]);
             }
@@ -1060,7 +1096,7 @@ class HomeworkView extends AbstractView {
                     $content = $post['content'];
                     $posts[] = [
                         'is_staff' => $is_staff,
-                        'date' => date_format($date, 'm/d/Y g:i A'),
+                        'date' => date_format($date, 'm/d/Y g:i A T'),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,

@@ -409,11 +409,8 @@ class FileUtils {
      * extension will get the content type "text/x-sh" even though just "text" would probably be more
      * appropriate. This is a weaker check for binary files than mime_content_type which does
      * some basic analysis of the actual file to determine the information as opposed to just the filename.
-     *
-     * @param $filename
-     * @return null|string
      */
-    public static function getContentType($filename) {
+    public static function getContentType(?string $filename): ?string {
         if ($filename === null) {
             return null;
         }

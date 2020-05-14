@@ -65,9 +65,6 @@ class AdminGradeableController extends AbstractController {
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
-        $this->core->getOutput()->addVendorJs(
-            FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
-        );
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
@@ -129,12 +126,29 @@ class AdminGradeableController extends AbstractController {
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
         // These are hard coded default config options.
-        $default_config_paths = [ ['PROVIDED: upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
-                                  ['PROVIDED: pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
-                                  ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
-                                  ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
-                                  ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
-                                  ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
+        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
+        $default_config_paths = [
+            ['PROVIDED: upload_only (1 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
+            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
+            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
+            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
+            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
+            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
+            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
+            ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
+            ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload/config')],
+            ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
+            FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload_3page/config')]
+        ];
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
@@ -246,7 +260,9 @@ class AdminGradeableController extends AbstractController {
 
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'peer' => $gradeable->isPeerGrading(),
+            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
@@ -737,7 +753,8 @@ class AdminGradeableController extends AbstractController {
                 'min_grading_group' => 1,
                 'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
                 'ta_instructions' => '',
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
+                'autograding_config_path' =>
+                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
@@ -825,7 +842,8 @@ class AdminGradeableController extends AbstractController {
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'regrade_allowed' => $regrade_allowed,
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
+                'autograding_config_path' =>
+                    FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
 
@@ -877,7 +895,9 @@ class AdminGradeableController extends AbstractController {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
-            $gradeable->setAutogradingConfigPath('/usr/local/submitty/more_autograding_examples/pdf_exam/config');
+            $gradeable->setAutogradingConfigPath(
+                FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/pdf_exam/config')
+            );
             $gradeable->setHasDueDate(false);
         }
 

@@ -24,19 +24,21 @@ $( document ).ready(function() {
     <div class="sub">
 
         {# Overview #}
-        <div class="box half" style="padding: 10px; width: 30%; word-break: break-word;">
+        <div class="box" style="padding: 10px; word-break: break-word;">
             <p>Version #{{ ta_graded_version }}</p>
             {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
-            {# Peer graders can not yet make overall comments. #}
-            {# <p>
-                {% if overall_comment|length != 0 %}
-            <hr>
-            Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
-            {% endif %}
-            </p> #}
+            {% for user in ordered_graders if overall_comments[user] is not empty %}
+                <div class="overall-comment-box">
+                    <p class="overall-comment-author">
+                        Overall note from {{peer_aliases[user]}}:
+                    </p>
+                    <p class="overall-comment">
+                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                    </p>
+                </div>
+            {% endfor %}
         </div>
 
         {% if uploaded_pdfs|length >= 1 %}
@@ -128,77 +130,13 @@ $( document ).ready(function() {
 
             {# Peer Component boxes #}
             {% for component in peer_components %}
-                <div class="box grade-results">
-                    <div class="box-badge">
-                        {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
-                    </div>
-                    <div class="box-info" style="width:100%">
-                        <h4>
-                            {{ component.title|escape }}
-                        </h4>
-                        <div style="float:left; width:100%;">
-                            <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
-                            <p>
-
-                            {# This is a layout table #}
-                            <table class="mobile-table">
-                                 <thead>
-                                    <tr>
-                                        {% for grader in component.peer_ids %}
-                                            <th class="peer-table-header">
-                                                {{ peer_aliases[grader] }}
-                                            </th>
-                                        {% endfor %}
-                                        <th> Points </th>
-                                        <th class="peer-table-title-data"> Title  </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for mark in component.marks|filter((mark) => mark.show_mark) %}
-                                        <tr>
-                                            {% for grader in component.peer_ids %}
-                                                <td class="peer-table-data">
-                                                    {% if mark.earned[grader] %}
-                                                        <div class="col-no-gutters indicator">
-                                                            <i class="far fa-check-square fa-1g"></i>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="col-no-gutters indicator">
-                                                            <i class="far fa-square fa-1g"></i>
-                                                        </div>
-                                                    {% endif %}
-                                                </td>
-                                            {% endfor %}
-                                            <td class="peer-table-data">
-                                                {{ mark.points|number_format(num_decimals) }}
-                                            </td>
-                                            <td class="peer-table-title-data">
-                                                {{ mark.title|nl2br }}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    {# Custom comments not yet supported for peer grading yet. #}
-                                    {# {% if component.custom_mark_score != 0 or component.comment != '' %}
-                                        <tr>
-                                            <td>
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            </td>
-                                            <td class="mark-score">
-                                                {{ component.custom_mark_score|number_format(num_decimals) }}
-                                            </td>
-                                            <td>
-                                                {{ component.comment|nl2br }}
-                                            </td>
-                                        </tr>
-                                    {% endif %} #}
-                                </tbody>
-                            </table>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                {% if component.peer_ids | length <= 5 %}
+                    {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
+                {% else %}
+                    {{ self.renderManyPeerResults(component) }}
+                {% endif %}                
             {% endfor %}
-        {# /Peer Component boxes #}
+            {# /Peer Component boxes #}
         {% endif %}
     {# /Total auto + manual #}
     </div>
@@ -208,3 +146,109 @@ $( document ).ready(function() {
         </div>
     {% endif %}
 {% endif %}
+
+
+{%- macro renderManyPeerResults(component) -%}
+    <div class="box grade-results">
+        <div class="box-badge">
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+        </div>
+        <div class="box-info" style="width:100%">
+            <h4>
+                {{ component.title|escape }}
+            </h4>
+            <div style="float:left; width:100%;">
+                <p style="padding-bottom: 10px;">
+                    {{ component.student_comment|nl2br }}
+                </p>
+                <p>
+
+                {# This is a layout table #}
+                <table class="mobile-table">
+                     <thead>
+                        <tr>
+                            <th class="peer-table-header" style="width:90px;"># of Peers</th>
+                            <th class="peer-table-header"> Points </th>
+                            <th class="peer-table-title-data"> Title  </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mark in component.marks|filter((mark) => mark.show_mark) %}
+                            <tr>
+                                <td class="peer-table-data">
+                                    {{ mark.num_earned }}
+                                </td>
+                                <td class="peer-table-data">
+                                    {{ mark.points|number_format(num_decimals) }}
+                                </td>
+                                <td class="peer-table-title-data">
+                                    {{ mark.title|nl2br }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </p>
+            </div>
+        </div>
+    </div>
+{%- endmacro -%}
+
+
+{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders) -%}
+    <div class="box grade-results">
+        <div class="box-badge">
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+        </div>
+        <div class="box-info" style="width:100%">
+            <h4>
+                {{ component.title|escape }}
+            </h4>
+            <div style="float:left; width:100%;">
+                <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
+                <p>
+
+                {# This is a layout table #}
+                <table class="mobile-table">
+                     <thead>
+                        <tr>
+                            {% for grader in ordered_graders if grader in component.peer_ids %}
+                                <th class="peer-table-header">
+                                    {{ peer_aliases[grader] }}
+                                </th>
+                            {% endfor %}
+                            <th> Points </th>
+                            <th class="peer-table-title-data"> Title  </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mark in component.marks|filter((mark) => mark.show_mark) %}
+                            <tr>
+                                {% for grader in ordered_graders if grader in component.peer_ids %}
+                                    <td class="peer-table-data">
+                                        {% if mark.earned[grader] %}
+                                            <div class="col-no-gutters indicator">
+                                                <i class="far fa-check-square fa-1g"></i>
+                                            </div>
+                                        {% else %}
+                                            <div class="col-no-gutters indicator">
+                                                <i class="far fa-square fa-1g"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                <td class="peer-table-data">
+                                    {{ mark.points|number_format(num_decimals) }}
+                                </td>
+                                <td class="peer-table-title-data">
+                                    {{ mark.title|nl2br }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </p>
+            </div>
+        </div>
+    </div>
+{%- endmacro -%}

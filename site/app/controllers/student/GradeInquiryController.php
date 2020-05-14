@@ -6,7 +6,7 @@ use app\controllers\AbstractController;
 use app\models\gradeable\GradedGradeable;
 use app\models\Notification;
 use app\models\Email;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -14,7 +14,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
-     * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
@@ -29,7 +29,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         if (!$gradeable->isRegradeOpen()) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Grade inquiries are not enabled for this gradeable')
             );
         }
@@ -41,7 +41,7 @@ class GradeInquiryController extends AbstractController {
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to request regrade')
             );
         }
@@ -49,17 +49,17 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
         }
         catch (\InvalidArgumentException $e) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
         }
         catch (\Exception $e) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }
@@ -68,7 +68,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
-     * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
@@ -88,21 +88,21 @@ class GradeInquiryController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Submitter has not made a grade inquiry')
             );
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to make grade inquiry post')
             );
         }
 
         $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
         if (is_null($grade_inquiry)) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Cannot find grade inquiry')
             );
         }
@@ -111,17 +111,17 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
         }
         catch (\InvalidArgumentException $e) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
         }
         catch (\Exception $e) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }
@@ -130,7 +130,7 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
-     * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
+     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
@@ -150,21 +150,21 @@ class GradeInquiryController extends AbstractController {
         }
 
         if (!$graded_gradeable->hasRegradeRequest()) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Submitter has not made a grade inquiry')
             );
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to change grade inquiry status')
             );
         }
 
         $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
         if (is_null($grade_inquiry)) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Cannot find grade inquiry')
             );
         }
@@ -186,17 +186,17 @@ class GradeInquiryController extends AbstractController {
                 $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
             }
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
         }
         catch (\InvalidArgumentException $e) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
         }
         catch (\Exception $e) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }

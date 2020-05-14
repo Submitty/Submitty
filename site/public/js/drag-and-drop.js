@@ -365,16 +365,15 @@ function openFile(url_full) {
 // moving to next input for split item submissions
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
-    var next_count = count+1;
-    var next_input = "#users_" + next_count + " :first";
-    if ($(next_input).length) {
-        $(next_input).focus();
-        $(next_input).select();
+    const next_input = $("#users_" + (count + 1)).first();
+    if (next_input) {
+        next_input.focus();
+        next_input.select();
 
-        var inputOffset = $(next_input).offset().top;
-        var inputHeight = $(next_input).height();
-        var windowHeight = $(window).height();
-        var offset;
+        const inputOffset = next_input.offset().top;
+        const inputHeight = next_input.height();
+        const windowHeight = $(window).height();
+        let offset;
 
         if (inputHeight < windowHeight) {
             offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
@@ -382,12 +381,9 @@ function moveNextInput(count) {
         else {
             offset = inputOffset;
         }
-        var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed);
+        $('html, body').animate({scrollTop: offset}, 500);
     }
 }
-
-
 
 // HANDLE SUBMISSION
 //========================================================================================
@@ -848,13 +844,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         }
     }
     // check due date
-    if (days_late > 0 && days_late <= late_days_allowed) {
+    if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
     }
-    else if (days_late > 0) {
+    else if (days_late > 0 && days_late > late_days_allowed) {
         message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
@@ -919,7 +915,6 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
-
 
     if (student_page) {
         var pages = [];

@@ -73,7 +73,7 @@ class NavigationView extends AbstractView {
         ]
     ];
 
-    const DATE_FORMAT = "m/d/Y @ h:i A";
+    const DATE_FORMAT = "m/d/Y @ h:i A T";
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
         // ======================================================================================
@@ -303,7 +303,7 @@ class NavigationView extends AbstractView {
         $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading();
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;
@@ -624,11 +624,11 @@ class NavigationView extends AbstractView {
             $grades_released = $gradeable->getGradeReleasedDate();
             if ($list_section === GradeableList::GRADING && $date < $grades_due) {
                 $title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . ')';
+                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . ")";
             }
             elseif ($list_section === GradeableList::GRADING && $date < $grades_released) {
                 $title = 'GRADE';
-                $date_text = '(grades will be released ' . $grades_released->format(self::DATE_FORMAT) . ')';
+                $date_text = '(grades will be released ' . $grades_released->format(self::DATE_FORMAT) . ")";
             }
             else {
                 $title = 'REGRADE';
