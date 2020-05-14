@@ -1,13 +1,13 @@
 <?php
 
-namespace app\models\gradeable;
+namespace app\models\notebook;
 
 use app\libraries\Core;
 use app\models\AbstractModel;
 
 /**
- * Class AbstractGradeableInput
- * @package app\models\gradeable
+ * Class AbstractNotebookInput
+ * @package app\models\notebook
  *
  * Information required to load gradeable input submissions on the submission page
  *
@@ -15,7 +15,7 @@ use app\models\AbstractModel;
  * @method array[] getImages()
  * @method string getLabel()
  */
-class AbstractGradeableInput extends AbstractModel {
+class AbstractNotebookInput extends AbstractModel {
 
     /** @prop @var string The name of the file to save text box data to */
     protected $file_name;

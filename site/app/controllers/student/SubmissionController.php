@@ -922,6 +922,14 @@ class SubmissionController extends AbstractController {
             //need to force re-parse the notebook serverside again
             $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $who_id);
 
+            $notebook = new UserSpecificNotebook(
+                $this->core,
+                $gradeable->getAutogradingConfig()->getNotebook(),
+                $gradeable_id,
+                $who_id
+            );
+
+
             //save the notebook hashes and item selected
             $json = [
                 "hashes" => $notebook->getHashes(),
