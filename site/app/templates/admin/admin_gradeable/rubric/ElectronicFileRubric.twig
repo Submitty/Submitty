@@ -30,7 +30,17 @@
 <script>
     $(document).ready(function() {
         loadTemplates().then(function() {
-            reloadInstructorEditRubric($('#g_id').val());
+            reloadInstructorEditRubric($('#g_id').val()).then( function() {
+                $('body').on('DOMSubtreeModified', '.component-container', function() {
+                    let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
+                    if (yesPeer) {
+                        $('#page_5_nav').show();
+                        $('#page_5_nav').addClass("normal-btn");
+                    } else {
+                        $('#page_5_nav').hide();
+                    }
+                });
+            });
         });
     });
 </script>

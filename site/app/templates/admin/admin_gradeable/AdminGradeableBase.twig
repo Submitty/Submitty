@@ -28,7 +28,7 @@
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Rubric</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Grader Assignment</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Dates</a>
-            <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Peer Matrix</a>
+            <a class="nav-bar key_to_click" id="page_5_nav" style="{{(gradeable.isPeerGrading()) ? '' : 'display:none;'}}" onclick="onChangeNavTab(5);">Peer Matrix</a>
         </div>
         <br/>
         <br/>
@@ -55,7 +55,7 @@
 <script>
 
     let adminGradeableNavTab = 0;
-    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true],['5',true]]);
+    var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true],['5',false]]);
     function onChangeNavTab(tab) {
 
         if (tab > 5 || tab < 0) {
@@ -71,6 +71,12 @@
         adminGradeableNavTab = tab;
 
         $('.nav-bar').each(function () {
+            if (this.id.split('_')[1] === '5') {
+                if (this.style != "display:none;") {
+                    $(this).addClass("{{ action != 'edit' ? "disabled-btn" : "normal-btn" }}")
+                }
+                return;
+            }
             if (navItemsStatus.get(this.id.split('_')[1]) === false) {
                 $(this).hide();
             }
@@ -95,8 +101,6 @@
             navItemsStatus.set('1', true);
             navItemsStatus.set('2', yesChecked);
             navItemsStatus.set('3', yesChecked);
-            //YO NO SET YET PT 1:
-            navItemsStatus.set('5', yesChecked);
         }
         else {
             navItemsStatus.set('1', false);
@@ -121,7 +125,6 @@
         $('[name="type"]').change(updateNavItemsStatus);
         $('[name="scanned_exam"]').change(updateNavItemsStatus);
         $('[name="ta_grading"]').change(updateNavItemsStatus);
-        // YO NO SE YET PT 2: navItemsStatus.set('5', yesPeer); where yesPeer = gradeable.isPeerGrading()
 
         // Update navigation on load
 
