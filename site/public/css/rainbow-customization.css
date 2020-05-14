@@ -29,6 +29,7 @@
 {
     width: 80%;
     height: 10vh;
+    margin-top: 10px;
 }
 
 #buckets_available_list li{
@@ -156,4 +157,14 @@ hr
 {
     margin: 7px 10px;
     border-top: 1px solid var(--viewed_content);
+}
+
+.rg_info_message
+{
+    margin-bottom: 10px;
+}
+
+#rg_web_ui
+{
+    display: none;
 }

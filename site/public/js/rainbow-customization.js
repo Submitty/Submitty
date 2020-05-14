@@ -183,21 +183,28 @@ function getGradeableBuckets()
                 gradeable.id = $(children).find(".gradeable-id")[0].innerHTML;
 
                 // Get per-gradeable curve data
+                let curve_points_selected = getSelectedCurveBenchmarks()
+
                 $(children).find(".gradeable-li-curve input").each(function() {
-                    if(this.value) {
+
+                    var benchmark = this.getAttribute('data-benchmark').toString();
+
+                    if(curve_points_selected.includes(benchmark) && this.value)
+                    {
                         if(!gradeable.hasOwnProperty('curve')) {
                             gradeable.curve = [];
                         }
+
                         gradeable.curve.push(parseFloat(this.value));
                     }
-                })
+                });
 
                 // Validate the set of per-gradeable curve values
                 if(gradeable.hasOwnProperty('curve')) {
 
-                    // Has 4 values
-                    if(gradeable.curve.length !== 4) {
-                        throw "To adjust the curve for gradeable " + gradeable.id + " you must enter values in all 4 boxes";
+                    // Has correct number of values
+                    if(gradeable.curve.length !== curve_points_selected.length) {
+                        throw "To adjust the curve for gradeable " + gradeable.id + " you must enter a value in each box";
                     }
 
                     var previous = gradeable.max;
@@ -256,27 +263,32 @@ function getBenchmarkPercent()
 {
     // Collect benchmark percents
     var benchmark_percent = {};
+    let selected_benchmarks = getSelectedCurveBenchmarks();
 
-    $.each($("input[class='benchmark_percent_input']"), function(){
+    $('.benchmark_percent_input').each(function() {
 
         // Get data
         var benchmark = this.getAttribute('data-benchmark').toString();
         var percent = this.value;
 
-        // Verify percent is not empty
-        if(percent === "")
-        {
-            throw "All benchmarks must have a value before saving."
-        }
+        if(selected_benchmarks.includes(benchmark)) {
 
-        // Verify percent is a floating point number
-        if(isNaN(parseFloat(percent)))
-        {
-            throw "Benchmark percent input must be a floating point number."
-        }
+            // Verify percent is not empty
+            if(percent === "")
+            {
+                throw "All benchmark percents must have a value before saving."
+            }
 
-        // Add to sections
-        benchmark_percent[benchmark] = percent;
+            // Verify percent is a floating point number
+            if(isNaN(parseFloat(percent)))
+            {
+                throw "Benchmark percent input must be a floating point number."
+            }
+
+            // Add to sections
+            benchmark_percent[benchmark] = percent;
+
+        }
     });
 
     return benchmark_percent;
@@ -386,6 +398,37 @@ function displayChangeDetectedMessage()
     $('#save_status').html('Changes detected, press "Save Changes" to save them.');
 }
 
+/**
+ * Sets the visibility for 'benchmark percent' input boxes and also per-gradeable curve input boxes
+ * based upon boxes in 'display benchmark' being selected / un-selected
+ *
+ * @param elem The checkbox input element captured from 'display benchmark'
+ */
+function setInputsVisibility(elem)
+{
+    let benchmark = elem.value;
+    let is_checked = elem.checked;
+
+    // Only care about inputs which are part of the curve_points_benchmarks
+    if(curve_points_benchmarks.includes(benchmark)) {
+        if(is_checked) {
+            $('.' + benchmark).show();
+        } else {
+            $('.' + benchmark).hide();
+        }
+    }
+
+    // If all boxes are unchecked can hide benchmark percent box and all per-gradeable curve options
+    if(getSelectedCurveBenchmarks().length === 0) {
+        $('#benchmark_percents').hide();
+        $('.fa-gradeable-curve').hide();
+        $('.gradeable-li-curve').hide();
+    } else {
+        $('#benchmark_percents').show();
+        $('.fa-gradeable-curve').show();
+    }
+}
+
 $(document).ready(function () {
 
     // Setup click handlers to handle collapsing and expanding each item
@@ -415,29 +458,40 @@ $(document).ready(function () {
         $('#gradeable-curve-div-' + id).toggle();
     });
 
-    // Hide curve input boxes based upon which percent benchmark boxes are selected
-    $('#display_benchmarks_collapse input').change(function() {
-        let benchmark = this.value;
-        let is_checked = this.checked;
+    // By default, open the input fields for per-gradable curves which have been previously set
+    $('.gradeable-li-curve').each(function() {
 
-        // Only care about inputs which are part of the curve_points_benchmarks
-        if(curve_points_benchmarks.includes(benchmark)) {
-            if(is_checked) {
-                $('.' + benchmark).show();
-            } else {
-                $('.' + benchmark).hide();
-            }
-        }
+        let has_at_least_one_value = false;
 
-        // If all boxes are unchecked can hide benchmark percent box and all per-gradeable curve options
-        if(getSelectedCurveBenchmarks().length === 0) {
-            $('#benchmark_percents').hide();
-            $('.fa-gradeable-curve').hide();
-            $('.gradeable-li-curve').hide();
-        } else {
-            $('#benchmark_percents').show();
-            $('.fa-gradeable-curve').show();
+        // Determine if any of the input boxes had a value pre-loaded into them
+        $(this).children('input').each(function() {
+           if(this.value) {
+               has_at_least_one_value = true;
+           }
+        });
+
+        // If so then open the per-gradeable curve input div
+        if(has_at_least_one_value) {
+            var id = jQuery(this).attr("id").split('-')[3];
+            $('#gradeable-curve-div-' + id).toggle();
         }
+    })
+
+    /**
+     * Configure visibility handlers for curve input boxes
+     * Curve input boxes include the benchmark percent input boxes and also the per-gradeable curve input boxes
+     * Visibility is controlled by which boxes are selected in the display benchmarks area
+     */
+    $('#display_benchmarks_collapse input').each(function() {
+
+        // Set the initial visibility on load
+        setInputsVisibility(this);
+
+        // Register a click handler to adjust visibility when boxes are selected / un-selected
+        $(this).change(function() {
+           setInputsVisibility(this);
+        });
+
     });
 
     // Register change handlers to update the status message when form inputs change
@@ -469,5 +523,11 @@ $(document).ready(function () {
     // Display auto rainbow grades log on button click
     $('#show_log_button').click(function() {
         $('#save_status_log').toggle();
-    })
+    });
+
+    // Hide the loading div and display the form once all form configuration is complete
+    $(document).ready(function() {
+        $('#rg_web_ui_loading').hide();
+        $('#rg_web_ui').show();
+    });
 });
