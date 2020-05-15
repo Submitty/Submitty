@@ -30,13 +30,13 @@ class PDFController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '',FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
+        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
             $dir_iter = new \DirectoryIterator(dirname($annotation_dir . '/'));
             foreach ($dir_iter as $fileInfo) {
-                if($fileInfo->isFile() && !$fileInfo->isDot()){
-                    $annotation_jsons[preg_replace('/\\.[^.\\s]{3,4}$/', '',$fileInfo->getFilename())] = file_get_contents($fileInfo->getPathname());
+                if ($fileInfo->isFile() && !$fileInfo->isDot()) {
+                    $annotation_jsons[preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileInfo->getFilename())] = file_get_contents($fileInfo->getPathname());
                 }
             }
         }
@@ -104,7 +104,7 @@ class PDFController extends AbstractController {
             return false;
         }
         
-        $annotation_file_path = FileUtils::joinPaths($annotation_version_path,(preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name'])));
+        $annotation_file_path = FileUtils::joinPaths($annotation_version_path, (preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name'])));
         if (!is_dir($annotation_file_path) && !FileUtils::createDir($annotation_file_path)) {
              return $this->core->getOutput()->renderJsonFail('Creating annotation filename folder failed');
         }
@@ -144,15 +144,15 @@ class PDFController extends AbstractController {
             }
         }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '',FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
+        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
             $annotation_file = FileUtils::joinPaths($annotation_dir, $grader_id);
             $annotation_file = $annotation_file . '.json';
             if (is_file($annotation_file)) {
                 $annotation_jsons[$grader_id] = file_get_contents($annotation_file);
-                }
             }
+        }
         $params = [
             "gradeable_id" => $gradeable_id,
             "id" => $id,
