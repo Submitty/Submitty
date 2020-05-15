@@ -71,12 +71,6 @@
         adminGradeableNavTab = tab;
 
         $('.nav-bar').each(function () {
-            if (this.id.split('_')[1] === '5') {
-                if (this.style != "display:none;") {
-                    $(this).addClass("{{ action != 'edit' ? "disabled-btn" : "normal-btn" }}")
-                }
-                return;
-            }
             if (navItemsStatus.get(this.id.split('_')[1]) === false) {
                 $(this).hide();
             }
@@ -101,6 +95,7 @@
             navItemsStatus.set('1', true);
             navItemsStatus.set('2', yesChecked);
             navItemsStatus.set('3', yesChecked);
+            navItemsStatus.set('5', yesChecked);
         }
         else {
             navItemsStatus.set('1', false);
