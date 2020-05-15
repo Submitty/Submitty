@@ -1,4 +1,3 @@
-
 <script>
     function disableElementChildren(c, dis = true) {
         dis ? $(c).hide() : $(c).show();
@@ -28,7 +27,7 @@
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Rubric</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Grader Assignment</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Dates</a>
-            <a class="nav-bar key_to_click" id="page_5_nav" style="{{(gradeable.isPeerGrading()) ? '' : 'display:none;'}}" onclick="onChangeNavTab(5);">Peer Matrix</a>
+            <a class="nav-bar key_to_click normal-btn" id="page_5_nav" style="{{(gradeable.isPeerGrading()) ? '' : 'display:none;'}}" onclick="onChangeNavTab(5);">Peer Matrix</a>
         </div>
         <br/>
         <br/>
@@ -55,7 +54,7 @@
 <script>
 
     let adminGradeableNavTab = 0;
-    var navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true],['5',false]]);
+    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true],['5',false]]);
     function onChangeNavTab(tab) {
 
         if (tab > 5 || tab < 0) {
