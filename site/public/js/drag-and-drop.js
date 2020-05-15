@@ -1103,7 +1103,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             filesToBeAdded = true;
         }
     }
-    if (filesToBeAdded == false){
+
+    if($("#url_title").val() !== "" && $("#url_url").val() !== "" ){
+      linkToBeAdded = true;
+      formData.append('url_title', $("#url_title").val());
+      formData.append('url_url', $("#url_url").val());
+    }
+
+    if (filesToBeAdded == false && linkToBeAdded == false){
         return;
     }
     $.ajax({

@@ -74,29 +74,16 @@
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
     {% set this_external_link = external_link[path] %}
-    <script>
 
-        function editCourseMaterialsInitialization(this_file_section, this_hide_from_students, dir, release_time){
-
-            if (this_file_section != null) {
-                newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time);
-            }
-
-            else {
-                newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time);
-            }
-
-        }
-
-    </script>
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
     <div class="file-container">
         <div class="file-viewer">
 
-            <i class="fas fa-file" style='vertical-align:text-bottom;'></i>
             {% if this_external_link %}
-                <a href="{{this_external_link[0]}}">{{this_external_link[1]}}</a>
+                <i class="fas fa-link" style='vertical-align:text-bottom;'></i>
+                <a href="{{this_external_link[0]}}">{{this_external_link[1]}}</a>&nbsp;
             {% else %}
+                <i class="fas fa-file" style='vertical-align:text-bottom;'></i>
                 {{ dir }}&nbsp;
             {% endif %}
             {% set dirExtension = dir|split('.')|last|lower %}

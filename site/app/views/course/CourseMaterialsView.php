@@ -51,8 +51,8 @@ class CourseMaterialsView extends AbstractView {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
                         if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
-                          $contents = json_decode(file_get_contents($expected_file_path));
-                          $external_link[$expected_file_path] = [$contents->url, $contents->name];
+                            $contents = json_decode(file_get_contents($expected_file_path));
+                            $external_link[$expected_file_path] = [$contents->url, $contents->name];
                         }
 
                         if ($release_date > $now_date_time) {
