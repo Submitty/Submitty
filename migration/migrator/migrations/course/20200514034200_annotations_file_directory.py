@@ -27,10 +27,10 @@ def up(config, database, semester, course):
                 copyfile(Path(dirPath,name), Path(file_name_path,grader_id))
                 os.remove(Path(dirPath,name))
                 file_name_quoted = "\'" + str(file_name_path) + "\'" 
-                os.system("chown -R -r "+php_user+":"+course_group+ file_name_quoted)
-                os.system("chmod -R -r u+rwx "+file_name_quoted)
-                os.system("chmod -R -r g+rxs "+file_name_quoted)
-                os.system("chmod -R -r o-rwx "+file_name_quoted)
+                os.system("chown -R "+php_user+":"+course_group+ " "+ file_name_quoted)
+                os.system("chmod -R u+rwx "+file_name_quoted)
+                os.system("chmod -R g+rxs "+file_name_quoted)
+                os.system("chmod -R o-rwx "+file_name_quoted)
                 
                 
 def down(config, database, semester, course):
@@ -53,9 +53,9 @@ def down(config, database, semester, course):
                 new_file_name = file_name + "_" + grader_id
                 copyfile(Path(dirPath,name), Path(Path(dirPath).parent,new_file_name))
                 file_name_quoted = "\'" + str(Path(Path(dirPath).parent,new_file_name)) + "\'"
-                os.system("chown -R -r "+php_user+":"+course_group+ file_name_quoted)
-                os.system("chmod -R -r u+rwx "+file_name_quoted)
-                os.system("chmod -R -r g+rxs "+file_name_quoted)
-                os.system("chmod -R -r o-rwx "+file_name_quoted)
+                os.system("chown -R "+php_user+":"+course_group+ " "+  file_name_quoted)
+                os.system("chmod -R u+rwx "+file_name_quoted)
+                os.system("chmod -R g+rxs "+file_name_quoted)
+                os.system("chmod -R o-rwx "+file_name_quoted)
                 rmtree(dirPath)
             
