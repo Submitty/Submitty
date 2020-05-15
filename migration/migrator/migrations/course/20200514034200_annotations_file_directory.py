@@ -46,7 +46,6 @@ def down(config, database, semester, course):
     
     for dirPath, dirName, files in os.walk(annotations_dir):
         for name in files:
-            print(Path(dirPath).parent.parent.parent.parent.name)
             if Path(dirPath).parent.parent.parent.parent.name == 'annotations':
                 file_name = Path(dirPath).name
                 grader_id = name
