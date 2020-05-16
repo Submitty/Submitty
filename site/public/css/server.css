@@ -1934,9 +1934,18 @@ header > * {
     color: unset;
 }
 
+@media (max-width: 541px) {
+    .content {
+        padding: 20px 15px 20px 20px;
+    }
+    .file-upload-table {
+        font-weight: 200;
+    }
+}
+
 @media (min-width: 541px) {
     .content {
-    margin: 30px;
+        margin: 30px;
         max-height: none;
     }
 
