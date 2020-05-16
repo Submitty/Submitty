@@ -35,8 +35,10 @@
                     let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
                     if (yesPeer) {
                         $('#page_5_nav').show();
+                        $('#page_5_nav').removeClass("hidden_no_peers");
                     } else {
                         $('#page_5_nav').hide();
+                        $('#page_5_nav').addClass("hidden_no_peers");
                     }
                 });
             });

@@ -28,7 +28,7 @@
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Rubric</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Grader Assignment</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Dates</a>
-            <a class="nav-bar key_to_click normal-btn" id="page_5_nav" style="{{(gradeable.isPeerGrading()) ? '' : 'display:none;'}}" onclick="onChangeNavTab(5);">Peer Matrix</a>
+            <a class="nav-bar key_to_click normal-btn{{(gradeable.isPeerGrading()) ? '' : ' hidden_no_peers'}}" id="page_5_nav" onclick="onChangeNavTab(5);">Peer Matrix</a>
         </div>
         <br/>
         <br/>
@@ -70,6 +70,10 @@
 
         adminGradeableNavTab = tab;
 
+        let yesPeer = !$("#page_5_nav").hasClass("hidden_no_peers");
+        let yesTAGrade = !$("#page_5_nav").hasClass("hidden_ta_grading");
+        navItemsStatus.set('5', yesPeer && yesTAGrade);
+
         $('.nav-bar').each(function () {
             if (navItemsStatus.get(this.id.split('_')[1]) === false) {
                 $(this).hide();
@@ -95,7 +99,11 @@
             navItemsStatus.set('1', true);
             navItemsStatus.set('2', yesChecked);
             navItemsStatus.set('3', yesChecked);
-            navItemsStatus.set('5', yesChecked);
+            if (yesChecked) {
+                $("#page_5_nav").removeClass("hidden_ta_grading");
+            } else {
+                $("#page_5_nav").addClass("hidden_ta_grading");
+            }
         }
         else {
             navItemsStatus.set('1', false);
