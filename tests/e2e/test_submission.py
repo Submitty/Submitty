@@ -51,7 +51,7 @@ class TestSubmission(BaseTestCase):
 
     # returns the number of submissions
     def get_submission_count(self, include_zero=False):
-        return len(self.driver.find_elements(By.XPATH, "//div[@class='content']/select/option"+(""if include_zero else"[not(@value='0')]")))
+        return len(self.driver.find_elements(By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option"+(""if include_zero else"[not(@value='0')]")))
 
     def accept_alerts(self, num_alerts):
         try:
@@ -105,7 +105,7 @@ class TestSubmission(BaseTestCase):
 
     def change_submission_version(self):
         # find the version selection dropdown and click
-        version_select_elem = self.driver.find_element(By.XPATH, "//div[@class='content']/select")
+        version_select_elem = self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/select")
         version_select_elem.click()
 
         # find an unselected version and click
@@ -114,7 +114,7 @@ class TestSubmission(BaseTestCase):
         new_version_elem.click()
 
         # wait until the page reloads to change the selected version, then click the "Grade This Version" button
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected]".format(new_version))))
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected]".format(new_version))))
         self.driver.find_element(By.XPATH, "//div[@class='content']/form/input[@type='submit' and @id='version_change']").click()
 
         # accept late day alert
@@ -129,7 +129,7 @@ class TestSubmission(BaseTestCase):
         self.assertGreater(select_idx, -1)
         select.select_by_visible_text(select.options[select_idx].text)
 
-        version_xpath = "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version)
+        version_xpath = "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version)
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, version_xpath)))
 
     # for test cases that require switching versions, make submissions to ensure they will
@@ -198,7 +198,7 @@ class TestSubmission(BaseTestCase):
 
         # click button and wait until page reloads to cancel version
         self.driver.find_element(By.XPATH, "//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='0' and @selected]")))
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='0' and @selected]")))
 
         # change back to a valid submission version
         self.change_submission_version()
