@@ -1,0 +1,56 @@
+.card {
+    display: flex;
+    padding: 24px 0;
+    text-align: left;
+}
+
+.title-cont {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.card-btn-cont {
+    flex: 1;
+    text-align: center;
+}
+.card-btn-cont .btn {
+    white-space: normal;
+    width: 90%;
+}
+
+
+@media (max-width: 780px) {
+    .card {
+        /*border: 1px solid var(--btn-text-black); */
+        text-align: center;
+        flex-direction: column;
+        padding: 24px 12px;
+        margin-bottom: 14px;
+        transition: all 0.2s;
+        border: 1px solid var(--text-black);
+    }
+    .card:hover {
+        box-shadow: 1px 3px 5px;
+        translate: 0 -5px;
+    }
+    .title-cont {
+        width: unset;
+    }
+    .card-btn-cont {
+        width: unset;
+        margin: 12px 0;
+    }
+    .card-btn-info {
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 541px) {
+    #grade-report-cont.content {
+        padding: 20px;
+        margin: 15px 0;
+    }
+    #grade-report h1 {
+        font-weight: 500;
+    }
+}
