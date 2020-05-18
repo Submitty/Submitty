@@ -150,7 +150,22 @@ class RainbowCustomization extends AbstractModel {
                 foreach ($json_bucket->ids as $json_gradeable) {
                     if (property_exists($json_gradeable, 'curve')) {
                         $curve_data = $json_gradeable->curve;
-                        $retArray[$json_bucket->type][$json_gradeable->id] = $curve_data;
+                        $curve_data_pos = 0;
+                        $selected_benchmarks = $this->RCJSON->getDisplayBenchmarks();
+                        $benchmarks_with_input_fields = array_slice($this->RCJSON::allowed_display_benchmarks, 3);
+
+                        $retArray[$json_bucket->type][$json_gradeable->id] = [];
+
+                        foreach($benchmarks_with_input_fields as $benchmark) {
+                            if (in_array($benchmark, $selected_benchmarks)) {
+                                $val = $curve_data[$curve_data_pos];
+                                $curve_data_pos++;
+                            } else {
+                                $val = '';
+                            }
+
+                            array_push($retArray[$json_bucket->type][$json_gradeable->id], $val);
+                        }
                     }
                 }
             }
