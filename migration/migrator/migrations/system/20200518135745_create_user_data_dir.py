@@ -12,13 +12,14 @@ def up(config):
     :type config: migrator.config.Config
     """
 
-    path = config.submitty['submitty_data_dir'] + '/image_uploads'
+    path = config.submitty['submitty_data_dir'] + '/user_data'
     user = config.submitty_users['php_user']
 
     if not os.path.isdir(path):
         os.system('mkdir ' + path)
         os.system('chmod 770 ' + path)
         shutil.chown(path, user, user)
+
 
 
 def down(config):
@@ -28,4 +29,7 @@ def down(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    pass
+    path = config.submitty['submitty_data_dir'] + '/user_data'
+
+    if os.path.isdir(path):
+        shutil.rmtree(path)
