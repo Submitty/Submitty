@@ -94,40 +94,7 @@ def main():
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
 
-    # Install all sample user images to the image_uploads directory
-    images_dir = os.path.join(SUBMITTY_DATA_DIR, 'image_uploads')
-    sample_images_dir = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos')
-
-    # Unzip each images zip inside temp
-    for zip_file in os.listdir(sample_images_dir):
-
-        zip_path = os.path.join(sample_images_dir, zip_file)
-
-        with ZipFile(zip_path, 'r') as zipObj:
-            zipObj.extractall('temp')
-
-    # Traverse subdirectories for images
-    for sub_dir in os.listdir('temp'):
-        for file in os.listdir(os.path.join('temp', sub_dir)):
-
-            # If file is an image, create a folder for them in the image_uploads dir
-            # Only need one image per user, so ignore duplicates
-            extension = file[-3:]
-            user_name = file[:-4]
-
-            if extension == 'png':
-                user_images_path = os.path.join(images_dir, user_name)
-
-                if not os.path.isdir(user_images_path):
-                    src = os.path.join('.', 'temp', sub_dir, file)
-                    dest = os.path.join(user_images_path, file)
-
-                    os.mkdir(user_images_path)
-                    shutil.copy(src, dest)
-
-    # Clean up temp
-    shutil.rmtree('temp')
-
+    # TODO: Have this script call setup_sample_user_data.py
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
