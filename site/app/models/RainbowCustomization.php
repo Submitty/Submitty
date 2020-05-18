@@ -156,11 +156,12 @@ class RainbowCustomization extends AbstractModel {
 
                         $retArray[$json_bucket->type][$json_gradeable->id] = [];
 
-                        foreach($benchmarks_with_input_fields as $benchmark) {
+                        foreach ($benchmarks_with_input_fields as $benchmark) {
                             if (in_array($benchmark, $selected_benchmarks)) {
                                 $val = $curve_data[$curve_data_pos];
                                 $curve_data_pos++;
-                            } else {
+                            }
+                            else {
                                 $val = '';
                             }
 
