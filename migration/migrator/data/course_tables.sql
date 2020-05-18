@@ -617,7 +617,7 @@ CREATE TABLE notifications (
 --
 -- Name: course_material_info; Type: TABLE; Schema: public; Owner: -
 --
-CREATE TABLE course_material_info (
+CREATE TABLE IF NOT EXISTS course_material_info (
     user_id character varying(255) NOT NULL,
     course_file_path TEXT NOT NULL,
     release_date timestamp with time zone NOT NULL,
