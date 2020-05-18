@@ -1,4 +1,4 @@
-const curve_points_benchmarks = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
+const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 
 function ExtractBuckets(){
     var x = [];
@@ -131,7 +131,7 @@ function getSelectedCurveBenchmarks()
     let result_set = [];
 
     all_selected_benchmarks.forEach(function(elem) {
-       if(curve_points_benchmarks.includes(elem)) {
+       if(benchmarks_with_input_fields.includes(elem)) {
            result_set.push(elem);
        }
     });
@@ -409,8 +409,8 @@ function setInputsVisibility(elem)
     let benchmark = elem.value;
     let is_checked = elem.checked;
 
-    // Only care about inputs which are part of the curve_points_benchmarks
-    if(curve_points_benchmarks.includes(benchmark)) {
+    // Only care about inputs which are part of the benchmarks_with_input_fields
+    if(benchmarks_with_input_fields.includes(benchmark)) {
         if(is_checked) {
             $('.' + benchmark).show();
         } else {

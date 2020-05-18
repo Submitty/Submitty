@@ -47,7 +47,7 @@
                 <h2>Benchmark Percents</h2>
                 <div id="benchmark_percents_collapse" class="collapsible_area">
                     <p class="rg_info_message">You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
-                    {% for benchmark in curve_points_benchmarks %}
+                    {% for benchmark in benchmarks_with_input_fields %}
                         {% if benchmark_percents[benchmark] is defined %}
                             {% set percent = benchmark_percents[benchmark] %}
                         {% else %}
@@ -148,10 +148,10 @@
                                                             {% endif %}
 
                                                             {% for i in range(0, 3) %}
-                                                                {% set html_id = 'per-gradeable-curve-' ~ gradeable['id'] ~ '-' ~ curve_points_benchmarks[i] %}
+                                                                {% set html_id = 'per-gradeable-curve-' ~ gradeable['id'] ~ '-' ~ benchmarks_with_input_fields[i] %}
 
-                                                                <label for="{{ html_id }}" class="{{ curve_points_benchmarks[i] }}">{{ curve_points[i] }} :</label>
-                                                                <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input {{ curve_points_benchmarks[i] }}" data-benchmark="{{ curve_points_benchmarks[i] }}" value="{{ curve_point_value[i] }}">
+                                                                <label for="{{ html_id }}" class="{{ benchmarks_with_input_fields[i] }}">{{ curve_points[i] }} :</label>
+                                                                <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input {{ benchmarks_with_input_fields[i] }}" data-benchmark="{{ benchmarks_with_input_fields[i] }}" value="{{ curve_point_value[i] }}">
                                                             {% endfor %}
                                                             <i class="far fa-question-circle fa-rb" title="You may apply a curve on a per gradeable basis.
 
