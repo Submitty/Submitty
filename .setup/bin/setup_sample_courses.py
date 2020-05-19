@@ -34,8 +34,6 @@ import sys
 import configparser
 import csv
 import pdb
-from zipfile import ZipFile
-
 import docker
 from tempfile import TemporaryDirectory
 
@@ -93,8 +91,6 @@ def main():
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
-
-    # TODO: Have this script call setup_sample_user_data.py
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
