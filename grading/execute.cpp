@@ -1125,7 +1125,7 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
 
   std::ofstream dispatched_actions_file;
 
-  dispatched_actions_file.open ("dispatched_actions.txt");
+  dispatched_actions_file.open ("dispatched_actions.txt", std::ofstream::app);
 
   try
   {
