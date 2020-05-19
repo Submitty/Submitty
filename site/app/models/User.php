@@ -126,6 +126,9 @@ class User extends AbstractModel {
     /** @prop @var array */
     protected $notification_settings = array();
 
+    /** @prop @var DisplayImage The user's DisplayImage model */
+    protected $display_image;
+
     /**
      * User constructor.
      *
@@ -183,6 +186,10 @@ class User extends AbstractModel {
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
+        }
+
+        if (isset($details['user_id']) && isset($details['display_image_state'])) {
+            $this->display_image = new DisplayImage($core, $details['user_id'], $details['display_image_state']);
         }
     }
 
