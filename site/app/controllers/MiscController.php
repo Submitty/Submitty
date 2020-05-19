@@ -180,10 +180,10 @@ class MiscController extends AbstractController {
         // security check
         $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
 
-        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+        /*if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
             return false;
-        }
+        }*/
 
         // If attempting to obtain course materials
         if ($dir == 'course_materials') {

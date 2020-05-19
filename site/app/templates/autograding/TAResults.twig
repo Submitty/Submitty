@@ -90,7 +90,7 @@ $( document ).ready(function() {
                         {% for file in uploaded_pdfs %}
                             {% if file.name in annotated_file_names %}
                                 {% if can_download and annotated_pdf_paths[file.name] is defined %}
-                                    <button class = 'btn btn-default key_to_click' onclick='downloadFile("{{ annotated_pdf_paths[file.name]|url_encode }}", "annotated_pdfs")' aria-label="Download the file"> Download
+                                    <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
                                 {% if loop.index != uploaded_pdfs|length %}

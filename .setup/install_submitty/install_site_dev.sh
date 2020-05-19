@@ -220,11 +220,11 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/twigjs
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
     #html2canvas
-    mkdir ${VENDOR_FOLDER}/html2canvas
-    cp ${NODE_FOLDER}/html2canvas/dist/html2canvas.js ${VENDOR_FOLDER}/html2canvas.js
+    #mkdir ${VENDOR_FOLDER}/html2canvas
+    #cp ${NODE_FOLDER}/html2canvas/dist/html2canvas.js ${VENDOR_FOLDER}/html2canvas.js
     #jspdf
     mkdir ${VENDOR_FOLDER}/jspdf
-    cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
+    #cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
     
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
