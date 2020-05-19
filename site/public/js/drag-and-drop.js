@@ -146,8 +146,8 @@ function addFilesFromInput(part, check_duplicate_zip=true){
           addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
           total_files_added++;
         }
-        $('#input-file' + part).val("");
     }
+    $('#input-file' + part).val("");
 }
 
 // Check for duplicate file names. This function returns an array.
