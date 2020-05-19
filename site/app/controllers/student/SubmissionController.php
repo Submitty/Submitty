@@ -20,7 +20,6 @@ use app\models\notebook\SubmissionTextBox;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 
-
 class SubmissionController extends AbstractController {
 
     private $upload_details = array('version' => -1, 'version_path' => null, 'user_path' => null,
@@ -923,15 +922,10 @@ class SubmissionController extends AbstractController {
         $this_config_inputs = [];
         if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
             //need to force re-parse the notebook serverside again
-            $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $who_id);
-
-            $notebook = new UserSpecificNotebook(
-                $this->core,
-                $gradeable->getAutogradingConfig()->getNotebook(),
-                $gradeable_id,
-                $who_id
+            $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
+                $who_id,
+                $gradeable_id
             );
-
 
             //save the notebook hashes and item selected
             $json = [

@@ -163,41 +163,62 @@ class AutogradingConfig extends AbstractModel {
     }
 
 
-    public function getNotebook() {
-        return $this->notebook_config;
+    public function getUserSpecificNotebook(string $user_id, string $gradeable_id): UserSpecificNotebook {
+        $notebook = new UserSpecificNotebook(
+            $this->core,
+            $this->notebook_config,
+            $gradeable_id,
+            $user_id
+        );
+
+        $this->parseTestCases($notebook->getTestCases());
+
+        return $notebook;
     }
 
 
-    public function parseTestCases(array $details): void {
+    private function parseTestCases(array $details): void {
         if (!isset($details['testcases'])) {
             return;
         }
-        foreach ($details['testcases'] as $idx => $testcase_details) {
-            $testcase = new AutogradingTestcase($this->core, $testcase_details, $idx);
 
-            // Accumulate only the positive points
-            $points = $testcase->getPoints();
-            if ($points >= 0.0) {
-                if ($testcase->isHidden()) {
-                    if ($testcase->isExtraCredit()) {
-                        $this->total_hidden_extra_credit += $points;
-                    }
-                    else {
-                        $this->total_hidden_non_extra_credit += $points;
-                    }
+        $previous_testcase_count = count($this->testcases);
+        foreach ($details['testcases'] as $idx => $testcase_details) {
+            //if there are already existing testcases, add these to the end
+            $index = $idx + $previous_testcase_count;
+            $testcase = new AutogradingTestcase($this->core, $testcase_details, $index);
+
+            $this->updateTestCasePoints($testcase);
+            $this->testcases[$index] = $testcase;
+        }
+    }
+
+    private function updateTestCasePoints($testcase) {
+        // Accumulate only the positive points
+        $points = $testcase->getPoints();
+        if ($points >= 0.0) {
+            if ($testcase->isHidden()) {
+                if ($testcase->isExtraCredit()) {
+                    $this->total_hidden_extra_credit += $points;
                 }
                 else {
-                    if ($testcase->isExtraCredit()) {
-                        $this->total_non_hidden_extra_credit += $points;
-                    }
-                    else {
-                        $this->total_non_hidden_non_extra_credit += $points;
-                    }
+                    $this->total_hidden_non_extra_credit += $points;
                 }
             }
-
-            $this->testcases[$idx] = $testcase;
+            else {
+                if ($testcase->isExtraCredit()) {
+                    $this->total_non_hidden_extra_credit += $points;
+                }
+                else {
+                    $this->total_non_hidden_non_extra_credit += $points;
+                }
+            }
         }
+    }
+
+
+    public function updateTestCases($test_cases) {
+        $this->parseTestCases($test_cases);
     }
 
     /**

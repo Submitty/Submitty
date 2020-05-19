@@ -12,31 +12,27 @@ use app\models\notebook\AbstractGradeableInput;
  * Class Notebook
  * @package app\models\notebook
  *
- * @method array getNotebookConfig()
  * @method array getInputs()
  * @method array getNotebook()
  * @method array getImagePaths()
  */
 
 class Notebook extends AbstractModel {
-    /** @prop @var array notebook config */
-    protected $notebook_config;
-    /** @prop @var parsed notebook from the config */
+    /** @prop @var array parsed notebook from the config */
     protected $notebook;
-
+    /** @prop @var array notebook elements that can hold user input */
     protected $inputs;
-
+    /** @prop @var string parsed notebook from the config */
     protected $gradeable_id;
-
+    /** @prop @var array of image names and their locations */
     protected $image_paths;
 
-    public function __construct(Core $core, array $details, string $gradeable_id) {
 
+    public function __construct(Core $core, array $details, string $gradeable_id) {
         parent::__construct($core);
 
-        $this->notebook_config = $details;
         $this->gradeable_id = $gradeable_id;
-        $this->parseNotebook($this->notebook_config);
+        $this->parseNotebook($details);
     }
 
 
