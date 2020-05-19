@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Setup script that scans over the user_photo zips inside the submitty repo sample files and then generates sample
+user_data for each sample user name it finds an image for.
+"""
 
 import os
 import shutil
