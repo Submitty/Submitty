@@ -1,47 +1,58 @@
-# TODO: Modify this script to include main() and test
+#!/usr/bin/env python3
 
 import os
 import shutil
-import datetime from datatime
+from datetime import datetime
+from zipfile import ZipFile
 
-# Install all sample user images to the user_data directory
-images_dir = os.path.join(SUBMITTY_DATA_DIR, 'user_data')
-sample_images_dir = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos')
 
-# Clean up any old installations
-shutil.rmtree(images_dir)
+SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
+SUBMITTY_DATA_DIR = "/var/local/submitty"
+SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
 
-# Unzip each images zip inside temp
-for zip_file in os.listdir(sample_images_dir):
 
-    zip_path = os.path.join(sample_images_dir, zip_file)
+def main():
 
-    with ZipFile(zip_path, 'r') as zipObj:
-        zipObj.extractall('temp')
+    user_data_dir = os.path.join(SUBMITTY_DATA_DIR, 'user_data')
+    sample_images_dir = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos')
 
-time_stamp = datetime.now()
+    # Clean up any old installations
+    for item in os.listdir(user_data_dir):
+        shutil.rmtree(os.path.join(user_data_dir, item))
 
-# Traverse subdirectories for images
-for sub_dir in os.listdir('temp'):
-    for file in os.listdir(os.path.join('temp', sub_dir)):
+    # Unzip the sample_files image archives
+    for zip_file in os.listdir(sample_images_dir):
 
-        # If file is an image, create a folder for them in the image_uploads dir
-        # Only need one image per user, so ignore duplicates
-        extension = file[-3:]
-        user_name = file[:-4]
+        zip_path = os.path.join(sample_images_dir, zip_file)
 
-        if extension == 'png':
-            user_images_path = os.path.join(images_dir, user_name, 'system_images')
-            new_file_name = time_stamp.strftime("%Y%m%d") + '.png'
+        with ZipFile(zip_path, 'r') as zipObj:
+            zipObj.extractall('temp')
 
-            if not os.path.isdir(user_images_path):
-                src = os.path.join('.', 'temp', sub_dir, file)
-                dest = os.path.join(user_images_path, new_file_name)
+    time_stamp = datetime.now()
 
-                os.makedirs(user_images_path)
-                shutil.copy(src, dest)
+    # Traverse subdirectories for images
+    for sub_dir in os.listdir('temp'):
+        for file in os.listdir(os.path.join('temp', sub_dir)):
 
-# Clean up temp
-shutil.rmtree('temp')
+            # If file is an image, create a folder for them in the user_data dir
+            # Only need one image per user, so ignore duplicates
+            extension = file[-3:]
+            user_name = file[:-4]
 
-exit()
+            if extension == 'png':
+                user_images_path = os.path.join(user_data_dir, user_name, 'system_images')
+                new_file_name = time_stamp.strftime("%Y%m%d") + '.png'
+
+                if not os.path.isdir(user_images_path):
+                    src = os.path.join('.', 'temp', sub_dir, file)
+                    dest = os.path.join(user_images_path, new_file_name)
+
+                    os.makedirs(user_images_path)
+                    shutil.copy(src, dest)
+
+    # Clean up temp
+    shutil.rmtree('temp')
+
+
+if __name__ == "__main__":
+    main()
