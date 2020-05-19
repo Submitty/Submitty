@@ -28,6 +28,7 @@
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Rubric</a>
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Grader Assignment</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Dates</a>
+            <a class="nav-bar key_to_click normal-btn{{(gradeable.isPeerGrading()) ? '' : ' hidden_no_peers'}}" id="page_5_nav" onclick="onChangeNavTab(5);">Peer Matrix</a>
         </div>
         <br/>
         <br/>
@@ -40,6 +41,7 @@
                 <div class="page-content" id="page_2_content">{{ include('admin/admin_gradeable/AdminGradeableRubric.twig')   }}</div>
                 <div class="page-content" id="page_3_content">{{ include('admin/admin_gradeable/AdminGradeableGraders.twig')  }}</div>
                 <div class="page-content" id="page_4_content">{{ include('admin/admin_gradeable/AdminGradeableDates.twig')    }}</div>
+                <div class="page-content" id="page_5_content">{{ include('admin/admin_gradeable/AdminGradeablePeers.twig')    }}</div>
             {% endif %}
         </div>
         <br/>
@@ -53,10 +55,10 @@
 <script>
 
     let adminGradeableNavTab = 0;
-    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true]]);
+    let navItemsStatus = new Map([['0',true],['1',true],['2',true],['3',true],['4',true],['5',false]]);
     function onChangeNavTab(tab) {
 
-        if (tab > 4 || tab < 0) {
+        if (tab > 5 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -67,6 +69,10 @@
         {% endif %}
 
         adminGradeableNavTab = tab;
+
+        let yesPeer = !$("#page_5_nav").hasClass("hidden_no_peers");
+        let yesTAGrade = !$("#page_5_nav").hasClass("hidden_ta_grading");
+        navItemsStatus.set('5', yesPeer && yesTAGrade);
 
         $('.nav-bar').each(function () {
             if (navItemsStatus.get(this.id.split('_')[1]) === false) {
@@ -80,7 +86,7 @@
 
         $('.page-content').hide();
         $('#page_' + tab + '_content').show();
-        for (var i =0 ; i<5 ;i++)
+        for (var i =0 ; i<6 ;i++)
         {
             $('#page_' + i + '_nav').removeClass('active-btn');
         }
@@ -93,6 +99,11 @@
             navItemsStatus.set('1', true);
             navItemsStatus.set('2', yesChecked);
             navItemsStatus.set('3', yesChecked);
+            if (yesChecked) {
+                $("#page_5_nav").removeClass("hidden_ta_grading");
+            } else {
+                $("#page_5_nav").addClass("hidden_ta_grading");
+            }
         }
         else {
             navItemsStatus.set('1', false);
