@@ -7,6 +7,7 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\User;
 
 class PDFController extends AbstractController {
 
@@ -66,7 +67,6 @@ class PDFController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/annotations", methods={"POST"})
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function savePDFAnnotation($gradeable_id) {
         //Save the annotation layer to a folder.
@@ -75,10 +75,23 @@ class PDFController extends AbstractController {
         $grader_id = $this->core->getUser()->getId();
         $course_path = $this->core->getConfig()->getCoursePath();
         $user_id = $annotation_info['user_id'];
+        
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return false;
+        }
+        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
+            if ($gradeable->isPeerGrading()) {
+                $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
+        
+                if (!in_array($user_id, $user_ids)) {
+                    return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
+                }
+            }
+            else {
+                return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
+            }
         }
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
@@ -114,7 +127,6 @@ class PDFController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function showGraderPDFEmbedded($gradeable_id) {
         // This is the embedded pdf annotator that we built.
@@ -130,6 +142,19 @@ class PDFController extends AbstractController {
         }
         else {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id);
+        }
+        
+        $grader_id = $this->core->getUser()->getId();
+        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
+            if ($gradeable->isPeerGrading()) {
+                $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
+                if (!in_array($id, $user_ids)) {
+                    return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
+                }
+            }
+            else {
+                return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
+            }
         }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
