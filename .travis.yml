@@ -161,7 +161,7 @@ jobs:
         - docker
       addons:
         chrome: stable
-        postgresql: "9.5"
+        postgresql: "10"
         apt:
           sources:
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
