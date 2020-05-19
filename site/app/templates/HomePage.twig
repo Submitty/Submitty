@@ -56,14 +56,16 @@
                     </a>
                 </li>
             {% endif %}
+
             <li>
-                <br>
-                <input id="theme_change" type="checkbox" title="Enable Dark Mode" class="key_to_click" onclick="toggleTheme();"></input>
-                <label for="theme_change">Enable Dark Mode</label>
-            </li>
-            <li class="light_mode_hide">
-                <input id="theme_change_black" type="checkbox" title="Enable Black Mode" class="key_to_click" onclick="toggleTheme('black');"></input>
-                <label for="theme_change_black">Enable Black Mode</label>
+              <br>
+              <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" onchange="updateTheme();">
+                <option value="system">Follow Device Theme</option>
+                <option value="system_black">Follow Device Theme (Black)</option>
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+                <option value="dark_black">Dark Mode (Black)</option>
+              </select>
             </li>
         </ul>
     </div>
