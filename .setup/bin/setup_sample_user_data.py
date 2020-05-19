@@ -5,7 +5,7 @@ import shutil
 from datetime import datetime
 from zipfile import ZipFile
 
-
+PHP_USER = 'submitty_php'
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
@@ -40,15 +40,26 @@ def main():
             user_name = file[:-4]
 
             if extension == 'png':
+                user_folder_path = os.path.join(user_data_dir, user_name)
                 user_images_path = os.path.join(user_data_dir, user_name, 'system_images')
                 new_file_name = time_stamp.strftime("%Y%m%d") + '.png'
+                access = 0o770
+
+                if not os.path.isdir(user_folder_path):
+                    os.makedirs(user_folder_path)
+                    os.chmod(user_folder_path, access)
+                    shutil.chown(user_folder_path, PHP_USER, PHP_USER)
 
                 if not os.path.isdir(user_images_path):
+                    os.makedirs(user_images_path)
+                    os.chmod(user_images_path, access)
+                    shutil.chown(user_images_path, PHP_USER, PHP_USER)
+
                     src = os.path.join('.', 'temp', sub_dir, file)
                     dest = os.path.join(user_images_path, new_file_name)
 
-                    os.makedirs(user_images_path)
                     shutil.copy(src, dest)
+                    shutil.chown(dest, PHP_USER, PHP_USER)
 
     # Clean up temp
     shutil.rmtree('temp')
