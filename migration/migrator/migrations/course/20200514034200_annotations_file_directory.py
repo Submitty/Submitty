@@ -28,43 +28,20 @@ def up(config, database, semester, course):
                             file_name = name.split('_', 1)[0]
                             grader_id = name.split('_', 1)[1]
                             print(Path(annotations_dir, dir, dirSecond, dirThrid))
-                            path_to_hash = dirPath.replace(str(Path(annotations_dir, dir, dirSecond, dirThrid)), "")
+                            directory = Path(annotations_dir, dir, dirSecond, dirThrid)
+                            path_to_hash = dirPath.replace(str(directory), "")
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
                             md5_file_name = hashlib.md5((path_to_hash + file_name + ".pdf"+ grader_id).encode())
                             print(path_to_hash + file_name + ".pdf"+ grader_id)
-                            copyfile(Path(dirPath,name), Path(annotations_dir, dir, dirSecond, dirThrid, md5_file_name.hexdigest() + '.json'))
-                            #os.remove(Path(dirPath,name))
-                            #file_name_quoted = "\'" + str(file_name_path) + "\'" 
-                            #os.system("chown -R "+php_user+":"+course_group+ " "+ file_name_quoted)
-                            #os.system("chmod -R u+rwx "+file_name_quoted)
-                            #os.system("chmod -R g+rxs "+file_name_quoted)
-                            #os.system("chmod -R o-rwx "+file_name_quoted)
+                            file_path = Path(annotations_dir, dir, dirSecond, dirThrid)
+                            copyfile(Path(dirPath,name), Path(directory, md5_file_name.hexdigest() + '.json'))
+                            os.remove(Path(dirPath,name))
+                            os.system("chown -R "+php_user+":"+course_group+ " "+ str(directory))
+                            os.system("chmod -R u+rwx "+str(directory))
+                            os.system("chmod -R g+rxs "+str(directory))
+                            os.system("chmod -R o-rwx "+str(directory))
                 
                 
 def down(config, database, semester, course):
     pass
-    #course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    #annotations_dir = Path(course_dir, 'annotations')
-    
-    # create the directories
-    #php_user = config.submitty_users['php_user']
-
-    # get course group
-    #stat_info = os.stat(str(course_dir))
-    #course_group_id = stat_info.st_gid
-    #course_group = grp.getgrgid(course_group_id)[0]
-    
-    #for dirPath, dirName, files in os.walk(annotations_dir):
-    #    for name in files:
-    #        if Path(dirPath).parent.parent.parent.parent.name == 'annotations':
-    #            file_name = Path(dirPath).name
-    #            grader_id = name
-    #            new_file_name = file_name + "_" + grader_id
-    #            copyfile(Path(dirPath,name), Path(Path(dirPath).parent,new_file_name))
-    #            file_name_quoted = "\'" + str(Path(Path(dirPath).parent,new_file_name)) + "\'"
-    #            os.system("chown -R "+php_user+":"+course_group+ " "+  file_name_quoted)
-    #            os.system("chmod -R u+rwx "+file_name_quoted)
-    #            os.system("chmod -R g+rxs "+file_name_quoted)
-    #            os.system("chmod -R o-rwx "+file_name_quoted)
-    #            rmtree(dirPath)
             
