@@ -2,21 +2,51 @@
     <legend>Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column:<input type="file" name="peer_graders_list" id="peer_graders_list"></legend>
     </br>
         <div class="table-wrapper">
-            <table class = "peer table">
-                <tr>
-                    <td> grader </td>
-                    <td> student </td>
-                </tr>
-            {% for key,value in peer_grader_pairs %}
-                <tr>
-                    <td>{{key}}</td>
-                    <td>
-                        {% for entry in value %}
-                            <span>{{entry}} </span>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endfor %}
+            <table id="peer-table" class = "table table-striped mobile-table directory-table">
+                <thead>
+                    <tr>
+                        <th>Grader</th>
+                        <th>Students</th>
+                        <th>Edit Students</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key,value in peer_grader_pairs %}
+                        <tr>
+                            <td>{{key}}</td>
+                            <td contenteditable='false' class="peer-table-students">
+                                {% for entry in value %}
+                                    <span>{{entry}} </span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a aria-label="edit {{key.getDisplayedFirstName()}} {{key.getDisplayedLastName()}}'s students"><i class="fas fa-pencil-alt"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 </fieldset>
+
+<script>
+
+    function onIconClick() {
+        let currStudentRow = $(this).parents('tr').find('.peer-table-students');
+        let toEdit = $(this).hasClass("fa-pencil-alt");
+        currStudentRow.prop('contenteditable', toEdit);
+
+        let toAdd = toEdit ? "fa-save" : "fa-pencil-alt";
+        let toRemove = toEdit ? "fa-pencil-alt" : "fa-save";
+        $(this).addClass(toAdd);
+        $(this).removeClass(toRemove);
+    }
+
+    $(document).ready(function() {
+        $(".fa-pencil-alt").click(onIconClick);
+
+        $(".peer-table-students").each( function() {
+            addEventListener("input", function() {  }, false);
+        });
+    });
+</script>
