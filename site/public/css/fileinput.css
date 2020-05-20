@@ -1,14 +1,14 @@
 #upload-boxes {
-    display: table; 
-    border-spacing: 5px; 
+    display: table;
+    border-spacing: 5px;
     width:100%;
 }
 
 .file-input {
-    cursor: pointer; 
-    text-align: center; 
-    border: dashed 2px var(--standard-light-gray); 
-    display:table-cell; 
+    cursor: pointer;
+    text-align: center;
+    border: dashed 2px var(--standard-light-gray);
+    display:table-cell;
     height: 20px;
 }
 
@@ -27,4 +27,8 @@
 /* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
 #upload-boxes > div:focus {
     outline: 2px solid var(--standard-focus-cornflowe-blue);
+}
+
+.openAllDiv {
+    color: var(--file-browser-blue);
 }

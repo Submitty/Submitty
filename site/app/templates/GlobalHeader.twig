@@ -65,6 +65,8 @@
 
         //determines if the user has a set theme
         function detectColorScheme(){
+            document.documentElement.setAttribute("data-theme", "");
+            document.documentElement.setAttribute("data-black_mode", "");
             let theme="light";    //default to light
             //local storage is used to override OS theme settings
             if(localStorage.getItem("theme")){
