@@ -40,6 +40,11 @@
     float: left;
 }
 
+.collapse-icon, .expand-icon {
+    margin-left: -10px;
+    display: none;
+}
+
 .course-main .course-title {
     font-size: 18px;
     margin: 0 5px;
@@ -106,6 +111,14 @@
         box-shadow: 1px 2px 3px var(--text-black);
         background: var(--submitty-logo-blue);
         color: white;
+    }
+
+    .panel-head-active .expand-icon, .collapse-icon {
+        display: inline;
+    }
+
+    .panel-head-active .collapse-icon, .expand-icon {
+        display: none;
     }
 
     .panel-active {

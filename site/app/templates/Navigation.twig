@@ -30,6 +30,8 @@
                  {% if info.is_expanded_initially %} panel-head-active {% endif %}"
             >
                 <div class="course-section-title">
+                    <i class="collapse-icon fas fa-caret-right"></i>
+                    <i class="expand-icon fas fa-caret-down"></i>
                     {{ info.title }}
                     {% if info.subtitle != "" %}
                         &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
