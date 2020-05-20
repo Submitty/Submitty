@@ -110,7 +110,7 @@ class PDFController extends AbstractController {
         
         $new_file_name = $partial_path . $grader_id . '.json';
         
-        file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($new_file_name)) .'.json', $annotation_layer);
+        file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($new_file_name)) . '.json', $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
     }
@@ -150,7 +150,7 @@ class PDFController extends AbstractController {
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
                 $annotation_decoded = json_decode(file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file)), true);
-                if($annotation_decoded != null) {
+                if ($annotation_decoded != null) {
                     $grader_id = $annotation_decoded[0]["userId"];
                     $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
                 }
