@@ -50,7 +50,7 @@ class ImagesController extends AbstractController {
             }
         }
         $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
-        $students = $this->core->getQueries()->getAllUsers();
+        $students = $this->core->getQueries()->getCourseUsersWithDisplayImage();
         $this->core->getOutput()->renderOutput(array('grading', 'Images'), 'listStudentImages', $students, $grader_sections, $instructor_permission);
     }
 
