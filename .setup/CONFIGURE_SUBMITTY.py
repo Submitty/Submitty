@@ -160,8 +160,8 @@ defaults = {'database_host': 'localhost',
             'email_server_hostname': 'mail.myuniversity.edu',
             'email_server_port': 25,
             'course_code_requirements': "Please follow your school's convention for course code.",
-            'sys_admin_email': 'submitty-admin@googlegroups.com',
-            'sys_admin_url': 'https://groups.google.com/forum/#!forum/submitty'
+            'sys_admin_email': '',
+            'sys_admin_url': ''
 }
 
 loaded_defaults = {}
@@ -243,13 +243,9 @@ else:
             INSTITUTION_HOMEPAGE = ''
         print()
 
-    while True:
-        SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
-        SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
-        # loop until the we have atleast one of the email, url
-        if SYS_ADMIN_EMAIL == '' and SYS_ADMIN_URL == '':
-            continue
-        break
+
+    SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
+    SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
 
     USERNAME_TEXT = defaults['username_change_text']
 

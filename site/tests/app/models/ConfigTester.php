@@ -74,8 +74,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "vcs_url" => "",
             "cgi_url" => "",
             "institution_name" => "RPI",
-            "sys_admin_email" => "submitty-admin@googlegroups.com",
-            "sys_admin_url" => "https://groups.google.com/forum/#!forum/submitty",
+            "sys_admin_email" => "admin@example.com",
+            "sys_admin_url" => "https://example.com/admin",
             "username_change_text" => "Submitty welcomes all students.",
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
@@ -193,8 +193,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("PamAuthentication", $config->getAuthentication());
         $this->assertEquals("America/Chicago", $config->getTimezone()->getName());
         $this->assertEquals("RPI", $config->getInstitutionName());
-        $this->assertEquals("submitty-admin@googlegroups.com", $config->getSysAdminEmail());
-        $this->assertEquals("https://groups.google.com/forum/#!forum/submitty", $config->getSysAdminUrl());
+        $this->assertEquals("admin@example.com", $config->getSysAdminEmail());
+        $this->assertEquals("https://example.com/admin", $config->getSysAdminUrl());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
@@ -287,8 +287,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'forum_create_thread_message' => '',
             'institution_homepage' => 'https://rpi.edu',
             'institution_name' => 'RPI',
-            "sys_admin_email" => "submitty-admin@googlegroups.com",
-            "sys_admin_url" => "https://groups.google.com/forum/#!forum/submitty",
+            "sys_admin_email" => "admin@example.com",
+            "sys_admin_url" => "https://example.com/admin",
             'private_repository' => '',
             'regrade_enabled' => false,
             'seating_only_for_instructor' => false,
