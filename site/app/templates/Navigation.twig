@@ -27,7 +27,7 @@
         {% for list_section, info in sections %}
             <div id="{{ info.section_id }}"
                  class="course-section-heading
-                 {% if info.isExpandedInitially %} panel-head-active {% endif %}"
+                 {% if info.is_expanded_initially %} panel-head-active {% endif %}"
             >
                 <div class="course-section-title">
                     {{ info.title }}
@@ -42,7 +42,7 @@
 
             <div id="{{ info.section_id }}-section"
                  class="course-section
-                 {% if info.isExpandedInitially %} panel-active {% endif %}"
+                 {% if info.is_expanded_initially %} panel-active {% endif %}"
             >
                 {% for g_info in info.gradeables %}
                 <div id="{{ g_info.id }}" class="gradeable-row">
