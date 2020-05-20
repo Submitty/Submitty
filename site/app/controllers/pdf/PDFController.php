@@ -98,7 +98,7 @@ class PDFController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
         
-        $partial_path = substr_replace($annotation_info["file_path"], "", 0, strlen($annotation_version_path));
+        $partial_path = substr_replace($annotation_info["file_path"], "", 0, strlen($annotation_version_path) + 1);
         
         #$annotation_layer_decoded = json_decode($_POST['annotation_layer']);
         
@@ -106,7 +106,8 @@ class PDFController extends AbstractController {
         
         #$annotation_layer = json_encode($annotation_layer_decoded);
         
-        $new_file_name = $partial_path . $grader_id;
+        $new_file_name = $partial_path . $grader_id . '.json';
+        
         file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($new_file_name)).'.json', $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;

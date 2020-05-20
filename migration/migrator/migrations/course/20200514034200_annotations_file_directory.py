@@ -11,12 +11,12 @@ def up(config, database, semester, course):
     annotations_dir = Path(course_dir, 'annotations')
     
     # create the directories
-    #php_user = config.submitty_users['php_user']
+    php_user = config.submitty_users['php_user']
 
     # get course group
-    #stat_info = os.stat(str(course_dir))
-    #course_group_id = stat_info.st_gid
-    #course_group = grp.getgrgid(course_group_id)[0]
+    stat_info = os.stat(str(course_dir))
+    course_group_id = stat_info.st_gid
+    course_group = grp.getgrgid(course_group_id)[0]
     
     #Go down to version directory.
     for dir in os.listdir(annotations_dir):
@@ -27,11 +27,11 @@ def up(config, database, semester, course):
                         if "_" in name:
                             file_name = name.split('_', 1)[0]
                             grader_id = name.split('_', 1)[1]
-                            path_to_hash = dirPath.replace(dirThrid, "")
+                            print(Path(annotations_dir, dir, dirSecond, dirThrid))
+                            path_to_hash = dirPath.replace(str(Path(annotations_dir, dir, dirSecond, dirThrid)), "")
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
-                            md5_file_name = hashlib.md5((path_to_hash + file_name + grader_id).encode())
-                            print(str(md5_file_name))
-                            print(str(dirThrid))
+                            md5_file_name = hashlib.md5((path_to_hash + file_name + ".pdf"+ grader_id).encode())
+                            print(path_to_hash + file_name + ".pdf"+ grader_id)
                             copyfile(Path(dirPath,name), Path(annotations_dir, dir, dirSecond, dirThrid, md5_file_name.hexdigest() + '.json'))
                             #os.remove(Path(dirPath,name))
                             #file_name_quoted = "\'" + str(file_name_path) + "\'" 
