@@ -40,9 +40,9 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
 
         // This initializes the toolbar and activates annotation mode
-        if (!isset($is_student) || !$is_student) {
+        /*if (!isset($is_student) || !$is_student) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
-        }
+        }*/
 
         return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
             'gradeable_id' => $params["gradeable_id"],
