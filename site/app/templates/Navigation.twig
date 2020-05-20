@@ -25,7 +25,10 @@
     {% if sections|length > 0 %}
         <div id="gradeables" class="collapse_panel_cont">
         {% for list_section, info in sections %}
-            <div id="{{ info.section_id }}" class="course-section-heading">
+            <div id="{{ info.section_id }}"
+                 class="course-section-heading
+                 {% if info.isExpandedInitially %} panel-head-active {% endif %}"
+            >
                 <div class="course-section-title">
                     {{ info.title }}
                     {% if info.subtitle != "" %}
@@ -37,7 +40,10 @@
                 {% endfor %}
             </div>
 
-            <div id="{{ info.section_id }}-section" class="course-section">
+            <div id="{{ info.section_id }}-section"
+                 class="course-section
+                 {% if info.isExpandedInitially %} panel-active {% endif %}"
+            >
                 {% for g_info in info.gradeables %}
                 <div id="{{ g_info.id }}" class="gradeable-row">
                     <div class="course-main">

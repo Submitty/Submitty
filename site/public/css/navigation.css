@@ -98,6 +98,20 @@
         translate: 0 -3px;
     }
 
+    .course-section {
+       display: none;
+    }
+
+    .panel-head-active {
+        box-shadow: 1px 2px 3px var(--text-black);
+        background: var(--submitty-logo-blue);
+        color: white;
+    }
+
+    .panel-active {
+        display: block;
+    }
+
     #gradeables-content h1 {
         font-weight: 400;
     }
