@@ -95,6 +95,8 @@ class User extends AbstractModel {
     protected $registration_section = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
+    /** @var string A valid PHP DateTimeZone string */
+    protected $time_zone;
 
     /**
      * @prop
@@ -183,6 +185,10 @@ class User extends AbstractModel {
         $this->manual_registration = isset($details['manual_registration']) && $details['manual_registration'] === true;
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
+        }
+
+        if (isset($details['time_zone'])) {
+            $this->time_zone = $details['time_zone'];
         }
     }
 

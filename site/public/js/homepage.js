@@ -16,3 +16,15 @@ function passwordChange() {
     $('[name="confirm_new_password"]', form).val("");
     $("#new_password").focus();
 }
+
+function getGeneralTimeZoneOptions() {
+
+}
+
+function getSpecificTimeZoneOptions(general_option) {
+
+}
+
+$(document).ready(function() {
+    // Populate the general time zone selector box with options
+});
