@@ -20,10 +20,10 @@
     </div>
 {% endif %}
 
-<div class="content">
+<div id="gradeables-content" class="content">
     <h1>Gradeables</h1>
     {% if sections|length > 0 %}
-        <div id="gradeables">
+        <div id="gradeables" class="collapse_panel_cont">
         {% for list_section, info in sections %}
             <div id="{{ info.section_id }}" class="course-section-heading">
                 <div class="course-section-title">
@@ -52,7 +52,11 @@
                         <div class="course-title">
                             {{ g_info.name }}
                             {% if g_info.url|trim != "" %}
-                                <a class="external" href="{{ g_info.url }}" target="_blank" aria-label="Go to instructions for {{ g_info.name }}">
+                                <a class="external"
+                                   href="{{ g_info.url }}"
+                                   target="_blank"
+                                   aria-label="Go to instructions for {{ g_info.name }}"
+                                >
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}
