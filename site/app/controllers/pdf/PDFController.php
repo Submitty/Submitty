@@ -30,14 +30,13 @@ class PDFController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
+        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version));
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
-            $dir_iter = new \DirectoryIterator(dirname($annotation_dir . '/'));
-            foreach ($dir_iter as $fileInfo) {
-                if ($fileInfo->isFile() && !$fileInfo->isDot()) {
-                    $annotation_jsons[preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileInfo->getFilename())] = file_get_contents($fileInfo->getPathname());
-                }
+            foreach (scandir($annotation_dir) as $annotation_file) {
+                $annotation_decoded = json_decode($annotation_file);
+                $grader_id = $annotation_decoded["userId"];
+                $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
             }
         }
         $params = [
@@ -66,7 +65,6 @@ class PDFController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         $user_id = $annotation_info['user_id'];
         
-
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return false;
@@ -99,17 +97,17 @@ class PDFController extends AbstractController {
         if (!is_dir($annotation_version_path) && !FileUtils::createDir($annotation_version_path)) {
             return $this->core->getOutput()->renderJsonFail('Creating annotation version folder failed.');
         }
-
-        if (strpos($annotation_info['file_name'], '..') !== false) {
-            return false;
-        }
         
-        $annotation_file_path = FileUtils::joinPaths($annotation_version_path, (preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name'])));
-        if (!is_dir($annotation_file_path) && !FileUtils::createDir($annotation_file_path)) {
-             return $this->core->getOutput()->renderJsonFail('Creating annotation filename folder failed');
-        }
-        $new_file_name = $grader_id . '.json';
-        file_put_contents(FileUtils::joinPaths($annotation_file_path, $new_file_name), $annotation_layer);
+        $partial_path = substr_replace($annotation_info["file_path"], "", 0, strlen($annotation_version_path));
+        
+        #$annotation_layer_decoded = json_decode($_POST['annotation_layer']);
+        
+        #$annotation_layer_decoded["file_path"] = $partial_path;
+        
+        #$annotation_layer = json_encode($annotation_layer_decoded);
+        
+        $new_file_name = $partial_path . $grader_id;
+        file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($new_file_name)).'.json', $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
     }
@@ -144,13 +142,15 @@ class PDFController extends AbstractController {
             }
         }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version, $filename));
+        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version));
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
-            $annotation_file = FileUtils::joinPaths($annotation_dir, $grader_id);
-            $annotation_file = $annotation_file . '.json';
-            if (is_file($annotation_file)) {
-                $annotation_jsons[$grader_id] = file_get_contents($annotation_file);
+            foreach (scandir($annotation_dir) as $annotation_file) {
+                $annotation_decoded = json_decode(file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file)), true);
+                if($annotation_decoded != null){
+                    $grader_id = $annotation_decoded[0]["userId"];
+                    $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                }
             }
         }
         $params = [
