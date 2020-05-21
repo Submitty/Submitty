@@ -20,7 +20,7 @@ class Server implements MessageComponentInterface {
     private $core;
 
     public function __construct(Core $core) {
-        $this->clients = new \SplObjectStorage;
+        $this->clients = new \SplObjectStorage();
         $this->sessions = [];
 
         $this->core = $core;
@@ -32,7 +32,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return bool
      */
-    private function checkAuth($conn){
+    private function checkAuth($conn) {
         $request = $conn->httpRequest;
         $client_id = $conn->resourceId;
         $userAgent = $request->getHeader('user-agent');
@@ -78,7 +78,7 @@ class Server implements MessageComponentInterface {
      * @param $content
      * @param bool $all, true to send to all, false to send to all but $from
      */
-    private function broadcast($from, $content, $all = true){
+    private function broadcast($from, $content, $all = true) {
         if ($all) {
             foreach ($this->clients as $client) {
                 $client->send($content);
@@ -126,7 +126,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return integer
      */
-    private function getSocketUserID($conn){
+    private function getSocketUserID($conn) {
         if (isset($this->sessions[$conn->resourceId])) {
             return $this->sessions[$conn->resourceId];
         }
@@ -141,7 +141,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return void
      */
-    private function setSocketClient($user_id, $conn){
+    private function setSocketClient($user_id, $conn) {
         $this->sessions[$conn->resourceId] = $user_id;
         $this->users[$user_id] = $conn;
     }
@@ -151,7 +151,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return void
      */
-    private function removeSocketClient($conn){
+    private function removeSocketClient($conn) {
         $user_id = $this->getSocketUserID($conn);
         unset($this->sessions[$conn->resourceId]);
         unset($this->users[$user_id]);
