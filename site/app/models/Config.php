@@ -296,8 +296,8 @@ class Config extends AbstractModel {
         $this->base_url = $submitty_json['submission_url'];
         $this->duck_banner_enabled = $submitty_json['duck_special_effects'] === true;
 
-        $this->sys_admin_email = $submitty_json['sys_admin_email'];
-        $this->sys_admin_url = $submitty_json['sys_admin_url'];
+        $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
+        $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {

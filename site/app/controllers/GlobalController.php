@@ -412,7 +412,7 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Report Issues", "url" => $this->core->getConfig()->getSysAdminUrl()];
         }
         if ($this->core->getConfig()->getSysAdminEmail() !== '') {
-            $footer_links[] =  ["title" => "Email Sys. Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "isEmail" => true];
+            $footer_links[] =  ["title" => "Email Sys. Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
         $runtime = $this->core->getOutput()->getRunTime();
