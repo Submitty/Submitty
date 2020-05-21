@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\libraries\DateUtils;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -80,8 +81,9 @@ class HomePageView extends AbstractView {
             "display_access_level" => $user->accessFaculty(),
             "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
             "change_username_url" => $this->output->buildUrl(['current_user', 'change_username']),
-            'available_time_zones' => implode(',', \DateTimeZone::listIdentifiers()),
-            'user_time_zone' => $user->getTimeZone()
+            'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
+            'user_time_zone' => $user->getTimeZone(),
+            'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
         ]);
     }
 

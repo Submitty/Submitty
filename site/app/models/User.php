@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
 
 /**
  * Class User
@@ -190,6 +191,10 @@ class User extends AbstractModel {
         if (isset($details['time_zone'])) {
             $this->time_zone = $details['time_zone'];
         }
+    }
+
+    public function setTimeZone(string $time_zone) {
+        $this->time_zone = $time_zone;
     }
 
     /**

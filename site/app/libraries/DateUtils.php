@@ -141,4 +141,23 @@ class DateUtils {
             'second' => $time->format('s')
         ];
     }
+
+    public static function getAvailableTimeZones() {
+        $available_time_zones = array_merge(['NOT_SET/NOT_SET'], \DateTimeZone::listIdentifiers());
+
+        // Get rid of 'UTC' time zone
+        unset($available_time_zones[sizeof($available_time_zones) - 1]);
+
+        return $available_time_zones;
+    }
+
+    public static function getUTCOffset(string $time_zone) {
+        if ($time_zone === 'NOT_SET/NOT_SET') {
+            return 'NOT_SET/NOT_SET';
+        }
+
+        $time_zone_obj = new \DateTimeZone($time_zone);
+        $offset = $time_zone_obj->getOffset(new \DateTime());
+        return strval($offset / 3600) . ':00';
+    }
 }

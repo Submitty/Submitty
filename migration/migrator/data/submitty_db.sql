@@ -139,7 +139,7 @@ CREATE TABLE users (
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_updated timestamp(6) with time zone,
     api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
-    time_zone VARCHAR NOT NULL DEFAULT 'America/New_York',
+    time_zone VARCHAR NOT NULL DEFAULT 'NOT SET/NOT SET',
     CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3))
 );
 

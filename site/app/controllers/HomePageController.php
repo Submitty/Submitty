@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\authentication\DatabaseAuthentication;
+use app\libraries\DateUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -10,6 +11,7 @@ use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use PHP_CodeSniffer\Reports\Json;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -26,6 +28,33 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+    }
+
+    /**
+     * @Route("/current_user/change_time_zone", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changeTimeZone() {
+
+        $failure_message = 'Error encountered updating user time zone.';
+
+        // Validate then update data
+        if(isset($_POST['time_zone']) && in_array($_POST['time_zone'], DateUtils::getAvailableTimeZones()))
+        {
+            $user = $this->core->getUser();
+            $result = $this->core->getQueries()->updateSubmittyUserTimeZone($user, $_POST['time_zone']);
+
+            if ($result != 1) {
+                return JsonResponse::getFailResponse($failure_message);
+            }
+
+            $user->setTimeZone($_POST['time_zone']);
+            $offset = DateUtils::getUTCOffset($_POST['time_zone']);
+            return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
+        }
+
+        // Needed values were not set, return failure
+        return JsonResponse::getFailResponse($failure_message);
     }
 
     /**

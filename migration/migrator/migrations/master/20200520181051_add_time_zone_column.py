@@ -10,8 +10,7 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    default_time_zone = config.submitty['timezone']
-    sql = "ALTER TABLE users ADD COLUMN time_zone VARCHAR NOT NULL DEFAULT '" + default_time_zone + "';"
+    sql = "ALTER TABLE users ADD COLUMN time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET';"
     database.execute(sql)
 
 
