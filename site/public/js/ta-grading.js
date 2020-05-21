@@ -1098,8 +1098,8 @@ function renderPDFToolbar(){
     let penColor;
     let scrollLock;
     function initPen() {
-        let init_size = document.getElementById('pen_size_selector').value;
-        let init_color = document.getElementById('color_selector').style.backgroundColor;
+        let init_size = localStorage.getItem('pen/size');
+        let init_color = localStorage.getItem('main_color');
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         if($('#scroll_lock_mode').is(':checked')) {
@@ -1131,8 +1131,8 @@ function renderPDFToolbar(){
 
 // Text stuff
     function initText() {
-        let init_size = document.getElementById('text_size_selector').value;
-        let init_color = document.getElementById('color_selector').style.backgroundColor;
+        let init_size = localStorage.getItem('text/size');
+        let init_color = localStorage.getItem('main_color');
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
         document.addEventListener('colorchange', function(e){
@@ -1145,9 +1145,8 @@ function renderPDFToolbar(){
     }
 
     function setText(size, color) {
-            textSize = size;
-            localStorage.setItem('text/size', textSize);
-            textColor = color;
+            localStorage.setItem('text/size', size);
+            localStorage.setItem('main_color', color);
             PDFAnnotate.UI.setText(textSize, textColor);
     }
     initColors();
