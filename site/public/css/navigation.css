@@ -87,7 +87,7 @@
     }
 }
 
-@media (max-width: 541px) {
+@media (max-width: 950px) {
     .course-section-heading {
         margin: 10px -25px;
         font-weight: 400;
@@ -137,15 +137,15 @@
     }
 }
 
-@media (min-width: 780px) {
-    .gradeable-row {
-        border: none;
-    }
+/*@media (min-width: 780px) {*/
+/*    .gradeable-row {*/
+/*        border: none;*/
+/*    }*/
 
-    .btn-nav {
-        min-width: 95%;
-    }
-}
+/*    .btn-nav {*/
+/*        min-width: 95%;*/
+/*    }*/
+/*}*/
 
 @media (min-width: 950px) {
     #gradeables {

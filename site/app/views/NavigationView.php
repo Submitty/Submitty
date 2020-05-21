@@ -41,7 +41,7 @@ class NavigationView extends AbstractView {
         ],
         GradeableList::OPEN => [
             "title" => "OPEN",
-            "is_expanded_initially" => true,
+            "is_panel_expanded" => true,
             "subtitle" => "",
             "section_id" => "open",
             "button_type_submission" => "btn-primary",
@@ -67,7 +67,7 @@ class NavigationView extends AbstractView {
         GradeableList::GRADED => [
             "title" => "GRADES AVAILABLE",
             "subtitle" => "",
-            "is_expanded_initially" => true,
+            "is_panel_expanded" => true,
             "section_id" => "graded",
             "button_type_submission" => 'btn-default',
             "button_type_grading" => 'btn-default',

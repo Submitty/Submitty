@@ -1,10 +1,10 @@
 $(document).ready(function() {
   let isCollapsibleDisabled = true;
-  const MOBILE_WIDTH = 541;
+  const TAB_WIDTH = 950;
   const panelHead = "#gradeables .course-section-heading";
 
   function handleCollapsiblePanel () {
-    if (window.innerWidth < MOBILE_WIDTH && isCollapsibleDisabled) {
+    if (window.innerWidth < TAB_WIDTH && isCollapsibleDisabled) {
       //Add a listener on a Gradeable heading
       $(panelHead).click(function () {
         $(this).toggleClass("panel-head-active");
@@ -13,7 +13,7 @@ $(document).ready(function() {
         });
       });
       isCollapsibleDisabled = false;
-    } else if (window.innerWidth > MOBILE_WIDTH && !isCollapsibleDisabled) {
+    } else if (window.innerWidth > TAB_WIDTH && !isCollapsibleDisabled) {
       // clear the listener from the header
       $(panelHead).off('click');
       // Make all the panels visible
