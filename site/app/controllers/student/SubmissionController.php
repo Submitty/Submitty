@@ -6,10 +6,11 @@ use app\controllers\AbstractController;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
+use app\libraries\GradingQueue;
 use app\libraries\Logger;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
@@ -109,6 +110,46 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
+            Logger::logAccess(
+                $this->core->getUser()->getId(),
+                $_COOKIE['submitty_token'],
+                "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+            );
+
+            $who_id = $this->core->getUser()->getId();
+            if ($gradeable->isTeamAssignment() && $graded_gradeable !== null) {
+                $team = $graded_gradeable->getSubmitter()->getTeam();
+                if ($team !== null) {
+                    $who_id = $team->getId();
+                }
+            }
+
+            $gradeable_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                "submissions",
+                $gradeable->getId()
+            );
+            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+            FileUtils::createDir($user_path, true);
+            $file_path = FileUtils::joinPaths($user_path, "user_assignment_access.json");
+
+            $fh = fopen($file_path, "a+");
+            flock($fh, LOCK_EX);
+            fseek($fh, 0);
+            $contents = fread($fh, max(filesize($file_path), 1));
+            $json = json_decode(((strlen($contents) > 0) ? $contents : '{}'), true);
+            if (!isset($json['page_load_history'])) {
+                $json['page_load_history'] = [];
+            }
+            $json['page_load_history'][] = [
+                'time' => $now->format('m-d-Y H:i:sO'),
+                'who' => $this->core->getUser()->getId()
+            ];
+            ftruncate($fh, 0);
+            fwrite($fh, FileUtils::encodeJson($json));
+            flock($fh, LOCK_UN);
+            fclose($fh);
+
             $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
@@ -368,7 +409,6 @@ class SubmissionController extends AbstractController {
             $qr_prefix = rawurlencode($_POST['qr_prefix']);
             $qr_suffix = rawurlencode($_POST['qr_suffix']);
 
-            $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"));
             //create a new job to split but uploads via QR
             for ($i = 0; $i < $count; $i++) {
                 $qr_upload_data = [
@@ -837,6 +877,7 @@ class SubmissionController extends AbstractController {
             "submissions",
             $gradeable->getId()
         );
+                   
 
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -875,6 +916,19 @@ class SubmissionController extends AbstractController {
 
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
+        }
+
+        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+            //need to force re-parse the notebook serverside again
+            $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $who_id);
+
+            //save the notebook hashes and item selected
+            $json = [
+                "hashes" => $notebook->getHashes(),
+                "item_pools_selected" => $notebook->getSelectedQuestions()
+            ];
+
+            FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".submit.notebook"), $json);
         }
 
         $this->upload_details['version_path'] = $version_path;
@@ -926,6 +980,7 @@ class SubmissionController extends AbstractController {
                 }
             }
 
+
             if (count($errors) > 0) {
                 $error_text = implode("\n", $errors);
                 return $this->uploadResult("Upload Failed: " . $error_text, false);
@@ -943,7 +998,6 @@ class SubmissionController extends AbstractController {
             $short_answer_objects    = json_decode($short_answer_objects, true);
             $codebox_objects         = json_decode($codebox_objects, true);
             $multiple_choice_objects = json_decode($multiple_choice_objects, true);
-
             $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
 
             foreach ($this_config_inputs as $this_input) {
@@ -956,7 +1010,8 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 elseif ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
+                    $answers = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
+                  
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -971,20 +1026,21 @@ class SubmissionController extends AbstractController {
                     $empty_inputs = false;
                 }
 
-                // FIXME: add error checking
+                //FIXME: add error checking
                 $file = fopen($dst, "w");
-
                 foreach ($answers as $answer_val) {
                     fwrite($file, $answer_val . "\n");
                 }
                 fclose($file);
             }
 
+
+
             $previous_files_src = array();
             $previous_files_dst = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
-            if (!empty($tmp)) {
+            if (!empty($tmp) && !$gradeable->getAutogradingConfig()->isNotebookGradeable()) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
                         $previous_files_src[$i + 1] = $tmp[$i];
@@ -1357,14 +1413,14 @@ class SubmissionController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
      */
-    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): Response {
+    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): MultiResponse {
         $ta = $ta === "true" ?? false;
         if ($ta !== false) {
             // make sure is full grader
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                return new Response(
+                return new MultiResponse(
                     JsonResponse::getFailResponse($msg),
                     null,
                     new RedirectResponse($this->core->buildCourseUrl())
@@ -1377,7 +1433,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($this->core->buildCourseUrl())
@@ -1392,7 +1448,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1403,7 +1459,7 @@ class SubmissionController extends AbstractController {
         if ($new_version < 0) {
             $msg = "Cannot set the version below 0.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1414,7 +1470,7 @@ class SubmissionController extends AbstractController {
         if ($new_version > $highest_version) {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1424,7 +1480,7 @@ class SubmissionController extends AbstractController {
         if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1445,7 +1501,7 @@ class SubmissionController extends AbstractController {
         if ($json === false) {
             $msg = "Failed to open settings file.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($url)
@@ -1460,7 +1516,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
             $this->core->addErrorMessage($msg);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
                 new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]))
@@ -1497,7 +1553,7 @@ class SubmissionController extends AbstractController {
             ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse(['version' => $new_version, 'message' => $msg]),
             null,
             new RedirectResponse($url)
@@ -1542,12 +1598,17 @@ class SubmissionController extends AbstractController {
         $results_json_exists = file_exists($filepath);
 
         // if the results json exists, check the database to make sure that the autograding results are there.
-        $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+        $has_results = $results_json_exists && ($this->core->getGradingQueue()->getQueueStatus(
             $gradeable_id,
-            $gradeable_version,
-            $user_id,
-            $team_id
-        );
+            $submitter_id,
+            $gradeable_version
+        ) === GradingQueue::NOT_QUEUED) &&
+            $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
+                $gradeable_id,
+                $gradeable_version,
+                $user_id,
+                $team_id
+            );
 
         if ($has_results) {
             $refresh_string = "REFRESH_ME";

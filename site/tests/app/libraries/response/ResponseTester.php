@@ -7,7 +7,7 @@ namespace tests\app\libraries\response;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\models\Config;
 use PHPUnit\Framework\TestCase;
@@ -57,9 +57,9 @@ EOD;
         $this->assertEquals(302, http_response_code());
     }
 
-    public function testWebOnlyResponse() {
+    public function testwebOnlyResponse() {
         $web_response = new WebResponse("Error", "errorPage", "You don't have access to this page.");
-        $response = Response::WebOnlyResponse($web_response);
+        $response = MultiResponse::webOnlyResponse($web_response);
         $this->assertNull($response->json_response);
         $this->assertNull($response->redirect_response);
         $this->assertEquals($web_response, $response->web_response);
@@ -69,7 +69,7 @@ EOD;
 
     public function testJsonOnlyResponse() {
         $json_response = JsonResponse::getSuccessResponse(['test' => true]);
-        $response = Response::JsonOnlyResponse($json_response);
+        $response = MultiResponse::JsonOnlyResponse($json_response);
         $this->assertNull($response->web_response);
         $this->assertNull($response->redirect_response);
         $this->assertEquals($json_response, $response->json_response);
@@ -82,7 +82,7 @@ EOD;
      */
     public function testRedirectOnlyResponse() {
         $redirect_response = new RedirectResponse('http://example.com');
-        $response = Response::RedirectOnlyResponse($redirect_response);
+        $response = MultiResponse::RedirectOnlyResponse($redirect_response);
         $this->assertNull($response->web_response);
         $this->assertNull($response->json_response);
         $this->assertEquals($redirect_response, $response->redirect_response);
@@ -96,7 +96,7 @@ EOD;
     public function testWebAndRedirectResponseUsesRedirect() {
         $web_response = new WebResponse("Error", "errorPage", "You don't have access to this page.");
         $redirect_response = new RedirectResponse('http://example.com');
-        $response = new Response(null, $web_response, $redirect_response);
+        $response = new MultiResponse(null, $web_response, $redirect_response);
         $response->render($this->core);
         $this->validateRedirectResponse();
     }
@@ -104,7 +104,7 @@ EOD;
     public function testWebAndJsonResponseUsesWeb() {
         $web_response = new WebResponse("Error", "errorPage", "You don't have access to this page.");
         $json_response = JsonResponse::getSuccessResponse(['test' => true]);
-        $response = new Response($json_response, $web_response, null);
+        $response = new MultiResponse($json_response, $web_response, null);
         $response->render($this->core);
         $this->validateWebResponse();
     }
@@ -115,7 +115,7 @@ EOD;
     public function testRedirectAndJsonResponseUsesRedirect() {
         $redirect_response = new RedirectResponse('http://example.com');
         $json_response = JsonResponse::getSuccessResponse(['test' => true]);
-        $response = new Response($json_response, null, $redirect_response);
+        $response = new MultiResponse($json_response, null, $redirect_response);
         $response->render($this->core);
         $this->validateRedirectResponse();
     }
@@ -124,7 +124,7 @@ EOD;
         $this->core->getOutput()->disableRender();
         $web_response = new WebResponse("Error", "errorPage", "You don't have access to this page.");
         $json_response = JsonResponse::getSuccessResponse(['test' => true]);
-        $response = new Response($json_response, $web_response, null);
+        $response = new MultiResponse($json_response, $web_response, null);
         $response->render($this->core);
         $this->validateJsonResponse();
     }
@@ -133,7 +133,7 @@ EOD;
         $this->core->getOutput()->disableRender();
         $redirect_response = new RedirectResponse('http://example.com');
         $json_response = JsonResponse::getSuccessResponse(['test' => true]);
-        $response = new Response($json_response, null, $redirect_response);
+        $response = new MultiResponse($json_response, null, $redirect_response);
         $response->render($this->core);
         $this->validateJsonResponse();
     }

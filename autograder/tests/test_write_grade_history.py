@@ -28,6 +28,8 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:59-0400",
                 "2019-05-23 20:39:12-0400",
                 0,
+                "2019-05-23 23:59:49-0400", # first access
+                10, # access_duration
                 "2019-05-23 20:39:12-0400",
                 "",
                 "2019-05-23 20:39:32-0400",
@@ -45,6 +47,8 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'submission_time': '2019-05-23 20:39:12-0400',
                 'queue_time': '2019-05-23 20:39:12-0400',
                 'batch_regrade': False,
+                'first_access_time': '2019-05-23 23:59:49-0400',
+                'access_duration': 10,
                 'grading_began': '2019-05-23 20:39:32-0400',
                 'wait_time': 20,
                 'grading_finished': '2019-05-23 20:39:55-0400',
@@ -67,6 +71,8 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:59-0400",
                 "2019-05-23 20:47:12-0400",
                 0,
+                "2019-05-23 23:59:49-0400", # first access
+                10, # access_duration
                 "2019-05-23 20:47:12-0400",
                 "",
                 "2019-05-23 20:47:32-0400",
@@ -82,6 +88,8 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'submission_time': '2019-05-23 20:47:12-0400',
                 'queue_time': '2019-05-23 20:47:12-0400',
                 'batch_regrade': False,
+                'first_access_time': '2019-05-23 23:59:49-0400',
+                'access_duration': 10,
                 'grading_began': '2019-05-23 20:47:32-0400',
                 'wait_time': 20,
                 'grading_finished': '2019-05-23 20:47:55-0400',
@@ -113,6 +121,8 @@ class TestWriteGradeHistory(unittest.TestCase):
                 "2019-05-23 23:59:59-0400",
                 "2019-05-28 20:39:12-0400",
                 301451,  # 3 days, 11 hours, 44 minutes, 11 seconds
+                "2019-05-23 20:39:02-0400", #first access
+                10, # access_duration
                 "2019-05-28 20:39:12-0400",
                 "",
                 "2019-05-28 20:39:32-0400",
@@ -130,6 +140,8 @@ class TestWriteGradeHistory(unittest.TestCase):
                 'days_late_before_extensions': 4,
                 'queue_time': '2019-05-28 20:39:12-0400',
                 'batch_regrade': False,
+                'first_access_time': '2019-05-23 20:39:02-0400',
+                'access_duration': 10,
                 'grading_began': '2019-05-28 20:39:32-0400',
                 'wait_time': 20,
                 'grading_finished': '2019-05-28 20:39:55-0400',

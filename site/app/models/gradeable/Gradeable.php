@@ -488,11 +488,13 @@ class Gradeable extends AbstractModel {
             });
             $this->core->addErrorMessage($msg);
         }
-        $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
-        foreach ($input as $row_num => $vals) {
-            $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
-            $this->modified = true;
-            $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+        else {
+            $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
+            foreach ($input as $row_num => $vals) {
+                $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
+                $this->modified = true;
+                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+            }
         }
     }
 
@@ -1563,14 +1565,15 @@ class Gradeable extends AbstractModel {
                 $teams = [];
                 foreach ($users as $u) {
                     $teamToAdd = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
-                    $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                    if ($this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId()) !== null) {
+                        $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                    }
                 }
-                $g_section = new GradingSection($this->core, false, "Peer", [$user], null, $teams);
+                $g_section = new GradingSection($this->core, false, -1, [$user], null, $teams);
                 return [$g_section];
             }
             $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
-            //TODO: Peer grading team assignments
-            $g_section = new GradingSection($this->core, false, "Peer", [$user], $users, null);
+            $g_section = new GradingSection($this->core, false, -1, [$user], $users, null);
             return [$g_section];
         }
         else {

@@ -24,7 +24,8 @@ class AbstractTextBox extends AbstractGradeableInput {
     public function __construct(Core $core, array $details) {
         parent::__construct($core, $details);
 
-        $this->row_count = $details['rows'];
+        //use value given by config or 2 - the HTML textarea default
+        $this->row_count = $details['rows'] ?? 2;
         if ($details['type'] === "codebox") {
             $this->is_codebox = true;
         }

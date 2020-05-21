@@ -180,6 +180,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
+                console.log(e);
+                displayAjaxError(e);
             }
         })
     }
@@ -268,7 +270,7 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_students, release_time) {
 
     let form = $("#edit-course-materials-form");
 
@@ -299,7 +301,7 @@ function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_stude
         $("#all-sections-showing-yes", form).prop('checked',false);
         $("#all-sections-showing-no", form).prop('checked',true);
     }
-    $("#material-edit-form", form).attr('data-directory', dir);
+    $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
 }
 function captureTabInModal(formName){
@@ -1191,7 +1193,7 @@ function enableTabsInTextArea(jQuerySelector) {
             // to work.  There is also no guarantee that controls are properly wrapped within
             // a <form>.  Therefore, retrieve a master list of all visible controls and switch
             // focus to the next control in the list.
-            var controls = $(":input").filter(":visible");
+            var controls = $(":tabbable").filter(":visible");
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
@@ -1417,19 +1419,20 @@ function setNewDateTime(id, path) {
             //get the value in each file so the color can be assigned
             //based on the time chosen
             var fileDT = newDateTime;
+            fileDT = fileDT.replace(/\s/, 'T');
+            currentDT = currentDT.replace(/\s/, 'T');
+            neverDT = neverDT.replace(/\s/, 'T');
             //also custom colors for this page for readability
-            if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
+            if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
                 $('#'+id).css("backgroundColor", green);
                 return green;
-            }
-            else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                $('#'+id).css("backgroundColor", red);
+             } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
+                 $('#'+id).css("backgroundColor", red);
                 return red;
-            }
-            else{
+             } else {
                 $('#'+id).css("backgroundColor", yellow);
                 return yellow;
-            }
+             }
         },
         error: function(e) {
             console.log("Error getting server time.");
@@ -1575,33 +1578,42 @@ function checkSidebarCollapse() {
     }
 }
 
-//Changes the theme from light to dark mode or the reverse
-//if mode='black' it will toggle the black mode instead of the normal mode
-function toggleTheme(mode='normal'){
-  if(mode==='normal'){
-    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") !== "dark") || localStorage.getItem("theme") === "light"){
-        localStorage.setItem("theme", "dark");
-        document.documentElement.setAttribute("data-theme", "dark");
-    }else{
-      localStorage.setItem("theme", "light");
-      document.documentElement.setAttribute("data-theme", "light");
-    }
-  }else if(mode === 'black'){
-    if(localStorage.getItem('black_mode') !== 'black'){
-        localStorage.setItem("black_mode", "black");
-        document.documentElement.setAttribute("data-black_mode", "black");
-    }else{
-      localStorage.setItem("black_mode", "");
-      document.documentElement.setAttribute("data-black_mode", "");
-    }
+function updateTheme(){
+  let choice = $("#theme_change_select option:selected").val();
+  if(choice === "system_black"){
+    localStorage.removeItem("theme");
+    localStorage.setItem("black_mode", "black");
+  }else if(choice === "light"){
+    localStorage.setItem("theme", "light");
+  }else if(choice === "dark"){
+    localStorage.setItem("theme", "dark");
+    localStorage.setItem("black_mode", "dark");
+  }else if(choice === "dark_black"){
+    localStorage.setItem("theme", "dark");
+    localStorage.setItem("black_mode", "black");
+  }else{ //choice === "system"
+    localStorage.removeItem("black_mode");
+    localStorage.removeItem("theme");
   }
+  detectColorScheme();
 }
 $(document).ready(function() {
-  if(localStorage.getItem("theme") === "dark"){
-    $('#theme_change').prop('checked', true);
-  }
-  if(localStorage.getItem("black_mode") === "black"){
-    $('#theme_change_black').prop('checked', true);
+  if(localStorage.getItem("theme")){
+      if(localStorage.getItem("theme") === "dark"){
+        if(localStorage.getItem("black_mode") === "black"){
+          $("#theme_change_select").val("dark_black");
+        }else{
+          $("#theme_change_select").val("dark");
+        }
+      }else{
+        $("#theme_change_select").val("light");
+      }
+  }else{
+    if(localStorage.getItem("black_mode") === "black"){
+      $("#theme_change_select").val("system_black");
+    }else{
+      $("#theme_change_select").val("system");
+    }
   }
 });
 

@@ -330,4 +330,55 @@ class Utils {
         }
         return $arr;
     }
+
+    /**
+     * Converts a plain text string to the appropriate CodeMirror mime type mode.
+     */
+    public static function getCodeMirrorMode(?string $type): string {
+        switch (strtolower($type)) {
+            case 'c':
+                return 'text/x-csrc';
+            case 'c++':
+            case 'cpp':
+            case 'h':
+            case 'hpp':
+                return 'text/x-c++src';
+            case 'c#':
+                return 'text/x-csharp';
+            case 'objective-c':
+                return 'text/x-objectivec';
+            case 'java':
+                return 'text/x-java';
+            case 'scala':
+                return 'text/scala';
+            case 'node':
+            case 'nodejs':
+            case 'javascript':
+            case 'js':
+                return 'text/javascript';
+            case 'typescript':
+                return 'text/typescript';
+            case 'json':
+                return 'application/json';
+            case 'python':
+                return 'text/x-python';
+            case 'oz':
+                return 'text/x-oz';
+            case 'sql':
+                return 'text/x-sql';
+            case 'mysql':
+                return 'text/x-mysql';
+            case 'pgsql':
+            case 'postgres':
+            case 'postgresql':
+                return 'text/x-pgsql';
+            case 'scheme':
+                return 'text/x-scheme';
+            case 'bash':
+            case 'sh':
+                return 'text/x-sh';
+            default:
+                return 'text/plain';
+        }
+    }
 }

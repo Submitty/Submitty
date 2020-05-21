@@ -6,6 +6,8 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\MultiResponse;
+use app\libraries\response\WebResponse;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -411,7 +413,8 @@ class ReportController extends AbstractController {
 
                 // Add score breakdown
                 $ta_gg = $gg->getOrCreateTaGradedGradeable();
-                $entry['overall_comment'] = $ta_gg->getOverallComment();
+                // an array where keys are userids and values are overall comments
+                $entry['overall_comments'] = $ta_gg->getOverallComments();
 
                 // Only split up scores if electronic gradeables
                 $entry['autograding_score'] = $gg->getAutoGradingScore();
@@ -553,9 +556,11 @@ class ReportController extends AbstractController {
                 "used_buckets" => $customization->getUsedBuckets(),
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
                 'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
+                'benchmarks_with_input_fields' => ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'],
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
+                'per_gradeable_curves' => $customization->getPerGradeableCurves(),
                 'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
                     $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
                     $this->core->getConfig()->getCourse(),
@@ -627,5 +632,27 @@ class ReportController extends AbstractController {
             // Else we timed out or something else went wrong
             $this->core->getOutput()->renderJsonFail($debug_contents);
         }
+    }
+
+    /**
+     * Generate full rainbow grades view for instructors
+     * @Route("/{_semester}/{_course}/gradebook")
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function displayGradebook() {
+        $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
+
+        $grade_file = null;
+        if (file_exists($grade_path)) {
+            $grade_file = file_get_contents($grade_path);
+        }
+
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                array('admin', 'Report'),
+                'showFullGradebook',
+                $grade_file
+            )
+        );
     }
 }

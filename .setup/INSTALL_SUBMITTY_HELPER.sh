@@ -285,6 +285,7 @@ if [ "${WORKER}" == 0 ]; then
     # if the to_be_graded directories do not exist, then make them
     mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
     mkdir -p $SUBMITTY_DATA_DIR/daemon_job_queue
+    mkdir -p $SUBMITTY_DATA_DIR/grading
 
     # set the permissions of these directories
     # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
@@ -293,6 +294,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/grading
+    chmod  750                                      $SUBMITTY_DATA_DIR/grading
 fi
 
 
