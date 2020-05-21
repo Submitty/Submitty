@@ -1147,7 +1147,7 @@ function renderPDFToolbar(){
     function setText(size, color) {
             localStorage.setItem('text/size', size);
             localStorage.setItem('main_color', color);
-            PDFAnnotate.UI.setText(textSize, textColor);
+            PDFAnnotate.UI.setText(size, color);
     }
     initColors();
     initPen();
