@@ -1070,7 +1070,6 @@ function renderPDFToolbar(){
         document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
         let init_color = localStorage.getItem('main_color');
-        document.getElementById('color_selector').style.backgroundColor;
         setColor(init_color);
     }
 
@@ -1091,8 +1090,8 @@ function renderPDFToolbar(){
     }
 
     function setColor(color){
-            localStorage.setItem('main_color', color);
-            document.getElementById('color_selector').style.backgroundColor = color;
+        localStorage.setItem('main_color', color);
+        document.getElementById('color_selector').style.backgroundColor = color;
     }
 // Pen stuff
     let penSize;
@@ -1110,12 +1109,12 @@ function renderPDFToolbar(){
         setPen(init_size, init_color);
         
         document.getElementById('pen_size_selector').addEventListener('change', function(e){
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setPen(value, penColor);
-    });
-    document.addEventListener('colorchange', function(e){
-        setPen(penSize, e.srcElement.getAttribute('value'));
-    });
+            let value = e.target.value ? e.target.value : e.srcElement.value;
+            setPen(value, penColor);
+        });
+        document.addEventListener('colorchange', function(e){
+            setPen(penSize, e.srcElement.getAttribute('value'));
+        });
     }
 
     function setPen(size, color) {
@@ -1141,8 +1140,8 @@ function renderPDFToolbar(){
         });
         document.getElementById('text_size_selector').addEventListener('change', function(e) {
             let value = e.target.value ? e.target.value : e.srcElement.value;
-        setText(value, textColor);
-    });
+            setText(value, textColor);
+        });
     }
 
     function setText(size, color) {
@@ -1158,9 +1157,12 @@ function renderPDFToolbar(){
 
 
 function initializePDFToolbar(){
-    let init_size = document.getElementById('pen_size_selector').value;
+    let init_pen_size = document.getElementById('pen_size_selector').value;
     let init_color = document.getElementById('color_selector').style.backgroundColor;
-    localStorage.setItem('pen/size', init_size);
+    localStorage.setItem('pen/size', init_pen_size);
     localStorage.setItem('main_color', init_color);
-    PDFAnnotate.UI.setPen(init_size, init_color);
+    PDFAnnotate.UI.setPen(init_pen_size, init_color);
+    let init_text_size = document.getElementById('text_size_selector').value;
+    localStorage.setItem('text/size', textSize);
+    PDFAnnotate.UI.setText(init_text_size, init_color);
 }
