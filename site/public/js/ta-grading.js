@@ -903,12 +903,8 @@ function renderPDFToolbar(){
             }, time);
         }
     }
-    initColors();
-    initPen();
-    initText();
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
     sessionStorage.setItem('toolbar_loaded', true);
-}
     function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
         let clicked_button = $("a[value="+option+"]");
@@ -1073,8 +1069,8 @@ function renderPDFToolbar(){
         document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
         document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
         document.addEventListener('colorchange', changeColor);
-        let init_color = localStorage.getItem('main_color') || '#ff0000';
-        document.getElementById('color_selector').style.backgroundColor = init_color;
+        let init_color = localStorage.getItem('main_color');
+        document.getElementById('color_selector').style.backgroundColor;
         setColor(init_color);
     }
 
@@ -1098,14 +1094,13 @@ function renderPDFToolbar(){
             localStorage.setItem('main_color', color);
             document.getElementById('color_selector').style.backgroundColor = color;
     }
-
 // Pen stuff
     let penSize;
     let penColor;
     let scrollLock;
     function initPen() {
-        let init_size = localStorage.getItem('pen/size') || 3;
-        let init_color = localStorage.getItem('main_color') || '#FF0000';
+        let init_size = document.getElementById('pen_size_selector').value;
+        let init_color = document.getElementById('color_selector').style.backgroundColor;
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         if($('#scroll_lock_mode').is(':checked')) {
@@ -1126,18 +1121,19 @@ function renderPDFToolbar(){
     function setPen(size, color) {
         penSize = size;
         penColor = color;
-        }
         
         if (scrollLock) {
             $('#file_content').css('overflow', 'hidden');
         }
-        
+        localStorage.setItem('pen/size', penSize);
+        localStorage.setItem('main_color', penColor);
         PDFAnnotate.UI.setPen(penSize, penColor);
+    }
 
 // Text stuff
     function initText() {
-        let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('main_color') || '#FF0000';
+        let init_size = document.getElementById('text_size_selector').value;
+        let init_color = document.getElementById('color_selector').style.backgroundColor;
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
         document.addEventListener('colorchange', function(e){
@@ -1155,3 +1151,16 @@ function renderPDFToolbar(){
             textColor = color;
             PDFAnnotate.UI.setText(textSize, textColor);
     }
+    initColors();
+    initPen();
+    initText();
+}
+
+
+function initializePDFToolbar(){
+    let init_size = document.getElementById('pen_size_selector').value;
+    let init_color = document.getElementById('color_selector').style.backgroundColor;
+    localStorage.setItem('pen/size', init_size);
+    localStorage.setItem('main_color', init_color);
+    PDFAnnotate.UI.setPen(init_size, init_color);
+}
