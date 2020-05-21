@@ -1,6 +1,6 @@
 <?php
 
-namespace socket;
+namespace app\libraries\socket;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
@@ -19,18 +19,11 @@ class Server implements MessageComponentInterface {
     private $users;
     private $core;
 
-    public function __construct() {
+    public function __construct(Core $core) {
         $this->clients = new \SplObjectStorage;
         $this->sessions = [];
 
-        $this->core = new Core();
-
-        $this->core->loadMasterConfig();
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $this->core->loadMasterDatabase();
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $this->core->loadAuthentication();
-        $this->core->loadCourseDatabase();
+        $this->core = $core;
     }
 
     /**
@@ -180,6 +173,11 @@ class Server implements MessageComponentInterface {
      * @param string $msgString
      */
     public function onMessage(ConnectionInterface $from, $msgString) {
+        if ($msgString === 'ping') {
+            $this->broadcast($from, 'pong');
+            return;
+        }
+
         if ($this->checkAuth($from)) {
             $msg = json_decode($msgString, true);
 
