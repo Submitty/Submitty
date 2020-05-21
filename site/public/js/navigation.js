@@ -20,6 +20,7 @@ $(document).ready(function() {
       $('#gradeables .course-section-heading').each(function() {
         if ($(this).next().is( ":hidden" )) {
           $(this).next().slideDown("slow");
+          $(this).toggleClass("panel-head-active");
         }
       });
       isCollapsibleDisabled = true;
