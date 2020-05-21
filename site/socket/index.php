@@ -25,7 +25,7 @@ $server = IoServer::factory(
             new Server($core)
         )
     ),
-    8080,
+    41983,
     '127.0.0.1'
 );
 
