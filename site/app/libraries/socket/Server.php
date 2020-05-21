@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\libraries\socket;
 
 use Ratchet\MessageComponentInterface;
@@ -16,7 +18,10 @@ class Server implements MessageComponentInterface {
     private $sessions;
 
     // Holds the mapping between User_ID (key) and Connection object (value)
+    /** @var array<string, \Ratchet\ConnectionInterface> */
     private $users;
+
+    /** @var Core */
     private $core;
 
     public function __construct(Core $core) {
@@ -29,15 +34,13 @@ class Server implements MessageComponentInterface {
     /**
      * This function checks if a given connection object is authenticated
      * It uses the submitty_session cookie in the header data to work
-     * @param $conn
-     * @return bool
      */
-    private function checkAuth($conn) {
+    private function checkAuth(ConnectionInterface $conn): bool {
         $request = $conn->httpRequest;
         $client_id = $conn->resourceId;
         $userAgent = $request->getHeader('user-agent');
 
-        if( $userAgent[0] === "websocket-client-php") {
+        if ($userAgent[0] === "websocket-client-php") {
             return true;
         }
         else {
@@ -78,7 +81,7 @@ class Server implements MessageComponentInterface {
      * @param $content
      * @param bool $all, true to send to all, false to send to all but $from
      */
-    private function broadcast($from, $content, $all = true) {
+    private function broadcast(ConnectionInterface $from, string $content, bool $all = true): void {
         if ($all) {
             foreach ($this->clients as $client) {
                 $client->send($content);
@@ -86,7 +89,7 @@ class Server implements MessageComponentInterface {
         }
         else {
             foreach ($this->clients as $client) {
-                if($client !== $from){
+                if ($client !== $from) {
                     $client->send($content);
                 }
             }
@@ -110,9 +113,9 @@ class Server implements MessageComponentInterface {
     /**
      * Fetches Connection object of a given User_ID
      * @param $user_id
-     * @return array
+     * @return bool|\Ratchet\ConnectionInterface
      */
-    private function getSocketClientID($user_id) {
+    private function getSocketClientID(string $user_id) {
         if (isset($this->users[$user_id])) {
             return $this->users[$user_id];
         }
@@ -126,7 +129,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return integer
      */
-    private function getSocketUserID($conn) {
+    private function getSocketUserID(ConnectionInterface $conn): void {
         if (isset($this->sessions[$conn->resourceId])) {
             return $this->sessions[$conn->resourceId];
         }
@@ -141,7 +144,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return void
      */
-    private function setSocketClient($user_id, $conn) {
+    private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
         $this->sessions[$conn->resourceId] = $user_id;
         $this->users[$user_id] = $conn;
     }
@@ -151,7 +154,7 @@ class Server implements MessageComponentInterface {
      * @param $conn
      * @return void
      */
-    private function removeSocketClient($conn) {
+    private function removeSocketClient(ConnectionInterface $conn): void {
         $user_id = $this->getSocketUserID($conn);
         unset($this->sessions[$conn->resourceId]);
         unset($this->users[$user_id]);
@@ -172,7 +175,7 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $from
      * @param string $msgString
      */
-    public function onMessage(ConnectionInterface $from, $msgString) {
+    public function onMessage(ConnectionInterface $from, string $msgString): void {
         if ($msgString === 'ping') {
             $this->broadcast($from, 'pong');
             return;
@@ -203,7 +206,7 @@ class Server implements MessageComponentInterface {
      * When any client closes the connection, remove information about them
      * @param ConnectionInterface $conn
      */
-    public function onClose(ConnectionInterface $conn) {
+    public function onClose(ConnectionInterface $conn): void {
         $this->removeSocketClient($conn);
         $this->clients->detach($conn);
         $conn->send('{"sys": "Disconnected"}');
@@ -214,7 +217,7 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $conn
      * @param \Exception $e
      */
-    public function onError(ConnectionInterface $conn, \Exception $e) {
+    public function onError(ConnectionInterface $conn, \Exception $e): void {
         $conn->close();
     }
 }
