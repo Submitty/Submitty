@@ -77,9 +77,6 @@ class Server implements MessageComponentInterface {
 
     /**
      * Push a given message to all or all-but-sender connections
-     * @param $from
-     * @param $content
-     * @param bool $all, true to send to all, false to send to all but $from
      */
     private function broadcast(ConnectionInterface $from, string $content, bool $all = true): void {
         if ($all) {
@@ -112,7 +109,6 @@ class Server implements MessageComponentInterface {
 
     /**
      * Fetches Connection object of a given User_ID
-     * @param $user_id
      * @return bool|\Ratchet\ConnectionInterface
      */
     private function getSocketClientID(string $user_id) {
@@ -126,10 +122,9 @@ class Server implements MessageComponentInterface {
 
     /**
      * Fetches User_ID of a given socket Connection object
-     * @param $conn
-     * @return integer
+     * @return string|false
      */
-    private function getSocketUserID(ConnectionInterface $conn): void {
+    private function getSocketUserID(ConnectionInterface $conn) {
         if (isset($this->sessions[$conn->resourceId])) {
             return $this->sessions[$conn->resourceId];
         }
@@ -140,8 +135,6 @@ class Server implements MessageComponentInterface {
 
     /**
      * Sets Connection object associativity with User_ID
-     * @param $user_id
-     * @param $conn
      * @return void
      */
     private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
@@ -151,7 +144,6 @@ class Server implements MessageComponentInterface {
 
     /**
      * Deletes Connection object associativity with User_ID
-     * @param $conn
      * @return void
      */
     private function removeSocketClient(ConnectionInterface $conn): void {
@@ -162,7 +154,6 @@ class Server implements MessageComponentInterface {
 
     /**
      * When a new user connects to the socket, check authentication
-     * @param ConnectionInterface $conn
      */
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
@@ -175,7 +166,7 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $from
      * @param string $msgString
      */
-    public function onMessage(ConnectionInterface $from, string $msgString): void {
+    public function onMessage(ConnectionInterface $from, $msgString) {
         if ($msgString === 'ping') {
             $this->broadcast($from, 'pong');
             return;
@@ -214,8 +205,6 @@ class Server implements MessageComponentInterface {
 
     /**
      * When any error occurs within the socket server script
-     * @param ConnectionInterface $conn
-     * @param \Exception $e
      */
     public function onError(ConnectionInterface $conn, \Exception $e): void {
         $conn->close();
