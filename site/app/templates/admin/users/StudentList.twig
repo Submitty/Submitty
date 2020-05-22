@@ -20,6 +20,7 @@
                     <th>Last Name</th>
                     <th>Rotating Section</th>
                     <th>Manual Registration</th>
+                    <th>Time Zone</th>
                     <th>Edit Student</th>
                     <th>View Grades</th>
                 </tr>
@@ -27,7 +28,7 @@
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="9">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="10">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -42,6 +43,7 @@
                             <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
+                            <td>{{ student.getTimeZone() == 'NOT_SET/NOT_SET' ? 'NOT SET' : student.getTimeZone() }}</td>
                             <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
                             <td>
                                 <form method="post" action="{{ view_grades_url }}">

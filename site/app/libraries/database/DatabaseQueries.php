@@ -169,6 +169,72 @@ GROUP BY user_id", array($user_id));
     }
 
     /**
+     * Join a table in the course database with a table from the master database.  This is useful when a table exists
+     * in both databases that has the same name, but certain information is only available in the master database.
+     * This is similar to joining database tables, but because SQL join between databases isn't trivial, that
+     * functionality is implemented here.  This function will select all columns from the course database table, and
+     * join in the requested columns from the same master database table.
+     *
+     * NOTE: Do not include the $join_column name in the $master_columns array.
+     *
+     * Example: joinCourseWithMaster('users', ['api_key', 'time_zone'], 'user_id', []);
+     * Will return all columns from the course database users column, but these rows will now include the
+     * api_key and time_zone columns from the master database.
+     *
+     * @param string $table Name of the table that must exist in both databases
+     * @param string $master_columns Array of column names to select from the master database (this value may not be '*')
+     * @param string $join_column Name of column to join on, this column must exist in both tables
+     * @param array $ordering_criteria Array of ordering criteria to add to SQL 'order by' clause
+     */
+    public function joinCourseWithMaster(string $table, array $master_columns, string $join_column, array $ordering_criteria = []): array {
+        $course_query = 'select * from ' . $table;
+
+        if (!empty($ordering_criteria)) {
+            $course_query = $course_query . ' order by ' . implode(',', $ordering_criteria);
+        }
+
+        $this->course_db->query($course_query);
+        $course_rows = $this->course_db->rows();
+
+        $set = array_merge($master_columns, [$join_column]);
+        $master_query = 'select ' . implode(',', $set) . ' from ' . $table;
+        $this->submitty_db->query($master_query);
+        $master_rows = $this->submitty_db->rows();
+
+        $results = [];
+
+        // Handle joining the sets
+        foreach ($course_rows as $course_row) {
+            foreach ($master_rows as $master_row) {
+                if ($course_row[$join_column] === $master_row[$join_column]) {
+                    $results[] = array_merge($course_row, $master_row);
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Collect array of course users, but joined with additional data from the master database
+     *
+     * @param array $additional_data Additional columns to join in that are in the master database users table but not
+     * the course database users table
+     * @return array Array of User objects representing those students in the current course
+     */
+    public function getCourseUsersWithAdditionalData(array $additional_data): array {
+        $users = [];
+
+        $db_rows = $this->joinCourseWithMaster('users', $additional_data, 'user_id', ['registration_section::INTEGER', 'user_id']);
+
+        foreach ($db_rows as $db_row) {
+            $users[] = new User($this->core, $db_row);
+        }
+
+        return $users;
+    }
+
+    /**
      * Fetches all students from the users table, ordering by course section than user_id.
      *
      * @param  string $section_key

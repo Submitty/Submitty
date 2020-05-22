@@ -29,7 +29,7 @@ class UsersController extends AbstractController {
      * @return MultiResponse
      */
     public function getStudents() {
-        $students = $this->core->getQueries()->getAllUsers();
+        $students = $this->core->getQueries()->getCourseUsersWithAdditionalData(['time_zone']);
         //Assemble students into sections
         $sorted_students = [];
         $download_info = [];
@@ -56,6 +56,7 @@ class UsersController extends AbstractController {
                 'last_name' => $student->getDisplayedLastName(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
+                'time_zone' => $student->getTimeZone(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
