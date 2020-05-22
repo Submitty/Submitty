@@ -76,14 +76,12 @@
 }
 
 @media (max-width: 401px) {
-    .course-section-heading {
-        font-size: 14px;
-    }
+    .course-section-heading,
     .course-main .course-title {
-        font-size: 12px;
+        font-size: 16px;
     }
     .course-button .btn, .subtitle {
-        font-size: 11px;
+        font-size: 12px;
     }
 }
 
@@ -128,24 +126,7 @@
     #gradeables-content h1 {
         font-weight: 400;
     }
-
-    .course-main .course-title {
-        font-size: 14px;
-    }
-    .course-button .btn, .subtitle {
-        font-size: 13px;
-    }
 }
-
-/*@media (min-width: 780px) {*/
-/*    .gradeable-row {*/
-/*        border: none;*/
-/*    }*/
-
-/*    .btn-nav {*/
-/*        min-width: 95%;*/
-/*    }*/
-/*}*/
 
 @media (min-width: 950px) {
     #gradeables {
@@ -165,6 +146,8 @@
     }
 
     .gradeable-row {
+        border: none;
+        display: table-row;
         justify-content: space-between;
     }
 
