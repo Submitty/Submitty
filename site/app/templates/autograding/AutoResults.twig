@@ -52,7 +52,7 @@
                 {% set can_view = (not testcase.hidden or show_hidden) %}
                 {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
 
-                <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#e5e5e5;'" : "" }}>
+                <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
                     <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"
 
                             {% if can_view_details and testcase.has_extra_results %}
@@ -64,10 +64,10 @@
                         {# Details button #}
                         {% if testcase.has_extra_results and can_view_details %}
                             <span class="loading-tools" id="details_tc_{{ loop.index0 }}" style="float:right">
-                            <span class="loading-tools-hide" style="color: #0000EE; text-decoration: underline;" hidden>
+                            <span class="loading-tools-hide" style="color: var(--standard-deep-blue); text-decoration: underline;" hidden>
                                 Hide Details
                             </span>
-                            <span class="loading-tools-show" style="color: #0000EE; text-decoration: underline;">
+                            <span class="loading-tools-show" style="color: var(--standard-deep-blue); text-decoration: underline;">
                                 Show Details
                             </span>
                             <span class="loading-tools-in-progress" aria-label="Loading Details for {{testcase.name}}" hidden>
@@ -100,11 +100,11 @@
                             <code>{{ testcase.details }}</code>
                             &nbsp;&nbsp;
                             {% if testcase.extra_credit %}
-                                <span class='italics' style="color: #0a6495;">Extra Credit</span>
+                                <span class='italics' style="color: var(--extra-credit-blue);">Extra Credit</span>
                             {% endif %}
                             &nbsp;&nbsp;
                             {% if can_view and testcase.view_testcase_message %}
-                                <span class='italics' style="color: #af0000;">{{ testcase.testcase_message }}</span>
+                                <span class='red-message'>{{ testcase.testcase_message }}</span>
                             {% endif %}
                         </h4>
                     </div>

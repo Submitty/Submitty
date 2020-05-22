@@ -30,6 +30,7 @@ class UsersView extends AbstractView {
             "use_database" => $use_database,
             'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
             "return_url_upload_class_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
+            'view_grades_url' => $this->core->buildCourseUrl() . '/users/view_grades',
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
         ]);
