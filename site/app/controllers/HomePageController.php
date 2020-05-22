@@ -43,8 +43,7 @@ class HomePageController extends AbstractController {
         $failure_message = 'Error encountered updating user time zone.';
 
         // Validate then update data
-        if(isset($_POST['time_zone']) && in_array($_POST['time_zone'], DateUtils::getAvailableTimeZones()))
-        {
+        if (isset($_POST['time_zone']) && in_array($_POST['time_zone'], DateUtils::getAvailableTimeZones())) {
             $user = $this->core->getUser();
             $result = $this->core->getQueries()->updateSubmittyUserTimeZone($user, $_POST['time_zone']);
 

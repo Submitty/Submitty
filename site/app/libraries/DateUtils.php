@@ -149,11 +149,11 @@ class DateUtils {
      *
      * @return array All user selectable time zones
      */
-    public static function getAvailableTimeZones() : array {
+    public static function getAvailableTimeZones(): array {
         $available_time_zones = array_merge(['NOT_SET/NOT_SET'], \DateTimeZone::listIdentifiers());
 
         // Get rid of 'UTC' time zone
-        unset($available_time_zones[sizeof($available_time_zones) - 1]);
+        unset($available_time_zones[count($available_time_zones) - 1]);
 
         return $available_time_zones;
     }
@@ -164,7 +164,7 @@ class DateUtils {
      * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
      * @return string The UTC offset, for example '+9.5 Hours' or '-5 Hours'
      */
-    public static function getUTCOffset(string $time_zone) : string {
+    public static function getUTCOffset(string $time_zone): string {
         if ($time_zone === 'NOT_SET/NOT_SET') {
             return 'NOT_SET';
         }
@@ -175,8 +175,6 @@ class DateUtils {
         $offset_as_string = strval($offset / 3600) . ' Hours';
 
         // Prepend a plus for non-negative offsets, minus is already included for negative offsets
-        $ret_val = $offset >= 0 ? '+' . $offset_as_string : $offset_as_string;
-
-        return $ret_val;
+        return $offset >= 0 ? '+' . $offset_as_string : $offset_as_string;
     }
 }
