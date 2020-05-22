@@ -92,10 +92,6 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
 
-    $(".fas").click(function () {
-        console.log("ajax call worked!");
-    });
-
     $('input,select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
@@ -137,9 +133,6 @@ $(document).ready(function () {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
-        console.log("$(document).ready");
-        console.log("data:");
-        console.log(data);
 
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             function (response_data) {
