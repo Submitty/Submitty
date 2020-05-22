@@ -33,6 +33,10 @@ class HomePageController extends AbstractController {
     /**
      * @Route("/current_user/change_time_zone", methods={"POST"})
      * @return JsonResponse
+     *
+     * Handle ajax request to update the currently logged in user's time zone data.
+     *
+     * Will return a json success or failure response depending on the result of the operation.
      */
     public function changeTimeZone() {
 
@@ -53,7 +57,7 @@ class HomePageController extends AbstractController {
             return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
         }
 
-        // Needed values were not set, return failure
+        // Needed values were not sent, return failure
         return JsonResponse::getFailResponse($failure_message);
     }
 

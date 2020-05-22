@@ -127,6 +127,13 @@ class DatabaseQueries {
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : null;
     }
 
+    /**
+     * Update a user's time zone string in the master database.
+     *
+     * @param User $user The user object for the user who should have their time zone modified
+     * @param string $time_zone A time zone string which may found in DateUtils::getAvailableTimeZones()
+     * @return int 1 if the update was successful, 0 if the operation failed
+     */
     public function updateSubmittyUserTimeZone(User $user, string $time_zone) {
         $this->submitty_db->query("update users set time_zone = ? where user_id = ?", [$time_zone, $user->getId()]);
         return $this->submitty_db->getRowCount();

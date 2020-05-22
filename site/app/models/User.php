@@ -96,7 +96,7 @@ class User extends AbstractModel {
     protected $registration_section = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
-    /** @var string A valid PHP DateTimeZone string */
+    /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
 
     /**
@@ -193,6 +193,10 @@ class User extends AbstractModel {
         }
     }
 
+    /**
+     * Set $this->time_zone
+     * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
+     */
     public function setTimeZone(string $time_zone) {
         $this->time_zone = $time_zone;
     }

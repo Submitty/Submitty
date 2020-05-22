@@ -17,10 +17,18 @@ function passwordChange() {
     $("#new_password").focus();
 }
 
+/**
+ * Gets the list of all available time zones as an array
+ * @returns {*|string[]|jQuery}
+ */
 function getAvailableTimeZones() {
     return $('#time_zone_selector_label').data('available_time_zones').split(',')
 }
 
+/**
+ * Gets the set of general time zone options
+ * @returns {Set<*>}
+ */
 function getGeneralTimeZoneOptions() {
     let available_time_zones = getAvailableTimeZones();
 
@@ -30,6 +38,11 @@ function getGeneralTimeZoneOptions() {
     return new Set(available_time_zones);
 }
 
+/**
+ * Gets the set of specific time zone options based on the passed in general option
+ * @param general_option
+ * @returns {Set<*>}
+ */
 function getSpecificTimeZoneOptions(general_option) {
     let available_time_zones = getAvailableTimeZones();
 
@@ -43,37 +56,35 @@ function getSpecificTimeZoneOptions(general_option) {
     return new Set(available_time_zones);
 }
 
+/**
+ * Populate the specific area drop down based on which general option was selected in the general option drop down.
+ *
+ * @param general_selection
+ * @param selected_option Optional parameter to specify which specific option will be selected when the drop down
+ * finishes populating.  If this parameter is omitted the default option will be a simple message prompting the user.
+ */
 function populateSpecificTimeZoneDropDown(general_selection, selected_option = null) {
     $('#time_zone_specific_drop_down').empty();
 
     let specific_area_set = getSpecificTimeZoneOptions(general_selection);
 
-    $('#time_zone_specific_drop_down').append('<option></option>');
+    $('#time_zone_specific_drop_down').append('<option>Please select a specific area</option>');
 
     specific_area_set.forEach(function(elem) {
-        $('#time_zone_specific_drop_down').append('<option value='+elem+'>'+elem+'</option>');
+        $('#time_zone_specific_drop_down').append('<option value="'+elem+'">'+elem+'</option>');
     });
 
     if(selected_option !== null) {
-        $('[value=' + selected_option + ']').prop('selected', true);
-    }
-}
-
-function updateUTCOffsetText(text) {
-    if(text === 'NOT_SET/NOT_SET') {
-        $('#utc_offset_stub').hide();
-    } else {
-        $('#utc_offset_stub').show();
-        $('#user_utc_offset').text(text);
+        $('[value="' + selected_option + '"]').prop('selected', true);
     }
 }
 
 $(document).ready(function() {
 
-    // Populate the general time zone selector box with options
+    // Populate the general area time zone selector box with options
     let general_area_set = getGeneralTimeZoneOptions();
     general_area_set.forEach(function(elem) {
-        $('#time_zone_general_drop_down').append('<option value='+elem+'>'+elem+'</option>');
+        $('#time_zone_general_drop_down').append('<option value="'+elem+'">'+elem+'</option>');
     });
 
     // Populate specific area time zone selector box when the general one has detected a change
@@ -82,7 +93,7 @@ $(document).ready(function() {
         populateSpecificTimeZoneDropDown(selected_elem);
     });
 
-    // Any changes to the specific time zone dropdown should be saved server-side
+    // Any user made changes to the specific time zone dropdown should be saved server-side
     $('#time_zone_specific_drop_down').change(function() {
 
         let general_area = $('#time_zone_general_drop_down').children(':selected')[0].innerHTML;
@@ -97,8 +108,9 @@ $(document).ready(function() {
                 time_zone: time_zone
             },
             success: function (response) {
+                // Update page elements if the data was successfully saved server-side
                 if (response.status === 'success') {
-                    updateUTCOffsetText(response.data.utc_offset);
+                    $('#user_utc_offset').text(response.data.utc_offset);
                 }
                 else {
                     console.log(response);
@@ -117,7 +129,7 @@ $(document).ready(function() {
         let general_area = user_time_zone.split('/', 1)[0];
         let specific_area = user_time_zone.replace(general_area + '/', '');
 
-        $('[value=' + general_area + ']').prop('selected', true);
+        $('[value="' + general_area + '"]').prop('selected', true);
         populateSpecificTimeZoneDropDown(general_area, specific_area);
     });
 });
