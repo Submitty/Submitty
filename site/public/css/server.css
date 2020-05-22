@@ -64,21 +64,21 @@ a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
-    color: var(--text-black);
+    color: var(--btn-default-text);
 }
 
 a.btn-default,
 a.fas.btn-default,
 a.fas,
 a > i.fas {
-    color: var(--text-black);
+    color: var(--btn-default-text);
 }
 
 a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: var(--btn-text-black);
+    color: var(--btn-default-text);
 }
 
 a.btn, a.icon {
@@ -158,7 +158,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: var(--btn-default-white);
+    color: var(--always-default-white);
     font-size: 18px;
     font-weight: 900
 }
@@ -242,7 +242,7 @@ table tr.table-header {
 }
 
 tr.info, tr.info td, tr.info th {
-    background-color: var(--table-info);
+    background-color: var(--alert-border-blue);
 }
 
 td>a.active-sort {
@@ -334,17 +334,21 @@ td>a.active-sort {
     flex-grow: 1;
 }
 
+[data-theme="dark"] .content {
+  box-shadow: none;
+}
+
 .content:last-child {
     flex-grow: 1;
 }
 
 .content.gradeable_message {
     background-color: var(--actionable-blue);
-    color: var(--text-white);
+    color: var(--always-default-white);
 }
 
 .content.gradeable_message a{
-    color: var(--text-white);
+    color: var(--always-default-white);
 }
 
 .content.gradeable_message p:not(:last-child){
@@ -519,7 +523,7 @@ td>a.active-sort {
 }
 
 .file-upload-table tr:hover {
-    background: #d1d1d1;
+    background: var(--file-upload-table-hover);
 }
 
 .green-message {
@@ -700,7 +704,7 @@ td>a.active-sort {
 
 .green-background {
     background-color: var(--standard-deep-dark-green);
-    color: var(--btn-default-white);
+    color: var(--always-default-white);
 }
 
 .yellow-background {
@@ -1799,6 +1803,10 @@ end of styles used in the admin gradeable page
 .shadow {
     box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     border-radius: 3px;
+}
+
+[data-theme="dark"] .shadow{
+  box-shadow: none;
 }
 
 .content {

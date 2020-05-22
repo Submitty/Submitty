@@ -1,0 +1,25 @@
+<fieldset>
+    <legend>Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column:</legend>
+
+    <label for="peer_graders_list">Select CSV file to upload for grader-student pairs</label>
+    <input type="file" name="peer_graders_list" id="peer_graders_list">
+    </br>
+        <div class="table-wrapper">
+            <table class = "peer table">
+                <tr>
+                    <td> grader </td>
+                    <td> student </td>
+                </tr>
+            {% for key,value in peer_grader_pairs %}
+                <tr>
+                    <td>{{key}}</td>
+                    <td>
+                        {% for entry in value %}
+                            <span>{{entry}} </span>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+</fieldset>
