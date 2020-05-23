@@ -290,10 +290,28 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllUnarchivedSemester(),
+                //$this->core->getQueries()->getAllUnarchivedSemester(),
+                $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken()
             )
+        );
+    }
+
+    /**
+     * @Route("/term/new", methods={"POST"})
+     * @return Response
+     */
+    public function addNewTerm() {
+        if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
+            $term_id = $_POST['term_id'];
+            $term_name = $_POST['term_name'];
+            $start_date = $_POST['start_date'];
+            $end_date = $_POST['end_date'];
+            $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
+        }
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
         );
     }
 }
