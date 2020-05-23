@@ -11,7 +11,6 @@ use app\libraries\Core;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
-use PHP_CodeSniffer\Reports\Json;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -42,21 +41,17 @@ class HomePageController extends AbstractController {
 
         $failure_message = 'Error encountered updating user time zone.';
 
-        // Validate then update data
-        if (isset($_POST['time_zone']) && in_array($_POST['time_zone'], DateUtils::getAvailableTimeZones())) {
-            $user = $this->core->getUser();
-            $result = $this->core->getQueries()->updateSubmittyUserTimeZone($user, $_POST['time_zone']);
+        if (isset($_POST['time_zone'])) {
+            $updated = $this->core->getUser()->updateTimeZone($_POST['time_zone']);
 
-            if ($result != 1) {
-                return JsonResponse::getFailResponse($failure_message);
+            // Updating went smoothly, so return success
+            if ($updated) {
+                $offset = DateUtils::getUTCOffset($_POST['time_zone']);
+                return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
             }
-
-            $user->setTimeZone($_POST['time_zone']);
-            $offset = DateUtils::getUTCOffset($_POST['time_zone']);
-            return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
         }
 
-        // Needed values were not sent, return failure
+        // Some failure occurred
         return JsonResponse::getFailResponse($failure_message);
     }
 
