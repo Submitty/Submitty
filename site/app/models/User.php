@@ -202,18 +202,17 @@ class User extends AbstractModel {
 
         // Validate the $time_zone string
         if (in_array($time_zone, DateUtils::getAvailableTimeZones())) {
-
             // Attempt to update database
             $result = $this->core->getQueries()->updateSubmittyUserTimeZone($this, $time_zone);
 
             // Return true if we were able to update the database
             if ($result === 1) {
                 $this->time_zone = $time_zone;
-                return True;
+                return true;
             }
         }
 
-        return False;
+        return false;
     }
 
     /**
