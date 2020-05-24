@@ -216,6 +216,16 @@ class User extends AbstractModel {
     }
 
     /**
+     * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
+     * user has not set their time zone.
+     *
+     * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
+     */
+    public function getTimeZoneNiceFormat() {
+        return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+    /**
      * Gets whether the user is allowed to access the grading interface
      * @return bool
      */

@@ -56,7 +56,7 @@ class UsersController extends AbstractController {
                 'last_name' => $student->getDisplayedLastName(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
-                'time_zone' => $student->getTimeZone(),
+                'time_zone' => $student->getTimeZoneNiceFormat(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp

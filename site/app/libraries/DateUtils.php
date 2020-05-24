@@ -159,7 +159,7 @@ class DateUtils {
     }
 
     /**
-     * Compute the offset in hours and minutes between the given time zone identifier string, and the UTC timezone.
+     * Compute the offset in hours between the given time zone identifier string, and the UTC timezone.
      *
      * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
      * @return string The UTC offset, for example '+9.5 Hours' or '-5 Hours'
