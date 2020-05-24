@@ -2,7 +2,6 @@ from .base_testcase import BaseTestCase
 import requests
 import json
 import os
-import sys
 
 
 class TestAccessibility(BaseTestCase):
@@ -69,6 +68,7 @@ class TestAccessibility(BaseTestCase):
         # genBaseline(self, url)
 
         validatePages(self)
+
 
 # Any code that should be run before checking for accessibility
 def setup(self):
