@@ -25,6 +25,7 @@ select {
 .li_with_drop_down {
     display: flex;
     flex-direction: column;
+    margin-top: 20px;
 }
 
 #utc_offset_stub {

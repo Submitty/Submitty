@@ -19,7 +19,7 @@ function passwordChange() {
 
 /**
  * Gets the list of all available time zones as an array
- * @returns {*|string[]|jQuery}
+ * @returns {string[]}
  */
 function getAvailableTimeZones() {
     return $('#time_zone_selector_label').data('available_time_zones').split(',')
