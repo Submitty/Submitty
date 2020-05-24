@@ -12,3 +12,22 @@
     white-space: normal;
     word-wrap: break-word;
 }
+
+li {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+select {
+    width: 100%;
+}
+
+.li_with_drop_down {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+#utc_offset_stub {
+    font-style: italic;
+}
