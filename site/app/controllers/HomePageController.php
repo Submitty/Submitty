@@ -308,10 +308,22 @@ class HomePageController extends AbstractController {
             $term_name = $_POST['term_name'];
             $start_date = $_POST['start_date'];
             $end_date = $_POST['end_date'];
-            $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
+
+            $terms = $this->core->getQueries()->getAllTerms();
+            if (in_array($term_id, $terms)) {
+                $this->core->addErrorMessage("Term id already exists.");
+            }
+            else if ($end_date < $start_date) {
+                $this->core->addErrorMessage("End date should be after Start date.");
+            }
+            else {
+                $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
+                $this->core->addSuccessMessage("Term added successfully.");
+            }
+
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
         }
-        return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
-        );
     }
 }
