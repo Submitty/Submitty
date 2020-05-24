@@ -177,12 +177,12 @@ GROUP BY user_id", array($user_id));
      *
      * NOTE: Do not include the $join_column name in the $master_columns array.
      *
-     * Example: joinCourseWithMaster('users', ['api_key', 'time_zone'], 'user_id', []);
+     * Example: joinCourseWithMaster('users', ['api_key', 'time_zone'], 'user_id');
      * Will return all columns from the course database users column, but these rows will now include the
      * api_key and time_zone columns from the master database.
      *
      * @param string $table Name of the table that must exist in both databases
-     * @param string $master_columns Array of column names to select from the master database (this value may not be '*')
+     * @param array $master_columns Array of column names to select from the master database (this value may not be '*')
      * @param string $join_column Name of column to join on, this column must exist in both tables
      * @param array $ordering_criteria Array of ordering criteria to add to SQL 'order by' clause
      */
@@ -196,8 +196,8 @@ GROUP BY user_id", array($user_id));
         $this->course_db->query($course_query);
         $course_rows = $this->course_db->rows();
 
-        $set = array_merge($master_columns, [$join_column]);
-        $master_query = 'select ' . implode(',', $set) . ' from ' . $table;
+        $all_columns = array_merge($master_columns, [$join_column]);
+        $master_query = 'select ' . implode(',', $all_columns) . ' from ' . $table;
         $this->submitty_db->query($master_query);
         $master_rows = $this->submitty_db->rows();
 
