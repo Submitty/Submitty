@@ -51,17 +51,24 @@
 
         let students_div = $("#students-to-edit");
         students_div.empty();
+        students_div.append("Edit Current Students:<br />")
         for (var i = 0; i < len; i++) {
             students_div.append('<input class="readonly peerstudents" type="text" name="user_id_' + i + '" readonly="readonly" value="' + peer_grader_pairs[grader_to_edit][i] + '" /> \
                 <input id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
+
+        let add_students_div = $("#students-to-add");
+        add_students_div.empty();
+        add_students_div.append("Add New Students:<br />")
         let student_autofill = JSON.parse($('#student_full_id').val());
-        students_div.append('<input type="text" name="user_id_' + i + '" /><br />');
+        add_students_div.append('<input type="text" name="user_id_' + i + '" /><br />');
         $('[name="user_id_'+i+'"]', form).autocomplete({
             source: student_autofill
         });
         $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
+        add_students_div.append('<span style="cursor: pointer;" onclick="" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
+        Add More Users</span>');
     }
 
     $(document).ready(function() {

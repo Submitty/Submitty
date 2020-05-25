@@ -201,6 +201,17 @@ div.btn-container {
     border-radius: 5px;
 }
 
+.popup-form .left-panel {
+    width:50%;
+    display: inline-block;
+}
+
+.popup-form .right-panel {
+    width: calc(50% - 10px);
+    display: inline-block;
+    vertical-align: top;
+}
+
 #rebuild-gradeable-button {
     float: left;
     display: inline-block;
