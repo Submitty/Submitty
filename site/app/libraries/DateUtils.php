@@ -159,22 +159,18 @@ class DateUtils {
     }
 
     /**
-     * Compute the offset in hours between the given time zone identifier string, and the UTC timezone.
+     * Compute the offset in hours:minutes between the given time zone identifier string, and the UTC timezone.
      *
      * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
-     * @return string The UTC offset, for example '+9.5 Hours' or '-5 Hours'
+     * @return string The UTC offset, for example '+9:30' or '-4:00'
      */
     public static function getUTCOffset(string $time_zone): string {
         if ($time_zone === 'NOT_SET/NOT_SET') {
-            return 'NOT_SET';
+            return 'NOT SET';
         }
 
-        // Convert offset to hours and then to string
-        $time_zone_obj = new \DateTimeZone($time_zone);
-        $offset = $time_zone_obj->getOffset(new \DateTime());
-        $offset_as_string = strval($offset / 3600) . ' Hours';
+        $time_stamp = new \DateTime('now', new \DateTimeZone($time_zone));
 
-        // Prepend a plus for non-negative offsets, minus is already included for negative offsets
-        return $offset >= 0 ? '+' . $offset_as_string : $offset_as_string;
+        return $time_stamp->format('P');
     }
 }

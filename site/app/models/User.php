@@ -226,6 +226,14 @@ class User extends AbstractModel {
     }
 
     /**
+     * Get the UTC offset for this user's time zone.
+     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     */
+    public function getUTCOffset() {
+        return DateUtils::getUTCOffset($this->time_zone);
+    }
+
+    /**
      * Gets whether the user is allowed to access the grading interface
      * @return bool
      */
