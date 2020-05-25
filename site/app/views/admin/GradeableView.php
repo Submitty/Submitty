@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+use app\libraries\Utils;
 
 class GradeableView extends AbstractView {
     public function uploadConfigForm($target_dir, $all_files, $gradeable_id, $inuse_config) {
@@ -23,6 +24,15 @@ class GradeableView extends AbstractView {
                 ? $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update?nav_tab=1'])
                 : '',
             "csrf_token" => $this->core->getCsrfToken()
+        ]);
+    }
+
+     public function AdminGradeablePeersForm($peer_grader_pairs, $students) {
+        $student_full = Utils::getAutoFillData($students);
+
+        return $this->core->getOutput()->renderTwigTemplate("admin/admin_gradeable/AdminGradeablePeersForm.twig", [
+            'pair_grader_pairs' => $peer_grader_pairs,
+            'student_full' => $student_full
         ]);
     }
 }

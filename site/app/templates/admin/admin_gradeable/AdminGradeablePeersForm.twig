@@ -2,7 +2,9 @@
 {% block popup_id %}admin-gradeable-peers-form{% endblock %}
 {% block title_tag %}<h1 id="admin-gradeable-peers-title"></h1>{% endblock %}
 {% block body %}
-
+	<input type="hidden" id="peer_grader_pairs" value='{{ pair_grader_pairs }}'/>
+	<input type="hidden" id="student_full_id" value='{{ student_full }}'/>
+	<div id="students-to-edit" class="left-panel"></div>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}

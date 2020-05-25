@@ -266,7 +266,9 @@ class AdminGradeableController extends AbstractController {
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupGradeablePeers');
+        $peer_grader_pairs = json_encode($this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()));
+        $students = $this->core->getQueries()->getAllUsers();
+        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'AdminGradeablePeersForm', $peer_grader_pairs, $students);
     }
 
     /* Http request methods (i.e. ajax) */

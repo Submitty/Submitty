@@ -7,6 +7,13 @@ input[disabled] {
     background: var(--standard-medium-gray);
 }
 
+input.readonly.peerstudents {
+    border: 1px solid var(--standard-light-gray);
+    background-color: var(--standard-pale-gray);
+    cursor: not-allowed;
+    color: var(--btn-text-black);
+}
+
 #gradeable-dates input[type="text"] {
     width: 200px;
 }
