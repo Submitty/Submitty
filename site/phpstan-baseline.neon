@@ -241,7 +241,7 @@ parameters:
 			path: app/controllers/pdf/PDFController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 63$#"
+			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 46$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
 			
@@ -827,7 +827,12 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
-			count: 2
+			count: 1
+			path: app/views/PDFView.php
+			
+		-
+			message: "#^Method app\\\\views\\\\PDFView\\:\\:downloadPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
+			count: 1
 			path: app/views/PDFView.php
 
 		-
