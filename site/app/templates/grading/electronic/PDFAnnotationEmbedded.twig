@@ -28,7 +28,7 @@
         alert("Can't fetch annotations");
     }
     {% if student_download %}
-    download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}");
+    download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}" , "{{ rerender_annotated_pdf }}");
     {% elseif student_popup %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}");
     {% else %}

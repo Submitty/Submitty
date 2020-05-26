@@ -38,9 +38,9 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jspdf', 'jspdf.min.js'));
+        //$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jspdf', 'jspdf.min.js'));
         //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('html2canvas', 'html2canvas.js'), 'vendor');
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
+        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
         //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.node.min'), 'vendor');
         // This initializes the toolbar and activates annotation mode
         if (!isset($is_student) || !$is_student) {
@@ -96,7 +96,7 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jspdf', 'jspdf.min.js'));
+        //$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jspdf', 'jspdf.min.js'));
         //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('html2canvas', 'html2canvas.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
         //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.node.min'), 'vendor');
@@ -112,6 +112,7 @@ class PDFView extends AbstractView {
             'filename' => $params["file_name"],
             'file_path' => $params['file_path'],
             'annotation_jsons' => json_encode($params["annotation_jsons"]),
+            'rerender_annotated_pdf' => $params["rerender_annotated_pdf"],
             'student_download' => $is_student,
             'page_num' => $params["page_num"],
             'pdf_url_base' => $pdf_url,

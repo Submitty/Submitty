@@ -142,7 +142,7 @@ cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
 #cp ${NODE_FOLDER}/html2canvas/dist/html2canvas.js ${VENDOR_FOLDER}/html2canvas.js
 #jspdf
 mkdir ${VENDOR_FOLDER}/jspdf
-#cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
+cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf/jspdf.min.js
 
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
