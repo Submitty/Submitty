@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\authentication\DatabaseAuthentication;
+use app\libraries\DateUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -26,6 +27,32 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+    }
+
+    /**
+     * @Route("/current_user/change_time_zone", methods={"POST"})
+     * @return JsonResponse
+     *
+     * Handle ajax request to update the currently logged in user's time zone data.
+     *
+     * Will return a json success or failure response depending on the result of the operation.
+     */
+    public function changeTimeZone() {
+
+        $failure_message = 'Error encountered updating user time zone.';
+
+        if (isset($_POST['time_zone'])) {
+            $updated = $this->core->getUser()->updateTimeZone($_POST['time_zone']);
+
+            // Updating went smoothly, so return success
+            if ($updated) {
+                $offset = DateUtils::getUTCOffset($_POST['time_zone']);
+                return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
+            }
+        }
+
+        // Some failure occurred
+        return JsonResponse::getFailResponse($failure_message);
     }
 
     /**
