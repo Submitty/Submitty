@@ -237,12 +237,17 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 46$#"
-			count: 1
+			count: 2
 			path: app/controllers/pdf/PDFController.php
 
 		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 63$#"
+			count: 1
+			path: app/controllers/pdf/PDFController.php
+			
+		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 3
+			count: 4
 			path: app/controllers/pdf/PDFController.php
 
 		-
@@ -797,37 +802,37 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 179$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 104$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 211$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
 			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
-			count: 1
+			count: 2
 			path: app/views/PDFView.php
 
 		-
