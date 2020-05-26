@@ -299,6 +299,7 @@ class Core {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
+        $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
 
     public function setUser(User $user): void {

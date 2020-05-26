@@ -74,6 +74,7 @@ class NavigationView extends AbstractView {
     ];
 
     const DATE_FORMAT = "m/d/Y @ h:i A T";
+    const TWIG_SAFE_DATE_FORMAT = 'm d Y h i A T';
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
         // ======================================================================================
@@ -212,7 +213,8 @@ class NavigationView extends AbstractView {
             "display_room_seating" => $display_room_seating,
             "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
-            "seating_config" => $seating_config
+            "seating_config" => $seating_config,
+            "DATE_FORMAT" => self::TWIG_SAFE_DATE_FORMAT
         ]);
     }
 
@@ -596,6 +598,7 @@ class NavigationView extends AbstractView {
         //Default values
         $class = self::gradeableSections[$list_section]["button_type_grading"];
         $date_text = null;
+        $date_time = null;
         $progress = null;
 
         //Button types that override any other buttons
@@ -624,11 +627,13 @@ class NavigationView extends AbstractView {
             $grades_released = $gradeable->getGradeReleasedDate();
             if ($list_section === GradeableList::GRADING && $date < $grades_due) {
                 $title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . ")";
+                $date_text = 'grades due ';
+                $date_time = $gradeable->getGradeDueDate();
             }
             elseif ($list_section === GradeableList::GRADING && $date < $grades_released) {
                 $title = 'GRADE';
-                $date_text = '(grades will be released ' . $grades_released->format(self::DATE_FORMAT) . ")";
+                $date_text = 'grades will be released ';
+                $date_time = $grades_released;
             }
             else {
                 $title = 'REGRADE';
@@ -677,13 +682,15 @@ class NavigationView extends AbstractView {
             else {
                 //Before grading has opened, only thing we can do is preview
                 $title = 'PREVIEW GRADING';
-                $date_text = '(grading starts ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT) . ")";
+                $date_text = 'grading starts ';
+                $date_time = $gradeable->getGradeStartDate();
             }
         }
 
         return new Button($this->core, [
             "title" => $title,
             "subtitle" => $date_text,
+            "date" => $date_time,
             "href" => $href,
             "progress" => $progress,
             "class" => "btn btn-nav btn-nav-grade {$class}",

@@ -21,7 +21,7 @@
 {% endif %}
 
 <div class="content">
-    <h1>Gradeables</h1>
+    <h1>Gradeables</h1><h2>{{ dump(DATE_FORMAT) }}</h2>
     {% if sections|length > 0 %}
         <div id="gradeables">
         {% for list_section, info in sections %}
@@ -106,7 +106,7 @@
                 {% if button.getTitle() != null %}
                     <br>
                 {% endif %}
-                <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
+                <span class="subtitle">({{ button.getSubtitle()|nl2br}} {{ button.date|date('m d Y h i A T') }})</span>
             {% endif %}
         </a>
         {% if button.getProgress() != null %}
