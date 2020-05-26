@@ -90,7 +90,7 @@
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
                 expandFile(html_file, url_file).then(function(){
-                    initializePDFToolbar();
+                    loadPDFToolbar();
                 });
             }
             else {

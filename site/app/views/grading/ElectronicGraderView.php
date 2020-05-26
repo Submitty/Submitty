@@ -1073,6 +1073,8 @@ HTML;
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf','PDFAnnotateEmbedded.js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf','PDFInitToolbar.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
