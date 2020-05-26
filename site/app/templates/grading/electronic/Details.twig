@@ -204,6 +204,8 @@
                 {{ self.render_column_team_id(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
                 {{ self.render_column_team_members(self, context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "team_members_anon" %}
+                {{ self.render_column_team_members_anon(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
                 {{ self.render_column_total(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total_peer" %}
@@ -449,6 +451,10 @@
     </td>
 {% endmacro %}
 
+{% macro render_column_team_members_anon(self, context, section, graded_gradeable, index, info, column) %}
+    <td>{{ "team" ~ index }}</td>
+{% endmacro %}
+
 {# Total Point Summary #}
 {% macro render_column_total(self, context, section, graded_gradeable, index, info, column) %}
     {% set box_background = (graded_gradeable.getAutoGradedGradeable().getActiveVersionInstance().getDaysLate() > graded_gradeable.getGradeable().getLateDays()) ? "late-box" : "" %}
@@ -508,7 +514,7 @@
 
 {# Anonymous ID #}
 {% macro render_column_user_id_anon(self, context, section, graded_gradeable, index, info, column) %}
-    <td>{{ graded_gradeable.getSubmitter().getUser().getAnonId() }}</td>
+    <td>{{ "student" ~ index }}</td>
 {% endmacro %}
 
 {# First Name #}
