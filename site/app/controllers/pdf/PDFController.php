@@ -97,7 +97,7 @@ class PDFController extends AbstractController {
                         $grader_id = $pdf_info[count($pdf_info) - 1];
                         if ($pdf_id . '.pdf' === $filename) {
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
-                            if ($latest_timestamp < $fileinfo->getMTime()){
+                            if ($latest_timestamp < $fileinfo->getMTime()) {
                                 $latest_timestamp = $fileinfo->getMTime();
                             }
                         }
@@ -106,7 +106,7 @@ class PDFController extends AbstractController {
             }
         }
         
-        if(file_exists($annotated_path) && $latest_timestamp <= filemtime($annotated_path)){
+        if (file_exists($annotated_path) && $latest_timestamp <= filemtime($annotated_path)) {
             $rerender_annotated_pdf = false;
         }
         
@@ -130,7 +130,7 @@ class PDFController extends AbstractController {
      * @param $target_dir
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/{target_dir}", methods={"POST"})
      */
-    public function savePDFAnnotation($gradeable_id,  $target_dir) {
+    public function savePDFAnnotation($gradeable_id, $target_dir) {
         //Save the annotation layer to a folder.
         $annotation_layer = $_POST['annotation_layer'];
         $annotation_info = $_POST['GENERAL_INFORMATION'];
