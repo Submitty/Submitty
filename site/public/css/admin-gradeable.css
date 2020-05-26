@@ -1,4 +1,4 @@
-input[readonly] {
+input[readonly]:not(.btn-danger) {
     background:var(--default-white);
     border:none;
 }

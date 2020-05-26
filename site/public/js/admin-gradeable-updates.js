@@ -133,7 +133,6 @@ $(document).ready(function () {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
-
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             function (response_data) {
                 // Clear errors by setting new values
