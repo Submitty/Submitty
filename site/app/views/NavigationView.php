@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\libraries\DateUtils;
 use app\models\Button;
 use app\libraries\GradeableType;
 use app\models\User;
@@ -72,8 +73,6 @@ class NavigationView extends AbstractView {
             "prefix" => "VIEW GRADE"
         ]
     ];
-
-    const DATE_FORMAT = "m/d/Y @ h:i A T";
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
         // ======================================================================================
@@ -213,7 +212,7 @@ class NavigationView extends AbstractView {
             "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config,
-            "DATE_FORMAT" => self::DATE_FORMAT
+            "DATE_TIME_FORMAT" => DateUtils::DATE_TIME_FORMAT
         ]);
     }
 
