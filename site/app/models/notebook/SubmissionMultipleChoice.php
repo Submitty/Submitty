@@ -6,11 +6,6 @@ use app\libraries\Core;
 use app\models\notebook\AbstractNotebookInput;
 
 /**
- * Class SubmissionMultipleChoice
- * @package app\models\notebook
- *
- * Information required to load multiple choice submissions on the submission page
- *
  * @method bool getAllowMultiple()
  * @method bool getRandomizeOrder()
  * @method array getChoices()

@@ -6,12 +6,12 @@ use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\AbstractModel;
-use app\models\notebook\AbstractGradeableInput;
+use app\exceptions\NotImplementedException;
+use app\exceptions\AuthorizationException;
+use app\exceptions\FileNotFoundException;
+use app\exceptions\IOException;
 
 /**
- * Class Notebook
- * @package app\models\notebook
- *
  * @method array getInputs()
  * @method array getNotebook()
  * @method array getImagePaths()
@@ -35,15 +35,6 @@ class Notebook extends AbstractModel {
         $this->parseNotebook($details);
     }
 
-
-    public function buildUserSpecificNotebook(string $gradeable_id, string $user_id): UserSpecificNotebook {
-        return new UserSpecificNotebook(
-            $this->core,
-            $this->notebook,
-            $gradeable_id,
-            $user_id
-        );
-    }
 
     protected function parseNotebook(array $details): void {
          // Setup $this->notebook
@@ -208,7 +199,7 @@ class Notebook extends AbstractModel {
     /**
      * Get the data from the student's most recent submission
      *
-     * @param $filename Name of the file to collect the data out of
+     * @param string $filename Name of the file to collect the data out of
      * @throws AuthorizationException if the user lacks permissions to read the submissions file
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file

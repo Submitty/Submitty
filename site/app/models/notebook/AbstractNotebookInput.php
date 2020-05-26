@@ -6,11 +6,6 @@ use app\libraries\Core;
 use app\models\AbstractModel;
 
 /**
- * Class AbstractNotebookInput
- * @package app\models\notebook
- *
- * Information required to load gradeable input submissions on the submission page
- *
  * @method string getFileName()
  * @method array[] getImages()
  * @method string getLabel()

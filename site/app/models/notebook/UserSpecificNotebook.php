@@ -8,9 +8,6 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 
 /**
- * Class UserSpecificNotebook
- * @package app\models\notebook
- *
  * @method array getTestCases()
  * @method array getHashes()
  * @method array getSelectedQuestions()
@@ -30,6 +27,8 @@ class UserSpecificNotebook extends Notebook {
     protected $selected_questions = [];
     /** @prop @var string warning if this notebook has potentially overlapping questions picked */
     protected $warning = null;
+    /** @prop @var array containing description of this notebook */
+    protected $notebook_config;
 
     private $user_id;
 
@@ -120,7 +119,7 @@ class UserSpecificNotebook extends Notebook {
     /**
     * Generate a unique hash used to select a question for this student's notebook, the hash is saved under $this->hashes
     * @param string $item_label the notebook item label in the config used
-    * @param int $from_pool_count the number of questions in the assoicated item pool
+    * @param int $from_pool_count the number of questions in the associated item pool
     * @return int the index of the question to select
     */
     private function getNotebookHash(string $item_label, int $from_pool_count): int {
@@ -140,7 +139,7 @@ class UserSpecificNotebook extends Notebook {
     }
 
     /**
-    * Given an item_pool name return all assoicated notebook values and their testcases
+    * Given an item_pool name return all associated notebook values and their testcases
     * @param string $tgt_name the name of the item_pool to search for
     */
     private function searchForItemPool(string $tgt_name): array {

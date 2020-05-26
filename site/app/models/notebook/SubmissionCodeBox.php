@@ -7,8 +7,6 @@ use app\libraries\Utils;
 use app\models\notebook\AbstractTextBox;
 
 /**
- * Information required to load code box submissions on the submission page
- *
  * @method string getLanguage()
  * @method string getCodeMirrorMode()
  */

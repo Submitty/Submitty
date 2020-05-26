@@ -289,6 +289,7 @@ class HomeworkView extends AbstractView {
 
         $config = $gradeable->getAutogradingConfig();
         $notebook = null;
+        $notebook_inputs = [];
         if ($config->isNotebookGradeable()) {
             $notebook_model = $config->getUserSpecificNotebook(
                 $this->core->getUser()->getId(),

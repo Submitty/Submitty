@@ -6,11 +6,6 @@ use app\libraries\Core;
 use app\models\notebook\AbstractNotebookInput;
 
 /**
- * Class AbstractTextBox
- * @package app\models\notebook
- *
- * Information required to load text box submissions on the submission page
- *
  * @method int getRowCount()
  * @method bool getIsCodebox()
  */
