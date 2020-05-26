@@ -36,6 +36,10 @@ class AutogradingTestcase extends AbstractModel {
     protected $view_testcase_message = true;
     /** @prop @var string */
     protected $testcase_label = '';
+    /** @prop @var array */
+    protected $dispatcher_actions = array();
+    /** @prop @var array */
+    protected $graphics_actions = array();
 
     /**
      * GradeableTestcase constructor.
@@ -55,6 +59,8 @@ class AutogradingTestcase extends AbstractModel {
         $this->hidden = ($testcase['hidden'] ?? false) === true;
         $this->view_testcase_message = ($testcase['view_testcase_message'] ?? true) === true;
         $this->testcase_label = $testcase['testcase_label'] ?? '';
+        $this->dispatcher_actions = $testcase['dispatcher_actions'] ?? [];
+        $this->graphics_actions = $testcase['actions'] ?? [];
     }
 
     public function getTestcaseLabel() {
@@ -127,6 +133,16 @@ class AutogradingTestcase extends AbstractModel {
 
     /** @internal */
     public function setViewTestcaseMessage() {
+        throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
+    }
+
+    /** @internal */
+    public function setDispatcherActions() {
+        throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
+    }
+
+    /** @internal */
+    public function setGraphicsActions() {
         throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
     }
 }

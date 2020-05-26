@@ -60,3 +60,15 @@
 .diff-code .whitespace {
     border: 1px solid var(--standard-deep-blue);
 }
+
+.autocheck-header {
+    height: 30px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+}
+
+.autocheck-header-button {
+    height:23px;
+    float:right;
+    margin-left: 5px;
+}

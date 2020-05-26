@@ -235,7 +235,10 @@ class AutoGradingView extends AbstractView {
             "display_version" => $version->getVersion(),
             "index" => $testcase->getTestcase()->getIndex(),
             "who" => $who,
-            "popup_css_file" => $popup_css_file
+            "popup_css_file" => $popup_css_file,
+            "testcase_name" => $testcase->getTestcase()->getName(),
+            "dispatcher_actions" => $testcase->getTestcase()->getDispatcherActions(),
+            "graphics_actions" => $testcase->getTestcase()->getGraphicsActions()
         ]);
     }
 

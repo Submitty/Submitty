@@ -1,0 +1,25 @@
+{% extends 'generic/Popup.twig' %}
+{% import 'functions/AutogradingActions.twig' as AutogradingActions %}
+
+{% block popup_id %}{{form_id}}{% endblock %}
+{% block title %}Test Procedure for {{testcase_name}}{% endblock %}
+{% block body %}
+    <div class="autograding-dispatcher-actions">
+    {% for action in dispatcher_actions %}
+        {{ AutogradingActions.renderDispatcherAction(action) }}
+    {% endfor %}
+    </div>
+    <div class="autograding-graphics-actions">
+    {% for action in graphics_actions %}
+        {{ AutogradingActions.renderGraphicsAction(action) }}
+    {% endfor %}
+    </div>
+{% endblock %}
+{% block form %}
+    <form>
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+{% endblock %}
