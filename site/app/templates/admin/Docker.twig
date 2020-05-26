@@ -45,8 +45,8 @@
 <div class="content">
     <h2 class="docker-header">Other</h2>
 
-    <p class="red-message">The following Docker images were listed in the autograding_config.json file but not found installed system wide</p>
-    <p>This could mean the image(s) are not installed yet or have been installed incorrectly </p>
+    <p class="red-message">The following Docker images were listed in the autograding_config.json file but were not found installed system wide</p>
+    <p>This could mean that the image(s) are not installed yet or have been installed incorrectly </p>
 
     <br>
         {% for image in autograding_containers['not_found'] %}
@@ -61,14 +61,14 @@
 {% macro renderDockerImage(data) %}
     {% for key, value in data %}
         <div class="shadow">
-            <h2>{{ value["name"] }}</h2>
-            <p> ID : &nbsp {{ value["short_id"] | trim("sha256:") }} </p>
-            <p> Size : &nbsp {{ value["size"] }} 
-                &nbsp &nbsp <em> (Virtual Size : {{ value["virtual_size"] }} ) </em> 
+            <h3>{{ value["name"] }}</h3>
+            <p> ID:  {{ value["short_id"] | trim("sha256:") }} </p>
+            <p> Size:  {{ value["size"] }} 
+                <em> (Virtual Size: {{ value["virtual_size"] }} ) </em> 
             </p>
-            <p> Tag &nbsp : &nbsp {{ value["tag"] }} </p>
+            <p> Tag: {{ value["tag"] }} </p>
             <br>
-            <p> Created on : {{ value["created"] }} </p>
+            <p> Created on: {{ value["created"] }} </p>
         </div>
     {% endfor %}
 {% endmacro %}

@@ -13,10 +13,12 @@ def up(config):
    
     #add submitty_cgi to docker group
     os.system("usermod -a -G docker " + config.submitty_users['cgi_user'] )
-    #allow php to read the autograding container
+
+    #allow php to read the autograding containers config
+    gid = grp.getgrnam( "submitty_daemonphp" ).gr_gid
 
     tgt_dir = os.path.join(config.submitty['submitty_install_dir'], 'config', 'autograding_containers.json')
-    os.chown(tgt_dir, config.submitty_users['daemon_uid'], config.submitty_users['php_gid'])
+    os.chown(tgt_dir, gid, config.submitty_users['php_gid'])
 
 
 def down(config):

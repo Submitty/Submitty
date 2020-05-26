@@ -464,10 +464,8 @@ if not args.worker:
     
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
       shutil.chown(file, 'root',DAEMON_GID)
-      os.chmod(file, 0o460)
+      os.chmod(CONTAINERS_JSON, 0o460)
 
-
-    os.chmod(CONTAINERS_JSON, 0o464)
 
 ##############################################################################
 # Write database json
