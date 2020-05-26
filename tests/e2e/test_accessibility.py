@@ -108,7 +108,7 @@ class TestAccessibility(BaseTestCase):
                         # print(json.dumps(error, indent=4, sort_keys=True))
                         foundErrorMessages.append(error['message'])
                         clean_error = {
-                            "error": error['message'].strip(),
+                            "error": error['message'].replace('\u201c',"'").replace('\u201d',"'").strip(),
                             "html extract": error['extract'].strip(),
                             "type": error['type'].strip()
                         }
