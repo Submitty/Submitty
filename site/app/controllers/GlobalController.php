@@ -417,6 +417,14 @@ class GlobalController extends AbstractController {
                 }
             }
         }
+        // append the help links
+        if ($this->core->getConfig()->getSysAdminUrl() !== '') {
+            $footer_links[] =  ["title" => "Report Issues", "url" => $this->core->getConfig()->getSysAdminUrl()];
+        }
+        if ($this->core->getConfig()->getSysAdminEmail() !== '') {
+            $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
+        }
+
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }
