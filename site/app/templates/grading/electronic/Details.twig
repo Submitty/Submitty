@@ -206,8 +206,6 @@
                 {{ self.render_column_team_id(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
                 {{ self.render_column_team_members(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "team_members_anon" %}
-                {{ self.render_column_team_members_anon(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
                 {{ self.render_column_total(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total_peer" %}
@@ -469,28 +467,6 @@
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}
-            {%- endfor -%}
-        {% endif %}
-    </div>
-    </td>
-{% endmacro %}
-
-{% macro render_column_team_members_anon(self, context, section, graded_gradeable, index, info, column) %}
-    <td>
-        {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
-            {{ graded_gradeable.getSubmitter().getUser().getAnonId() }}
-        {% else %}
-            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
-                {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getAnonId() -}}
-            {%- endfor -%}
-        {% endif %}
-    <div style="font-style: italic; display: inline; color: grey;">
-        {% if graded_gradeable.getGradeable().isTeamAssignment() %}
-            {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
-                {%- if loop.index == 1 -%}Pending: {% endif -%}
-                {%- if loop.index != 1 -%}, {% endif -%}
-                {{- member.getAnonId() -}}
             {%- endfor -%}
         {% endif %}
     </div>
