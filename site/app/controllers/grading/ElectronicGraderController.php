@@ -948,7 +948,6 @@ class ElectronicGraderController extends AbstractController {
         if ($peer && !$team) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
         }
-        
         else {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
