@@ -57,6 +57,33 @@ def up(config, database):
     $$ LANGUAGE plpgsql;"""
     database.execute(sql)
 
+    # Insert database function which propagates time zone data from master to courses
+    # Required in this case because master already contains some data that wasn't synced to courses
+    sql = """CREATE OR REPLACE FUNCTION propagate_users() RETURNS VOID AS $$
+             DECLARE
+                 query_string TEXT;
+                 db_conn TEXT;
+                 course_row RECORD;
+             BEGIN
+
+                 FOR course_row IN SELECT courses_users.user_id, courses_users.semester, courses_users.course, users.time_zone FROM courses_users, users WHERE users.user_id = courses_users.user_id LOOP
+                     -- RAISE NOTICE 'User: %, Time zone: %, Semester: %, Course: %', course_row.user_id, course_row.time_zone, course_row.semester, course_row.course;
+
+                     db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+                     query_string := 'UPDATE users SET time_zone = ' || quote_literal(course_row.time_zone) || ' WHERE user_id = ' || quote_literal(course_row.user_id);
+                     PERFORM dblink_exec(db_conn, query_string);
+                 END LOOP;
+
+             END;
+             $$ LANGUAGE plpgsql;"""
+    database.execute(sql)
+
+    # Call function to propagate user time zones
+    database.execute('select propagate_users();')
+
+    # Clean up by removing the function
+    database.execute('DROP FUNCTION IF EXISTS propagate_users();')
+
 
 def down(config, database):
     """
