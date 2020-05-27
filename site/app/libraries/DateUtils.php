@@ -12,6 +12,12 @@ class DateUtils {
     /** @var string Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
 
+    /** @var string Default date time formatting used in gradeable open/close/due dates and other places */
+    const DATE_TIME_FORMAT = 'm/d/Y @ h:i A T';
+
+    /** @var string Same as DATE_TIME_FORMAT but includes seconds */
+    const DATE_TIME_FORMAT_WITH_SECONDS = 'm/d/Y @ h:i:s A T';
+
     /**
      * Given two dates, give the interval of time in days between these two times. Any partial "days" are rounded
      * up to the nearest day in the positive direction. Thus if there's a difference of 2 days and 3 hours, then

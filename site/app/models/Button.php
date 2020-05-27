@@ -38,6 +38,9 @@ class Button extends AbstractModel {
     protected $title;
     /** @prop @var string|null $subtitle */
     protected $subtitle;
+    /** @prop @var DateTime|null A DateTime object representing the time for this Button.  For example if this was a
+    * grade button then $date may represent the date and time grading begins or ends */
+    protected $date;
     /** @prop @var string|null $href */
     protected $href;
     /** @prop @var string|null $onclick */
@@ -67,6 +70,7 @@ class Button extends AbstractModel {
         parent::__construct($core);
         $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
+        $this->date     = $details["date"] ?? null;
         $this->href     = $details["href"] ?? null;
         $this->onclick  = $details["onclick"] ?? null;
         $this->class    = $details["class"] ?? "btn";
