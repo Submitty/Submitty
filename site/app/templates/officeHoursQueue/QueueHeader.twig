@@ -3,6 +3,11 @@
     <p>{{viewer.getQueueMessage() | markdown}}</p>
   </div>
 {% endif %}
+{% if viewer.getQueueWhiteboardMessage() | length > 0 %}
+  <div class="content">
+    <p>{{viewer.getQueueWhiteboardMessage() | markdown}}</p>
+  </div>
+{% endif %}
 <div class="content">
   <h1>
     Office Hours Queue

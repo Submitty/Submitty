@@ -204,6 +204,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getConfig()->getQueueMessage();
     }
 
+    public function getQueueWhiteboardMessage() {
+        return $this->core->getConfig()->getQueueWhiteboardMessage();
+    }
+
     public function getNumberAheadInQueueThisWeek() {
         if ($this->firstTimeInQueueThisWeek($this->getCurrentQueueLastHelped())) {
             $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());

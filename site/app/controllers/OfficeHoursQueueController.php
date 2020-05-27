@@ -459,4 +459,30 @@ class OfficeHoursQueueController extends AbstractController {
             )
         );
     }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/update_whiteboard", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return MultiResponse
+    */
+    public function updateWhiteboard() {
+        if (!isset($_POST['queue_whiteboard_message'])) {
+            $this->core->addErrorMessage("Missing whiteboard content");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $config_json = $this->core->getConfig()->getCourseJson();
+        $config_json['course_details']['queue_whiteboard_message'] = $_POST['queue_whiteboard_message'];
+        if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Could not save config file')
+            );
+        }
+        $this->core->addSuccessMessage("Updated whiteboard");
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
 }

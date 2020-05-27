@@ -51,3 +51,10 @@ th{
 .current_queue_row, a > i.fas{
   color: var(--btn-text-black);
 }
+
+.whiteboard-setting {
+    min-height: 7em;
+    flex: 1 0 auto;
+    margin: 0 0 1em;
+    width: 100%;
+}

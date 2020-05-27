@@ -65,6 +65,7 @@ use app\libraries\FileUtils;
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
+ * @method string getQueueWhiteboardMessage()
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  */
@@ -226,6 +227,8 @@ class Config extends AbstractModel {
     protected $queue_contact_info;
     /** @prop @var string */
     protected $queue_message;
+    /** @prop @var string */
+    protected $queue_whiteboard_message;
     /** @prop @var string */
     protected $submitty_install_path;
     /** @prop @var bool */
@@ -412,7 +415,7 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message'
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'queue_whiteboard_message'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
