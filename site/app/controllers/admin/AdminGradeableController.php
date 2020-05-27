@@ -854,7 +854,8 @@ class AdminGradeableController extends AbstractController {
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
-                'late_submission_allowed' => true
+                'late_submission_allowed' => true,
+                'limited_access_blind' === false,
             ]);
         }
         else {
@@ -870,6 +871,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
                 'has_due_date' => false,
+                'limited_access_blind' => false
             ]);
         }
 

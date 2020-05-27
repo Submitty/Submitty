@@ -4041,6 +4041,8 @@ AND gc_id IN (
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
                   eg_peer_grading AS peer_grading,
+                  eg_limited_access_blind AS limited_access_blind,
+                  eg_peer_blind AS peer_blind,
                   eg_peer_grade_set AS peer_grade_set,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
@@ -4719,13 +4721,14 @@ AND gc_id IN (
                   eg_allow_late_submission,
                   eg_precision,
                   eg_peer_grading,
+                  eg_limited_access_blind,
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -4866,6 +4869,7 @@ AND gc_id IN (
                       eg_allow_late_submission=?,
                       eg_precision=?,
                       eg_peer_grading=?,
+                      eg_limited_access_blind=?,
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
                       eg_regrade_allowed=?,

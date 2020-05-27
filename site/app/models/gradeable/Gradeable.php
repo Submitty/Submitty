@@ -82,6 +82,11 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
+ * @method void setStudentSubmit($can_student_submit)
+ * @method bool setLimitedAccessBlind($limited_access_blind)
+ * @method bool isLimitedAccessBlind()
+ * @method bool setPeerBlind($peer_blind)
+ * @method bool getPeerBlind()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -213,7 +218,10 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-
+    /** @prop @var bool will limited access graders grade the gradeable blindly*/
+    //protected $limited_access_blind = false;
+    /** @prop @var bool will peer graders grade the gradeable blindly*/
+    //protected $peer_blind = 2;
 
     /**
      * Gradeable constructor.
@@ -252,12 +260,14 @@ class Gradeable extends AbstractModel {
             $this->setHasDueDate($details['has_due_date']);
             $this->setPeerGrading($details['peer_grading']);
             $this->setPeerGradeSet($details['peer_grade_set']);
+            //$this->setPeerBlind($details['peer_blind']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            //$this->setLimitedAccessBlind($details['limited_access_blind']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
