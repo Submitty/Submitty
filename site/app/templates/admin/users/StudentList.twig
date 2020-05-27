@@ -46,7 +46,7 @@
                             <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
                             <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
-                            <td>{{ student.formatted_tz }}</td>
+                            <td>{{ formatted_tzs[student.getId()] }}</td>
                             <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
                             <td>
                                 <form method="post" action="{{ view_grades_url }}">

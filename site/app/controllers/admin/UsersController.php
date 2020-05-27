@@ -33,10 +33,11 @@ class UsersController extends AbstractController {
         //Assemble students into sections
         $sorted_students = [];
         $download_info = [];
+        $formatted_tzs = [];
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-            $student->formatted_tz = $student->getTimeZoneNiceFormat() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
+            $formatted_tzs[$student->getId()] = $student->getTimeZoneNiceFormat() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
                 case User::GROUP_INSTRUCTOR:
@@ -74,6 +75,7 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
+                $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication
             )
         );
