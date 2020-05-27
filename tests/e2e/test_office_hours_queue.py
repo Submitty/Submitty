@@ -251,5 +251,9 @@ class TestOfficeHoursQueue(BaseTestCase):
         return len(alerts)
 
     def expectedAlerts(self, success=0, error=0, success_text=[], error_text=[]):
+        if(success > 0):
+            self.wait_for_element((By.CLASS_NAME, 'alert-success'))
+        if(error > 0):
+            self.wait_for_element((By.CLASS_NAME, 'alert-error'))
         self.assertEqual(self.countAlertSuccess(success_text), success)
         self.assertEqual(self.countAlertError(error_text), error)
