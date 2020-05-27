@@ -898,10 +898,10 @@ class ElectronicGraderController extends AbstractController {
 
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = null;
-            if($peer && !$team){
+            if ($peer && !$team) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($from)[$from], false);
             }
-            else{
+            else {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
             }
             if ($from_graded_gradeable === false) {
@@ -937,7 +937,7 @@ class ElectronicGraderController extends AbstractController {
             // Reassign who_id
             if (!is_null($goToStudent)) {
                 $who_id = $goToStudent->getId();
-                if($peer && !$team){
+                if ($peer && !$team) {
                     $who_id = $goToStudent->getAnonId();
                 }
             }
@@ -945,11 +945,11 @@ class ElectronicGraderController extends AbstractController {
 
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = null;
-        if($peer && !$team){
+        if ($peer && !$team) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
         }
         
-        else{
+        else {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
         if ($graded_gradeable === false) {
