@@ -194,6 +194,8 @@
                 {{ self.render_column_grading(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading_peer" %}
                 {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "grading_peer" %}
+                {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ self.render_column_index(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "section" %}
@@ -371,33 +373,55 @@
     </td>
 {% endmacro %}
 
-{# Grading Button (peer) TODO: fix this for peer grading support
-{% macro render_column_grading_peer(self, context, section, gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently)
-    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
-    {% if components|length == 0 %}
+{# Grading Button (peer) TODO: fix this for peer grading support #}
+{% macro render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) %}
+    {% if  graded_gradeable.hasOverriddenGrades() %}
+        {% set contents = "Overridden" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
+        {% set contents = "No Submission" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
+        {% set contents = "Cancelled Submission" %}
+        {% set btn_class = "btn-default" %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
+        {%  endif %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+            {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
+                {% set contents = "Version Conflict" %}
+                {% set btn_class = "btn-primary" %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = "Grading Incomplete" %}
+            {% elseif graded_gradeable.isTaGradingComplete() or core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
+                {% set btn_class = "btn-default" %}
+            {% endif %}
+        {% endif %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
+        {%  endif %}
     {% else %}
-        {% set score = 0 %}
-        {% for component in components %}
-            {% set score = score + component.getScore() %}
-        {% endfor %}
-
-        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingPoints() %}
-        {% set btn_class = "btn-default" %}
+        {% set contents = "View" %}
+        {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
-            <b><i>No Team</i></b>
-        {% else %}
-            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getAnonId(), 'sort': context.sort, 'direction': context.direction}) }}">
-                {{ contents }}
-            </a>
-        {% endif %}
+        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+            {{ contents }}
+            {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
+                <span class="notification-badge">{{ badge_count }}</span>
+            {% endif %}
+        </a>
     </td>
 {% endmacro %}
-#}
+
 
 {# Index #}
 {% macro render_column_index(self, context, section, graded_gradeable, index, info, column) %}
@@ -452,7 +476,25 @@
 {% endmacro %}
 
 {% macro render_column_team_members_anon(self, context, section, graded_gradeable, index, info, column) %}
-    <td>{{ "team" ~ index }}</td>
+    <td>
+        {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
+            {{ graded_gradeable.getSubmitter().getUser().getAnonId() }}
+        {% else %}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
+                {%- if loop.index != 1 -%}, {% endif -%}
+                {{- member.getAnonId() -}}
+            {%- endfor -%}
+        {% endif %}
+    <div style="font-style: italic; display: inline; color: grey;">
+        {% if graded_gradeable.getGradeable().isTeamAssignment() %}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
+                {%- if loop.index == 1 -%}Pending: {% endif -%}
+                {%- if loop.index != 1 -%}, {% endif -%}
+                {{- member.getAnonId() -}}
+            {%- endfor -%}
+        {% endif %}
+    </div>
+    </td>
 {% endmacro %}
 
 {# Total Point Summary #}
@@ -514,7 +556,7 @@
 
 {# Anonymous ID #}
 {% macro render_column_user_id_anon(self, context, section, graded_gradeable, index, info, column) %}
-    <td>{{ "student" ~ index }}</td>
+    <td>{{ graded_gradeable.getSubmitter().getUser().getAnonId() }}</td>
 {% endmacro %}
 
 {# First Name #}

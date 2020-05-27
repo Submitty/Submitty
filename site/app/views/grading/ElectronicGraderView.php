@@ -381,7 +381,7 @@ HTML;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
+        
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
         // title => displayed title in the table header
@@ -400,12 +400,12 @@ HTML;
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
-                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading"];
+                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
