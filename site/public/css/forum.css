@@ -591,5 +591,11 @@ body {min-width: 925px;}
 }
 
 .category-sortable {
-  background-color: var(--btn-default-white);
+  background-color: var(--always-default-white);
+}
+
+[data-theme="dark"] .post_box,
+[data-theme="dark"] .create_thread_button,
+[data-theme="dark"] .well {
+  box-shadow: none;
 }
