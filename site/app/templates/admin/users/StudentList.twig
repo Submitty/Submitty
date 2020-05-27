@@ -19,7 +19,6 @@
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Rotating Section</th>
-                    <th>Manual Registration</th>
                     <th>UTC Offset / Time Zone</th>
                     <th>Edit Student</th>
                     <th>View Grades</th>
@@ -28,7 +27,7 @@
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="10">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="9">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -37,15 +36,16 @@
                         {% endif %}
                         <tr id="user-{{ student.getId() }}" class="{{ class }}">
                             <td></td>
-                            <td>{{ registration }}</td>
+                            <td>
+                                {{ registration }}
+                                {% if student.isManualRegistration() %}
+                                    <i class="fas fa-hammer" title="Manually Registered"></i>
+                                {% endif %}
+                            </td>
                             <td class="align-left">{{ student.getId() }}</td>
                             <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
                             <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
-                            <td>{% if student.isManualRegistration() %}
-                                    <i class="fas fa-hammer"></i>
-                                {% endif %}
-                            </td>
                             <td>{{ student.formatted_tz }}</td>
                             <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
                             <td>
