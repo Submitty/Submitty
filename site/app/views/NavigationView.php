@@ -395,7 +395,8 @@ class NavigationView extends AbstractView {
         if ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) {
             $date_text = 'opens ';
             $date_time = $gradeable->getSubmissionOpenDate();
-        } else {
+        }
+        else {
             $date_text = 'due ';
             $date_time = $gradeable->getSubmissionDueDate();
         }

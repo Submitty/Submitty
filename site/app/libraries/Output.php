@@ -121,8 +121,6 @@ HTML;
         }, ["is_safe" => ["html"]]));
 
         if ($full_load) {
-            $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
-                ->setTimezone($this->core->getConfig()->getTimezone());
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
