@@ -242,6 +242,16 @@ class GlobalController extends AbstractController {
                 }
             }
 
+            if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(["gradebook"]),
+                    "title" => "Gradebook",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-gradebook",
+                    "icon" => "fa-book-reader"
+                ]);
+            }
+
             if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
@@ -407,6 +417,14 @@ class GlobalController extends AbstractController {
                 }
             }
         }
+        // append the help links
+        if ($this->core->getConfig()->getSysAdminUrl() !== '') {
+            $footer_links[] =  ["title" => "Report Issues", "url" => $this->core->getConfig()->getSysAdminUrl()];
+        }
+        if ($this->core->getConfig()->getSysAdminEmail() !== '') {
+            $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
+        }
+
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }

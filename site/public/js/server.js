@@ -1272,19 +1272,23 @@ function loadOverriddenGrades(g_id) {
 }
 
 function refreshOnResponseOverriddenGrades(json) {
-    var form = $("#load-overridden-grades");
-    $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
-    $('#title').replaceWith(title);
+    const form = $("#load-overridden-grades");
+    $('#grade-override-table tr:gt(0)').remove();
+    let title = 'Overridden Grades for ' + json['data']['gradeable_id'];
+    $('#title').text(title);
     if(json['data']['users'].length === 0){
-        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+      $("#load-overridden-grades").addClass('d-none');
+      $("#empty-table").removeClass('d-none');
+      $('#empty-table').text('There are no overridden grades for this homework');
     }
     else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
-            $('#my_table').append(bits.join('</td><td>'));
+            let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
+      $("#load-overridden-grades").removeClass('d-none');
+      $("#empty-table").addClass('d-none');
     }
 }
 
@@ -1578,35 +1582,42 @@ function checkSidebarCollapse() {
     }
 }
 
-//Changes the theme from light to dark mode or the reverse
-//if mode='black' it will toggle the black mode instead of the normal mode
-function toggleTheme(mode='normal'){
-  if(mode==='normal'){
-    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") !== "dark") || localStorage.getItem("theme") === "light"){
-        localStorage.setItem("theme", "dark");
-        document.documentElement.setAttribute("data-theme", "dark");
-    }else{
-      localStorage.setItem("theme", "light");
-      document.documentElement.setAttribute("data-theme", "light");
-    }
-  }else if(mode === 'black'){
-    if(localStorage.getItem('black_mode') !== 'black'){
-        localStorage.setItem("black_mode", "black");
-        document.documentElement.setAttribute("data-black_mode", "black");
-    }else{
-      localStorage.setItem("black_mode", "");
-      document.documentElement.setAttribute("data-black_mode", "");
-    }
+function updateTheme(){
+  let choice = $("#theme_change_select option:selected").val();
+  if(choice === "system_black"){
+    localStorage.removeItem("theme");
+    localStorage.setItem("black_mode", "black");
+  }else if(choice === "light"){
+    localStorage.setItem("theme", "light");
+  }else if(choice === "dark"){
+    localStorage.setItem("theme", "dark");
+    localStorage.setItem("black_mode", "dark");
+  }else if(choice === "dark_black"){
+    localStorage.setItem("theme", "dark");
+    localStorage.setItem("black_mode", "black");
+  }else{ //choice === "system"
+    localStorage.removeItem("black_mode");
+    localStorage.removeItem("theme");
   }
+  detectColorScheme();
 }
 $(document).ready(function() {
-  if(localStorage.getItem("theme") === "dark"){
-    $('#theme_change').prop('checked', true);
-  }else if(localStorage.getItem("theme") === null && window.matchMedia("(prefers-color-scheme: dark)").matches){
-    $('#theme_change').prop('checked', true);
-  }
-  if(localStorage.getItem("black_mode") === "black"){
-    $('#theme_change_black').prop('checked', true);
+  if(localStorage.getItem("theme")){
+      if(localStorage.getItem("theme") === "dark"){
+        if(localStorage.getItem("black_mode") === "black"){
+          $("#theme_change_select").val("dark_black");
+        }else{
+          $("#theme_change_select").val("dark");
+        }
+      }else{
+        $("#theme_change_select").val("light");
+      }
+  }else{
+    if(localStorage.getItem("black_mode") === "black"){
+      $("#theme_change_select").val("system_black");
+    }else{
+      $("#theme_change_select").val("system");
+    }
   }
 });
 

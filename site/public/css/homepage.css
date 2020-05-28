@@ -13,10 +13,21 @@
     word-wrap: break-word;
 }
 
-[data-theme="dark"] .light_mode_hide{
-  display: inline-block!important;
+li {
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
-.light_mode_hide {
-  display: none!important;
+select {
+    width: 100%;
+}
+
+.li_with_drop_down {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+#utc_offset_stub {
+    font-style: italic;
 }

@@ -242,7 +242,7 @@ progress::-webkit-progress-value {
 .file-viewer a:link,
 .file-viewer a:visited,
 .file-viewer a:active {
-    color: var(--external-link-blue);
+    color: var(--file-browser-blue);
 }
 
 .file-viewer a:hover {
@@ -260,7 +260,7 @@ progress::-webkit-progress-value {
 .div-viewer a:link,
 .div-viewer a:visited,
 .div-viewer a:active {
-    color: var(--external-link-blue);
+    color: var(--file-browser-blue);
 }
 
 .div-viewer a:hover {
@@ -445,7 +445,7 @@ tr.is_publish {
 }
 
 .gradeable .version-warning {
-    color:rgb(200, 0, 0);
+    color:var(--error-alert-dark-red);
     font-weight: bold;
     font-size:medium;
 }
@@ -458,7 +458,7 @@ tr.is_publish {
 }
 
 .gradeable .ta-student-comment {
-    color: #777;
+    color: var(--grading-note);
 }
 
 .gradeable .verify-container {
