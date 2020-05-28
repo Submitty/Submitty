@@ -14,7 +14,12 @@
                     {% if link['icon'] is defined %}
                         <i class="footer-link-icon fa fa-lg {{ link['icon'] }}"></i>
                     {% endif %}
-                    <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
+                    {% if link['is_email'] is defined %}
+                        <a href="mailto:{{ link['url'] }}" class="black-btn">{{ link['title'] }}</a>
+                    {% else %}
+                         <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
+                    {% endif %}
+
                 {% endfor %}
 
                 {% if is_debug %}
