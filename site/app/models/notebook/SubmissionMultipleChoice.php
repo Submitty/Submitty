@@ -1,21 +1,16 @@
 <?php
 
-namespace app\models\gradeable;
+namespace app\models\notebook;
 
 use app\libraries\Core;
-use app\models\gradeable\AbstractGradeableInput;
+use app\models\notebook\AbstractNotebookInput;
 
 /**
- * Class SubmissionMultipleChoice
- * @package app\models\gradeable
- *
- * Information required to load multiple choice submissions on the submission page
- *
  * @method bool getAllowMultiple()
  * @method bool getRandomizeOrder()
  * @method array getChoices()
  */
-class SubmissionMultipleChoice extends AbstractGradeableInput {
+class SubmissionMultipleChoice extends AbstractNotebookInput {
 
     /** @prop @var bool Whether or not the MC is multiselect */
     protected $allow_multiple;
