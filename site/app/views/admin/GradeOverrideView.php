@@ -11,6 +11,7 @@ class GradeOverrideView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Grades Override');
 
         $student_full = Utils::getAutoFillData($students);
+        $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("admin/GradeOverride.twig", [
             "gradeables" => $gradeables,
