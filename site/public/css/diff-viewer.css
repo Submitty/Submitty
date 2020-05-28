@@ -72,3 +72,21 @@
     float:right;
     margin-left: 5px;
 }
+
+.action-header {
+    margin-top: 5px;
+    margin-bottom: 16px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.action-body {
+    font-family: monospace;
+    color: var(--btn-text-black);
+    font-size: 16px;
+}
+
+.autograding-action {
+    margin-top: 0px;
+    margin-bottom: 10px;
+}

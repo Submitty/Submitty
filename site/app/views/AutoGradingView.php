@@ -229,6 +229,7 @@ class AutoGradingView extends AbstractView {
         }
 
         $popup_css_file = $this->core->getOutput()->timestampResource($popup_css_file, 'css');
+        $server_css_file = $this->core->getOutput()->timestampResource('server.css', 'css');
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoChecks.twig", [
             "gradeable_id" => $gradeable->getId(),
             "checks" => $checks,
@@ -236,6 +237,7 @@ class AutoGradingView extends AbstractView {
             "index" => $testcase->getTestcase()->getIndex(),
             "who" => $who,
             "popup_css_file" => $popup_css_file,
+            "server_css_file" => $server_css_file,
             "testcase_name" => $testcase->getTestcase()->getName(),
             "publish_actions" => $testcase->getTestcase()->isPublishActions(),
             "dispatcher_actions" => $testcase->getTestcase()->getDispatcherActions(),

@@ -1,0 +1,21 @@
+{% import 'functions/AutogradingActions.twig' as AutogradingActions %}
+
+<div id={{element_id}} style="display:none">
+    <div>
+        <div class="action-header">
+            Test Procedure for {{testcase_name}}
+        </div>
+        <div class="action-body">
+            <div class="autograding-dispatcher-actions">
+            {% for action in dispatcher_actions %}
+                {{ AutogradingActions.renderDispatcherAction(action) }}
+            {% endfor %}
+            </div>
+            <div class="autograding-graphics-actions">
+            {% for action in graphics_actions %}
+                {{ AutogradingActions.renderGraphicsAction(action) }}
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
