@@ -192,9 +192,9 @@
                 {{ self.render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
                 {{ self.render_column_grading(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "grading_peer" %}
-                {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
-            {% elseif column.function == "grading_peer" %}
+            {% elseif column.function == "grading_blind" %}
+                {{ self.render_column_grading_blind(self, context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "grading_blind" %}
                 {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
                 {{ self.render_column_index(self, context, section, graded_gradeable, index, info, column) }}
@@ -372,7 +372,7 @@
 {% endmacro %}
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
-{% macro render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_grading_blind(self, context, section, graded_gradeable, index, info, column) %}
     {% if  graded_gradeable.hasOverriddenGrades() %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}

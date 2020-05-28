@@ -73,13 +73,14 @@ Form
         How should grading be anonymized for limited access graders?
         <a class="fa-question-circle" target=_blank aria-label="Manual Grading Anonymization"></a>
     </legend>
-    <input type="radio" name="manual_grading_anonymization" value="2" id="blind_limited_access_grading"
-        {{ (gradeable.isLimitedAccessBlind()) ? 'checked' : '' }}> <label for="blind_limited_access_grading">Blinded Grading</label>
+    <input type="radio" name="limited_access_blind" value="2" id="blind_limited_access_grading"
+        {{ (gradeable.getLimitedAccessBlind() == 2) ? 'checked' : '' }}> <label for="blind_limited_access_grading">Blinded Grading</label>
 
-    <input type="radio" name="manual_grading_anonymization" value="1" id="unblind_limited_access_grading"
-        {{ (gradeable.isLimitedAccessBlind() != true or action == "new") ? 'checked' : '' }}><label for="unblind_limited_access_grading">Unblinded Grading</label>
+    <input type="radio" name="limited_access_blind" value="1" id="unblind_limited_access_grading"
+        {{ (gradeable.getLimitedAccessBlind() == 1 or action == "new") ? 'checked' : '' }}><label for="unblind_limited_access_grading">Unblinded Grading</label>
 
 </fieldset>
+
 
 <div id="doc_all_access">
     <br />

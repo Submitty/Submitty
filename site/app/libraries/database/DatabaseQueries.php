@@ -4722,13 +4722,14 @@ AND gc_id IN (
                   eg_precision,
                   eg_peer_grading,
                   eg_limited_access_blind,
+                  eg_peer_blind
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -4838,6 +4839,8 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
+                    $gradeable->getLimitedAccessBlind(),
+                    $gradeable->getPeerBlind(),
                     $gradeable->isPeerGrading(),
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
@@ -4868,8 +4871,9 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
-                      eg_peer_grading=?,
                       eg_limited_access_blind=?,
+                      eg_peer_blind=?,
+                      eg_peer_grading=?,
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
                       eg_regrade_allowed=?,
