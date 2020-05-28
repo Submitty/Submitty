@@ -37,7 +37,6 @@
     }
 
     function parseReleaseNotes(raw_str) {
-        str = raw_str.replace(/\n/g, "<br />").replace(/\r/g, "").replace("*", "").replace(RegExp("\[(.*?)\]"), "");
-        return str;
+        return raw_str.replace(/\n/g, "<br />").replace(/\r/g, "").replace("*", "").replace(RegExp("\[(.*?)\]"), "");
     }
 </script>
