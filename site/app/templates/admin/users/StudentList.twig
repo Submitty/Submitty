@@ -13,6 +13,7 @@
             <caption>Students Enrolled</caption>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Registration Section</th>
                     <th>User ID</th>
                     <th>First Name</th>
@@ -20,12 +21,13 @@
                     <th>Rotating Section</th>
                     <th>Manual Registration</th>
                     <th>Edit Student</th>
+                    <th>View Grades</th>
                 </tr>
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="8">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="9">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -33,6 +35,7 @@
                             {% set class = "access-grading" %}
                         {% endif %}
                         <tr id="user-{{ student.getId() }}" class="{{ class }}">
+                            <td></td>
                             <td>{{ registration }}</td>
                             <td class="align-left">{{ student.getId() }}</td>
                             <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
@@ -40,6 +43,13 @@
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
                             <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                            <td>
+                                <form method="post" action="{{ view_grades_url }}">
+                                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                  <input type="hidden" name="student_id" value="{{ student.getId() }}"/>
+                                  <button type="submit" class="btn btn-primary" title="View Grades">View Grades</button>
+                                </form>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

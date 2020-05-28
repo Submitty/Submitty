@@ -103,7 +103,7 @@ class AutoGradedVersion extends AbstractModel {
      * Loads information about the status of out item in the queue
      */
     private function loadQueueStatus() {
-        $this->queue_position = $this->core->getGradingQueue()->getQueueStatus($this);
+        $this->queue_position = $this->core->getGradingQueue()->getQueueStatusAGV($this);
     }
 
     /**

@@ -13,7 +13,7 @@
                             {% endif %}
                             {% set display_semester = course.display_semester %}
                             <h3> {{ display_semester }} </h3>
-                            <ul id="course-list" class="bare-list">
+                            <ul class="bare-list course-list">
                         {% endif %}
                                 <li>
                                     <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl([course['semester'], course['title']]) }}">
@@ -56,6 +56,25 @@
                     </a>
                 </li>
             {% endif %}
+            <li class="li_with_drop_down">
+                <b id="time_zone_selector_label" data-user_time_zone="{{ user_time_zone }}" data-available_time_zones="{{ available_time_zones }}">Time Zone (<span id="utc_offset_stub">UTC Offset <span id="user_utc_offset">{{ user_utc_offset }}</span></span>): <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone">
+                    <i style="font-style:normal;" class="fa-question-circle"></i></a></b>
+                    <em>Important Note: All due dates are currently displayed in server timezone.</em>
+                <label for="time_zone_general_drop_down">General Area:</label>
+                <select id="time_zone_general_drop_down"></select>
+                <label for="time_zone_specific_drop_down">Specific Area:</label>
+                <select id="time_zone_specific_drop_down"></select>
+            </li>
+            <li class="li_with_drop_down">
+                <b>Color Theme:</b>
+                <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" onchange="updateTheme();">
+                    <option value="system">Follow Device Theme</option>
+                    <option value="system_black">Follow Device Theme (Black)</option>
+                    <option value="light">Light Mode</option>
+                    <option value="dark">Dark Mode</option>
+                    <option value="dark_black">Dark Mode (Black)</option>
+              </select>
+            </li>
         </ul>
     </div>
 </div>

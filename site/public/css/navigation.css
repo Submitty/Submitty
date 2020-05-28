@@ -5,13 +5,13 @@
     flex-wrap: wrap;
     margin: 0 -30px;
     padding: 9px 30px;
-    background-color: lightgray;
+    background-color: var(--standard-light-gray);
 }
 
 .gradeable-row {
     margin: 0 -30px;
     padding: 18px 30px;
-    border-bottom: 1px solid lightgray;
+    border-bottom: 1px solid var(--standard-light-gray);
 }
 
 .gradeable-row:nth-last-child(1) {

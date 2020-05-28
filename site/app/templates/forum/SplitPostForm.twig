@@ -10,17 +10,17 @@
         <p>Name of new thread: <p>
         <input type="hidden" id="split_post_id" name="split_post_id" value="-1" data-ays-ignore="true">
         <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
-        <input type="input" id="split_post_input" name="split_post_input" oninput="disableIfEmpty(this, 'split_post_submit')" placeholder="Name of new thread" style="width: 100%"/>
+        <input type="text" aria-label="Split Post Input" id="split_post_input" name="split_post_input" oninput="disableIfEmpty(this, 'split_post_submit')" placeholder="Name of new thread" style="width: 100%"/>
     </div>
-    <div>
-        <p>Categories of new thread: </p>
+    <fieldset>
+        <legend>Categories of new thread: </legend>
         {% for category in categories %}
             <a class="btn cat-buttons" data-color="{{ category.color }}" style="border-color: {{ category.color }}; background-color: #FFFFFF; color: {{ category.color }};" id="split_post_category_{{ category.category_id }}">
                 {{ category.category_desc }}
                 <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
             </a>
         {% endfor %}
-    </div>
+    </fieldset>
 
 {% endblock %}
 {% block form %}
@@ -33,7 +33,7 @@
 
     <input class="btn btn-primary" type="submit" id="split_post_submit" value="Split Post" disabled/>
 
-    <script type="text/javascript">
+    <script>
         function disableIfEmpty(obj, id) {
             document.getElementById(id).disabled = obj.value.length === 0;
         }

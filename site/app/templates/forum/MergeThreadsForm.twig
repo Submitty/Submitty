@@ -7,17 +7,29 @@
         <p class="yellow-message">The selected thread is the chronologically oldest thread. No merge action is available.</p>
     {% else %}
         <div>
-            <p>Merge current thread into:<p>
+            <p>Merge current thread into:</p>
             <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
             <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" aria-label="Select thread to merge into" data-ays-ignore="true">
                 {% for threads in possibleMerges %}
-                    <option value=({{ threads['id'] }})>({{ threads['id'] }}) {{ threads['title'] }}</option>
+                    <option value=({{ threads['id'] }}) data-first-post-id={{ threads['first_post_id'] }}>({{ threads['id'] }}) {{ threads['title'] }}</option>
                 {% endfor %}
             </select>
+        </div>
+        <div>
+            <p>Content of Selected Thread:</p>
+            <div id="thread-content" class=""></div>
             <script>
                 $(document).ready(function(){
                     $(".chosen-select").chosen({ width: "100%" });
+                    // Make AJAX call to get the content of the
+                    // first post.
+                    var selected_thread_first_post_id = $(".chosen-select").children("option").first().attr('data-first-post-id');
+                    updateSelectedThreadContent(selected_thread_first_post_id);
+                    $(".chosen-select").change(function() {
+                        selected_thread_first_post_id = $(this).children("option:selected").attr('data-first-post-id');
+                        updateSelectedThreadContent(selected_thread_first_post_id);
+                     });
                     $("#merge-threads .form-body").css("min-height", "inherit");
                     $("#merge-threads .form-body").css('overflow-y', 'initial');
                     document.getElementsByClassName('chosen-search-input')[0].setAttribute('aria-label', 'Chosen thread');

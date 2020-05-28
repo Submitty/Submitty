@@ -27,16 +27,30 @@
             {% endif %}
         </div>
         <div class="box col-md-6">
-            <span id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
+            {% if first_access_time is not null and first_access_time is not empty %}
+                first access timestamp: {{ first_access_time|date('m/d/Y h:i:s A T') }}<br />
+            {% endif %}
+            <span id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A T') }}</span> <br />
             days late: {{ days_late }} (before extensions)<br />
             {% if results is defined %}
                 grading time: {{ grade_time }} seconds<br />
+                {% if num_autogrades == 1 %}
+                    queue wait time: {{ wait_time }} seconds<br />
+                {% endif %}
+                {% if access_duration > 3600 %}
+                    gradeable access duration: {{ access_duration // 3600 }} hours
+                                               {{ (access_duration // 60) % 60 }} minutes
+                                               {{ access_duration % 60 }} seconds<br />
+                {% elseif access_duration > 60 %}
+                    gradeable access duration: {{ access_duration // 60 }} minutes
+                                               {{ access_duration % 60 }} seconds<br />
+                {% elseif access_duration > 0 %}
+                    gradeable access duration: {{ access_duration % 60 }} seconds<br />
+                {% endif %}
                 {% if num_autogrades > 1 %}
                     <br />
                     number of re-autogrades: {{ num_autogrades - 1 }}<br />
-                    last re-autograde finished: {{ grading_finished|date('m/d/Y h:i:s A') }}<br />
-                {% else %}
-                    queue wait time: {{ wait_time }} seconds<br />
+                    last re-autograde finished: {{ grading_finished|date('m/d/Y h:i:s A T') }}<br />
                 {% endif %}
                 {% if is_vcs %}
                     git commit hash:
@@ -54,6 +68,6 @@
     </div>
 {% else %}
     {# Keep the Submission date to let Confetti parse the date #}
-    <span hidden id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
+    <span hidden id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A T') }}</span> <br />
 {% endif %}
 {# /Submitted files #}

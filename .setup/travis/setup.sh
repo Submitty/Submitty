@@ -52,6 +52,11 @@ adduser submitty_daemon submitty_daemoncgi
 adduser submitty_daemon docker
 useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
+cp -R /home/travis/.composer /home/${PHP_USER}/.composer
+chown -R ${PHP_USER}:${PHP_USER} /home/${PHP_USER}/.composer
+cp -R /home/travis/.cache /home/${PHP_USER}/.cache
+chown -R ${PHP_USER}:${PHP_USER} /home/${PHP_USER}/.cache
+
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_DATA_DIR}
 chmod -R 777 ${SUBMITTY_INSTALL_DIR}
@@ -64,6 +69,8 @@ America/New_York
 http://localhost
 
 
+sysadmin@example.com
+https://example.com
 ${AUTH_METHOD}
 
 

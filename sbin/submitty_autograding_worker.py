@@ -11,6 +11,7 @@ import contextlib
 import traceback
 import tempfile
 import zipfile
+from pathlib import Path
 
 from autograder import autograding_utils
 from autograder import grade_item
@@ -194,6 +195,21 @@ def read_autograding_worker_json():
         raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))
     return name, stats
 # ==================================================================================
+# Removes any existing files or folders in the autograding_done folder.
+def cleanup_old_jobs():
+    for file_path in Path(SUBMITTY_DATA_DIR, "autograding_DONE").glob("*"):
+        file_path = str(file_path)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding DONE file: " + file_path)
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, JOB_ID,trace=traceback.format_exc())
+
+# ==================================================================================
+
+
 if __name__ == "__main__":
+    cleanup_old_jobs()
+    print('cleaned up old jobs')
     my_name, my_stats = read_autograding_worker_json()
     launch_workers(my_name, my_stats)

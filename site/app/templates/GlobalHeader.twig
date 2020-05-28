@@ -61,6 +61,34 @@
         }
 
         var onAjaxInit;
+
+
+        //determines if the user has a set theme
+        function detectColorScheme(){
+            document.documentElement.setAttribute("data-theme", "");
+            document.documentElement.setAttribute("data-black_mode", "");
+            let theme="light";    //default to light
+            //local storage is used to override OS theme settings
+            if(localStorage.getItem("theme")){
+                if(localStorage.getItem("theme") === "dark"){
+                    theme = "dark";
+                }
+            } else if(!window.matchMedia) {
+                //matchMedia method not supported
+                return false;
+            } else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                //OS theme setting detected as dark
+                theme = "dark";
+            }
+            //dark theme preferred, set document with a `data-theme` attribute
+            if (theme === "dark") {
+                 document.documentElement.setAttribute("data-theme", "dark");
+                 if(localStorage.getItem("black_mode") === "black"){
+                   document.documentElement.setAttribute("data-black_mode", "black");
+                 }
+            }
+        }
+        detectColorScheme();
     </script>
 
 </head>
@@ -75,7 +103,7 @@
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
         {# separates our content from user custom bars #}
-        <div id="submitty-body" class="flex-col invisible">
+        <div id="submitty-body" class="flex-col">
             <div id="mobile-menu">
                 <div id="menu-header" class="flex-row">
                 <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
@@ -161,6 +189,7 @@
 
                 <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                     <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
+                    <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
                 </a>
                 {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                 {% if sidebar_buttons|length > 2 %}
@@ -176,11 +205,6 @@
             </nav>
             <noscript class="system-message danger">
                 You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.
-                <style media="screen">
-                  #submitty-body{
-                    visibility: visible;
-                  }
-                </style>
             </noscript>
             {% if system_message is not null and system_message|length > 0 %}
             <div class="system-message warning">
@@ -205,7 +229,7 @@
             </div>
             <div id="wrapper">
                 {% if sidebar_buttons|length > 0 %}
-                    <aside class="preload">
+                    <aside class="{{collapse_sidebar?'collapsed':''}}">
                         <ul>
                             {% for button in sidebar_buttons %}
                                 {{ self.render_sidebar_button(button, false) }}
@@ -252,7 +276,7 @@
                 >
                     <span class="flex-line"> {# col in flex-row #}
                         {% if button.getIcon() != null %}
-                            <i class="fa {{ button.getIcon() }} preload"></i>
+                            <i class="fa {{ button.getIcon() }}"></i>
                         {% endif %}
 
                         <span class="icon-title"> {{ button.getTitle() }} </span>

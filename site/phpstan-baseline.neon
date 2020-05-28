@@ -76,11 +76,6 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Variable \\$user_2_index_in_others might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/PlagiarismController.php
-
-		-
 			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
 			count: 6
 			path: app/controllers/admin/PlagiarismController.php
@@ -151,11 +146,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$peer_grade_set might not be defined\\.$#"
-			count: 3
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Variable \\$my_grading might not be defined\\.$#"
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -203,11 +193,6 @@ parameters:
 		-
 			message: "#^Variable \\$goToStudent might not be defined\\.$#"
 			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Variable \\$total_submitted might not be defined\\.$#"
-			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -432,11 +417,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$zipname\\)\\: Unexpected token \"\\$zipname\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/FileUtils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 637$#"
 			count: 1
 			path: app/libraries/FileUtils.php
 
@@ -706,26 +686,6 @@ parameters:
 			path: app/models/Notification.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$event\\)\\: Unexpected token \"\\$event\", expected type at offset 18$#"
-			count: 2
-			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$recipients\\)\\: Unexpected token \"\\$recipients\", expected type at offset 39$#"
-			count: 2
-			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$event$#"
-			count: 1
-			path: app/models/NotificationFactory.php
-
-		-
-			message: "#^PHPDoc tag @param references unknown parameter\\: \\$recipients$#"
-			count: 1
-			path: app/models/NotificationFactory.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected type at offset 67$#"
 			count: 1
 			path: app/models/RainbowCustomizationJSON.php
@@ -899,4 +859,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-

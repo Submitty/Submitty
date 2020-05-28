@@ -49,9 +49,26 @@
     padding-bottom:3px;
     text-align: center;
     vertical-align: middle;
-    line-height: 25px;  
+    line-height: 25px;
     font-weight:    bold;
     background-color: var(--badge-backgroud-red);
+}
+
+.info_banner {
+    border: solid 6px var(--important-post);
+    position:relative;
+    display: block;
+    float: left;
+    width: 400px;
+    height: 25px;
+    top: 2px;
+    left: 120px;
+    padding-top:3px;
+    padding-bottom:3px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 25px;
+    font-weight:    bold;
 }
 
 .icon-auto-grading-results {
@@ -225,7 +242,7 @@ progress::-webkit-progress-value {
 .file-viewer a:link,
 .file-viewer a:visited,
 .file-viewer a:active {
-    color: #005c83;
+    color: var(--file-browser-blue);
 }
 
 .file-viewer a:hover {
@@ -243,7 +260,7 @@ progress::-webkit-progress-value {
 .div-viewer a:link,
 .div-viewer a:visited,
 .div-viewer a:active {
-    color: #005c83;
+    color: var(--file-browser-blue);
 }
 
 .div-viewer a:hover {
@@ -256,6 +273,7 @@ progress::-webkit-progress-value {
     position: relative;
     padding: 3px;
     margin: 1px;
+    color: var(--text-black);
 }
 
 .icon-folder-closed {
@@ -295,10 +313,10 @@ progress::-webkit-progress-value {
 }
 
 .icon-mark-stats {
-    visibility: visible; 
-    cursor: pointer; 
-    position: relative; 
-    top: 2px; 
+    visibility: visible;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
     left: 1%;
 }
 
@@ -360,7 +378,7 @@ tr.is_publish {
 }
 
 #hotkeys-list tr:nth-child(even) {
-    background-color: #eee;
+    background-color: var(--alternating-row-color-light);
 }
 
 #hotkeys-list td {
@@ -378,9 +396,16 @@ tr.is_publish {
     margin: 15px;
 }
 
+.overall-comment-top-row {
+    margin-bottom: 10px;
+}
+
+.overall-comment-status {
+    text-align: right
+}
+
 .gradeable .general-comment {
-    background-color:#E9EFEF;
-    cursor: pointer;
+    background-color:var(--overall-comment);
 }
 
 .gradeable .general-comment-entry {
@@ -420,7 +445,7 @@ tr.is_publish {
 }
 
 .gradeable .version-warning {
-    color:rgb(200, 0, 0);
+    color:var(--error-alert-dark-red);
     font-weight: bold;
     font-size:medium;
 }
@@ -433,7 +458,7 @@ tr.is_publish {
 }
 
 .gradeable .ta-student-comment {
-    color: #777;
+    color: var(--grading-note);
 }
 
 .gradeable .verify-container {
@@ -593,16 +618,15 @@ tr.is_publish {
     width: 20px;
     height: 20px;
     margin: 2px;
-    border: 2px solid #000;
+    border: 2px solid var(--text-black);
     border-radius: 4px;
-    color: #888;
     font-size: 14px;
     text-align: center;
 }
 
 .gradeable .mark-selector.mark-selected {
-    color: #ccc;
-    background-color: #000;
+    color: var(--text-white);
+    background-color: var(--checkbox-black);
 }
 
 .gradeable .mark-selector.hidden {

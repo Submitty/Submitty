@@ -19,6 +19,10 @@
                     Component graded by a limited access grader
                 </li>
                 <li>
+                    <i class="fas fa-circle grader-4"></i>
+                    Peer component graded by a student
+                </li>
+                <li>
                     <i class="fas fa-circle grader-1"></i>
                     Component graded by a full access grader
                 </li>
@@ -107,13 +111,15 @@
                 {# Section heading #}
                 <tbody>
                     <tr class="info">
-                        <td colspan="{{ columns|length }}" style="text-align: center">
-                            {% if gradeable.isGradeByRegistration() %}
-                                Students Enrolled in Registration Section {{ section.title }}
-                            {% else %}
-                                Students Assigned to Rotating Section {{ section.title }}
-                            {% endif %}
-                        </td>
+                        {% if core.getUser().getGroup() < 4 %}
+                            <td colspan="{{ columns|length }}" style="text-align: center">
+                                {% if gradeable.isGradeByRegistration()%}
+                                    Students Enrolled in Registration Section {{ section.title }}
+                                {% else %}
+                                    Students Assigned to Rotating Section {{ section.title }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
                     </tr>
                     <tr class="info">
                         <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
@@ -337,10 +343,10 @@
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
+            {% elseif graded_gradeable.isTaGradingComplete() or core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
         {% endif %}
@@ -424,7 +430,7 @@
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}
         {% else %}
-            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsers() -%}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}
@@ -468,20 +474,20 @@
     </td>
 {% endmacro %}
 
-{# Total Point Summary (peer)
+{# Total Point Summary (peer) #}
 {% macro render_column_total_peer(self, context, section, graded_gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently)
-    {# todo: this is a lot of math for the view, we should move this into the Gradeable model
+    {# todo: test this (no way to create peer assignments currently) #}
+    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
     {% set graded = gradeable.getGradedNonHiddenPoints() %}
     {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
     {% for component in components %}
-        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score
+        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
         {% set graded = graded + component.getScore() %}
     {% endfor %}
     {#
         instead of autograding_score it should be total autograding possible
         I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
-
+    #}
     {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
@@ -489,7 +495,6 @@
         {% endif %}
     </td>
 {% endmacro %}
-#}
 
 {# User ID #}
 {% macro render_column_user_id(self, context, section, graded_gradeable, index, info, column) %}
@@ -497,6 +502,7 @@
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter.getId() }}
         {% endif %}
+        
     </td>
 {% endmacro %}
 
