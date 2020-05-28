@@ -28,7 +28,7 @@ class GradeableView extends AbstractView {
     }
 
     public function AdminGradeablePeersForm($peer_grader_pairs, $students) {
-        $student_autofill= Utils::getAutoFillData($students);
+        $student_autofill = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("admin/admin_gradeable/AdminGradeablePeersForm.twig", [
             'pair_grader_pairs' => $peer_grader_pairs,
