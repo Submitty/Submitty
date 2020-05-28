@@ -34,14 +34,36 @@
 </fieldset>
 
 <script>
-
     function removeGraderAlert($grader_to_edit) {
         var txt;
-        if (confirm("This will remove " + $grader_to_edit + "\'s row from Peer Matrix. Are you sure you want to continue?")) {
+        if (confirm("This will remove " + $grader_to_edit + "\'s entire row from Peer Matrix. Are you sure you want to continue?")) {
             console.log("continued");
         } else {
             console.log("canceled");
         }
+    }
+
+    function removeStudent(i, $grader_to_edit) {
+        $student_to_remove = $('[name="edit_user_id_'+i+'"]', form);
+        if (!confirm("This will remove " + $student_to_remove.val() + " from " + $grader_to_edit + "'s row. Are you sure you want to continue?")) {
+            return;
+        }
+        var form = $("#admin-gradeable-peers-form");
+        $('#edit_user_id_'+i+'', form).remove();
+    }
+
+    function addNewStudent() {
+        let form = $("#admin-gradeable-peers-form");
+        let add_students_div = $("#students-to-add");
+        let j = $('.add_user_ids').count;
+        $('#add_student_button').remove();
+        add_students_div.append('<p class="add_user_ids" id="add_user_id_'+j+'"><input type="text" name="add_user_id_'+j+'" /><br></p>');
+        $('[name="add_user_id_'+j+'"]', form).autocomplete({
+            source: student_autofill
+        });
+        $('[name="add_user_id_'+j+'"]').autocomplete( "option", "appendTo", form );
+        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addNewStudent();" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
+
     }
 
     function adminGradeablePeerForm() {
@@ -62,24 +84,23 @@
         curr_students_div.empty();
         curr_students_div.append("Edit Current Students:<br />")
         for (var i = 0; i < len; i++) {
-            curr_students_div.append('<input class="readonly peerstudents" type="text" name="user_id_' + i + '" readonly="readonly" value="' + peer_grader_pairs[grader_to_edit][i] + '" /> \
-                <input id="remove_student_'+i+'" class="btn btn-danger" value="Remove" readonly="readonly" onclick="" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+            curr_students_div.append('<p class="edit_user_ids" id="edit_user_id_' + i + '"><input class="readonly peerstudents" type="text" name="edit_user_id_' + i + '" readonly="readonly" value="' + peer_grader_pairs[grader_to_edit][i] + '" /> <input id="remove_student_'+i+'" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeStudent('+i+',\''+grader_to_edit+'\');" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br /></p>');
         }
-        //set the right panel to allow adding new students
+        //set right panel to allow removing grader completely
         let add_students_div = $("#students-to-add");
         add_students_div.empty();
+        add_students_div.append("Remove Grader:<br />");
+        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\''+grader_to_edit+'\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br /><br />');
+        //set the right panel to allow adding new students
         add_students_div.append("Add New Students:<br />")
         let student_autofill = JSON.parse($('#student_autofill').val());
-        add_students_div.append('<input type="text" name="user_id_' + i + '" /><br />');
-        $('[name="user_id_'+i+'"]', form).autocomplete({
+        add_students_div.append('<p class="add_user_ids" id="add_user_id_0"><input type="text" name="add_user_id_0" /><br></p>');
+        $('[name="add_user_id_0"]', form).autocomplete({
             source: student_autofill
         });
-        $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
-        add_students_div.append('<span style="cursor: pointer;" onclick="" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
-        Add More Users</span><br /><br />');
-        //set right panel to allow removing grader completely
-        add_students_div.append("Remove Grader:<br />");
-        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\''+grader_to_edit+'\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+        $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
+        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addNewStudent();" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
+        
     }
 
     $(document).ready(function() {
