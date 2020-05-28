@@ -77,7 +77,7 @@ function draghandle(e){
 // check if adding a file is valid (not exceeding the limit)
 function addIsValid(files_to_add, total_added_files) {
   if (files_to_add+total_added_files > MAX_NUM_OF_FILES){
-    alert('Exceeded allowable number of files.\nPlease package your files in a single .zip file if it is necessary for you to submit more than this limit.');
+    alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
     return false;
   }
   return true;
