@@ -38,10 +38,6 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        //$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jspdf', 'jspdf.min.js'));
-        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('html2canvas', 'html2canvas.js'), 'vendor');
-        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
-        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.node.min'), 'vendor');
         // This initializes the toolbar and activates annotation mode
         if (!isset($is_student) || !$is_student) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
@@ -68,9 +64,12 @@ class PDFView extends AbstractView {
      *
      * @param $gradeable_id
      * @param $user_id
-     * @param $filename
+     * @param $file_name
+     * @param $file_path
      * @param $annotation_jsons
      * @param $is_student
+     * @param $rerender_annotated_pdf
+     * @param $page_num
      *
      * @return void
      */
@@ -96,10 +95,7 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        //$this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jspdf', 'jspdf.min.js'));
-        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('html2canvas', 'html2canvas.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
-        //$localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.node.min'), 'vendor');
         // This initializes the toolbar and activates annotation mode
         if (!isset($is_student) || !$is_student) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
