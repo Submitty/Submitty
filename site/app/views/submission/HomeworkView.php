@@ -469,7 +469,8 @@ class HomeworkView extends AbstractView {
             'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
             'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
-            'max_post_size' => Utils::returnBytes(ini_get('post_max_size'))
+            'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
+            'max_file_uploads' => ini_get('max_file_uploads')
         ]);
     }
 
