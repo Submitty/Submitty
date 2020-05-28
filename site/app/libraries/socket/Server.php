@@ -65,7 +65,6 @@ class Server implements MessageComponentInterface {
                 }
                 else {
                     $this->setSocketClient($user_id, $conn);
-                    $conn->send('{"sys": "Connected"}');
                     return true;
                 }
             }
@@ -111,7 +110,7 @@ class Server implements MessageComponentInterface {
      * Fetches Connection object of a given User_ID
      * @return bool|\Ratchet\ConnectionInterface
      */
-    private function getSocketClientID(string $user_id) {
+    private function getSocketClient(string $user_id) {
         if (isset($this->users[$user_id])) {
             return $this->users[$user_id];
         }
@@ -153,12 +152,11 @@ class Server implements MessageComponentInterface {
     }
 
     /**
-     * When a new user connects to the socket, check authentication
+     * On connection, add socket to tracked clients, but we do not need
+     * to check auth here as 
      */
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
-
-        $this->checkAuth($conn);
     }
 
     /**
@@ -179,7 +177,7 @@ class Server implements MessageComponentInterface {
                 case "new_thread":
                 case "new_post":
                     $user_id = $msg["data"]["user_id"];
-                    if ($fromConn = $this->getSocketClientID($user_id)) {
+                    if ($fromConn = $this->getSocketClient($user_id)) {
                         $this->broadcast($fromConn, $msgString, true);
                     }
                     else {
@@ -200,7 +198,6 @@ class Server implements MessageComponentInterface {
     public function onClose(ConnectionInterface $conn): void {
         $this->removeSocketClient($conn);
         $this->clients->detach($conn);
-        $conn->send('{"sys": "Disconnected"}');
     }
 
     /**
