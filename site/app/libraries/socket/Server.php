@@ -153,7 +153,7 @@ class Server implements MessageComponentInterface {
 
     /**
      * On connection, add socket to tracked clients, but we do not need
-     * to check auth here as 
+     * to check auth here as that is done on every message.
      */
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
