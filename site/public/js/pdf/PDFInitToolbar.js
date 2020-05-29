@@ -200,9 +200,9 @@ function renderPDFToolbar(){
         document.getElementById('color_selector').style.backgroundColor = color;
     }
 // Pen stuff
-    let penSize;
-    let penColor;
-    let scrollLock;
+    let penSize = 3;
+    let penColor = '#FF0000';
+    let scrollLock= false;
     function initPen() {
         let init_size = localStorage.getItem('pen/size');
         let init_color = localStorage.getItem('main_color');
@@ -215,29 +215,28 @@ function renderPDFToolbar(){
         setPen(init_size, init_color);
         
         document.getElementById('pen_size_selector').addEventListener('change', function(e){
-            let value = e.target.value ? e.target.value : e.srcElement.value;
-            setPen(value, penColor);
+            setPen(e.target.value || e.srcElement.value, penColor);
         });
         document.addEventListener('colorchange', function(e){
             setPen(penSize, e.srcElement.getAttribute('value'));
         });
     }
 
-    function setPen(size, color) {
-        penSize = size;
-        penColor = color;
+    function setPen(pen_size, pen_color) {
+        penSize = pen_size;
+        penColor = pen_color;
         
         if (scrollLock) {
             $('#file_content').css('overflow', 'hidden');
         }
-        localStorage.setItem('pen/size', penSize);
-        localStorage.setItem('main_color', penColor);
-        PDFAnnotate.UI.setPen(penSize, penColor);
+        localStorage.setItem('pen/size', pen_size);
+        localStorage.setItem('main_color', pen_color);
+        PDFAnnotate.UI.setPen(pen_size, pen_color);
     }
 
 // Text stuff
-    let textSize;
-    let textColor;
+    let textSize = 12;
+    let textColor = '#FF0000';
     function initText() {
         let init_size = localStorage.getItem('text/size');
         let init_color = localStorage.getItem('main_color');
@@ -247,17 +246,16 @@ function renderPDFToolbar(){
             setText(textSize, e.srcElement.getAttribute('value'));
         });
         document.getElementById('text_size_selector').addEventListener('change', function(e) {
-            let value = e.target.value ? e.target.value : e.srcElement.value;
-            setText(value, textColor);
+            setText(e.target.value || e.srcElement.value, textColor);
         });
     }
 
-    function setText(size, color) {
-            textSize = size;
-            textColor = color;
-            localStorage.setItem('text/size', size);
-            localStorage.setItem('main_color', color);
-            PDFAnnotate.UI.setText(size, color);
+    function setText(text_size, text_color) {
+        textSize = text_size;
+        textColor = text_color;
+        localStorage.setItem('text/size', text_size);
+        localStorage.setItem('main_color', text_color);
+        PDFAnnotate.UI.setText(text_size, text_color);
     }
     initColors();
     initPen();

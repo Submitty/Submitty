@@ -132,6 +132,6 @@ function loadPDFToolbar(){
     localStorage.setItem('main_color', init_color);
     PDFAnnotate.UI.setPen(init_pen_size, init_color);
     let init_text_size = document.getElementById('text_size_selector').value;
-    localStorage.setItem('text/size', textSize);
+    localStorage.setItem('text/size', init_text_size);
     PDFAnnotate.UI.setText(init_text_size, init_color);
 }
