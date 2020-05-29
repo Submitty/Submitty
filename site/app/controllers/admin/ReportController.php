@@ -41,6 +41,7 @@ class ReportController extends AbstractController {
         }
 
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+        $this->core->getOutput()->enableMobileViewport();
 
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates', $grade_summaries_last_run);
     }

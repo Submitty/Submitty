@@ -2,16 +2,12 @@
 
 namespace app\models\notebook;
 
+use app\models\notebook\Notebook;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
-use app\models\AbstractModel;
 
 /**
- * Class UserSpecificNotebook
- * @package app\models\notebook
- *
- * @method array getNotebookConfig()
  * @method array getTestCases()
  * @method array getHashes()
  * @method array getSelectedQuestions()
@@ -19,12 +15,10 @@ use app\models\AbstractModel;
  * @method bool getWarning()
  */
 
-class UserSpecificNotebook extends AbstractModel {
+class UserSpecificNotebook extends Notebook {
 
     /** @prop @var array array of items where the notebook selects from */
     protected $item_pool = [];
-    /** @prop @var array notebook config */
-    protected $notebook_config;
     /** @prop @var array testcases config */
     protected $test_cases = [];
     /** @prop @var array hashes generated for student's notebook */
@@ -33,20 +27,21 @@ class UserSpecificNotebook extends AbstractModel {
     protected $selected_questions = [];
     /** @prop @var string warning if this notebook has potentially overlapping questions picked */
     protected $warning = null;
+    /** @prop @var array containing description of this notebook */
+    protected $notebook_config;
 
-    private $gradeable_id;
     private $user_id;
 
     public function __construct(Core $core, array $details, string $gradeable_id, string $user_id) {
+        parent::__construct($core, $details, $gradeable_id);
 
-        parent::__construct($core);
-
-        $tgt_dir = FileUtils::joinPaths(
-            $this->core->getConfig()->getCoursePath(),
-            "config/complete_config",
-            "complete_config_" . $gradeable_id . ".json"
+        $json = FileUtils::readJsonFile(
+            FileUtils::joinPaths(
+                $core->getConfig()->getCoursePath(),
+                "config/complete_config",
+                "complete_config_" . $gradeable_id . ".json"
+            )
         );
-        $json = FileUtils::readJsonFile($tgt_dir);
 
         if ($json !== false && isset($json['item_pool'])) {
             $this->item_pool = $json['item_pool'];
@@ -54,19 +49,24 @@ class UserSpecificNotebook extends AbstractModel {
 
         $this->gradeable_id = $gradeable_id;
         $this->user_id = $user_id;
-
         $this->notebook_config = $this->replaceNotebookItemsWithQuestions($details);
+
+        //need to re-parse notebook now that config has been reconstructed
+        parent::parseNotebook($this->notebook_config);
     }
 
 
-    /** Collect items from a notebook and replace them with the actual notebook values
+    /**
+    * Collect items from a notebook and replace them with the actual notebook values
+    * @param array $raw_notebook the original user created config with item sections
+    * @return array a new notebook with the item sections replaced with actual notebook questions/markdown/images etc
     */
     private function replaceNotebookItemsWithQuestions(array $raw_notebook): array {
         $new_notebook = [];
         $seen_items = [];
         $tests = [];
 
-        foreach ($raw_notebook['notebook'] as $notebook_cell) {
+        foreach ($raw_notebook as $notebook_cell) {
             if (isset($notebook_cell['type']) && $notebook_cell['type'] === 'item') {
                 //see if theres a target item pool and replace this with the actual notebook
                 $tgt_item = $this->getItemFromPool($notebook_cell);
@@ -101,6 +101,11 @@ class UserSpecificNotebook extends AbstractModel {
     }
 
 
+    /**
+    * Given a notebook item return an associated notebook question
+    * @param array $item notebook item from the user created config
+    * @return string the name of the notebook question to select
+    */
     private function getItemFromPool(array $item): string {
         $item_label = $item['item_label'];
         $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
@@ -110,6 +115,13 @@ class UserSpecificNotebook extends AbstractModel {
         return $item_from_pool;
     }
 
+
+    /**
+    * Generate a unique hash used to select a question for this student's notebook, the hash is saved under $this->hashes
+    * @param string $item_label the notebook item label in the config used
+    * @param int $from_pool_count the number of questions in the associated item pool
+    * @return int the index of the question to select
+    */
     private function getNotebookHash(string $item_label, int $from_pool_count): int {
     
         $gid = $this->gradeable_id;
@@ -126,7 +138,10 @@ class UserSpecificNotebook extends AbstractModel {
         return $selected;
     }
 
-
+    /**
+    * Given an item_pool name return all associated notebook values and their testcases
+    * @param string $tgt_name the name of the item_pool to search for
+    */
     private function searchForItemPool(string $tgt_name): array {
         $ret = ["notebook" => [], "testcases" => []];
         foreach ($this->item_pool as $item) {

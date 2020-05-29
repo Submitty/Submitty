@@ -807,6 +807,52 @@ function togglePageDetails() {
 }
 
 /**
+ * Opens a new tab on https://validator.w3.org with the contents of the current html page
+ */
+function validateHtml() {
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  function c(a, b) {
+    const c = document.createElement("textarea");
+    c.name = a;
+    c.value = b;
+    d.appendChild(c)
+  }
+  const e = ((a) => {
+      for (var b = "", a = a.firstChild; a;) {
+        switch (a.nodeType) {
+          case Node.ELEMENT_NODE:
+            b += a.outerHTML;
+            break;
+          case Node.TEXT_NODE:
+            b += a.nodeValue;
+            break;
+          case Node.CDATA_SECTION_NODE:
+            b += "<![CDATA[" + a.nodeValue + "]]\>";
+            break;
+          case Node.COMMENT_NODE:
+            b += "<\!--" + a.nodeValue + "--\>";
+            break;
+          case Node.DOCUMENT_TYPE_NODE:
+            b += "<!DOCTYPE " + a.name + ">\n"
+        }
+        a = a.nextSibling
+      }
+      return b
+  })(document);
+  const d = document.createElement("form");
+  d.method = "POST";
+  d.action = "https://validator.w3.org/nu/";
+  d.enctype = "multipart/form-data";
+  d.target = "_blank";
+  d.acceptCharset = "utf-8";
+  c("showsource", "yes");
+  c("content", e);
+  document.body.appendChild(d);
+  d.submit();
+  d.outerHTML = "";
+}
+
+/**
  * Remove an alert message from display. This works for successes, warnings, or errors to the
  * user
  * @param elem
@@ -1272,19 +1318,23 @@ function loadOverriddenGrades(g_id) {
 }
 
 function refreshOnResponseOverriddenGrades(json) {
-    var form = $("#load-overridden-grades");
-    $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
-    $('#title').replaceWith(title);
+    const form = $("#load-overridden-grades");
+    $('#grade-override-table tr:gt(0)').remove();
+    let title = 'Overridden Grades for ' + json['data']['gradeable_id'];
+    $('#title').text(title);
     if(json['data']['users'].length === 0){
-        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+      $("#load-overridden-grades").addClass('d-none');
+      $("#empty-table").removeClass('d-none');
+      $('#empty-table').text('There are no overridden grades for this homework');
     }
     else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
-            $('#my_table').append(bits.join('</td><td>'));
+            let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
+      $("#load-overridden-grades").removeClass('d-none');
+      $("#empty-table").addClass('d-none');
     }
 }
 

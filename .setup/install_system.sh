@@ -635,6 +635,8 @@ America/New_York
 ${SUBMISSION_URL}
 
 
+sysadmin@example.com
+https://example.com
 1
 submitty-admin
 submitty-admin

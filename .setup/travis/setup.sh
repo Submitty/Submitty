@@ -69,6 +69,8 @@ America/New_York
 http://localhost
 
 
+sysadmin@example.com
+https://example.com
 ${AUTH_METHOD}
 
 
