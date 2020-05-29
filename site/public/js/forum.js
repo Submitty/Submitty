@@ -277,6 +277,7 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
                 $('#thread_post_anon_edit').remove();
             }
             $('#edit-user-post').css('display', 'block');
+            captureTabInModal("edit-user-post");
 
             $(".cat-buttons input").prop('checked', false);
 
@@ -681,6 +682,7 @@ function showSplit(post_id) {
         }
       }
       $("#popup-post-split").show();
+      captureTabInModal("popup-post-split");
     },
     error: function(){
       window.alert("Something went wrong while trying to get post information for splitting. Try again later.");
@@ -711,6 +713,7 @@ function showHistory(post_id) {
                 return;
             }
             $("#popup-post-history").show();
+            captureTabInModal("popup-post-history");
             $("#popup-post-history .post_box.history_box").remove();
             $("#popup-post-history .form-body").css("padding", "5px");
             var dummy_box = $($("#popup-post-history .post_box")[0]);
@@ -1399,7 +1402,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
                 $('#messages').append(message);
                 return;
             }
-            
+
             json = json['data'];
             $("#thread-content").html(json['post']);
             if (json.markdown === true) {

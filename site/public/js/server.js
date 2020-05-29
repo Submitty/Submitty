@@ -303,10 +303,12 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
     }
     $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
+    captureTabInModal("edit-course-materials-form");
 }
-function captureTabInModal(formName){
+function captureTabInModal(formName, resetFocus=true){
+    releaseTabFromModal(formName);
 
-  var form = $("#".concat(formName));
+    var form = $("#".concat(formName));
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -314,7 +316,9 @@ function captureTabInModal(formName){
     var lastInput = inputs.last();
 
     /*set focus on first element*/
-    firstInput.focus();
+    if(resetFocus){
+      firstInput.focus();
+    }
 
     /*redirect last tab to first element*/
     form.on('keydown', function (e) {
