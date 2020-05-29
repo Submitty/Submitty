@@ -176,7 +176,8 @@ class Notification extends AbstractModel {
             }
         }
         else {
-            return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
+            // TODO: Continue debugging here
+            return DateUtils::convertTimeStampServerToUser($this->core, $actual_time, DateUtils::getDateFormat($this->core, 'forum'));
         }
     }
 }

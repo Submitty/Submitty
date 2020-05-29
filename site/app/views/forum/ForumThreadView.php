@@ -783,10 +783,10 @@ class ForumThreadView extends AbstractView {
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
         // Get formatted time stamps
-        $date = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp'], DateUtils::getDateFormat('forum'));
+        $date = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp'], DateUtils::getDateFormat($this->core, 'forum'));
 
         if (!is_null($post["edit_timestamp"])) {
-            $edit_date = DateUtils::convertTimeStampServerToUser($this->core, $post["edit_timestamp"], DateUtils::getDateFormat('forum'));
+            $edit_date = DateUtils::convertTimeStampServerToUser($this->core, $post["edit_timestamp"], DateUtils::getDateFormat($this->core, 'forum'));
         }
         else {
             $edit_date = null;

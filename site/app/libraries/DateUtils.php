@@ -18,7 +18,7 @@ class DateUtils {
     const DATE_FORMATS_KEYS = [
         'gradeable',
         'gradeable_with_seconds',
-        'forum'
+        'forum'                     // Also used in user notifications
     ];
 
     // Internationalized DateTime formatting strings
@@ -41,6 +41,7 @@ class DateUtils {
      * using the MM/DD/YYYY format but eventually this function will pick up configuration data and return a formatting
      * string consistent with whatever part of the world the submitty administrators are setting it up for.
      *
+     * @param Core $core
      * @param string $key A key available in self::DATE_FORMAT_KEYS
      * @throws BadArgumentException The supplied key was not found is self::DATE_FORMATS_KEYS
      * @return string
