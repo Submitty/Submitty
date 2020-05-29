@@ -279,7 +279,7 @@ WHERE status = 1"
     public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
         $this->submitty_db->query(
             "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
-            array($term_id, $term_name, $start_date, $end_date)
+            [$term_id, $term_name, $start_date, $end_date]
         );
     }
 

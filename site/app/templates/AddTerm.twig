@@ -1,38 +1,40 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}add-new-term{% endblock %}
-{% block title %}Add new Term{% endblock %}
+{% block title %}Add New Term{% endblock %}
 {% block form %}
     <form method="post" action="{{ add_term_url }}">
         {{ parent() }}
     </form>
 {% endblock %}
 {% block body %}
-    <p class="std-margin">
-        A message is to be displayed here...
-    </p>
-    <p class="std-margin">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam tempor sed velit nec porttitor. Maecenas eu dolor est. Sed sit amet lacus sed elit accumsan molestie ullamcorper ut est. Curabitur molestie quam sit amet ex sodales venenatis. Proin porttitor erat vitae justo pharetra, id hendrerit felis sagittis.
-    </p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <div class="flex-col">
+    <div class="flex-col my-3">
         <div class="row">
             <label class="col-md-6" for="term-id">
-                Term id:&emsp;
-                <input type="text" name="term_id" placeholder="s20" id="term-id" required/>
+                <div class="row">
+                    <span class="col-md-5">Term id:</span>
+                    <input type="text" name="term_id" placeholder="s20" id="term-id" class="col-md-6" required/>
+                </div>
             </label>
             <label class="col-md-6" for="start-date">
-                Start Date:&emsp;
-                <input type="date" name="start_date" id="start-date" required/>
+                <div class="row">
+                    <span class="col-md-5">Start Date:</span>
+                    <input type="date" name="start_date" id="start-date" class="col-md-6" required/>
+                </div>
             </label>
         </div>
         <div class="row">
             <label class="col-md-6 mt-3" for="term-name">
-                Term Name:&emsp;
-                <input type="text" name="term_name" placeholder="Spring 2020" id="term-name" required/>
+                <div class="row">
+                    <span class="col-md-5">Term name:</span>
+                    <input type="text" name="term_name" placeholder="Spring 2020" id="term-name" class="col-md-6" required/>
+                </div>
             </label>
             <label class="col-md-6 mt-3" for="end-date">
-                End Date:&emsp;
-                <input type="date" name="end_date" id="end-date" required/>
+                <div class="row">
+                    <span class="col-md-5">End Date:</span>
+                    <input type="date" name="end_date" id="end-date" class="col-md-6" required/>
+                </div>
             </label>
         </div>
     </div>

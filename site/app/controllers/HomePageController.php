@@ -290,7 +290,6 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                //$this->core->getQueries()->getAllUnarchivedSemester(),
                 $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken()
