@@ -25,7 +25,7 @@
     "plotly.js-dist": "1.53.0",
     "shortcut-buttons-flatpickr": "0.3.0",
     "twig": "1.15.1",
-    "jspdf": "1.5.3"
+    "jspdf": "2.1.1"
   },
   "devDependencies": {}
 }
