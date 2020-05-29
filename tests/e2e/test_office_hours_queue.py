@@ -109,10 +109,14 @@ class TestOfficeHoursQueue(BaseTestCase):
 
     def openFilterSettings(self):
         self.goToQueuePage()
-        self.assertEqual(True,self.driver.execute_script("return $('#filterSettingsCollapse').is(':hidden')"))
+        self.assertEqual(True,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
         self.driver.find_element(By.ID, 'toggle_filter_settings').click()
-        self.assertEqual(False,self.driver.execute_script("return $('#filterSettingsCollapse').is(':hidden')"))
+        self.assertEqual(False,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
 
+    def closeFilterSettings(self):
+        self.assertEqual(False,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
+        self.driver.find_element(By.XPATH, '//*[@id="filter-settings"]//*[@class="form-button-container"]/*').click()
+        self.assertEqual(True,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
 
     def deleteAllQueues(self):
         self.openFilterSettings()
@@ -120,6 +124,7 @@ class TestOfficeHoursQueue(BaseTestCase):
             self.driver.find_element(By.CLASS_NAME, 'delete_queue_btn').click()
             self.driver.switch_to.alert.accept()
             self.openFilterSettings()
+        self.closeFilterSettings()
 
     def openQueue(self, name, code=None):
         self.openFilterSettings()
