@@ -1,3 +1,6 @@
+#tag-list{
+    margin-left: 20px;
+}
 
 .docker-header{
     display: inline-block;
@@ -8,6 +11,7 @@
     padding: 10px;
     margin-top: 10px;
 }
+
 
 /* desktop view */
 @media (min-width: 550px) {

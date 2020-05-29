@@ -26,7 +26,7 @@ class DockerView extends AbstractView {
             $image["created"] = $date;
             $image["size"] = Utils::formatBytes('mb', $image["size"], true);
             $image["virtual_size"] = Utils::formatBytes('mb', $image["virtual_size"], true);
-
+            $image["additional_names"] = array_slice($image['tags'], 1);
 
             $copy[] = $image;
         }
@@ -35,10 +35,11 @@ class DockerView extends AbstractView {
 
         //figure out which images are installed and listed in the config
         foreach ($docker_data['docker_images'] as $image) {
-            $name = $image['tags'][0];
-
-            if (in_array($name, $autograding_containers)) {
-                $found_images[] = $image;
+            foreach ($autograding_containers as $container) {
+                if (in_array($container, $image['tags'])) {
+                    $found_images[] = $image;
+                    break;
+                }
             }
         }
 
@@ -48,7 +49,7 @@ class DockerView extends AbstractView {
             foreach ($docker_data['docker_images'] as $image) {
                 $name = $image['tags'][0];
 
-                if ($name === $autograding_image) {
+                if (in_array($autograding_image, $image['tags'])) {
                     $found = true;
                     break;
                 }
@@ -59,11 +60,21 @@ class DockerView extends AbstractView {
             }
         }
 
+
+        //sort containers alphabetically
+        $sort_containers = function (array $containers, string $key, int $order = SORT_ASC): array {
+            $names = array_column($containers, $key);
+            array_multisort($names, $order, $containers);
+            return $containers;
+        };
+
+
         $autograding_containers = [
-            "found" => $found_images,
-            "not_found" => $not_found,
-            "all_images" => $docker_data['docker_images']
+            "found" => $sort_containers($found_images, 'name'),
+            "all_images" => $sort_containers($docker_data['docker_images'], 'name'),
+            "not_found" => sort($not_found)
         ];
+
 
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",

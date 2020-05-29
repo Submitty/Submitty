@@ -464,8 +464,9 @@ if not args.worker:
     
     for file in [WORKERS_JSON, CONTAINERS_JSON]:
       shutil.chown(file, 'root',DAEMON_GID)
-      os.chmod(CONTAINERS_JSON, 0o460)
+      os.chmod(file, 0o460)
 
+    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
 ##############################################################################
 # Write database json

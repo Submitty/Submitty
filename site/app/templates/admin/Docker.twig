@@ -69,6 +69,15 @@
             <p> Tag: {{ value["tag"] }} </p>
             <br>
             <p> Created on: {{ value["created"] }} </p>
+            <br>
+            {% if value["additional_names"] | length > 0 %}
+            <p>This container has also been tagged as :</p>
+            <ul id="tag-list">
+                {% for name in value["additional_names"] %}
+                <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         </div>
     {% endfor %}
 {% endmacro %}
