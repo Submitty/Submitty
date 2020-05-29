@@ -16,6 +16,9 @@ use app\models\AbstractModel;
  * @method getPoints()
  * @method isExtraCredit()
  * @method isHidden()
+ * @method getDispatcherActions()
+ * @method getGraphicsActions()
+ * @method isPublishActions()
  */
 class AutogradingTestcase extends AbstractModel {
 
@@ -36,11 +39,11 @@ class AutogradingTestcase extends AbstractModel {
     protected $view_testcase_message = true;
     /** @prop @var string */
     protected $testcase_label = '';
-    /** @prop @var array */
+    /** @prop-read @var array */
     protected $dispatcher_actions = array();
-    /** @prop @var array */
+    /** @prop-read @var array */
     protected $graphics_actions = array();
-    /** @prop @var boolean */
+    /** @prop-read @var boolean */
     protected $publish_actions = false;
 
     /**
@@ -136,21 +139,6 @@ class AutogradingTestcase extends AbstractModel {
 
     /** @internal */
     public function setViewTestcaseMessage() {
-        throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
-    }
-
-    /** @internal */
-    public function setDispatcherActions() {
-        throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
-    }
-
-    /** @internal */
-    public function setGraphicsActions() {
-        throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
-    }
-
-    /** @internal */
-    public function setPublishActions() {
         throw new \BadFunctionCallException('Setters disabled for AutogradingTestcase');
     }
 }

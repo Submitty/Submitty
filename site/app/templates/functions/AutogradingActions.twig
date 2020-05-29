@@ -3,7 +3,6 @@
 {% macro renderDispatcherAction(action) %}
     {% import _self as self %}
 
-    <p class="autograding-action">
     {% if action.action == "delay" %}
         {{ self.renderDelay(action) }}
     {% elseif action.action == "stdin" %}
@@ -13,14 +12,12 @@
     {% else %}
         An undocumented action was taken
     {% endif %}
-    </p>
 {% endmacro %}
 
 {# Render a Graphics Action #}
 {# @var object action #}
 {% macro renderGraphicsAction(action) %}
     {% import _self as self %}
-    <p class="autograding-action">
     {% if action.action == "delay" %}
         {{ self.renderGraphicsDelay(action) }}
     {% elseif action.action == "screenshot" %}
@@ -46,7 +43,6 @@
     {% else %}
         An undocumented action was taken
     {% endif %}
-    </p>
 {% endmacro %}
 
 
