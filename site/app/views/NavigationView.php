@@ -42,6 +42,7 @@ class NavigationView extends AbstractView {
         ],
         GradeableList::OPEN => [
             "title" => "OPEN",
+            "is_panel_expanded" => true,
             "subtitle" => "",
             "section_id" => "open",
             "button_type_submission" => "btn-primary",
@@ -67,6 +68,7 @@ class NavigationView extends AbstractView {
         GradeableList::GRADED => [
             "title" => "GRADES AVAILABLE",
             "subtitle" => "",
+            "is_panel_expanded" => true,
             "section_id" => "graded",
             "button_type_submission" => 'btn-default',
             "button_type_grading" => 'btn-default',
@@ -198,6 +200,7 @@ class NavigationView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
+        $this->core->getOutput()->addInternalJs("navigation.js");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
