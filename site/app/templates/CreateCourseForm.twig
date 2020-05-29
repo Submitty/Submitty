@@ -22,7 +22,9 @@
                         </option>
                     {% endfor %}
                 </select>
-                <button class="btn btn-secondary" type="button" style="margin-left:10px;" onclick="addNewTerm()">Other</button>
+                {% if is_superuser %}
+                    <button class="btn btn-secondary" type="button" style="margin-left:10px;" onclick="addNewTerm()">Other</button>
+                {% endif %}
             </div>
         </div>
 
