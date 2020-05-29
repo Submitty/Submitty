@@ -221,7 +221,7 @@ class User extends AbstractModel {
      *
      * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
      */
-    public function getTimeZoneNiceFormat() {
+    public function getNiceFormatTimeZone() {
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
     }
 

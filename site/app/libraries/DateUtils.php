@@ -179,4 +179,55 @@ class DateUtils {
 
         return $time_stamp->format('P');
     }
+
+    /**
+     * Determine if the given time stamp includes a UTC offset.  If so, return the original time stamp but with the
+     * offset information trimmed off.  Since all times saved on the server are saved in the server time zone,
+     * removing the UTC offset from the time stamp removes any ambiguity arising from instantiating a DateTime object
+     * with the original string, and then changing the time zone to the server time zone.  This is needed to properly
+     * handle areas switching in and out of daylight savings time.
+     *
+     * @param string $time_stamp A time stamp that could be used to instantiate a PHP DateTime object
+     * @return string The original time stamp if no offset information was found, or the original time stamp with the
+     * offset information removed.
+     */
+    public static function stripUTCOffset(string $time_stamp): string {
+        $time = new \DateTime($time_stamp);
+        $time_zone = $time->getTimezone()->getName();
+
+        // Determine if $time_zone starts with a '-' or a '+'
+        // If so then this time stamp was setup with an offset instead of a real time zone
+        $needle = $time_zone[0];
+
+        if ($needle === '+' || $needle === '-') {
+            $pos = strripos($time_stamp, $needle);
+            $time_stamp = substr($time_stamp, 0 , $pos);
+        }
+
+        return $time_stamp;
+    }
+
+    public static function convertTimeStampServerToUser(Core $core, string $time_stamp, string $format) {
+        $user = $core->getUser();
+        $server_time_zone = $core->getConfig()->getTimezone();
+
+        // No user, use the server time zone
+        if ($user === null) {
+            $user_time_zone = $server_time_zone;
+        }
+        else {
+            $user_time_zone = $user->getNiceFormatTimeZone();
+        }
+
+        // Just use the server's time zone if the user has not set one
+        if ($user_time_zone === 'NOT SET') {
+            $user_time_zone = $server_time_zone;
+        }
+
+        // Preform the conversion
+        $time = new \DateTime(self::stripUTCOffset($time_stamp), $server_time_zone);
+        $time->setTimezone(new \DateTimeZone($user_time_zone));
+
+        return $time->format($format);
+    }
 }

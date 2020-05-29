@@ -8,6 +8,8 @@ use app\libraries\FileUtils;
 
 class ForumThreadView extends AbstractView {
 
+    const DATE_TIME_FORMAT = 'n/j g:i A';
+
     public function forumAccess() {
         return $this->core->getConfig()->isForumEnabled();
     }
@@ -79,7 +81,7 @@ class ForumThreadView extends AbstractView {
 
                 $post_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . "#" . $post['p_id'];
 
-                $posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
+                $posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), self::DATE_TIME_FORMAT);
 
                 $thread_list[$count - 1]["posts"][] = array(
                     "post_link" => $post_link,
@@ -698,7 +700,7 @@ class ForumThreadView extends AbstractView {
             $date_content = ["not_null" => !is_null($date)];
 
             if (!is_null($date)) {
-                $date_content["formatted"] = $function_date($date, "n/j g:i A");
+                $date_content["formatted"] = $function_date($date, self::DATE_TIME_FORMAT);
             }
 
             $thread_content[] = [
@@ -784,13 +786,16 @@ class ForumThreadView extends AbstractView {
 
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
-        $date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
+        // Get formatted time stamps
+        $date = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp'], self::DATE_TIME_FORMAT);
+
         if (!is_null($post["edit_timestamp"])) {
-            $edit_date = $function_date(DateUtils::parseDateTime($post["edit_timestamp"], $this->core->getConfig()->getTimezone()), "n/j g:i A");
+            $edit_date = DateUtils::convertTimeStampServerToUser($this->core, $post["edit_timestamp"], self::DATE_TIME_FORMAT);
         }
         else {
             $edit_date = null;
         }
+
         $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
         $author_email = trim($user_info['user_email']);
         $first_name = trim($user_info["first_name"]);
@@ -969,7 +974,7 @@ class ForumThreadView extends AbstractView {
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
-            "post_date" => $function_date($date, 'n/j g:i A'),
+            "post_date" => $date,
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
             "visible_username" => $visible_username,
