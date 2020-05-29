@@ -72,6 +72,9 @@ class AuthenticationController extends AbstractController {
      * @return MultiResponse
      */
     public function loginForm($old = null) {
+        if (!is_null($old) && !Utils::startsWith(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
+            $old = null;
+        }
         return MultiResponse::webOnlyResponse(
             new WebResponse('Authentication', 'loginForm', $old)
         );
@@ -89,6 +92,9 @@ class AuthenticationController extends AbstractController {
      * @return MultiResponse
      */
     public function checkLogin($old = null) {
+        if (!is_null($old) && !Utils::startsWith(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
+            $old = null;
+        }
         if (isset($old)) {
             $old = urldecode($old);
         }

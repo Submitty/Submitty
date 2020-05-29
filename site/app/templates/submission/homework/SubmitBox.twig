@@ -242,6 +242,7 @@
                     <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                     <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
                     </table>
+                    <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
                 </div>
             {% endfor %}
         </div>
@@ -285,6 +286,7 @@
         <script>
             $(function() {
                 setButtonStatus();
+                initMaxNoFiles({{ max_file_uploads }});
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
