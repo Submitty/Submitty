@@ -62,6 +62,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue(FileUtils::createDir($this->config['course_path'], true));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions")));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue")));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], "grading")));
 
         $this->core = new Core();
         $this->core->setOutput(new NullOutput($this->core));
