@@ -812,12 +812,12 @@ function togglePageDetails() {
 function validateHtml() {
   //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
   function c(a, b) {
-    var c = document.createElement("textarea");
+    const c = document.createElement("textarea");
     c.name = a;
     c.value = b;
     d.appendChild(c)
   }
-  const e = (a) => {
+  const e = ((a) => {
       for (var b = "", a = a.firstChild; a;) {
         switch (a.nodeType) {
           case Node.ELEMENT_NODE:
@@ -838,7 +838,7 @@ function validateHtml() {
         a = a.nextSibling
       }
       return b
-  }(document);
+  })(document);
   const d = document.createElement("form");
   d.method = "POST";
   d.action = "https://validator.w3.org/nu/";
