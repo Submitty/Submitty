@@ -147,6 +147,17 @@
 
                 Grading Index
             </a>
+            
+            <fieldset>
+
+            <input type="radio" name="instructor_blind" value="1" id="unblind_instructor_grading"
+                {{ (gradeable.getInstructorBlind() == 1) ? 'checked' : '' }}> <label for="unblind_instructor_grading">Unblinded Grading</label>
+
+            <input type="radio" name="insturctor_blind" value="2" id="blind_instructor_grading"
+                {{ (gradeable.getInstructorBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_access_grading">Blinded Grading</label>
+
+        </fieldset>
+            
             <ul style="margin-left: 25px; margin-top: -5px; float: left">
                 <li>View Submissions</li>
                 {%  if team_assignment %}

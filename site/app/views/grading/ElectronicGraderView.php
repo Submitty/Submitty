@@ -376,8 +376,6 @@ HTML;
      * @return string
      */
     public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction) {
-
-        var_dump($gradeable->getLimitedAccessBlind());
         
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -394,6 +392,9 @@ HTML;
             if ($gradeable->isTeamAssignment()) {
                 $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
             }
+            elseif($gradeable->getPeerBlind() !== 3){
+                $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
+            }
             else {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
             }
@@ -402,12 +403,22 @@ HTML;
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
+                if($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== 3){
+                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                }
+                else{
+                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
+                }
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
-                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading_blind"];
+                if($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== 3){
+                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                }
+                else{
+                    $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_blind"];
+                }
                 $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
@@ -447,6 +458,9 @@ HTML;
                 if($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2){
                     $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading_blind"];
                 }
+                else{
+                    $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
+                }
                 $columns[]     = ["width" => "7%",  "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
                 if ($gradeable->isTaGradeReleased()) {
@@ -459,6 +473,9 @@ HTML;
                 }
                 if($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2){
                     $columns[]     = ["width" => "12%", "title" => "TA Grading",       "function" => "grading_blind"];
+                }
+                else{
+                    $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
                 }
                 $columns[]     = ["width" => "12%", "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
@@ -738,12 +755,18 @@ HTML;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
+        
+        $limimted_access_blind = false;
+        if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
+            $limimted_access_blind = true;
+        }
+        
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2));
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -760,7 +783,7 @@ HTML;
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
-        if (!$peer) {
+        if (!$peer && $gradeable->getLimitedAccessBlind() !== 2) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled()) {
@@ -833,7 +856,7 @@ HTML;
      * @param string $direction
      * @return string
      */
-    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from) {
+    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind) {
         $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
 
         // Setup urls for prev and next students
@@ -855,6 +878,7 @@ HTML;
             // WIP. Replace this with a better function call once there is a definitive way to determine my peer-ness.
             // For now, I am a peer if I cannot access the peer panel.
             "i_am_a_peer" => $i_am_a_peer,
+            "limited_access_blind" => $limited_access_blind,
             "prev_student_url" => $prev_student_url,
             "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,

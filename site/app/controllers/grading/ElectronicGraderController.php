@@ -883,9 +883,14 @@ class ElectronicGraderController extends AbstractController {
             $peer = true;
         }
         
+        $peer_double_blind = false;
+        if($peer && $gradeable->getPeerBlind() == 3){
+            $peer_double_blind = true;
+        }
+        
         $limited_access_blind = false;
         
-        if($gradeable->isLimitedAccessBlind() && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER){
+        if($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER){
             $limited_access_blind = true;
         }
         
@@ -905,7 +910,7 @@ class ElectronicGraderController extends AbstractController {
 
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = null;
-            if (($peer || $limited_access_blind) && !$team) {
+            if (($peer_double_blind || $limited_access_blind) && !$team) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($from)[$from], false);
             }
             else {
@@ -944,7 +949,7 @@ class ElectronicGraderController extends AbstractController {
             // Reassign who_id
             if (!is_null($goToStudent)) {
                 $who_id = $goToStudent->getId();
-                if (($peer || $limited_access_blind) && !$team) {
+                if (($peer_double_blind || $limited_access_blind) && !$team) {
                     $who_id = $goToStudent->getAnonId();
                 }
             }
@@ -952,7 +957,7 @@ class ElectronicGraderController extends AbstractController {
 
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = null;
-        if (($peer || $limited_access_blind) && !$team) {
+        if (($peer_double_blind || $limited_access_blind) && !$team) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
         }
         else {

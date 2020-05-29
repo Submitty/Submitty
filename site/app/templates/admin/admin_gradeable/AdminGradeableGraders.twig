@@ -73,14 +73,33 @@ Form
         How should grading be anonymized for limited access graders?
         <a class="fa-question-circle" target=_blank aria-label="Manual Grading Anonymization"></a>
     </legend>
-    <input type="radio" name="limited_access_blind" value="2" id="blind_limited_access_grading"
-        {{ (gradeable.getLimitedAccessBlind() == 2) ? 'checked' : '' }}> <label for="blind_limited_access_grading">Blinded Grading</label>
-
     <input type="radio" name="limited_access_blind" value="1" id="unblind_limited_access_grading"
-        {{ (gradeable.getLimitedAccessBlind() == 1 or action == "new") ? 'checked' : '' }}><label for="unblind_limited_access_grading">Unblinded Grading</label>
+        {{ (gradeable.getLimitedAccessBlind() == 1) ? 'checked' : '' }}> <label for="unblind_limited_access_grading">Unblinded Grading</label>
+
+    <input type="radio" name="limited_access_blind" value="2" id="blind_limited_access_grading"
+        {{ (gradeable.getLimitedAccessBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_limited_access_grading">Blinded Grading</label>
 
 </fieldset>
 
+{% if peer %}
+
+    <br />
+    <fieldset>
+        <legend>
+            How should grading be anonymized for peer graders?
+            <a class="fa-question-circle" target=_blank aria-label="Manual Grading Anonymization"></a>
+        </legend>
+        <input type="radio" name="peer_blind" value="1" id="unblind_peer_grading"
+            {{ (gradeable.getPeerBlind() == 1) ? 'checked' : ''}}><label for="unblind_peer_grading">Unblinded Grading</label>
+        <input type="radio" name="peer_blind" value="2" id="single_blind_peer_grading"
+            {{ (gradeable.getPeerBlind() == 2) ? 'checked' : '' }}> <label for="single_blind_peer_grading">Single Blinded Grading</label>
+
+        <input type="radio" name="peer_blind" value="3" id="double_blind_peer_grading"
+            {{ (gradeable.getPeerBlind() == 3 or action == "new") ? 'checked' : '' }}><label for="double_blind_peer_grading">Double Blinded Grading</label>
+
+    </fieldset>
+
+{% endif %}
 
 <div id="doc_all_access">
     <br />
