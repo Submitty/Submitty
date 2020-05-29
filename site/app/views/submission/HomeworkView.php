@@ -451,7 +451,7 @@ class HomeworkView extends AbstractView {
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
             'due_date' => $gradeable->getSubmissionDueDate(),
-            'DATE_TIME_FORMAT' => DateUtils::DATE_TIME_FORMAT,
+            'DATE_TIME_FORMAT' => DateUtils::getDateFormat('gradeable'),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
@@ -970,7 +970,7 @@ class HomeworkView extends AbstractView {
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'csrf_token' => $this->core->getCsrfToken(),
-            'DATE_TIME_FORMAT' => DateUtils::DATE_TIME_FORMAT_WITH_SECONDS
+            'DATE_TIME_FORMAT' => DateUtils::getDateFormat('gradeable_with_seconds')
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
@@ -1096,7 +1096,7 @@ class HomeworkView extends AbstractView {
                     $content = $post['content'];
                     $posts[] = [
                         'is_staff' => $is_staff,
-                        'date' => date_format($date, DateUtils::DATE_TIME_FORMAT),
+                        'date' => date_format($date, DateUtils::getDateFormat('gradeable')),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,

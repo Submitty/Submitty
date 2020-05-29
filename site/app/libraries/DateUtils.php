@@ -2,6 +2,8 @@
 
 namespace app\libraries;
 
+use app\exceptions\BadArgumentException;
+
 /**
  * Class DateUtils
  *
@@ -12,11 +14,44 @@ class DateUtils {
     /** @var string Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
 
-    /** @var string Default date time formatting used in gradeable open/close/due dates and other places */
-    const DATE_TIME_FORMAT = 'm/d/Y @ h:i A T';
+    // Keys available to use with getDateFormat
+    const DATE_FORMATS_KEYS = [
+        'gradeable',
+        'gradeable_with_seconds',
+        'forum'
+    ];
 
-    /** @var string Same as DATE_TIME_FORMAT but includes seconds */
-    const DATE_TIME_FORMAT_WITH_SECONDS = 'm/d/Y @ h:i:s A T';
+    // Internationalized DateTime formatting strings
+    const DATE_FORMATS = [
+        'MDY' => [
+            'gradeable' => 'm/d/Y @ h:i A T',
+            'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
+            'forum' => 'n/j g:i A'
+        ],
+        'DMY' => [
+            'gradeable' => 'd/m/Y @ h:i A T',
+            'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
+            'forum' => 'j/n g:i A'
+        ]
+    ];
+
+    /**
+     * Get the appropriate internationalized DateTime formatting string.  Some countries use a MM/DD/YYYY format, while
+     * others use a DD/MM/YYYY format, etc.  Currently this function only returns the strings formatted for countries
+     * using the MM/DD/YYYY format but eventually this function will pick up configuration data and return a formatting
+     * string consistent with whatever part of the world the submitty administrators are setting it up for.
+     *
+     * @param string $key A key available in self::DATE_FORMAT_KEYS
+     * @throws BadArgumentException The supplied key was not found is self::DATE_FORMATS_KEYS
+     * @return string
+     */
+    public static function getDateFormat(string $key) {
+        if (!in_array($key, self::DATE_FORMATS_KEYS)) {
+            throw new BadArgumentException('The $key must be a member of DateUtils::DATE_FORMAT_KEYS');
+        }
+
+        return self::DATE_FORMATS['MDY'][$key];
+    }
 
     /**
      * Given two dates, give the interval of time in days between these two times. Any partial "days" are rounded
@@ -207,6 +242,15 @@ class DateUtils {
         return $time_stamp;
     }
 
+    /**
+     * Take a time stamp from the server (will be in the server time zone), convert it to the user's time zone, and
+     * then output it according to the given formatting string.
+     *
+     * @param Core $core
+     * @param string $time_stamp A time stamp string which could be used to instantiate a PHP DateTime object
+     * @param string $format A DateTime formatting string
+     * @return string The time zone converted and formatted string
+     */
     public static function convertTimeStampServerToUser(Core $core, string $time_stamp, string $format) {
         $user = $core->getUser();
         $server_time_zone = $core->getConfig()->getTimezone();

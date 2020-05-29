@@ -212,7 +212,7 @@ class NavigationView extends AbstractView {
             "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config,
-            "DATE_TIME_FORMAT" => DateUtils::DATE_TIME_FORMAT
+            "DATE_TIME_FORMAT" => DateUtils::getDateFormat('gradeable')
         ]);
     }
 

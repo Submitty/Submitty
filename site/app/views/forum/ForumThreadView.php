@@ -8,8 +8,6 @@ use app\libraries\FileUtils;
 
 class ForumThreadView extends AbstractView {
 
-    const DATE_TIME_FORMAT = 'n/j g:i A';
-
     public function forumAccess() {
         return $this->core->getConfig()->isForumEnabled();
     }
@@ -81,7 +79,7 @@ class ForumThreadView extends AbstractView {
 
                 $post_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . "#" . $post['p_id'];
 
-                $posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), self::DATE_TIME_FORMAT);
+                $posted_on = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp_post'], DateUtils::getDateFormat('forum'));
 
                 $thread_list[$count - 1]["posts"][] = array(
                     "post_link" => $post_link,
@@ -402,7 +400,6 @@ class ForumThreadView extends AbstractView {
         $activeThreadAnnouncement = $activeThread['pinned'];
 
         $thread_id = $activeThread['id'];
-        $function_date = 'date_format';
 
         $first = true;
         $first_post_id = 1;
@@ -452,7 +449,7 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, $totalAttachments);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $totalAttachments);
 
                         break;
                     }
@@ -471,7 +468,7 @@ class ForumThreadView extends AbstractView {
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, 1, $display_option, $includeReply, $totalAttachments);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, $totalAttachments);
 
                 if ($first) {
                     $first = false;
@@ -591,7 +588,6 @@ class ForumThreadView extends AbstractView {
 
         $activeThreadAnnouncement = false;
         $activeThreadTitle = "";
-        $function_date = 'date_format';
         $activeThread = [];
 
         $thread_content = [];
@@ -604,7 +600,7 @@ class ForumThreadView extends AbstractView {
                 $date = null;
             }
             else {
-                $date = DateUtils::parseDateTime($first_post['timestamp'], $this->core->getConfig()->getTimezone());
+                $date = DateUtils::convertTimeStampServerToUser($this->core, $first_post['timestamp'], DateUtils::getDateFormat('forum'));
             }
             if ($thread['merged_thread_id'] != -1) {
                 // For the merged threads
@@ -700,7 +696,7 @@ class ForumThreadView extends AbstractView {
             $date_content = ["not_null" => !is_null($date)];
 
             if (!is_null($date)) {
-                $date_content["formatted"] = $function_date($date, self::DATE_TIME_FORMAT);
+                $date_content["formatted"] = $date;
             }
 
             $thread_content[] = [
@@ -780,17 +776,17 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, &$totalAttachments) {
+    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, &$totalAttachments) {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
 
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
         // Get formatted time stamps
-        $date = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp'], self::DATE_TIME_FORMAT);
+        $date = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp'], DateUtils::getDateFormat('forum'));
 
         if (!is_null($post["edit_timestamp"])) {
-            $edit_date = DateUtils::convertTimeStampServerToUser($this->core, $post["edit_timestamp"], self::DATE_TIME_FORMAT);
+            $edit_date = DateUtils::convertTimeStampServerToUser($this->core, $post["edit_timestamp"], DateUtils::getDateFormat('forum'));
         }
         else {
             $edit_date = null;
