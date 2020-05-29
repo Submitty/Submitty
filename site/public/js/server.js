@@ -838,8 +838,8 @@ function validateHtml() {
         a = a.nextSibling
       }
       return b
-    }(document),
-    d = document.createElement("form");
+  }(document);
+  const d = document.createElement("form");
   d.method = "POST";
   d.action = "https://validator.w3.org/nu/";
   d.enctype = "multipart/form-data";
