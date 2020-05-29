@@ -45,7 +45,7 @@ class DateUtils {
      * @throws BadArgumentException The supplied key was not found is self::DATE_FORMATS_KEYS
      * @return string
      */
-    public static function getDateFormat(string $key) {
+    public static function getDateFormat(Core $core, string $key) {
         if (!in_array($key, self::DATE_FORMATS_KEYS)) {
             throw new BadArgumentException('The $key must be a member of DateUtils::DATE_FORMAT_KEYS');
         }

@@ -79,7 +79,7 @@ class ForumThreadView extends AbstractView {
 
                 $post_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . "#" . $post['p_id'];
 
-                $posted_on = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp_post'], DateUtils::getDateFormat('forum'));
+                $posted_on = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp_post'], DateUtils::getDateFormat($this->core, 'forum'));
 
                 $thread_list[$count - 1]["posts"][] = array(
                     "post_link" => $post_link,
@@ -600,7 +600,7 @@ class ForumThreadView extends AbstractView {
                 $date = null;
             }
             else {
-                $date = DateUtils::convertTimeStampServerToUser($this->core, $first_post['timestamp'], DateUtils::getDateFormat('forum'));
+                $date = DateUtils::convertTimeStampServerToUser($this->core, $first_post['timestamp'], DateUtils::getDateFormat($this->core, 'forum'));
             }
             if ($thread['merged_thread_id'] != -1) {
                 // For the merged threads
