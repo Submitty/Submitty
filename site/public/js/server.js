@@ -817,7 +817,7 @@ function validateHtml() {
     c.value = b;
     d.appendChild(c)
   }
-  var e = function(a) {
+  const e = (a) => {
       for (var b = "", a = a.firstChild; a;) {
         switch (a.nodeType) {
           case Node.ELEMENT_NODE:
