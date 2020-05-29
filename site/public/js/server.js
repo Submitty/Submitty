@@ -1272,19 +1272,23 @@ function loadOverriddenGrades(g_id) {
 }
 
 function refreshOnResponseOverriddenGrades(json) {
-    var form = $("#load-overridden-grades");
-    $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
-    $('#title').replaceWith(title);
+    const form = $("#load-overridden-grades");
+    $('#grade-override-table tr:gt(0)').remove();
+    let title = 'Overridden Grades for ' + json['data']['gradeable_id'];
+    $('#title').text(title);
     if(json['data']['users'].length === 0){
-        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+      $("#load-overridden-grades").addClass('d-none');
+      $("#empty-table").removeClass('d-none');
+      $('#empty-table').text('There are no overridden grades for this homework');
     }
     else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
-            $('#my_table').append(bits.join('</td><td>'));
+            let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
+      $("#load-overridden-grades").removeClass('d-none');
+      $("#empty-table").addClass('d-none');
     }
 }
 
