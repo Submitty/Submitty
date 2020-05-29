@@ -40,6 +40,7 @@
         $('#' + id).hide();
     }
 
+    // Runs captureTabInModal() automatically when the popup is unhidden
     (function() {
       let targetNode = document.getElementById('{{ block('popup_id') }}');
       let observer = new MutationObserver(function(){

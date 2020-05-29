@@ -87,7 +87,7 @@ function editUserForm(user_id) {
             }
             else {
                 $("#edit-student-modal-title").css('display','none');
-                $("#edit-student-modal-title").css('display','block');
+                $("#edit-grader-modal-title").css('display','block');
             }
             $("#new-student-modal-title").css('display','none');
             $("#new-grader-modal-title").css('display','none');
