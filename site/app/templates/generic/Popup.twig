@@ -39,4 +39,15 @@
     function closePopup(id) {
         $('#' + id).hide();
     }
+
+    (function() {
+      let targetNode = document.getElementById('{{ block('popup_id') }}');
+      let observer = new MutationObserver(function(){
+          if(targetNode.style.display != 'none'){
+              console.log("{{ block('popup_id') }} is visible")
+              captureTabInModal('{{ block('popup_id') }}');
+          }
+      });
+      observer.observe(targetNode, { attributes: true, childList: true });
+    })();
 </script>

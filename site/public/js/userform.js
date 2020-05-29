@@ -66,7 +66,6 @@ function newUserForm() {
         $("#user_lastname")[0].setCustomValidity("user_lastname is required");
     }
     checkValidEntries();
-    captureTabInModal("edit-user-form");
 }
 
 //opens modal with initial settings for edit user
@@ -102,7 +101,6 @@ function editUserForm(user_id) {
             }
             completeUserFormInformation(json);
             clearValidityWarnings();
-            captureTabInModal("edit-user-form");
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
@@ -186,8 +184,8 @@ function checkValidEntries() {
     }
     else {
         $("#user-form-submit").prop('disabled',false);
-        captureTabInModal("edit-user-form", false);
     }
+    captureTabInModal("edit-user-form", false);
 }
 
 function setRedOrTransparent(input,reg_expression) {

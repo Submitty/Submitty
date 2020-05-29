@@ -194,7 +194,6 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('[id="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
-    captureTabInModal("delete-gradeable-form");
 }
 
 function displayCloseSubmissionsWarning(form_action,gradeable_name) {
@@ -204,7 +203,6 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     $('[id="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
-    captureTabInModal("close-submissions-form");
     form.find('.form-body').scrollTop(0);
 }
 
@@ -231,7 +229,6 @@ function newDeleteCourseMaterialForm(path, file_name) {
     $('.delete-course-material-message', form).append('<b>'+file_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
-    captureTabInModal("delete-course-material-form");
     form.find('.form-body').scrollTop(0);
 }
 
@@ -239,7 +236,6 @@ function newUploadImagesForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#upload-images-form");
     form.css("display", "block");
-    captureTabInModal("upload-images-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
@@ -264,7 +260,6 @@ function newUploadCourseMaterialsForm() {
     $('[name="existing-file-list"]', form).append('<b>'+JSON.stringify(files)+'</b>');
 
     form.css("display", "block");
-    captureTabInModal("upload-course-materials-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 
@@ -303,7 +298,6 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
     }
     $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
-    captureTabInModal("edit-course-materials-form");
 }
 function captureTabInModal(formName, resetFocus=true){
     releaseTabFromModal(formName);
@@ -350,8 +344,6 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     var form = $("#set-folder-release-form");
     form.css("display", "block");
 
-    captureTabInModal("set-folder-release-form");
-
     form.find('.form-body').scrollTop(0);
     $('[id="release_title"]',form).attr('data-path',changeActionVariable);
     $('[name="release_date"]', form).val(releaseDates);
@@ -371,7 +363,6 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
     $('[name="delete"]', form).attr('action', form_action);
     form.css("display", "block");
     form.find('.form-body').scrollTop(0);
-    captureTabInModal("delete-plagiarism-result-and-config-form");
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
@@ -590,7 +581,6 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
-    captureTabInModal("admin-team-form");
 
     form.find('.form-body').scrollTop(0);
     $("#admin-team-form-submit").prop('disabled',false);
@@ -773,7 +763,6 @@ function importTeamForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#import-team-form");
     form.css("display", "block");
-    captureTabInModal("import-team-form");
     form.find('.form-body').scrollTop(0);
     $('[name="upload_team"]', form).val(null);
 }
@@ -783,7 +772,6 @@ function randomizeRotatingGroupsButton() {
     $('.popup-form').css('display', 'none');
     var form = $("#randomize-button-warning");
     form.css("display", "block");
-    captureTabInModal("randomize-button-warning");
     form.find('.form-body').scrollTop(0);
 }
 
