@@ -47,7 +47,32 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-
+/**
+        * Route for randomizing peer assignments
+        * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
+        * @AccessControl(role="INSTRUCTOR")
+    */ 
+    public function ajaxRandomizePeers($gradeable_id){
+        $gradeable_id=$_POST['gradeable_id'];
+         $gradeable = $this->tryGetGradeable($gradeable_id);
+         if ($gradeable === false) {
+             $this->core->addErrorMessage('Invalid Gradeable!');
+             $this->core->redirect($this->core->buildCourseUrl());
+         }
+         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+         $download_info = [];
+         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+         foreach ($students as $student) {
+              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+              $sorted_students[$reg_sec][] = $student;
+              array_push($download_info, [
+                  'user_id' => $student->getId(),
+                 // reg_section => $reg_sec,
+              ]);
+          }
+        // $response_data=json_encode($download_info,true); 
+        $this->core->getOutput()->renderJsonSuccess($download_info);
+         }
     /**
      * Route for getting whitespace information for the diff viewer
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output/remove")
