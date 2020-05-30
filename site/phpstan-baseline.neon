@@ -806,12 +806,22 @@ parameters:
 			path: app/views/PDFView.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
+			message: "#^PHPDoc tag @param has invalid value \\(\\$file_name\\)\\: Unexpected token \"\\$file_name\", expected type at offset 155$#"
 			count: 1
 			path: app/views/PDFView.php
 			
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 180$#"
+			count: 1
+			path: app/views/PDFView.php
+			
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$file_path\\)\\: Unexpected token \"\\$file_path\", expected type at offset 180$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$page_num\\)\\: Unexpected token \"\\$page_num\", expected type at offset 301$#"
 			count: 1
 			path: app/views/PDFView.php
 
