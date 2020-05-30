@@ -122,6 +122,9 @@ footer .footer-separator {
     #moorthy-duck{
         display: none;
     }
+    footer {
+        font-size: 14px;
+    }
 }
 
 @media (min-width: 541px) {
