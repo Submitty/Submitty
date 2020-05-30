@@ -4,7 +4,7 @@
   </div>
 {% endif %}
 {% if viewer.getQueueWhiteboardMessage() | length > 0 %}
-  <div class="content">
+  <div id="whiteboard" class="content">
     <h2>Virtual Whiteboard:</h2>
     <p>{{viewer.getQueueWhiteboardMessage() | markdown}}</p>
   </div>
@@ -24,7 +24,7 @@
     {% include 'officeHoursQueue/QueueStatus.twig' %}
     <br>
   {% endif %}
-  
+
   {% include 'officeHoursQueue/QueueButtonBar.twig' %}
   {% include 'officeHoursQueue/CurrentQueue.twig' %}
   {% include 'officeHoursQueue/QueueHistory.twig' %}

@@ -134,7 +134,9 @@
             $("#current_queue").replaceWith(newQueue);
             filterQueues();
             if(notifications_enabled && queueEmpty && $( ".help_btn:visible" ).length > 0){
-              new Notification("A student has joined the queue");
+              if($('.btn-success.finish_helping_btn').length === 0){
+                new Notification("A student has joined the queue");
+              }
             }
           });
           $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {

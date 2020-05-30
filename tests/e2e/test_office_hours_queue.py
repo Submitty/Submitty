@@ -1,6 +1,8 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from random import choice
+from string import ascii_lowercase
 
 class TestOfficeHoursQueue(BaseTestCase):
     """
@@ -10,14 +12,8 @@ class TestOfficeHoursQueue(BaseTestCase):
         super().__init__(testname, log_in=False)
 
     def test_office_hours_queue(self):
-        self.log_in(user_id='instructor', user_password='instructor')
-
         # Turn the queue on
-        self.get(self.get_current_semester()+"/sample/config")
-        if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
-            self.driver.find_element(By.ID, 'queue-enabled').click()
-        if(self.driver.find_element(By.ID, 'queue-contact-info').is_selected()):
-            self.driver.find_element(By.ID, 'queue-contact-info').click()
+        enableQueue(self)
 
         # Delete any old queues (this should remove anyone that was currently in the queue as well)
         self.deleteAllQueues()
@@ -29,6 +25,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(0, 1, success_text=[], error_text=['Unable to add queue. Make sure you have a unique queue name'])
         self.openQueue("random code")
         self.expectedAlerts(1, 0, success_text=['New queue added'], error_text=[])
+
 
         self.changeQueueCode("random code")
         self.expectedAlerts(1, 0, success_text=['Queue Access Code Changed'], error_text=[])
@@ -96,8 +93,13 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(1, 0, success_text=['Queue emptied'], error_text=[])
         self.assertEqual(base_queue_history_count+4, self.queueHistoryCount(False))
         self.assertEqual(0, self.currentQueueCount())
-        self.switchToStudent('student')
 
+        whiteboard_string = ''.join(choice(ascii_lowercase) for i in range(10))
+        self.editWhiteboard(whiteboard_string)
+        self.assertEqual(' '.join(self.driver.find_element(By.ID, 'whiteboard').text.split()), f'Virtual Whiteboard: {whiteboard_string}')
+
+
+        self.switchToStudent('student')
         # Students should not be able to see any of theses elements
         self.assertEqual(True, self.verifyElementMissing('class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
         self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new_queue_token', 'new_queue_rand_token', 'open_new_queue_btn']))
@@ -117,6 +119,24 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(False,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
         self.driver.find_element(By.XPATH, '//*[@id="filter-settings"]//*[@class="form-button-container"]/*').click()
         self.assertEqual(True,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
+
+    def openWhiteboardSettings(self):
+        self.goToQueuePage()
+        self.assertEqual(True,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
+        self.driver.find_element(By.ID, 'toggle_whiteboard_settings').click()
+        self.assertEqual(False,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
+
+    def saveWhiteboardSettings(self):
+        self.assertEqual(False,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
+        self.driver.find_element(By.ID, 'save_whiteboard').click()
+        self.assertEqual(True,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
+
+    def editWhiteboard(self, text):
+        self.openWhiteboardSettings()
+        self.driver.find_element(By.ID, 'queue-whiteboard-message').clear()
+        self.driver.find_element(By.ID, 'queue-whiteboard-message').send_keys(text)
+        self.saveWhiteboardSettings()
+
 
     def deleteAllQueues(self):
         self.openFilterSettings()
@@ -262,3 +282,11 @@ class TestOfficeHoursQueue(BaseTestCase):
             self.wait_for_element((By.CLASS_NAME, 'alert-error'))
         self.assertEqual(self.countAlertSuccess(success_text), success)
         self.assertEqual(self.countAlertError(error_text), error)
+
+def enableQueue(self):
+    self.log_in(user_id='instructor', user_password='instructor')
+    self.get(self.get_current_semester()+"/sample/config")
+    if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
+        self.driver.find_element(By.ID, 'queue-enabled').click()
+    if(self.driver.find_element(By.ID, 'queue-contact-info').is_selected()):
+        self.driver.find_element(By.ID, 'queue-contact-info').click()
