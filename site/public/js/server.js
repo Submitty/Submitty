@@ -305,10 +305,15 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
     form.css("display", "block");
     captureTabInModal("edit-course-materials-form");
 }
+
+var lastActiveElement = null;
 function captureTabInModal(formName, resetFocus=true){
-    releaseTabFromModal(formName);
+    if(resetFocus){
+        lastActiveElement = document.activeElement;
+    }
 
     var form = $("#".concat(formName));
+    form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -332,15 +337,19 @@ function captureTabInModal(formName, resetFocus=true){
         }
     });
 
-    form.on('hidden.bs.modal', function () {
-        releaseTabFromModal(formName);
-    })
+    //Watch for the modal to be hidden
+    let observer = new MutationObserver(function(){
+        if(form[0].style.display === 'none'){
+            releaseTabFromModal(formName);
+        }
+    });
+    observer.observe(form[0], { attributes: true, childList: true });
 }
 
 function releaseTabFromModal(formName){
-
     var form = $("#".concat(formName));
     form.off('keydown');
+    lastActiveElement.focus();
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
