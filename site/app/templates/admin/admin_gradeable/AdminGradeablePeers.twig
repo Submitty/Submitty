@@ -55,6 +55,7 @@
     function addNewStudent() {
         let form = $("#admin-gradeable-peers-form");
         let add_students_div = $("#students-to-add");
+        let student_autofill = JSON.parse($('#student_autofill').val());
         let j = $('.add_user_ids').count;
         $('#add_student_button').remove();
         add_students_div.append('<p class="add_user_ids" id="add_user_id_'+j+'"><input type="text" name="add_user_id_'+j+'" /><br></p>');
