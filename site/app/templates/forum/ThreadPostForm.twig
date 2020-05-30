@@ -31,7 +31,7 @@
             <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
