@@ -98,16 +98,17 @@ class submitty_router():
       # newline every n characters
       newline_cadence = 24
       # most_lines_allowed (not including ending ellipsis)
-      max_num_lines = 3
+      max_num_lines = 10
 
+      message = str(message)
       for i in range(0, len(message), newline_cadence):
         if i + newline_cadence > newline_cadence*max_num_lines:
-          message_lines.append('  ...  ')
+          message_lines.append('...')
           break
         message_lines.append(message[i:i+newline_cadence])
 
       if len(message_lines) == 1:
-        outfile.write(f'{start}: {str(message)}\n')
+        outfile.write(f'{start}: {message}\n')
       else:
         str_lines = [str(x) for x in message_lines ]
         outfile.write(f'{start}: {"<br>".join(str_lines)}\n')
