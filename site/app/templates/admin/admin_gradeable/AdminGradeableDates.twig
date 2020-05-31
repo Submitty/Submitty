@@ -1,5 +1,5 @@
 <div id="gradeable-dates">
-    <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format) }}">
+    <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
     <label for="date_ta_view">TA Beta Testing Date (visible to TAs)</label>
 
     <br />
@@ -7,13 +7,13 @@
 
     <div class="electronic_file electronic_file_dates">
         <div class="team_yes team_yes_dates">
-            <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format) }}">
+            <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format, timezone_string) }}">
             <label for="date_team_lock">Team Lock Date (Instructors can still manually manage teams)</label>
 
             <br />
         </div>
 
-        <input id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format) }}">
+        <input id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format, timezone_string) }}">
         <label for="date_submit">Submission Open Date (submission available to students)</label>
 
         <br />
@@ -28,32 +28,32 @@
             </div>
 
             <div id="due_date_container" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
-                <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format) }}">
+                <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format, timezone_string) }}">
                 <label for="date_due">Due Date</label>
             </div>
         </div>
     </div>
 
     <div class="manual_grading manual_grading_dates">
-        <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format) }}">
+        <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format, timezone_string) }}">
         <label for="date_grade">TA/Instructor Manual Grading Open Date (grading may begin)</label>
 
         <br />
 
-        <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format) }}">
+        <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format, timezone_string) }}">
         <label for="date_grade_due">TA/Instructor Manual Grading Due Date</label>
 
         <br />
     </div>
 
-    <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format) }}">
+    <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
     <label for="date_released">Grades Released Date (grades will be visible to students)</label>
 
     <br />
 
     <div class="electronic_file electronic_file_dates">
         <div class="regrade_request_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
-            <input name="regrade_request_date" id="date_regrade_request" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format) }}">
+            <input name="regrade_request_date" id="date_regrade_request" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format, timezone_string) }}">
             <label for="date_regrade_request">Grade Inquiry Due Date (Grade Inquiries must be initiated by this date)</label>
         </div>
 
