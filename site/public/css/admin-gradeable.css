@@ -3,7 +3,7 @@ input[readonly]:not(.btn-danger) {
     border:none;
 }
 
-input[disabled] {
+input[disabled]:not(#admin-gradeable-peers-submit) {
     background: var(--standard-medium-gray);
 }
 
