@@ -11,10 +11,6 @@ def up(config, database):
     :type database: migrator.db.Database
     """
 
-    # Add display_image_state column to the master users table
-    sql = "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_image_state VARCHAR NOT NULL DEFAULT 'system';"
-    database.execute(sql)
-
     # Insert database function which propagates time zone data from master to courses
     # Required in this case because master already contains some data that wasn't synced to courses
     sql = """CREATE OR REPLACE FUNCTION propagate_users() RETURNS VOID AS $$
@@ -24,15 +20,12 @@ def up(config, database):
         row RECORD;
     BEGIN
 
-        -- Add time_zone and display_image_state to course databases
+        -- Add time_zone to course databases
         FOR row IN SELECT datname FROM pg_database WHERE datname ILIKE 'submitty\_%' LOOP
 
             db_conn := format('dbname=%s', row.datname);
 
             query_string := 'ALTER TABLE users ADD COLUMN IF NOT EXISTS time_zone VARCHAR NOT NULL DEFAULT ''NOT_SET/NOT_SET'';';
-            PERFORM dblink_exec(db_conn, query_string);
-
-            query_string := 'ALTER TABLE users ADD COLUMN IF NOT EXISTS display_image_state VARCHAR NOT NULL DEFAULT ''system'';';
             PERFORM dblink_exec(db_conn, query_string);
 
         END LOOP;
@@ -84,7 +77,7 @@ def up(config, database):
         FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
             RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
             db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-            query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', time_zone=' || quote_literal(NEW.time_zone) || ', display_image_state=' || quote_literal(NEW.display_image_state) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+            query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
             -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
             IF query_string IS NULL THEN
                 RAISE EXCEPTION 'query_string error in trigger function sync_user()';

@@ -140,7 +140,6 @@ CREATE TABLE users (
     last_updated timestamp(6) with time zone,
     api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
     time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
-    display_image_state VARCHAR NOT NULL DEFAULT 'system',
     CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3))
 );
 
@@ -315,7 +314,7 @@ BEGIN
     FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
         RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
         db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-        query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', time_zone=' || quote_literal(NEW.time_zone) || ', display_image_state=' || quote_literal(NEW.display_image_state) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+        query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', time_zone=' || quote_literal(NEW.time_zone) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
         -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
         IF query_string IS NULL THEN
             RAISE EXCEPTION 'query_string error in trigger function sync_user()';
