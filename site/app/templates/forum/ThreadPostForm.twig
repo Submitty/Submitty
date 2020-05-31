@@ -240,6 +240,16 @@
         var item = e.clipboardData.items[0];
         if (item.type.indexOf("image")===0){
             image = item.getAsFile();
+
+            num_clipboard_files++;
+            old_name = image.name.split('.');
+            new_name = old_name[0] + num_clipboard_files.toString() + '.' + old_name[1];
+
+            Object.defineProperty(image, 'name', {
+                writable: true,
+                value: new_name
+            });
+
             addFile(image, part);
         }
     }
