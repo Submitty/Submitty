@@ -118,6 +118,7 @@ if (empty($_COOKIE['submitty_token'])) {
     Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
+
 if ($request->isMethod('POST')) {
     $max_post_length = ini_get("post_max_size");
     $max_post_bytes = Utils::returnBytes($max_post_length);
@@ -128,20 +129,26 @@ if ($request->isMethod('POST')) {
         $response = MultiResponse::JsonOnlyResponse(
             JsonResponse::getFailResponse($msg)
         );
+
+        if ($response instanceof ResponseInterface) {
+            $response->render($core);
+        }
+
+        return $core->getOutput()->displayOutput();
     }
+}
+
+$is_api = explode('/', $request->getPathInfo())[1] === 'api';
+if ($is_api) {
+    if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
+        $_POST = json_decode(file_get_contents('php://input'), true);
+    }
+    $response = WebRouter::getApiResponse($request, $core);
 }
 else {
-    $is_api = explode('/', $request->getPathInfo())[1] === 'api';
-    if ($is_api) {
-        if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
-            $_POST = json_decode(file_get_contents('php://input'), true);
-        }
-        $response = WebRouter::getApiResponse($request, $core);
-    }
-    else {
-        $response = WebRouter::getWebResponse($request, $core);
-    }
+    $response = WebRouter::getWebResponse($request, $core);
 }
+
 
 if ($response instanceof ResponseInterface) {
     $response->render($core);
