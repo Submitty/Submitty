@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\exceptions\NullException;
 use app\libraries\Core;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
@@ -58,6 +59,8 @@ class User extends AbstractModel {
     const LEVEL_SUPERUSER             = 1;
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
+
+    const NULL_TIME_ZONE_MESSAGE = 'Null User->time_zone detected. User->time_zone should never be null.';
 
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
@@ -221,15 +224,24 @@ class User extends AbstractModel {
      *
      * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
      */
-    public function getTimeZoneNiceFormat() {
+    public function getTimeZoneNiceFormat(): string {
+        if (is_null($this->time_zone)) {
+            throw new NullException(self::NULL_TIME_ZONE_MESSAGE);
+        }
+
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
     }
 
     /**
      * Get the UTC offset for this user's time zone.
+     *
      * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
      */
-    public function getUTCOffset() {
+    public function getUTCOffset(): string {
+        if (is_null($this->time_zone)) {
+            throw new NullException(self::NULL_TIME_ZONE_MESSAGE);
+        }
+
         return DateUtils::getUTCOffset($this->time_zone);
     }
 
