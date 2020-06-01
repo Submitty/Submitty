@@ -27,14 +27,10 @@ def up(config, database, semester, course):
                         if "_" in name:
                             file_name = name.split('_', 1)[0]
                             grader_id = name.split('_', 1)[1]
-                            print(Path(annotations_dir, dir, dirSecond, dirThrid))
-                            directory = Path(annotations_dir, dir, dirSecond, dirThrid)
-                            path_to_hash = dirPath.replace(str(directory), "")
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
-                            md5_file_name = hashlib.md5((path_to_hash + file_name + ".pdf"+ grader_id).encode())
-                            print(path_to_hash + file_name + ".pdf"+ grader_id)
+                            md5_file_name = hashlib.md5((dirPath + file_name).encode())
                             file_path = Path(annotations_dir, dir, dirSecond, dirThrid)
-                            copyfile(Path(dirPath,name), Path(directory, md5_file_name.hexdigest() + '.json'))
+                            copyfile(Path(dirPath,name), Path(directory, md5_file_name.hexdigest() + "_" + grader_id + '.json'))
                             os.remove(Path(dirPath,name))
                             os.system("chown -R "+php_user+":"+course_group+ " "+ str(directory))
                             os.system("chmod -R u+rwx "+str(directory))

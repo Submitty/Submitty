@@ -359,11 +359,14 @@ class AutoGradingView extends AbstractView {
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $file["encoded_name"] = md5($file['path']);
                 $uploaded_pdfs[] = $file;
+                
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $file["encoded_name"] = md5($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -390,15 +393,15 @@ class AutoGradingView extends AbstractView {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
         $annotated_file_names = [];
         if (is_dir($annotation_path)) {
-            $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-            foreach ($dir_iter as $dirInfo) {
-                if ($dirInfo->isDir() && !$dirInfo->isDot() && count(scandir($dirInfo->getPathname()))) {
-                    $pdf_id = $dirInfo . '.pdf';
+            $dir_iter = new \DirectoryIterator($annotation_path);
+            foreach ($dir_iter as $fileInfo) {
+                if ($fileInfo->isFile() && !$fileInfo->isDot()) {
+                    $pdf_id = explode("_",$fileInfo)[0];
                     $annotated_file_names[] = $pdf_id;
                 }
             }
         }
-
+        
         // Update overall comments to have display names
         $overall_comments = [];
         foreach ($ta_graded_gradeable->getOverallComments() as $user_name => $comment) {
@@ -579,17 +582,14 @@ class AutoGradingView extends AbstractView {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
         $annotated_file_names = [];
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
+            //$first_file = scandir($annotation_path)[2];
+            //$annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
+            if (is_dir($annotation_path)) {
                 $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
+                foreach ($dir_iter as $dirInfo) {
+                    if ($dirInfo->isDir() && !$dirInfo->isDot() && count(scandir($dirInfo->getPathname()))) {
+                        if (file_get_contents($dirInfo->getPathname()) != "") {
+                            $pdf_id = $dirInfo . '.pdf';
                             $annotated_file_names[] = $pdf_id;
                         }
                     }
