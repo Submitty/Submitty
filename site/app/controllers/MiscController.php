@@ -222,7 +222,7 @@ class MiscController extends AbstractController {
      */
     public function downloadSubmissionZip($gradeable_id, $user_id, $is_anon, $version = null, $origin = null) {
         if($is_anon){
-            $user_id = $this->core->getQueries()->getUserFromAnon($user_id);
+            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
         }
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
