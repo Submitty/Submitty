@@ -25,10 +25,11 @@ def main():
     print("Content-type: text/html")
     print()
 	# Do a localhost check
-	ip_addr = cgi.escape(os.environ["REMOTE_ADDR"])
-	if ip_addr != "127.0.0.1" and ip_addr != "localhost":
-		print_error("Cannot be called from external host")
-		return
+	# TODO : FIX THIS, IT IS CRASHING THE SCRIPT
+	#ip_addr = cgi.escape(os.environ["REMOTE_ADDR"])
+	#if ip_addr != "127.0.0.1" and ip_addr != "localhost":
+	#	print_error("Cannot be called from external host")
+	#	return
 
     with open("/usr/local/submitty/config/submitty.json") as data:
         config = json.load(data)
