@@ -970,6 +970,7 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
             "has_vcs_files" => $isVcs,
             "submissions" => $submissions,
             "checkout" => $checkout,
