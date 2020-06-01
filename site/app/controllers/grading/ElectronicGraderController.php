@@ -2380,7 +2380,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         foreach ($graded_components as $key => $value) {
-            $total_graded += intval($value);
+            $total_graded += intval($value); 
         }
         foreach ($total_users as $key => $value) {
             $total_total += $value * $num_components;
