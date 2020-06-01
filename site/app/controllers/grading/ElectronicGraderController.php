@@ -73,9 +73,10 @@ class ElectronicGraderController extends AbstractController {
               ]);
               array_push($student_array,$student->getId());
           }
+          $graded_array=$student_array;
           $final_grading_info=[];
           foreach($student_array as $grader){
-              $temp_array=$student_array;
+              $temp_array=$graded_array;
               if (($key = array_search($grader, $temp_array)) !== false) {
                 unset($temp_array[$key]);
             }
@@ -83,10 +84,13 @@ class ElectronicGraderController extends AbstractController {
               $grading_list=[];
               for($i=0;$i<$number_to_grade;++$i){
                  array_push($grading_list,$temp_array[$i]);
+                 if (($key = array_search($temp_array[$i], $graded_array)) !== false) {
+                    unset($graded_array[$key]);
+                }
               }
-              array_push($final_grading_info,$grader,$grading_list);
+              array_push($final_grading_info,[$grader,$grading_list]);
           }
-        // $gradeable->setRandomPeerGradersList($final_grading_info);
+         $gradeable->setRandomPeerGradersList($final_grading_info);
         // $response_data=json_encode($download_info,true); 
         $this->core->getOutput()->renderJsonSuccess($final_grading_info);
          }
