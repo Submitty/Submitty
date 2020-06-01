@@ -53,25 +53,42 @@ class ElectronicGraderController extends AbstractController {
         * @AccessControl(role="INSTRUCTOR")
     */ 
     public function ajaxRandomizePeers($gradeable_id){
-        $gradeable_id=$_POST['gradeable_id'];
-         $gradeable = $this->tryGetGradeable($gradeable_id);
+        $number_to_grade=1;
+       // $gradeable_id=$_POST['gradeable_id'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
          if ($gradeable === false) {
              $this->core->addErrorMessage('Invalid Gradeable!');
              $this->core->redirect($this->core->buildCourseUrl());
          }
          $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-         $download_info = [];
+         $student_array= [];
+         $student_list= [];
          $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
          foreach ($students as $student) {
               $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
               $sorted_students[$reg_sec][] = $student;
-              array_push($download_info, [
+              array_push($student_list, [
                   'user_id' => $student->getId(),
                  // reg_section => $reg_sec,
               ]);
+              array_push($student_array,$student->getId());
           }
+          $final_grading_info=[];
+          foreach($student_array as $grader){
+              $temp_array=$student_array;
+              if (($key = array_search($grader, $temp_array)) !== false) {
+                unset($temp_array[$key]);
+            }
+              shuffle($temp_array);
+              $grading_list=[];
+              for($i=0;$i<$number_to_grade;++$i){
+                 array_push($grading_list,$temp_array[$i]);
+              }
+              array_push($final_grading_info,$grader,$grading_list);
+          }
+        // $gradeable->setRandomPeerGradersList($final_grading_info);
         // $response_data=json_encode($download_info,true); 
-        $this->core->getOutput()->renderJsonSuccess($download_info);
+        $this->core->getOutput()->renderJsonSuccess($final_grading_info);
          }
     /**
      * Route for getting whitespace information for the diff viewer
@@ -856,7 +873,7 @@ class ElectronicGraderController extends AbstractController {
                 $this->core->getQueries()->acceptTeamInvitation($team_id, $id);
             }
             foreach ($remove_user_ids as $id) {
-                $this->core->getQueries()->leaveTeam($team_id, $id);
+                $this->core->getQueries()->leaveTeam($team_id, $id); 
             }
             $this->core->addSuccessMessage("Updated Team {$team_id}");
 
