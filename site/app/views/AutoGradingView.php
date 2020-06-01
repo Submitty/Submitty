@@ -361,7 +361,6 @@ class AutoGradingView extends AbstractView {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
                 $file["encoded_name"] = md5($file['path']);
                 $uploaded_pdfs[] = $file;
-                
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
@@ -396,7 +395,7 @@ class AutoGradingView extends AbstractView {
             $dir_iter = new \DirectoryIterator($annotation_path);
             foreach ($dir_iter as $fileInfo) {
                 if ($fileInfo->isFile() && !$fileInfo->isDot()) {
-                    $pdf_id = explode("_",$fileInfo)[0];
+                    $pdf_id = explode("_", $fileInfo)[0];
                     $annotated_file_names[] = $pdf_id;
                 }
             }
