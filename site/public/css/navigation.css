@@ -5,13 +5,17 @@
     flex-wrap: wrap;
     margin: 0 -30px;
     padding: 9px 30px;
-    background-color: var(--standard-light-gray);
+    border-bottom: 1px solid var(--standard-light-gray);
 }
 
 .gradeable-row {
     margin: 0 -30px;
     padding: 18px 30px;
     border-bottom: 1px solid var(--standard-light-gray);
+}
+
+#gradeables-content.content {
+    padding-bottom: 0;
 }
 
 .gradeable-row:nth-last-child(1) {
@@ -34,6 +38,11 @@
     font-size: 18px;
     padding-right: 10px;
     float: left;
+}
+
+.collapse-icon, .expand-icon {
+    margin-left: -10px;
+    display: none;
 }
 
 .course-main .course-title {
@@ -62,18 +71,60 @@
     display: none;
 }
 
-@media (min-width: 541px) {   
+.course-section-title {
+    display: inline;
+}
+
+@media (max-width: 401px) {
+    .course-section-heading,
+    .course-main .course-title {
+        font-size: 16px;
+    }
+    .course-button .btn, .subtitle {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 950px) {
     .course-section-heading {
-        border-bottom: 2px solid #000;
-        background: none;
+        margin: 10px -25px;
+        font-weight: 400;
+        background-color: var(--default-white);
+        transition: 0.2s;
+        border: 1px solid var(--text-black);
     }
 
-    .gradeable-row {
-        border: none;
+    .course-section-heading:hover {
+        box-shadow: 1px 2px 3px var(--text-black);
+        background: var(--submitty-logo-blue);
+        color: white;
+        translate: 0 -3px;
     }
 
-    .btn-nav {
-        min-width: 95%;
+    .course-section {
+       display: none;
+    }
+
+    .panel-head-active {
+        box-shadow: 1px 2px 3px var(--text-black);
+        background: var(--submitty-logo-blue);
+        color: white;
+    }
+
+    .panel-head-active .expand-icon, .collapse-icon {
+        display: inline;
+    }
+
+    .panel-head-active .collapse-icon, .expand-icon {
+        display: none;
+    }
+
+    .panel-active {
+        display: block;
+    }
+
+    #gradeables-content h1 {
+        font-weight: 400;
     }
 }
 
@@ -85,7 +136,6 @@
     }
 
     .course-section-heading {
-        border-bottom: 1px solid var(--standard-light-gray);
         margin: 0;
         padding: 0;
         display: table-row-group;
@@ -96,6 +146,7 @@
     }
 
     .gradeable-row {
+        border: none;
         display: table-row;
         justify-content: space-between;
     }
