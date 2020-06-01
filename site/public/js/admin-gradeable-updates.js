@@ -150,7 +150,69 @@ $(document).ready(function () {
                 updateErrorMessage();
             }, updateGradeableErrorCallback);
     });
-});
+    $('#random_peer_graders_list').click(
+        function () {
+            if ($(this).hasClass('ignore')) {
+                return;
+            }
+            // If its rubric-related, then make different request
+            if ($('#gradeable_rubric').find('[name="' + this.name + '"]').length > 0) {
+                // ... but don't automatically save electronic rubric data
+                if (!$('#radio_electronic_file').is(':checked')) {
+                    saveRubric(false);
+                }
+                return;
+            }
+            if ($('#grader_assignment').find('[name="' + this.name + '"]').length > 0) {
+                saveGraders();
+                return;
+            }
+            if ($(this).prop('id') == 'all_access' || $(this).prop('id') == 'minimum_grading_group') {
+                saveGraders();
+            }
+            // Don't save if it we're ignoring it
+            if ($(this).hasClass('ignore')) {
+                return;
+            }
+        
+            let data = {'csrf_token': csrfToken};
+            data[this.name] = $(this).val();
+            let addDataToRequest = function (i, val) {
+                if (val.type === 'radio' && !$(val).is(':checked')) {
+                    return;
+                }
+                if($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
+                    $(val).val('0');
+                }
+                data[val.name] = $(val).val();
+            };
+        
+            // If its date-related, then submit all date data
+            if ($('#gradeable-dates').find('input[name="' + this.name + '"]').length > 0
+                || $(this).hasClass('date-related')) {
+                $('#gradeable-dates :input,.date-related').each(addDataToRequest);
+            }
+            setRandomGraders($('#g_id').val(), data,
+                function (response_data) {
+                    // Clear errors by setting new values
+                    for (let key in response_data) {
+                        if (response_data.hasOwnProperty(key)) {
+                            clearError(key, response_data[key]);
+                        }
+                    }
+                    // Clear errors by just removing red background
+                    for (let key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            clearError(key);
+                        }
+                    }
+                    updateErrorMessage();
+                }, updateGradeableErrorCallback);
+            });
+    });
+    
+    
+    
 
 function ajaxRebuildGradeableButton() {
     var gradeable_id = $('#g_id').val();
@@ -241,7 +303,40 @@ function ajaxCheckBuildStatus() {
         }
     });
 }
-
+function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback)
+    {
+    console.log("Clicked");
+    var gradeable_id=$('#g_id').val();
+    $.ajax({
+        type: "POST", 
+        url: buildCourseUrl(['gradeable', gradeable_id, 'ajaxRandomizePeers']),
+        data: {csrf_token:p_values['csrf_token']},
+        //: 'json',
+        success: function(response){
+            console.log("Response is Ready");
+            console.log(response);
+            },
+       error: function (jqXHR, exception) {
+        var msg = '';
+        if (jqXHR.status === 0) {
+            msg = 'Not connect.\n Verify Network.';
+        } else if (jqXHR.status == 404) {
+            msg = 'Requested page not found. [404]';
+        } else if (jqXHR.status == 500) {
+            msg = 'Internal Server Error [500].';
+        } else if (exception === 'parsererror') {
+            msg = 'Requested JSON parse failed.';
+        } else if (exception === 'timeout') {
+            msg = 'Time out error.';
+        } else if (exception === 'abort') {
+            msg = 'Ajax request aborted.';
+        } else {
+            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+        }
+        alert("error occured"+msg);
+    }
+     });
+}
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     if('peer_graders_list' in p_values && $('#peer_graders_list').length){
         $('#save_status').html('Saving Changes');
