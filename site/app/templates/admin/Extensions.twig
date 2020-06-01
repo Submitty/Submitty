@@ -1,36 +1,36 @@
 <div id="message"></div>
 <div class="content">
     <h1>Excused Absence Extensions</h1>
+    <p>Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.</p>
+    <br>
     <form id="extensions-form" class="exception-form" method="post" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <input type="hidden" name="option" value="-1" />
         <div class="option">
-            <p>Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.</p>
-            <div class="option">
-                <label for="gradeable-select">Select Gradeable:</label>
-                <select name="g_id" id="gradeable-select" onchange="updateGradeableForExtensions()">
-                    <option disabled {% if current_gradeable is null %} selected {% endif %} value> -- select an option -- </option>
-                    {% for index, value in gradeables %}
-                        <option
+            <label for="gradeable-select" class="option-title">Select Gradeable:</label><br>
+            <select name="g_id" id="gradeable-select" onchange="updateGradeableForExtensions()">
+                <option disabled {% if current_gradeable is null %} selected {% endif %} value> -- select an option -- </option>
+                {% for index, value in gradeables %}
+                    <option
                             value="{{value['g_id']}}"
                             {% if current_gradeable['g_id'] == value['g_id'] %} selected {% endif %}
-                        >
-                            {{ value['g_title'] }}
-                        </option>
-                    {% endfor %}
-                </select>
-                {% if current_gradeable is not null %}
-                    <p id="due-date-label">Set Due Date:
-                        <span id="due-date" data-date="{{ current_gradeable['eg_submission_due_date'] | date("Y-m-d") }}">
-                            {{ current_gradeable['eg_submission_due_date'] | date("m/d/Y H:i:s T") }}
-                        <span>
-                    </p>
-                {% endif %}
-            </div>
+                    >
+                        {{ value['g_title'] }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if current_gradeable is not null %}
+                <p id="due-date-label">Set Due Date:
+                    <span id="due-date" data-date="{{ current_gradeable['eg_submission_due_date'] | date("Y-m-d") }}">
+                        {{ current_gradeable['eg_submission_due_date'] | date("m/d/Y H:i:s T") }}
+                    <span>
+                </p>
+            {% endif %}
         </div>
          <input type="hidden" name="due_date" value="{{ due_date }}" />
         <fieldset class="single-student">
             <legend class="option-title">Single Student Entry</legend>
+            <br>
             <label for="user_id">
                 Student ID:
                 <input name="user_id" id="user_id" class="option-input" type="text">
@@ -66,11 +66,13 @@
         <table id="extensions-table" class="table table-striped mobile-table">
             <caption>Extensions</caption>
             <thead>
-                <th>Student ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Number of Days of Extension</th>
-                <th>Delete</th>
+                <tr>
+                    <th>Student ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Number of Days of Extension</th>
+                    <th>Delete</th>
+                </tr>
             </thead>
             <tbody>
                 {% for user in current_exceptions %}

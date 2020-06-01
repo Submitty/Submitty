@@ -36,6 +36,9 @@ fieldset {
 #extensions-table td:nth-of-type(5):before { content: "Delete"; }
 
 @media (min-width: 768px) {
+    #extensions-table {
+        text-align: left;
+    }
     .single-student label {
         flex: 0 0 0;
         width: 420px;

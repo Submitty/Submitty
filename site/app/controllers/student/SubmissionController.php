@@ -14,10 +14,11 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\SubmissionTextBox;
-use app\models\gradeable\SubmissionCodeBox;
-use app\models\gradeable\SubmissionMultipleChoice;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\notebook\UserSpecificNotebook;
+use app\models\notebook\SubmissionTextBox;
+use app\models\notebook\SubmissionCodeBox;
+use app\models\notebook\SubmissionMultipleChoice;
 
 class SubmissionController extends AbstractController {
 
@@ -918,9 +919,13 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
 
+        $this_config_inputs = [];
         if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
             //need to force re-parse the notebook serverside again
-            $notebook = $gradeable->getAutogradingConfig()->getNotebook($gradeable_id, $who_id);
+            $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
+                $who_id,
+                $gradeable_id
+            );
 
             //save the notebook hashes and item selected
             $json = [
@@ -929,6 +934,8 @@ class SubmissionController extends AbstractController {
             ];
 
             FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".submit.notebook"), $json);
+
+            $this_config_inputs = $notebook->getInputs();
         }
 
         $this->upload_details['version_path'] = $version_path;
@@ -998,7 +1005,6 @@ class SubmissionController extends AbstractController {
             $short_answer_objects    = json_decode($short_answer_objects, true);
             $codebox_objects         = json_decode($codebox_objects, true);
             $multiple_choice_objects = json_decode($multiple_choice_objects, true);
-            $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
 
             foreach ($this_config_inputs as $this_input) {
                 if ($this_input instanceof SubmissionTextBox) {
