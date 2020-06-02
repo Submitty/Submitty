@@ -273,10 +273,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
 					<tr>
-				        <td style = "cursor:pointer;width:25%" id="user_down">User &darr;</td>
-				        <td style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</td>
-				        <td style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</td>
-				        <td style = "cursor:pointer;width:25%" id="filepath_down">Filepath</td>
+				        <th style = "cursor:pointer;width:25%" id="user_down">User &darr;</th>
+				        <th style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</th>
+				        <th style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</th>
+				        <th style = "cursor:pointer;width:25%" id="filepath_down">Filepath</th>
 					</tr>
 HTML;
 
@@ -517,7 +517,7 @@ HTML;
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
-                
+
                 if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
                     $info["graded_groups"][] = 4;
                 }
@@ -842,7 +842,7 @@ HTML;
         if ($peer && $this->core->getUser()->getGroup() == 4) {
             $i_am_a_peer = true;
         }
-        
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,
