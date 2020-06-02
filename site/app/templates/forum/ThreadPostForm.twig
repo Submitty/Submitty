@@ -83,7 +83,7 @@
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
         <textarea name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
-        onkeydown="submitNearestForm(event,$(this))"></textarea>
+        onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
     </div>
 <br/>
 {% endif %}
@@ -235,6 +235,24 @@
                 theForm.trigger('reinitialize.areYouSure');
                 theForm.submit();
             }
+        }
+    }
+
+    function pasteImageFromClipboard(e, textarea, part) {
+        var item = e.clipboardData.items[0];
+        if (item.type.indexOf("image")===0){
+            image = item.getAsFile();
+
+            num_clipboard_files++;
+            old_name = image.name.split('.');
+            new_name = old_name[0] + num_clipboard_files.toString() + '.' + old_name[1];
+
+            Object.defineProperty(image, 'name', {
+                writable: true,
+                value: new_name
+            });
+
+            addFile(image, part);
         }
     }
 </script>
