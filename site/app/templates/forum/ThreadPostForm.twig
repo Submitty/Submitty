@@ -96,13 +96,15 @@
                 No categories exists please create one.
             </span>
         {% endif %}
-        <fieldset id='categories-pick-list'>
-          <legend id="cat_label">Categories</legend>
-          {% for category in categories %}
-              <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                  <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
-              </div>
-          {% endfor %}
+        <fieldset>
+          <legend id="cat_label">Categories:</legend>
+          <div id=id='categories-pick-list'>
+            {% for category in categories %}
+                <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
+                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+                </div>
+            {% endfor %}
+          </div>
         </fieldset>
     <script>
     $(function() {
@@ -177,8 +179,8 @@
             {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
-            <label class="inline-block" for="Announcement">{{ "Pin Thread" }}</label>
-            <input type="checkbox" class="pinThread-checkbox" name="pinThread" value="pinThread" data-ays-ignore="true"/>
+            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
+            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
