@@ -1,6 +1,6 @@
 <?php
-namespace app\views;
 
+namespace app\views;
 
 use app\libraries\FileUtils;
 use app\views\Date;
@@ -14,7 +14,8 @@ class StatsView extends AbstractView {
      * @param array $notcontains
      * @return array
      */
-    function convertFileToArray($file,$whatstat = 0,$contains = array(),$notcontains = array()) {
+
+    private function convertFileToArray($file, $whatstat = 0, $contains = array(), $notcontains = array()) {
         $lines = explode(PHP_EOL, $file);
         $array = array();
         $notcontains[] = "zip";
@@ -26,8 +27,8 @@ class StatsView extends AbstractView {
                 if (gettype($next) != "String" && $next == array()) {
                     continue;
                 }
-                $next = preg_grep($contain,array($next));
-                foreach ($next as $k=>$v) {
+                $next = preg_grep($contain, array($next));
+                foreach ($next as $k => $v) {
                     $next = $v;
                     break;
                 }
@@ -73,10 +74,12 @@ class StatsView extends AbstractView {
         }
         return $array;
     }
-    public function formatdate($date) {
+
+    private function formatdate($date) {
         return $date->format('Ymd') . ".txt";
     }
-    public function limitDataByThisSemester($maxdays = 9999,$type = 0,$whiltelist = array(),$blacklist = array()) {
+
+    private function limitDataByThisSemester($maxdays = 9999, $type = 0, $whiltelist = array(), $blacklist = array()) {
         $currentdate = new \DateTime('now', $this->core->getConfig()->getTimezone());
         $semester = ($currentdate->format('n') < 7 ? "s" : "f") . $currentdate->format('y');
         $newsem = $semester;
@@ -102,7 +105,7 @@ class StatsView extends AbstractView {
         return array($x,$y,$hour);
     }
 
-    public function groupbyhour($array) {
+    private function groupbyhour($array) {
         $res = array();
         $time_values = array();
         if (count($array) == 0) {
@@ -143,10 +146,10 @@ class StatsView extends AbstractView {
     public function showStats() {
 
         $files = scandir("/var/local/submitty/logs/autograding");
-        $gradetimesall = $this->limitDataByThisSemester(9999,1);
+        $gradetimesall = $this->limitDataByThisSemester(9999, 1);
         $waittimesall = $this->limitDataByThisSemester();
-        $gradetimesme = $this->limitDataByThisSemester(9999,1,array($this->core->getUser()->getId()),array("BATCH"));
-        $waittimesme = $this->limitDataByThisSemester(9999,0,array($this->core->getUser()->getId()),array("BATCH"));
+        $gradetimesme = $this->limitDataByThisSemester(9999, 1, array($this->core->getUser()->getId()), array("BATCH"));
+        $waittimesme = $this->limitDataByThisSemester(9999, 0, array($this->core->getUser()->getId()), array("BATCH"));
 
         $currentdate = new \DateTime('now', $this->core->getConfig()->getTimezone());
 
