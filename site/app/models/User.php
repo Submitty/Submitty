@@ -222,6 +222,7 @@ class User extends AbstractModel {
      * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
      * user has not set their time zone.
      *
+     * @throws NullException Found null user time zone, but this should never happen
      * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
      */
     public function getNiceFormatTimeZone(): string {
@@ -234,6 +235,7 @@ class User extends AbstractModel {
     /**
      * Get the UTC offset for this user's time zone.
      *
+     * @throws NullException Found null user time zone, but this should never happen
      * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
      */
     public function getUTCOffset(): string {
