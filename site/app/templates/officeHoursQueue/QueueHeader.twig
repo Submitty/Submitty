@@ -3,10 +3,10 @@
     <p>{{viewer.getQueueMessage() | markdown}}</p>
   </div>
 {% endif %}
-{% if viewer.getQueueWhiteboardMessage() | length > 0 %}
-  <div id="whiteboard" class="content">
-    <h2>Virtual Whiteboard:</h2>
-    <p>{{viewer.getQueueWhiteboardMessage() | markdown}}</p>
+{% if viewer.getQueueAnnouncementMessage() | length > 0 %}
+  <div id="announcement" class="content">
+    <h2>Todays Announcements:</h2>
+    <p>{{viewer.getQueueAnnouncementMessage() | markdown}}</p>
   </div>
 {% endif %}
 <div class="content">

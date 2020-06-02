@@ -25,6 +25,6 @@
         "queue_enabled": false,
         "queue_contact_info": false,
         "queue_message": "",
-        "queue_whiteboard_message": ""
+        "queue_announcement_message": ""
     }
 }

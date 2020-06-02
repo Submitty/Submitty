@@ -204,8 +204,8 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getConfig()->getQueueMessage();
     }
 
-    public function getQueueWhiteboardMessage() {
-        return $this->core->getConfig()->getQueueWhiteboardMessage();
+    public function getQueueAnnouncementMessage() {
+        return $this->core->getConfig()->getQueueAnnouncementMessage();
     }
 
     public function getNumberAheadInQueueThisWeek() {

@@ -16,7 +16,7 @@
   <span class="option-title">Modify old queue</span>
   <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token" style="height:auto;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-    <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required" onchange="document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';">
+    <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
       <option value="">Queue Name</option>
       {% for queue in viewer.getAllQueues() %}
         <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>

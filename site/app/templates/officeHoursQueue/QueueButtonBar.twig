@@ -1,6 +1,6 @@
 {% if viewer.isGrader()%}
   {% include('officeHoursQueue/QueueFilter.twig') %}
-  {% include('officeHoursQueue/QueueWhiteboard.twig') %}
+  {% include('officeHoursQueue/QueueAnnouncement.twig') %}
 
   <p>
     For more information: <a target=_blank href="https://submitty.org/grader/queue">
@@ -11,8 +11,8 @@
     <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()">
       Filter Settings
     </button>
-    <button id="toggle_whiteboard_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#whiteboard-settings').show()">
-      Edit Whiteboard
+    <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
+      Edit Announcement
     </button>
     <button id="auto_refresh_btn" class="btn btn-default filter_btn" type="button" onclick="toggleAutoRefresh()">
       Turn On Auto Refresh

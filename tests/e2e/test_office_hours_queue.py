@@ -94,9 +94,11 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(base_queue_history_count+4, self.queueHistoryCount(False))
         self.assertEqual(0, self.currentQueueCount())
 
-        whiteboard_string = ''.join(choice(ascii_lowercase) for i in range(10))
-        self.editWhiteboard(whiteboard_string)
-        self.assertEqual(' '.join(self.driver.find_element(By.ID, 'whiteboard').text.split()), f'Virtual Whiteboard: {whiteboard_string}')
+        announcement_string = ''.join(choice(ascii_lowercase) for i in range(10))
+        self.editAnnouncement(announcement_string)
+        self.assertEqual(' '.join(self.driver.find_element(By.ID, 'announcement').text.split()), f'Todays Announcements: {announcement_string}')
+        self.editAnnouncement("")
+        self.assertEqual(True, self.verifyElementMissing('id', ['announcement']))
 
 
         self.switchToStudent('student')
@@ -120,22 +122,22 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.driver.find_element(By.XPATH, '//*[@id="filter-settings"]//*[@class="form-button-container"]/*').click()
         self.assertEqual(True,self.driver.execute_script("return $('#filter-settings').is(':hidden')"))
 
-    def openWhiteboardSettings(self):
+    def openAnnouncementSettings(self):
         self.goToQueuePage()
-        self.assertEqual(True,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
-        self.driver.find_element(By.ID, 'toggle_whiteboard_settings').click()
-        self.assertEqual(False,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
+        self.assertEqual(True,self.driver.execute_script("return $('#announcement-settings').is(':hidden')"))
+        self.driver.find_element(By.ID, 'toggle_announcement_settings').click()
+        self.assertEqual(False,self.driver.execute_script("return $('#announcement-settings').is(':hidden')"))
 
-    def saveWhiteboardSettings(self):
-        self.assertEqual(False,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
-        self.driver.find_element(By.ID, 'save_whiteboard').click()
-        self.assertEqual(True,self.driver.execute_script("return $('#whiteboard-settings').is(':hidden')"))
+    def saveAnnouncementSettings(self):
+        self.assertEqual(False,self.driver.execute_script("return $('#announcement-settings').is(':hidden')"))
+        self.driver.find_element(By.ID, 'save_announcement').click()
+        self.assertEqual(True,self.driver.execute_script("return $('#announcement-settings').is(':hidden')"))
 
-    def editWhiteboard(self, text):
-        self.openWhiteboardSettings()
-        self.driver.find_element(By.ID, 'queue-whiteboard-message').clear()
-        self.driver.find_element(By.ID, 'queue-whiteboard-message').send_keys(text)
-        self.saveWhiteboardSettings()
+    def editAnnouncement(self, text):
+        self.openAnnouncementSettings()
+        self.driver.find_element(By.ID, 'queue-announcement-message').clear()
+        self.driver.find_element(By.ID, 'queue-announcement-message').send_keys(text)
+        self.saveAnnouncementSettings()
 
 
     def deleteAllQueues(self):

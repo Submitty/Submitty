@@ -22,8 +22,8 @@ def up(config, database, semester, course):
         with open(config_file, 'r') as in_file:
             j = json.load(in_file)
 
-        if 'queue_whiteboard_message' not in j['course_details']:
-            j['course_details']['queue_whiteboard_message'] = ''
+        if 'queue_announcement_message' not in j['course_details']:
+            j['course_details']['queue_announcement_message'] = ''
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
@@ -50,8 +50,8 @@ def down(config, database, semester, course):
         with open(config_file, 'r') as in_file:
             j = json.load(in_file)
 
-        if 'queue_whiteboard_message' in j['course_details']:
-            del j['course_details']['queue_whiteboard_message']
+        if 'queue_announcement_message' in j['course_details']:
+            del j['course_details']['queue_announcement_message']
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)

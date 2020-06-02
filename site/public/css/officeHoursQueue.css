@@ -52,7 +52,7 @@ th{
   color: var(--btn-text-black);
 }
 
-.whiteboard-setting {
+.announcement-setting {
     min-height: 7em;
     flex: 1 0 auto;
     margin: 0 0 1em;

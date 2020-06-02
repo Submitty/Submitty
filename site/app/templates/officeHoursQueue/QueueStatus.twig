@@ -8,7 +8,7 @@
     <div class="form-group">
       <label for="queue_code">Queue Name:
       </label>
-      <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+      <select id="queue_code" class="form-control" name="code" required="required">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllQueues() if queue['open'] == 'true' %}
           <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
