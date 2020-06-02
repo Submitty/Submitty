@@ -79,7 +79,7 @@ class ForumThreadView extends AbstractView {
 
                 $post_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . "#" . $post['p_id'];
 
-                $posted_on = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp_post'], DateUtils::getDateFormat($this->core, 'forum'));
+                $posted_on = DateUtils::convertTimeStamp($this->core->getUser(), $post['timestamp_post'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
                 $thread_list[$count - 1]["posts"][] = array(
                     "post_link" => $post_link,
@@ -600,7 +600,7 @@ class ForumThreadView extends AbstractView {
                 $date = null;
             }
             else {
-                $date = DateUtils::convertTimeStampServerToUser($this->core, $first_post['timestamp'], DateUtils::getDateFormat($this->core, 'forum'));
+                $date = DateUtils::convertTimeStamp($this->core->getUser(), $first_post['timestamp'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             }
             if ($thread['merged_thread_id'] != -1) {
                 // For the merged threads
@@ -783,10 +783,10 @@ class ForumThreadView extends AbstractView {
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
         // Get formatted time stamps
-        $date = DateUtils::convertTimeStampServerToUser($this->core, $post['timestamp'], DateUtils::getDateFormat($this->core, 'forum'));
+        $date = DateUtils::convertTimeStamp($this->core->getUser(), $post['timestamp'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
         if (!is_null($post["edit_timestamp"])) {
-            $edit_date = DateUtils::convertTimeStampServerToUser($this->core, $post["edit_timestamp"], DateUtils::getDateFormat($this->core, 'forum'));
+            $edit_date = DateUtils::convertTimeStamp($this->core->getUser(), $post["edit_timestamp"], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
         }
         else {
             $edit_date = null;

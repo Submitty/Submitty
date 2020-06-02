@@ -250,6 +250,9 @@ class Config extends AbstractModel {
     /** @prop-read @var array */
     protected $feature_flags = [];
 
+    /** @prop @var DateTimeFormat */
+    protected $date_time_format;
+
     /**
      * Config constructor.
      *
@@ -258,6 +261,10 @@ class Config extends AbstractModel {
     public function __construct(Core $core) {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
+
+        // For now this will be set to 'MDY', eventually this will be setup in submitty configuration script
+        // and pulled from there
+        $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
     }
 
     public function loadMasterConfigs($config_path) {

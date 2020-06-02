@@ -2,7 +2,7 @@
 
 namespace app\libraries;
 
-use app\exceptions\BadArgumentException;
+use app\models\User;
 
 /**
  * Class DateUtils
@@ -13,46 +13,6 @@ class DateUtils {
 
     /** @var string Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
-
-    // Keys available to use with getDateFormat
-    const DATE_FORMATS_KEYS = [
-        'gradeable',
-        'gradeable_with_seconds',
-        'forum'                     // Also used in user notifications
-    ];
-
-    // Internationalized DateTime formatting strings
-    const DATE_FORMATS = [
-        'MDY' => [
-            'gradeable' => 'm/d/Y @ h:i A T',
-            'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
-            'forum' => 'n/j g:i A'
-        ],
-        'DMY' => [
-            'gradeable' => 'd/m/Y @ h:i A T',
-            'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
-            'forum' => 'j/n g:i A'
-        ]
-    ];
-
-    /**
-     * Get the appropriate internationalized DateTime formatting string.  Some countries use a MM/DD/YYYY format, while
-     * others use a DD/MM/YYYY format, etc.  Currently this function only returns the strings formatted for countries
-     * using the MM/DD/YYYY format but eventually this function will pick up configuration data and return a formatting
-     * string consistent with whatever part of the world the submitty administrators are setting it up for.
-     *
-     * @param Core $core
-     * @param string $key A key available in self::DATE_FORMAT_KEYS
-     * @throws BadArgumentException The supplied key was not found is self::DATE_FORMATS_KEYS
-     * @return string
-     */
-    public static function getDateFormat(Core $core, string $key) {
-        if (!in_array($key, self::DATE_FORMATS_KEYS)) {
-            throw new BadArgumentException('The $key must be a member of DateUtils::DATE_FORMAT_KEYS');
-        }
-
-        return self::DATE_FORMATS['MDY'][$key];
-    }
 
     /**
      * Given two dates, give the interval of time in days between these two times. Any partial "days" are rounded
@@ -217,62 +177,16 @@ class DateUtils {
     }
 
     /**
-     * Determine if the given time stamp includes a UTC offset.  If so, return the original time stamp but with the
-     * offset information trimmed off.  Since all times saved on the server are saved in the server time zone,
-     * removing the UTC offset from the time stamp removes any ambiguity arising from instantiating a DateTime object
-     * with the original string, and then changing the time zone to the server time zone.  This is needed to properly
-     * handle areas switching in and out of daylight savings time.
+     * Converts the given time stamp string into the given user's time zone and then returns it according
+     * to the given format.
      *
-     * @param string $time_stamp A time stamp that could be used to instantiate a PHP DateTime object
-     * @return string The original time stamp if no offset information was found, or the original time stamp with the
-     * offset information removed.
+     * @param User $user
+     * @param string $time_stamp
+     * @param string $format
+     * @return string
      */
-    public static function stripUTCOffset(string $time_stamp): string {
-        $time = new \DateTime($time_stamp);
-        $time_zone = $time->getTimezone()->getName();
-
-        // Determine if $time_zone starts with a '-' or a '+'
-        // If so then this time stamp was setup with an offset instead of a real time zone
-        $needle = $time_zone[0];
-
-        if ($needle === '+' || $needle === '-') {
-            $pos = strripos($time_stamp, $needle);
-            $time_stamp = substr($time_stamp, 0 , $pos);
-        }
-
-        return $time_stamp;
-    }
-
-    /**
-     * Take a time stamp from the server (will be in the server time zone), convert it to the user's time zone, and
-     * then output it according to the given formatting string.
-     *
-     * @param Core $core
-     * @param string $time_stamp A time stamp string which could be used to instantiate a PHP DateTime object
-     * @param string $format A DateTime formatting string
-     * @return string The time zone converted and formatted string
-     */
-    public static function convertTimeStampServerToUser(Core $core, string $time_stamp, string $format) {
-        $user = $core->getUser();
-        $server_time_zone = $core->getConfig()->getTimezone();
-
-        // No user, use the server time zone
-        if ($user === null) {
-            $user_time_zone = $server_time_zone;
-        }
-        else {
-            $user_time_zone = $user->getNiceFormatTimeZone();
-        }
-
-        // Just use the server's time zone if the user has not set one
-        if ($user_time_zone === 'NOT SET') {
-            $user_time_zone = $server_time_zone;
-        }
-
-        // Preform the conversion
-        $time = new \DateTime(self::stripUTCOffset($time_stamp), $server_time_zone);
-        $time->setTimezone(new \DateTimeZone($user_time_zone));
-
+    public static function convertTimeStamp(User $user, string $time_stamp, string $format) {
+        $time = self::parseDateTime($time_stamp, $user->getUsableTimeZone());
         return $time->format($format);
     }
 }

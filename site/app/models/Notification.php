@@ -176,8 +176,7 @@ class Notification extends AbstractModel {
             }
         }
         else {
-            // TODO: Continue debugging here
-            return DateUtils::convertTimeStampServerToUser($this->core, $actual_time, DateUtils::getDateFormat($this->core, 'forum'));
+            return DateUtils::convertTimeStamp($this->core->getUser(), $actual_time, $this->core->getConfig()->getDateTimeFormat()->getFormat('notification'));
         }
     }
 }

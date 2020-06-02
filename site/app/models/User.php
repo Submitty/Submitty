@@ -219,6 +219,21 @@ class User extends AbstractModel {
     }
 
     /**
+     * Gets a \DateTimeZone instantiation for the user's time zone if they have one set, or the server time zone
+     * if they don't.
+     *
+     * @return \DateTimeZone
+     */
+    public function getUsableTimeZone(): \DateTimeZone {
+        if ($this->time_zone === 'NOT_SET/NOT_SET' || is_null($this->time_zone)) {
+            return new \DateTimeZone($this->core->getConfig()->getTimezone());
+        }
+        else {
+            return new \DateTimeZone($this->time_zone);
+        }
+    }
+
+    /**
      * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
      * user has not set their time zone.
      *
