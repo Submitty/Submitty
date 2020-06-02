@@ -128,20 +128,20 @@
     remove_data(weekago);
 
 
-    plot(allwaitx,allwaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_week_wait")
-    plot(allgradetimex,allgradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_week_grade")
-    plot(mewaitx,mewaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_week_wait_m")
-    plot(megradetimex,megradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_week_grade_m")
+    plot(allwaitx,allwaity,"Average Wait time for the past week",'Wait time in seconds',"Date/Time","past_week_wait")
+    plot(allgradetimex,allgradetimey,"Average Grade time the past week",'Grade time in seconds',"Date/Time","past_week_grade")
+    plot(mewaitx,mewaity,"Average Wait time for the past week",'Wait time in seconds',"Date/Time","past_week_wait_m")
+    plot(megradetimex,megradetimey,"Average Grade time for the past week",'Grade time in seconds',"Date/Time","past_week_grade_m")
 
     var dayago = minus_day(new Date(today),1)
 
 
     remove_data(dayago);
 
-    plot(allwaitx,allwaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_24_wait")
-    plot(allgradetimex,allgradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_24_grade")
-    plot(mewaitx,mewaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_24_wait_m")
-    plot(megradetimex,megradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_24_grade_m")
+    plot(allwaitx,allwaity,"Average Wait time for the past 24 hours",'Wait time in seconds',"Date/Time","past_24_wait")
+    plot(allgradetimex,allgradetimey,"Average Grade time for the past 24 hours",'Grade time in seconds',"Date/Time","past_24_grade")
+    plot(mewaitx,mewaity,"Average Wait time for the past 24 hours",'Wait time in seconds',"Date/Time","past_24_wait_m")
+    plot(megradetimex,megradetimey,"Average Grade time for the past 24 hours",'Grade time in seconds',"Date/Time","past_24_grade_m")
 
     allwaitx = [];
     allwaity = [];
