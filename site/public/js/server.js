@@ -572,10 +572,15 @@ function downloadCSV(code) {
         }
     });
 
+    // Setup default name for the CSV file
+    let course = $('#download_info_json_id').data('course');
+    let semester = $('#download_info_json_id').data('semester');
+    let csv_name = [semester, course, 'users', 'data'].join('_') + '.csv'
+
     var temp_element = $('<a id="downloadlink"></a>');
     var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
     temp_element.attr('href', address);
-    temp_element.attr('download', 'course_users_data.csv');
+    temp_element.attr('download', csv_name);
     temp_element.css('display', 'none');
     $(document.body).append(temp_element);
     $('#downloadlink')[0].click();

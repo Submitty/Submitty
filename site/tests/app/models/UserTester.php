@@ -2,6 +2,7 @@
 
 namespace tests\app\models;
 
+use app\exceptions\NullException;
 use app\libraries\Core;
 use app\models\User;
 
@@ -173,5 +174,41 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, array());
         $this->assertFalse($user->isLoaded());
         $this->assertNull($user->getId());
+    }
+
+    public function testGetTimeZoneNiceFormatNull() {
+        $user = new User($this->core, []);
+        $this->expectException(NullException::class);
+        $this->expectExceptionMessage(User::NULL_TIME_ZONE_MESSAGE);
+        $user->getTimeZoneNiceFormat();
+    }
+
+    public function testGetTimeZoneNiceFormatNotSet() {
+        $user = new User($this->core, [
+            'user_id' => 'test',
+            'user_firstname' => 'test',
+            'user_lastname' => 'test',
+            'user_email' => 'user@email.com',
+            'time_zone' => 'NOT_SET/NOT_SET'
+        ]);
+        $this->assertEquals('NOT SET', $user->getTimeZoneNiceFormat());
+    }
+
+    public function testGetUTCOffsetNull() {
+        $user = new User($this->core, []);
+        $this->expectException(NullException::class);
+        $this->expectExceptionMessage(User::NULL_TIME_ZONE_MESSAGE);
+        $user->getUTCOffset();
+    }
+
+    public function testGetUTCOffsetNotSet() {
+        $user = new User($this->core, [
+            'user_id' => 'test',
+            'user_firstname' => 'test',
+            'user_lastname' => 'test',
+            'user_email' => 'user@email.com',
+            'time_zone' => 'NOT_SET/NOT_SET'
+        ]);
+        $this->assertEquals('NOT SET', $user->getUTCOffset());
     }
 }
