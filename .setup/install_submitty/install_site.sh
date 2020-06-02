@@ -2,19 +2,17 @@
 
 
 ################################################################################################
-### DEVELOPMENTAL SITE INSTALLER
+### SITE INSTALLER
 #
-# This is a new, developmental site installer. This script looks at the result of the rsync
-# command to tell what files have been updated, and uses that list to see if:
-#   - if package.json or package-lock.json was modified, run NPM
+# This script is used to install the submitty site code from ${SUBMITTY_REPOSITORY}/site to
+# ${SUBMITTY_INSTALL_DIR}/site. It then deals with composer and npm dependencies, and finally
+# sets permissions as appropriate. To have the best efficiency and speed, we use rsync to
+# deal with moving the files, and then use the result of that command to tell us what files
+# were updated and to accomplish the following just for those files:
+#   - if package.json or package-lock.json was modified, run NPM and move into place js files
 #   - if composer.json or composer.lock was modified, run composer
-#   - only set permissions appropriate for modified files
+#   - only set permissions for modified files
 #
-# This is more efficient by orders of magnitude than install_site_prod.sh, but at the cost
-# of being more complicated to get right. As such, this script is currently set to only
-# run when the debugging_enabled flag is set, which should largely only affect vagrant
-# users, and which gives us a good picture of stability before eventual production rollout
-# in a number of months.
 ################################################################################################
 
 set_permissions () {
@@ -197,9 +195,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jquery-ui
     cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
     cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
-    # jquery-ui-timepicker-addon
-    mkdir ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
-    cp ${NODE_FOLDER}/jquery-ui-timepicker-addon/dist/*.min.* ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs

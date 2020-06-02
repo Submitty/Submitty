@@ -766,11 +766,6 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected type at offset 87$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$status\\)\\: Unexpected token \"\\$status\", expected type at offset 68$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php

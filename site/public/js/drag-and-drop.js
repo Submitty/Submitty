@@ -17,6 +17,9 @@ var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
+let total_files_added = 0;
+let MAX_NUM_OF_FILES;
+
 var empty_inputs = true;
 
 var student_ids = [];           // all student ids
@@ -71,13 +74,30 @@ function draghandle(e){
 
 // ADD FILES FOR NEW SUBMISSION
 //========================================================================================
+// check if adding a file is valid (not exceeding the limit)
+function addIsValid(files_to_add, total_added_files) {
+  if (files_to_add+total_added_files > MAX_NUM_OF_FILES){
+    alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
+    return false;
+  }
+  return true;
+}
+
+//initialize maximum no of files with that of the php_ini value
+function initMaxNoFiles(max_no_of_files) {
+  MAX_NUM_OF_FILES = max_no_of_files;
+}
+
 // add files dragged
 function drop(e){
     draghandle(e);
     var filestream= e.dataTransfer.files;
-    var part = get_part_number(e);
-    for(var i=0; i<filestream.length; i++){
-        addFileWithCheck(filestream[i], part); // check for folders
+    if (addIsValid(filestream.length, total_files_added)){
+        var part = get_part_number(e);
+        for(var i=0; i<filestream.length; i++){
+            addFileWithCheck(filestream[i], part); // check for folders
+            total_files_added++;
+        }
     }
 }
 
@@ -85,9 +105,12 @@ function drop(e){
 function dropWithMultipleZips(e){
     draghandle(e);
     var filestream= e.dataTransfer.files;
-    var part = get_part_number(e);
-    for(var i=0; i<filestream.length; i++){
-        addFileWithCheck(filestream[i], part, false); // check for folders
+    if (addIsValid(filestream.length, total_files_added)){
+        var part = get_part_number(e);
+        for(var i=0; i<filestream.length; i++){
+            addFileWithCheck(filestream[i], part, false); // check for folders
+            total_files_added++;
+        }
     }
 }
 
@@ -118,8 +141,11 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip=true){
     var filestream = document.getElementById("input-file" + part).files;
-    for(var i=0; i<filestream.length; i++){
-        addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+    if (addIsValid(filestream.length, total_files_added)){
+        for(var i=0; i<filestream.length; i++){
+          addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+          total_files_added++;
+        }
     }
     $('#input-file' + part).val("");
 }
@@ -203,6 +229,7 @@ function addFile(file, part, check_duplicate_zip=true){
     }
 
     setButtonStatus()
+
 }
 
 // REMOVE FILES
@@ -219,6 +246,7 @@ function deleteFiles(part) {
     var labels = dropzone.getElementsByClassName("file-label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
+        total_files_added--;
     }
     label_array[part-1] = [];
     changed = true;
@@ -243,6 +271,7 @@ function deleteSingleFile(filename, part, previous) {
             if (file_array[part-1][j].name == filename) {
                 file_array[part-1].splice(j, 1);
                 label_array[part-1].splice(j, 1);
+                total_files_added--;
                 break;
             }
         }
