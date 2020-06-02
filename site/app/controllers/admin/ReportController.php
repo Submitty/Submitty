@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
@@ -107,10 +108,10 @@ class ReportController extends AbstractController {
             $time_stamp = filemtime($summaries_dir . '/' . $files[2]);
 
             // Format it
-            $time_stamp = date("F d Y - g:i:s A", $time_stamp);
-            $time_stamp = $time_stamp . ' - ' . $this->core->getConfig()->getTimezone()->getName();
+            $time_stamp = new \DateTime("@$time_stamp");
+            $time_stamp->setTimezone($this->core->getConfig()->getTimezone());
 
-            return $time_stamp;
+            return DateUtils::convertTimeStamp($this->core->getUser(), $time_stamp->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'));
         }
     }
 
