@@ -115,7 +115,7 @@ class TestSubmission(BaseTestCase):
 
         # wait until the page reloads to change the selected version, then click the "Grade This Version" button
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='{}' and @selected]".format(new_version))))
-        self.driver.find_element(By.XPATH, "//div[@class='content']/form/input[@type='submit' and @id='version_change']").click()
+        self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/form/input[@type='submit' and @id='version_change']").click()
 
         # accept late day alert
         self.accept_alerts(1)
@@ -197,7 +197,7 @@ class TestSubmission(BaseTestCase):
         self.ensure_multiple_versions()
 
         # click button and wait until page reloads to cancel version
-        self.driver.find_element(By.XPATH, "//div[@class='content']/form/input[@type='submit' and @id='do_not_grade']").click()
+        self.driver.find_element(By.XPATH, "//div[@class='content']/div[@id='version-cont']/form/input[@type='submit' and @id='do_not_grade']").click()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/div[@id='version-cont']/select/option[@value='0' and @selected]")))
 
         # change back to a valid submission version
