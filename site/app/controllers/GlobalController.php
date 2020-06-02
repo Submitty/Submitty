@@ -138,6 +138,13 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-comments"
                 ]);
             }
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['stats']),
+                "title" => "Statistics",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-stats",
+                "icon" => "fa-chart-bar"
+            ]);
 
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line"

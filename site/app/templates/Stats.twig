@@ -1,0 +1,249 @@
+
+<style>
+    div.hidecontent {
+        display: none;
+    }
+</style>
+<div class="content" id="stat_page_content">
+    <div class="tab">
+        <div class =tab-bar-wrapper">
+            <a class="nav-bar normal-btn key_to_click timeframe defaultOpen" tabindex="0"  onclick="openStat(this, 'past_hour','timeframe'), this.blur()">Past Hour</a>
+            <a class="nav-bar normal-btn key_to_click timeframe" tabindex="0"  onclick="openStat(this, 'past_24','timeframe'), this.blur()">Past 24 Hours</a>
+            <a class="nav-bar normal-btn key_to_click timeframe" tabindex="0"  onclick="openStat(this, 'past_week','timeframe'), this.blur()">Past Week</a>
+            <a class="nav-bar normal-btn key_to_click timeframe" tabindex="0"  onclick="openStat(this, 'entire_semester','timeframe'), this.blur()">Entire Semester</a>
+        </div>
+    </div>
+    <div class =tab-bar-wrapper" style="margin-top: 15px;">
+        <a class="nav-bar normal-btn key_to_click typestab defaultOpen" tabindex="0"  onclick="openStat(this,'wait_time','typestab'), this.blur()">Wait Time</a>
+        <a class="nav-bar normal-btn key_to_click typestab" tabindex="0"  onclick="openStat(this,'grading_time','typestab'), this.blur()">Grading Time</a>
+    </div>
+    <div class =tab-bar-wrapper" style="margin-top: 15px;">
+        <a class="nav-bar normal-btn key_to_click aboutwho" tabindex="0"  onclick="openStat(this,'me','aboutwho'), this.blur()">Just me</a>
+        <a class="nav-bar normal-btn key_to_click aboutwho defaultOpen" tabindex="0"  onclick="openStat(this,'everyone','aboutwho'), this.blur()">Everyone</a>
+    </div>
+
+    <div class="timeframe past_hour">
+        <div class="aboutwho me">
+            <div class="wait_time typestab" id="past_hour_wait_m"></div>
+            <div class="grading_time typestab" id="past_hour_grade_m"></div>
+        </div>
+        <div class="aboutwho everyone">
+            <div class="wait_time typestab" id="past_hour_wait"></div>
+            <div class="grading_time typestab" id="past_hour_grade"></div>
+        </div>
+
+
+    </div>
+    <div class="timeframe past_24">
+        <div class="aboutwho me">
+            <div class="wait_time typestab" id="past_24_wait_m"></div>
+            <div class="grading_time typestab" id="past_24_grade_m"></div>
+        </div>
+        <div class="aboutwho everyone">
+            <div class="wait_time typestab" id="past_24_wait"></div>
+            <div class="grading_time typestab" id="past_24_grade"></div>
+        </div>
+
+    </div>
+    <div class="timeframe past_week">
+        <div class="aboutwho me">
+
+            <div class="wait_time typestab" id="past_week_wait_m"></div>
+            <div class="grading_time typestab" id="past_week_grade_m"></div>
+        </div>
+        <div class="aboutwho everyone">
+
+            <div class="wait_time typestab" id="past_week_wait"></div>
+            <div class="grading_time typestab" id="past_week_grade"></div>
+        </div>
+
+    </div>
+    <div class="timeframe entire_semester">
+        <div class="aboutwho me">
+
+            <div class="wait_time typestab" id="entire_semester_wait_m"></div>
+            <div class="grading_time typestab" id="entire_semester_grade_m"></div>
+        </div>
+        <div class="aboutwho everyone">
+
+            <div class="wait_time typestab" id="entire_semester_wait"></div>
+            <div class="grading_time typestab" id="entire_semester_grade"></div>
+        </div>
+
+    </div>
+
+</div>
+<script>
+    var today = '{{ today }}';
+
+    var allwaitx = [];
+    var allwaity = [];
+    var mewaitx = [];
+    var mewaity = [];
+    var allgradetimex = [];
+    var allgradetimey = [];
+    var megradetimex = [];
+    var megradetimey = [];
+
+
+    {% for i in waittimeally %}
+    allwaity.push({{ i }});
+    {% endfor %}
+    {% for i in waittimeallx %}
+    allwaitx.push('{{ i }}');
+    {% endfor %}
+    {% for i in gradetimeally %}
+    allgradetimey.push({{ i }});
+    {% endfor %}
+    {% for i in gradetimeallx %}
+    allgradetimex.push('{{ i }}');
+    {% endfor %}
+    {% for i in waittimemey %}
+    mewaity.push({{ i }});
+    {% endfor %}
+    {% for i in waittimemex %}
+    mewaitx.push('{{ i }}');
+    {% endfor %}
+    {% for i in gradetimemey %}
+    megradetimey.push({{ i }});
+    {% endfor %}
+    {% for i in gradetimemex %}
+    megradetimex.push('{{ i }}');
+    {% endfor %}
+
+
+
+
+
+
+
+
+    plot(allwaitx,allwaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","entire_semester_wait")
+    plot(allgradetimex,allgradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","entire_semester_grade")
+    plot(mewaitx,mewaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","entire_semester_wait_m")
+    plot(megradetimex,megradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","entire_semester_grade_m")
+
+    var weekago = minus_day(new Date(today),7)
+
+    remove_data(weekago);
+
+
+    plot(allwaitx,allwaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_week_wait")
+    plot(allgradetimex,allgradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_week_grade")
+    plot(mewaitx,mewaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_week_wait_m")
+    plot(megradetimex,megradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_week_grade_m")
+
+    var dayago = minus_day(new Date(today),1)
+
+
+    remove_data(dayago);
+
+    plot(allwaitx,allwaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_24_wait")
+    plot(allgradetimex,allgradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_24_grade")
+    plot(mewaitx,mewaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_24_wait_m")
+    plot(megradetimex,megradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_24_grade_m")
+
+    allwaitx = [];
+    allwaity = [];
+    mewaitx = [];
+    mewaity = [];
+    allgradetimex = [];
+    allgradetimey = [];
+    megradetimex = [];
+    megradetimey = [];
+
+    {% for i in hour[1] %}
+    allwaity.push({{ i[1] }});
+    {% endfor %}
+    {% for i in hour[1] %}
+    allwaitx.push('{{ i[0] }}');
+    {% endfor %}
+    {% for i in hour[0] %}
+    allgradetimey.push({{ i[1] }});
+    {% endfor %}
+    {% for i in hour[0] %}
+    allgradetimex.push('{{ i[0] }}');
+    {% endfor %}
+    {% for i in hour[3] %}
+    mewaity.push({{ i[1] }});
+    {% endfor %}
+    {% for i in hour[3] %}
+    mewaitx.push('{{ i[0] }}');
+    {% endfor %}
+    {% for i in hour[2] %}
+    megradetimey.push({{ i[1] }});
+    {% endfor %}
+    {% for i in hour[2] %}
+    megradetimex.push('{{ i[0] }}');
+    {% endfor %}
+
+    plot(allwaitx,allwaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_hour_wait")
+    plot(allgradetimex,allgradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_hour_grade")
+    plot(mewaitx,mewaity,"Average Wait time for entire semester",'Wait time in seconds',"Date/Time","past_hour_wait_m")
+    plot(megradetimex,megradetimey,"Average Grade time for entire semester",'Grade time in seconds',"Date/Time","past_hour_grade_m")
+
+    function remove_data(amnt) {
+        allwaitx.filter((val) => {
+            ((new Date(val)) >= amnt)
+        })
+        allwaity.splice(allwaitx.length)
+        mewaitx.filter((val) => {
+            ((new Date(val)) >= amnt)
+        })
+        mewaity.splice(mewaitx.length)
+    }
+    function minus_day(day,amount) {
+        day.setDate(day.getDate()-amount)
+        return day;
+    }
+    function plot(x,y,title,xaxis,yaxis,id) {
+        Plotly.newPlot(id, [{
+            x: x,
+            y: y,
+            type: 'bar',
+            marker: {'color': y,
+                'colorscale': [[0, 'rgb(135,255,0)'],
+                    [0.2, 'rgb(183,255,0)'],
+                    [0.4, 'rgb(160,255,0)'],
+                    [0.5, 'rgb(177,255,0)'],
+                    [0.6, 'rgb(238,255,0)'],
+                    [0.7, 'rgb(239,59,44)'],
+                    [0.8, 'rgb(203,24,29)'],
+                    [0.9, 'rgb(255,0,11)'],
+                    [1, 'rgb(255,0,31)']]
+            }
+        }
+        ], {
+            title: title,
+            xaxis: {
+                rangemode: 'tozero',
+                autorange: true,
+            },
+            yaxis:{
+                title: yaxis
+            },
+        });
+    }
+
+
+    function openStat(evt, statName, grouping) {
+        var tablinks = document.getElementsByClassName(grouping);
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(/ active-btn/g, "");
+            tablinks[i].className += " hidecontent"
+        }
+        tablinks = document.getElementsByClassName(statName);
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(/ hidecontent/g, "");
+        }
+        evt.className += " active-btn";
+    }
+
+    let opennow = document.getElementsByClassName('defaultOpen');
+    for (let i = 0;i < opennow.length;++i) {
+        console.log("test")
+        opennow[i].click();
+    }
+
+
+</script>
