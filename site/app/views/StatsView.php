@@ -4,6 +4,7 @@ namespace app\views;
 
 use app\libraries\FileUtils;
 use app\views\Date;
+
 class StatsView extends AbstractView {
 
     /**
