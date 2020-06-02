@@ -54,6 +54,23 @@
     background-color: var(--badge-backgroud-red);
 }
 
+.info_banner {
+    border: solid 6px var(--important-post);
+    position:relative;
+    display: block;
+    float: left;
+    width: 400px;
+    height: 25px;
+    top: 2px;
+    left: 120px;
+    padding-top:3px;
+    padding-bottom:3px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 25px;
+    font-weight:    bold;
+}
+
 .icon-auto-grading-results {
     background: url('../img/glyphicons-40-notes.png') no-repeat;
     display: inline-block;
@@ -225,7 +242,7 @@ progress::-webkit-progress-value {
 .file-viewer a:link,
 .file-viewer a:visited,
 .file-viewer a:active {
-    color: var(--external-link-blue);
+    color: var(--file-browser-blue);
 }
 
 .file-viewer a:hover {
@@ -243,7 +260,7 @@ progress::-webkit-progress-value {
 .div-viewer a:link,
 .div-viewer a:visited,
 .div-viewer a:active {
-    color: var(--external-link-blue);
+    color: var(--file-browser-blue);
 }
 
 .div-viewer a:hover {
@@ -428,7 +445,7 @@ tr.is_publish {
 }
 
 .gradeable .version-warning {
-    color:rgb(200, 0, 0);
+    color:var(--error-alert-dark-red);
     font-weight: bold;
     font-size:medium;
 }
@@ -441,7 +458,7 @@ tr.is_publish {
 }
 
 .gradeable .ta-student-comment {
-    color: #777;
+    color: var(--grading-note);
 }
 
 .gradeable .verify-container {

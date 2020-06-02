@@ -47,6 +47,8 @@ use app\libraries\FileUtils;
  * @method bool isEmailEnabled()
  * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
+ * @method string getSysAdminEmail()
+ * @method string getSysAdminUrl()
  * @method string getCourseEmail()
  * @method string getVcsUser()
  * @method string getVcsType()
@@ -154,6 +156,20 @@ class Config extends AbstractModel {
      * @prop
      */
     protected $course_code_requirements = "";
+
+    /**
+     * Email address of the System Administration
+     * @var string
+     * @prop
+     */
+    protected $sys_admin_email = "";
+
+    /**
+     * Webpage URL for a help page (not hosted by submitty).
+     * @var string
+     * @prop
+     */
+    protected $sys_admin_url = "";
 
     /** @prop @var string Text shown to all users for system announcement */
     protected $system_message = '';
@@ -279,6 +295,9 @@ class Config extends AbstractModel {
 
         $this->base_url = $submitty_json['submission_url'];
         $this->duck_banner_enabled = $submitty_json['duck_special_effects'] === true;
+
+        $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
+        $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {

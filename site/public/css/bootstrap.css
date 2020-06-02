@@ -67,22 +67,22 @@ fieldset[disabled] a.btn {
     pointer-events: none;
 }
 .btn-default {
-    color: var(--standard-deep-dark-gray);
+    color: var(--btn-default-text);
     background-color: var(--btn-default-white);
 }
 .btn-default:focus,
 .btn-default.focus {
-    color: var(--standard-deep-dark-gray);
+    color: var(--btn-default-text);
     background-color: var(--btn-standard-pale-blue-gray);
 }
 .btn-default:hover {
-    color: var(--standard-deep-dark-gray);
-    background-color: var(--standard-pale-gray);
+    color: var(--btn-default-text);
+    background-color: var(--btn-default-hover);
 }
 .btn-default:active,
 .btn-default.active,
 .open > .dropdown-toggle.btn-default {
-    color: var(--standard-deep-dark-gray);
+    color: var(--btn-default-text);
     background-color: var(--btn-standard-pale-blue-gray);
 }
 .btn-default:active:hover,
@@ -96,6 +96,12 @@ fieldset[disabled] a.btn {
 .open > .dropdown-toggle.btn-default.focus {
     color: var(--standard-deep-dark-gray);
     background-color: var(--standard-pale-blue);
+}
+[data-theme="dark"] .btn-default:active:focus,
+[data-theme="dark"] .btn-default:focus,
+[data-theme="dark"] .btn-default:active {
+  color: var(--btn-default-text);
+  background-color: var(--btn-default-active);
 }
 .btn-default:active,
 .btn-default.active,
@@ -223,7 +229,7 @@ fieldset[disabled] .btn-success.focus {
 }
 .btn-success .badge {
     color: var(--good-green);
-    background-color: var(--btn-default-white);
+    background-color: var(--always-default-white);
 }
 .btn-info {
     color: var(--btn-text-white);
@@ -274,7 +280,7 @@ fieldset[disabled] .btn-info.focus {
 }
 .btn-info .badge {
     color: var(--info-blue);
-    background-color: var(--btn-default-white);
+    background-color: var(--always-default-white);
 }
 .btn-warning {
     color: var(--btn-text-white);
@@ -325,7 +331,7 @@ fieldset[disabled] .btn-warning.focus {
 }
 .btn-warning .badge {
     color: var(--standard-light-orange);
-    background-color: var(--btn-default-white);
+    background-color: var(--always-default-white);
 }
 .btn-danger {
     color: var(--btn-text-white);
@@ -376,7 +382,7 @@ fieldset[disabled] .btn-danger.focus {
 }
 .btn-danger .badge {
     color: var(--dark-badge-background-red);
-    background-color: var(--btn-default-white);
+    background-color: var(--always-default-white);
 }
 .btn-link {
     font-weight: normal;
