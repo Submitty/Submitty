@@ -26,18 +26,20 @@
 }
 
 #upload-boxes {
-    display: table; 
-    border-spacing: 5px; 
+    display: flex;
     width: 100%;
 }
 
 .upload-box {
+    flex: 1;
     cursor: pointer;
     text-align: center;
     border: dashed 2px var(--standard-light-gray);
-    display:table-cell;
-    height: 150px;
+    display:block;
+    min-height: 150px;
+    margin: 3px;
 }
+
 #gradeable-submission-cont #submit {
     color: white!important;
 }
@@ -80,7 +82,7 @@
 
     .badge {
         margin-left: 5px;
-     }
+    }
 
     .grade-results .box-info {
         margin-left: 5px;
@@ -110,6 +112,18 @@
 
     #submission-mode label {
         display: block;
+    }
+
+    #upload-boxes {
+        flex-direction: column;
+    }
+
+    #upload-boxes .upload-box:last-child {
+        margin-bottom: 10px;
+    }
+
+    .upload-box {
+        margin-top: 10px;
     }
 
     .upload-box h2.label {
