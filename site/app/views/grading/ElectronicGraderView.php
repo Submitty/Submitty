@@ -944,14 +944,13 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        $user_ids = array();
         $add_files = function (&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             if ($new_files) {
                 foreach ($new_files as $file) {
-                    $user_id = explode("/", $file["path"])[9];
-                    $file["path"] = $this->setAnonPath($file["path"]);
-                    $user_ids[explode("/", $file["path"])[9]] = $user_id;
+                    if($start_dir_name == "submissions"){
+                        $file["path"] = $this->setAnonPath($file["path"]);
+                    }
                     $path = explode('/', $file['relative_name']);
                     array_pop($path);
                     $working_dir = &$files[$start_dir_name];
@@ -974,66 +973,17 @@ HTML;
         // if you change here, then change there as well
         // order of these statements matter I believe
 
-        /*$display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
+        $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
         $isVcs = $graded_gradeable->getGradeable()->isVcs();
         if ($display_version_instance !==  null) {
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
-            $result_files = $display_version_instance->getResultsFiles();
-            $result_public_files = $display_version_instance->getResultsPublicFiles();
-            foreach ($files['submissions'] as $file){
-                $user_id = explode("/", $file["path"])[9];
-                $files["submissions"][$file["name"]]["path"] = $this->setAnonPath($file["path"]);
-                $user_ids[explode("/", $files["submissions"][$file["name"]]["path"])[9]] = $user_id;
-            }
-            foreach ($files['checkout'] as $file){
-                $user_id = explode("/", $file["path"])[9];
-                $files["checkout"][$file["name"]]["path"] = $this->setAnonPath($file["path"]);
-                $user_ids[explode("/", $files["checkout"][$file["name"]]["path"])[9]] = $user_id;
-            }
-            foreach ($meta_files['submissions'] as $file){
-                $user_id = explode("/", $file["path"])[9];
-                $meta_files["submissions"][$file["name"]]["path"] = $this->setAnonPath($file["path"]);
-                $user_ids[explode("/", $meta_files["submissions"][$file["name"]]["path"])[9]] = $user_id;
-            }
-            foreach ($meta_files['checkout'] as $file){
-                $user_id = explode("/", $file["path"])[9];
-                $meta_files["checkout"][$file["name"]]["path"] = $this->setAnonPath($file["path"]);
-                $user_ids[explode("/", $meta_files["checkout"][$file["name"]]["path"])[9]] = $user_id;
-            }
-                        
-            if($result_files != null){
-                foreach ($result_files as $file){
-                    $user_id = explode("/", $file["path"])[9];
-                    $result_files[$file["name"]]["path"] = $this->setAnonPath($file["path"]);
-                    $user_ids[explode("/", $result_files[$file["name"]]["path"])[9]] = $user_id;
-                }
-            }
-                        
-            if($result_public_files != null){
-                foreach ($result_public_files as $file){
-                    $user_id = explode("/", $file["path"])[9];
-                    $result_public_files[$file["name"]]["user_id"] = explode("/", $file["path"])[9];
-                    $result_public_files[$file["name"]]["path"] = $this->setAnonPath($file["path"]);
-                    $user_ids[explode("/", $result_public_files[$file["name"]]["user_id"])[9]] = $user_id;
-                }
-            }
-                        
+
             $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
-            $add_files($results, $result_files, 'results');
-            $add_files($results_public, $result_public_files, 'results_public');*/
-            $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
-            $isVcs = $graded_gradeable->getGradeable()->isVcs();
-            if ($display_version_instance !==  null) {
-                $meta_files = $display_version_instance->getMetaFiles();
-                $files = $display_version_instance->getFiles();
-
-                $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
-                $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
-                $add_files($results, $display_version_instance->getResultsFiles(), 'results');
-                $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
-            }
+            $add_files($results, $display_version_instance->getResultsFiles(), 'results');
+            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
+        }
 
         // For PDFAnnotationBar.twig
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
@@ -1042,7 +992,6 @@ HTML;
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
             "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
             "has_vcs_files" => $isVcs,
-            "user_ids" => $user_ids,
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
