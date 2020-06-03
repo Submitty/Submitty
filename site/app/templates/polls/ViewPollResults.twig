@@ -1,31 +1,28 @@
 <script>
     window.onload = function() {
-        dataPoints = [];
+        const xPoints = [];
+        const yPoints = [];
+        let string;
         {% for answer, number in results %}
-            string = "{{ poll.getResponseString(answer) }}"
-            dataPoints.push({ y: {{ number }}, label: string}),
+            string = "{{ poll.getResponseString(answer) }}";
+            xPoints.push(string);
+            yPoints.push({{ number }});
         {% endfor %}
-        title = "{{ poll.getName() }}"
-        console.log(dataPoints);
-        var chart = new CanvasJS.Chart("chartContainer", {
-            animationEnabled: true,
-            theme: "light2", // "light1", "light2", "dark1", "dark2"
-            title:{
-                text: title
-            },
-            axisY: {
-                title: "Response Count"
-            },
-            data: [{        
-                type: "column",
-                dataPoints: dataPoints
-            }]
-        });
-        chart.render();
+        const title = "{{ poll.getName() }}"
+        const data = [
+          {
+            x: xPoints,
+            y: yPoints,
+            type: 'bar'
+          }
+        ];
+        const layout = {
+          title: "{{ poll.getQuestion() }}"
+        }
+        Plotly.newPlot("chartContainer", data, layout);
     }
 </script>
 
 <div class="content">
     <div id="chartContainer" style="height: 370px; width: 100%;"></div>
-    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </div>

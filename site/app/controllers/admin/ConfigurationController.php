@@ -153,17 +153,8 @@ class ConfigurationController extends AbstractController {
         ) {
             $entry = $entry === "true" ? true : false;
         }
-        elseif ($name === 'queue_enabled') {
-            $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'queue_contact_info') {
-            $entry = $entry === "true" ? true : false;
-        }
         elseif ($name === 'polls_enabled') {
             $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'upload_message') {
-            $entry = nl2br($entry);
         }
         elseif ($name == "course_home_url") {
             if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {

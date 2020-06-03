@@ -48,7 +48,19 @@ class PollController extends AbstractController {
     * @return MultiResponse
     */
     public function showPoll() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
+        if ($poll == null) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         if ($this->core->getUser()->accessAdmin()) {
             return MultiResponse::webOnlyResponse(
                 new WebResponse(
@@ -90,16 +102,29 @@ class PollController extends AbstractController {
     * @return MultiResponse
     */
     public function addNewPoll() {
+        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
+          $this->core->addErrorMessage("Error occured in adding poll");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $response_count = $_POST["response_count"];
         $responses = array();
         $answers = array();
         $orders = array();
         for ($i = 0; $i < $response_count; $i++) {
+            if(!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
+              $this->core->addErrorMessage("Error occured in adding poll");
+              return MultiResponse::RedirectOnlyResponse(
+                  new RedirectResponse($this->core->buildCourseUrl(['polls']))
+              );
+            }
             $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
             $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
             if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
                 $answers[] = $_POST["option_id_" . $i];
             }
+
         }
         $this->core->getQueries()->addNewPoll($_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
 
@@ -114,6 +139,12 @@ class PollController extends AbstractController {
     * @return MultiResponse
     */
     public function openPoll() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $this->core->getQueries()->openPoll($_POST["poll_id"]);
 
         return MultiResponse::RedirectOnlyResponse(
@@ -127,6 +158,12 @@ class PollController extends AbstractController {
     * @return MultiResponse
     */
     public function endPoll() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $this->core->getQueries()->endPoll($_POST["poll_id"]);
 
         return MultiResponse::RedirectOnlyResponse(
@@ -139,6 +176,18 @@ class PollController extends AbstractController {
     * @return MultiResponse
     */
     public function submitResponse() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
+        if (!isset($_POST["answer"])) {
+          $this->core->addErrorMessage("No answer given");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
         if ($poll == null) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -147,7 +196,18 @@ class PollController extends AbstractController {
             );
         }
         if ($poll->isOpen()) {
-            $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answer"]);
+            if ($_POST["answer"] == "-1") {
+                $this->core->getQueries()->deleteUserResponseIfExists($_POST["poll_id"]);
+            }
+            else {
+                $this->core->getQueries()->submitResponse($_POST["poll_id"], $_POST["answer"]);
+            }
+        }
+        else {
+            $this->core->addErrorMessage("Poll is closed");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
         }
 
         return MultiResponse::RedirectOnlyResponse(
@@ -161,6 +221,12 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function editPoll() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
 
         if ($poll == null) {
@@ -185,11 +251,29 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function submitEdits() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
+        if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
+          $this->core->addErrorMessage("Error occured in editing poll");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $response_count = $_POST["response_count"];
         $responses = array();
         $answers = array();
         $orders = array();
         for ($i = 0; $i < $response_count; $i++) {
+            if(!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
+              $this->core->addErrorMessage("Error occured in adding poll");
+              return MultiResponse::RedirectOnlyResponse(
+                  new RedirectResponse($this->core->buildCourseUrl(['polls']))
+              );
+            }
             $responses[$_POST["option_id_" . $i]] = $_POST["response_" . $i];
             $orders[$_POST["option_id_" . $i]] = $_POST["order_" . $i];
             if (isset($_POST["is_correct_" . $i]) && $_POST["is_correct_" . $i] == "on") {
@@ -197,7 +281,7 @@ class PollController extends AbstractController {
             }
         }
         $this->core->getQueries()->editPoll($_POST["poll_id"], $_POST["name"], $_POST["question"], $responses, $answers, $_POST["release_date"], $orders);
-        
+
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
         );
@@ -209,6 +293,12 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function deletePoll() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $this->core->getQueries()->deletePoll($_POST["poll_id"]);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['polls']))
@@ -221,9 +311,22 @@ class PollController extends AbstractController {
      * @return MultiResponse
      */
     public function viewResults() {
+        if (!isset($_POST["poll_id"])) {
+          $this->core->addErrorMessage("Invalid Poll ID");
+          return MultiResponse::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['polls']))
+          );
+        }
         $poll = $this->core->getQueries()->getPoll($_POST["poll_id"]);
         $results = $this->core->getQueries()->getResults($_POST["poll_id"]);
-        //var_dump($results);
+        if ($poll == null) {
+          if (!isset($_POST["poll_id"])) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+          }
+        }
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'Poll',

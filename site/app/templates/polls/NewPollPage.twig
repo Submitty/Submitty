@@ -40,7 +40,7 @@
             <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
             <br/> <br/>
 
-            
+
 
             <button type="submit" class="btn btn-primary">Add Poll</button>
         </form>
@@ -103,7 +103,7 @@
             <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
             <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
             <br/> <br/>
-            
+
             <button type="submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
@@ -112,10 +112,9 @@
 
 <script>
     function addResponse() {
-        count = $(".poll_response").length
-        first_free_id = 0
+        let count = $(".poll_response").length
+        let first_free_id = 0
         while($(`.option_id[value="${first_free_id}"]`).length != 0){
-            console.log("still looking")
             first_free_id++;
         }
         $("#responses").append(`
@@ -138,7 +137,7 @@
             </div>
         `);
         $(`#response_${count}_wrapper`).children(".up-btn").on("click", function() {
-            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
             if (curr_pos == 0) {
                 return;
             }
@@ -151,7 +150,7 @@
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
         })
         $(`#response_${count}_wrapper`).children(".down-btn").on("click", function() {
-            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
             if (curr_pos == $(".poll_response").length - 1) {
                 return;
             }
@@ -164,15 +163,15 @@
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
         })
         $(`#response_${count}_wrapper`).children(".delete-btn").on("click", function() {
-            count = $(".poll_response").length
-            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
-            for(i=curr_pos + 1; i < count; i++) {
+            let count = $(".poll_response").length
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            for(let i=curr_pos + 1; i < count; i++) {
                 $(".order-" + i).attr("value", i - 1)
                 $(".order-" + i).addClass("order-" + (i - 1));
                 $(".order-" + i).removeClass("order-" + i);
             }
-            for(i=wrapper_id + 1; i < count; i++) {
+            for(let i=wrapper_id + 1; i < count; i++) {
                 $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
                 $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
                 $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
@@ -188,7 +187,7 @@
     }
 
     function removeResponse() {
-        count = $(".poll_response").length
+        let count = $(".poll_response").length
         count -= 1
         $(`#response_${count}_wrapper`).remove()
         $("#response-count").val("" + count)
@@ -196,7 +195,7 @@
 
     $(document).ready(function() {
         $(".up-btn").on("click", function() {
-            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
             if (curr_pos == 0) {
                 return;
             }
@@ -209,7 +208,7 @@
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
         })
         $(".down-btn").on("click", function() {
-            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
             if (curr_pos == $(".poll_response").length - 1) {
                 return;
             }
@@ -222,15 +221,15 @@
             $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
         })
         $(".delete-btn").on("click", function() {
-            count = $(".poll_response").length
-            curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
-            wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
-            for(i=curr_pos + 1; i < count; i++) {
+            let count = $(".poll_response").length
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            for(let i=curr_pos + 1; i < count; i++) {
                 $(".order-" + i).attr("value", i - 1)
                 $(".order-" + i).addClass("order-" + (i - 1));
                 $(".order-" + i).removeClass("order-" + i);
             }
-            for(i=wrapper_id + 1; i < count; i++) {
+            for(let i=wrapper_id + 1; i < count; i++) {
                 $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
                 $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
                 $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))

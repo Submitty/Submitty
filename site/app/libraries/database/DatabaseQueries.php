@@ -5088,7 +5088,7 @@ AND gc_id IN (
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT {$conflict_clause}
                 DO
-                    UPDATE SET 
+                    UPDATE SET
                         goc_overall_comment=?;
             ";
 
@@ -5888,7 +5888,7 @@ AND gc_id IN (
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               LEFT JOIN (
-                SELECT 
+                SELECT
                     json_agg(goc_grader_id) as commenter_ids,
                     json_agg(goc_overall_comment) as overall_comments,
                     g_id,
@@ -6504,6 +6504,11 @@ AND gc_id IN (
             $results[$option_id] = count($this->course_db->rows());
         }
         return $results;
+    }
+
+    public function deleteUserResponseIfExists($poll_id) {
+        $user = $this->core->getUser()->getId();
+        $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", array($poll_id, $user));
     }
 
     //// END ONLINE POLLING QUERIES ////

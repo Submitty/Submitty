@@ -11,12 +11,34 @@
     <form method="post" action="{{ base_url }}/submitResponse">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+        <label class="radio" for="answer-no-response">
+            {% if poll.isOpen() %}
+                {% if poll.getUserResponse(user_id) == null %}
+                    <input type="radio" value="-1" name="answer" id="answer-no-response" checked/>
+                {% else %}
+                    <input type="radio" value="-1" name="answer" id="answer-no-response"/>
+                {% endif %}
+            {% else %}
+                {% if poll.getUserResponse(user_id) == null %}
+                    <input type="radio" value="-1" name="answer" id="answer-no-response" checked disabled/>
+                {% else %}
+                    <input type="radio" value="-1" name="answer" id="answer-no-response" disabled/>
+                {% endif %}
+            {% endif %}
+            No response
+        </label>
+        <br/>
+        <br/>
         {% set index = 0%}
         {% for response in poll.getResponses() %}
             <div>
                 <label class="radio" for="answer-{{index}}">
-                    {% if response == poll.getUserResponse(user_id) %}
-                        <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}" checked/>
+                    {% if response is same as(poll.getUserResponse(user_id)) %}
+                        {% if poll.isOpen() %}
+                            <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}" checked/>
+                        {% else %}
+                            <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}" checked disabled/>
+                        {% endif %}
                     {% elseif poll.isOpen() %}
                         <input type=radio value="{{ response }}" name="answer" id="answer-{{index}}"/>
                     {% else %}
