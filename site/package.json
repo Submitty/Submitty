@@ -26,5 +26,10 @@
     "shortcut-buttons-flatpickr": "0.3.0",
     "twig": "1.15.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint": "^7.1.0"
+  },
+  "scripts": {
+    "lint": "eslint public/js/*.js public/js/pdf/*.js"
+  }
 }
