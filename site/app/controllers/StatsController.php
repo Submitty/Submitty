@@ -1,4 +1,5 @@
 <?php
+
 namespace app\controllers;
 
 use app\libraries\Core;
@@ -11,11 +12,10 @@ use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
 
 /**
- * Class statscontroller
+ * Class StatsController
  *
  */
-
-class statscontroller extends AbstractController {
+class StatsController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
     }
@@ -23,8 +23,7 @@ class statscontroller extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/stats", methods={"GET"})
      */
-
     public function showall($something = null) {
-        $this->core->getOutput()->renderOutput('Stats','showStats');
+        $this->core->getOutput()->renderOutput('Stats', 'showStats');
     }
 }

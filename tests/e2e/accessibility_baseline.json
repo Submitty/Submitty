@@ -81,5 +81,12 @@
         "The “font” element is obsolete. Use CSS instead.",
         "Element “div” not allowed as child of element “font” in this context. (Suppressing further errors from this subtree.)",
         "Too many messages."
+    ],
+    "/s20/sample/stats": [
+        "Element “style” not allowed as child of element “main” in this context. (Suppressing further errors from this subtree.)",
+        "Element “path” is missing required attribute “d”.",
+        "Element “a” is missing required attribute “href”.",
+        "Duplicate ID “symbol”.",
+        "The first occurrence of ID “symbol” was here."
     ]
 }
