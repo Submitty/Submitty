@@ -92,7 +92,7 @@
                 expandFile(html_file, url_file);
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(getNonAnonPath(url_file)) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
                 if(iframe.hasClass("full_panel")){
                     $('#'+iframeId).attr("height", "1200px");
                 }
@@ -113,22 +113,6 @@
         }
         return false;
     }
-    
-    function getNonAnonPath(path){
-        nonAnonPath = "";
-        pathPieces = path.split("/");
-        for (i = 1; i < pathPieces.length; i++) {
-            if(i == 9){
-                user_id = "{{submitter_id}}";
-                nonAnonPath += "/" + user_id; 
-            }
-            else{
-                nonAnonPath += "/" + pathPieces[i];
-            }
-        }
-        console.log(nonAnonPath);
-        return nonAnonPath;
-    }
 
     function openFile(html_file, url_file) {
         var directory = "";
@@ -147,7 +131,7 @@
         else if (url_file.includes("split_pdf")) {
             directory = "split_pdf";
         }
-        window.open("{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(getNonAnonPath(url_file)) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
     //TODO: Name better
