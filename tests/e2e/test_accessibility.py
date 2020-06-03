@@ -61,10 +61,6 @@ class TestAccessibility(BaseTestCase):
         # Then run 'python3 -m unittest e2e.test_accessibility' from inside the tests folder
         # self.genBaseline()
 
-        # Uncomment this to generate a new baseline for a specific url
-        # url = '' # your url here
-        # self.genBaseline(url)
-
         self.validatePages()
 
 
