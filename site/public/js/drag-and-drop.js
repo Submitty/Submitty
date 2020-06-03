@@ -22,6 +22,8 @@ let MAX_NUM_OF_FILES;
 
 var empty_inputs = true;
 
+let num_clipboard_files = 0;
+
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
@@ -34,6 +36,7 @@ function initializeDragAndDrop() {
     empty_inputs = true;
     student_ids = [];
     student_without_ids = [];
+    num_clipboard_files=0;
 }
 
 // initializing file_array and previous_files
