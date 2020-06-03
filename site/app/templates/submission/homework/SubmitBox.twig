@@ -241,7 +241,7 @@
                     </h2>
                     <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                     <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
-                      <tr style="background:transparent;">
+                      <tr style="background:transparent; display:none;">
                         <th>File Name:</th>
                         <th>Size:</th>
                       </tr>
