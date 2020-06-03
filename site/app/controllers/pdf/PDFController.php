@@ -187,7 +187,7 @@ class PDFController extends AbstractController {
             "gradeable_id" => $gradeable_id,
             "id" => $id,
             "file_name" => $filename,
-            "file_path" => $this->$_POST['file_path'],
+            "file_path" => $_POST['file_path'],
             "annotation_jsons" => $annotation_jsons,
             "is_student" => false,
             "page_num" => $page_num

@@ -894,9 +894,18 @@ class ElectronicGraderController extends AbstractController {
             }
 
             // Get the graded gradeable for the $from user
-            $my_id = $peer && !$team ? $from :  $this->core->getQueries()->getUserFromAnon($from)[$from];
-            $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $my_id, false);
-
+            $from_graded_gradeable = false;
+            if ($peer && !$team) {
+                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($from)[$from], false);
+            }
+            else {
+                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
+            }
+            
+            if ($from_graded_gradeable === false) {
+                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            }
+            
             // Get the user ID of the user we were viewing on the TA grading interface
             $from_id = $from_graded_gradeable->getSubmitter();
 
@@ -930,8 +939,15 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // Get the graded gradeable for the submitter we are requesting
-        $my_id = $peer && !$team ? $this->core->getQueries()->getUserFromAnon($who_id)[$who_id] : $who_id;
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $my_id, false);
+        $graded_gradeable = false;
+        if ($peer && !$team) {
+            if(array_key_exists($who_id, $this->core->getQueries()->getUserFromAnon($who_id))){
+                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
+            }
+        }
+        else{
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
+        }
         if ($graded_gradeable === false) {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
                 $peer = false;
