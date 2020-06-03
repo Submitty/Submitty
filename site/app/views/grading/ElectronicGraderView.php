@@ -32,22 +32,6 @@ class ElectronicGraderView extends AbstractView {
      * @return string
      */
     
-    public function setAnonPath($file_path){
-        $file_path_parts = explode("/", $file_path);
-        $anon_path = "";
-        for($index = 1; $index < count($file_path_parts); $index++) {
-            if($index == 9){
-                $user_id = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUsersById(array($user_id))[$user_id]->getAnonId();
-                $anon_path = $anon_path . "/" . $anon_id;
-            }
-            else{
-                $anon_path = $anon_path . "/" . $file_path_parts[$index];
-            }
-        }
-        return $anon_path;
-    }
-    
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -936,6 +920,27 @@ HTML;
             "discussion_forum_content" => $posts_view
         ]);
     }
+    
+    /**
+     * Replace the userId with the corresponding anon_id in the given file_path
+     * @param string $file_path
+     * @return string $anon_path
+     */
+    public function setAnonPath($file_path){
+        $file_path_parts = explode("/", $file_path);
+        $anon_path = "";
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index == 9) {
+                $user_id = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getUsersById(array($user_id))[$user_id]->getAnonId();
+                $anon_path = $anon_path . "/" . $anon_id;
+            }
+            else {
+                $anon_path = $anon_path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $anon_path;
+    }
 
     /**
      * Render the Submissions and Results Browser panel
@@ -948,7 +953,7 @@ HTML;
             $files[$start_dir_name] = array();
             if ($new_files) {
                 foreach ($new_files as $file) {
-                    if($start_dir_name == "submissions"){
+                    if ($start_dir_name == "submissions") {
                         $file["path"] = $this->setAnonPath($file["path"]);
                     }
                     $path = explode('/', $file['relative_name']);
