@@ -137,7 +137,7 @@ class PDFController extends AbstractController {
         $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
 
-        if($is_anon){
+        if ($is_anon) {
             $id = $this->core->getQueries()->getUserFromAnon($id)[$id];
         }
 

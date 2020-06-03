@@ -941,11 +941,11 @@ class ElectronicGraderController extends AbstractController {
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
         if ($peer && !$team) {
-            if(array_key_exists($who_id, $this->core->getQueries()->getUserFromAnon($who_id))){
+            if (array_key_exists($who_id, $this->core->getQueries()->getUserFromAnon($who_id))) {
                 $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
             }
         }
-        else{
+        else {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
         if ($graded_gradeable === false) {
