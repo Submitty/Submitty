@@ -41,7 +41,6 @@
     }
 
     function removeStudent(i, $grader_to_edit) {
-        $student_to_remove = $('[name="edit_user_id_'+i+'"]', form);
         var form = $("#admin-gradeable-peers-form");
         $('#edit_user_id_'+i+'', form).remove();
     }
@@ -111,8 +110,38 @@
         }
     }
 
+    function submitFormAjax() {
+        let url = $('#peers_submit_url');
+        let fd = [];
+        fd['grader_id'] = $("#admin-gradeable-peers-title").text().substr(18);
+        fd['remove_grader'] = $('#removed-all').text();
+        fd['curr_student_ids'] = [];
+        $(".edit_user_ids :input.peerstudents").each(function() {
+            fd['curr_student_ids'].push($(this).val());
+        });
+        fd['add_user_ids'] = [];
+        $(".add_user_ids :input").each(function() {
+            fd['add_user_ids'].push($(this).val());
+        });
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            success: function() {
+                $('.popup-form').css('display', 'none');
+                console.log(fd);
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        });
+    }
+
     $(document).ready(function() {
         $("#peer-table").on("click", ".fa-pencil-alt", adminGradeablePeerForm);
-        $('#admin-gradeable-peers-form').on("change", ":text", checkSubmitValid)
+        $('#admin-gradeable-peers-form').on("change", ":text", checkSubmitValid);
     });
 </script>

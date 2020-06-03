@@ -266,9 +266,17 @@ class AdminGradeableController extends AbstractController {
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
-        $peer_grader_pairs = json_encode($this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()));
-        $students = $this->core->getQueries()->getAllUsers();
-        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'AdminGradeablePeersForm', $peer_grader_pairs, $students);
+        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'AdminGradeablePeersForm', $gradeable);
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function adminGradeablePeerSubmit() {
+        ob_start();
+        var_dump($_POST);
+        ob_get_clean();
     }
 
     /* Http request methods (i.e. ajax) */
