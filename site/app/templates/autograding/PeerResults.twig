@@ -38,6 +38,7 @@ $( document ).ready(function() {
                         <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
                     </p>
                 </div>
+                
             {% endfor %}
         </div>
 
@@ -136,6 +137,7 @@ $( document ).ready(function() {
                     {{ self.renderManyPeerResults(component) }}
                 {% endif %}                
             {% endfor %}
+            {{ self.renderPeerFeedbackTable(component, peer_aliases, ordered_graders)  }}
             {# /Peer Component boxes #}
         {% endif %}
     {# /Total auto + manual #}
@@ -250,5 +252,64 @@ $( document ).ready(function() {
                 </p>
             </div>
         </div>
+    </div>
+{%- endmacro -%}
+
+{%- macro renderPeerFeedbackTable(component, peer_aliases, ordered_graders) -%}
+    <div class="box-info" style="width:100%">
+        <table class="mobile-table">
+                    <thead>
+                        <tr>
+                                <th class="peer-table-header">
+                                    Peer Grader
+                                </th>
+                                
+                                <th class="peer-table-header">
+                                    No Feedback
+                                </th>
+                                <th class="peer-table-header">
+                                    Thank you!
+                                </th>
+                                <th class="peer-table-header">
+                                    This feedback was helpful to me!
+                                </th>
+                                <th class="peer-table-header">
+                                    This feedback was detailed, specific, and/or technical.
+                                </th>
+                                <th class="peer-table-header">
+                                    This feedback was inaccurate and/or inappropriate.
+                                </th>
+                        </tr>
+                    </thead>
+                {% for grader in ordered_graders %}
+                <tr>
+                <td class="peer-table-data">
+                    {{ peer_aliases[grader] }}
+                </td>
+                <fieldset>
+                <td class="peer-table-data">
+                    <input type="radio" id = "no_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
+                            {{ action != 'new'}}>
+                </td>
+                <td class="peer-table-data">
+                    <input type="radio" id = "Thank_you_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
+                            {{ action != 'new'}}>
+                </td>
+                <td class="peer-table-data">
+                    <input type="radio" id = "helpful_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
+                            {{ action != 'new'}}>
+                </td>
+                <td class="peer-table-data">       
+                    <input type="radio" id = "detailed_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
+                            {{ action != 'new' }}>
+                </td>
+                <td class="peer-table-data">      
+                    <input type="radio" id = "poor_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
+                            {{ action != 'new' }}>
+                </td>
+                </fieldset>
+                </tr>
+                {% endfor %}
+        </table>
     </div>
 {%- endmacro -%}
