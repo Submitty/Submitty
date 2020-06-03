@@ -64,21 +64,21 @@ a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
-    color: var(--text-black);
+    color: var(--btn-default-text);
 }
 
 a.btn-default,
 a.fas.btn-default,
 a.fas,
 a > i.fas {
-    color: var(--text-black);
+    color: var(--btn-default-text);
 }
 
 a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: var(--btn-text-black);
+    color: var(--btn-default-text);
 }
 
 a.btn, a.icon {
@@ -110,6 +110,7 @@ input[type="color"] {
     font-size: 14px;
     line-height: 20px;
     color: var(--standard-dark-gray);
+    background-color: var(--standard-input-background);
     vertical-align: middle;
     border: 1px solid var(--standard-light-gray);
     -webkit-border-radius: 4px;
@@ -157,7 +158,7 @@ input[type="checkbox"]:checked{
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: var(--btn-default-white);
+    color: var(--always-default-white);
     font-size: 18px;
     font-weight: 900
 }
@@ -185,10 +186,6 @@ select.disabled,
 textarea.disabled,
 input.disabled {
     background-color: var(--standard-light-gray);
-}
-
-textarea, input[type="text"], input[type="number"], input[type="date"], input[type="checkbox"], select{
-  background-color: var(--standard-input-background);
 }
 
 button,
@@ -245,7 +242,7 @@ table tr.table-header {
 }
 
 tr.info, tr.info td, tr.info th {
-    background-color: var(--table-info);
+    background-color: var(--alert-border-blue);
 }
 
 td>a.active-sort {
@@ -290,6 +287,25 @@ td>a.active-sort {
 /* layout table classes  */
 /* Layout tables do not have <caption>, <thead>, and <th> tags */
 
+.layout-table-div {
+    display: table;
+    width: 100%;
+    text-align: center;
+    border: 1px solid var(--standard-medium-gray);
+}
+
+.layout-table-div-row {
+    display: table-row;
+}
+
+.layout-table-div-cell {
+    display: table-cell;
+}
+
+.layout-table-div-header {
+    background-color: var(--standard-hover-light-gray);
+}
+
 /* styling used in a <th> cell, except this is for a layout table */
 .layout_th_cell {
     font-weight: bold;
@@ -318,17 +334,21 @@ td>a.active-sort {
     flex-grow: 1;
 }
 
+[data-theme="dark"] .content {
+  box-shadow: none;
+}
+
 .content:last-child {
     flex-grow: 1;
 }
 
 .content.gradeable_message {
     background-color: var(--actionable-blue);
-    color: var(--text-white);
+    color: var(--always-default-white);
 }
 
 .content.gradeable_message a{
-    color: var(--text-white);
+    color: var(--always-default-white);
 }
 
 .content.gradeable_message p:not(:last-child){
@@ -503,7 +523,7 @@ td>a.active-sort {
 }
 
 .file-upload-table tr:hover {
-    background: #d1d1d1;
+    background: var(--file-upload-table-hover);
 }
 
 .green-message {
@@ -552,6 +572,14 @@ td>a.active-sort {
     background: var(--default-white);
     box-shadow: 2px 2px 4px -3px var(--standard-light-gray);
     padding: 5px 5px 10px;
+}
+
+.overall-comment-box {
+  margin-top:10px;
+}
+
+.overall-comment-author {
+  font-weight: bold;
 }
 
 .submission-page-total-header {
@@ -676,7 +704,7 @@ td>a.active-sort {
 
 .green-background {
     background-color: var(--standard-deep-dark-green);
-    color: var(--btn-default-white);
+    color: var(--always-default-white);
 }
 
 .yellow-background {
@@ -1604,7 +1632,7 @@ end of styles used in the admin gradeable page
   background-color: var(--default-white);
   color: var(--text-black);
 }
-#wrapper_upload {
+.wrapper_upload {
   color: var(--text-black);
 }
 
@@ -1777,6 +1805,10 @@ end of styles used in the admin gradeable page
     border-radius: 3px;
 }
 
+[data-theme="dark"] .shadow{
+  box-shadow: none;
+}
+
 .content {
     margin: 10px;;
     padding: 30px;
@@ -1800,7 +1832,7 @@ end of styles used in the admin gradeable page
 }
 
 #popup_to_show_matches_id {
-  overflow:hidden;
+  overflow-y:auto;
   border:2px solid grey;
 }
 

@@ -11,13 +11,15 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDays;
-use app\models\gradeable\SubmissionMultipleChoice;
-use app\models\gradeable\SubmissionTextBox;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\models\gradeable\AbstractGradeableInput;
+/* Notebook */
+use app\models\notebook\AbstractNotebookInput;
+use app\models\notebook\UserSpecificNotebook;
+use app\models\notebook\SubmissionMultipleChoice;
+use app\models\notebook\SubmissionTextBox;
 
 class HomeworkView extends AbstractView {
 
@@ -283,8 +285,33 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
-        $inputs = $gradeable->getAutogradingConfig()->getInputs();
-        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
+        $output = "";
+
+        $config = $gradeable->getAutogradingConfig();
+        $notebook = null;
+        $notebook_inputs = [];
+        if ($config->isNotebookGradeable()) {
+            $notebook_model = $config->getUserSpecificNotebook(
+                $this->core->getUser()->getId(),
+                $gradeable->getId()
+            );
+
+            $notebook = $notebook_model->getNotebook();
+            $warning = $notebook_model->getWarning();
+            if (isset($warning) && $this->core->getUser()->accessGrading()) {
+                $output = $this->core->getOutput()->renderTwigTemplate(
+                    'generic/Banner.twig',
+                    [
+                        'message' => $warning,
+                        'error' => true
+                    ]
+                );
+            }
+            $h = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($h, $notebook);
+            $notebook_inputs = $notebook_model->getInputs();
+            $image_data = $notebook_model->getImagePaths();
+        }
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
         if ($graded_gradeable !== null) {
@@ -313,30 +340,8 @@ class HomeworkView extends AbstractView {
         $github_user_id = '';
         $github_repo_id = '';
 
-        $image_data = [];
-        if (!$gradeable->isVcs()) {
-            // Prepare notebook image data for displaying
-            foreach ($notebook as $cell) {
-                if (isset($cell['type']) && $cell['type'] == "image") {
-                    $image_name = $cell['image'];
-                    $imgPath = FileUtils::joinPaths(
-                        $this->core->getConfig()->getCoursePath(),
-                        'test_input',
-                        $gradeable->getId(),
-                        $image_name
-                    );
-                    $content_type = FileUtils::getContentType($imgPath);
-                    if (substr($content_type, 0, 5) === 'image') {
-                        // Read image path, convert to base64 encoding
-                        $inputImageData = base64_encode(file_get_contents($imgPath));
-                        // Format the image SRC:  data:{mime};base64,{data};
-                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
-                        // insert the sample image data
-                        $image_data[$image_name] = $inputimagesrc;
-                    }
-                }
-            }
 
+        if (!$gradeable->isVcs()) {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
@@ -382,9 +387,9 @@ class HomeworkView extends AbstractView {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $input_data = array_map(function (AbstractGradeableInput $inp) {
+        $input_data = array_map(function (AbstractNotebookInput $inp) {
             return $inp->toArray();
-        }, $inputs);
+        }, $notebook_inputs);
         $student_id = '';
         if (!is_null($graded_gradeable)) {
             $student_id = ($graded_gradeable->getSubmitter()->isTeam()) ?
@@ -397,7 +402,7 @@ class HomeworkView extends AbstractView {
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
-        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
         // Import custom stylesheet to style notebook items
@@ -417,7 +422,10 @@ class HomeworkView extends AbstractView {
 
         $DATE_FORMAT = "m/d/Y @ h:i A T";
         $numberUtils = new NumberUtils();
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+
+
+        // TODO: go through this list and remove the variables that are not used
+        return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
@@ -440,7 +448,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
+            'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -452,16 +460,17 @@ class HomeworkView extends AbstractView {
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
-            'notebook' => $notebook_data,
+            'notebook' => $notebook_data ?? null,
             'testcase_messages' => $testcase_messages,
-            'image_data' => $image_data,
+            'image_data' => $image_data ?? null,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
             'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
-            'max_post_size' => Utils::returnBytes(ini_get('post_max_size'))
+            'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
+            'max_file_uploads' => ini_get('max_file_uploads')
         ]);
     }
 
@@ -550,7 +559,7 @@ class HomeworkView extends AbstractView {
                 continue;
             }
             elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
             }
 
             $page_count = 0;
@@ -646,7 +655,7 @@ class HomeworkView extends AbstractView {
 
         $peer_grading_max = $gradeable->getPeerPoints();
         $ta_grading_max   = $gradeable->getTaPoints();
-        
+
         $ta_grading_earned = 0;
         $peer_grading_earned = 0;
 
@@ -814,7 +823,7 @@ class HomeworkView extends AbstractView {
         else {
             $no_autograding = true;
         }
-        
+
         // If there is no autograding at all, only explicitly let the student know that before
         // TA grades are released.
         if (
@@ -886,11 +895,17 @@ class HomeworkView extends AbstractView {
             ]);
 
             if ($history !== null) {
+                $my_first_access_time = "";
+                if ($history->getFirstAccessTime() !== null) {
+                    $my_first_access_time = DateUtils::dateTimeToString($history->getFirstAccessTime());
+                }
                 $param = array_merge($param, [
                     'results' => 0,
                     'grade_time' => $history->getGradeTime(),
+                    'first_access_time' => $my_first_access_time,
                     'grading_finished' => DateUtils::dateTimeToString($history->getGradingFinished()),
                     'wait_time' => $history->getWaitTime(),
+                    'access_duration' => $history->getAccessDuration(),
                     'revision' => $history->getVcsRevision(),
                 ]);
             }

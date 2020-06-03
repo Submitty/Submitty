@@ -41,6 +41,7 @@ class NavigationView extends AbstractView {
         ],
         GradeableList::OPEN => [
             "title" => "OPEN",
+            "is_panel_expanded" => true,
             "subtitle" => "",
             "section_id" => "open",
             "button_type_submission" => "btn-primary",
@@ -66,6 +67,7 @@ class NavigationView extends AbstractView {
         GradeableList::GRADED => [
             "title" => "GRADES AVAILABLE",
             "subtitle" => "",
+            "is_panel_expanded" => true,
             "section_id" => "graded",
             "button_type_submission" => 'btn-default',
             "button_type_grading" => 'btn-default',
@@ -199,6 +201,7 @@ class NavigationView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
+        $this->core->getOutput()->addInternalJs("navigation.js");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
@@ -303,7 +306,7 @@ class NavigationView extends AbstractView {
         $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading() && $this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId());
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;

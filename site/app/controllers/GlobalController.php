@@ -215,11 +215,11 @@ class GlobalController extends AbstractController {
             if ($this->core->getUser()->accessGrading()) {
                 $images_course_path = $this->core->getConfig()->getCoursePath();
                 // FIXME: this code is duplicated in ImagesController.php
-                $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
-                $common_images_path_1 = Fileutils::joinPaths("/var/local/submitty/student_images");
+                $images_path = FileUtils::joinPaths($images_course_path, "uploads/student_images");
+                $common_images_path_1 = FileUtils::joinPaths("/var/local/submitty/student_images");
                 $term = explode('/', $this->core->getConfig()->getCoursePath());
                 $term = $term[count($term) - 2];
-                $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images", $term);
+                $common_images_path_2 = FileUtils::joinPaths("/var/local/submitty/student_images", $term);
                 // FIXME: consider searching through the common location for matches to my students
                 // (but this would be expensive)
                 $any_images_files = array_merge(
@@ -250,6 +250,16 @@ class GlobalController extends AbstractController {
                         ]);
                     }
                 }
+            }
+
+            if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(["gradebook"]),
+                    "title" => "Gradebook",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-gradebook",
+                    "icon" => "fa-book-reader"
+                ]);
             }
 
             if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
@@ -417,6 +427,14 @@ class GlobalController extends AbstractController {
                 }
             }
         }
+        // append the help links
+        if ($this->core->getConfig()->getSysAdminUrl() !== '') {
+            $footer_links[] =  ["title" => "Report Issues", "url" => $this->core->getConfig()->getSysAdminUrl()];
+        }
+        if ($this->core->getConfig()->getSysAdminEmail() !== '') {
+            $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
+        }
+
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }

@@ -16,10 +16,11 @@ import zipfile
 import stat
 import subprocess
 import shutil
+import codecs
 import glob
 
-def just_write_grade_history(json_file,assignment_deadline,submission_time,
-                             seconds_late,queue_time,batch_regrade,grading_began,
+def just_write_grade_history(json_file,assignment_deadline,submission_time,seconds_late,
+                             first_access_time,access_duration,queue_time,batch_regrade,grading_began,
                              wait_time,grading_finished,grade_time,autograde_total,
                              revision):
 
@@ -44,6 +45,8 @@ def just_write_grade_history(json_file,assignment_deadline,submission_time,
         blob["days_late_before_extensions"] = days_late
     blob["queue_time"] = queue_time
     blob["batch_regrade"] = True if batch_regrade == "BATCH" else False
+    blob["first_access_time"] = first_access_time
+    blob["access_duration"] = access_duration
     blob["grading_began"] = grading_began
     blob["wait_time"] = wait_time
     blob["grading_finished"] = grading_finished
@@ -94,6 +97,7 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
 
     now = dateutils.get_current_time()
     datefile = "{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
+    os.makedirs(log_path, exist_ok=True)
     autograding_log_file = os.path.join(log_path, datefile)
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     batch_string = "BATCH" if is_batch else ""
@@ -118,7 +122,7 @@ def log_container_meta(log_path, event="", name="", container="", time=0):
 
 def write_to_log(log_path, message):
     """ Given a log file, create or append message to log file"""
-    with open(log_path, 'a') as log_file:
+    with open(log_path, 'a+') as log_file:
         try:
             fcntl.flock(log_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
             print(' | '.join((str(x) for x in message)), file=log_file)
@@ -176,7 +180,6 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     copy_contents_into(job_id, generated_output_path, tmp_work_generated_output, tmp_logs, log_path, stack_trace_log_path)
 
     # Copy in instructor solution code.
-    # TODO: Is this necessary?
     instructor_solution = os.path.join(tmp_autograding, 'instructor_solution')
     copy_contents_into(job_id, instructor_solution, tmp_work_instructor_solution, tmp_logs, log_path, stack_trace_log_path)
 
@@ -319,12 +322,20 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
 
     if os.path.exists(random_output_path):
         pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
+    # timestamp of first access to the gradeable page
+    first_access_string = ""
     # grab the submission time
     if "generate_output" in queue_obj and queue_obj["generate_output"]:
         submission_string = ""
     else:
         with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
             submission_string = submission_time_file.read().rstrip()
+        # grab the first access to the gradeable page (if it exists)
+        user_assignment_access_filename = os.path.join(tmp_submission, "user_assignment_access.json")
+        if os.path.exists(user_assignment_access_filename):
+            with open(user_assignment_access_filename, 'r') as access_file:
+                obj = json.load(access_file, object_pairs_hook=collections.OrderedDict)
+                first_access_string = obj["page_load_history"][0]["time"]
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
@@ -367,12 +378,29 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
 
 
         gradeable_deadline_string = gradeable_config_obj["date_due"]
+
+        # FIXME: The access date string is currently misformatted
+        #    mm-dd-yyyy, but we want yyyy-mm-dd.  Also it is missing
+        #    the common name timezone string, e.g., "America/NewYork".
+        #    We should standardize this logging eventually, but
+        #    keeping it as is because we are mid-semester with this
+        #    new feature and I don't want to break things.
+        words = first_access_string.split(' ')
+        date_parts = words[0].split('-')
+        if len(date_parts[0]) == 2:
+            words[0] = date_parts[2]+'-'+date_parts[0]+'-'+date_parts[1]
+            first_access_string = ' '.join(words)
         
         submission_datetime = dateutils.read_submitty_date(submission_string)
         gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
         gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
         submission_longstring = dateutils.write_submitty_date(submission_datetime)
         seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
+        # compute the access duration in seconds (if it exists)
+        access_duration = -1
+        if first_access_string != "":
+            first_access_datetime = dateutils.read_submitty_date(first_access_string)
+            access_duration = int((submission_datetime-first_access_datetime).total_seconds())
 
         # note: negative = not late
         grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
@@ -389,17 +417,34 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
         waittime = queue_obj["waittime"]
 
         try:
-            shutil.move(os.path.join(tmp_work, "results.json"), os.path.join(tmp_results, "results.json"))
+
+            # Make certain results.json is utf-8 encoded.
+            results_json_path = os.path.join(tmp_work, 'results.json')
+            with codecs.open(results_json_path, 'r', encoding='utf-8', errors='ignore') as infile:
+                results_str = "".join(line.rstrip() for line in infile)
+                results_obj = json.loads(results_str)
+            with open(results_json_path, 'w') as outfile:
+                json.dump(results_obj, outfile, indent=4)
+
+            shutil.move(results_json_path, os.path.join(tmp_results, "results.json"))
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
                 print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
                 log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
                 log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
+        # Rescue custom validator files
+        custom_validator_output_directory = os.path.join(tmp_results, "custom_validator_output")
+        pattern_copy("rescue_custom_validator_validation_jsons", [os.path.join(tmp_work, 'validation_results_*.json'),], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_logs", [os.path.join(tmp_work, 'validation_logfile_*.txt'),], tmp_work, custom_validator_output_directory, tmp_logs)
+        pattern_copy("rescue_custom_validator_errors", [os.path.join(tmp_work, 'validation_stderr_*.txt'),], tmp_work, custom_validator_output_directory, tmp_logs)
+
         just_write_grade_history(history_file,
                                 gradeable_deadline_longstring,
                                 submission_longstring,
                                 seconds_late,
+                                first_access_string,
+                                access_duration,
                                 queue_obj["queue_time"],
                                 "BATCH" if is_batch_job else "INTERACTIVE",
                                 grading_began_longstring,

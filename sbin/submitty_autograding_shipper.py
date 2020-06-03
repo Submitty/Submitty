@@ -17,6 +17,7 @@ import tempfile
 import socket
 import traceback
 import subprocess
+import random
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
@@ -34,8 +35,12 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
+IN_PROGRESS_PATH = os.path.join(SUBMITTY_DATA_DIR, "grading")
 
 JOB_ID = '~SHIP~'
+
+def worker_folder(worker_name):
+    return os.path.join(IN_PROGRESS_PATH, worker_name)
 
 
 # ==================================================================================
@@ -615,125 +620,121 @@ def checkout_vcs_repo(my_file):
     return obj
 
 # ==================================================================================
-def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
+def get_job(my_name,which_machine,my_capabilities,which_untrusted):
     """
-    Picks a job from the queue
-
-    :param overall_lock: a lock on the directory containing all queue files
+    Pick a job from the queue.
     """
 
     time_get_job_begin = dateutils.get_current_time()
 
-    with overall_lock:
-        folder= INTERACTIVE_QUEUE
+    folder = worker_folder(my_name)
+
+    '''
+    ----------------------------------------------------------------
+    Our first priority is to perform any awaiting VCS checkouts
+
+    Note: This design is imperfect:
+    
+        * If all shippers are busy working on long-running autograding
+        tasks there will be a delay of seconds or minutes between
+        a student pressing the submission button and clone happening.
+        This is a minor exploit allowing them to theoretically
+        continue working on their submission past the deadline for
+        the time period of the delay.
+        -- This is not a significant, practical problem.
+    
+        * If multiple and/or large git submissions arrive close
+        together, this shipper job will be tied up performing these
+        clone operations.  Because we don't release the lock, any
+        other shippers that complete their work will also be blocked
+        from either helping with the clones or tackling the next
+        autograding job.
+        -- Based on experience with actual submission patterns, we
+            do not anticipate that this will be a significant
+            bottleneck at this time.
+    
+        * If a git clone takes a very long time and/or hangs because of
+        network problems, this could halt all work on the server.
+        -- We'll need to monitor the production server.
+    
+    We plan to do a complete overhaul of the
+    scheduler/shipper/worker and refactoring this design should be
+    part of the project.
+    ----------------------------------------------------------------
+    '''
+
+    # Grab all the VCS files currently in the folder...
+    vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
+    for f in vcs_files:
+        vcs_file = f[len(folder)+1:]
+        no_vcs_file = f[len(folder)+1+5:]
+        # do the checkout
+        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+        # save the regular grading queue file
+        with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
+            json.dump(updated_obj, queue_file)
+        # cleanup the vcs queue file
+        os.remove(folder+"/"+vcs_file)
+    # ----------------------------------------------------------------
 
 
-        '''
-        ----------------------------------------------------------------
-        Our first priority is to perform any awaiting VCS checkouts
+    # Grab all the files currently in the folder, sorted by creation
+    # time, and put them in the queue to be graded
+    files = [str(f) for f in Path(folder).glob('*')]
+    files_and_times = list()
+    for f in files:
+        try:
+            my_time = os.path.getctime(f)
+        except:
+            continue
+        tup = (f, my_time)
+        files_and_times.append(tup)
 
-        Note: This design is imperfect:
-        
-          * If all shippers are busy working on long-running autograding
-            tasks there will be a delay of seconds or minutes between
-            a student pressing the submission button and clone happening.
-            This is a minor exploit allowing them to theoretically
-            continue working on their submission past the deadline for
-            the time period of the delay.
-            -- This is not a significant, practical problem.
-        
-          * If multiple and/or large git submissions arrive close
-            together, this shipper job will be tied up performing these
-            clone operations.  Because we don't release the lock, any
-            other shippers that complete their work will also be blocked
-            from either helping with the clones or tackling the next
-            autograding job.
-            -- Based on experience with actual submission patterns, we
-               do not anticipate that this will be a significant
-               bottleneck at this time.
-        
-          * If a git clone takes a very long time and/or hangs because of
-            network problems, this could halt all work on the server.
-            -- We'll need to monitor the production server.
-        
-        We plan to do a complete overhaul of the
-        scheduler/shipper/worker and refactoring this design should be
-        part of the project.
-        ----------------------------------------------------------------
-        '''
+    files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
+    my_job=""
 
-        # Grab all the VCS files currently in the folder...
-        vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
-        for f in vcs_files:
-            vcs_file = f[len(folder)+1:]
-            no_vcs_file = f[len(folder)+1+5:]
-            # do the checkout
-            updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
-            # save the regular grading queue file
-            with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
-                json.dump(updated_obj, queue_file)
-            # cleanup the vcs queue file
-            os.remove(folder+"/"+vcs_file)
-        # ----------------------------------------------------------------
+    for full_path_file, file_time in files_and_times:
+        # get the file name (without the path)
+        just_file = full_path_file[len(folder)+1:]
 
+        # skip items that are already being graded
+        if (just_file[0:8]=="GRADING_"):
+            continue
+        grading_file = os.path.join(folder,"GRADING_"+just_file)
+        if grading_file in files:
+            continue
 
-        # Grab all the files currently in the folder, sorted by creation
-        # time, and put them in the queue to be graded
-        files = [str(f) for f in Path(folder).glob('*')]
-        files_and_times = list()
-        for f in files:
-            try:
-                my_time = os.path.getctime(f)
-            except:
-                continue
-            tup = (f, my_time)
-            files_and_times.append(tup)
+        # skip items (very recently added!) that are already waiting for a VCS checkout
+        if (just_file[0:5]=="VCS__"):
+            continue
 
-        files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
-        my_job=""
+        # found something to do
+        try:
+            with open(full_path_file, 'r') as infile:
+                queue_obj = json.load(infile)
+        except:
+            continue
 
-        for full_path_file, file_time in files_and_times:
-            # get the file name (without the path)
-            just_file = full_path_file[len(folder)+1:]
+        #Check to make sure that we are capable of grading this submission
+        required_capabilities = queue_obj["required_capabilities"]
+        if not required_capabilities in my_capabilities:
+            continue
 
-            # skip items that are already being graded
-            if (just_file[0:8]=="GRADING_"):
-                continue
-            grading_file = os.path.join(folder,"GRADING_"+just_file)
-            if grading_file in files:
-                continue
+        # prioritize interactive jobs over (batch) regrades
+        # if you've found an interactive job, exit early (since they are sorted by timestamp)
+        if not "regrade" in queue_obj or not queue_obj["regrade"]:
+            my_job = just_file
+            break
 
-            # skip items (very recently added!) that are already waiting for a VCS checkout
-            if (just_file[0:5]=="VCS__"):
-                continue
+        # otherwise it's a regrade, and if we don't already have a
+        # job, take it, but we have to search the rest of the list
+        if my_job == "":
+            my_job = just_file
 
-            # found something to do
-            try:
-                with open(full_path_file, 'r') as infile:
-                    queue_obj = json.load(infile)
-            except:
-                continue
-
-            #Check to make sure that we are capable of grading this submission
-            required_capabilities = queue_obj["required_capabilities"]
-            if not required_capabilities in my_capabilities:
-                continue
-
-            # prioritize interactive jobs over (batch) regrades
-            # if you've found an interactive job, exit early (since they are sorted by timestamp)
-            if not "regrade" in queue_obj or not queue_obj["regrade"]:
-                my_job = just_file
-                break
-
-            # otherwise it's a regrade, and if we don't already have a
-            # job, take it, but we have to search the rest of the list
-            if my_job == "":
-                my_job = just_file
-
-        if not my_job == "":
-            grading_file = os.path.join(folder, "GRADING_" + my_job)
-            # create the grading file
-            with open(os.path.join(grading_file), "w") as queue_file:
+    if not my_job == "":
+        grading_file = os.path.join(folder, "GRADING_" + my_job)
+        # create the grading file
+        with open(os.path.join(grading_file), "w") as queue_file:
                 json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
 
     time_get_job_end = dateutils.get_current_time()
@@ -748,7 +749,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
+def shipper_process(my_name,my_data,full_address,which_untrusted):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -758,7 +759,8 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     """
 
     which_machine   = full_address
-    my_capabilities = my_data[my_name]['capabilities']
+    my_capabilities = my_data['capabilities']
+    my_folder = worker_folder(my_name)
 
     # ignore keyboard interrupts in the shipper processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -766,22 +768,22 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     counter=0
     while True:
         try:
-            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
+            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted)
             if not my_job == "":
                 counter=0
-                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
+                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(my_folder, my_job))
                 continue
             else:
                 if counter == 0 or counter >= 10:
-                    print ("{0} {1}: no available job".format(my_name, which_untrusted))
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
+                        message=f"{my_name} {which_untrusted}: no available job")
                     counter=0
                 counter+=1
                 time.sleep(1)
 
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
-            my_message = "ERROR in get_job {0} {1} {2}. For more details, see traces entry".format(which_machine,which_untrusted,str(e))
-            print (my_message)
+            my_message = f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. For more details, see traces entry"
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
 
@@ -795,13 +797,6 @@ def launch_shippers(worker_status_map):
         raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="grade_scheduler.py launched")
 
-    # Clean up old files from previous shipping/autograding (any
-    # partially completed work will be re-done)
-    for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*"):
-        file_path = str(file_path)
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove old queue file: " + file_path)
-        os.remove(file_path)
-
     for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
         file_path = str(file_path)
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding TODO file: " + file_path)
@@ -810,9 +805,6 @@ def launch_shippers(worker_status_map):
         file_path = str(file_path)
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
-
-    # this lock will be used to edit the queue or new job event
-    overall_lock = multiprocessing.Lock()
 
     # The names of the worker machines, the capabilities of each
     # worker machine, and the number of workers per machine are stored
@@ -843,6 +835,16 @@ def launch_shippers(worker_status_map):
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+        thread_count = machine["num_autograding_workers"]
+        
+        # Cleanup previous in-progress submissions
+        worker_folders = [worker_folder(f'{name}_{i}') for i in range(thread_count)]
+        for folder in worker_folders:
+            os.makedirs(folder, exist_ok=True)
+            # Clear out in-progress files, as these will be re-done.
+            for grading in Path(folder).glob('GRADING_*'):
+                os.remove(grading)
+
         if worker_status_map[name] == False:
             print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="{0} could not be reached, so we are not spinning up shipper threads.".format(name))
@@ -874,25 +876,46 @@ def launch_shippers(worker_status_map):
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1} For more details, see trace entry.".format(name,e))
             continue
         # launch the shipper threads
-        for i in range(0,num_workers_on_machine):
+        for i in range(thread_count):
+            thread_name = f'{name}_{i}'
             u = "untrusted" + str(i).zfill(2)
-            p = multiprocessing.Process(target=shipper_process,args=(name,single_machine_data,full_address, u,overall_lock))
+            p = multiprocessing.Process(target=shipper_process,args=(thread_name,single_machine_data[name],full_address, u))
             p.start()
-            processes.append(p)
+            processes.append((thread_name, p))
         total_num_workers += num_workers_on_machine
 
     # main monitoring loop
     try:
         while True:
             alive = 0
-            for i in range(0,total_num_workers):
-                if processes[i].is_alive:
+            for name, p in processes:
+                if p.is_alive:
                     alive = alive+1
                 else:
-                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+str(i)+" is not alive")
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+name+" is not alive")
             if alive != total_num_workers:
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
-            #print ("shippers= ",total_num_workers,"  alive=",alive)
+
+            # Find which workers are currently idle, as well as any autograding
+            # jobs which need to be scheduled.
+            workers = [name for (name, p) in processes if p.is_alive]
+            idle_workers = list(filter(
+                lambda n: len(os.listdir(worker_folder(n))) == 0,
+                workers))
+            jobs = filter(os.path.isfile, 
+                map(lambda f: os.path.join(INTERACTIVE_QUEUE, f), 
+                    os.listdir(INTERACTIVE_QUEUE)))
+            
+            # Distribute available jobs randomly among workers currently idle.
+            for job in jobs:
+                if len(idle_workers) == 0:
+                    break
+                dest = random.choice(idle_workers)
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, 
+                    message=f"Pushing job {os.path.basename(job)} to {dest}.")
+                shutil.move(job, worker_folder(dest))
+                idle_workers.remove(dest)
+
             time.sleep(1)
 
     except KeyboardInterrupt:
