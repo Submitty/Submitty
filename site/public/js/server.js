@@ -303,10 +303,17 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
     }
     $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
+    captureTabInModal("edit-course-materials-form");
 }
-function captureTabInModal(formName){
 
-  var form = $("#".concat(formName));
+var lastActiveElement = null;
+function captureTabInModal(formName, resetFocus=true){
+    if(resetFocus){
+        lastActiveElement = document.activeElement;
+    }
+
+    var form = $("#".concat(formName));
+    form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -314,7 +321,9 @@ function captureTabInModal(formName){
     var lastInput = inputs.last();
 
     /*set focus on first element*/
-    firstInput.focus();
+    if(resetFocus){
+      firstInput.focus();
+    }
 
     /*redirect last tab to first element*/
     form.on('keydown', function (e) {
@@ -328,15 +337,19 @@ function captureTabInModal(formName){
         }
     });
 
-    form.on('hidden.bs.modal', function () {
-        releaseTabFromModal(formName);
-    })
+    //Watch for the modal to be hidden
+    let observer = new MutationObserver(function(){
+        if(form[0].style.display === 'none'){
+            releaseTabFromModal(formName);
+        }
+    });
+    observer.observe(form[0], { attributes: true, childList: true });
 }
 
 function releaseTabFromModal(formName){
-
     var form = $("#".concat(formName));
     form.off('keydown');
+    lastActiveElement.focus();
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
@@ -804,6 +817,52 @@ function togglePageDetails() {
             }
         });
     }
+}
+
+/**
+ * Opens a new tab on https://validator.w3.org with the contents of the current html page
+ */
+function validateHtml() {
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  function c(a, b) {
+    const c = document.createElement("textarea");
+    c.name = a;
+    c.value = b;
+    d.appendChild(c)
+  }
+  const e = ((a) => {
+      for (var b = "", a = a.firstChild; a;) {
+        switch (a.nodeType) {
+          case Node.ELEMENT_NODE:
+            b += a.outerHTML;
+            break;
+          case Node.TEXT_NODE:
+            b += a.nodeValue;
+            break;
+          case Node.CDATA_SECTION_NODE:
+            b += "<![CDATA[" + a.nodeValue + "]]\>";
+            break;
+          case Node.COMMENT_NODE:
+            b += "<\!--" + a.nodeValue + "--\>";
+            break;
+          case Node.DOCUMENT_TYPE_NODE:
+            b += "<!DOCTYPE " + a.name + ">\n"
+        }
+        a = a.nextSibling
+      }
+      return b
+  })(document);
+  const d = document.createElement("form");
+  d.method = "POST";
+  d.action = "https://validator.w3.org/nu/";
+  d.enctype = "multipart/form-data";
+  d.target = "_blank";
+  d.acceptCharset = "utf-8";
+  c("showsource", "yes");
+  c("content", e);
+  document.body.appendChild(d);
+  d.submit();
+  d.outerHTML = "";
 }
 
 /**
