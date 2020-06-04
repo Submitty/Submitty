@@ -33,9 +33,11 @@ class UsersController extends AbstractController {
         //Assemble students into sections
         $sorted_students = [];
         $download_info = [];
+        $formatted_tzs = [];
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $formatted_tzs[$student->getId()] = $student->getTimeZoneNiceFormat() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
                 case User::GROUP_INSTRUCTOR:
@@ -56,6 +58,8 @@ class UsersController extends AbstractController {
                 'last_name' => $student->getDisplayedLastName(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
+                'utc_offset' => $student->getUTCOffset(),
+                'time_zone' => $student->getTimeZoneNiceFormat(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
@@ -71,6 +75,7 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
+                $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication
             )
         );
