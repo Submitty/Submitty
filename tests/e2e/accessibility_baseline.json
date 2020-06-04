@@ -16,6 +16,7 @@
     "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": [],
     "/s20/sample/gradeable/future_no_tas_test/grading?view=all": [],
     "/s20/sample/gradeable/open_homework/grading/status": [],
+    "/s20/sample/gradeable/open_homework/bulk_stats": [],
     "/s20/sample/gradeable/open_homework/grading/details?view=all": [],
     "/s20/sample/gradeable/open_homework": [
         "Bad value “text” for attribute “role” on element “div”.",
@@ -25,6 +26,8 @@
     "/s20/sample/gradeable/grades_released_homework_autota": [
         "Bad value “text” for attribute “role” on element “div”.",
         "Attribute “fname” not allowed on element “tr” at this point.",
+        "Duplicate ID “confetti_canvas”.",
+        "The first occurrence of ID “confetti_canvas” was here.",
         "CSS: The value “break-word” is deprecated"
     ],
     "/s20/sample/notifications": [],
@@ -39,18 +42,14 @@
     "/s20/sample/office_hours_queue": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/course_materials": [
-        "Bad value “sample folder” for attribute “id” on element “a”: An ID must not contain whitespace."
-    ],
+    "/s20/sample/course_materials": [],
     "/s20/sample/forum": [
         "The element “input” must not appear as a descendant of the “a” element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "Bad value “button” for attribute “type” on element “a”: Subtype missing.",
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools)."
     ],
     "/s20/sample/forum/threads/new": [
-        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "Element “p” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)"
+        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
     "/s20/sample/forum/categories": [],
     "/s20/sample/forum/stats": [
@@ -66,8 +65,7 @@
     "/s20/sample/extensions": [],
     "/s20/sample/grade_override": [],
     "/s20/sample/plagiarism": [
-        "The “center” element is obsolete. Use CSS instead.",
-        "Element “div” not allowed as child of element “b” in this context. (Suppressing further errors from this subtree.)"
+        "Attribute “name” not allowed on element “div” at this point."
     ],
     "/s20/sample/plagiarism/configuration/new": [
         "Attribute “name” not allowed on element “div” at this point.",
@@ -75,11 +73,5 @@
     ],
     "/s20/sample/reports": [],
     "/s20/sample/late_table": [],
-    "/s20/sample/grades": [
-        "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
-        "The “align” attribute on the “td” element is obsolete. Use CSS instead.",
-        "The “font” element is obsolete. Use CSS instead.",
-        "Element “div” not allowed as child of element “font” in this context. (Suppressing further errors from this subtree.)",
-        "Too many messages."
-    ]
+    "/s20/sample/grades": []
 }
