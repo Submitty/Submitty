@@ -683,6 +683,17 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
+if [[ ${VAGRANT} == 1 ]]; then
+    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
+
+    rm -rf ${SUBMITTY_DATA_DIR}/logs/
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty ${SUBMITTY_DATA_DIR}/logs
+fi
+
 echo Beginning Install Submitty Script
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
@@ -720,51 +731,6 @@ if [ ${WORKER} == 0 ]; then
 
         DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
         VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
-
-        rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-        rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
-        chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
-
-        # Having postgresql log to a shared folder can break postgresql, so use a local folder instead.
-        mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
-        chown -R postgres:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/psql
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/psql
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names ${SUBMITTY_DATA_DIR}/logs/preferred_names
-        chown -R ${DAEMON_USER}:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/preferred_names
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/preferred_names
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
