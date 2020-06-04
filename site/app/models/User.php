@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use app\exceptions\NullException;
 use app\libraries\Core;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
@@ -191,17 +190,15 @@ class User extends AbstractModel {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
 
-        if (isset($details['time_zone'])) {
-            $this->time_zone = $details['time_zone'];
-        }
+        $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
     }
 
     /**
-     * Update $this->time_zone
+     * Set $this->time_zone
      * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
      * @return bool True if time zone was able to be updated, False otherwise
      */
-    public function updateTimeZone(string $time_zone): bool {
+    public function setTimeZone(string $time_zone): bool {
 
         // Validate the $time_zone string
         if (in_array($time_zone, DateUtils::getAvailableTimeZones())) {
@@ -222,28 +219,18 @@ class User extends AbstractModel {
      * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
      * user has not set their time zone.
      *
-     * @throws NullException Found null user time zone, but this should never happen
      * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
      */
     public function getTimeZoneNiceFormat(): string {
-        if (is_null($this->time_zone)) {
-            throw new NullException(self::NULL_TIME_ZONE_MESSAGE);
-        }
-
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
     }
 
     /**
      * Get the UTC offset for this user's time zone.
      *
-     * @throws NullException Found null user time zone, but this should never happen
      * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
      */
     public function getUTCOffset(): string {
-        if (is_null($this->time_zone)) {
-            throw new NullException(self::NULL_TIME_ZONE_MESSAGE);
-        }
-
         return DateUtils::getUTCOffset($this->time_zone);
     }
 
