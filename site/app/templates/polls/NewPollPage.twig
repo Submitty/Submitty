@@ -113,7 +113,10 @@
 <script>
     flatpickr('.poll-date', {
         allowInput: true,
-        dateFormat: "Y-m-d"
+        dateFormat: "Y-m-d",
+        onReady: (a, b, fp) => {
+          fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+        }
     });
 
     function addResponse() {
