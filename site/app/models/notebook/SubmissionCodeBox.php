@@ -1,14 +1,12 @@
 <?php
 
-namespace app\models\gradeable;
+namespace app\models\notebook;
 
 use app\libraries\Core;
 use app\libraries\Utils;
-use app\models\gradeable\AbstractTextBox;
+use app\models\notebook\AbstractTextBox;
 
 /**
- * Information required to load code box submissions on the submission page
- *
  * @method string getLanguage()
  * @method string getCodeMirrorMode()
  */

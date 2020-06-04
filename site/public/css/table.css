@@ -1,6 +1,8 @@
 #empty-table {
-    padding: 1em;
+    margin: 10px auto;
+    padding: 1.6em 1em;
     text-align: center;
+    border-radius: 8px;
 }
 
 .mobile-table {

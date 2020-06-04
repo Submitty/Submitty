@@ -1,20 +1,15 @@
 <?php
 
-namespace app\models\gradeable;
+namespace app\models\notebook;
 
 use app\libraries\Core;
-use app\models\gradeable\AbstractGradeableModel;
+use app\models\notebook\AbstractNotebookInput;
 
 /**
- * Class AbstractTextBox
- * @package app\models\gradeable
- *
- * Information required to load text box submissions on the submission page
- *
  * @method int getRowCount()
  * @method bool getIsCodebox()
  */
-class AbstractTextBox extends AbstractGradeableInput {
+class AbstractTextBox extends AbstractNotebookInput {
 
     /** @prop @var int The row height for the text box */
     protected $row_count;

@@ -18,7 +18,7 @@ class PlagiarismView extends AbstractView {
         <a class="btn btn-primary" href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'new'])}">+ Configure New Gradeable for Plagiarism Detection</a>
     </div><br /><br />
     <div class="sub">
-    <center>
+    <div>
     <table style="border-collapse: separate;border-spacing: 15px 10px;">
 HTML;
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -138,7 +138,7 @@ HTML;
         }
 
         $return .= <<<HTML
-    </table></center>
+    </table></div>
     </div>
 </div>
 HTML;
@@ -240,7 +240,7 @@ HTML;
                         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                         <p>Note: Deleting plagiarism results will also delete the saved configuration for the gradeable.</p><br>
                         Are you sure to delete Plagiarism Results for
-                        <b><div name="gradeable_title"></div></b>
+                        <div name="gradeable_title"></div>
                         <div class="form-buttons">
                             <div class="form-button-container">
                                 <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
