@@ -235,7 +235,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         self.verify_execution_status()
     except Exception as e:
       self.log_stack_trace(traceback.format_exc())
-      self.log("ERROR: Could not verify execution mode status.")
+      self.log_message("ERROR: Could not verify execution mode status.")
       return
 
     more_than_one = True if len(containers) > 1 else False
@@ -246,7 +246,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         container.create(my_script, arguments, more_than_one)
         created_containers.append(container)
       except Exception as e:
-        self.log(f"ERROR: Could not create container {container.name} with image {container.image}")
+        self.log_message(f"ERROR: Could not create container {container.name} with image {container.image}")
         self.log_stack_trace(traceback.format_exc())
 
         # Failing to create a container is a critical error.
