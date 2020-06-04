@@ -79,8 +79,8 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
-                $error = "Datestamp must be Y-m-d";
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d H:i:s', $_POST['datestamp']) === false)) {
+                $error = "Datestamp must be Y-m-d H:i:s";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
@@ -93,7 +93,10 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-            $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+
+            $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
+
+            $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
