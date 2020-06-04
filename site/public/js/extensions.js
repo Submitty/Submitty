@@ -1,4 +1,4 @@
-function updateGradeableForExtensions() {
+$("#gradeable-select").change(function(){
     var g_id = $('#gradeable-select').val();
     var expiration_date = new Date(Date.now());
     expiration_date.setDate(expiration_date.getDate() + 1);

@@ -239,11 +239,26 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       return
 
     more_than_one = True if len(containers) > 1 else False
+    created_containers = list()
     for container in containers:
       my_script = os.path.join(container.directory, script)
-      container.create(my_script, arguments, more_than_one)
+      try:
+        container.create(my_script, arguments, more_than_one)
+        created_containers.append(container)
+      except Exception as e:
+        self.log(f"ERROR: Could not create container {container.name} with image {container.image}")
+        self.log_stack_trace(traceback.format_exc())
 
-  
+        # Failing to create a container is a critical error.
+        # Try to clean up any containers we successfully created, then raise.
+        for c in created_containers:
+          try:
+            c.cleanup_container()
+          except:
+            pass
+        raise
+
+
   def network_containers(self, containers):
     """ Given a set of containers, network them per their specifications. """
     if len(containers) <= 1:
