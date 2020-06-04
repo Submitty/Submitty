@@ -300,6 +300,9 @@ if [ ${WORKER} == 0 ]; then
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
     # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
+
+    #add cgi user to docker group in order to use the Docker python sdk
+    usermod -a -G "docker" ${CGI_USER}
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi

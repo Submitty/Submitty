@@ -263,6 +263,9 @@ if [ "${WORKER}" == 0 ]; then
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
     chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
+
+    # php needs to be able to read containers config
+    chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json
 fi
 
 # Set permissions of all files in the logs directories
