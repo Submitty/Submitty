@@ -10,12 +10,12 @@
 
     <h3 style="margin-bottom:10px;"> Manage Categories </h3>
 
-    <div id="manage_categories_view" align="center">
-        <div style="max-width: 750px;" align="left">
+    <div id="manage_categories_view" style="margin: 0 auto; max-width: 750px;">
+        <div>
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <span  style="float: right;">
-                <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" rows="1" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
+                <input id="new_category_text" aria-label="New Category" placeholder="New Category" style="resize:none;" type="text" name="new_category" maxlength="50" onkeyup="checkInputMaxLength($(this))" />
                 <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
                     <i class="fas fa-plus-circle fa-1x"></i> Add category
                 </button>

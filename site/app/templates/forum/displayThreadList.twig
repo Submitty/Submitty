@@ -1,11 +1,11 @@
 {% for thread in thread_content %}
-    <a href="{{ thread.link }}" class="thread_box_link" data="{{ thread.thread_id }}">
+    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}">
         <div class="{{ thread.class }}">
             {% if thread.pinned %}
-                <i class="fas fa-star thread-announcement" title = "Announcement" aria-label="Announcement"></i>
+                <i class="fas fa-thumbtack thread-announcement" title = "Pinned to the top" aria-label="Pinned to the top"></i>
             {% endif %}
             {% if thread.favorite %}
-                <i class="fas fa-thumbtack thread-favorite" title="Pinned as my favorite" aria-label="Pinned as my favorite"></i>
+                <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
             {% endif %}
             {% if thread.merged_thread_id != -1 %}
                 <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>

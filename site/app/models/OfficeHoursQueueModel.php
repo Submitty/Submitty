@@ -26,6 +26,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     private $code_to_index = array();//an array maps queue codes to their index (this is used to give each queue a color)
     private $current_queue;
     private $full_history;
+    private $current_queue_state;
     private $colors = array('#c98ee4','#9fcc55','#ea79a1','#4ed78e','#ef7568','#38b3eb','#e09965','#8499e3','#83cc88','#d9ab39','#4ddcc0','#b9c673','#658bfb','#76cc6c','#dc8b3d','#c9bf5d','#5499f0','#9a89f0','#e57fcf','#c0c246');
 
     /**
@@ -43,6 +44,10 @@ class OfficeHoursQueueModel extends AbstractModel {
 
         $this->current_queue = $this->core->getQueries()->getCurrentQueue();
         $this->full_history = $full_history === 'true';
+
+        if (!$this->isGrader()) {
+            $this->current_queue_state = $this->core->getQueries()->getCurrentQueueState();
+        }
     }
 
     public function getIndexFromCode($code) {
@@ -129,8 +134,22 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueNumberAheadOfYou($queue_code);
     }
 
-    public function firstTimeInQueue($id, $queue_code) {
-        return $this->core->getQueries()->firstTimeInQueue($id, $queue_code);
+    public function firstTimeInQueueToday($time) {
+        if (is_null($time)) {
+            return true;
+        }
+        $one_day_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
+        date_sub($one_day_ago, date_interval_create_from_date_string('1 days'));
+        return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_day_ago;
+    }
+
+    public function firstTimeInQueueThisWeek($time) {
+        if (is_null($time)) {
+            return true;
+        }
+        $one_week_ago = new \DateTime('tomorrow', $this->core->getConfig()->getTimezone());
+        date_sub($one_week_ago, date_interval_create_from_date_string('5 days'));
+        return DateUtils::parseDateTime($time, $this->core->getConfig()->getTimezone()) < $one_week_ago;
     }
 
     public function inQueue() {
@@ -138,11 +157,19 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getCurrentQueueCode() {
-        return $this->core->getQueries()->getCurrentQueueState()['queue_code'];
+        return $this->current_queue_state['queue_code'];
     }
 
     public function getCurrentQueueStatus() {
-        return $this->core->getQueries()->getCurrentQueueState()['current_state'];
+        return $this->current_queue_state['current_state'];
+    }
+
+    public function getCurrentQueueLastHelped() {
+        return $this->current_queue_state['last_time_in_queue'];
+    }
+
+    public function getCurrentQueueTimeIn() {
+        return $this->current_queue_state['time_in'];
     }
 
     public function cleanForId($str) {
@@ -171,5 +198,33 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function isContactInfoEnabled() {
         return $this->core->getConfig()->getQueueContactInfo();
+    }
+
+    public function getQueueMessage() {
+        return $this->core->getConfig()->getQueueMessage();
+    }
+
+    public function getNumberAheadInQueueThisWeek() {
+        if ($this->firstTimeInQueueThisWeek($this->getCurrentQueueLastHelped())) {
+            $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
+        }
+        else {
+          //Check assuming their time_in is current time because then it assumes
+          //everyone not helped this week is in front of them
+            $time_in = $this->core->getDateTimeNow();
+        }
+        return $this->core->getQueries()->getNumberAheadInQueueThisWeek($this->getCurrentQueueCode(), $time_in);
+    }
+
+    public function getNumberAheadInQueueToday() {
+        if ($this->firstTimeInQueueToday($this->getCurrentQueueLastHelped())) {
+            $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
+        }
+        else {
+          //Check assuming their time_in is current time because then it assumes
+          //everyone not helped today is in front of them
+            $time_in = $this->core->getDateTimeNow();
+        }
+        return $this->core->getQueries()->getNumberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);
     }
 }

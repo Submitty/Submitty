@@ -10,7 +10,6 @@ we utilize several third-party libraries to help power various components. Below
 | jQuery    | Copyright jQuery Foundation and other contributors | https://jquery.com | [MIT License](https://github.com/jquery/jquery/blob/master/LICENSE.txt) |
 | jQuery-UI | Copyright jQuery Foundation and other contributors | https://jquery.com | [MIT License](https://github.com/jquery/jquery-ui/blob/master/LICENSE.txt) |
 | jQuery-Color | Copyright jQuery Foundation and other contributors | https://jquery.com | [MIT License](https://github.com/jquery/jquery-color/blob/master/LICENSE.txt) |
-| jQuery-Timepicker-Addon | Copyright (c) 2013 Trent Richardson | https://github.com/trentrichardson/jQuery-Timepicker-Addon | [MIT License](https://github.com/trentrichardson/jQuery-Timepicker-Addon/blob/master/LICENSE-MIT) |
 | CodeMirror | Copyright (c) 2019 Marijn Haverbeke \<marijnh@gmail.com\> and others | https://codemirror.net/ | [MIT License](https://github.com/codemirror/CodeMirror/blob/master/LICENSE) |
 | Bootstrap | Copyright (c) 2011-2016 Twitter, Inc. | https://getbootstrap.com/ | [MIT License](https://github.com/twbs/bootstrap/blob/master/LICENSE) |
 | ramsey/uuid | Copyright (c) 2012 - 2018 Ben Ramsey \<ben@benramsey.com\> | https://github.com/ramsey/uuid | [MIT License](https://github.com/ramsey/uuid/blob/master/LICENSE) |

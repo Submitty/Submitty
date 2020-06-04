@@ -23,7 +23,7 @@
                                 {{ base64_image(imageData[student.getId()].path, student.getId()) }}
                             {% else %}
                                 {% if errorImageData == '_NONE_' %}
-                                    <i><span style="color:#595959">No Image Available</span></i>
+                                    <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                                 {% else %}
                                     {{ base64_image(errorImageData.path, 'No Image Available') }}
                                 {% endif %}

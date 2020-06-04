@@ -113,6 +113,13 @@ HTML;
             throw new OutputException('Invalid path to image file');
         }, ['is_safe' => ['html']]));
 
+        $this->twig->addFunction(new \Twig\TwigFunction("plurality_picker", function ($num, $single, $plural) {
+            if ($num == 1) {
+                return $single;
+            }
+            return $plural;
+        }, ["is_safe" => ["html"]]));
+
         if ($full_load) {
             $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
                 ->setTimezone($this->core->getConfig()->getTimezone());

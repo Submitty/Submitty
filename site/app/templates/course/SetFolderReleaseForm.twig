@@ -47,24 +47,16 @@
             var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
 
             if (new Date(nDT).getTime() <= new Date(currentDT).getTime()) {
-                return "#87db88";
+                return "var(--date-picker-green)";
             }
             else if(new Date(nDT).getTime()>=new Date(neverDT).getTime()){
-                return "#f76c6c";
+                return "var(--date-picker-red)";
             }
             else {
-                return "#ffeb54";
+                return "var(--date-picker-yellow)";
             }
         }
-        function setChildPerm(dirArr,handleData){
-            changeFolderPermission(dirArr,'1',function (output) {
-                if(output){
-                    if(handleData){
-                        handleData(true);
-                    }
-                }
-            });
-        }
+
         function setChild(dirArr,releaseDate,handleData) {
             //send the array of folder paths and set the time to the new one
             changeFolderNewDateTime(dirArr,releaseDate.value,function (output) {
@@ -75,36 +67,33 @@
                 }
 
             });
-
         }
-        function confirmReleaseDate(){
+
+        function confirmReleaseDate() {
             var directory = document.getElementById("submit_time");
             var dirArr = JSON.parse(directory.dataset.indir);
             var ID = directory.dataset.iden;
 
             var releaseDate = document.getElementById("date_to_release");
             //makes sure you cannot set to null times
-            if(releaseDate.value == ""){
+            if (releaseDate.value == "") {
                 window.alert("No blank time allowed");
                 return;
             }
-            setChildPerm(dirArr,function (output) {
-                if(output){
-                    setChild(dirArr,releaseDate,function (output) {
-                        //when done reload
-                        if(output) {
-                            var selectedDiv = 'date_to_release_'+ID;
-                            //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
-                            $("[id^="+selectedDiv+"]").val(releaseDate.value);
-                            $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
-                            //delay so function can finish most of the way
-                            //window.setTimeout('parent.location.reload()',100);
-                            parent.location.reload();
-                        }
-                    });
+            setChild(dirArr, releaseDate, function (output) {
+                //when done reload
+                if (output) {
+                    var selectedDiv = 'date_to_release_' + ID;
+                    //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
+                    $("[id^=" + selectedDiv + "]").val(releaseDate.value);
+                    $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
+                    //delay so function can finish most of the way
+                    //window.setTimeout('parent.location.reload()',100);
+                    parent.location.reload();
                 }
             });
         }
+
 
         flatpickr("#date_to_release", {
                     plugins: [ShortcutButtonsPlugin(

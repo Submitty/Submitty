@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS terms (
 
     # Create FK, courses table (semester) references terms table (term_id)
     try:
+        database.execute("ALTER TABLE ONLY courses DROP CONSTRAINT IF EXISTS courses_fkey;")
         database.execute("ALTER TABLE ONLY courses ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES terms (term_id) ON UPDATE CASCADE;")
     except Exception as e:
         database.execute("ROLLBACK;")

@@ -84,6 +84,7 @@ function isSettingsVisible() {
 function showSettings() {
     generateHotkeysList();
     $("#settings-popup").show();
+    captureTabInModal("settings-popup");
 }
 
 function hideSettings() {

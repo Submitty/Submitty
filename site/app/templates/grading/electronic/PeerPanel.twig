@@ -5,7 +5,7 @@
                 <span class="col grading_label">Peer Grading</span>
                 <div class="inner-container" id="peer-grading-box">
                     {% if has_active_version %}
-                        <script type="application/javascript">
+                        <script>
                             $(document).ready(function () {
                                 loadTemplates().then(function() {
                                     return reloadPeerRubric('{{ gradeable_id }}', '{{ anon_id }}');

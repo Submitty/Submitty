@@ -7,7 +7,7 @@ use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\models\RainbowCustomizationJSON;
 use app\views\admin\ConfigurationView;
@@ -29,9 +29,9 @@ class ConfigurationController extends AbstractController {
     /**
      * @Route("/api/{_semester}/{_course}/config", methods={"GET"})
      * @Route("/{_semester}/{_course}/config", methods={"GET"})
-     * @return Response
+     * @return MultiResponse
      */
-    public function viewConfiguration(): Response {
+    public function viewConfiguration(): MultiResponse {
         $fields = array(
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
@@ -54,6 +54,7 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
+            'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
         );
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -65,7 +66,7 @@ class ConfigurationController extends AbstractController {
             );
         }
 
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse([
                 'config' => $fields,
                 'gradeable_seating_options' => $seating_options,
@@ -95,18 +96,18 @@ class ConfigurationController extends AbstractController {
     /**
      * @Route("/api/{_semester}/{_course}/config", methods={"POST"})
      * @Route("/{_semester}/{_course}/config", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
-    public function updateConfiguration(): Response {
+    public function updateConfiguration(): MultiResponse {
         if (!isset($_POST['name'])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Name of config value not provided')
             );
         }
         $name = $_POST['name'];
 
         if (!isset($_POST['entry'])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Name of config entry not provided')
             );
         }
@@ -119,14 +120,14 @@ class ConfigurationController extends AbstractController {
                 $gradeable_ids[] = $option['g_id'];
             }
             if (!in_array($entry, $gradeable_ids)) {
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Invalid gradeable chosen for seating')
                 );
             }
         }
         elseif (in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
             if (!ctype_digit($entry)) {
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Must enter a number for this field')
                 );
             }
@@ -141,24 +142,17 @@ class ConfigurationController extends AbstractController {
                     'display_custom_message',
                     'forum_enabled',
                     'regrade_enabled',
-                    'seating_only_for_instructor'
+                    'seating_only_for_instructor',
+                    'queue_enabled',
+                    'queue_contact_info'
                 ]
             )
         ) {
             $entry = $entry === "true" ? true : false;
         }
-        elseif ($name === 'queue_enabled') {
-            $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'queue_contact_info') {
-            $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'upload_message') {
-            $entry = nl2br($entry);
-        }
         elseif ($name == "course_home_url") {
             if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($entry . ' is not a valid URL')
                 );
             }
@@ -176,7 +170,7 @@ class ConfigurationController extends AbstractController {
                     $customization_json->loadFromJsonFile();
                 }
                 catch (\Exception $e) {
-                    return Response::JsonOnlyResponse(
+                    return MultiResponse::JsonOnlyResponse(
                         JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
                     );
                 }
@@ -197,19 +191,19 @@ class ConfigurationController extends AbstractController {
 
         $config_json = $this->core->getConfig()->getCourseJson();
         if (!isset($config_json['course_details'][$name])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );
         }
         $config_json['course_details'][$name] = $entry;
 
         if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Could not save config file')
             );
         }
 
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
         );
     }

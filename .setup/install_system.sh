@@ -137,7 +137,6 @@ alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias submitty_install_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
-alias submitty_install_site_dev='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/install_site_dev.sh'
 alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
@@ -146,6 +145,10 @@ alias submitty_restart_services='submitty_restart_autograding && systemctl resta
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
+systemctl start submitty_autograding_shipper
+systemctl start submitty_autograding_worker
+systemctl start submitty_daemon_jobs_handler
+systemctl start nullsmtpd
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
@@ -297,6 +300,9 @@ if [ ${WORKER} == 0 ]; then
     # FIXME:  umask setting above not complete
     # might need to also set USERGROUPS_ENAB to "no", and manually create
     # the PHP_GROUP and DAEMON_GROUP single user groups.  See also /etc/login.defs
+
+    #add cgi user to docker group in order to use the Docker python sdk
+    usermod -a -G "docker" ${CGI_USER}
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
     echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
@@ -630,6 +636,8 @@ America/New_York
 ${SUBMISSION_URL}
 
 
+sysadmin@example.com
+https://example.com
 1
 submitty-admin
 submitty-admin
@@ -678,6 +686,17 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
+if [[ ${VAGRANT} == 1 ]]; then
+    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
+
+    rm -rf ${SUBMITTY_DATA_DIR}/logs/
+    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+
+    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty ${SUBMITTY_DATA_DIR}/logs
+fi
+
 echo Beginning Install Submitty Script
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
@@ -715,51 +734,6 @@ if [ ${WORKER} == 0 ]; then
 
         DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
         VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
-
-        rm -rf ${SUBMITTY_DATA_DIR}/logs/*
-        rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
-        chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
-
-        # Having postgresql log to a shared folder can break postgresql, so use a local folder instead.
-        mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
-        chown -R postgres:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/psql
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/psql
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names ${SUBMITTY_DATA_DIR}/logs/preferred_names
-        chown -R ${DAEMON_USER}:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/preferred_names
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/preferred_names
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
