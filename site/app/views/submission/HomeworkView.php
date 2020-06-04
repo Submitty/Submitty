@@ -420,9 +420,7 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
 
-        $DATE_FORMAT = "m/d/Y @ h:i A T";
         $numberUtils = new NumberUtils();
-
 
         // TODO: go through this list and remove the variables that are not used
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
@@ -430,7 +428,8 @@ class HomeworkView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
-            'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
+            'due_date' => $gradeable->getSubmissionDueDate(),
+            'DATE_TIME_FORMAT' => DateUtils::DATE_TIME_FORMAT,
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
@@ -949,7 +948,8 @@ class HomeworkView extends AbstractView {
             'can_change_submissions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
-            "csrf_token" => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'DATE_TIME_FORMAT' => DateUtils::DATE_TIME_FORMAT_WITH_SECONDS
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
@@ -1075,7 +1075,7 @@ class HomeworkView extends AbstractView {
                     $content = $post['content'];
                     $posts[] = [
                         'is_staff' => $is_staff,
-                        'date' => date_format($date, 'm/d/Y g:i A T'),
+                        'date' => date_format($date, DateUtils::DATE_TIME_FORMAT),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,
