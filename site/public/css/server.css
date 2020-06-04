@@ -1956,3 +1956,7 @@ header > * {
     font-family: inherit;
     max-width: 70vw;
 }
+
+.block {
+  display: block;
+}
