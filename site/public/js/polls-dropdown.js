@@ -1,6 +1,6 @@
 $(document).ready(function() {
-    $(".dropdown-btn").on("click", function() {
+    $(".dropdown_bar").on("click", function() {
     $(this).siblings("table").toggle();
-    $(this).children("i").toggleClass("down right");
+    $(this).find("i").toggleClass("down right");
     });
 });

@@ -7,27 +7,27 @@
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
             <label for="poll-name">
-                <h3> Poll Name: </h3>
+                Poll Name:
+                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             </label>
-            <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
             <br/> <br/>
 
             <label for="poll-question">
-                <h3> Question: </h3>
+                Question:
+                <textarea
+                    id="poll-question"
+                    name="question"
+                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
+                    rows="10" cols="30"
+                    placeholder="Enter question here..."
+                    maxlength="5000"></textarea>
             </label>
-            <textarea
-                id="poll-question"
-                name="question"
-                style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                rows="10" cols="30"
-                placeholder="Enter question here..."
-                maxlength="5000"></textarea>
             <br/><br/>
 
-            <label for="poll-time">
-                <h3> Expected release date: </h3>
+            <label for="poll-date">
+                Expected release date:
+                <input id="poll-date" class="poll-date"  name="release_date" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
-            <input type="date" name="release_date" id="poll-date"/>
             <br/>
 
             <hr>
@@ -53,26 +53,26 @@
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
 
             <label for="poll-name">
-                <h3> Poll Name: </h3>
+                Poll Name:
+                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             </label>
-            <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
             <br/> <br/>
 
             <label for="poll-question">
-                <h3> Question: </h3>
+                Question:
+                <textarea
+                    id="poll-question"
+                    name="question"
+                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
+                    rows="10" cols="30"
+                    maxlength="5000">{{ poll.getQuestion() }}</textarea>
             </label>
-            <textarea
-                id="poll-question"
-                name="question"
-                style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
-                rows="10" cols="30"
-                maxlength="5000">{{ poll.getQuestion() }}</textarea>
             <br/><br/>
 
-            <label for="poll-time">
-                <h3> Expected release date: </h3>
+            <label for="poll-date">
+                Expected release date:
+                <input id="poll-date" class="poll-date" name="release_date" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
             </label>
-            <input type="date" name="release_date" id="poll-date" value="{{ poll.getReleaseDate() }}"/>
             <br/>
             <hr>
             <h2> Responses: </h2>
@@ -82,18 +82,18 @@
                     <div id="response_{{response}}_wrapper">
                         <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
                         <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
-                        <input type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
-                        <textarea class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                        <input aria-label="Is correct" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
+                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
                         rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
-                        <button type="button" class="move-btn up-btn">
+                        <div class="move-btn up-btn">
                             <i class="move-arrow up"></i>
-                        </button>
-                        <button type="button" class="move-btn down-btn">
+                        </div>
+                        <div class="move-btn down-btn">
                             <i class="move-arrow down"></i>
-                        </button>
-                        <button type="button" class="move-btn delete-btn">
-                            <i class="fa fa-lg fa-trash"></i>
-                        </button>
+                        </div>
+                        <div class="move-btn delete-btn">
+                            <i class="fa fa-lg fa-trash delete"></i>
+                        </div>
                         <br/>
                     </div>
                     {% set index = index + 1%}
@@ -111,6 +111,11 @@
 
 
 <script>
+    flatpickr('.poll-date', {
+        allowInput: true,
+        dateFormat: "Y-m-d"
+    });
+
     function addResponse() {
         let count = $(".poll_response").length
         let first_free_id = 0
@@ -121,18 +126,18 @@
             <div id="response_${count}_wrapper">
                 <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
                 <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
-                <input type=checkbox name="is_correct_${count}">
-                <textarea class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                <input aria-label="Is correct" type=checkbox name="is_correct_${count}">
+                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
                 rows="10" cols="30"></textarea>
-                <button type="button" class="move-btn up-btn">
+                <div class="move-btn up-btn">
                     <i class="move-arrow up"></i>
-                </button>
-                <button type="button" class="move-btn down-btn">
+                </div>
+                <div class="move-btn down-btn">
                     <i class="move-arrow down"></i>
-                </button>
-                <button type="button" class="move-btn delete-btn">
-                    <i class="fa fa-lg fa-trash"></i>
-                </button>
+                </div>
+                <div class="move-btn delete-btn">
+                    <i class="fa fa-lg fa-trash delete"></i>
+                </div>
                 <br/>
             </div>
         `);

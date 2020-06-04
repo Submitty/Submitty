@@ -147,13 +147,11 @@ class ConfigurationController extends AbstractController {
                     'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
-                    'queue_contact_info'
+                    'queue_contact_info',
+                    'polls_enabled'
                 ]
             )
         ) {
-            $entry = $entry === "true" ? true : false;
-        }
-        elseif ($name === 'polls_enabled') {
             $entry = $entry === "true" ? true : false;
         }
         elseif ($name == "course_home_url") {

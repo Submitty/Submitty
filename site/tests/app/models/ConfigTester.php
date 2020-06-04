@@ -313,15 +313,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled' => true,
             'queue_contact_info' => true,
             'queue_message' => '',
-<<<<<<< HEAD
             'polls_enabled'                  => false,
             'polls_pts_for_correct'          => 1.0,
             'polls_pts_for_incorrect'        => 0.0,
-            'feature_flags' => []
-=======
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
->>>>>>> ad58593b60a3eb3500dc6515616065b1c99420de
         );
         $actual = $config->toArray();
 
