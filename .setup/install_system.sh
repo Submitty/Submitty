@@ -141,13 +141,15 @@ alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setu
 alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
-alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
+alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
+systemctl start submitty_websocket_server
 systemctl start nullsmtpd
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
@@ -432,7 +434,7 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -705,10 +707,12 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 systemctl restart submitty_autograding_shipper
 systemctl restart submitty_autograding_worker
 systemctl restart submitty_daemon_jobs_handler
+systemctl restart submitty_websocket_server
 # also, set it to automatically start on boot
 systemctl enable submitty_autograding_shipper
 systemctl enable submitty_autograding_worker
 systemctl enable submitty_daemon_jobs_handler
+systemctl enable submitty_websocket_server
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
