@@ -2,6 +2,7 @@
     "env": {
         "browser": true,
         "es6": true,
+        "es2017": true,
         "jquery": true
     },
     "extends": "eslint:recommended",
@@ -10,7 +11,7 @@
         "SharedArrayBuffer": "readonly"
     },
     "parserOptions": {
-        "ecmaVersion": 11,
+        "ecmaVersion": 2017,
         "sourceType": "module"
     },
     "rules": {
@@ -23,7 +24,7 @@
         "linebreak-style": ["error", "unix"],
         "no-trailing-spaces": ["error"],
         "no-var": ["error"],
-        "refer-arrow-callback": ["error"],
+        "prefer-arrow-callback": ["error"],
         "prefer-const": ["error"],
         "prefer-template": ["error"],
         "quotes": ["error", "single"],
