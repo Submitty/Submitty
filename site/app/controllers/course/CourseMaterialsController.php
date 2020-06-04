@@ -176,6 +176,9 @@ class CourseMaterialsController extends AbstractController {
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
+        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
+        $new_data_time = DateUtils::dateTimeToString($new_data_time);
+
         //only one will not iterate correctly
         if (is_string($data)) {
             $data = [$data];

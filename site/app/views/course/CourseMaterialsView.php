@@ -145,7 +145,6 @@ class CourseMaterialsView extends AbstractView {
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $server_time = DateUtils::getServerTimeJson($this->core);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
@@ -160,7 +159,6 @@ class CourseMaterialsView extends AbstractView {
             "delete_url" => $this->core->buildCourseUrl(["course_materials", "delete"]),
             "delete_folder_url" => $this->core->buildCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
-            'server_time' => $server_time,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_section" => $user_section,
             "reg_sections" => $reg_sections,
