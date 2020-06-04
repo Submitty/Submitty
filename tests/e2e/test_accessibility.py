@@ -35,6 +35,8 @@ class TestAccessibility(BaseTestCase):
         '/{}/{}/config',
         '/{}/{}/theme',
         '/{}/{}/office_hours_queue',
+        '/{}/{}/polls',
+        '/{}/{}/polls/newPoll',
         '/{}/{}/course_materials',
         '/{}/{}/forum',
         '/{}/{}/forum/threads/new',
