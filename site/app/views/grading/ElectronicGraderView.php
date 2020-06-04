@@ -926,7 +926,7 @@ HTML;
      * @param string $file_path
      * @return string $anon_path
      */
-    public function setAnonPath($file_path){
+    public function setAnonPath($file_path) {
         $file_path_parts = explode("/", $file_path);
         $anon_path = "";
         for ($index = 1; $index < count($file_path_parts); $index++) {
