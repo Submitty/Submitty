@@ -1418,3 +1418,11 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
         }
     });
 }
+
+function scrollThreadListTo(element){
+  var offset = $(element).position();
+  $('#thread_list').animate({
+      scrollTop: offset.top-100,
+      scrollLeft: offset.left
+  });
+}
