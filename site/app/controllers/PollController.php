@@ -117,7 +117,7 @@ class PollController extends AbstractController {
         }
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === FALSE) {
-            $this->core->addErrorMessage($_POST["release_date"]);
+            $this->core->addErrorMessage("Invalid poll release date");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
@@ -284,7 +284,7 @@ class PollController extends AbstractController {
         }
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
         if ($date === FALSE) {
-            $this->core->addErrorMessage($_POST["release_date"]);
+            $this->core->addErrorMessage("Invalid poll release date");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
