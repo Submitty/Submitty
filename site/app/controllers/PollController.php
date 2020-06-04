@@ -9,6 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
+use app\libraries\DateUtils;
 
 class PollController extends AbstractController {
     public function __construct(Core $core) {
@@ -104,6 +105,19 @@ class PollController extends AbstractController {
     public function addNewPoll() {
         if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
             $this->core->addErrorMessage("Error occured in adding poll");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
+            $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        if ($date === FALSE) {
+            $this->core->addErrorMessage($_POST["release_date"]);
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
@@ -258,6 +272,19 @@ class PollController extends AbstractController {
         }
         if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
             $this->core->addErrorMessage("Error occured in editing poll");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        if ($_POST["response_count"] <= 0 || $_POST["name"] == "" || $_POST["question"] == "" || $_POST["release_date"] == "") {
+            $this->core->addErrorMessage("Poll must fill out all fields, and have at least one option");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['polls']))
+            );
+        }
+        $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        if ($date === FALSE) {
+            $this->core->addErrorMessage($_POST["release_date"]);
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
