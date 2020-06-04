@@ -273,10 +273,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
 					<tr>
-				        <td style = "cursor:pointer;width:25%" id="user_down">User &darr;</td>
-				        <td style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</td>
-				        <td style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</td>
-				        <td style = "cursor:pointer;width:25%" id="filepath_down">Filepath</td>
+				        <th style = "cursor:pointer;width:25%" id="user_down">User &darr;</th>
+				        <th style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</th>
+				        <th style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</th>
+				        <th style = "cursor:pointer;width:25%" id="filepath_down">Filepath</th>
 					</tr>
 HTML;
 
@@ -517,7 +517,7 @@ HTML;
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
-                
+
                 if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
                     $info["graded_groups"][] = 4;
                 }
@@ -659,6 +659,11 @@ HTML;
             }
         }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $this->core->getOutput()->addInternalCss('details.css');
+        $this->core->getOutput()->addInternalJs('details.js');
+
+        $this->core->getOutput()->enableMobileViewport();
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -715,7 +720,6 @@ HTML;
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
         ]);
     }
-
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
@@ -789,7 +793,27 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ]);
         }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
 
+            $pattern_match_flag = false;
+            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if ($pattern_match_flag == true) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
+                "message" => "Multiple files within submissions"
+                ]);
+            }
+        }
         return $return;
     }
 
@@ -818,7 +842,7 @@ HTML;
         if ($peer && $this->core->getUser()->getGroup() == 4) {
             $i_am_a_peer = true;
         }
-        
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,
@@ -905,7 +929,7 @@ HTML;
      * Render the Submissions and Results Browser panel
      * @param GradedGradeable $graded_gradeable
      * @param int $display_version
-     * @return string
+     * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
         $add_files = function (&$files, $new_files, $start_dir_name) {
@@ -948,7 +972,6 @@ HTML;
 
         // For PDFAnnotationBar.twig
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),

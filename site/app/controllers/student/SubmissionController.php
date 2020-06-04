@@ -14,10 +14,11 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
-use app\models\gradeable\SubmissionTextBox;
-use app\models\gradeable\SubmissionCodeBox;
-use app\models\gradeable\SubmissionMultipleChoice;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\notebook\UserSpecificNotebook;
+use app\models\notebook\SubmissionTextBox;
+use app\models\notebook\SubmissionCodeBox;
+use app\models\notebook\SubmissionMultipleChoice;
 
 class SubmissionController extends AbstractController {
 
@@ -877,6 +878,7 @@ class SubmissionController extends AbstractController {
             "submissions",
             $gradeable->getId()
         );
+                   
 
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -915,6 +917,25 @@ class SubmissionController extends AbstractController {
 
         if (!FileUtils::createDir($version_path)) {
             return $this->uploadResult("Failed to make folder for the current version.", false);
+        }
+
+        $this_config_inputs = [];
+        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+            //need to force re-parse the notebook serverside again
+            $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
+                $who_id,
+                $gradeable_id
+            );
+
+            //save the notebook hashes and item selected
+            $json = [
+                "hashes" => $notebook->getHashes(),
+                "item_pools_selected" => $notebook->getSelectedQuestions()
+            ];
+
+            FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".submit.notebook"), $json);
+
+            $this_config_inputs = $notebook->getInputs();
         }
 
         $this->upload_details['version_path'] = $version_path;
@@ -966,6 +987,7 @@ class SubmissionController extends AbstractController {
                 }
             }
 
+
             if (count($errors) > 0) {
                 $error_text = implode("\n", $errors);
                 return $this->uploadResult("Upload Failed: " . $error_text, false);
@@ -984,8 +1006,6 @@ class SubmissionController extends AbstractController {
             $codebox_objects         = json_decode($codebox_objects, true);
             $multiple_choice_objects = json_decode($multiple_choice_objects, true);
 
-            $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
-
             foreach ($this_config_inputs as $this_input) {
                 if ($this_input instanceof SubmissionTextBox) {
                     $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
@@ -996,7 +1016,8 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 elseif ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
+                    $answers = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
+                  
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1011,20 +1032,21 @@ class SubmissionController extends AbstractController {
                     $empty_inputs = false;
                 }
 
-                // FIXME: add error checking
+                //FIXME: add error checking
                 $file = fopen($dst, "w");
-
                 foreach ($answers as $answer_val) {
                     fwrite($file, $answer_val . "\n");
                 }
                 fclose($file);
             }
 
+
+
             $previous_files_src = array();
             $previous_files_dst = array();
             $previous_part_path = array();
             $tmp = json_decode($_POST['previous_files']);
-            if (!empty($tmp)) {
+            if (!empty($tmp) && !$gradeable->getAutogradingConfig()->isNotebookGradeable()) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
                         $previous_files_src[$i + 1] = $tmp[$i];

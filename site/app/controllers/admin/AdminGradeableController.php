@@ -65,9 +65,6 @@ class AdminGradeableController extends AbstractController {
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
-        $this->core->getOutput()->addVendorJs(
-            FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
-        );
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');

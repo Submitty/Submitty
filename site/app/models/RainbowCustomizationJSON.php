@@ -48,7 +48,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Get gradeables array
+     * Get gradeable buckets array
      *
      * @return array
      */
@@ -220,7 +220,6 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param object $gradeable
      */
     public function addGradeable(object $gradeable) {
-        // TODO: Validate gradeable data
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
         $emptyObject = (object) [];

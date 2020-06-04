@@ -24,7 +24,7 @@
                     $(".chosen-select").chosen({ width: "100%" });
                     // Make AJAX call to get the content of the
                     // first post.
-                    var selected_thread_first_post_id = $(".chosen-select").children("option:first").attr('data-first-post-id');
+                    var selected_thread_first_post_id = $(".chosen-select").children("option").first().attr('data-first-post-id');
                     updateSelectedThreadContent(selected_thread_first_post_id);
                     $(".chosen-select").change(function() {
                         selected_thread_first_post_id = $(this).children("option:selected").attr('data-first-post-id');

@@ -12,12 +12,6 @@
     margin-right: 0;
 }
 
-.notebook p
-{
-    margin-top: 2px;
-    margin-bottom: 2px;
-}
-
 .notebook ul {
     padding-left: 3rem;
 }
@@ -50,13 +44,6 @@ fieldset.mc {
 .mc > label > :nth-child(2)
 {
     display: inline;
-}
-
-/* Clear top margin for items that live inside a single multiple choice description */
-/* Useful for several newline separated headers inside a single markdown item  */
-.mc > label > *
-{
-    margin-top: 0;
 }
 
 /* Style the color of notebook feedback messages */
@@ -92,4 +79,33 @@ textarea.sa-box {
     width: 60em; 
     height: 100%; 
     min-height: 110px;
+}
+
+.mc label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.mc input[type='checkbox'],
+.mc input[type='radio'] {
+    margin: 5px;
+}
+
+.mc pre {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Add some margin for informational content that is inside <p> tags */
+.notebook li,
+.notebook p {
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+/* Clear that margin for <p> tags that are part of a multiple choice input */
+.notebook fieldset p {
+    margin-top: 0;
+    margin-bottom: 0;
 }

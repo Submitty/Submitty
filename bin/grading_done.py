@@ -26,6 +26,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 GRADING_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
+IN_PROGRESS_DIR = os.path.join(SUBMITTY_DATA_DIR, "grading")
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_USERS_JSON = json.load(open_file)
@@ -40,9 +41,13 @@ DAEMON_USER=OPEN_USERS_JSON['daemon_user']
 
 if not os.path.isdir(GRADING_QUEUE):
     raise SystemExit("ERROR: autograding queue {} does not exist".format(GRADING_QUEUE))
+if not os.path.isdir(IN_PROGRESS_DIR):
+    raise SystemExit(f"ERROR: grading in-progress directory {IN_PROGRESS_DIR} does not exist")
 if not os.access(GRADING_QUEUE, os.R_OK):
     # most instructors do not have read access to the interactive queue
     print("WARNING: autograding queue {} is not readable".format(GRADING_QUEUE))
+if not os.access(IN_PROGRESS_DIR, os.R_OK):
+    print(f"WARNING: in-progress directory {IN_PROGRESS_DIR} is not readable")
 
 # ======================================================================
 
@@ -175,6 +180,27 @@ def print_status(epoch_time,num_shippers,num_workers,
     return done
 
 
+class QueueItem:
+    def __init__(self, json_file, epoch_time, is_grading=False):
+        # If this is for a queue item currently grading; then we ensure the 
+        # provided JSON file begins with 'GRADING_', and we get rid of the
+        # 'GRADING_' prefix for the regular queue file, while also reading
+        # the 'GRADING_' file.
+        if is_grading:
+            base, tail = os.path.split(json_file)
+            assert(tail.startswith('GRADING_'))
+            
+            with open(json_file, 'r') as infile:
+                self.grading_queue_obj = json.load(infile)
+
+            json_file = os.path.join(base, tail[8:])
+
+        self.start_time = os.path.getmtime(json_file)
+        self.elapsed_time = epoch_time - self.start_time
+        with open(json_file, 'r') as infile:
+            self.queue_obj = json.load(infile)
+        self.is_regrade = "regrade" in self.queue_obj
+
 
 def main():
     args = parse_args()
@@ -235,67 +261,57 @@ def main():
             full_path_file = str(full_path_file)
             json_file = full_path_file
 
-            # get the file name (without the path)
-            just_file = full_path_file[len(GRADING_QUEUE)+1:]
-            # skip items that are already being graded
-            is_grading = just_file[0:8]=="GRADING_"
-            is_regrade = False
-
-            if is_grading:
-                grading_json_file = json_file
-                json_file = os.path.join(GRADING_QUEUE,just_file[8:])
-                try:
-                    with open(grading_json_file, 'r') as infile:
-                        grading_queue_obj = json.load(infile)
-                except:
-                    print("whoops cannot read",grading_json_file)
-                    continue
             try:
-                start_time = os.path.getmtime(json_file)
-                elapsed_time = epoch_time-start_time
-                with open(json_file, 'r') as infile:
-                    queue_obj = json.load(infile)
-                if "regrade" in queue_obj:
-                    is_regrade = queue_obj["regrade"]
-            except:
-                print ("whoops",json_file,end="")
-                elapsed_time = 0
+                entry = QueueItem(json_file, epoch_time)
+            except Exception as e:
+                print(f"Whoops: could not read for {json_file}: {e}")
                 continue
 
-
-            if is_grading:
-                if is_regrade:
-                    regrade_grading_count+=1
-                else:
-                    interactive_grading_count+=1
+            if entry.is_regrade:
+                regrade_count += 1
             else:
-                if is_regrade:
-                    regrade_count+=1
+                interactive_count += 1
+
+            capability = entry.queue_obj["required_capabilities"]
+            max_time = entry.queue_obj["max_possible_grading_time"]
+
+            capability_queue_counts[capability] += 1
+
+        for worker_folder in filter(os.path.isdir, Path(IN_PROGRESS_DIR).glob('*')):
+            for grading_file in Path(worker_folder).glob('GRADING_*'):
+                json_file = str(grading_file)
+                try:
+                    entry = QueueItem(json_file, epoch_time, is_grading=True)
+                except Exception as e:
+                    print(f"Whoops: could not read for entry {json_file}: {e}")
+                    continue
+
+                if entry.is_regrade:
+                    regrade_count += 1
+                    regrade_grading_count += 1
                 else:
-                    interactive_count+=1
+                    interactive_count += 1
+                    interactive_grading_count += 1
+                
+                full_machine = entry.grading_queue_obj['machine']
 
-            capability = queue_obj["required_capabilities"]
-            max_time = queue_obj["max_possible_grading_time"]
+                capability = entry.queue_obj['required_capabilities']
+                max_time = entry.queue_obj['max_possible_grading_time']
 
-            grading_machine = "NONE"
-            if is_grading:
-                full_machine = grading_queue_obj["machine"]            
+                grading_machine = "NONE"
                 for machine in OPEN_AUTOGRADING_WORKERS_JSON:
                     m = OPEN_AUTOGRADING_WORKERS_JSON[machine]["address"]
                     if OPEN_AUTOGRADING_WORKERS_JSON[machine]["username"] != "":
-                        m = OPEN_AUTOGRADING_WORKERS_JSON[machine]["username"] + "@" + m
+                        m = f"{OPEN_AUTOGRADING_WORKERS_JSON[machine]['username']}@{m}"
                     if full_machine == m:
                         grading_machine = machine
-
-            if is_grading:
-                machine_grading_counts[grading_machine]+=1
-                if (elapsed_time > max_time):
+                        break
+                machine_grading_counts[grading_machine] += 1
+                
+                if entry.elapsed_time > max_time:
                     machine_stale_job[grading_machine] = True
                     stale = True
-                    print ("--> STALE JOB: {:5d} seconds   {:s}".format(int(elapsed_time),json_file))
-                capability_queue_counts[capability]-=1
-            else:
-                capability_queue_counts[capability]+=1
+                    print(f"--> STALE JOB: {int(entry.elapsed_time):5d} seconds   {json_file:s}")
 
 
         done = print_status(epoch_time,
