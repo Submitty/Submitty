@@ -16,7 +16,8 @@ class DateTimeFormat extends AbstractModel {
         'gradeable_with_seconds',
         'forum',
         'notification',
-        'office_hours_queue'
+        'office_hours_queue',
+        'date_time_picker'
     ];
 
     // Internationalized DateTime formatting strings
@@ -26,14 +27,16 @@ class DateTimeFormat extends AbstractModel {
             'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
             'forum' => 'n/j g:i A',
             'notification' => 'n/j g:i A',
-            'office_hours_queue' => 'g:i A'
+            'office_hours_queue' => 'g:i A',
+            'date_time_picker' => 'Y-m-d H:i:s'
         ],
         'DMY' => [
             'gradeable' => 'd/m/Y @ h:i A T',
             'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
             'forum' => 'j/n g:i A',
             'notification' => 'j/n g:i A',
-            'office_hours_queue' => 'g:i A'
+            'office_hours_queue' => 'g:i A',
+            'date_time_picker' => 'Y-m-d H:i:s'
         ]
     ];
 

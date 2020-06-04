@@ -105,7 +105,7 @@ class CourseMaterialsView extends AbstractView {
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
-                $file_release_dates[$expected_file_path] = $releaseData;
+                $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             }
 
             if ($json == false) {
@@ -149,7 +149,7 @@ class CourseMaterialsView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
-            'date_format' => 'Y-m-d H:i:sO',
+            'date_format' => 'Y-m-d H:i:s',
             "folderPath" => $expected_path,
             "uploadFolderPath" => $upload_path,
             "submissions" => $submissions,
