@@ -262,8 +262,8 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'MDY', eventually this will be setup in submitty configuration script
-        // and pulled from there
+        // For now this will be set to 'MDY', and configured as a property of the Config class
+        // Eventually this should be moved to the User class and configured on a per-user basis
         $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
     }
 
