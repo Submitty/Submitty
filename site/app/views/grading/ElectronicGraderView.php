@@ -31,6 +31,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_warnings
      * @return string
      */
+    
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -381,7 +382,7 @@ HTML;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
+        
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
         // title => displayed title in the table header
@@ -393,19 +394,19 @@ HTML;
                 $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
             }
             else {
-                $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
+                $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
             }
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
-                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading"];
+                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
@@ -933,6 +934,7 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
+        $user_ids = array();
         $add_files = function (&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             if ($new_files) {
@@ -958,7 +960,6 @@ HTML;
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
         // order of these statements matter I believe
-
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
         $isVcs = $graded_gradeable->getGradeable()->isVcs();
         if ($display_version_instance !==  null) {
@@ -979,7 +980,9 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
             "has_vcs_files" => $isVcs,
+            "user_ids" => $user_ids,
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,

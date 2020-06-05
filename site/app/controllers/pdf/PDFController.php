@@ -134,7 +134,12 @@ class PDFController extends AbstractController {
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
+        $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
+
+        if ($is_anon) {
+            $id = $this->core->getQueries()->getUserFromAnon($id)[$id];
+        }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
