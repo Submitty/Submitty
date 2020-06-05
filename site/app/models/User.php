@@ -214,16 +214,6 @@ class User extends AbstractModel {
     }
 
     /**
-     * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
-     * user has not set their time zone.
-     *
-     * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
-     */
-    public function getTimeZoneNiceFormat(): string {
-        return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
-    }
-
-    /**
      * Get the UTC offset for this user's time zone.
      *
      * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
@@ -251,28 +241,10 @@ class User extends AbstractModel {
      * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
      * user has not set their time zone.
      *
-     * @throws NullException Found null user time zone, but this should never happen
      * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
      */
     public function getNiceFormatTimeZone(): string {
-        if (is_null($this->time_zone)) {
-            throw new NullException(self::NULL_TIME_ZONE_MESSAGE);
-        }
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
-    }
-
-    /**
-     * Get the UTC offset for this user's time zone.
-     *
-     * @throws NullException Found null user time zone, but this should never happen
-     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
-     */
-    public function getUTCOffset(): string {
-        if (is_null($this->time_zone)) {
-            throw new NullException(self::NULL_TIME_ZONE_MESSAGE);
-        }
-
-        return DateUtils::getUTCOffset($this->time_zone);
     }
 
     /**
