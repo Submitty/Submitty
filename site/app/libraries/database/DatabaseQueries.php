@@ -6363,6 +6363,6 @@ AND gc_id IN (
 
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
         $this->submitty_db->query($query, array($user_id, $semester, $course));
-        return (bool) $this->submitty_db->getRowCount();
+        return $this->submitty_db->getRowCount() > 0;
     }
 }
