@@ -867,6 +867,7 @@ HTML;
      * @return string
      */
     public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
+        $this->core->getOutput()->addInternalJs('submission-page.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
