@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Offset int does not exist on array\\(\\?0 \\=\\> 'results'\\|'results_public'\\|'submissions', \\?1 \\=\\> 'checkout'\\|'results_public', \\?2 \\=\\> 'results'\\|'results_public', \\?3 \\=\\> 'results_public'\\)\\.$#"
-			count: 3
-			path: app/controllers/MiscController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$show_all\\)\\: Unexpected token \"\\$show_all\", expected type at offset 18$#"
 			count: 1
 			path: app/controllers/NotificationController.php
