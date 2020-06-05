@@ -89,7 +89,9 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                expandFile(html_file, url_file);
+                expandFile(html_file, url_file).then(function(){
+                    loadPDFToolbar();
+                });
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
