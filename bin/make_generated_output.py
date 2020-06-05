@@ -46,7 +46,11 @@ def main():
         "required_capabilities": required_capabilities,
         "queue_time": dateutils.write_submitty_date(microseconds=True),
         "generate_output": True,
+        "max_possible_grading_time" : -1,
+        "who" : "build",
+        "regrade" : False,
     }
+
     should_generated_output = False
     for testcase in testcases:  
         input_generation_commands = testcase.get('input_generation_commands',[])

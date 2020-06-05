@@ -12,6 +12,12 @@ class DateUtils {
     /** @var string Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
 
+    /** @var string Default date time formatting used in gradeable open/close/due dates and other places */
+    const DATE_TIME_FORMAT = 'm/d/Y @ h:i A T';
+
+    /** @var string Same as DATE_TIME_FORMAT but includes seconds */
+    const DATE_TIME_FORMAT_WITH_SECONDS = 'm/d/Y @ h:i:s A T';
+
     /**
      * Given two dates, give the interval of time in days between these two times. Any partial "days" are rounded
      * up to the nearest day in the positive direction. Thus if there's a difference of 2 days and 3 hours, then
@@ -129,7 +135,7 @@ class DateUtils {
      * @param $core Core core
      * @return array
      */
-    public static function getServerTimeJson($core): array {
+    public static function getServerTimeJson(Core $core): array {
         $time = new \DateTime('now', $core->getConfig()->getTimezone());
 
         return [
@@ -140,5 +146,37 @@ class DateUtils {
             'minute' => $time->format('i'),
             'second' => $time->format('s')
         ];
+    }
+
+    /**
+     * Get the complete set of time zones a user may select.  This is essentially just the list of time zone
+     * identifiers made available by PHP, however 'NOT_SET/NOT_SET' has been added to accommodate users that
+     * have not yet set their time zone.  'UTC' has also been removed as users need not select this option.
+     *
+     * @return array All user selectable time zones
+     */
+    public static function getAvailableTimeZones(): array {
+        $available_time_zones = array_merge(['NOT_SET/NOT_SET'], \DateTimeZone::listIdentifiers());
+
+        // Get rid of 'UTC' time zone
+        unset($available_time_zones[count($available_time_zones) - 1]);
+
+        return $available_time_zones;
+    }
+
+    /**
+     * Compute the offset in hours:minutes between the given time zone identifier string, and the UTC timezone.
+     *
+     * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
+     * @return string The UTC offset, for example '+9:30' or '-4:00'
+     */
+    public static function getUTCOffset(string $time_zone): string {
+        if ($time_zone === 'NOT_SET/NOT_SET') {
+            return 'NOT SET';
+        }
+
+        $time_stamp = new \DateTime('now', new \DateTimeZone($time_zone));
+
+        return $time_stamp->format('P');
     }
 }

@@ -25,12 +25,16 @@
     --hover-light-border-actionable-blue: #2e6da4;
     --hover-border-actionable-blue: #204d74;
     --hover-dark-border-actionable-blue: #122b40;
+    --standard-lightskyblue: rgb(135, 206, 250);
+    --standard-mediumorchid: rgb(186, 85, 211);
 
     --info-blue: #5bc0de;
     --hover-focus-info-blue: #31b0d5;
     --hover-active-all-info-blue: #269abc;
 
     --default-white: #ffffff;
+
+    --always-default-white: #ffffff;
 
     --badge-backgroud-red: #ff0000;
     --dark-badge-background-red: #ad3937;
@@ -52,6 +56,10 @@
     --alert-invalid-entry-pink: #FFDDDD;
 
     --standard-pale-blue-gray: #e8f0f7;
+    --btn-standard-pale-blue-gray: #e8f0f7;
+    --btn-default-active: #e8f0f7;
+    --btn-default-white: #ffffff;
+    --btn-default-hover: #f5f5f5;
     --standard-light-blue-gray: #ddddff;
     --standard-pale-gray: #f5f5f5;
     --standard-hover-light-gray: #e5e5e5;
@@ -82,6 +90,7 @@
     --standard-medium-orange: #ec971f;
     --standard-vibrant-orange: #ffa500;
     --standard-creamsicle-orange: #ff8040;
+    --standard-peachpuff: rgb(255, 218, 185);
 
     --standard-vibrant-yellow: #ffff00;
 
@@ -112,6 +121,7 @@
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #eac73d;
+    --standard-beige: rgb(245, 245, 220);
     --standard-light-gold: #fff3cd;
     --standard-light-green: #99ff99;
     --standard-pastel-blue: #d9edf7;
@@ -131,11 +141,16 @@
     /*text and fonts*/
     --text-black: #000000; /*use only on white/background-blue*/
     --text-white: #ffffff; /*use on all colors*/
+    --btn-text-white: #ffffff;
+    --btn-text-black: #000000;
+    --btn-default-text: #2e2e2e;
 
     /*discussion forum*/
     --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /*is also for star color*/
+    --attachment-box-color: #f5f5f5;
+    --file-upload-table-hover: #d1d1d1;
 
 
         /*these differ from the colors on the posts for some reason?
@@ -156,6 +171,7 @@
     --selected-nav-sidebar: #d9e1e2;
     --selected-nav-sidebar-text: #000000;
     --nav-sidebar-text: #006398;
+    --sidebar-hover-text: #002334;
 
 
     /*tables*/
@@ -166,4 +182,220 @@
     --date-picker-yellow: #ffeb54;
     --date-picker-red: #f76c6c;
 
+    /* other */
+    --box-shadow-very-transparent: rgba(0,0,0,0.12);
+    --box-shadow-slightly-transparent: rgba(0,0,0,0.20);
+    --no-image-available: #595959;
+    --standard-input-background: #ffffff;
+    --checkbox-black: #000000;
+    --overall-comment: #E9EFEF;
+    --alternating-row-color-light: #eee;
+    --grading-note: #777;
+    --file-browser-blue: #2627ee;
+    --extra-credit-blue: #0a6495;
+
+
+
+}
+
+[data-black_mode="black"][data-theme="dark"] {
+      --default-white: #000000;
+      --background-blue: #000000;
+}
+
+[data-theme="dark"] {
+      /*master color*/
+      --submitty-logo-blue: #316498;
+      /*might wanna change blue borders/hover text/sidebar text to submitty blue*/
+
+      /*buttons, primarily but also can be used for notifications/anything
+      that requires this color scheme*/
+      --danger-red: #dc3545;
+      --focus-danger-red: #ff5555;
+      --hover-active-danger-red: #ff6661;
+      --disabled-danger-red: #ad3937;
+
+      --warning-brown: #945600;
+      --focus-warning-brown: #ad7c37;
+      --hover-warning-brown: #9c5b00;
+      --active-warning-brown: #b58a4e;
+
+      --good-green: #5fb760;
+      --hover-good-green: #66cc77;
+      --disabled-good-green: #5cb85c;
+
+      --actionable-blue: #006398;
+      --focus-actionable-blue: #368aae;
+      --hover-actionable-blue:#00729E;
+      --hover-light-border-actionable-blue: #2e6da4;
+      --hover-border-actionable-blue: #204d74;
+      --hover-dark-border-actionable-blue: #122b40;
+      --standard-lightskyblue: #0975B9;
+      --standard-mediumorchid: #B240CE;
+
+      --info-blue: #5bc0de;
+      --hover-focus-info-blue: #31b0d5;
+      --hover-active-all-info-blue: #269abc;
+
+      --default-white: #36393f;
+
+      --always-default-white: #ffffff;
+
+      --badge-backgroud-red: #ff0000;
+      --dark-badge-background-red: #ad3937;
+      --error-alert-dark-red: #FF7A7A;
+      --gray-red: #b94a48;
+
+      --alert-background-bronze: #fcf8e3;
+      --alert-border-bronze: #514123;
+      --alert-bronze: #c09853;
+      --alert-success-green: #468847;
+      --alert-background-success-green: #dff0d8;
+      --alert-border-success-green: #d6e9c6;
+      --alert-danger-red: #8b0000;
+      --alert-border-danger-red: #f2dede;
+      --alert-background-danger-red: #eed3d7;
+      --alert-info-blue: #3a87ad;
+      --alert-background-blue: #687379;
+      --alert-border-blue: #2b5e68;
+      --alert-invalid-entry-pink: #FFDDDD;
+
+      --standard-pale-blue-gray: #2a2224;
+      --btn-standard-pale-blue-gray: #e8f0f7;
+      --btn-default-active: #6d6d6d;
+      --btn-default-white: #515151;
+      --btn-default-hover: #595959;
+      --standard-light-blue-gray: #ddddff;
+      --standard-pale-gray: #f5f5f5;
+      --standard-hover-light-gray: #2B2B2B;
+      --standard-light-gray: #757575;
+      --standard-light-medium-gray: #bbbbbb;
+      --standard-medium-gray: #A3A3A3;
+      --standard-medium-dark-gray: #666666;
+      --standard-dark-gray: #5555555;
+      --standard-deep-dark-gray: #2e2e2e;
+
+      --standard-gray-black: #111111;
+
+      --standard-pale-blue: #d8eef6;
+      --standard-focus-cornflowe-blue: #2a3e64;
+      --standard-medium-blue: #337ab7;
+      --standard-medium-vibrant-blue: #1e90ff;
+      --standard-aqua: #00b3fa;
+      --standard-dark-blue: #23527c;
+      --standard-medium-dark-blue: #286090;
+      --standard-deep-blue: #9E9EFF;
+      --standard-gray-blue: #0088bf;
+
+      --standard-light-red:  #d9534f;
+      --standard-medium-red: #c9302c;
+      --standard-red-orange: #f62817;
+
+      --standard-light-orange: #f0ad4e;
+      --standard-medium-orange: #ec971f;
+      --standard-vibrant-orange: #ffa500;
+      --standard-creamsicle-orange: #ff8040;
+      --standard-peachpuff: rgb(153, 112, 76);
+
+      --standard-vibrant-yellow: #757500;
+
+      --standard-vibrant-purple: #cc66ff;
+      --standard-plum-purple: #72518a;
+      --standard-vibrant-pink: #fd4472;
+      --standard-vibrant-pink-red: #c40233;
+
+      --standard-vibrant-green: #33cc33;
+      --standard-medium-green: #449d44;
+      --standard-dark-green: #00BD00;
+      --standard-deep-dark-green: #006600;
+
+      --standard-mint-green: #00e08e;
+      --standard-dark-mint-green: #00a368;
+
+      --standard-pale-lime-green: #dff0d8;
+      --standard-light-lime-green: #c3e3b5;
+      --standard-medium-lime-green: #99cb84;
+      --standard-medium-dark-lime-green: #7dfa78;
+
+      --standard-vibrant-dark-blue: #006699;
+      --standard-bronze: #E6AC00;
+      --standard-pastel-pink: #f2dede;
+      --standard-light-pink: #ff9999;
+      --standard-tangerine-yellow: #ffcc00;
+      --standard-pastel-yellow: #fcf8e3;
+      --standard-pale-yellow: #ffff99;
+      --standard-light-yellow: #ffff66;
+      --standard-light-yellow-brown: #8E7306;
+      --standard-beige: rgb(119, 119, 106);
+      --standard-light-gold: #fff3cd;
+      --standard-light-green: #427742;
+      --standard-pastel-blue: #2f6580;
+      --standard-light-blue: #99ccff;
+      --standard-light-seafoam: #a4dad5;
+
+      /*the look of the webpage itself*/
+      --background-blue: #202225;
+      --main-body-white: #ffffff;
+      --subheading-underscore-grey: #888888;
+
+      /*dropdown buttons*/
+      --hover-dropdown: #f5f5f5;
+      --disabled-dropdown: #888888;
+      --focus-dropdown: #f5f5f5;
+
+      /*text and fonts*/
+      --text-black: #ffffff; /*use only on white/background-blue*/
+      --text-white: #000000; /*use on all colors*/
+      --btn-text-white: #ffffff;
+      --btn-text-black: #000000;
+      --btn-default-text: #ffffff;
+
+      /*discussion forum*/
+      --viewed-discussion-post-blue: #e8f0f7;
+      --deleted-discussion-post-grey: #dcdcdc;
+      --important-post: #ffd700; /*is also for star color*/
+      --attachment-box-color: #4a4a4a;
+      --file-upload-table-hover: #4a4a4a;
+
+
+          /*these differ from the colors on the posts for some reason?
+          so I will put them here for reference
+          green-message: #008800
+          blue-message: #0a6496
+          red-message99: #af0000
+          yellow-message: #ff9900
+          black-message: #000000*/
+
+      /*links*/
+      --external-link-blue: #9B9BF3;
+      --external-link-hover: #a1a1ec;
+      --external-link-disabled: #888888;
+      --external-link-active: #991313;
+
+      /*sidebar*/
+      --selected-nav-sidebar: #535353;
+      --selected-nav-sidebar-text: #6c6c6c;
+      --nav-sidebar-text: #c8c8c8;;
+      --sidebar-hover-text: #ffffff;
+
+
+      /*tables*/
+      --table-info: #566268;
+
+      /*datepicker background colors*/
+      --date-picker-green: #446f44;
+      --date-picker-yellow: #9d9131;
+      --date-picker-red: #953d3d;
+
+      /* other */
+      --box-shadow-very-transparent: rgba(255,255,255,0);
+      --box-shadow-slightly-transparent: rgba(255,255,255,0);
+      --no-image-available: #ADADAD;
+      --standard-input-background: #4a4a4a;
+      --checkbox-black: #5296db;
+      --overall-comment: #4E5353;
+      --alternating-row-color-light: #4d4848;
+      --grading-note: #A8A8A8;
+      --file-browser-blue: #ffffff;
+      --extra-credit-blue: #2DACF0;
 }

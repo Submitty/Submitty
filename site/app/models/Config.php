@@ -47,6 +47,8 @@ use app\libraries\FileUtils;
  * @method bool isEmailEnabled()
  * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
+ * @method string getSysAdminEmail()
+ * @method string getSysAdminUrl()
  * @method string getCourseEmail()
  * @method string getVcsUser()
  * @method string getVcsType()
@@ -65,6 +67,8 @@ use app\libraries\FileUtils;
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
+ * @method string getSubmittyInstallPath()
+ * @method bool isDuckBannerEnabled()
  */
 
 class Config extends AbstractModel {
@@ -153,6 +157,20 @@ class Config extends AbstractModel {
      */
     protected $course_code_requirements = "";
 
+    /**
+     * Email address of the System Administration
+     * @var string
+     * @prop
+     */
+    protected $sys_admin_email = "";
+
+    /**
+     * Webpage URL for a help page (not hosted by submitty).
+     * @var string
+     * @prop
+     */
+    protected $sys_admin_url = "";
+
     /** @prop @var string Text shown to all users for system announcement */
     protected $system_message = '';
 
@@ -224,6 +242,10 @@ class Config extends AbstractModel {
     protected $queue_contact_info;
     /** @prop @var string */
     protected $queue_message;
+    /** @prop @var string */
+    protected $submitty_install_path;
+    /** @prop @var bool */
+    protected $duck_banner_enabled;
 
     /** @prop-read @var array */
     protected $feature_flags = [];
@@ -269,11 +291,13 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
 
-        $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->log_exceptions = true;
 
         $this->base_url = $submitty_json['submission_url'];
-        $this->submitty_path = $submitty_json['submitty_data_dir'];
+        $this->duck_banner_enabled = $submitty_json['duck_special_effects'] === true;
+
+        $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
+        $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
@@ -318,10 +342,14 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
+        $this->submitty_path = $submitty_json['submitty_data_dir'];
+        $this->submitty_log_path = $submitty_json['site_log_path'];
+        $this->submitty_install_path = $submitty_json['submitty_install_dir'];
+
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
-        foreach (array('submitty_path', 'submitty_log_path') as $path) {
+        foreach (array('submitty_path', 'submitty_log_path', 'submitty_install_path') as $path) {
             if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }

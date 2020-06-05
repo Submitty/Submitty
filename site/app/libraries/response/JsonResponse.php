@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Class JsonResponse
  * @package app\libraries\response
  */
-class JsonResponse extends AbstractResponse {
+class JsonResponse implements ResponseInterface {
 
     /** @var array json encoded array */
     public $json;
@@ -44,7 +44,7 @@ class JsonResponse extends AbstractResponse {
      * Renders JSON data.
      * @param Core $core
      */
-    public function render(Core $core) {
+    public function render(Core $core): void {
         $core->getOutput()->renderJson($this->json);
     }
 

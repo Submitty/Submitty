@@ -95,11 +95,10 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         );
         $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
-        $user->setPassword("test");
-        $hashed_password = password_hash("test", PASSWORD_DEFAULT);
-        password_verify("test", $hashed_password);
-        $user->setPassword($hashed_password);
-        password_verify("test", $hashed_password);
+        $user->setPassword("test1");
+        $this->assertTrue(password_verify("test1", $user->getPassword()));
+        $user->setPassword(password_hash("test2", PASSWORD_DEFAULT));
+        $this->assertTrue(password_verify("test2", $user->getPassword()));
     }
 
     public function testToObject() {
@@ -174,5 +173,27 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, array());
         $this->assertFalse($user->isLoaded());
         $this->assertNull($user->getId());
+    }
+
+    public function testGetTimeZoneNiceFormatExplicitlySet() {
+        $user = new User($this->core, [
+            'user_id' => 'test',
+            'user_firstname' => 'test',
+            'user_lastname' => 'test',
+            'user_email' => 'user@email.com',
+            'time_zone' => 'NOT_SET/NOT_SET'
+        ]);
+        $this->assertEquals('NOT SET', $user->getTimeZoneNiceFormat());
+    }
+
+    public function testGetUTCOffsetExplicitlySet() {
+        $user = new User($this->core, [
+            'user_id' => 'test',
+            'user_firstname' => 'test',
+            'user_lastname' => 'test',
+            'user_email' => 'user@email.com',
+            'time_zone' => 'NOT_SET/NOT_SET'
+        ]);
+        $this->assertEquals('NOT SET', $user->getUTCOffset());
     }
 }

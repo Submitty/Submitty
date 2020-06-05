@@ -21,20 +21,18 @@
         var data = [trace1];
         return data;
     }
+
     function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
-        if(increment<1){
-            increment = 1;
-        }
-        var loop = Math.ceil(range/increment);
-        var tracking = min;
+        let loop = Math.ceil(range/increment);
+        let tracking = min;
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
-            tracking+=increment;
-            if(i==(loop-1)){
-                xBuckets.push(tracking-increment+" to <="+max);
+            tracking = +parseFloat(tracking+increment).toPrecision(4);
+            if(i===(loop-1)){
+                xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <="+max);
             }
             else{
-               xBuckets.push(tracking-increment+" to <"+tracking);
+               xBuckets.push(+parseFloat(tracking-increment).toPrecision(4)+" to <"+tracking);
             }
         }
         var maxMin = tracking-increment;
@@ -42,7 +40,7 @@
         for(i = 0;i<xValue.length;i++){
            ct++;
            for(var [key,value] of betterBuckets){
-                if(key==maxMin){
+                if(key===maxMin){
                     if(xValue[i]>=key&&xValue[i]<=max){
                        betterBuckets.set(key,value+1);
                    }
@@ -63,6 +61,18 @@
         }
         return mode;
     }
+
+
+    function fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
+        let bucketSize = Math.floor(range / 10);
+        if (bucketSize === 0) {
+            bucketSize = range / 10;
+        }
+
+        return fillBuckets(range,bucketSize,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+    }
+
+
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
         var bucketInputTotal = document.getElementById("bucket-size-total");
         var bucketInputAuto = document.getElementById("bucket-size-auto");
@@ -74,7 +84,12 @@
         modeCount=0;
         {% if overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
-                mode=fillBuckets(rangeT,parseInt(bucketInputTotal.value),betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
+                let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
+                if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return;
+                }
+                mode=fillBuckets(rangeT,bucketInputTotalValue,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
                 var dataTotal=tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
@@ -86,8 +101,13 @@
             }
         {% endif %}
         {% if autograded_average != null or autograded_average.getCount() != 0  %}
+            let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
             if(bucketInputAuto.value!=''){
-                mode=fillBuckets(range,parseInt(bucketInputAuto.value),betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+                if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
+                    alert('Error: Invalid bucket size.');
+                    return ;
+                }
+                mode=fillBuckets(range,bucketInputAutoValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
                 var dataAuto = tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputAuto.value='';
@@ -98,8 +118,7 @@
                 return mode;
             }
         {% endif %}
-        var bucketSize = Math.floor(range/10);
-        mode=fillBuckets(range,bucketSize,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+        mode=fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
         return  mode;
     }
 </script>
@@ -164,7 +183,7 @@
         <div class="sub">
             No Grading To Be Done! :)
         </div>
-    {% else %}
+    {% elseif core.getUser().getGroup() < 4 %}
         <div class = "tab">
             <div class =tab-bar-wrapper">
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
@@ -281,8 +300,7 @@
                         }
                     }
 
-                    var bucketSize = Math.floor(rangeT/10);
-                    mode = fillBuckets(rangeT, bucketSize, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
+                    mode = fillBucketsForRange(rangeT, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
 
                     if (maxT==0 && minT==50) {
                         minT=0;
@@ -488,8 +506,7 @@
                             rangeA = maxA-minA;
                         }
 
-                        var bucketSize = Math.floor(rangeA/10);
-                        mode = fillBuckets(rangeA,bucketSize,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
+                        mode = fillBucketsForRange(rangeA,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
 
                         if (minA==50 && maxA==0) {
                             minA=0;
@@ -574,28 +591,29 @@
                             </ul>
                             <br/>
                         {% endif %}
-
-                        {% if team_assignment %}
+                        {% if core.getUser().getGroup() < 4 %}
+                            {% if team_assignment %}
+                                <br/>
+                                <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
+                                <br/>
+                                <br/>
+                                <b>Number of teams:</b> {{ total_submissions }}
+                                <br/>
+                                <br/>
+                                <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                            {% else %}
+                                <br/>
+                                <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                <br/>
+                                <br/>
+                                <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                            {% endif %}
+                        
                             <br/>
-                            <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
                             <br/>
-                            <br/>
-                            <b>Number of teams:</b> {{ total_submissions }}
-                            <br/>
-                            <br/>
-                            <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                        {% else %}
-                            <br/>
-                            <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                            <br/>
-                            <br/>
-                            <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
                         {% endif %}
-
-                        <br/>
-                        <br/>
                         {% if peer %}
-                            <b>Current percentage of students grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
+                            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                         {% else %}
                             <b>By Grading Sections:</b>
                             <div style="margin-left: 20px">
@@ -624,7 +642,7 @@
                                 <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
 								<b>Number of students who have viewed their grade:</b>
 									{{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
-                            {% else %}
+                            {% elseif not peer%}
                                 <br/>
                                 <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% endif %}
@@ -706,6 +724,8 @@
 
             </div>
         </div>
+    {% else %}
+        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}

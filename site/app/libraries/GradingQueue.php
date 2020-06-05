@@ -18,10 +18,17 @@ class GradingQueue {
     private $queue_path = '';
     /** @var string[] An array of queue file names relative to $queue_path */
     private $queue_files = null;
+    /** @var string[][] An array of queue file names relative to some worker's
+     *      subdirectory under $grading_path. The first layer is indexed by
+     *      worker, the second layer is a simple list.
+     */
+    private $subqueue_files = null;
     /** @var string[] An array of grading file names relative to $queue_path
      *      Note: These names still have the GRADING_FILE_PREFIX attached to them
      */
     private $grading_files = [];
+    private $grading_path = '';
+    private $grading_remaining = [];
 
     const GRADING_FILE_PREFIX = 'GRADING_';
     const VCS_FILE_PREFIX = 'VCS__';
@@ -32,6 +39,7 @@ class GradingQueue {
 
     public function __construct($semester, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
+        $this->grading_path = FileUtils::joinPaths($submitty_path, 'grading');
         $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
     }
 
@@ -40,34 +48,65 @@ class GradingQueue {
      */
     public function reloadQueue() {
         // Get all items in queue dir
-        $all_files = scandir($this->queue_path);
+        $queued_files = scandir($this->queue_path);
+        $grading_dirs = scandir($this->grading_path);
 
         $grading_files = [];
         $queue_files = [];
+        $subqueue_files = [];
         $times = [];
+        $subtimes = [];
 
         // Filter the results so we only get files
-        foreach ($all_files as $file) {
+        foreach ($queued_files as $file) {
             $fqp = FileUtils::joinPaths($this->queue_path, $file);
             if (is_file($fqp)) {
-                if (strpos($file, self::GRADING_FILE_PREFIX) !== false) {
-                    $grading_files[] = $file;
-                }
-                else {
-                    $queue_files[] = $file;
+                $queue_files[] = $file;
 
-                    // Also, record the last modified of each item
-                    $times[] = filemtime($fqp);
+                // Also, record the last modified of each item
+                $times[] = filemtime($fqp);
+            }
+        }
+
+        foreach ($grading_dirs as $remote_dir) {
+            $path = FileUtils::joinPaths($this->grading_path, $remote_dir);
+            // First, we filter to directories that are neither `.` nor `..`.
+            // These remote directories each correspond to an individual worker.
+            if ($remote_dir !== "." && $remote_dir !== ".." && is_dir($path)) {
+                $this_remote_files = scandir($path);
+                foreach ($this_remote_files as $file) {
+                    $full_path = FileUtils::joinPaths($path, $file);
+                    // Keep only files in this directory. Additionally, if the
+                    // filename is *NOT* prefixed by the prefix set in
+                    // GRADING_FILE_PREFIX, then we still count this file as
+                    // "in the queue" as the worker has yet to pick it up.
+                    if (is_file($full_path)) {
+                        if (strpos($file, self::GRADING_FILE_PREFIX) !== false) {
+                            $grading_files[] = $file;
+                        }
+                        else {
+                            if (!array_key_exists($remote_dir, $subqueue_files)) {
+                                $subqueue_files[$remote_dir] = [];
+                                $subtimes[$remote_dir] = [];
+                            }
+                            $subqueue_files[$remote_dir][] = $file;
+                            $subtimes[$remote_dir][] = filemtime($full_path);
+                        }
+                    }
                 }
             }
         }
 
         // Sort files by last modified time (descending)
         array_multisort($times, SORT_ASC, $queue_files);
+        foreach ($subqueue_files as $worker => $subqueue) {
+            array_multisort($subtimes[$worker], SORT_ASC, $subqueue);
+        }
 
         // Finally, set the member variables
         $this->queue_files = $queue_files;
         $this->grading_files = $grading_files;
+        $this->subqueue_files = $subqueue_files;
     }
 
     /**
@@ -84,15 +123,30 @@ class GradingQueue {
      * @param AutoGradedVersion $auto_graded_version
      * @return int The version's queue position, or GRADING if being graded, or NOT_QUEUED of not found
      */
-    public function getQueueStatus(AutoGradedVersion $auto_graded_version) {
+    public function getQueueStatusAGV(AutoGradedVersion $auto_graded_version) {
+        return $this->getQueueStatus(
+            $auto_graded_version->getGradedGradeable()->getGradeable()->getId(),
+            $auto_graded_version->getGradedGradeable()->getSubmitter()->getId(),
+            $auto_graded_version->getVersion()
+        );
+    }
+
+    /**
+     * Gets the position of the provided autograding Gradeable from the queue
+     * @param string $gradeableId
+     * @param string $submitterId
+     * @param int $version
+     * @return int The version's queue position, or GRADING if being graded, or NOT_QUEUED of not found
+     */
+    public function getQueueStatus($gradeableId, $submitterId, $version) {
         $this->ensureLoadedQueue();
 
         // Generate the queue file names
         $queue_file = implode(self::QUEUE_FILE_SEPARATOR, [
             $this->queue_file_prefix,
-            $auto_graded_version->getGradedGradeable()->getGradeable()->getId(),
-            $auto_graded_version->getGradedGradeable()->getSubmitter()->getId(),
-            $auto_graded_version->getVersion()
+            $gradeableId,
+            $submitterId,
+            $version
         ]);
         $grading_queue_file = self::GRADING_FILE_PREFIX . $queue_file;
         $vcs_queue_file = self::VCS_FILE_PREFIX . $queue_file;
@@ -112,6 +166,18 @@ class GradingQueue {
             // Also check for the vcs queue file, which will soon be converted into a regular queue file
             $queue_status = array_search($vcs_queue_file, $this->queue_files, true);
         }
+        if ($queue_status === false) {
+            // If it's not in the main queue, it's probably in some worker's
+            // subqueue awaiting to be picked up. We search each worker's
+            // subqueue and, if we find the queue file there, we stop
+            // searching as we've found it.
+            foreach ($this->subqueue_files as $subqueue) {
+                $queue_status = array_search($queue_file, $subqueue, true);
+                if ($queue_status !== false) {
+                    break;
+                }
+            }
+        }
 
         if ($queue_status !== false) {
             // Convert from 0-indexed array since 0 is self::GRADING
@@ -128,7 +194,11 @@ class GradingQueue {
      */
     public function getQueueCount() {
         $this->ensureLoadedQueue();
-        return count($this->queue_files);
+        $count = count($this->queue_files);
+        foreach ($this->subqueue_files as $subqueue) {
+            $count += count($subqueue);
+        }
+        return $count;
     }
 
     /**

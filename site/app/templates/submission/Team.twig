@@ -76,7 +76,7 @@
         <h3>Invite new teammates by their user ID:</h3>
         <br />
         <form action="{{ send_invitation_url }}" method="post">
-            <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
+            <input type="text" name="invite_id" id="invite_id" placeholder="User ID" aria-label="User ID"/>
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <input type="submit" value = "Invite" class="btn btn-primary" />
         </form>
@@ -122,7 +122,7 @@
             <caption />
             <thead class="persist thead">
                 <tr>
-                    <th style="width:3%"></th>
+                    <th style="width:3%">Index</th>
                     <th style="width:10%">First Name</th>
                     <th style="width:10%">Last Name</th>
                     <th style="width:10%">User ID</th>

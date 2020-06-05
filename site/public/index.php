@@ -6,7 +6,7 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
-use app\libraries\response\Response;
+use app\libraries\response\ResponseInterface;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -99,6 +99,9 @@ $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getBaseUrl());
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 
+// Stops clickjacking on all pages
+header('X-Frame-Options: SAMEORIGIN');
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
 if ($core->getConfig()->isDebug()) {
@@ -124,7 +127,7 @@ else {
     $response = WebRouter::getWebResponse($request, $core);
 }
 
-if ($response instanceof Response) {
+if ($response instanceof ResponseInterface) {
     $response->render($core);
 }
 

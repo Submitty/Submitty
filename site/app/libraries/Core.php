@@ -11,7 +11,6 @@ use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
-use app\models\NotificationFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -300,6 +299,7 @@ class Core {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
+        $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
 
     public function setUser(User $user): void {

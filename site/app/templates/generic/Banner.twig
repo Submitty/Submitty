@@ -1,0 +1,12 @@
+{% import _self as self %}
+
+<div class="content"
+    {% if error %}
+        style="background-color: #d9534f;"
+    {% endif %}
+>
+    <h4>
+        {{ message }}
+    </h4>
+</div>
+

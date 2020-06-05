@@ -74,10 +74,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "vcs_url" => "",
             "cgi_url" => "",
             "institution_name" => "RPI",
+            "sys_admin_email" => "admin@example.com",
+            "sys_admin_url" => "https://example.com/admin",
             "username_change_text" => "Submitty welcomes all students.",
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
-            'system_message' => "Some system message"
+            'system_message' => "Some system message",
+            "duck_special_effects" => false
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -175,6 +178,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir . "/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir . "/logs", $config->getLogPath());
+
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
@@ -189,6 +193,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("PamAuthentication", $config->getAuthentication());
         $this->assertEquals("America/Chicago", $config->getTimezone()->getName());
         $this->assertEquals("RPI", $config->getInstitutionName());
+        $this->assertEquals("admin@example.com", $config->getSysAdminEmail());
+        $this->assertEquals("https://example.com/admin", $config->getSysAdminUrl());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
@@ -236,6 +242,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'default_hw_late_days' => 0,
             'default_student_late_days' => 0,
             'zero_rubric_grades' => false,
+            'duck_banner_enabled' => false,
             'upload_message' => '',
             'display_rainbow_grades_summary' => false,
             'display_custom_message' => false,
@@ -280,6 +287,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'forum_create_thread_message' => '',
             'institution_homepage' => 'https://rpi.edu',
             'institution_name' => 'RPI',
+            "sys_admin_email" => "admin@example.com",
+            "sys_admin_url" => "https://example.com/admin",
             'private_repository' => '',
             'regrade_enabled' => false,
             'seating_only_for_instructor' => false,
@@ -298,7 +307,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled' => true,
             'queue_contact_info' => true,
             'queue_message' => '',
-            'feature_flags' => []
+            'feature_flags' => [],
+            'submitty_install_path' => $this->temp_dir,
         );
         $actual = $config->toArray();
 
@@ -389,7 +399,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find config directory: .*\/config\/database.json/');
+        $this->expectExceptionMessageMatches('/Could not find config directory: .*\/config\/database.json/');
         $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
     }
 
@@ -398,7 +408,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find database config: .*\/config\/database.json/');
+        $this->expectExceptionMessageMatches('/Could not find database config: .*\/config\/database.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -407,7 +417,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find submitty config: .*\/config\/submitty.json/');
+        $this->expectExceptionMessageMatches('/Could not find submitty config: .*\/config\/submitty.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -432,7 +442,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
         $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
-        $this->expectExceptionMessageRegExp('/Could not find email config: .*\/config\/email.json/');
+        $this->expectExceptionMessageMatches('/Could not find email config: .*\/config\/email.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -545,7 +555,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'secrets_submitty_php.json'));
         $this->expectException(ConfigException::class);
-        $this->expectExceptionMessageRegExp('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
+        $this->expectExceptionMessageMatches('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
         $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
     }

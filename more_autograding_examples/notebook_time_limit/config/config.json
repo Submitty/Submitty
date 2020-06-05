@@ -1,0 +1,126 @@
+{
+    "assignment_message" : "#Welcome to a Timed Notebook Gradeable  \n\
+  \n\
+Here's a short list of instructions:  \n\
+* This is an open-book quiz.  \n\
+* You have 10 minutes to submit your answers.  \n\
+&nbsp;  \n\
+*NOTE 1: If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.*  \n\
+*NOTE 2: You may submit this assignment multiple times, but you will lose 1 point for each submission in excess of 5.*",
+
+    "autograding" : {
+        "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
+        "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
+        "submission_to_validation" : [ "*.txt", "*.png" ],
+        "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
+    },
+    "notebook" : [
+        {
+            "type": "markdown",
+            "markdown_string": "###What is `2 + 2`?"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "math_1.txt",
+            "testcase_ref" : "math_1",
+            "choices":[
+                {"value": "a", "description": "`2`"},
+                {"value": "b", "description": "`3`"},
+                {"value": "c", "description": "`4`"},
+                {"value": "d", "description": "`5`"},
+                {"value": "e", "description" : "*none of the above*"}
+            ]
+        },
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###What is `3 + 3`?"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "math_2.txt",
+            "testcase_ref" : "math_2",
+            "choices":[
+                {"value": "a", "description": "`3`"},
+                {"value": "b", "description": "`4`"},
+                {"value": "c", "description": "`5`"},
+                {"value": "d", "description": "`6`"},
+                {"value": "e", "description" : "*none of the above*"}
+            ]
+        },
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###Select *all* statements that are true:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "math_3.txt",
+            "testcase_ref" : "math_3",
+            "choices":[
+                {"value": "a", "description": "`1 + 1 = 2`"},
+                {"value": "b", "description": "`4 - 2 = 3`"},
+                {"value": "c", "description": "`2 * 2 = 4`"},
+                {"value": "d", "description": "`6 / 2 = 4`"}
+            ],
+            "allow_multiple": true
+        }
+    ],
+    "testcases" : [ 
+
+        { "title":"Math 1", "points":10, "testcase_label":"math_1",
+          "validation":[ { "method":"diff", "actual_file":"math_1.txt", "expected_file":"math_1_answer.txt",
+                           "show_expected":"never","show_actual":"never",
+                           "failure_message":"Incorrect Answer" } ] },
+        { "title":"Math 2", "points":10, "testcase_label":"math_2",
+          "validation":[ { "method":"diff", "actual_file":"math_2.txt", "expected_file":"math_2_answer.txt",
+                           "show_expected":"never","show_actual":"never",
+                           "failure_message":"Incorrect Answer" } ] },
+        { "title":"Math 3", "points":10, "testcase_label":"math_3",
+          "validation":[ { "method":"diff", "actual_file":"math_3.txt", "expected_file":"math_3_answer.txt",
+                           "show_expected":"never","show_actual":"never",
+                           "failure_message":"Incorrect Answer" } ] },
+
+
+        // ==========================================================
+        // NOTE: Currently implemented as an instructor provided
+        // custom validator, but will likely be available as a built
+        // in validation option in the future.
+        // ==========================================================
+        {
+            "title":"Check Time Limit",
+            "copy_access_files" : true,
+            "points": -30,  // maximum penalty -- must match below
+            "validation":
+            [
+                {
+                    "actual_file" : "user_assignment_access.json",
+                    "method" : "custom_validator",
+                    "command" : "python3 timelimit.py --minutes 10 --penalty_per_minute -1",
+                    "allowed_minutes" : 10,
+                    "penalty_per_minute" : -1,
+                    "max_penalty" : -30, // must match above
+                    "show_actual":"never",
+
+                    // optional field to list specific users with different time limits
+                    "override" :
+                    [
+                        { "user" : "instructor", "allowed_minutes" : 20 },
+                        { "user" : "student",    "allowed_minutes" : 15 },
+                        { "user" : "aphacker",   "allowed_minutes" : 5 }
+                    ]
+                }
+            ]
+        },
+                
+        {
+            "title": "Submission Limit",
+            "type": "FileCheck",
+            "max_submissions": 5,
+            "penalty": -1,
+            "points": -5,
+            "timestamped_stdout": false
+         }
+
+    ]
+}

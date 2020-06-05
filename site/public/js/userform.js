@@ -66,6 +66,7 @@ function newUserForm() {
         $("#user_lastname")[0].setCustomValidity("user_lastname is required");
     }
     checkValidEntries();
+    captureTabInModal("edit-user-form");
 }
 
 //opens modal with initial settings for edit user
@@ -76,6 +77,9 @@ function editUserForm(user_id) {
         success: function(data) {
             var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
+            // will help to check whether the userForm is edited or not
+            $('[name="edit_user"]', form).attr('data-user', data);
+
             form.css("display", "block");
             form.find('.form-body').scrollTop(0);
             if (json['user_group'] == 4) {
@@ -98,6 +102,7 @@ function editUserForm(user_id) {
             }
             completeUserFormInformation(json);
             clearValidityWarnings();
+            captureTabInModal("edit-user-form");
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
@@ -190,6 +195,7 @@ function checkValidEntries() {
     else {
         $("#user-form-submit").prop('disabled',false);
     }
+    captureTabInModal("edit-user-form", false);
 }
 
 function setRedOrTransparent(input,reg_expression) {
@@ -267,18 +273,70 @@ function completeUserFormInformation(user) {
     }
 }
 
+function isUserFormEmpty() {
+  let form = document.querySelectorAll('form')[0];
+  let isFormEmpty = true;
+  for (const formElement of form.elements) {
+    const {name, value, type, checked} = formElement;
+    // skipping all the hidden fields, user-group and manual-registration
+    if (type === 'hidden' || name === 'user_group' || name === 'manual_registration') {
+      continue;
+    }
+    else if ((type === "text" && value.length) || (type === "select-one" && value !=='null') || checked){
+      isFormEmpty = false;
+      break;
+    }
+  }
+  return isFormEmpty;
+}
+
+function isUserFormEdited() {
+  let form = document.querySelectorAll('form')[0];
+
+  let data = $('[name="edit_user"]').attr('data-user');
+  let user = JSON.parse(data)['data'];
+  let rotating_section = user['rotating_section'] === null ? "null" : user['rotating_section'].toString();
+  let registration_section = user['registration_section'] === null ? "null" : user['registration_section'].toString();
+
+  let user_grading_sections = user['grading_registration_sections'] ? user['grading_registration_sections'].sort() : [];
+
+  let current_grading_sections = [];
+  $('[name="grading_registration_section[]"]').each(function () {
+    if ($(this).prop('checked')) {
+      current_grading_sections.push(+$(this).val());
+    }
+  })
+  // check if there is any changes made in the grading checkboxes.
+  let grading_sections_edited = !(current_grading_sections.length === current_grading_sections.length && current_grading_sections.every((num, idx) => num === user_grading_sections[idx]));
+
+  return (
+    $('[name="user_numeric_id"]', form).val() !== user['user_numeric_id'] ||
+    $('[name="user_firstname"]', form).val() !== user['user_firstname'] ||
+    $('[name="user_lastname"]', form).val() !== user['user_lastname'] ||
+    $('[name="user_preferred_firstname"]', form).val() !== user['user_preferred_firstname'] ||
+    $('[name="user_preferred_lastname"]', form).val() !== user['user_preferred_lastname'] ||
+    $('[name="user_email"]', form).val() !== user['user_email'] ||
+    ! $('[name="user_group"]  option[value="' + user['user_group'] + '"]').prop('selected')  ||
+    $('[name="manual_registration"]', form).prop('checked') !==  user['manual_registration'] ||
+    ! $('[name="registered_section"] option[value="' + registration_section + '"]').prop('selected') ||
+    ! $('[name="rotating_section"] option[value="' + rotating_section + '"]').prop('selected') ||
+    grading_sections_edited
+  )
+}
+
 function clearUserFormInformation() {
-    var form = $("#edit-user-form");
-    $('[name="user_numeric_id"]', form).val("");
-    $('[name="user_firstname"]', form).val("");
-    $('[name="user_preferred_firstname"]', form).val("");
-    $('[name="user_lastname"]', form).val("");
-    $('[name="user_preferred_lastname"]', form).val("");
-    $('[name="user_email"]', form).val("");
-    $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="manual_registration"]', form).prop('checked', true);
-    $("[name='grading_registration_section[]']").prop('checked', false);
+    let form = document.querySelectorAll('form')[0];
+    for (const formElement of form.elements) {
+      const {name, value, type, checked} = formElement;
+      if (type === "text") {
+        formElement.value = "";
+      } else if (type === "select-one") {
+        formElement.selectedIndex = 0;
+      } else if (type === "checkbox") {
+          // clear the checkbox for all the checkboxes other than manual_registration
+          formElement.checked = name === "manual_registration";
+      }
+    }
     clearValidityWarnings();
 }
 
@@ -287,14 +345,36 @@ function clearValidityWarnings() {
         $(this)[0].setCustomValidity("");
     });
     $("#user-form-submit").prop('disabled',false);
+    captureTabInModal("edit-user-form", false);
 }
 
 function closeButton() {
-    $('#edit-user-form').css('display', 'none');
-    if($('[name="edit_user"]').val() == 'true') {
-        $('[name="user_id"]', $("#edit-user-form")).val("");
-        clearUserFormInformation();
+  let form = document.querySelectorAll('form')[0];
+  let closeForm = false;
+  // edit from manage page
+  if($('[name="edit_user"]', form).val() === "true") {
+    if (isUserFormEdited()) {
+       if (confirm('Changes to the form will be lost!')) {
+         $('[name="edit_user"]', form).attr('data-user', '');
+         closeForm = true;
+       }
+    } else {
+      closeForm = true;
     }
+  } else {
+    // If form contain some data, prompt the user for data loss
+    if (!isUserFormEmpty()) {
+      if (confirm('Changes to the form will be lost!')) {
+        closeForm = true;
+      }
+    } else {
+      closeForm = true;
+    }
+  }
+  if (closeForm) {
+    clearUserFormInformation();
+    $('#edit-user-form').css('display', 'none');
+  }
 }
 
 function redirectToEdit() {
