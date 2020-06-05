@@ -9,6 +9,28 @@ $( document ).ready(function() {
         $("#ShowRegradeRequestButton").hide();
     }
 });
+function open_peer_feedback_tab(user, ordered_graders) {
+    $('.page-content').hide();
+    $('#peer-feedback-'+user).show();
+    for (var i = 0 ; i<{{ordered_graders|json_encode|raw}}.length;i++){
+        $('#peer_feedback_nav_'+{{ordered_graders|json_encode|raw}}[i]).removeClass('active-btn');
+    }
+    $('#peer_feedback_nav_'+user).addClass('active-btn');
+}
+function switch_feedback_modes() {
+    var check = $('#switch_feedback_button');
+    console.log($('#switch_feedback_button')[0].textContent);
+    if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
+        $('#switch_feedback_button')[0].textContent = "Switch to Normal Display";
+        $('#peer_feedback_wrapper').show();
+        $('#normal_peer_wrapper').hide();
+    }
+    else{
+        $('#switch_feedback_button')[0].textContent = "Switch to Feedback Mode";
+        $('#normal_peer_wrapper').show();
+        $('#peer_feedback_wrapper').hide();
+    }
+}
 </script>
 
 {% if not been_ta_graded %}
@@ -126,18 +148,22 @@ $( document ).ready(function() {
                     {% endif %}>
 
                     <h4>Peer Grading Total</h4>
+                    <a id="switch_feedback_button" class="btn btn-default" onclick="switch_feedback_modes()">Switch to Feedback Mode</a>
                 </div>
             </div>
 
             {# Peer Component boxes #}
+            <div id="normal_peer_wrapper">
             {% for component in peer_components %}
                 {% if component.peer_ids | length <= 5 %}
-                    {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
+                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
+                    </div>
                 {% else %}
-                    {{ self.renderManyPeerResults(component) }}
+                        {{ self.renderManyPeerResults(component) }}
                 {% endif %}                
             {% endfor %}
-            {{ self.renderPeerFeedbackTable(component, peer_aliases, ordered_graders)  }}
+            </div>
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments)  }}
             {# /Peer Component boxes #}
         {% endif %}
     {# /Total auto + manual #}
@@ -255,61 +281,49 @@ $( document ).ready(function() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(component, peer_aliases, ordered_graders) -%}
-    <div class="box-info" style="width:100%">
-        <table class="mobile-table">
-                    <thead>
-                        <tr>
-                                <th class="peer-table-header">
-                                    Peer Grader
-                                </th>
-                                
-                                <th class="peer-table-header">
-                                    No Feedback
-                                </th>
-                                <th class="peer-table-header">
-                                    Thank you!
-                                </th>
-                                <th class="peer-table-header">
-                                    This feedback was helpful to me!
-                                </th>
-                                <th class="peer-table-header">
-                                    This feedback was detailed, specific, and/or technical.
-                                </th>
-                                <th class="peer-table-header">
-                                    This feedback was inaccurate and/or inappropriate.
-                                </th>
-                        </tr>
-                    </thead>
-                {% for grader in ordered_graders %}
-                <tr>
-                <td class="peer-table-data">
-                    {{ peer_aliases[grader] }}
-                </td>
-                <fieldset>
-                <td class="peer-table-data">
-                    <input type="radio" id = "no_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
-                            {{ action != 'new'}}>
-                </td>
-                <td class="peer-table-data">
-                    <input type="radio" id = "Thank_you_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
-                            {{ action != 'new'}}>
-                </td>
-                <td class="peer-table-data">
-                    <input type="radio" id = "helpful_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
-                            {{ action != 'new'}}>
-                </td>
-                <td class="peer-table-data">       
-                    <input type="radio" id = "detailed_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
-                            {{ action != 'new' }}>
-                </td>
-                <td class="peer-table-data">      
-                    <input type="radio" id = "poor_peer_feedback_{{peer_aliases[grader]}}" name="peer_feedback_{{peer_aliases[grader]}}" value="true"
-                            {{ action != 'new' }}>
-                </td>
-                </fieldset>
-                </tr>
-                {% endfor %}
-        </table>
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments) -%}
+    <div id="peer_feedback_wrapper" style="display: none;">
+        <div class="box grade-results">
+            {% for grader in ordered_graders %}
+                <a class="nav-bar key_to_click" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
+            {% endfor %}
+        </div>
+            {% for grader in ordered_graders %}
+            
+                <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
+                    <table class="mobile-table" id="peer-feedback-table-{{grader}}">
+                        <tbody>
+                            {% for component in peer_components %}
+                                <div class="box-info">
+                                        <h4>{{ component.title|escape }}
+                                        </h4>
+                                        <p>
+                                                {% for mark in component.marks %}
+                                                            {% if mark.earned[grader] %}
+                                                                <i class="far fa-check-square fa-1g"></i>
+                                                            {% else %}
+                                                                <i class="far fa-square fa-1g"></i>
+                                                            {% endif %}
+                                                            {{ mark.points|number_format(num_decimals) }}
+                                                            {{ mark.title|nl2br }}
+                                                    </br>
+                                                {% endfor %}
+                                        </p>
+                                </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if overall_comments[grader] is not empty %}
+                        <div class="overall-comment-box">
+                            <p class="overall-comment-author">
+                                Overall note from grader:
+                            </p>
+                            <p class="overall-comment">
+                                <span class='gradeable_comment'>{{ overall_comments[grader] | nl2br }}</span>
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
     </div>
 {%- endmacro -%}
