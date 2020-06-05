@@ -53,6 +53,8 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
     //todo check up on how this works.
     whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
+    // archive the timestamped dispatcher actions
+    whole_config["autograding"]["work_to_details"].push_back("**/dispatched_actions.txt");
   }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
