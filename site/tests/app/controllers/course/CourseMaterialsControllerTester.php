@@ -157,11 +157,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $this->assertEquals($expected_files1, $f1);
     }
-    
+
     /**
      * @runInSeparateProcess
-    */
-
+     */
     public function testModifyCourseMaterials() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
@@ -190,7 +189,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_POST['fn'][] = FileUtils::joinPaths($this->upload_path, $name);
         $new_date = new \DateTime('2005-01-01');
-        $new_date = $new_date->format('Y-m-d H:i:s');
+        $new_date = $new_date->format('Y-m-d H:i:sO');
 
         $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date);
 
