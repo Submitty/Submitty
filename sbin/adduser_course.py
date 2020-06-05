@@ -42,7 +42,7 @@ def main():
     if path.isdir(DATABASE_HOST):
         engine_str += f"/submitty?host={DATABASE_HOST}"
     else:
-        engine_str += "{DATABASE_HOST}/submitty"
+        engine_str += f"{DATABASE_HOST}/submitty"
 
     engine = create_engine(engine_str)
     connection = engine.connect()
