@@ -4,7 +4,7 @@ $("#gradeable-select").change(function(){
     expiration_date.setDate(expiration_date.getDate() + 1);
     document.cookie = "exception_gid=" + g_id + "; expires=" + expiration_date.toUTCString();
     window.location=window.location; // pseudo post/redirect/get pattern
-}
+});
 
 function updateHomeworkExtension() {
     var fd = new FormData($('#extensions-form').get(0));
