@@ -362,8 +362,9 @@ class UsersController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/delete_user", methods={"POST"})
+     * @param "users"|"graders" $type
      */
-    public function deleteUser($type = 'users') {
+    public function deleteUser(string $type = 'users'): RedirectResponse {
         $user_id = trim($_POST['user_id']);
         $displayed_fullname = trim($_POST['displayed_fullname']);
         $semester = $this->core->getConfig()->getSemester();
