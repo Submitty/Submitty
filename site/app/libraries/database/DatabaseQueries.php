@@ -6355,7 +6355,7 @@ AND gc_id IN (
      * @param string $course
      * @return bool false on failure (or 0 rows deleted), true otherwise.
      */
-    public function deleteUser($user_id, $semester, $course) {
+    public function deleteUser(string $user_id, string $semester, string $course): bool {
         // User cannot remove themself.
         if ($user_id === $this->core->getUser()->getId()) {
             return false;
