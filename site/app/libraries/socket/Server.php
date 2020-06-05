@@ -77,7 +77,7 @@ class Server implements MessageComponentInterface {
     /**
      * Push a given message to all or all-but-sender connections
      */
-    private function broadcast(ConnectionInterface $from, string $content, bool $all = true): void {
+    private function broadcast(ConnectionInterface $from, string $content, $all = true): void {
         if ($all) {
             foreach ($this->clients as $client) {
                 $client->send($content);
@@ -169,23 +169,22 @@ class Server implements MessageComponentInterface {
             $this->broadcast($from, 'pong');
             return;
         }
-
         if ($this->checkAuth($from)) {
             $msg = json_decode($msgString, true);
 
             switch ($msg["type"]) {
-                case "new_thread":
-                case "new_post":
-                    $user_id = $msg["data"]["user_id"];
-                    if ($fromConn = $this->getSocketClient($user_id)) {
-                        $this->broadcast($fromConn, $msgString, true);
-                    }
-                    else {
-                        $this->broadcast($from, $msgString, true);
-                    }
-                    break;
+//                case "new_thread":
+//                case "new_post":
+//                    $user_id = $msg["data"]["user_id"];
+//                    if ($fromConn = $this->getSocketClient($user_id)) {
+//                        $this->broadcast($fromConn, $msgString, true);
+//                    }
+//                    else {
+//                        $this->broadcast($from, $msgString, true);
+//                    }
+//                    break;
                 default:
-                    $this->broadcast($from, $msgString, true);
+                    $this->broadcast($from, $msgString, false);
                     break;
             }
         }

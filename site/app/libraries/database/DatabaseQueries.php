@@ -710,7 +710,7 @@ WHERE status = 1"
 
     public function getThread($thread_id) {
         $this->course_db->query("SELECT * from threads where id = ?", array($thread_id));
-        return $this->course_db->rows();
+        return $this->course_db->row();
     }
 
     public function getThreadTitle($thread_id) {

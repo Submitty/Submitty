@@ -108,7 +108,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     return files;
 }
 
-function publishFormWithAttachments(form, test_category, error_message) {
+function publishFormWithAttachments(form, test_category, error_message, is_thread) {
     if(!form[0].checkValidity()) {
         form[0].reportValidity();
         return false;
@@ -152,6 +152,11 @@ function publishFormWithAttachments(form, test_category, error_message) {
                 $('#messages').append(message);
                 return;
             }
+
+            if (is_thread){
+              var thread_id = json['data']['thread_id'];
+              window.socketClient.send({'type': "new_thread", 'thread_id': thread_id});
+            }
             window.location.href = json['data']['next_page'];
         },
         error: function(){
@@ -166,7 +171,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
 function createThread(e) {
     e.preventDefault();
     try {
-        return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+        return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.", true);
     }
     catch (err) {
         console.error(err);
@@ -178,13 +183,57 @@ function createThread(e) {
 function publishPost(e) {
     e.preventDefault();
     try {
-        return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+        return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.", false);
     }
     catch (err) {
         console.error(err);
         alert("Something went wrong. Please try again.");
         return false;
     }
+}
+
+function socketNewThreadHandler(thread_id){
+  $.ajax({
+    type: 'POST',
+    url: buildCourseUrl(['forum', 'threads', 'single']),
+    data: {'thread_id': thread_id, 'csrf_token': window.csrfToken},
+    success: function (response) {
+      try {
+        var result = JSON.parse(response);
+
+        var last_announcement = $('.thread-announcement').last().parent().parent();
+        var last_pinned = $('.thread-favorite').last().parent().parent();
+        var last = last_pinned.length == 0 ? last_announcement : last_pinned;
+
+        if (last.length == 0) {
+          $(result.data).insertBefore($('.thread_box_link').first());
+        } else {
+          $(result.data).insertAfter(last.next());
+        }
+
+        $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
+      } catch(err) {
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new thread. Please refresh the page.</div>';
+        $('#messages').append(message);
+        return;
+      }
+    },
+    error: function (a, b) {
+      window.alert('Something went wrong when adding new thread. Please refresh the page.');
+    }
+  });
+}
+
+function initSocketClient() {
+  window.socketClient = new WebSocketClient();
+  window.socketClient.onmessage = (msg) => {
+    if(msg.type === "new_thread"){
+      socketNewThreadHandler(msg.thread_id);
+    }
+    thread_post_handler();
+    loadThreadHandler();
+  };
+  window.socketClient.open();
 }
 
 function changeThreadStatus(thread_id) {
