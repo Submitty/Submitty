@@ -3,15 +3,6 @@
 <div class="content">
 
     <script>
-        var year = parseInt("{{ server_time['year'] }}", 10);
-        var month = parseInt("{{ server_time['month'] }}", 10) - 1;
-        var day = parseInt("{{ server_time['day'] }}", 10);
-        var hour = parseInt("{{ server_time['hour'] }}", 10);
-        var minute = parseInt("{{ server_time['minute'] }}", 10);
-        var second = parseInt("{{ server_time['second'] }}", 10);
-
-        server_time = new Date(year, month, day, hour, minute, second);
-
         green = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-green');
         yellow = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-yellow');
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
@@ -106,7 +97,7 @@
 
                 <script>
                     function determineRelease(inputID){
-                        var now = server_time;
+                        var now = new Date();
 
                         function pad(str){
                             return ('0'+str).slice(-2);
