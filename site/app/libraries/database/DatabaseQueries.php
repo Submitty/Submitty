@@ -5087,7 +5087,7 @@ AND gc_id IN (
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT {$conflict_clause}
                 DO
-                    UPDATE SET 
+                    UPDATE SET
                         goc_overall_comment=?;
             ";
 
@@ -5887,7 +5887,7 @@ AND gc_id IN (
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               LEFT JOIN (
-                SELECT 
+                SELECT
                     json_agg(goc_grader_id) as commenter_ids,
                     json_agg(goc_overall_comment) as overall_comments,
                     g_id,
@@ -6356,11 +6356,6 @@ AND gc_id IN (
      * @return bool false on failure (or 0 rows deleted), true otherwise.
      */
     public function deleteUser(string $user_id, string $semester, string $course): bool {
-        // User cannot remove themself.
-        if ($user_id === $this->core->getUser()->getId()) {
-            return false;
-        }
-
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
         $this->submitty_db->query($query, array($user_id, $semester, $course));
         return $this->submitty_db->getRowCount() > 0;

@@ -12,6 +12,8 @@ def up(config, database):
     """
     database.execute("ALTER TABLE IF EXISTS ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
     database.execute("ALTER TABLE IF EXISTS ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;")
+    database.execute("ALTER TABLE IF EXISTS ONLY sessions DROP CONSTRAINT IF EXISTS sessions_fkey")
+    database.execute("ALTER TABLE ONLY sessions ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;")
 
     database.execute("""
 CREATE OR REPLACE FUNCTION sync_delete_user() RETURNS TRIGGER AS $$
@@ -104,3 +106,5 @@ def down(config, database):
     database.execute("DROP FUNCTION IF EXISTS sync_delete_user();")
     database.execute("ALTER TABLE IF EXISTS ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
     database.execute("ALTER TABLE IF EXISTS ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
+    database.execute("ALTER TABLE IF EXISTS ONLY sessions DROP CONSTRAINT IF EXISTS sessions_fkey")
+    database.execute("ALTER TABLE ONLY sessions ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
