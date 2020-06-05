@@ -1,9 +1,6 @@
 {
     "/home": [],
-    "/home/courses/new": [
-        "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
-        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control."
-    ],
+    "/home/courses/new": [],
     "/s20/sample": [],
     "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": [
         "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
