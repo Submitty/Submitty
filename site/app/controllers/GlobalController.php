@@ -63,6 +63,14 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-new-course",
                     "icon" => "fa-plus-square"
                 ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['admin', 'docker']),
+                    "title" => "Docker UI",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-docker-link",
+                    "icon" => "fa-docker",
+                    "prefix" => "fab",
+                ]);
             }
 
             if ($unread_notifications_count !== null) {
@@ -417,6 +425,14 @@ class GlobalController extends AbstractController {
                 }
             }
         }
+        // append the help links
+        if ($this->core->getConfig()->getSysAdminUrl() !== '') {
+            $footer_links[] =  ["title" => "Report Issues", "url" => $this->core->getConfig()->getSysAdminUrl()];
+        }
+        if ($this->core->getConfig()->getSysAdminEmail() !== '') {
+            $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
+        }
+
         $runtime = $this->core->getOutput()->getRunTime();
         return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }

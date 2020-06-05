@@ -2,9 +2,14 @@
   "description" : "The config.json schema for Submitty",
   "additionalProperties" : false,
   "type": "object",
-  "required" : ["autograding", "autograding_method", "container_options", "testcases", "timestamped_stdout"],
+  "required" : ["autograding", "autograding_method", "container_options", "testcases", "timestamped_stdout", "publish_actions"],
   "properties" : {
       "timestamped_stdout" : {
+        "description" : "Timestamp student standard output files",
+        "type" : "boolean"
+      },
+      "publish_actions" : {
+        "description" : "Display a list of the actions taken for a testcase via the web UI",
         "type" : "boolean"
       },
       "early_submission_incentive" : {
@@ -384,6 +389,7 @@
       "required" : ["max_submissions", "penalty", "points", "title", "type", "timestamped_stdout"],
       "properties" : {
         "timestamped_stdout" : {
+          "description" : "Timestamp student standard output files",
           "type" : "boolean"
         },
         "max_submissions" : {
@@ -439,9 +445,13 @@
       "additionalProperties" : false,
       "required" : ["containers", "solution_containers", "dispatcher_actions", "points",
                     "pre_commands", "single_port_per_container", 
-                    "use_router", "title", "validation", "timestamped_stdout"],
+                    "use_router", "title", "validation", "timestamped_stdout", "publish_actions"],
       "properties" : {
         "timestamped_stdout" : {
+          "type" : "boolean"
+        },
+        "publish_actions" : {
+          "description" : "Display a list of the actions taken for a testcase via the web UI",
           "type" : "boolean"
         },
         "hidden" : {

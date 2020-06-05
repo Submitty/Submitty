@@ -53,10 +53,15 @@ public:
   bool getHidden() const { return _json.value("hidden", false); }
   bool getExtraCredit() const { return _json.value("extra_credit",false); }
   bool viewTestcaseMessage() const { return _json.value("view_testcase_message",true); }
+  bool publishActions() const { return _json.value("publish_actions", false); }
 
   bool isFileCheck() const { return _json.value("type","Execution") == "FileCheck"; }
   bool isCompilation() const { return _json.value("type","Execution") == "Compilation"; }
   bool isExecution() const { return _json.value("type","Execution") == "Execution"; }
+
+  nlohmann::json getDispatcherActions() const { return _json.value("dispatcher_actions", nlohmann::json::array());}
+  nlohmann::json getGraphicsActions() const { return _json.value("actions", nlohmann::json::array());}
+
 
   bool isSubmittyCount() const {
     std::vector<std::string> commands = getCommands();
