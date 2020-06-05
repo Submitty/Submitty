@@ -230,7 +230,7 @@ class User extends AbstractModel {
      */
     public function getUsableTimeZone(): \DateTimeZone {
         if ($this->time_zone === 'NOT_SET/NOT_SET') {
-            return new \DateTimeZone($this->core->getConfig()->getTimezone());
+            return $this->core->getConfig()->getTimezone();
         }
         else {
             return new \DateTimeZone($this->time_zone);
