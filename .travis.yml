@@ -321,6 +321,7 @@ jobs:
             - libpcre3-dev
             - unzip
             - libboost-all-dev
+            - openjdk-8-jdk
       env: CLANG_VER="5.0.2"
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
@@ -349,6 +350,8 @@ jobs:
         - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
         - sudo bash .setup/travis/setup.sh
         - sudo bash .setup/travis/setup_test_suite.sh
+      before_script:
+        - jdk_switcher use openjdk8
       script:
         - travis_wait 45 sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
     #- <<: *04-integration
