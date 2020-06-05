@@ -78,5 +78,4 @@ class DateTimeFormat extends AbstractModel {
 
         return self::DATE_FORMATS[$this->specifier][$key];
     }
-
 }
