@@ -25,6 +25,10 @@ nlohmann::json printTestCase(TestCase test) {
   j["hidden"] = test.getHidden();
   j["view_testcase_message"] = test.viewTestcaseMessage();
 
+  j["publish_actions"] = test.publishActions();
+  j["dispatcher_actions"] = test.getDispatcherActions();
+  j["actions"] = test.getGraphicsActions();
+
   // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
   j["view_file_results"] = true;
   j["view_test_points"] = true;

@@ -2,7 +2,6 @@
 
 namespace app\views;
 
-use app\libraries\DateUtils;
 use app\models\Button;
 use app\libraries\GradeableType;
 use app\models\User;

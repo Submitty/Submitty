@@ -24,6 +24,7 @@ class TestAccessibility(BaseTestCase):
         '/{}/{}/gradeable/future_no_tas_lab/grading?view=all',
         '/{}/{}/gradeable/future_no_tas_test/grading?view=all',
         '/{}/{}/gradeable/open_homework/grading/status',
+        '/{}/{}/gradeable/open_homework/bulk_stats',
         '/{}/{}/gradeable/open_homework/grading/details?view=all',
         '/{}/{}/gradeable/open_homework',
         '/{}/{}/gradeable/open_team_homework/team',
@@ -50,7 +51,6 @@ class TestAccessibility(BaseTestCase):
         '/{}/{}/plagiarism/configuration/new',
         '/{}/{}/reports',
         '/{}/{}/late_table',
-        '/{}/{}/theme',
         '/{}/{}/grades',
     ]
 

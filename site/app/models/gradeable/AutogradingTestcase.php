@@ -16,6 +16,9 @@ use app\models\AbstractModel;
  * @method getPoints()
  * @method isExtraCredit()
  * @method isHidden()
+ * @method getDispatcherActions()
+ * @method getGraphicsActions()
+ * @method isPublishActions()
  */
 class AutogradingTestcase extends AbstractModel {
 
@@ -36,6 +39,12 @@ class AutogradingTestcase extends AbstractModel {
     protected $view_testcase_message = true;
     /** @prop @var string */
     protected $testcase_label = '';
+    /** @prop-read @var array */
+    protected $dispatcher_actions = array();
+    /** @prop-read @var array */
+    protected $graphics_actions = array();
+    /** @prop-read @var boolean */
+    protected $publish_actions = false;
 
     /**
      * GradeableTestcase constructor.
@@ -55,6 +64,9 @@ class AutogradingTestcase extends AbstractModel {
         $this->hidden = ($testcase['hidden'] ?? false) === true;
         $this->view_testcase_message = ($testcase['view_testcase_message'] ?? true) === true;
         $this->testcase_label = $testcase['testcase_label'] ?? '';
+        $this->publish_actions = $testcase['publish_actions'] ?? false;
+        $this->dispatcher_actions = $testcase['dispatcher_actions'] ?? [];
+        $this->graphics_actions = $testcase['actions'] ?? [];
     }
 
     public function getTestcaseLabel() {
