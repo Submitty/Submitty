@@ -63,6 +63,14 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-new-course",
                     "icon" => "fa-plus-square"
                 ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['admin', 'docker']),
+                    "title" => "Docker UI",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-docker-link",
+                    "icon" => "fa-docker",
+                    "prefix" => "fab",
+                ]);
             }
 
             if ($unread_notifications_count !== null) {

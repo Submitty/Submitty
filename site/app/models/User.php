@@ -59,6 +59,8 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
+    const NULL_TIME_ZONE_MESSAGE = 'Null User->time_zone detected. User->time_zone should never be null.';
+
     /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
@@ -188,17 +190,15 @@ class User extends AbstractModel {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
 
-        if (isset($details['time_zone'])) {
-            $this->time_zone = $details['time_zone'];
-        }
+        $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
     }
 
     /**
-     * Update $this->time_zone
+     * Set $this->time_zone
      * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
      * @return bool True if time zone was able to be updated, False otherwise
      */
-    public function updateTimeZone(string $time_zone): bool {
+    public function setTimeZone(string $time_zone): bool {
 
         // Validate the $time_zone string
         if (in_array($time_zone, DateUtils::getAvailableTimeZones())) {
@@ -213,6 +213,25 @@ class User extends AbstractModel {
         }
 
         return false;
+    }
+
+    /**
+     * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
+     * user has not set their time zone.
+     *
+     * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
+     */
+    public function getTimeZoneNiceFormat(): string {
+        return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+    /**
+     * Get the UTC offset for this user's time zone.
+     *
+     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
     }
 
     /**

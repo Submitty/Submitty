@@ -601,6 +601,16 @@ parameters:
 			path: app/libraries/routers/WebRouter.php
 
 		-
+			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
+			count: 1
+			path: app/libraries/socket/Server.php
+
+		-
+			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$resourceId\\.$#"
+			count: 5
+			path: app/libraries/socket/Server.php
+
+		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected type at offset 350$#"
 			count: 1
 			path: app/models/AbstractModel.php
@@ -854,3 +864,4 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
+
