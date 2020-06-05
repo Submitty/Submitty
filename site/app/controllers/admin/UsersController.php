@@ -376,7 +376,7 @@ class UsersController extends AbstractController {
             $this->core->addErrorMessage("Could not remove {$displayed_fullname}.  They may have recorded activity in your course.");
         }
 
-        $this->core->redirect($this->core->buildCourseUrl([$type]));
+        return new RedirectResponse($this->core->buildCourseUrl([$type]));
     }
 
     /**
