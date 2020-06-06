@@ -43,7 +43,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         $filename = $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']) . '.log';
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
-        ExceptionHandler::handleException(new BaseException("test", array("test" => "b", "test2" => array('a','c'))));
+        ExceptionHandler::handleException(new BaseException("test", ["test" => "b", "test2" => ['a','c']]));
         $file = FileUtils::joinPaths($tmp_dir, 'site_errors', $filename);
         $this->assertFileExists($file);
         $actual = file_get_contents($file);

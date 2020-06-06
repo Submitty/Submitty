@@ -153,21 +153,21 @@ class AdminGradeableController extends AbstractController {
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
-        $all_uploaded_config_paths = array();
+        $all_uploaded_config_paths = [];
         foreach ($all_uploaded_configs as $file) {
             $all_uploaded_config_paths[] = [ 'UPLOADED: ' . substr($file['path'], strlen($uploaded_configs_dir) + 1) , $file['path'] ];
         }
         // Configs stored in a private repository (specified in course config)
         $config_repo_string = $this->core->getConfig()->getPrivateRepository();
-        $all_repository_config_paths = array();
-        $repository_error_messages = array();
+        $all_repository_config_paths = [];
+        $repository_error_messages = [];
         $repo_id_number = 1;
         foreach (explode(',', $config_repo_string) as $config_repo_name) {
             $config_repo_name = str_replace(' ', '', $config_repo_name);
             if ($config_repo_name == '') {
                 continue;
             }
-            $directory_queue = array($config_repo_name);
+            $directory_queue = [$config_repo_name];
             $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue, $repository_error_messages, $repo_id_number);
             if (isset($repo_paths)) {
                 $all_repository_config_paths = array_merge($all_repository_config_paths, $repo_paths);
@@ -264,8 +264,8 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
     }
 
     /* Http request methods (i.e. ajax) */
@@ -281,8 +281,8 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
 
                 $users = $this->core->getQueries()->getAllUsers();
-                $user_ids = array();
-                $grading = array();
+                $user_ids = [];
+                $grading = [];
                 $peer_grade_set = $gradeable->getPeerGradeSet();
                 foreach ($users as $key => $user) {
                     // Need to remove non-student users, or users in the NULL section
@@ -291,7 +291,7 @@ class AdminGradeableController extends AbstractController {
                     }
                     else {
                         $user_ids[] = $user->getId();
-                        $grading[$user->getId()] = array();
+                        $grading[$user->getId()] = [];
                     }
                 }
                 $user_number = count($user_ids);
@@ -489,12 +489,12 @@ class AdminGradeableController extends AbstractController {
     private function getValidPathsToConfigDirectories($dir_queue, &$error_messages, $repo_id_number) {
         $repository_path = $dir_queue[0];
         $count = 0;
-        $return_array = array();
+        $return_array = [];
 
         while (count($dir_queue) != 0) {
             if ($count >= 1000) {
                 $error_messages[] = "Repository #" . $repo_id_number . " entered on the \"Course Settings\" is too large to parse.";
-                return array();
+                return [];
             }
 
             $dir = $dir_queue[0];
@@ -503,7 +503,7 @@ class AdminGradeableController extends AbstractController {
 
             if (!file_exists($dir) || !is_dir($dir)) {
                 $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
-                return array();
+                return [];
             }
 
             try {
@@ -511,7 +511,7 @@ class AdminGradeableController extends AbstractController {
             }
             catch (\Exception $e) {
                 $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
-                return array();
+                return [];
             }
 
             if ($this->checkPathToConfigFile($dir)) {
@@ -586,9 +586,9 @@ class AdminGradeableController extends AbstractController {
             $start_index_text = 0;
 
             // Load all of the old numeric/text elements into two arrays
-            $old_numerics = array();
+            $old_numerics = [];
             $num_old_numerics = 0;
-            $old_texts = array();
+            $old_texts = [];
             $num_old_texts = 0;
             foreach ($old_components as $old_component) {
                 if ($old_component->isText() === true) {
@@ -676,7 +676,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
-        $new_graders = array();
+        $new_graders = [];
         if (isset($details['graders'])) {
             $new_graders = $details['graders'];
         }

@@ -57,7 +57,7 @@ class TeamController extends AbstractController {
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
-        $json = array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => $user_id)));
+        $json = ["team_history" => [["action" => "create", "time" => $current_time, "user" => $user_id]]];
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
@@ -115,7 +115,7 @@ class TeamController extends AbstractController {
             $this->core->addErrorMessage("Failed to open settings file");
             $this->core->redirect($return_url);
         }
-        $json["team_history"][] = array("action" => "leave", "time" => $current_time, "user" => $user_id);
+        $json["team_history"][] = ["action" => "leave", "time" => $current_time, "user" => $user_id];
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMessage("Failed to write to team history to settings file");
@@ -211,7 +211,7 @@ class TeamController extends AbstractController {
             $this->core->addErrorMEssage("Failed to open settings file");
             $this->core->redirect($return_url);
         }
-        $json["team_history"][] = array("action" => "send_invitation", "time" => $current_time, "sent_by_user" => $user_id, "sent_to_user" => $invite_id);
+        $json["team_history"][] = ["action" => "send_invitation", "time" => $current_time, "sent_by_user" => $user_id, "sent_to_user" => $invite_id];
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
@@ -285,7 +285,7 @@ class TeamController extends AbstractController {
             $this->core->addErrorMessage("Failed to open settings file");
             $this->core->redirect($return_url);
         }
-        $json["team_history"][] = array("action" => "accept_invitation", "time" => $current_time, "user" => $user_id);
+        $json["team_history"][] = ["action" => "accept_invitation", "time" => $current_time, "user" => $user_id];
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMessage("Failed to write to team history to settings file");
@@ -341,7 +341,7 @@ class TeamController extends AbstractController {
             $this->core->addErrorMEssage("Failed to open settings file");
             $this->core->redirect($return_url);
         }
-        $json["team_history"][] = array("action" => "cancel_invitation", "time" => $current_time, "canceled_by_user" => $user_id, "canceled_user" => $cancel_id);
+        $json["team_history"][] = ["action" => "cancel_invitation", "time" => $current_time, "canceled_by_user" => $user_id, "canceled_user" => $cancel_id];
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
@@ -452,6 +452,6 @@ class TeamController extends AbstractController {
         $date = $this->core->getDateTimeNow();
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
-        $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock);
+        $this->core->getOutput()->renderOutput(['submission', 'Team'], 'showTeamPage', $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock);
     }
 }

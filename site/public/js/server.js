@@ -971,8 +971,8 @@ function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
-    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
+function downloadSubmissionZip(grade_id, user_id, is_anon = false, version = null, origin = null) {
+    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon={is_anon}`;
     return false;
 }
 
