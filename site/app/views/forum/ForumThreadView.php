@@ -106,7 +106,7 @@ class ForumThreadView extends AbstractView {
         for a specific thread, in addition to head of the threads
         that have been created after applying filter and to be
         displayed in the left panel.
-    */
+     */
 
     public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax = false) {
 

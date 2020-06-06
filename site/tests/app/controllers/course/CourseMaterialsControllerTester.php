@@ -160,7 +160,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     
     /**
      * @runInSeparateProcess
-    */
+     */
 
     public function testModifyCourseMaterials() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')

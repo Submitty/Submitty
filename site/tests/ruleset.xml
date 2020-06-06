@@ -26,8 +26,6 @@
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
-        <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
-        <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
 
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />

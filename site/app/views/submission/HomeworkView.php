@@ -621,11 +621,11 @@ class HomeworkView extends AbstractView {
     }
 
      /**
-     * @param GradedGradeable $graded_gradeable
-     * @param AutoGradedVersion|null $version_instance
-     * @param bool $show_hidden
-     * @return string
-     */
+      * @param GradedGradeable $graded_gradeable
+      * @param AutoGradedVersion|null $version_instance
+      * @param bool $show_hidden
+      * @return string
+      */
     private function renderTotalScoreBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -745,11 +745,11 @@ class HomeworkView extends AbstractView {
     }
 
      /**
-     * @param GradedGradeable $graded_gradeable
-     * @param AutoGradedVersion|null $version_instance
-     * @param bool $show_hidden
-     * @return string
-     */
+      * @param GradedGradeable $graded_gradeable
+      * @param AutoGradedVersion|null $version_instance
+      * @param bool $show_hidden
+      * @return string
+      */
     private function renderAutogradingBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
