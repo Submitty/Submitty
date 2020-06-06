@@ -676,11 +676,15 @@ class SubmissionController extends AbstractController {
 
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         if (!file_exists($settings_file)) {
-            $json = ["active_version" => $new_version,
-                          "history" => [["version" => $new_version,
-                                                   "time" => $current_time_string_tz,
-                                                   "who" => $original_user_id,
-                                                   "type" => "upload"]]];
+            $json = [
+                "active_version" => $new_version,
+                "history" => [[
+                    "version" => $new_version,
+                    "time" => $current_time_string_tz,
+                    "who" => $original_user_id,
+                    "type" => "upload"
+                ]]
+            ];
         }
         else {
             $json = FileUtils::readJsonFile($settings_file);
