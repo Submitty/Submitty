@@ -45,7 +45,7 @@ class Server implements MessageComponentInterface {
         }
         else {
             $cookieString = $request->getHeader("cookie");
-            parse_str(strtr($cookieString[0], array('&' => '%26', '+' => '%2B', ';' => '&')), $cookies);
+            parse_str(strtr($cookieString[0], ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
 
             $sessid = $cookies['submitty_session'];
 

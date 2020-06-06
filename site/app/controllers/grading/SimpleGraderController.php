@@ -65,10 +65,10 @@ class SimpleGraderController extends AbstractController {
 
         //Grab the students in section, sectiontype.
         if ($section_type === "rotating_section") {
-            $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRotatingSections([$section], $sort_by);
         }
         elseif ($section_type === "registration_section") {
-            $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRegistrationSections([$section], $sort_by);
         }
         else {
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
@@ -233,7 +233,7 @@ class SimpleGraderController extends AbstractController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         // Return ids and scores of updated components in success response so frontend can validate
-        $return_data = array();
+        $return_data = [];
 
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
@@ -296,9 +296,9 @@ class SimpleGraderController extends AbstractController {
 
         $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
         $arr_length = count($csv_array);
-        $return_data = array();
+        $return_data = [];
 
-        $data_array = array();
+        $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
             $temp_array = explode(',', $csv_array[$i]);
             $data_array[] = $temp_array;
@@ -312,7 +312,7 @@ class SimpleGraderController extends AbstractController {
                     continue;
                 }
 
-                $temp_array = array();
+                $temp_array = [];
                 $temp_array['username'] = $username;
                 $index1 = 0;
                 $index2 = 3; //3 is the starting index of the grades in the csv

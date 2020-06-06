@@ -241,7 +241,7 @@ class Component extends AbstractModel {
      * @param array $points A complete array of floats (or nulls) indexed by component point property
      */
     private function assertPoints(array $points) {
-        $errors = array();
+        $errors = [];
 
         // Give error messages to all null elements
         foreach (self::point_properties as $property) {

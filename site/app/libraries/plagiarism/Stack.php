@@ -10,7 +10,7 @@ class Stack {
     protected $stack;
     protected $limit;
 
-    public function __construct($initial = array()) {
+    public function __construct($initial = []) {
         // initialize the stack
         $this->stack = $initial;
     }

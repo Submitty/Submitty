@@ -324,12 +324,12 @@ class HomeworkView extends AbstractView {
 
         if ($this->core->getUser()->accessGrading()) {
             $students = $this->core->getQueries()->getAllUsers();
-            $student_ids = array();
+            $student_ids = [];
             foreach ($students as $student) {
                 $student_ids[] = $student->getId();
             }
 
-            $students_version = array();
+            $students_version = [];
             foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
                 /** @var GradedGradeable $gg */
                 $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
@@ -403,7 +403,7 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
 
-        $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
+        $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
@@ -483,7 +483,7 @@ class HomeworkView extends AbstractView {
         $files = [];
         $cover_images = [];
         $count = 1;
-        $count_array = array();
+        $count_array = [];
         $bulk_upload_data = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
