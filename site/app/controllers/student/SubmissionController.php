@@ -1253,8 +1253,10 @@ class SubmissionController extends AbstractController {
             // Public or private github
             if ($gradeable->getVcsHostType() == 2 || $gradeable->getVcsHostType() == 3) {
                 $dst = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
-                $json = ["git_user_id" => $_POST["git_user_id"],
-                              "git_repo_id" => $_POST["git_repo_id"]];
+                $json = [
+                    "git_user_id" => $_POST["git_user_id"],
+                    "git_repo_id" => $_POST["git_repo_id"]
+                ];
                 if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
                     return $this->uploadResult("Failed to write to VCS_CHECKOUT file.", false);
                 }
@@ -1274,9 +1276,11 @@ class SubmissionController extends AbstractController {
                 $order = intval($question->getOrder());
                 $title = $question->getTitle();
                 $page_val = intval($pages_array[$i]);
-                $json[] = ["order" => $order,
-                                "title" => $title,
-                                "page #" => $page_val];
+                $json[] = [
+                    "order" => $order,
+                    "title" => $title,
+                    "page #" => $page_val
+                ];
                 $i++;
             }
             if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
