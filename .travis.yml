@@ -51,6 +51,7 @@ jobs:
       before_install:
         - sudo update-java-alternatives --jre-headless --set java-1.8.0-openjdk-amd64
         - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        - alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac 1
         - sudo update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
