@@ -16,7 +16,7 @@ Required Input:
      onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}"
 >
     {% if edit_marks_enabled %}
-        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks" aria-label="Click and drag to reorder marks">
+        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks">
             <i class="fas fa-ellipsis-v"></i>
         </span>
     {% endif %}
@@ -35,6 +35,7 @@ Required Input:
                    onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    step="{{ precision }}"
+                   aria-label="mark value"
                    value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
             <script>
@@ -64,7 +65,7 @@ Required Input:
     <span class="col-sm mark-title"
           data-title="{{ mark.title|escape }}">
         {% if edit_marks_enabled %}
-            <textarea onkeyup="auto_grow(this)" class="noscroll"
+            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title"
                     {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}

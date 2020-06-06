@@ -3,13 +3,10 @@
     "/home/courses/new": [],
     "/s20/sample": [],
     "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": [
-        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
         "Attribute “placeholder” not allowed on element “input” at this point.",
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”."
     ],
-    "/s20/sample/autograding_config?g_id=future_no_tas_homework": [
-        "Attribute “name” not allowed on element “div” at this point."
-    ],
+    "/s20/sample/autograding_config?g_id=future_no_tas_homework": [],
     "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": [],
     "/s20/sample/gradeable/future_no_tas_test/grading?view=all": [],
     "/s20/sample/gradeable/open_homework/grading/status": [],
@@ -31,9 +28,7 @@
     "/s20/sample/notifications/settings": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/gradeable": [
-        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”."
-    ],
+    "/s20/sample/gradeable": [],
     "/s20/sample/config": [],
     "/s20/sample/theme": [],
     "/s20/sample/office_hours_queue": [
