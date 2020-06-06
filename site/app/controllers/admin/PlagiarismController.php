@@ -311,19 +311,20 @@ class PlagiarismController extends AbstractController {
 
         $config_dir = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/";
         $json_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json";
-        $json_data = ["semester" =>    $semester,
-                            "course" =>     $course,
-                            "gradeable" =>  $gradeable_id,
-                            "version" =>    $version_option,
-                            "file_option" => $file_option,
-                            "language" =>   $language,
-                            "threshold" =>  $threshold,
-                            "hash" => bin2hex(random_bytes(8)),
-                            "sequence_length" => $sequence_length,
-                            "prev_term_gradeables" => $prev_term_gradeables,
-                            "ignore_submissions" =>   $ignore_submissions,
-                            "instructor_provided_code" =>   $instructor_provided_code,
-                                        ];
+        $json_data = [
+            "semester" =>    $semester,
+            "course" =>     $course,
+            "gradeable" =>  $gradeable_id,
+            "version" =>    $version_option,
+            "file_option" => $file_option,
+            "language" =>   $language,
+            "threshold" =>  $threshold,
+            "hash" => bin2hex(random_bytes(8)),
+            "sequence_length" => $sequence_length,
+            "prev_term_gradeables" => $prev_term_gradeables,
+            "ignore_submissions" =>   $ignore_submissions,
+            "instructor_provided_code" =>   $instructor_provided_code,
+        ];
         if ($file_option == "matching_regex") {
             $json_data["regex"] = $regex_for_selecting_files;
         }
