@@ -103,7 +103,7 @@ class UsersView extends AbstractView {
 
     public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
         $this->core->getOutput()->addBreadcrumb('Manage Sections');
-        $reg_sections_count = array();
+        $reg_sections_count = [];
         foreach ($students as $student) {
             $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
             if (array_key_exists($registration, $reg_sections_count)) {

@@ -112,17 +112,17 @@ class ForumController2 extends AbstractController {
         //Notify User
         $this->core->addErrorMessage($error);
         if ($isThread) {
-            $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+            $url = $this->core->buildUrl(['component' => 'forum', 'page' => 'create_thread']);
         }
         else {
-            $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
+            $url = $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]);
         }
-        return array(-1, $url);
+        return [-1, $url];
     }
 
     private function changeThreadStatus($status) {
         $thread_id = $_POST['thread_id'];
-        $result = array();
+        $result = [];
         if ($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
             if ($this->core->getQueries()->updateResolveState($thread_id, $status)) {
                 $result['success'] = 'Thread resolve state has been changed.';
@@ -150,11 +150,11 @@ class ForumController2 extends AbstractController {
     }
 
     public function addNewCategory() {
-        $result = array();
+        $result = [];
         if ($this->core->getUser()->accessGrading()) {
             if (!empty($_REQUEST["newCategory"])) {
                 $category = $_REQUEST["newCategory"];
-                if ($this->isValidCategories(-1, array($category))) {
+                if ($this->isValidCategories(-1, [$category])) {
                     $result["error"] = "That category already exists.";
                 }
                 else {
@@ -174,11 +174,11 @@ class ForumController2 extends AbstractController {
     }
 
     public function deleteCategory() {
-        $result = array();
+        $result = [];
         if ($this->core->getUser()->accessGrading()) {
             if (!empty($_REQUEST["deleteCategory"])) {
                 $category = (int) $_REQUEST["deleteCategory"];
-                if (!$this->isValidCategories(array($category))) {
+                if (!$this->isValidCategories([$category])) {
                     $result["error"] = "That category doesn't exists.";
                 }
                 elseif (!$this->isCategoryDeletionGood($category)) {
@@ -205,7 +205,7 @@ class ForumController2 extends AbstractController {
     }
 
     public function editCategory() {
-        $result = array();
+        $result = [];
         if ($this->core->getUser()->accessGrading()) {
             $category_id = $_REQUEST["category_id"];
             $category_desc = null;
@@ -214,7 +214,7 @@ class ForumController2 extends AbstractController {
 
             if (!empty($_REQUEST["category_desc"])) {
                 $category_desc = $_REQUEST["category_desc"];
-                if ($this->isValidCategories(-1, array($category_desc))) {
+                if ($this->isValidCategories(-1, [$category_desc])) {
                     $result["error"] = "That category already exists.";
                     $should_update = false;
                 }
@@ -242,15 +242,15 @@ class ForumController2 extends AbstractController {
     }
 
     public function reorderCategories() {
-        $result = array();
+        $result = [];
         if ($this->core->getUser()->accessGrading()) {
             $rows = $this->core->getQueries()->getCategories();
 
-            $current_order = array();
+            $current_order = [];
             foreach ($rows as $row) {
                 $current_order[] = (int) $row['category_id'];
             }
-            $new_order = array();
+            $new_order = [];
             foreach ($_POST['categorylistitem'] as $item) {
                 $new_order[] = (int) $item;
             }
@@ -281,7 +281,7 @@ class ForumController2 extends AbstractController {
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
             if ($type) {
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
+                $notification = new Notification($this->core, ['component' => 'forum', 'type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']]);
                 $this->core->getQueries()->pushNotification($notification);
             }
         }
@@ -343,10 +343,10 @@ class ForumController2 extends AbstractController {
             }
             $post = $this->core->getQueries()->getPost($post_id);
             $post_author = $post['author_user_id'];
-            $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+            $notification = new Notification($this->core, ['component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author]);
             $this->core->getQueries()->pushNotification($notification);
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            $this->core->getOutput()->renderJson($response = array('type' => $type));
+            $this->core->getOutput()->renderJson($response = ['type' => $type]);
             return $this->core->getOutput()->getOutput();
         }
         elseif ($modifyType == 2) { //undelete post or thread
@@ -354,16 +354,16 @@ class ForumController2 extends AbstractController {
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if (is_null($result)) {
                 $error = "Parent post must be undeleted first.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                $this->core->getOutput()->renderJson($response = ['error' => $error]);
             }
             else {
                 /// We want to reload same thread again, in both case (thread/post undelete)
                 $type = "post";
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification = new Notification($this->core, ['component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author]);
                 $this->core->getQueries()->pushNotification($notification);
-                $this->core->getOutput()->renderJson($response = array('type' => $type));
+                $this->core->getOutput()->renderJson($response = ['type' => $type]);
             }
             return $this->core->getOutput()->getOutput();
         }
@@ -412,7 +412,7 @@ class ForumController2 extends AbstractController {
             if ($any_changes) {
                 $post = $this->core->getQueries()->getPost($post_id);
                 $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
+                $notification = new Notification($this->core, ['component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author]);
                 $this->core->getQueries()->pushNotification($notification);
             }
             if ($isError) {
@@ -421,7 +421,7 @@ class ForumController2 extends AbstractController {
             else {
                         $this->core->addSuccessMessage($messageString);
             }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+            $this->core->redirect($this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]));
         }
     }
 
@@ -434,7 +434,7 @@ class ForumController2 extends AbstractController {
             }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
-            $categories_ids  = array();
+            $categories_ids  = [];
             if (!empty($_POST["cat"])) {
                 foreach ($_POST["cat"] as $category_id) {
                     $categories_ids[] = (int) $category_id;
@@ -476,7 +476,7 @@ class ForumController2 extends AbstractController {
         $current_user = $this->core->getUser()->getId();
         if (!ForumUtils::isValidCategories($this->core->getQueries()->getCategories(), $categories_ids)) {
             // No filter for category
-            $categories_ids = array();
+            $categories_ids = [];
         }
 
         $thread_block = $this->core->getQueries()->loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id);
@@ -485,7 +485,7 @@ class ForumController2 extends AbstractController {
         $blockNumber = $thread_block['block_number'];
 
         foreach ($ordered_threads as &$thread) {
-            $list = array();
+            $list = [];
             foreach (explode("|", $thread['categories_ids']) as $id) {
                 $list[] = (int) $id;
             }
@@ -501,8 +501,8 @@ class ForumController2 extends AbstractController {
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
-        $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : array();
-        $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : array();
+        $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
+        $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
         if (empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
             $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
@@ -518,25 +518,25 @@ class ForumController2 extends AbstractController {
         }
         $max_thread = 0;
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, -1);
-        $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : array();
+        $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : [];
         $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int) $_POST["currentThreadId"] : -1;
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return $this->core->getOutput()->renderJson(array(
+        return $this->core->getOutput()->renderJson([
                 "html" => $this->core->getOutput()->getOutput(),
                 "count" => count($threads),
                 "page_number" => $pageNumber,
-            ));
+            ]);
     }
 
     public function showThreads() {
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
-        $category_id = array($category_id);
-        $thread_status = array();
-        $new_posts = array();
+        $category_id = [$category_id];
+        $thread_status = [];
+        $new_posts = [];
         $unread_threads = false;
         if (!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
@@ -581,7 +581,7 @@ class ForumController2 extends AbstractController {
                 if ($thread['merged_thread_id'] != -1) {
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
-                    $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id'])));
+                    $this->core->redirect($this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id']]));
                     return;
                 }
                 if ($option == "alpha") {
@@ -610,7 +610,7 @@ class ForumController2 extends AbstractController {
     }
 
     private function getAllowedCategoryColor() {
-        $colors = array();
+        $colors = [];
         $colors["MAROON"]   = "#800000";
         $colors["OLIVE"]    = "#808000";
         $colors["GREEN"]    = "#008000";
@@ -628,9 +628,9 @@ class ForumController2 extends AbstractController {
 
     public function getHistory() {
         $post_id = $_POST["post_id"];
-        $output = array();
+        $output = [];
         if ($this->core->getUser()->accessGrading()) {
-            $_post = array();
+            $_post = [];
             $older_posts = $this->core->getQueries()->getPostHistory($post_id);
             $current_post = $this->core->getQueries()->getPost($post_id);
             $oc = $current_post["author_user_id"];
@@ -651,7 +651,7 @@ class ForumController2 extends AbstractController {
             // Fetch additional information
             foreach ($output as &$_post) {
                 $emptyUser = empty($_post['user']);
-                $_post['user_info'] = $emptyUser ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+                $_post['user_info'] = $emptyUser ? ['first_name' => 'Anonymous', 'last_name' => '', 'email' => ''] : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
                 $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
             }
         }
@@ -669,18 +669,18 @@ class ForumController2 extends AbstractController {
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
-        $users = array();
+        $users = [];
         for ($i = 0; $i < $num_posts; $i++) {
             $user = $posts[$i]["author_user_id"];
             $content = $posts[$i]["content"];
             if (!isset($users[$user])) {
-                $users[$user] = array();
+                $users[$user] = [];
                 $u = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
                 $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
-                $users[$user]["posts"] = array();
-                $users[$user]["id"] = array();
-                $users[$user]["timestamps"] = array();
+                $users[$user]["posts"] = [];
+                $users[$user]["id"] = [];
+                $users[$user]["timestamps"] = [];
                 $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
             }
@@ -726,7 +726,7 @@ class ForumController2 extends AbstractController {
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author, 'child_root_post' => $child_root_post));
+                    $notification = new Notification($this->core, ['component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author, 'child_root_post' => $child_root_post]);
                     $this->core->getQueries()->pushNotification($notification);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
@@ -739,7 +739,7 @@ class ForumController2 extends AbstractController {
         else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+        $this->core->redirect($this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]));
     }
 
 
@@ -758,7 +758,7 @@ class ForumController2 extends AbstractController {
         $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true' ? true : false;
         $email_announcement = !empty($_POST['EmailAnnouncement']) && $this->core->getUser()->accessFullGrading() && $_POST['EmailAnnouncement'] == 'true' ? true : false;
 
-        $categories_ids  = array();
+        $categories_ids  = [];
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int) $category_id;
         }
@@ -778,7 +778,7 @@ class ForumController2 extends AbstractController {
         if ($result) {
             //We published with success!
             $this->core->addSuccessMessage('Thread created successfully.');
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+            $this->core->redirect($this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread']));
         }
         else {
             return $this->core->getOutput()->renderJson(['error' => 'The post data is malformed. Please try submitting your post again.']);

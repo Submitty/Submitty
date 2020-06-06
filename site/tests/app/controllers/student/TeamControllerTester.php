@@ -12,7 +12,7 @@ class TeamControllerTester extends BaseUnitTest {
 
     private $core;
 
-    private $config = array();
+    private $config = [];
 
     public function setUp(): void {
         $config['gradeable_id'] = "test";
@@ -70,7 +70,7 @@ class TeamControllerTester extends BaseUnitTest {
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
 
-        $team_history = FileUtils::encodeJson(array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => "testUser"))));
+        $team_history = FileUtils::encodeJson(["team_history" => [["action" => "create", "time" => $current_time, "user" => "testUser"]]]);
 
         $this->assertJsonStringEqualsJsonFile($settings_file, $team_history);
     }

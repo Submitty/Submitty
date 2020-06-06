@@ -221,9 +221,9 @@ class GlobalController extends AbstractController {
                 // FIXME: consider searching through the common location for matches to my students
                 // (but this would be expensive)
                 $any_images_files = array_merge(
-                    FileUtils::getAllFiles($images_path, array(), true),
-                    FileUtils::getAllFiles($common_images_path_1, array(), true),
-                    FileUtils::getAllFiles($common_images_path_2, array(), true)
+                    FileUtils::getAllFiles($images_path, [], true),
+                    FileUtils::getAllFiles($common_images_path_1, [], true),
+                    FileUtils::getAllFiles($common_images_path_2, [], true)
                 );
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
