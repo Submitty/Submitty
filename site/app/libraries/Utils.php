@@ -304,13 +304,13 @@ class Utils {
     }
 
     /**
-    * Convert bytes to a specified format thats human readable
-    * E.g : MB, 10485760 => 10MB
-    * @param string $format
-    * @param int $bytes
-    * @param bool $round should the result be rounded to the nearest number
-    * @return string
-    */
+     * Convert bytes to a specified format thats human readable
+     * E.g : MB, 10485760 => 10MB
+     * @param string $format
+     * @param int $bytes
+     * @param bool $round should the result be rounded to the nearest number
+     * @return string
+     */
     public static function formatBytes(string $format, int $bytes, bool $round = false): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
         $result = $bytes / pow(1024, floor($formats[strtolower($format)]));

@@ -2409,12 +2409,12 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
      /**
-     * returns 2d array of new graders after rotating sections set up
-     * for all access grading and limited access graders gradeables,
-     * top level is all graders' ids and second level is all rotating sections
-     *
-     * @return array
-     */
+      * returns 2d array of new graders after rotating sections set up
+      * for all access grading and limited access graders gradeables,
+      * top level is all graders' ids and second level is all rotating sections
+      *
+      * @return array
+      */
     public function getNewGraders() {
         $new_graders = [];
         $all_sections = $this->core->getQueries()->getAllRotatingSections();

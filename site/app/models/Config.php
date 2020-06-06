@@ -96,10 +96,10 @@ class Config extends AbstractModel {
     protected $course_json = array();
 
     /**
-    * Indicates whether a course config has been successfully loaded.
-    * @var bool
-    * @prop
-    */
+     * Indicates whether a course config has been successfully loaded.
+     * @var bool
+     * @prop
+     */
     protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
