@@ -1,6 +1,6 @@
 language: php
 sudo: true
-dist: xenial
+dist: bionic
 
 cache:
   pip: true
@@ -321,8 +321,14 @@ jobs:
             - libpcre3-dev
             - unzip
             - libboost-all-dev
+            - openjdk-8-jdk
       env: CLANG_VER="5.0.2"
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install:
+        - sudo update-java-alternatives --jre-headless --set java-1.8.0-openjdk-amd64
+        - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        - sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac 1
+        - sudo update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
         - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
