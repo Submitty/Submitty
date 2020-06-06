@@ -40,9 +40,9 @@ class AutogradingTestcase extends AbstractModel {
     /** @prop @var string */
     protected $testcase_label = '';
     /** @prop-read @var array */
-    protected $dispatcher_actions = array();
+    protected $dispatcher_actions = [];
     /** @prop-read @var array */
-    protected $graphics_actions = array();
+    protected $graphics_actions = [];
     /** @prop-read @var boolean */
     protected $publish_actions = false;
 

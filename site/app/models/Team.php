@@ -47,10 +47,10 @@ class Team extends AbstractModel {
         $this->id = $details['team_id'];
         $this->registration_section = $details['registration_section'];
         $this->rotating_section = $details['rotating_section'];
-        $this->member_user_ids = array();
-        $this->invited_user_ids = array();
-        $this->member_users = array();
-        $this->invited_users = array();
+        $this->member_user_ids = [];
+        $this->invited_user_ids = [];
+        $this->member_users = [];
+        $this->invited_users = [];
         foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
             if (array_key_exists('anon_id', $user_details)) {

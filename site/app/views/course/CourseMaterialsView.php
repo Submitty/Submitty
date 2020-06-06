@@ -24,10 +24,10 @@ class CourseMaterialsView extends AbstractView {
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
         $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students) {
-            $files[$start_dir_name] = array();
+            $files[$start_dir_name] = [];
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
-            $no_json = array();
+            $no_json = [];
 
             foreach ($course_materials_array as $file) {
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
@@ -72,7 +72,7 @@ class CourseMaterialsView extends AbstractView {
                     }
                 }
                 else {
-                    $ex_file_path = array();
+                    $ex_file_path = [];
                     $isMaterialReleased = '1';
                     $date = $now_date_time->format("Y-m-d H:i:sO");
                     $date = substr_replace($date, "9999", 0, 4);
@@ -93,7 +93,7 @@ class CourseMaterialsView extends AbstractView {
 
                 foreach ($path as $dir) {
                     if (!isset($working_dir[$dir])) {
-                        $working_dir[$dir] = array();
+                        $working_dir[$dir] = [];
                     }
                     $working_dir = &$working_dir[$dir];
                 }
@@ -117,11 +117,11 @@ class CourseMaterialsView extends AbstractView {
             }
         };
 
-        $submissions = array();
-        $file_release_dates = array();
-        $in_dir = array();
-        $file_sections = array();
-        $hide_from_students = array();
+        $submissions = [];
+        $file_release_dates = [];
+        $in_dir = [];
+        $file_sections = [];
+        $hide_from_students = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");

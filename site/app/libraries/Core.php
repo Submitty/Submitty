@@ -82,19 +82,19 @@ class Core {
 
         // initialize our alert queue if it doesn't exist
         if (!isset($_SESSION['messages'])) {
-            $_SESSION['messages'] = array();
+            $_SESSION['messages'] = [];
         }
 
         // initialize our alert types if one of them doesn't exist
-        foreach (array('error', 'notice', 'success') as $key) {
+        foreach (['error', 'notice', 'success'] as $key) {
             if (!isset($_SESSION['messages'][$key])) {
-                $_SESSION['messages'][$key] = array();
+                $_SESSION['messages'][$key] = [];
             }
         }
 
         // we cast each of our controller markers to lower to normalize our controller switches
         // and prevent any unexpected page failures for users in entering a capitalized controller
-        foreach (array('component', 'page', 'action') as $key) {
+        foreach (['component', 'page', 'action'] as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
         $this->notification_factory = new NotificationFactory($this);
@@ -503,7 +503,7 @@ class Core {
      *
      * @return string
      */
-    public function buildUrl($parts = array()) {
+    public function buildUrl($parts = []) {
         return $this->getConfig()->getBaseUrl() . implode("/", $parts);
     }
 
@@ -517,7 +517,7 @@ class Core {
      *
      * @return string
      */
-    public function buildCourseUrl($parts = array()) {
+    public function buildCourseUrl($parts = []) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
@@ -543,7 +543,7 @@ class Core {
      * @return array
      */
     public function getControllerTypes() {
-        return array('component', 'page', 'action');
+        return ['component', 'page', 'action'];
     }
 
     /**

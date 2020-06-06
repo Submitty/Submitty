@@ -14,7 +14,6 @@
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
 
-        <exclude name="Generic.Arrays.DisallowLongArraySyntax.Found" />
         <exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed" />
         <exclude name="Generic.Files.LineLength.TooLong" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
