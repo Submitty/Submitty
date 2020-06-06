@@ -10,11 +10,11 @@ use tests\BaseUnitTest;
 
 class DatabaseFactoryTester extends BaseUnitTest {
     public function postgresqlDrivers() {
-        return array(
-            array('pgsql'),
-            array('postgresql'),
-            array('postgres')
-        );
+        return [
+            ['pgsql'],
+            ['postgresql'],
+            ['postgres']
+        ];
     }
 
     /**
@@ -23,14 +23,14 @@ class DatabaseFactoryTester extends BaseUnitTest {
      */
     public function testDatabaseFactoryPostgresql($driver) {
         $factory = new DatabaseFactory($driver);
-        $this->assertInstanceOf(PostgresqlDatabase::class, $factory->getDatabase(array()));
+        $this->assertInstanceOf(PostgresqlDatabase::class, $factory->getDatabase([]));
         /** @noinspection PhpParamsInspection */
         $this->assertInstanceOf(DatabaseQueries::class, $factory->getQueries($this->createMockCore()));
     }
 
     public function testDatabaseFactorySqlite() {
         $factory = new DatabaseFactory('sqlite');
-        $this->assertInstanceOf(SqliteDatabase::class, $factory->getDatabase(array()));
+        $this->assertInstanceOf(SqliteDatabase::class, $factory->getDatabase([]));
         /** @noinspection PhpParamsInspection */
         $this->assertInstanceOf(DatabaseQueries::class, $factory->getQueries($this->createMockCore()));
     }
@@ -39,6 +39,6 @@ class DatabaseFactoryTester extends BaseUnitTest {
          $factory = new DatabaseFactory('invalid');
          $this->expectException(\app\exceptions\NotImplementedException::class);
          $this->expectExceptionMessage('Database not implemented for driver: invalid');
-         $factory->getDatabase(array());
+         $factory->getDatabase([]);
     }
 }

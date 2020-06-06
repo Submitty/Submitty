@@ -32,7 +32,7 @@ class ConfigurationController extends AbstractController {
      * @return MultiResponse
      */
     public function viewConfiguration(): MultiResponse {
-        $fields = array(
+        $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
             'default_hw_late_days'           => $this->core->getConfig()->getDefaultHwLateDays(),
@@ -55,7 +55,7 @@ class ConfigurationController extends AbstractController {
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
-        );
+        ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
         if ($this->core->getConfig()->isSubmittyAdminUserVerified()) {
@@ -115,7 +115,7 @@ class ConfigurationController extends AbstractController {
 
         if ($name === "room_seating_gradeable_id") {
             $gradeable_seating_options = $this->getGradeableSeatingOptions();
-            $gradeable_ids = array();
+            $gradeable_ids = [];
             foreach ($gradeable_seating_options as $option) {
                 $gradeable_ids[] = $option['g_id'];
             }
@@ -125,7 +125,7 @@ class ConfigurationController extends AbstractController {
                 );
             }
         }
-        elseif (in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+        elseif (in_array($name, ['default_hw_late_days', 'default_student_late_days'])) {
             if (!ctype_digit($entry)) {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Must enter a number for this field')

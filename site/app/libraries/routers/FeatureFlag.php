@@ -9,7 +9,10 @@ namespace app\libraries\routers;
  * method of a controller. The feature flag is passed
  * as the single argument to the constructor:
  *
- *   @FeatureFlag('foo')
+ * ```php
+ * @FeatureFlag('foo')
+ * class Foo {}
+ * ```
  *
  * @Annotation
  * @Target({"CLASS", "METHOD"})

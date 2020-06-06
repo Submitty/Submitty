@@ -14,7 +14,7 @@ use tests\BaseUnitTest;
 class GradeableListTester extends BaseUnitTest {
     public function testFullList() {
         $core = $this->getCore();
-        $gradeables = array();
+        $gradeables = [];
         $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
             $core,
             "01_future_homework_no_ta",
@@ -168,7 +168,7 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertEquals(4, $list->getGradeableCount(GradeableType::CHECKPOINTS));
         $this->assertEquals(4, $list->getGradeableCount(GradeableType::NUMERIC_TEXT));
 
-        $expected = array('01_future_homework_no_ta', '07_future_checkpoint_no_ta', '11_future_numeric_no_ta');
+        $expected = ['01_future_homework_no_ta', '07_future_checkpoint_no_ta', '11_future_numeric_no_ta'];
         $actual = $list->getFutureGradeables();
         $this->assertCount(count($expected), $actual);
         $this->assertEquals($expected, array_keys($actual));
@@ -176,7 +176,7 @@ class GradeableListTester extends BaseUnitTest {
             $this->assertEquals($gradeables[$key], $actual[$key]);
         }
 
-        $expected = array('02_future_homework', '08_future_checkpoint', '12_future_numeric');
+        $expected = ['02_future_homework', '08_future_checkpoint', '12_future_numeric'];
         $actual = $list->getBetaGradeables();
         $this->assertCount(count($expected), $actual);
         $this->assertEquals($expected, array_keys($actual));
@@ -194,7 +194,7 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertArrayHasKey('04_closed_homework', $actual);
         $this->assertEquals($gradeables['04_closed_homework'], $actual['04_closed_homework']);
 
-        $expected = array('09_grading_lab', '05_grading_homework', '13_grading_numeric');
+        $expected = ['09_grading_lab', '05_grading_homework', '13_grading_numeric'];
         $actual = $list->getGradingGradeables();
         $this->assertCount(count($expected), $actual);
         $this->assertEquals($expected, array_keys($actual));
@@ -202,7 +202,7 @@ class GradeableListTester extends BaseUnitTest {
             $this->assertEquals($gradeables[$key], $actual[$key]);
         }
 
-        $expected = array('10_graded_lab', '14_graded_numeric', '06_graded_homework');
+        $expected = ['10_graded_lab', '14_graded_numeric', '06_graded_homework'];
         $actual = $list->getGradedGradeables();
         $this->assertCount(count($expected), $actual);
         $this->assertEquals($expected, array_keys($actual));
@@ -212,7 +212,7 @@ class GradeableListTester extends BaseUnitTest {
     }
 
     public function testSubmittableHasDueAdmin() {
-        $gradeables = array();
+        $gradeables = [];
         $core = $this->getCore();
         $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
             $core,
@@ -292,7 +292,7 @@ class GradeableListTester extends BaseUnitTest {
     }
 
     public function testSubmittableHasDueGrader() {
-        $gradeables = array();
+        $gradeables = [];
         $core = $this->getCore(false);
         $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
             $core,
@@ -373,7 +373,7 @@ class GradeableListTester extends BaseUnitTest {
     }
 
     public function testSubmittableHasDueStudent() {
-        $gradeables = array();
+        $gradeables = [];
         $core = $this->getCore(false, false);
         $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
             $core,
@@ -454,7 +454,7 @@ class GradeableListTester extends BaseUnitTest {
     }
 
     public function testSubmittableNoDueGrader() {
-        $gradeables = array();
+        $gradeables = [];
         $core = $this->getCore(false);
         $gradeables['01_future_no_due'] = $this->mockGradeable(
             $core,
@@ -516,7 +516,7 @@ class GradeableListTester extends BaseUnitTest {
         $actual = $list->getClosedGradeables();
         $this->assertCount(0, $actual);
 
-        $expected = array('02_grading_no_due', '03_ta_submit_no_due');
+        $expected = ['02_grading_no_due', '03_ta_submit_no_due'];
         $actual = $list->getGradingGradeables();
         $this->assertCount(count($expected), $actual);
         $this->assertEquals($expected, array_keys($actual));
@@ -531,7 +531,7 @@ class GradeableListTester extends BaseUnitTest {
     public function testSubmittableNoDueStudent() {
         $core = $this->GetCore(false, false);
 
-        $gradeables = array();
+        $gradeables = [];
         $gradeables['01_no_submit_no_due'] = $this->mockGradeable(
             $core,
             "01_no_submit_no_due",
@@ -635,7 +635,7 @@ class GradeableListTester extends BaseUnitTest {
 
     public function testNoSubmittableGradeables() {
         $core = $this->getCore();
-        $gradeables = array();
+        $gradeables = [];
         $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable(
             $core,
             "07_future_checkpoint_no_ta",
@@ -656,7 +656,7 @@ class GradeableListTester extends BaseUnitTest {
     public function testGetGradeable() {
         $core = $this->getCore();
 
-        $gradeables = array();
+        $gradeables = [];
         $gradeables['01_electronic'] = $this->mockGradeable(
             $core,
             "01_electronic",

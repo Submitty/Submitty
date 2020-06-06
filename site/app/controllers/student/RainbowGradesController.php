@@ -18,6 +18,6 @@ class RainbowGradesController extends AbstractController {
             $grade_file = file_get_contents($grade_path);
         }
 
-        $this->core->getOutput()->renderOutput(array('submission', 'RainbowGrades'), 'showGrades', $grade_file);
+        $this->core->getOutput()->renderOutput(['submission', 'RainbowGrades'], 'showGrades', $grade_file);
     }
 }

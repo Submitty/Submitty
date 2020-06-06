@@ -30,7 +30,7 @@ class GradeableAutocheck extends AbstractModel {
     protected $description = "";
 
     /** @prop @var array[] Message to show underneath the description for a diff */
-    protected $messages = array();
+    protected $messages = [];
 
     /** @prop @var boolean If this check's file is in results_public */
     protected $public;
@@ -58,8 +58,8 @@ class GradeableAutocheck extends AbstractModel {
 
         if (isset($details['messages'])) {
             foreach ($details['messages'] as $message) {
-                $this->messages[] = array('message' => $message['message'],
-                                            'type' => Utils::prepareHtmlString($message['type']));
+                $this->messages[] = ['message' => $message['message'],
+                                            'type' => Utils::prepareHtmlString($message['type'])];
             }
         }
 
@@ -95,7 +95,7 @@ class GradeableAutocheck extends AbstractModel {
             elseif (substr($details["expected_file"], 0, 16) == "generated_output") {
                 $result_path_array = array_reverse(explode("/", $results_path));
                 $path_array = explode("/", $details["expected_file"]);
-                $inserted_array = array($result_path_array[2],"random_output");
+                $inserted_array = [$result_path_array[2],"random_output"];
                 array_splice($path_array, 1, 0, $inserted_array);
                 if (file_exists($course_path . "/" . implode('/', $path_array))) {
                     $expected_file = $course_path . "/" . implode('/', $path_array);

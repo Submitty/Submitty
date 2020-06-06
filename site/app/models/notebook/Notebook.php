@@ -139,13 +139,13 @@ class Notebook extends AbstractModel {
 
 
       /**
-     * Gets a new 'notebook' which contains information about most recent submissions
-     *
-     * @return array An updated 'notebook' which has the most recent submission data entered into the
-     * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
-     * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
-     * blank.
-     */
+       * Gets a new 'notebook' which contains information about most recent submissions
+       *
+       * @return array An updated 'notebook' which has the most recent submission data entered into the
+       * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
+       * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
+       * blank.
+       */
     public function getMostRecentNotebookSubmissions(int $version, array $new_notebook): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
