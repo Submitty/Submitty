@@ -49,9 +49,9 @@ jobs:
             - openjdk-8-jdk
       env: CLANG_VER="5.0.2"
       before_install:
-        - sudo update-java-alternatives --jre-headless --set java-8-openjdk-amd64
+        - sudo update-java-alternatives --jre-headless --set java-1.8.0-openjdk-amd64
         - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-        - sudo update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
+        - sudo update-alternatives --set javac /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/javac
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
