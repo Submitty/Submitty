@@ -85,16 +85,16 @@ class DiffViewer {
     //The first element of array is used to find the special char, the second is the visual representation, the third is
     // the escape code
     const SPECIAL_CHARS_LIST = [
-                                "space" => [" ", "&nbsp;", " "],
-                                "tabs" => ["\t", "↹", "\\t"],
-                                "carriage return" => ["\r", "↵<br>", "\\r<br>"],
-                                "null characters" => ["\0", "^@", "\\0"],
-                                "smart quote1" => ["\xC2\xAB", "\"", "\\xC2\\xAB"],
-                                "smart quote2" => ["\xE2\x80\x98", "\"", "\\xE2\\x80\\x98"],
-                                "smart quote3" => ["\xE2\x80\x99", "'", "\\xE2\\x80\\x99"],
-                                "em dash" => ["\xE2\x80\x94", "—", "\\xE2\\x80\\x94"],
-                                "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
-                               ];
+        "space" => [" ", "&nbsp;", " "],
+        "tabs" => ["\t", "↹", "\\t"],
+        "carriage return" => ["\r", "↵<br>", "\\r<br>"],
+        "null characters" => ["\0", "^@", "\\0"],
+        "smart quote1" => ["\xC2\xAB", "\"", "\\xC2\\xAB"],
+        "smart quote2" => ["\xE2\x80\x98", "\"", "\\xE2\\x80\\x98"],
+        "smart quote3" => ["\xE2\x80\x99", "'", "\\xE2\\x80\\x99"],
+        "em dash" => ["\xE2\x80\x94", "—", "\\xE2\\x80\\x94"],
+        "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
+    ];
 
     const EXPECTED = 'expected';
     const ACTUAL = 'actual';
