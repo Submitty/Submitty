@@ -40,14 +40,14 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function stringStarts() {
-        return array(
-            array("test", "test", true),
-            array("test", "tes", true),
-            array("test", "te", true),
-            array("test", "t", true),
-            array("test", "", true),
-            array("test", "st", false)
-        );
+        return [
+            ["test", "test", true],
+            ["test", "tes", true],
+            ["test", "te", true],
+            ["test", "t", true],
+            ["test", "", true],
+            ["test", "st", false]
+        ];
     }
 
     /**
@@ -62,14 +62,14 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function stringEnds() {
-        return array(
-            array("test", "test", true),
-            array("test", "est", true),
-            array("test", "st", true),
-            array("test", "t", true),
-            array("test", "", true),
-            array("test", "te", false)
-        );
+        return [
+            ["test", "test", true],
+            ["test", "est", true],
+            ["test", "st", true],
+            ["test", "t", true],
+            ["test", "", true],
+            ["test", "te", false]
+        ];
     }
 
     /**
@@ -89,21 +89,21 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testStripStringFromArray() {
-        $array = array(
+        $array = [
             "test/aa",
-            array(
+            [
                 "test/test2/aa",
                 "bb"
-            )
-        );
-        $expected = array("/aa", array("/2/aa", "bb"));
+            ]
+        ];
+        $expected = ["/aa", ["/2/aa", "bb"]];
         $this->assertEquals($expected, Utils::stripStringFromArray("test", $array));
     }
 
     public function testStripStringFromArrayNull() {
         $this->assertNull(Utils::stripStringFromArray("test", null));
-        $this->assertNull(Utils::stripStringFromArray(null, array()));
-        $this->assertNull(Utils::stripStringFromArray(1, array()));
+        $this->assertNull(Utils::stripStringFromArray(null, []));
+        $this->assertNull(Utils::stripStringFromArray(1, []));
     }
 
     public function elementDataProvider() {
@@ -357,7 +357,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -374,7 +374,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -403,7 +403,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -420,7 +420,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -437,7 +437,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -454,7 +454,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -483,7 +483,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -500,7 +500,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -533,7 +533,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -550,7 +550,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -567,7 +567,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -584,7 +584,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();

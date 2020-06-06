@@ -18,48 +18,49 @@
         {# Title / Page Number #}
         <div class="row">
             <div class="col-label-fixed">
-                <span>Title</span>
+                <label for="component-title-{{component.id}}">Title</label>
             </div>
             <div class="col component-title-container">
-                <input class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
+                <input id="component-title-{{component.id}}" class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
             </div>
             {% if component.page > 0 %}
                 <div class="col-no-gutters page-label">
-                    <span>Page #</span>
+                    <label for="page-number-{{component.id}}">Page #</label>
                 </div>
                 <div class="col-no-gutters">
-                    <input class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)" onmouseup="onComponentPageNumberChange(this)">
+                    <input id="page-number-{{component.id}}" class="page-number" type="number" step="1" min="1" value="{{ component.page }}" onchange="onComponentPageNumberChange(this)" onmouseup="onComponentPageNumberChange(this)">
                 </div>
             {% else %}
-                <input class="page-number" value="{{ component.page }}" hidden/>
+                <input class="page-number" value="{{ component.page }}" aria-label="page number" hidden/>
             {% endif %}
         </div>
 
         {# TA Note #}
         <div class="row">
             <div class="col-label-fixed">
-                <span>Note to TAs</span>
+                <label for="ta-comment-{{component.id}}">Note to TAs</label>
             </div>
             <div class="col tight-right">
-                <textarea class="ta-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
+                <textarea id="ta-comment-{{component.id}}" class="ta-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
             </div>
         </div>
 
         {# Student note #}
         <div class="row">
             <div class="col-label-fixed">
-                <span>Note to Students</span>
+                <label for="student-comment-{{component.id}}">Note to Students</label>
             </div>
             <div class="col tight-right">
-                <textarea class="student-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
+                <textarea id="student-comment-{{component.id}}" class="student-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
             </div>
         </div>
 
         {# Point Inputs #}
         <div class="row point-input-row">
-            <div class="col-label-fixed">Points</div>
+            <label for="max-points-{{component.id}}" class="col-label-fixed">Points</label>
             <div class="col point-input-container">
-                <input class="max-points"
+                <input id="max-points-{{component.id}}"
+                       class="max-points"
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ component.max_value|round(decimal_precision) }}"
@@ -68,9 +69,10 @@
             </div>
         </div>
         <div class="row point-input-row">
-            <div class="col-label-fixed">Additional Extra Credit Points</div>
+            <label for="extra-credit-points-{{component.id}}" class="col-label-fixed">Additional Extra Credit Points</label>
             <div class="col point-input-container">
-                <input class="extra-credit-points"
+                <input id="extra-credit-points-{{component.id}}"
+                       class="extra-credit-points"
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ extra_credit_points|round(decimal_precision) }}"
@@ -80,9 +82,10 @@
             <div class="col"><i>Student scores will be clamped from above to Points + Additional Extra Credit Points</i></div>
         </div>
         <div class="row point-input-row">
-            <div class="col-label-fixed">Negative Penalty Points</div>
+            <label for="penalty-points-{{component.id}}" class="col-label-fixed">Negative Penalty Points</label>
             <div class="col point-input-container">
-                <input class="penalty-points"
+                <input id="penalty-points-{{component.id}}"
+                       class="penalty-points"
                        step="{{ precision }}"
                        type="number" min="0"
                        value="{{ component.lower_clamp|abs|round(decimal_precision) }}"
@@ -93,8 +96,8 @@
         </div>
 
         {# Count up / down #}
-        <div class="row point-input-row count-type-row">
-            <div class="col-label-fixed">How should points be assigned?</div>
+        <fieldset class="row point-input-row count-type-row">
+            <legend class="col-label-fixed">How should points be assigned?</legend>
             <div class="col">
                 <span class="radio-input">
                     <input type="radio" class="count-up-selector count-type-selector key_to_click" tabindex="0"
@@ -109,7 +112,7 @@
                            onclick="onClickCountDown(this)" id="grade_by_count_down_{{ component.id }}"> <label for="grade_by_count_down_{{ component.id }}">Grade by Count Down (from "Points")</label>
                 </span>
             </div>
-        </div>
+        </fieldset>
         <div class="row divider"></div>
     </div>
 {% endblock %}

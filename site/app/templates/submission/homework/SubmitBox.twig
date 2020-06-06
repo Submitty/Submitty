@@ -25,7 +25,7 @@
             <h2>Due: {{ due_date|date(DATE_TIME_FORMAT) }}</h2>
         {% endif %}
         <div class="loading-bar-wrapper">
-            <label for="loading-bar">Upload progress: <span id="loading-bar-percentage"></span></label>
+            <span>Upload progress: <span id="loading-bar-percentage"></span></span>
             <progress id="loading-bar" value="0" ></progress>
         </div>
     </header>
@@ -241,6 +241,10 @@
                     </h2>
                     <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                     <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
+                      <tr style="background:transparent; display:none;">
+                        <th>File Name:</th>
+                        <th>Size:</th>
+                      </tr>
                     </table>
                     <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
                 </div>
@@ -454,5 +458,3 @@
         });
     });
 </script>
-
-

@@ -7,7 +7,7 @@ use app\models\Breadcrumb;
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name) {
         $messages = [];
-        foreach (array('error', 'notice', 'success') as $type) {
+        foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
                 $messages[] = [
                     "type" => $type,

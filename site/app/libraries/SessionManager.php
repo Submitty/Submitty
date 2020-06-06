@@ -16,7 +16,7 @@ class SessionManager {
      */
     private $core;
 
-    private $session = array();
+    private $session = [];
 
     /**
      * SessionManager constructor.
@@ -75,7 +75,7 @@ class SessionManager {
     public function removeCurrentSession(): bool {
         if (isset($this->session['session_id'])) {
             $this->core->getQueries()->removeSessionById($this->session['session_id']);
-            $this->session = array();
+            $this->session = [];
             return true;
         }
         return false;

@@ -12,7 +12,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testUserNoPreferred() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
@@ -26,8 +26,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
-        );
+            'grading_registration_sections' => [1, 2]
+        ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
@@ -42,7 +42,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['registration_section'], $user->getRegistrationSection());
         $this->assertEquals($details['rotating_section'], $user->getRotatingSection());
         $this->assertEquals($details['manual_registration'], $user->isManualRegistration());
-        $this->assertEquals(array(1,2), $user->getGradingRegistrationSections());
+        $this->assertEquals([1,2], $user->getGradingRegistrationSections());
         $this->assertTrue($user->accessAdmin());
         $this->assertTrue($user->accessFullGrading());
         $this->assertTrue($user->accessGrading());
@@ -50,7 +50,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testUserPreferred() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
@@ -63,8 +63,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1,2)
-        );
+            'grading_registration_sections' => [1,2]
+        ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
@@ -78,7 +78,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testPassword() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'user_numeric_id' => "123456789",
             'user_password' => "test",
@@ -91,8 +91,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1,2)
-        );
+            'grading_registration_sections' => [1,2]
+        ];
         $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
         $user->setPassword("test1");
@@ -102,7 +102,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testToObject() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'anon_id' => "TestAnonymous",
             'user_numeric_id' => '123456789',
@@ -117,19 +117,19 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1,2)
-        );
+            'grading_registration_sections' => [1,2]
+        ];
         $user = new User($this->core, $details);
         $actual = $user->toArray();
         password_verify("test", $actual['password']);
         unset($actual['password']);
         ksort($actual);
-        $expected = array(
+        $expected = [
             'displayed_first_name' => 'User',
             'displayed_last_name' => 'Tester',
             'email' => 'test@example.com',
             'legal_first_name' => 'User',
-            'grading_registration_sections' => array(1,2),
+            'grading_registration_sections' => [1,2],
             'group' => User::GROUP_INSTRUCTOR,
             'access_level' => User::LEVEL_FACULTY,
             'id' => 'test',
@@ -145,7 +145,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnonymous",
             'user_updated' => false,
             'instructor_updated' => false,
-            'notification_settings' => array(
+            'notification_settings' => [
                 'reply_in_post_thread' => false,
                 'merge_threads' => false,
                 'all_new_threads' => false,
@@ -164,13 +164,13 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_joined_email' => true,
                 'team_member_submission_email' => true,
                 'self_notification_email' => false
-            )
-        );
+            ]
+        ];
         $this->assertEquals($expected, $actual);
     }
 
     public function testErrorUser() {
-        $user = new User($this->core, array());
+        $user = new User($this->core, []);
         $this->assertFalse($user->isLoaded());
         $this->assertNull($user->getId());
     }

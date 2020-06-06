@@ -247,7 +247,7 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $folder_names = array();
+        $folder_names = [];
         //See which directories we are allowed to read.
         if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
             //These two have the same check
@@ -417,7 +417,7 @@ class MiscController extends AbstractController {
                     );
                     $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
                 }
-                $students_array = array();
+                $students_array = [];
                 foreach ($students as $student) {
                     $students_array[] = $student->getId();
                 }

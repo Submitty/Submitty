@@ -150,7 +150,7 @@ class NotificationFactory {
      */
     private function createNotificationsArray(array $event, array $recipients): array {
         $event['sender_id'] = $this->core->getUser()->getId();
-        $notifications = array();
+        $notifications = [];
         foreach ($recipients as $recipient) {
             $event['to_user_id'] = $recipient;
             $notifications[] = Notification::createNotification($this->core, $event);
@@ -165,7 +165,7 @@ class NotificationFactory {
      * @return array of email objects
      */
     private function createEmailsArray(array $event, array $recipients, bool $author): array {
-        $emails = array();
+        $emails = [];
         foreach ($recipients as $recipient) {
             //Checks if a url is in metadata and sets $relevant_url null or that url
             $metadata = json_decode($event['metadata'], true);

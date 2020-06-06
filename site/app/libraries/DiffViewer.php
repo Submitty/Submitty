@@ -33,7 +33,7 @@ class DiffViewer {
     /**
      * @var array
      */
-    private $actual = array();
+    private $actual = [];
 
     /**
      * @var bool
@@ -52,22 +52,22 @@ class DiffViewer {
     /**
      * @var array
      */
-    private $expected = array();
+    private $expected = [];
 
     /**
      * @var array
      */
-    private $diff = array();
+    private $diff = [];
 
     /**
      * @var array
      */
-    private $add = array();
+    private $add = [];
 
     /**
      * @var array
      */
-    private $link = array();
+    private $link = [];
 
     /**
      * @var string
@@ -76,7 +76,7 @@ class DiffViewer {
     /**
      * @var array
      */
-    private $white_spaces = array();
+    private $white_spaces = [];
 
     const SPECIAL_CHARS_ORIGINAL = 'original';
     const SPECIAL_CHARS_ESCAPE = 'escape';
@@ -84,17 +84,17 @@ class DiffViewer {
 
     //The first element of array is used to find the special char, the second is the visual representation, the third is
     // the escape code
-    const SPECIAL_CHARS_LIST = array(
-                                "space" => [" ", "&nbsp;", " "],
-                                "tabs" => ["\t", "↹", "\\t"],
-                                "carriage return" => ["\r", "↵<br>", "\\r<br>"],
-                                "null characters" => ["\0", "^@", "\\0"],
-                                "smart quote1" => ["\xC2\xAB", "\"", "\\xC2\\xAB"],
-                                "smart quote2" => ["\xE2\x80\x98", "\"", "\\xE2\\x80\\x98"],
-                                "smart quote3" => ["\xE2\x80\x99", "'", "\\xE2\\x80\\x99"],
-                                "em dash" => ["\xE2\x80\x94", "—", "\\xE2\\x80\\x94"],
-                                "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
-                               );
+    const SPECIAL_CHARS_LIST = [
+        "space" => [" ", "&nbsp;", " "],
+        "tabs" => ["\t", "↹", "\\t"],
+        "carriage return" => ["\r", "↵<br>", "\\r<br>"],
+        "null characters" => ["\0", "^@", "\\0"],
+        "smart quote1" => ["\xC2\xAB", "\"", "\\xC2\\xAB"],
+        "smart quote2" => ["\xE2\x80\x98", "\"", "\\xE2\\x80\\x98"],
+        "smart quote3" => ["\xE2\x80\x99", "'", "\\xE2\\x80\\x99"],
+        "em dash" => ["\xE2\x80\x94", "—", "\\xE2\\x80\\x94"],
+        "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
+    ];
 
     const EXPECTED = 'expected';
     const ACTUAL = 'actual';
@@ -120,13 +120,13 @@ class DiffViewer {
     public function reset() {
         $this->has_actual = false;
         $this->display_actual = false;
-        $this->actual = array();
+        $this->actual = [];
         $this->has_expected = false;
         $this->display_expected = false;
-        $this->expected = array();
-        $this->diff = array();
-        $this->add = array();
-        $this->link = array();
+        $this->expected = [];
+        $this->diff = [];
+        $this->add = [];
+        $this->link = [];
     }
 
     /**
@@ -240,8 +240,8 @@ class DiffViewer {
             $diff = FileUtils::readJsonFile($diff_file);
         }
 
-        $this->diff = array(self::EXPECTED => array(), self::ACTUAL => array());
-        $this->add = array(self::EXPECTED => array(), self::ACTUAL => array());
+        $this->diff = [self::EXPECTED => [], self::ACTUAL => []];
+        $this->add = [self::EXPECTED => [], self::ACTUAL => []];
 
         if (isset($diff['differences']) && $can_diff) {
             $diffs = $diff['differences'];
@@ -264,7 +264,7 @@ class DiffViewer {
                             $this->diff[self::ACTUAL][$line_num] = $this->compressRange($line['char_number']);
                         }
                         else {
-                            $this->diff[self::ACTUAL][$line_num] = array();
+                            $this->diff[self::ACTUAL][$line_num] = [];
                         }
                         $act_final = $line_num;
                     }
@@ -280,7 +280,7 @@ class DiffViewer {
                             $this->diff[self::EXPECTED][$line_num] = $this->compressRange($line['char_number']);
                         }
                         else {
-                            $this->diff[self::EXPECTED][$line_num] = array();
+                            $this->diff[self::EXPECTED][$line_num] = [];
                         }
                         $exp_final = $line_num;
                     }
@@ -697,13 +697,13 @@ class DiffViewer {
         sort($range);
         $range[] = -100;
         $last = -100;
-        $return = array();
-        $temp = array();
+        $return = [];
+        $temp = [];
         foreach ($range as $number) {
             if ($number != $last + 1) {
                 if (count($temp) > 0) {
-                    $return[] = array($temp[0], end($temp));
-                    $temp = array();
+                    $return[] = [$temp[0], end($temp)];
+                    $temp = [];
                 }
             }
             $temp[] = $number;
@@ -722,7 +722,7 @@ class DiffViewer {
     public function existsDifference() {
         $this->buildViewer();
         $return = false;
-        foreach (array(self::EXPECTED, self::ACTUAL) as $key) {
+        foreach ([self::EXPECTED, self::ACTUAL] as $key) {
             if (count($this->diff[$key]) > 0 || count($this->add[$key]) > 0) {
                 $return = true;
             }

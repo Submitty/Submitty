@@ -27,9 +27,9 @@ class Output {
     private $buffer_output = true;
 
     private $output_buffer = "";
-    private $breadcrumbs = array();
+    private $breadcrumbs = [];
     private $page_name = "";
-    private $loaded_views = array();
+    private $loaded_views = [];
 
     /** @var Set */
     private $css;
@@ -205,7 +205,7 @@ HTML;
         if (is_array($view)) {
             $view = implode("\\", $view);
         }
-        $func = call_user_func_array(array($this->getView($view), $function), $args);
+        $func = call_user_func_array([$this->getView($view), $function], $args);
         if ($func === false) {
             throw new OutputException("Cannot find function '{$function}' in requested view '{$view}'");
         }
