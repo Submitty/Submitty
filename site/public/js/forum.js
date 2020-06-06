@@ -241,6 +241,22 @@ function socketDeleteThreadHandler(thread_id){
   }
 }
 
+function socketResolveThreadHandler(thread_id){
+  var icon_to_update = $("[data-thread_id='" + thread_id + "']").find("i.fa-question");
+  $(icon_to_update).fadeOut(400, function () {
+    $(icon_to_update).removeClass("fa-question thread-unresolved").addClass("fa-check thread-resolved").fadeIn(400);
+  });
+  $(icon_to_update).attr("title", "Thread Resolved");
+  $(icon_to_update).attr("aria-label", "Thread Resolved");
+
+  if ($("#current-thread").val() == thread_id){
+    $("[title='Mark thread as resolved']").remove();
+
+    var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread was resolved.</div>';
+    $('#messages').append(message);
+  }
+}
+
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
@@ -249,6 +265,9 @@ function initSocketClient() {
     }
     else if (msg.type === "delete_thread"){
       socketDeleteThreadHandler(msg.thread_id);
+    }
+    else if (msg.type === "resolve_thread"){
+      socketResolveThreadHandler(msg.thread_id);
     }
     thread_post_handler();
     loadThreadHandler();
@@ -278,6 +297,7 @@ function changeThreadStatus(thread_id) {
                 $('#messages').append(message);
                 return;
             }
+            window.socketClient.send({'type': "resolve_thread", 'thread_id': thread_id});
             window.location.reload();
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
             $('#messages').append(message);
