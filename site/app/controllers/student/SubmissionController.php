@@ -209,7 +209,7 @@ class SubmissionController extends AbstractController {
      * If success, also returns highest version of the student gradeable.
      *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
-    */
+     */
     public function ajaxValidGradeable($gradeable_id) {
 
         if (!isset($_POST['user_id'])) {
@@ -307,7 +307,7 @@ class SubmissionController extends AbstractController {
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
-    */
+     */
     public function ajaxBulkUpload($gradeable_id) {
         if (empty($_POST)) {
             $max_size =  Utils::returnBytes(ini_get('post_max_size'));
