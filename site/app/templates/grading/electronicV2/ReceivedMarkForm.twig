@@ -1,0 +1,28 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}student-marklist-popup{% endblock %}
+{% block title %}Mark Statistics{% endblock %}
+{% block body %}
+    <h3>
+        <span class="question-title"></span>:
+        <em class="mark-title"></em>
+    </h3>
+    <br>
+    <strong># of submitters with mark:</strong>
+    <span class="section-submitter-count">0</span>
+    (<span class="total-submitter-count">0</span>)
+    <br>
+    <strong># of graded components:</strong>
+    <span class="section-graded-component-count">0</span>
+    (<span class="total-graded-component-count">0</span>)
+    <br>
+    <strong># of total components:</strong>
+    <span class="section-total-component-count">0</span>
+    (<span class="total-total-component-count">0</span>)
+    <br>
+    <br>
+    <strong>Students:</strong>
+    <br>
+    <span class="student-names">
+        <br>Name1
+    </span>
+{% endblock %}

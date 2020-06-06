@@ -1,13 +1,13 @@
+#electronic-gradeable-container {
+    padding: 0;
+    padding-bottom: 20px;
+}
+
 #bar_wrapper {
-    position: absolute;
-    height: 41px;
-    width: 650px;
-    top: -90px;
-    left: 45%;
-    background-color: var(--standard-pale-blue-gray);
     cursor: move;
     z-index:40;
-    border: solid 6px var(--important-post);
+    padding: 10px;
+    /*border: solid 6px var(--important-post);*/
     box-sizing: content-box;
 }
 
@@ -15,25 +15,75 @@
     z-index: 20;
 }
 
-.draggable_content{
+.navigation-box {
+    margin: 4px auto;
+    display: flex;
+    width: fit-content;
+}
+
+.draggable_content {
     width: 100%;
     height:100%;
     overflow: auto;
 }
 
 .grading_toolbar {
-    position:relative;
     display: block;
-    float: left;
     padding-top:3px;
     padding-bottom:3px;
-    background-color: #var(--standard-pale-blue-gray);
+    /*background-color: #var(--standard-pale-blue-gray);*/
 }
 
 .grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;
     box-shadow: 0px 0px 5px 5px var(--standard-vibrant-yellow);
     background-color: yellow;
+}
+
+.ta-navlink-cont {
+    display: inline-block;
+    position: relative;
+    border: 2px solid black;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px #675252;
+}
+
+.nav-btn-cont:before {
+    content: "";
+    width: 2px;
+    position: absolute;
+    height: 100%;
+    background: black;
+    left: 50%;
+    display: inline-block;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+#ungraded-student-navlink {
+    background: #36e08e;
+}
+
+#student-navlink {
+    background: #fa4472;
+}
+
+#grade-inquiry-navlink {
+    background: #36e08e;
+}
+
+.progressbar {
+    width: 100%;
+    height: 100%;
+    border: 2px solid black;
+    box-shadow: 1px 1px 5px black;
+}
+
+.progress-value {
+    position: absolute;
+    top: 49%;
+    left: 50%;
+    transform: translate(-50%,-50%);
 }
 
 .banner {
@@ -166,21 +216,15 @@
     margin: 5px;
 }
 
-.icon-home {
-    background: url('../img/glyphicons-21-home.png') no-repeat -2px -1px;
-    display: inline-block;
-    height: 22px;
-    width: 22px;
-    margin: 5px;
-}
-
 .progress_bar {
     position: relative;
-    height: 31px;
     width: 190px;
-    float: right;
-    background-color: var(--standard-pale-blue-gray);
-    border: 5px solid var(--standard-pale-blue-gray);
+    display: block;
+    margin-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 8px;
+    /*background-color: var(--standard-pale-blue-gray);*/
+    /*border: 5px solid var(--standard-pale-blue-gray);*/
 }
 
 progress {
@@ -191,13 +235,14 @@ progress::-webkit-progress-value {
     background: var(--standard-medium-vibrant-blue);
 }
 
-.draggable {
+.ta-nav-wrapper {
+    width: 100%;
+    background: #5bc0de;
 }
 
 .rubric_panel {
     font-size: 90%;
     cursor: move;
-    position: absolute;
     background-color: var(--standard-pale-blue-gray);
     display: none;
     z-index: 30;
@@ -318,6 +363,11 @@ progress::-webkit-progress-value {
     position: relative;
     top: 2px;
     left: 1%;
+}
+
+.icon-streched {
+    padding: 3px 8px;
+    width: unset;
 }
 
 .rubric-title {
