@@ -741,6 +741,7 @@ HTML;
         		<div class="content" id="electronic-gradeable-container">
 HTML;
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderGradingPanelHeader', $graded_gradeable);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -859,12 +860,18 @@ HTML;
             "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
             "next_ungraded_student_url" => $next_ungraded_student_url,
-            "home_url" => $home_url,
+            "home_url" => $home_url
+        ]);
+    }
+
+    public function renderGradingPanelHeader(GradedGradeable $graded_gradeable) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronicV2/GradingPanelHeader.twig", [
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
         ]);
     }
+
 
     /**
      * Render the Autograding Testcases panel

@@ -86,6 +86,39 @@
     transform: translate(-50%,-50%);
 }
 
+#grading-panel-header {
+    margin-top: 6px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    overflow: auto;
+}
+
+.panel-header-box {
+    display: flex;
+}
+
+.grade-panel {
+    border: 2px solid;
+    padding: 2px 10px 5px;
+    border-radius: 59px;
+    margin-left: 12px;
+}
+
+.grade-panel button {
+    color: var(--text-black);
+    position: relative;
+    padding-left: 22px;
+    white-space: nowrap;
+}
+
+.grade-panel button i {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    font-size: 17px;
+}
+
 .banner {
     border: solid 6px var(--important-post);
     position:relative;
