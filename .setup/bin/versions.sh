@@ -14,7 +14,7 @@ export SysadminTools_Version=v20.01.00
 # JAVA
 export JUNIT_VERSION=4.12
 export HAMCREST_VERSION=1.3
-export JACOCO_VERSION=0.8.5
+export JACOCO_VERSION=0.8.0
 
 # DR. MEMORY
 export DRMEMORY_TAG=release_2.0.1
