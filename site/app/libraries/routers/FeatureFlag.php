@@ -8,7 +8,7 @@ namespace app\libraries\routers;
  * Use this to enable access to a given controller or
  * method of a controller. The feature flag is passed
  * as the single argument to the constructor:
- * 
+ *
  * ```php
  * @FeatureFlag('foo')
  * class Foo {}

@@ -59,10 +59,14 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * ```php
  * @AccessControl(permission="grading.simple")
- * class SomeController extends AbstractController {
- *     @AccessControl(role="INSTRUCTOR")
- *     public function foo() {...}
- * }
+ * class SomeController extends AbstractController {}
+ * ```
+ *
+ * and then in the class:
+ *
+ * ```php
+ * @AccessControl(role="INSTRUCTOR")
+ * public function foo() {...}
  * ```
  *
  * @Annotation
