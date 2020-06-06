@@ -566,7 +566,7 @@ WHERE status = 1"
             if ($value != 'false') {
                 $results[$key] = 'true';
             }
-            $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true' ? true : false);
+            $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true');
             $updates .= $key . ' = ?,';
         }
 
@@ -779,7 +779,7 @@ WHERE status = 1"
         $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
         $parent_id = $this->course_db->rows()[0]["parent_id"];
         $children = [$post_id];
-        $get_deleted = ($newStatus ? false : true);
+        $get_deleted = $newStatus == 0;
         $this->findChildren($post_id, $thread_id, $children, $get_deleted);
 
         if (!$newStatus) {
@@ -5087,7 +5087,7 @@ AND gc_id IN (
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT {$conflict_clause}
                 DO
-                    UPDATE SET 
+                    UPDATE SET
                         goc_overall_comment=?;
             ";
 
@@ -5887,7 +5887,7 @@ AND gc_id IN (
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               LEFT JOIN (
-                SELECT 
+                SELECT
                     json_agg(goc_grader_id) as commenter_ids,
                     json_agg(goc_overall_comment) as overall_comments,
                     g_id,

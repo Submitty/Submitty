@@ -750,13 +750,13 @@ class ForumController2 extends AbstractController {
         //Get post data
         $title = trim($_POST['title']);
         $thread_post_content = $_POST['thread_post_content'];
-        $anon = !empty($_POST['Anon']) ? true : false;
+        $anon = !empty($_POST['Anon']);
         $thread_status = $_POST['thread_status'];
 
 
         //Default to false
-        $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true' ? true : false;
-        $email_announcement = !empty($_POST['EmailAnnouncement']) && $this->core->getUser()->accessFullGrading() && $_POST['EmailAnnouncement'] == 'true' ? true : false;
+        $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true';
+        $email_announcement = !empty($_POST['EmailAnnouncement']) && $this->core->getUser()->accessFullGrading() && $_POST['EmailAnnouncement'] == 'true';
 
         $categories_ids  = [];
         foreach ($_POST["cat"] as $category_id) {
@@ -789,7 +789,7 @@ class ForumController2 extends AbstractController {
         $parent_id = $_POST['parent_id'];
         $post_content = $_POST['thread_post_content'];
         $thread_id = $_POST['thread_id'];
-        $anon = !empty($_POST['Anon']) ? true : false;
+        $anon = !empty($_POST['Anon']);
 
 
         return $this->core->getForum()->publish([

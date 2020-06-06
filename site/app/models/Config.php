@@ -452,10 +452,17 @@ class Config extends AbstractModel {
             $this->$key = intval($this->$key);
         }
 
-        $array = ['zero_rubric_grades', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled", 'queue_contact_info'];
+        $array = [
+            'zero_rubric_grades',
+            'display_rainbow_grades_summary',
+            'display_custom_message',
+            'forum_enabled', 'regrade_enabled',
+            'seating_only_for_instructor',
+            'queue_enabled',
+            'queue_contact_info'
+        ];
         foreach ($array as $key) {
-            $this->$key = ($this->$key == true) ? true : false;
+            $this->$key = (bool) $this->$key;
         }
 
         if (!empty($this->course_json['feature_flags']) && is_array($this->course_json['feature_flags'])) {
