@@ -19,28 +19,33 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * Example (role only):
  *
- *      The following function is only accessible to full access graders and
- *      instructors.
+ * The following function is only accessible to full access graders and
+ * instructors.
  *
+ * ```php
  * @AccessControl(role="FULL_ACCESS_GRADER")
- *      public function foo() {...}
- *
+ * public function foo() {...}
+ * ```
  * Example (permission only):
  *
- *      All functions inside the following class is only accessible to users
- *      with "grading.simple" permission, which is equivalent to having
- *      canI("grading.simple") being true.
+ * All functions inside the following class is only accessible to users
+ * with "grading.simple" permission, which is equivalent to having
+ * canI("grading.simple") being true.
  *
+ * ```php
  * @AccessControl(permission="grading.simple")
- *      class SomeController extends AbstractController {...}
+ * class SomeController extends AbstractController {...}
+ * ```
  *
  * Example (role & permission):
  *
- *      The following function is only accessible to full access graders
- *      and instructors with "grading.simple" permission.
+ * The following function is only accessible to full access graders
+ * and instructors with "grading.simple" permission.
  *
+ * ```php
  * @AccessControl(role="FULL_ACCESS_GRADER", permission="grading.simple")
- *      public function foo() {...}
+ * public function foo() {...}
+ * ```
  *
  * Note that if you use method level @AccessControl() annotation, the class
  * level @AccessControl() annotation will not be considered at the same time.
@@ -49,14 +54,16 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * Example (class & method):
  *
- *      The foo() function will only consider if the user has the "instructor"
- *      role, and will NOT check the "grading.simple" permission.
+ * The foo() function will only consider if the user has the "instructor"
+ * role, and will NOT check the "grading.simple" permission.
  *
+ * ```php
  * @AccessControl(permission="grading.simple")
- *      class SomeController extends AbstractController {
- * @AccessControl(role="INSTRUCTOR")
- *          public function foo() {...}
- *      }
+ * class SomeController extends AbstractController {
+ *     @AccessControl(role="INSTRUCTOR")
+ *     public function foo() {...}
+ * }
+ * ```
  *
  * @Annotation
  * @Target({"CLASS", "METHOD"})
