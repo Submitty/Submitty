@@ -169,6 +169,7 @@ class Server implements MessageComponentInterface {
             $this->broadcast($from, 'pong');
             return;
         }
+
         if ($this->checkAuth($from)) {
             $msg = json_decode($msgString, true);
 

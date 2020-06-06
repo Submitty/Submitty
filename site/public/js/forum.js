@@ -224,11 +224,31 @@ function socketNewThreadHandler(thread_id){
   });
 }
 
+function socketDeleteThreadHandler(thread_id){
+  var thread_to_delete = "[data-thread_id='" + thread_id + "']";
+  $(thread_to_delete).fadeOut(400, function () {
+    $(thread_to_delete).next().remove();
+    $(thread_to_delete).remove();
+  });
+
+  if ($("#current-thread").val() == thread_id){
+    var new_url = buildCourseUrl(['forum', 'threads']);
+    window.location.replace(new_url);
+
+    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Thread was deleted.</div>';
+    $('#messages').append(message);
+    return;
+  }
+}
+
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
     if(msg.type === "new_thread"){
       socketNewThreadHandler(msg.thread_id);
+    }
+    else if (msg.type === "delete_thread"){
+      socketDeleteThreadHandler(msg.thread_id);
     }
     thread_post_handler();
     loadThreadHandler();
@@ -1085,12 +1105,14 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 var new_url = "";
                 switch(json['data']['type']){
                     case "thread":
+                      window.socketClient.send({'type': "delete_thread", 'thread_id': thread_id});
+                      new_url = buildCourseUrl(['forum', 'threads']);
+                      break;
+                    case "post":
+                      new_url = buildCourseUrl(['forum', 'threads', thread_id]);
+                      break;
                     default:
                         new_url = buildCourseUrl(['forum', 'threads']);
-                        break;
-
-                    case "post":
-                        new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                         break;
                 }
                 window.location.replace(new_url);
