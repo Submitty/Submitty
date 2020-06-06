@@ -22,8 +22,12 @@ use app\models\notebook\SubmissionMultipleChoice;
 
 class SubmissionController extends AbstractController {
 
-    private $upload_details = ['version' => -1, 'version_path' => null, 'user_path' => null,
-                                    'assignment_settings' => false];
+    private $upload_details = [
+        'version' => -1,
+        'version_path' => null,
+        'user_path' => null,
+        'assignment_settings' => false
+    ];
 
 
     /**
