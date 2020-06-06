@@ -640,10 +640,10 @@ class HomeworkView extends AbstractView {
         if ($version_instance !== null) {
             $total_score += $version_instance->getTotalPoints();
             if ($show_hidden) {
-                $total_max += $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
+                $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
             else {
-                $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+                $total_max += $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit();
             }
         }
         //Clamp full gradeable score to zero

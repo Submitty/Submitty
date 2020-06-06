@@ -877,6 +877,8 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
+        $peer = $gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $team = $gradeable->isTeamAssignment();
 
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
@@ -892,11 +894,18 @@ class ElectronicGraderController extends AbstractController {
             }
 
             // Get the graded gradeable for the $from user
-            $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
-            if ($from_graded_gradeable === false) {
-                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            $from_graded_gradeable = false;
+            if ($peer && !$team) {
+                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($from)[$from], false);
             }
-
+            else {
+                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
+            }
+            
+            if ($from_graded_gradeable === false) {
+                 $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            }
+            
             // Get the user ID of the user we were viewing on the TA grading interface
             $from_id = $from_graded_gradeable->getSubmitter();
 
@@ -925,19 +934,23 @@ class ElectronicGraderController extends AbstractController {
 
             // Reassign who_id
             if (!is_null($goToStudent)) {
-                $who_id = $goToStudent->getId();
+                $who_id = $peer && !$team ? $goToStudent->getAnonId() :   $goToStudent->getId();
             }
         }
 
         // Get the graded gradeable for the submitter we are requesting
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
+        $graded_gradeable = false;
+        if ($peer && !$team) {
+            if (array_key_exists($who_id, $this->core->getQueries()->getUserFromAnon($who_id))) {
+                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
+            }
+        }
+        else {
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
+        }
         if ($graded_gradeable === false) {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
-        }
-
-        $peer = false;
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
-            $peer = true;
+                $peer = false;
         }
 
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
@@ -948,7 +961,6 @@ class ElectronicGraderController extends AbstractController {
         $graded = 0;
         $total = 0;
         $total_submitted = 0;
-        $team = $gradeable->isTeamAssignment();
         if ($peer) {
             $section_key = 'registration_section';
             $total = $gradeable->getPeerGradeSet();

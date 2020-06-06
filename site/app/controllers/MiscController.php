@@ -220,7 +220,10 @@ class MiscController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $version = null, $origin = null) {
+    public function downloadSubmissionZip($gradeable_id, $user_id, $is_anon, $version = null, $origin = null) {
+        if ($is_anon) {
+            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+        }
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
