@@ -4705,6 +4705,7 @@ AND gc_id IN (
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                 $gradeable->isRegradeAllowed(),
+                $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
                 $gradeable->isDiscussionBased()
             ];
@@ -4734,10 +4735,11 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed,
+                  eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5087,7 +5089,7 @@ AND gc_id IN (
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT {$conflict_clause}
                 DO
-                    UPDATE SET 
+                    UPDATE SET
                         goc_overall_comment=?;
             ";
 
@@ -5887,7 +5889,7 @@ AND gc_id IN (
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               LEFT JOIN (
-                SELECT 
+                SELECT
                     json_agg(goc_grader_id) as commenter_ids,
                     json_agg(goc_overall_comment) as overall_comments,
                     g_id,
