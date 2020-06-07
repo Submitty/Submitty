@@ -92,7 +92,7 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
 
-    $('input,select,textarea').change(function () {
+    $('#peer_graders_list').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
@@ -204,6 +204,7 @@ $(document).ready(function () {
                     }
                     // Clear errors by just removing red background
                     for (let key in data) {
+                        console.log("Hello");
                         if (data.hasOwnProperty(key)) {
                             clearError(key);
                         }
@@ -465,7 +466,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
                 else {
                     alert('Internal server error');
-                    console.error(response.message);
+                    console.error(response.status);
                 }
             },
             error: function (response) {
