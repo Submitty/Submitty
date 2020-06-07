@@ -600,8 +600,6 @@ class ForumController extends AbstractController {
         $current_user_id = $this->core->getUser()->getId();
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
-        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
-        $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
         if (is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
             $message = "";
