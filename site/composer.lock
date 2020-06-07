@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4fe203daa7ed39d0a03a41bb7343adf8",
+    "content-hash": "fa2a2480caad26432cbfc6f8b7fcdb1f",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2593,16 +2593,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.23",
+            "version": "0.12.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "71e529efced79e055fa8318b692e7f7d03ea4e75"
+                "reference": "f108dabe757a584fafc3baabc0fabf4d45e040f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/71e529efced79e055fa8318b692e7f7d03ea4e75",
-                "reference": "71e529efced79e055fa8318b692e7f7d03ea4e75",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f108dabe757a584fafc3baabc0fabf4d45e040f1",
+                "reference": "f108dabe757a584fafc3baabc0fabf4d45e040f1",
                 "shasum": ""
             },
             "require": {
@@ -2631,7 +2631,7 @@
                 "MIT"
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
-            "time": "2020-05-05T12:55:44+00:00"
+            "time": "2020-06-07T22:01:45+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
