@@ -40,13 +40,11 @@ class Email extends AbstractModel {
         $this->setUserId($details["to_user_id"]);
         $this->setSubject($this->formatSubject($details["subject"]));
 
-        $relevant_url = null;
-        if (array_key_exists("relevant_url", $details)) {
-            $relevant_url = $details["relevant_url"];
-        }
-
-        $author = $details["author"];
-        $this->setBody($this->formatBody($details["body"], $relevant_url, $author));
+        $this->setBody($this->formatBody(
+            $details["body"],
+            $details['relevant_url'] ?? null,
+            $details['author'] ?? false
+        ));
     }
 
     //inject course label into subject
