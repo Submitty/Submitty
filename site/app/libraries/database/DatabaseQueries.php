@@ -4705,6 +4705,7 @@ AND gc_id IN (
                 $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                 $gradeable->isRegradeAllowed(),
+                $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
                 $gradeable->isDiscussionBased()
             ];
@@ -4734,10 +4735,11 @@ AND gc_id IN (
                   eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed,
+                  eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
