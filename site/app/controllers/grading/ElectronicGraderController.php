@@ -47,13 +47,19 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
+    /* Used in ajaxRandomizePeets as a helper function.
+    @param  $type
+    */
+    public function arr_rotate($array,$rotate_count) {
+        
+    }
 /**
         * Route for randomizing peer assignments
         * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
         * @AccessControl(role="INSTRUCTOR")
     */ 
     public function ajaxRandomizePeers($gradeable_id){
-        $number_to_grade=1;
+        $number_to_grade=$_POST['number_to_grade'];
        // $gradeable_id=$_POST['gradeable_id'];
         $gradeable = $this->tryGetGradeable($gradeable_id);
          if ($gradeable === false) {
@@ -74,8 +80,35 @@ class ElectronicGraderController extends AbstractController {
               array_push($student_array,$student->getId());
           }
           $graded_array=$student_array;
+          $final_info=[];
+          shuffle($student_array);
+          array_push($final_info,$student_array);
           $final_grading_info=[];
-          foreach($student_array as $grader){
+          $max_offset=sizeof($student_array);
+          $offset_array=[];
+          for($i=0;$i<$number_to_grade;++$i){
+            $random_offset=rand(1,$max_offset);
+            array_push($offset_array,$random_offset);
+          }
+          foreach($offset_array as $element){
+            $temp_array=$student_array;
+            for ($i = 0; $i < $element; $i++) {
+                array_push($temp_array, array_shift($temp_array));
+            }
+            //arr_rotate($temp_array,);
+            array_push($final_info,$temp_array);
+          }
+          for($i=0;$i<sizeof($final_info[0]);++$i){
+              $temp=[];
+              for($j=1;$j<sizeof($final_info);++$j){
+                  array_push($temp,$final_info[$j][$i]);
+              }
+           //   $this->core->getOutput()->renderJsonSuccess($temp);
+                  //array_push($temp,$final_info[0][$i],$temp);
+            array_push($final_grading_info,[$final_info[0][$i],$temp]);
+          }
+            
+         /* foreach($student_array as $grader){
               $temp_array=$graded_array;
               if (($key = array_search($grader, $temp_array)) !== false) {
                 unset($temp_array[$key]);
@@ -85,14 +118,15 @@ class ElectronicGraderController extends AbstractController {
               for($i=0;$i<$number_to_grade;++$i){
                  array_push($grading_list,$temp_array[$i]);
                  if (($key = array_search($temp_array[$i], $graded_array)) !== false) {
-                    unset($graded_array[$key]);
+                    unset($graded_array[$key]); 
                 }
               }
               array_push($final_grading_info,[$grader,$grading_list]);
-          }
-         $gradeable->setRandomPeerGradersList($final_grading_info);
+          }*/
+          $this->core->getOutput()->renderJsonSuccess($final_grading_info);
+        $gradeable->setRandomPeerGradersList($final_grading_info);
         // $response_data=json_encode($download_info,true); 
-        $this->core->getOutput()->renderJsonSuccess($final_grading_info);
+       
          }
     /**
      * Route for getting whitespace information for the diff viewer
