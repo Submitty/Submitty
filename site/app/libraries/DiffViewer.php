@@ -183,7 +183,7 @@ class DiffViewer {
                 if (filesize($actual_file) < $size_limit) {
                     $this->actual_file_name = $actual_file;
                     $this->actual = file_get_contents($actual_file);
-                    $this->has_actual = trim($this->actual) !== "" ? true : false;
+                    $this->has_actual = trim($this->actual) !== "";
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
                 }
@@ -192,7 +192,7 @@ class DiffViewer {
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
                     $this->actual = file_get_contents($actual_file, null, null, 0, $size_limit);
-                    $this->has_actual = trim($this->actual) !== "" ? true : false;
+                    $this->has_actual = trim($this->actual) !== "";
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
                 }
@@ -209,7 +209,7 @@ class DiffViewer {
             else {
                 if (filesize($expected_file) < $size_limit) {
                     $this->expected = file_get_contents($expected_file);
-                    $this->has_expected = trim($this->expected) !== "" ? true : false;
+                    $this->has_expected = trim($this->expected) !== "";
                     $this->expected = explode("\n", $this->expected);
                     $this->display_expected = true;
                 }
@@ -217,7 +217,7 @@ class DiffViewer {
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
                     $this->expected = file_get_contents($expected_file, null, null, 0, $size_limit);
-                    $this->has_expected = trim($this->expected) !== "" ? true : false;
+                    $this->has_expected = trim($this->expected) !== "";
                     $this->expected = explode("\n", $this->expected);
                     $this->display_expected = true;
                 }

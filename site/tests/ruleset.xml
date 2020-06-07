@@ -33,7 +33,6 @@
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedMethod" />
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.WriteOnlyProperty" />
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedProperty" />
-        <exclude name="SlevomatCodingStandard.ControlStructures.UselessTernaryOperator.UselessTernaryOperator" />
         <exclude name="SlevomatCodingStandard.ControlStructures.UselessIfConditionWithReturn" />
         <exclude name="SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly.ReferencedGeneralException" />
         <exclude name="SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter" />
