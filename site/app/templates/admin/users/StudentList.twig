@@ -20,14 +20,15 @@
                     <th>Last Name</th>
                     <th>Rotating Section</th>
                     <th>UTC Offset / Time Zone</th>
-                    <th>Edit Student</th>
                     <th>View Grades</th>
+                    <th>Edit Student</th>
+                    <th>Delete Student</th>
                 </tr>
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
                     <tr class="info">
-                        <th class="section-break" colspan="9">Students Enrolled in Registration Section {{ registration }}</td>
+                        <th class="section-break" colspan="10">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
                         {% set class = "" %}
@@ -47,7 +48,6 @@
                             <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ formatted_tzs[student.getId()] }}</td>
-                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
                             <td>
                                 <form method="post" action="{{ view_grades_url }}">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -55,6 +55,8 @@
                                     <a onclick="$(this).parent().submit();"><i class="fas fa-chart-line"></i></a>
                                 </form>
                             </td>
+                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                            <td><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedFirstName() }}', '{{ student.getDisplayedLastName() }}');" aria-label="delete student {{ student.getDisplayedFirstName() }} {{ student.getDisplayedLastName() }}"><i class="fas fa-trash"></i></a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -67,3 +69,4 @@
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
+{% include('admin/users/DeleteUserForm.twig') %}
