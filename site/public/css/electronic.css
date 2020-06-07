@@ -1,8 +1,29 @@
+/* TODO finally put this code to server and sidebar css*/
+body {
+    min-width: auto;
+}
+#submitty-body {
+    height: 100vh;
+}
+main#main {
+    min-width: 0;
+}
+#wrapper {
+    padding-top: 30px;
+    min-height: 0;
+}
+
+aside {
+    margin: 0;
+    padding-top: 0;
+    overflow: scroll;
+}
+
+
 #electronic-gradeable-container {
+    height: 100%;
     padding: 0;
-    height:100%;
-    max-height: 100%;
-    min-height: 100%;
+    margin: 0 20px 0 0;
 }
 
 #bar_wrapper {
@@ -287,12 +308,13 @@ progress::-webkit-progress-value {
     background-color: var(--standard-pale-blue-gray);
     display: none;
     z-index: 30;
-    overflow:hidden;
+    overflow: auto;
+    margin: 10px;
+    height: calc(100% - 140px);
     opacity: 0.95;
 }
 
 #autograding_results.rubric_panel {
-    height: calc(100% - 140px);
     display: block;
     z-index: auto;
     margin: 10px;
@@ -887,24 +909,6 @@ tr.is_publish {
 
 #mark-conflict-popup .mark-conflict-container {
     margin-top: 25px;
-}
-
-/*Submission Panel CSS*/
-
-#submission_browser {
-    left:15px;
-    bottom:40px;
-    width:48%;
-    height:30%;
-    overflow: hidden;
-}
-
-#discussion_browser {
-    left:15px;
-    bottom:40px;
-    width:48%;
-    height:30%;
-    overflow: hidden;
 }
 
 #discussion_browser.rubric_panel {

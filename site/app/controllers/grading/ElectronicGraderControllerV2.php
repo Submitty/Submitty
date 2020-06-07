@@ -1083,9 +1083,9 @@ class ElectronicGraderControllerV2 extends AbstractController {
         );
         Logger::logTAGrading($logger_params);
 
-        $this->core->getOutput()->addInternalCss('electronic.css');
         $this->core->getOutput()->addInternalCss('forum.css');
         $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('electronic.css');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
