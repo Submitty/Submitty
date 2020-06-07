@@ -1,6 +1,6 @@
 <div id="grading-panel-header">
     <div class="panel-header-box">
-        <span class="grade-panel" id="autograding-results-btn">
+        <span class="grade-panel" id="autograding_results_btn">
             <button title="Show/Hide Autograding Testcases (Press A)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
@@ -9,7 +9,7 @@
                 <i class="fas fa-list"></i>Autograding Testcases
             </button>
         </span>
-        <span class="grade-panel" id="grading-rubric-btn">
+        <span class="grade-panel" id="grading_rubric_btn">
             <button title="Show/Hide Grading Rubric (Press G)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
@@ -18,7 +18,7 @@
                 <i class="fas fa-edit"></i>Grading Rubric
             </button>
         </span>
-        <span class="grade-panel" id="submission-btn">
+        <span class="grade-panel" id="submission_browser_btn">
             <button title="Show/Hide Submission and Results Browser (Press O)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
@@ -28,7 +28,7 @@
             </button>
         </span>
         {% if ((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) %}
-            <span class="grade-panel" id="student-info-btn">
+            <span class="grade-panel" id="student_info_btn">
                 <button title="Show/Hide Student Information (Press S)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -39,7 +39,7 @@
             </span>
         {% endif %}
         {% if peer_gradeable and not i_am_a_peer %}
-            <span class="grade-panel" id="peer-info-btn">
+            <span class="grade-panel" id="peer_info_btn">
                 <button title="Show/Hide Peer Information (Press P)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -50,7 +50,7 @@
             </span>
         {% endif %}
         {% if discussion_based %}
-            <span class="grade-panel" id="discussion-posts-btn">
+            <span class="grade-panel" id="discussion_browser_btn">
                 <button title="Show/Hide Discussion Posts"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -61,7 +61,7 @@
             </span>
         {% endif %}
         {% if regrade_panel_available %}
-            <span class="grade-panel" id="grade-inquiry-btn">
+            <span class="grade-panel" id="regrade_info_btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn key_to_click"
                         tabindex="0"

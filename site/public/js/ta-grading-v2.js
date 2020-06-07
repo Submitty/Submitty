@@ -33,7 +33,7 @@ function eraseCookie(name) {
 
 function deleteCookies(){
   $.each(document.cookie.split(/; */), function(){
-    var cookie = this.split("=")
+    var cookie = this.split("=");
     if(!cookie[1] || cookie[1] == 'undefined'){
       document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       document.cookie = "cookie_version=-1; path=/;";
@@ -46,9 +46,6 @@ function onAjaxInit() {}
 function readCookies(){
 
   var silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
-
-  // var pdf_annotation_bar_top = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_top\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  // var pdf_annotation_bar_left = document.cookie.replace(/(?:(?:^|.*;\s*)pdf_annotation_bar_left\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
   var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
   var opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
@@ -124,7 +121,7 @@ function updateCookies(){
     });
   });
   files = JSON.stringify(files);
-  document.cookie = "files=" + files + "; path=/;"
+  document.cookie = "files=" + files + "; path=/;";
 
   document.cookie = "cookie_version=" + cookie_version + "; path=/;";
 }
@@ -211,105 +208,64 @@ registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, fu
 
 //-----------------------------------------------------------------------------
 // Panel show/hide
+//
 
-function isAutogradingVisible() {
-  return $("#autograding_results").is(":visible");
-}
-
-function isRubricVisible() {
-  return $("#grading_rubric").is(":visible");
-}
-
-function isSubmissionsVisible() {
-  return $("#submission_browser").is(":visible");
-}
-
-function isInfoVisible() {
-  return $("#student_info").is(":visible");
-}
-function isRegradeVisible(){
-  return $("#regrade_info").is(":visible");
-}
-
-function isDiscussionVisible() {
-  return $("#discussion_browser").is(":visible");
-}
-
-function isPeerVisible() {
-  return $("#peer_info").is(":visible");
-}
-
-function setAutogradingVisible(visible) {
-  $('.grading_toolbar .fa-list').toggleClass('icon-selected', visible);
-  $("#autograding_results").toggle(visible);
-  hideIfEmpty("#autograding_results");
+function setPanelsVisiblilities (ele) {
+  let panelElements = [
+      { str: "#autograding_results", icon: ".grading_toolbar .fa-list"},
+      { str: "#grading_rubric", icon: ".grading_toolbar .fa-edit"},
+      { str: "#submission_browser", icon: "grading_toolbar .fa-folder-open.icon-header"},
+      { str: "#student_info", icon: ".grading_toolbar .fa-user"},
+      { str: "#regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+      { str: "#discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
+      { str: "#peer_info", icon: ".grading_toolbar .fa-users"}
+    ];
+  panelElements.forEach((panel) => {
+    //hide all panels but given one
+    if (panel.str !== ele) {
+      $(panel.str).hide();
+      $(panel.icon).removeClass('icon-selected');
+      $(panel.str + "_btn").removeClass('active');
+    } else {
+      const eleVisibility = !$(panel.str).is(":visible");
+      $(panel.str).toggle(eleVisibility);
+      $(panel.icon).toggleClass('icon-selected', eleVisibility);
+      $(panel.str + "_btn").toggleClass('active', eleVisibility);
+    }
+  });
 }
 
-function setRubricVisible(visible) {
-  $('.grading_toolbar .fa-edit').toggleClass('icon-selected', visible);
-  $("#grading_rubric").toggle(visible);
-}
-
-function setSubmissionsVisible(visible) {
-  $('.grading_toolbar .fa-folder-open.icon-header').toggleClass('icon-selected', visible);
-  $("#submission_browser").toggle(visible);
-  hideIfEmpty("#submission_browser");
-}
-
-function setInfoVisible(visible) {
-  $('.grading_toolbar .fa-user').toggleClass('icon-selected', visible);
-  $("#student_info").toggle(visible);
-  hideIfEmpty("#student_info");
-}
-
-function setRegradeVisible(visible) {
-  $('.grading_toolbar .grade_inquiry_icon').toggleClass('icon-selected', visible);
-  $("#regrade_info").toggle(visible);
-  hideIfEmpty("#regrade_info");
-}
-
-function setDiscussionVisible(visible) {
-  $('.grading_toolbar .fa-comment-alt').toggleClass('icon-selected', visible);
-  $("#discussion_browser").toggle(visible);
-  hideIfEmpty("#discussion_browser");
-}
-
-function setPeerVisible(visible) {
-  $('.grading_toolbar .fa-users').toggleClass('icon-selected', visible);
-  $("#peer_info").toggle(visible);
-}
 function toggleAutograding() {
-  setAutogradingVisible(!isAutogradingVisible());
+  setPanelsVisiblilities("#autograding_results");
 }
 
 function toggleRubric() {
-  setRubricVisible(!isRubricVisible());
+  setPanelsVisiblilities("#grading_rubric");
 }
 
 function toggleSubmissions() {
-  setSubmissionsVisible(!isSubmissionsVisible());
+  setPanelsVisiblilities("#submission_browser");
 }
 
 function toggleInfo() {
-  setInfoVisible(!isInfoVisible());
+  setPanelsVisiblilities("#student_info");
 }
 function toggleRegrade() {
-  setRegradeVisible(!isRegradeVisible());
+  setPanelsVisiblilities("#regrade_info");
 }
 
 function toggleDiscussion() {
-  setDiscussionVisible(!isDiscussionVisible());
+  setPanelsVisiblilities("#discussion_browser");
 }
 
 function togglePeer() {
-  setPeerVisible(!isPeerVisible());
+  setPanelsVisiblilities("#peer_info");
 }
 
 function resetModules() {
   deleteCookies();
   updateCookies();
 }
-
 
 registerKeyHandler({name: "Reset Panel Positions", code: "KeyR"}, function() {
   resetModules();
@@ -420,7 +376,6 @@ registerKeyHandler({name: "Toggle Rubric Edit Mode", code: "KeyE"}, function() {
   onToggleEditMode();
   updateCookies();
 });
-
 
 //-----------------------------------------------------------------------------
 // Selecting marks

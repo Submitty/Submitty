@@ -45,12 +45,6 @@ aside {
     width: fit-content;
 }
 
-.draggable_content {
-    width: 100%;
-    height:100%;
-    overflow: auto;
-}
-
 .grading_toolbar {
     display: block;
     padding-top:3px;
@@ -136,6 +130,7 @@ aside {
     cursor: pointer;
     padding-left: 22px;
     white-space: nowrap;
+    outline: none;
 }
 
 .grade-panel button i {
@@ -147,6 +142,10 @@ aside {
 
 .grade-panel:hover button {
     color: white;
+}
+
+#regrade_inner_info .inner-container {
+    padding: 20px;
 }
 
 .banner {
@@ -925,49 +924,49 @@ tr.is_publish {
     display:inline-block;
 }
 
-#autograding-results-btn {
+#autograding_results_btn {
     border: 2px solid #bc0a33;
 }
-#autograding-results-btn:hover {
+#autograding_results_btn:hover, #autograding_results_btn.active {
     background: #962e2e;
 }
 
-#grading-rubric-btn {
+#grading_rubric_btn {
     border: 2px solid #249c63;
 }
-#grading-rubric-btn:hover {
+#grading_rubric_btn:hover, #grading_rubric_btn.active {
     background: #1c794d;
 }
 
-#submission-btn {
+#submission_browser_btn {
     border: 2px solid #1c83b7;
 }
-#submission-btn:hover {
+#submission_browser_btn:hover, #submission_browser_btn.active {
     background: #286888;
 }
 
-#student-info-btn {
+#student_info_btn {
     border: 2px solid #316895;
 }
-#student-info-btn:hover {
+#student_info_btn:hover, #student_info_btn.active {
     background: #316895;
 }
 
-#peer-info-btn {
+#peer_info_btn {
     border: 2px solid #316895;
 }
-#peer-info-btn:hover {
+#peer_info_btn:hover, #peer_info_btn.active {
     background: #316895;
 }
-#discussion-posts-btn {
+#discussion_browser_btn {
     border: 2px solid #316895;
 }
-#discussion-posts-btn:hover {
+#discussion_browser_btn:hover, #discussion_browser_btn.active {
     background: #316895;
 }
-#grade-inquiry-btn {
+#regrade_info_btn {
     border: 2px solid #f29f0d;
 }
-#grade-inquiry-btn:hover {
+#regrade_info_btn:hover, #regrade_info_btn.active {
     background: #9e7835;
 }
