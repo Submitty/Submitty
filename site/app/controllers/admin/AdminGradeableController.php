@@ -836,12 +836,13 @@ class AdminGradeableController extends AbstractController {
             }
 
             $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
-
+            $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => $details['team_assignment'] === 'true',
                 'ta_grading' => $details['ta_grading'] === 'true',
                 'team_size_max' => $details['team_size_max'],
                 'regrade_allowed' => $regrade_allowed,
+                'grade_inquiry_per_component_allowed' => $grade_inquiry,
                 'autograding_config_path' =>
                     FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config'),
                 'scanned_exam' => $details['scanned_exam'] === 'true',
@@ -1040,6 +1041,7 @@ class AdminGradeableController extends AbstractController {
                 $errors[$prop] = $e->getMessage();
             }
         }
+
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
         if ($date_set) {
