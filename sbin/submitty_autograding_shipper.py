@@ -19,6 +19,8 @@ import traceback
 import subprocess
 import random
 
+import requests
+
 from autograder import autograding_utils
 from autograder import packer_unpacker
 
@@ -42,6 +44,14 @@ JOB_ID = '~SHIP~'
 def worker_folder(worker_name):
     return os.path.join(IN_PROGRESS_PATH, worker_name)
 
+def upload_file(local, remote):
+    with open(local, 'rb') as fd:
+        buf = fd.read()
+    resp = requests.put(f'http://localhost:8080/{remote}', data=buf)
+    try:
+        resp.raise_for_status()
+    except Exception as e:
+        autograding_utils.log_message(f"Error putting file {local} in http://localhost:8080/{remote}: {str(e)}")
 
 # ==================================================================================
 def initialize(untrusted_queue):
@@ -201,6 +211,10 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
     # prepare the zip files
     try:
         autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
+
+        upload_file(autograding_zip_tmp, 'autograding.zip')
+        upload_file(submission_zip_tmp, 'submission.zip')
+
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -786,6 +800,51 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
             my_message = f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. For more details, see traces entry"
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
+
+
+
+# ==================================================================================
+# ==================================================================================
+def can_short_circuit_job(job: str) -> bool:
+    """
+    Check whether a job can be short-circuited.
+
+    Currently, a job can be short-circuited if its autograding configuration
+    has at least one autograding test case. This is available through the
+    `autograde_count` value in the queue file JSON. If this value is not in
+    the JSON, or if the file could not be opened, we assume it cannot be
+    short-circuited.
+    """
+    try:
+        with open(job) as queue_file_json:
+            queue_file = json.loads(queue_file_json)
+    except Exception:
+        # We couldn't read this file for some reason. It's safer to assume it
+        # can't be short-circuited.
+        return False
+    if 'autograde_count' in queue_file:
+        return queue_file['autograde_count'] > 0
+    else:
+        return False
+
+
+# ==================================================================================
+# ==================================================================================
+def short_circuit(job: str):
+    """
+    Short-circuit a job.
+
+    This function creates the results for the given job.
+    """
+    try:
+        with open(job) as queue_file_json:
+            queue_file = json.loads(queue_file_json)
+    except Exception as ex:
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
+                                      message=f"Could not open queue file: {ex}")
+        return
+    
+    # If the job is a VCS job, we want to check the directory out.
 
 
 
