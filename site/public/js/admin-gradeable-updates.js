@@ -92,7 +92,7 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
 
-    $('select,textarea').change(function () {
+    $('input,select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
