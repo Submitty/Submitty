@@ -1,12 +1,15 @@
 #electronic-gradeable-container {
     padding: 0;
-    padding-bottom: 20px;
+    height:100%;
+    max-height: 100%;
+    min-height: 100%;
 }
 
 #bar_wrapper {
     cursor: move;
     z-index:40;
-    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     /*border: solid 6px var(--important-post);*/
     box-sizing: content-box;
 }
@@ -102,12 +105,14 @@
     border: 2px solid;
     padding: 2px 10px 5px;
     border-radius: 59px;
+    cursor: pointer;
     margin-left: 12px;
 }
 
 .grade-panel button {
     color: var(--text-black);
     position: relative;
+    cursor: pointer;
     padding-left: 22px;
     white-space: nowrap;
 }
@@ -117,6 +122,10 @@
     top: -2px;
     left: 0;
     font-size: 17px;
+}
+
+.grade-panel:hover button {
+    color: white;
 }
 
 .banner {
@@ -275,7 +284,6 @@ progress::-webkit-progress-value {
 
 .rubric_panel {
     font-size: 90%;
-    cursor: move;
     background-color: var(--standard-pale-blue-gray);
     display: none;
     z-index: 30;
@@ -284,6 +292,10 @@ progress::-webkit-progress-value {
 }
 
 #autograding_results.rubric_panel {
+    height: calc(100% - 140px);
+    display: block;
+    z-index: auto;
+    margin: 10px;
     border:5px solid var(--standard-vibrant-pink-red);
 }
 
@@ -907,4 +919,51 @@ tr.is_publish {
 
 #changeCodeStyle {
     display:inline-block;
+}
+
+#autograding-results-btn {
+    border: 2px solid #bc0a33;
+}
+#autograding-results-btn:hover {
+    background: #962e2e;
+}
+
+#grading-rubric-btn {
+    border: 2px solid #249c63;
+}
+#grading-rubric-btn:hover {
+    background: #1c794d;
+}
+
+#submission-btn {
+    border: 2px solid #1c83b7;
+}
+#submission-btn:hover {
+    background: #286888;
+}
+
+#student-info-btn {
+    border: 2px solid #316895;
+}
+#student-info-btn:hover {
+    background: #316895;
+}
+
+#peer-info-btn {
+    border: 2px solid #316895;
+}
+#peer-info-btn:hover {
+    background: #316895;
+}
+#discussion-posts-btn {
+    border: 2px solid #316895;
+}
+#discussion-posts-btn:hover {
+    background: #316895;
+}
+#grade-inquiry-btn {
+    border: 2px solid #f29f0d;
+}
+#grade-inquiry-btn:hover {
+    background: #9e7835;
 }
