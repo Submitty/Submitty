@@ -92,7 +92,7 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
 
-    $('input,select,textarea').change(function () {
+    $('select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
@@ -151,7 +151,9 @@ $(document).ready(function () {
             }, updateGradeableErrorCallback);
     });
     $('#random_peer_graders_list').click(
+       
         function () {
+            
             if ($(this).hasClass('ignore')) {
                 return;
             }
@@ -305,13 +307,12 @@ function ajaxCheckBuildStatus() {
 }
 function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback)
     {
-    console.log("Clicked");
+    var number_to_grade=$('#number_to_peer_grade').val();
     var gradeable_id=$('#g_id').val();
     $.ajax({
         type: "POST", 
         url: buildCourseUrl(['gradeable', gradeable_id, 'ajaxRandomizePeers']),
-        data: {csrf_token:p_values['csrf_token']},
-        //: 'json',
+        data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade},
         success: function(response){
             console.log("Response is Ready");
             console.log(response);
