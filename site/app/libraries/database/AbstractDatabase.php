@@ -380,11 +380,11 @@ abstract class AbstractDatabase {
      * booleans, we generally use a tinyint(1) and just use 0/1 to represent it else we convert it to whatever
      * works for that given database.
      *
-     * @param bool $value
+     * @param mixed $value
      *
      * @return mixed
      */
-    public function convertBoolean(bool $value) {
+    public function convertBoolean($value) {
         return ($value === true) ? 1 : 0;
     }
 }
