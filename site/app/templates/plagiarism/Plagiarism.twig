@@ -28,6 +28,8 @@
     </script>
 {% endif %}
 
+{% include('plagiarism/DeletePlagiarismResultsAndConfig.twig') %}
+
 {% macro renderPlagiarismRow(row) %}
     {% if row['in_queue'] %}
         <tr style="color:grey;">
