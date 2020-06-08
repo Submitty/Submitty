@@ -30,12 +30,12 @@ def up(config, database, semester, course):
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
                             md5_file_name = hashlib.md5((dirPath + file_name).encode())
                             file_path = Path(annotations_dir, dir, dirSecond, dirThrid)
-                            copyfile(Path(dirPath,name), Path(directory, md5_file_name.hexdigest() + "_" + grader_id + '.json'))
+                            copyfile(Path(dirPath,name), Path(dirPath, md5_file_name.hexdigest() + "_" + grader_id + '.json'))
                             os.remove(Path(dirPath,name))
-                            os.system("chown -R "+php_user+":"+course_group+ " "+ str(directory))
-                            os.system("chmod -R u+rwx "+str(directory))
-                            os.system("chmod -R g+rxs "+str(directory))
-                            os.system("chmod -R o-rwx "+str(directory))
+                            os.system("chown -R "+php_user+":"+course_group+ " "+ str(dirPath))
+                            os.system("chmod -R u+rwx "+str(dirPath))
+                            os.system("chmod -R g+rxs "+str(dirPath))
+                            os.system("chmod -R o-rwx "+str(dirPath))
                 
                 
 def down(config, database, semester, course):

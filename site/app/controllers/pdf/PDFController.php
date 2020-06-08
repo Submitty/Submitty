@@ -31,12 +31,15 @@ class PDFController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version));
+        $json_path = substr(urldecode($path), 0, -3) . "json";
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
-                $annotation_decoded = json_decode($annotation_file);
-                $grader_id = $annotation_decoded["userId"];
-                $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                if(explode('_', $annotation_file)[0] === md5(urldecode($path))){
+                    $annotation_decoded = json_decode($annotation_file);
+                    $grader_id = $annotation_decoded["userId"];
+                    $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                }
             }
         }
         $params = [
@@ -112,7 +115,7 @@ class PDFController extends AbstractController {
         }
         
         $annotation_layer = json_encode($annotation_layer_decoded);
-                
+                        
         file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($annotation_info["file_path"])) . "_" . $grader_id . '.json', $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
@@ -151,14 +154,16 @@ class PDFController extends AbstractController {
             }
         }
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version));
+        $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
-                $annotation_decoded = json_decode(file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file)), true);
-                if ($annotation_decoded != null) {
-                    $grader_id = $annotation_decoded[0]["userId"];
-                    $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                if(explode('_', $annotation_file)[0] === md5(urldecode($path))){
+                    $annotation_decoded = json_decode(file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file)), true);
+                    if ($annotation_decoded != null) {
+                        $grader_id = $annotation_decoded[0]["userId"];
+                        $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                    }
                 }
             }
         }
