@@ -937,8 +937,8 @@ HTML;
         $anon_path = "";
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
-                $user_id = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUsersById(array($user_id))[$user_id]->getAnonId();
+                $user_id[] = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id]->getAnonId();
                 $anon_path = $anon_path . "/" . $anon_id;
             }
             else {
