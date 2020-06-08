@@ -6359,7 +6359,7 @@ AND gc_id IN (
      */
     public function deleteUser(string $user_id, string $semester, string $course): bool {
         $query = "DELETE FROM courses_users WHERE user_id=? AND semester=? AND course=?";
-        $this->submitty_db->query($query, array($user_id, $semester, $course));
+        $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }
 }
