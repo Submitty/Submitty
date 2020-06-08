@@ -264,6 +264,7 @@ function togglePeer() {
 
 function toggleFullScreenMode () {
   $("main#main").toggleClass('full-screen-mode');
+  $("#fullscreen-btn-cont").toggleClass('active');
 }
 
 function resetModules() {

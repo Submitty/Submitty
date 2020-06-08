@@ -2,13 +2,26 @@
 body {
     min-width: auto;
 }
+
 #submitty-body {
     height: 100vh;
 }
+
 main#main {
     min-width: 0;
-    transition: all 0.6s linear;
 }
+
+main#main.full-screen-mode {
+    z-index: 10;
+    animation-duration: 0.5s;
+    animation-name: scaleUp;
+    animation-fill-mode: forwards;
+}
+
+main#main.full-screen-mode .content {
+    margin: 0;
+}
+
 #wrapper {
     padding-top: 30px;
     min-height: 0;
@@ -20,7 +33,6 @@ aside {
     overflow: scroll;
 }
 
-
 #electronic-gradeable-container {
     height: 100%;
     padding: 0;
@@ -28,16 +40,10 @@ aside {
 }
 
 #bar_wrapper {
-    cursor: move;
-    z-index:40;
     padding-top: 10px;
     padding-bottom: 10px;
     /*border: solid 6px var(--important-post);*/
     box-sizing: content-box;
-}
-
-#footer {
-    z-index: 20;
 }
 
 .navigation-box {
@@ -46,6 +52,8 @@ aside {
     width: fit-content;
 }
 
+
+/* Toolbar CSS*/
 .grading_toolbar {
     display: block;
     padding-top:3px;
@@ -55,8 +63,30 @@ aside {
 
 .grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;
-    box-shadow: 0px 0px 5px 5px var(--standard-vibrant-yellow);
-    background-color: yellow;
+    box-shadow: 0px 0px 5px 5px var(--subheading-underscore-grey);
+    background-color: var(--subheading-underscore-grey);
+}
+
+#fullscreen-btn-cont.active {
+    background: var(--subheading-underscore-grey);
+}
+
+#fullscreen-btn-cont.active i.fa-compress,
+#fullscreen-btn-cont i.fa-expand {
+    display: inline-block;
+}
+
+#fullscreen-btn-cont.active i.fa-expand,
+#fullscreen-btn-cont i.fa-compress {
+    display: none;
+}
+
+/* Resets server.css pink color */
+a > i.fa:hover,
+a > i.fas:hover,
+button > i.fa:hover,
+button > i.fas:hover {
+    color: initial;
 }
 
 .ta-navlink-cont {
@@ -105,6 +135,24 @@ aside {
     transform: translate(-50%,-50%);
 }
 
+.progress_bar {
+    position: relative;
+    width: 190px;
+    display: block;
+    margin-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 8px;
+}
+
+progress {
+    border-radius: 2px;
+}
+
+progress::-webkit-progress-value {
+    background: var(--standard-medium-vibrant-blue);
+}
+
+/* Grading Panel Header (Buttons) CSS */
 #grading-panel-header {
     margin-top: 6px;
     width: 100%;
@@ -145,8 +193,89 @@ aside {
     color: white;
 }
 
+#autograding_results_btn {
+    border: 2px solid #bc0a33;
+}
+
+#autograding_results_btn:hover, #autograding_results_btn.active {
+    background: #962e2e;
+}
+
+#grading_rubric_btn {
+    border: 2px solid #249c63;
+}
+#grading_rubric_btn:hover, #grading_rubric_btn.active {
+    background: #1c794d;
+}
+
+#submission_browser_btn {
+    border: 2px solid #1c83b7;
+}
+#submission_browser_btn:hover, #submission_browser_btn.active {
+    background: #286888;
+}
+
+#student_info_btn {
+    border: 2px solid #316895;
+}
+
+#student_info_btn:hover, #student_info_btn.active {
+    background: #316895;
+}
+
+#peer_info_btn {
+    border: 2px solid #316895;
+}
+
+#peer_info_btn:hover, #peer_info_btn.active {
+    background: #316895;
+}
+
+#discussion_browser_btn {
+    border: 2px solid #316895;
+}
+
+#discussion_browser_btn:hover, #discussion_browser_btn.active {
+    background: #316895;
+}
+
+#regrade_info_btn {
+    border: 2px solid #f29f0d;
+}
+
+#regrade_info_btn:hover, #regrade_info_btn.active {
+    background: #9e7835;
+}
+
+/* Grading Panels CSS */
 #regrade_inner_info .inner-container {
     padding: 20px;
+}
+
+#autograding_results.rubric_panel {
+    display: block;
+    margin: 10px;
+    border:5px solid var(--standard-vibrant-pink-red);
+}
+
+#grading_rubric.rubric_panel {
+    border:5px solid var(--standard-dark-mint-green);
+}
+
+#submission_browser.rubric_panel {
+    border:5px solid var(--standard-gray-blue);
+}
+
+#regrade_info.rubric_panel {
+    border:5px solid var(--standard-vibrant-orange);
+}
+
+#student_info.rubric_panel {
+    border:5px solid var(--text-black);
+}
+
+#peer_info.rubric_panel {
+    border:5px solid var(--standard-plum-purple);
 }
 
 .banner {
@@ -279,25 +408,6 @@ aside {
     margin: 5px;
 }
 
-.progress_bar {
-    position: relative;
-    width: 190px;
-    display: block;
-    margin-left: 4px;
-    padding-top: 4px;
-    padding-bottom: 8px;
-    /*background-color: var(--standard-pale-blue-gray);*/
-    /*border: 5px solid var(--standard-pale-blue-gray);*/
-}
-
-progress {
-    border-radius: 2px;
-}
-
-progress::-webkit-progress-value {
-    background: var(--standard-medium-vibrant-blue);
-}
-
 .ta-nav-wrapper {
     width: 100%;
     background: #5bc0de;
@@ -307,36 +417,12 @@ progress::-webkit-progress-value {
     font-size: 90%;
     background-color: var(--standard-pale-blue-gray);
     display: none;
-    z-index: 30;
     overflow: auto;
     margin: 10px;
     height: calc(100% - 140px);
     opacity: 0.95;
 }
 
-#autograding_results.rubric_panel {
-    display: block;
-    z-index: auto;
-    margin: 10px;
-    border:5px solid var(--standard-vibrant-pink-red);
-}
-
-#grading_rubric.rubric_panel {
-    border:5px solid var(--standard-dark-mint-green);
-}
-
-#submission_browser.rubric_panel {
-    border:5px solid var(--standard-gray-blue);
-}
-#regrade_info.rubric_panel {
-    border:5px solid var(--standard-vibrant-orange);
-}
-#student_info.rubric_panel {
-    border:5px solid var(--text-black);
-}
-#peer_info.rubric_panel {
-    border:5px solid var(--standard-plum-purple);
-}
 
 .grading_label {
     display: inline-block;
@@ -925,16 +1011,7 @@ tr.is_publish {
     display:inline-block;
 }
 
-main#main.full-screen-mode {
-    z-index: 10;
-    animation-duration: 0.5s;
-    animation-name: scaleUp;
-    animation-fill-mode: forwards;
-}
-main#main.full-screen-mode .content {
-    margin: 0;
-}
-
+/* Animations */
 @keyframes scaleUp {
     from {
         position: fixed;
@@ -950,57 +1027,4 @@ main#main.full-screen-mode .content {
         top: 0;
         left: 0;
     }
-}
-
-
-/*main, main > * {*/
-/*    transition: all 3s ease-in-out;*/
-/*}*/
-
-
-#autograding_results_btn {
-    border: 2px solid #bc0a33;
-}
-#autograding_results_btn:hover, #autograding_results_btn.active {
-    background: #962e2e;
-}
-
-#grading_rubric_btn {
-    border: 2px solid #249c63;
-}
-#grading_rubric_btn:hover, #grading_rubric_btn.active {
-    background: #1c794d;
-}
-
-#submission_browser_btn {
-    border: 2px solid #1c83b7;
-}
-#submission_browser_btn:hover, #submission_browser_btn.active {
-    background: #286888;
-}
-
-#student_info_btn {
-    border: 2px solid #316895;
-}
-#student_info_btn:hover, #student_info_btn.active {
-    background: #316895;
-}
-
-#peer_info_btn {
-    border: 2px solid #316895;
-}
-#peer_info_btn:hover, #peer_info_btn.active {
-    background: #316895;
-}
-#discussion_browser_btn {
-    border: 2px solid #316895;
-}
-#discussion_browser_btn:hover, #discussion_browser_btn.active {
-    background: #316895;
-}
-#regrade_info_btn {
-    border: 2px solid #f29f0d;
-}
-#regrade_info_btn:hover, #regrade_info_btn.active {
-    background: #9e7835;
 }
