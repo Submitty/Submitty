@@ -169,65 +169,6 @@ GROUP BY user_id", [$user_id]);
     }
 
     /**
-     * Join a table in the course database with a table from the master database.  This is useful when a table exists
-     * in both databases that has the same name, but certain information is only available in the master database.
-     * This is similar to joining database tables, but because SQL join between databases isn't trivial, that
-     * functionality is implemented here.  This function will select all columns from the course database table, and
-     * join in the requested columns from the same master database table.
-     *
-     * NOTE: Do not include the $join_column name in the $master_columns array.
-     *
-     * Example: joinCourseWithMaster('users', ['api_key', 'display_image_state'], 'user_id');
-     * Will return all columns from the course database users column, but these rows will now include the
-     * api_key and display_image_state columns from the master database.
-     *
-     * @param string $table Name of the table that must exist in both databases
-     * @param string $master_columns Array of column names to select from the master database (this value may not be '*')
-     * @param string $join_column Name of column to join on, this column must exist in both tables
-     */
-    public function joinCourseWithMaster(string $table, array $master_columns, string $join_column) : array {
-        $course_query = 'select * from ' . $table;
-        $this->course_db->query($course_query);
-        $course_rows = $this->course_db->rows();
-
-        $set = array_merge($master_columns, [$join_column]);
-        $master_query = 'select ' . implode(',', $set) . ' from ' . $table;
-        $this->submitty_db->query($master_query);
-        $master_rows = $this->submitty_db->rows();
-
-        $results = [];
-
-        // Handle joining the sets
-        foreach ($course_rows as $course_row) {
-            foreach ($master_rows as $master_row) {
-                if ($course_row[$join_column] === $master_row[$join_column]) {
-                    $results[] = array_merge($course_row, $master_row);
-                }
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Get the set of course users, but use a specialized query so that the results may contain additional data
-     * needed to find the user's appropriate display image.
-     *
-     * @return array
-     */
-    public function getCourseUsersWithDisplayImage() : array {
-        $users = [];
-
-        $db_rows = $this->joinCourseWithMaster('users', ['display_image_state'], 'user_id');
-
-        foreach ($db_rows as $db_row) {
-            $users[] = new User($this->core, $db_row);
-        }
-
-        return $users;
-    }
-
-    /**
      * Fetches all students from the users table, ordering by course section than user_id.
      *
      * @param  string $section_key

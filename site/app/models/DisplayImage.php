@@ -11,7 +11,7 @@ use app\libraries\FileUtils;
  * @package app\models\image
  *
  * DisplayImage model represents a user's personal head shot.  Users may have multiple images in their user_data
- * directory, and DisplayImage takes care of selecting the most single most appropriate image for display.
+ * directory, and DisplayImage takes care of selecting the single most appropriate image for display.
  */
 class DisplayImage extends AbstractModel
 {

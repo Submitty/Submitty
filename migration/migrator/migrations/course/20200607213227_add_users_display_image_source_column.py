@@ -1,7 +1,7 @@
-"""Migration for the Submitty master database."""
+"""Migration for a given Submitty course database."""
 
 
-def up(config, database):
+def up(config, database, semester, course):
     """
     Run up migration.
 
@@ -9,12 +9,16 @@ def up(config, database):
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
+    :param semester: Semester of the course being migrated
+    :type semester: str
+    :param course: Code of course being migrated
+    :type course: str
     """
     sql = "ALTER TABLE users ADD COLUMN display_image_state VARCHAR NOT NULL DEFAULT 'system';"
     database.execute(sql)
 
 
-def down(config, database):
+def down(config, database, semester, course):
     """
     Run down migration (rollback).
 
@@ -22,5 +26,9 @@ def down(config, database):
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
+    :param semester: Semester of the course being migrated
+    :type semester: str
+    :param course: Code of course being migrated
+    :type course: str
     """
     pass
