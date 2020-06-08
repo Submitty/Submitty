@@ -18,8 +18,6 @@ function open_peer_feedback_tab(user, ordered_graders) {
     $('#peer_feedback_nav_'+user).addClass('active-btn');
 }
 function switch_feedback_modes() {
-    var check = $('#switch_feedback_button');
-    console.log($('#switch_feedback_button')[0].textContent);
     if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
         $('#switch_feedback_button')[0].textContent = "Switch to Normal Display";
         $('#peer_feedback_wrapper').show();
@@ -88,7 +86,6 @@ function switch_feedback_modes() {
             {% for component in peer_components %}
                 {% if component.peer_ids | length <= 5 %}
                         {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
-                    </div>
                 {% else %}
                         {{ self.renderManyPeerResults(component) }}
                 {% endif %}                
@@ -219,58 +216,58 @@ function switch_feedback_modes() {
                 <a class="nav-bar key_to_click" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
             {% endfor %}
         </div>
-            {% for grader in ordered_graders %}
+        {% for grader in ordered_graders %}
+        
+            <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
+                <table class="mobile-table" id="peer-feedback-table-{{grader}}">
+                    <tbody>
+                        {% for component in peer_components %}
+                            <div class="box-info">
+                                    <h4>{{ component.title|escape }}
+                                    </h4>
+                                    <p>
+                                        {% for mark in component.marks %}
+                                            {% if mark.earned[grader] %}
+                                                <i class="far fa-check-square fa-1g"></i>
+                                            {% else %}
+                                                <i class="far fa-square fa-1g"></i>
+                                            {% endif %}
+                                            {{ mark.points|number_format(num_decimals) }}
+                                            {{ mark.title|nl2br }}
+                                            </br>
+                                        {% endfor %}
+                                    </p>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if overall_comments[grader] is not empty %}
+                    <div class="overall-comment-box">
+                        <p class="overall-comment-author">
+                            Overall note from grader:
+                        </p>
+                        <p class="overall-comment">
+                            <span class='gradeable_comment'>{{ overall_comments[grader] | nl2br }}</span>
+                        </p>
+                    </div>
+                {% endif %}
             
-                <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
-                    <table class="mobile-table" id="peer-feedback-table-{{grader}}">
-                        <tbody>
-                            {% for component in peer_components %}
-                                <div class="box-info">
-                                        <h4>{{ component.title|escape }}
-                                        </h4>
-                                        <p>
-                                                {% for mark in component.marks %}
-                                                            {% if mark.earned[grader] %}
-                                                                <i class="far fa-check-square fa-1g"></i>
-                                                            {% else %}
-                                                                <i class="far fa-square fa-1g"></i>
-                                                            {% endif %}
-                                                            {{ mark.points|number_format(num_decimals) }}
-                                                            {{ mark.title|nl2br }}
-                                                    </br>
-                                                {% endfor %}
-                                        </p>
-                                </div>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% if overall_comments[grader] is not empty %}
-                        <div class="overall-comment-box">
-                            <p class="overall-comment-author">
-                                Overall note from grader:
-                            </p>
-                            <p class="overall-comment">
-                                <span class='gradeable_comment'>{{ overall_comments[grader] | nl2br }}</span>
-                            </p>
-                        </div>
-                    {% endif %}
-                
-                {% for file in uploaded_pdfs %}
-                    {% if file.name in annotated_file_names and grader in file.graders%}
-                                </br>
-                                <p>
-                                    {{file.name}} :
-                                </p>
-                                <p>
-                                    <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&grader={{ grader|url_encode }}')">View Popup <i class="fas fa-window-restore"></i>
-                                    </a>
-                                </p>
-                    {% endif %}
+            {% for file in uploaded_pdfs %}
+                {% if file.name in annotated_file_names and grader in file.graders%}
+                    </br>
+                    <p>
+                        {{file.name}} :
+                    </p>
+                    <p>
+                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&grader={{ grader|url_encode }}')">View Popup <i class="fas fa-window-restore"></i>
+                        </a>
+                    </p>
+                {% endif %}
 
-                {% endfor %}
-                
-                </div>
-                
             {% endfor %}
+            
+            </div>
+            
+        {% endfor %}
     </div>
 {%- endmacro -%}
