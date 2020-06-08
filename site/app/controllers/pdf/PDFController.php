@@ -32,7 +32,7 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
-        if($grader != null){
+        if ($grader != null) {
             $grader = html_entity_decode($grader);
         }
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
