@@ -121,8 +121,8 @@ class PDFController extends AbstractController {
             "page_num" => 1,
             'jquery' => true,
         ];
-
-        $this->core->getOutput()->renderOutput(array('PDF'), 'downloadPDFEmbedded', $params);
+        $pdf_array[] = 'PDF'
+        $this->core->getOutput()->renderOutput($pdf_array, 'downloadPDFEmbedded', $params);
     }
 
     /**
