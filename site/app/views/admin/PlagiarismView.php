@@ -76,6 +76,7 @@ class PlagiarismView extends AbstractView {
          return $this->core->getOutput()->renderTwigTemplate('plagiarism/Plagiarism.twig', [
             "refresh_page" => $refresh_page,
             "plagiarism_results_info" => $plagiarism_result_info,
+            "csrf_token" => $this->core->getCsrfToken(),
             "new_plagiarism_config_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']),
             "refreshLichenMainPageLink" => $this->core->buildCourseUrl(['plagiarism', 'check_refresh']),
             "semester" => $semester,
@@ -147,37 +148,6 @@ HTML;
 </script>
 HTML;
         return $return;
-    }
-
-    public function deletePlagiarismResultAndConfigForm() {
-        return <<<HTML
-    <div class="popup-form"  style="display: none;" id="delete-plagiarism-result-and-config-form">
-        <form name="delete" method="post">
-            <div class="popup-box">
-                <div class="popup-window ui-draggable ui-draggable-handle" style="position: relative;">
-                    <div class="form-title">
-                        <h1>Delete Plagiarism Results</h1>
-                    </div>
-                    <div class="form-body">
-                        <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-                        <p>Note: Deleting plagiarism results will also delete the saved configuration for the gradeable.</p><br>
-                        Are you sure to delete Plagiarism Results for
-                        <div name="gradeable_title"></div>
-                        <div class="form-buttons">
-                            <div class="form-button-container">
-                                <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
-                                <input class="btn btn-danger" type="submit" value="Delete" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-    <script>
-        $(".popup-window").draggable();
-    </script>
-HTML;
     }
 
     public function plagiarismPopUpToShowMatches() {
