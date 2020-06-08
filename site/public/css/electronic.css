@@ -7,6 +7,7 @@ body {
 }
 main#main {
     min-width: 0;
+    transition: all 0.6s linear;
 }
 #wrapper {
     padding-top: 30px;
@@ -923,6 +924,39 @@ tr.is_publish {
 #changeCodeStyle {
     display:inline-block;
 }
+
+main#main.full-screen-mode {
+    z-index: 10;
+    animation-duration: 0.5s;
+    animation-name: scaleUp;
+    animation-fill-mode: forwards;
+}
+main#main.full-screen-mode .content {
+    margin: 0;
+}
+
+@keyframes scaleUp {
+    from {
+        position: fixed;
+        height: 40vh;
+        top: 30%;
+        left: 20%;
+    }
+    to {
+        transform: scale(1, 1);
+        position: fixed;
+        height: 100vh;
+        width: 100vw;
+        top: 0;
+        left: 0;
+    }
+}
+
+
+/*main, main > * {*/
+/*    transition: all 3s ease-in-out;*/
+/*}*/
+
 
 #autograding_results_btn {
     border: 2px solid #bc0a33;

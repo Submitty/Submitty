@@ -37,7 +37,13 @@
                 </a>
             </span>
             <span class="ta-navlink-cont">
-                <a href="{{ home_url }}"><i title="Go to full screen mode" class="fa fa-expand icon-header icon-streched"></i></a>
+                <button title="Go to full screen mode"
+                        class="invisible-btn key_to_click"
+                        tabindex="0"
+                        onclick="toggleFullScreenMode();"
+                >
+                    <i class="fa fa-expand icon-header icon-streched"></i>
+                </button>
             </span>
             <span class="ta-navlink-cont">
                 <a href="{{ home_url }}"><i title="Go to normal mode" class="fa fa-compress icon-header icon-streched" aria-hidden="true"></i></a>

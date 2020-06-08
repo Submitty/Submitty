@@ -262,6 +262,10 @@ function togglePeer() {
   setPanelsVisiblilities("#peer_info");
 }
 
+function toggleFullScreenMode () {
+  $("main#main").toggleClass('full-screen-mode');
+}
+
 function resetModules() {
   deleteCookies();
   updateCookies();
