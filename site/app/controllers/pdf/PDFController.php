@@ -64,7 +64,7 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }
     
-        /**
+    /**
      * @param $gradeable_id
      * @param $filename
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")
