@@ -161,8 +161,6 @@ HTML;
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
 
         #default values for the form
         $gradeable_id = "";
@@ -213,39 +211,31 @@ HTML;
             }
         }
 
-        $return = "";
-
-        if ($new_or_edit == "new") {
-            $return .= <<<HTML
-                    <select name="gradeable_id">
-HTML;
-            foreach ($gradeable_ids_titles as $gradeable_id_title) {
-                $title = $gradeable_id_title['g_title'];
-                $id = $gradeable_id_title['g_id'];
-                $return .= <<<HTML
-                            <option value="{$id}">$title</option>
-HTML;
-            }
-            $return .= <<<HTML
-                    </select>
-HTML;
-        }
-        elseif ($new_or_edit == "edit") {
-            $return .= <<<HTML
-                    $title
-HTML;
-        }
-
-        if ($new_or_edit == "edit" && $saved_config["instructor_provided_code"]) {
-            $return .= <<<HTML
-                    <br />
-                    <font size="-1">Current Provided Code: $provided_code_filename</font>
-HTML;
-        }
-        $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
+            "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}",
+            "csrf_token" => $this->core->getCsrfToken(),
+            "prior_term_gradeables_number" => $prior_term_gradeables_number,
+            "ignore_submission_number" => $ignore_submission_number,
+            "gradeable_ids_titles" => $gradeable_ids_titles,
+            "title" => $title,
+            "saved_config" => $saved_config,
+            'no_provided_code' => $no_provided_code,
+            'provided_code' => $provided_code,
+            "all_version" => $all_version,
+            "active_version" => $active_version,
+            "all_files" => $all_files,
+            "regex_matching_files" => $regex_matching_files,
+            "regex" => $regex,
+            "language" => $language,
+            "threshold" => $threshold,
+            "sequence_length" => $sequence_length,
+            "no_ignore" => $no_ignore,
+            "ignore" => $ignore,
+            "provided_code_filename" => $provided_code_filename,
+            "plagiarism_link" => $this->core->buildCourseUrl(['plagiarism']),
             "prior_term_gradeables" => $prior_term_gradeables,
-            "ignore_submissions" => $saved_config['ignore_submissions']
+            "prior_term_gradeables_json" => $prior_term_gradeables_json,
         ]);
     }
 }

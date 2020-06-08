@@ -2,17 +2,17 @@
     <h1>Plagiarism Detection Configuration -- WORK IN PROGRESS</h1>
     <br>
     <div id="save-configuration-form" style="overflow:auto;">
-        <form method="post" action="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'new'])}?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}" enctype="multipart/form-data">
-            <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
-            <input type="hidden" name="prior_term_gradeables_number" value="{$prior_term_gradeables_number}" />
-            <input type="hidden" name="ignore_submission_number" value="{$ignore_submission_number}" /><br />
+        <form method="post" action="{{ form_action_link }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="prior_term_gradeables_number" value="{{ prior_term_gradeables_number }}" />
+            <input type="hidden" name="ignore_submission_number" value="{{ ignore_submission_number }}" /><br />
             <div style="width:100%;">
                 <div style="width:20%;float:left">Select Gradeable:</div>
                 <div style="width:70%;float:right">
 
                     {% if new_or_edit == "new" %}
                         <select name="gradeable_id">
-                            {% for gradeable_id_title in gradeables_ids_titles %}
+                            {% for gradeable_id_title in gradeable_ids_titles %}
                                 <option value="{{ gradeable_id_title['g_id'] }}">{{ gradeable_id_title['g_title'] }}</option>
                             {% endfor %}
                         </select>
@@ -25,15 +25,15 @@
             <div style="width:100%;">
                 <div style="width:20%;float:left">Instructor Provided Code:</div>
                 <div style="width:70%;float:right">
-                    <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {$no_provided_code} >
+                    <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {{ no_provided_code }} >
                     <label for="no_code_provided_id">No</label>
-                    <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {$provided_code}>
+                    <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {{ provided_code }}>
                     <label for="code_provided_id">Yes</label><br />
                     <input type="file" name="provided_code_file">
 
                     {% if new_or_edit == "edit" and saved_config['instructor_provided_code'] %}
                         <br />
-                        <font size="-1">Current Provided Code: $provided_code_filename</font>
+                        <font size="-1">Current Provided Code: {{ provided_code_filename }}</font>
                     {% endif %}
 
                 </div>
@@ -41,44 +41,44 @@
             <div style="width:100%;">
                 <div style="width:20%;float:left">Version:</div>
                 <div style="width:70%;float:right">
-                    <input type="radio" id="all_version_id" value="all_version" name="version_option" {$all_version} >
+                    <input type="radio" id="all_version_id" value="all_version" name="version_option" {{ all_version }} >
                     <label for="all_version_id">All Version</label>
-                    <input type="radio" id="active_version_id" value="active_version" name="version_option" {$active_version}>
+                    <input type="radio" id="active_version_id" value="active_version" name="version_option" {{ active_version }}>
                     <label for="active_version_id">Only Active Version</label><br />
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
                 <div style="width:20%;float:left">Files to be Compared:</div>
                 <div style="width:70%;float:right">
-                    <input type="radio" id="all_files_id" value="all_files" name="file_option" {$all_files}>
+                    <input type="radio" id="all_files_id" value="all_files" name="file_option" {{ all_files }}>
                     <label for="all_files_id">All Files</label>
-                    <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {$regex_matching_files}>
+                    <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {{ regex_matching_files }}>
                     <label for="regex_matching_files_id">Regex matching files</label><br />
-                    <input type="text" name="regex_to_select_files" value="{$regex}"/>
+                    <input type="text" name="regex_to_select_files" value="{{ regex }}"/>
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
                 <div style="width:20%;float:left">Language:</div>
                 <div style="width:70%;float:right">
                     <select name="language">
-                        <option value="python" {$language['python']}>Python</option>
-                        <option value="cpp" {$language['cpp']}>C++</option>
-                        <option value="java" {$language['java']}>Java</option>
-                        <option value="plaintext" {$language['plaintext']}>Plain Text</option>
-                        <option value="mips" {$language['mips']}>MIPS Assembly</option>
+                        <option value="python" {{ language["python"] }}>Python</option>
+                        <option value="cpp" {{ language["cpp"] }}>C++</option>
+                        <option value="java" {{ language["java"] }}>Java</option>
+                        <option value="plaintext" {{ language["plaintext"] }}>Plain Text</option>
+                        <option value="mips" {{ language["mips"] }}>MIPS Assembly</option>
                     </select>
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
                 <div style="width:20%;float:left">Threshold/Maximum number of students<br>(more than this number of students with matching code will be considered common code):</div>
                 <div style="width:70%;float:right">
-                    <input type="text" name="threshold"/ value="{$threshold}" />
+                    <input type="text" name="threshold" value="{{ threshold }}" />
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
                 <div style="width:20%;float:left">Sequence Length:</div>
                 <div style="width:70%;float:right">
-                    <input type="text" name="sequence_length" value="{$sequence_length}"/>
+                    <input type="text" name="sequence_length" value="{{ sequence_length }}"/>
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;overflow:auto;">
@@ -86,7 +86,7 @@
                 <div style="width:70%;float:right;overflow:auto;" name= "prev_gradeable_div">
 
                     {% if new_or_edit == "edit" %}
-                        {% for saved_prev_term_gradeable_path as saved_config['prev_term_gradeables'] %}
+                        {% for saved_prev_term_gradeable_path in saved_config['prev_term_gradeables'] %}
                             {% set reversed_per_term_grad_path = saved_prev_term_gradeable_path|reverse %}
                             {% set exploded_reversed_per_term = reversed_per_term_grad_path|split('/') %}
                             {% set saved_prev_sem = exploded_reversed_per_term[3]|reverse %};
@@ -132,7 +132,7 @@
                             <br />
                         {% endfor %}
                     {% endif %}
-                    {% set saved_prev_term_grad_length = saved_config['prev_term_gradeables'].length %}
+                    {% set saved_prev_term_grad_length = saved_config['prev_term_gradeables']|length %}
                     <select name="prev_sem_{{ saved_prev_term_grad_length }}">
                         <option value="">None</option>
                         {% for sem, sem_courses in prior_term_gradeables %}
@@ -156,17 +156,17 @@
             <div style="width:100%;overflow:auto;">
                 <div style="width:20%;float:left">Are there any submissions that should be ignored?</div>
                 <div name="ignore_submission_div" style="width:70%;float:right;overflow:auto;">
-                    <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {$no_ignore} >
+                    <input type="radio" id="ignore_none_id" value="no_ignore" name="ignore_submission_option" {{ no_ignore }}>
                     <label for="ignore_none_id">No</label>
-                    <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {$ignore} >
+                    <input type="radio" id="ignore_id" value="ignore" name="ignore_submission_option" {{ ignore }}>
                     <label for="ignore_id">Yes</label><br />
 
                     {% if new_or_edit == "edit" %}
-                        {% for saved_ignore_submission in ignore_submissions %}
+                        {% for saved_ignore_submission in saved_config['ignore_submissions'] %}
                             <input type="text" name="ignore_submission_{{ loop.index0 }}" value="{{ saved_ignore_submission }}"/><br />
                         {% endfor %}
                     {% endif %}
-                    <input type="text" name="ignore_submission_{{ ignore_submissions.length }}" />
+                    <input type="text" name="ignore_submission_{{ saved_config['ignore_submissions'].length }}" />
                 </div>
                 <br />
                 <div style="width:70%;float:right">
@@ -176,7 +176,7 @@
                 </div>
             </div><br /><br />
             <div style="float: right; width: auto; margin-top: 5px;">
-                <a href="{$this->core->buildCourseUrl(['plagiarism'])}" class="btn btn-danger">Cancel</a>
+                <a href="{{ plagiarism_link }}" class="btn btn-danger">Cancel</a>
                 <input class="btn btn-primary" type="submit" value="Save Configuration" />
             </div><br /><br /><br />
         </form>
@@ -185,9 +185,9 @@
 
 <script>
     const form = $("#save-configuration-form");
-    const prior_term_gradeables = JSON.parse('{$prior_term_gradeables_json}');
+    const prior_term_gradeables = JSON.parse('{{ prior_term_gradeables_json }}');
     $("select").change(function(){
-        var select_element_name = $(this).attr("name");
+        const select_element_name = $(this).attr("name");
         configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeables, select_element_name);
     });
     $('[name="add_more_prev_gradeable"]', form).on('click', function(){
