@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PlagiarismController extends AbstractController {
     private function getGradeablesFromPriorTerm() {
-        $return = array();
+        $return = [];
 
         $filename = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
@@ -37,7 +37,7 @@ class PlagiarismController extends AbstractController {
                 $line = explode("/", $line);
                 $sem = $line[5];
                 $course = $line[6];
-                $gradeables = array();
+                $gradeables = [];
                 while (!feof($file)) {
                     $line = fgets($file);
                     if (trim(trim($line, " "), "\n") === "") {
@@ -81,7 +81,7 @@ class PlagiarismController extends AbstractController {
 
         $nightly_rerun_info_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/nightly_rerun.json";
         if (!file_exists($nightly_rerun_info_file)) {
-            $nightly_rerun_info = array();
+            $nightly_rerun_info = [];
             foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
                 $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
             }
@@ -118,8 +118,8 @@ class PlagiarismController extends AbstractController {
 
 
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'deletePlagiarismResultAndConfigForm');
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'deletePlagiarismResultAndConfigForm');
     }
 
     /**
@@ -141,7 +141,7 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
         $content = file_get_contents($file_path);
-        $content = trim(str_replace(array("\r", "\n"), '', $content));
+        $content = trim(str_replace(["\r", "\n"], '', $content));
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings, 3);
         foreach ($rankings as $i => $ranking) {
@@ -149,8 +149,8 @@ class PlagiarismController extends AbstractController {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
         }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'plagiarismPopUpToShowMatches');
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismPopUpToShowMatches');
     }
 
     /**
@@ -159,7 +159,7 @@ class PlagiarismController extends AbstractController {
     public function configureNewGradeableForPlagiarismForm() {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), array('.', '..'));
+        $gradeable_with_submission = array_diff(scandir("/var/local/submitty/courses/$semester/$course/submissions/"), ['.', '..']);
         $gradeable_ids_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         foreach ($gradeable_ids_titles as $i => $gradeable_id_title) {
             if (!in_array($gradeable_id_title['g_id'], $gradeable_with_submission) || file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id_title['g_id'] . ".json") || file_exists("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id_title['g_id'] . ".json")) {
@@ -168,7 +168,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, null);
     }
 
     /**
@@ -236,14 +236,14 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $prev_term_gradeables = array();
+        $prev_term_gradeables = [];
         for ($i = 0; $i < $prev_gradeable_number; $i++) {
             if ($_POST['prev_sem_' . $i] != "" && $_POST['prev_course_' . $i] != "" && $_POST['prev_gradeable_' . $i] != "") {
                 array_push($prev_term_gradeables, "/var/local/submitty/course/" . $_POST['prev_sem_' . $i] . "/" . $_POST['prev_course_' . $i] . "/submissions/" . $_POST['prev_gradeable_' . $i]);
             }
         }
 
-        $ignore_submissions = array();
+        $ignore_submissions = [];
         $ignore_submission_option = $_POST['ignore_submission_option'];
         if ($ignore_submission_option == "ignore") {
             for ($i = 0; $i < $ignore_submission_number; $i++) {
@@ -311,19 +311,20 @@ class PlagiarismController extends AbstractController {
 
         $config_dir = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/";
         $json_file = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json";
-        $json_data = array("semester" =>    $semester,
-                            "course" =>     $course,
-                            "gradeable" =>  $gradeable_id,
-                            "version" =>    $version_option,
-                            "file_option" => $file_option,
-                            "language" =>   $language,
-                            "threshold" =>  $threshold,
-                            "hash" => bin2hex(random_bytes(8)),
-                            "sequence_length" => $sequence_length,
-                            "prev_term_gradeables" => $prev_term_gradeables,
-                            "ignore_submissions" =>   $ignore_submissions,
-                            "instructor_provided_code" =>   $instructor_provided_code,
-                                        );
+        $json_data = [
+            "semester" =>    $semester,
+            "course" =>     $course,
+            "gradeable" =>  $gradeable_id,
+            "version" =>    $version_option,
+            "file_option" => $file_option,
+            "language" =>   $language,
+            "threshold" =>  $threshold,
+            "hash" => bin2hex(random_bytes(8)),
+            "sequence_length" => $sequence_length,
+            "prev_term_gradeables" => $prev_term_gradeables,
+            "ignore_submissions" =>   $ignore_submissions,
+            "instructor_provided_code" =>   $instructor_provided_code,
+        ];
         if ($file_option == "matching_regex") {
             $json_data["regex"] = $regex_for_selecting_files;
         }
@@ -455,7 +456,7 @@ class PlagiarismController extends AbstractController {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
         }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config, $title);
+        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config, $title);
     }
 
     /**
@@ -527,13 +528,13 @@ class PlagiarismController extends AbstractController {
         $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
         if (!file_exists($file_path)) {
-            $return = array('error' => 'Ranking file not exists.');
+            $return = ['error' => 'Ranking file not exists.'];
             $return = json_encode($return);
             echo($return);
             return;
         }
         $content = file_get_contents($file_path);
-        $content = trim(str_replace(array("\r", "\n"), '', $content));
+        $content = trim(str_replace(["\r", "\n"], '', $content));
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings, 3);
         foreach ($rankings as $ranking) {
@@ -544,7 +545,7 @@ class PlagiarismController extends AbstractController {
         if ($version_user_1 == "max_matching") {
             $version_user_1 = $max_matching_version;
         }
-        $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), array(".", ".."));
+        $all_versions_user_1 = array_diff(scandir($course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1), [".", ".."]);
 
         $file_name = $course_path . "/lichen/concatenated/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/submission.concatenated";
         $data = "";
@@ -555,10 +556,10 @@ class PlagiarismController extends AbstractController {
             else {
                 $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
             }
-            $data = array('display_code1' => $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info);
+            $data = ['display_code1' => $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci' => $color_info];
         }
         else {
-            $return = array('error' => 'User 1 submission.concatenated for specified version not found.');
+            $return = ['error' => 'User 1 submission.concatenated for specified version not found.'];
             $return = json_encode($return);
             echo($return);
             return;
@@ -571,7 +572,7 @@ class PlagiarismController extends AbstractController {
                 $data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
             }
             else {
-                $return = array('error' => 'User 2 submission.concatenated for matching version not found.');
+                $return = ['error' => 'User 2 submission.concatenated for matching version not found.'];
                 $return = json_encode($return);
                 echo($return);
                 return;
@@ -584,12 +585,12 @@ class PlagiarismController extends AbstractController {
     }
 
     public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
-        $color_info = array();
+        $color_info = [];
 
         //Represents left and right display users
-        $color_info[1] = array();
-        $color_info[2] = array();
-        $segment_info = array();
+        $color_info[1] = [];
+        $color_info[2] = [];
+        $segment_info = [];
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
         if (!file_exists($file_path)) {
@@ -614,10 +615,10 @@ class PlagiarismController extends AbstractController {
                 $end_line = $tokens_user_1[$e_pos - 1]["line"] - 1;
                 $start_value = $tokens_user_1[$s_pos - 1]["value"];
                 $end_value = $tokens_user_1[$e_pos - 1]["value"];
-                $userMatchesStarts = array();
-                $userMatchesEnds = array();
+                $userMatchesStarts = [];
+                $userMatchesEnds = [];
                 // if (match['type'] == "match") {
-                    $segment_info["{$start_line}_{$start_pos}"] = array();
+                    $segment_info["{$start_line}_{$start_pos}"] = [];
                     $orange_color = false;
                 foreach ($match->getUsers() as $i => $other) {
                     $segment_info["{$start_line}_{$start_pos}"][] = $other->getUid() . "_" . $other->getVid();
@@ -679,17 +680,17 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        $return = array();
+        $return = [];
         $error = "";
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
         if (!file_exists($file_path)) {
-            $return = array('error' => 'Ranking file not exists.');
+            $return = ['error' => 'Ranking file not exists.'];
             $return = json_encode($return);
             echo($return);
             return;
         }
         $content = file_get_contents($file_path);
-        $content = trim(str_replace(array("\r", "\n"), '', $content));
+        $content = trim(str_replace(["\r", "\n"], '', $content));
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings, 3);
         foreach ($rankings as $ranking) {
@@ -710,8 +711,8 @@ class PlagiarismController extends AbstractController {
             foreach ($content as $match) {
                 if ($match["type"] == "match") {
                     foreach ($match["others"] as $match_info) {
-                        if (!in_array(array($match_info["username"],$match_info["version"]), $return)) {
-                            array_push($return, array($match_info["username"],$match_info["version"]));
+                        if (!in_array([$match_info["username"],$match_info["version"]], $return)) {
+                            array_push($return, [$match_info["username"],$match_info["version"]]);
                         }
                     }
                 }
@@ -737,27 +738,27 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        $return = array();
+        $return = [];
 
         $file_path = $course_path . "/lichen/matches/" . $gradeable_id . "/" . $user_id_1 . "/" . $version_user_1 . "/matches.json";
         if (!file_exists($file_path)) {
-            echo(json_encode(array("error" => "user 1 matches.json does not exists")));
+            echo(json_encode(["error" => "user 1 matches.json does not exists"]));
         }
         else {
             $content = json_decode(file_get_contents($file_path), true);
             foreach ($content as $match) {
                 if ($tokens_user_1[$match["start"] - 1]["line"] - 1 == $start && $tokens_user_1[$match["end"] - 1]["line"] - 1 == $end) { //also do char place
                     foreach ($match["others"] as $match_info) {
-                        $matchingpositions = array();
+                        $matchingpositions = [];
                         $token_path_2 = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $match_info['username'] . "/" . $match_info['version'] . "/tokens.json";
                         $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
                         foreach ($match_info['matchingpositions'] as $matchingpos) {
-                            array_push($matchingpositions, array("start_line" => $tokens_user_2[$matchingpos["start"] - 1]["line"] - 1 , "start_ch" => $tokens_user_2[$matchingpos["start"] - 1]["char"] - 1,
-                                 "end_line" => $tokens_user_2[$matchingpos["end"] - 1]["line"] - 1, "end_ch" => $tokens_user_2[$matchingpos["end"] - 1]["char"] - 1 ));
+                            array_push($matchingpositions, ["start_line" => $tokens_user_2[$matchingpos["start"] - 1]["line"] - 1 , "start_ch" => $tokens_user_2[$matchingpos["start"] - 1]["char"] - 1,
+                                 "end_line" => $tokens_user_2[$matchingpos["end"] - 1]["line"] - 1, "end_ch" => $tokens_user_2[$matchingpos["end"] - 1]["char"] - 1 ]);
                         }
                         $first_name = $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
                         $last_name = $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedLastName();
-                        array_push($return, array($match_info["username"],$match_info["version"], $matchingpositions, $first_name, $last_name));
+                        array_push($return, [$match_info["username"],$match_info["version"], $matchingpositions, $first_name, $last_name]);
                     }
                 }
             }

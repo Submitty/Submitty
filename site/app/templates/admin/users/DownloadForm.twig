@@ -2,7 +2,7 @@
 {% block popup_id %}download-form{% endblock %}
 {% block title %}Download Users{% endblock %}
 {% block body %}
-    <input type="hidden" value='{{ download_info_json }}' id="download_info_json_id">
+    <input type="hidden" value='{{ download_info_json }}' id="download_info_json_id" data-course="{{ course }}" data-semester="{{ semester }}">
     <div style="width:300px">
         {% for section in reg_sections %}
             <input type="checkbox" value="{{ section.sections_registration_id }}" id="registration_section_{{ section.sections_registration_id }}"><label for="registration_section_{{ section.sections_registration_id }}">Registration Section {{ section.sections_registration_id }}</label><br>

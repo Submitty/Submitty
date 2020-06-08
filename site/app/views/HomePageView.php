@@ -20,7 +20,7 @@ class HomePageView extends AbstractView {
         bool $database_authentication,
         string $csrf_token
     ) {
-        $statuses = array();
+        $statuses = [];
         $course_types = [$unarchived_courses, $archived_courses];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",
@@ -30,7 +30,7 @@ class HomePageView extends AbstractView {
         ];
 
         foreach ($course_types as $course_type) {
-            $ranks = array();
+            $ranks = [];
 
             //Create rank lists
             for ($i = 1; $i < 5; $i++) {

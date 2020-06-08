@@ -1,5 +1,6 @@
 {% import _self as self %}
 
+{% set actions_id = "actions_" ~ index %}
 {% for check in checks %}
     {% if loop.index0 != 0 %}
         <div class="clear"></div>
@@ -7,16 +8,19 @@
     {% if check.pdf %}
         <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
-        <br>
-        {% if check.actual %}
-        <div style="height:23px; float:right;">
-            <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ who }}', '{{ display_version }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
+        <div class="autocheck-header">
+          {% if check.actual %}
+            <div class="autocheck-header-button">
+                <a id="show_char_{{ index }}_{{ loop.index0 }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="changeDiffView('container_{{ index }}_{{ loop.index0 }}', '{{ gradeable_id }}', '{{ who }}', '{{ display_version }}', '{{ index }}', '{{ loop.index0 }}', 'white_space_helper_{{ index }}')">Visualize whitespace characters</a>
+            </div>
+          {% endif %}
+          {% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and loop.index0 == 0 and publish_actions %}
+            <div class="autocheck-header-button">
+                <a id="show_actions_{{ index }}" class="btn btn-default key_to_click" tabindex="0" style="float:right;" onclick="openActionsPopup('{{ popup_css_file }}', '{{ actions_id }}');">View test procedure</a>
+            </div>
+          {% endif %}
         </div>
-        <div><span style="margin-left: 20px" class="line_code" id='white_space_helper_{{ index }}'></span></div>
-        {% endif %}
-
         <div class="box-block">
-
             {% if not check.actual %}
                <h4 style="margin-bottom: 0">{{ check.description }}</h4>
                <div>
@@ -34,6 +38,15 @@
 
         </div>
     {% endif %}
+
+{% if ((dispatcher_actions | length > 0) or (graphics_actions | length > 0)) and publish_actions %}
+  {% include('autograding/ActionView.twig') with {
+      'testcase_name': testcase_name,
+      'element_id': actions_id,
+      'dispatcher_actions' : dispatcher_actions,
+      'graphics_actions' : graphics_actions }
+  %}
+{% endif %}
 
 {% endfor %}
 

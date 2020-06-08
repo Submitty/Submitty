@@ -276,7 +276,7 @@
                 >
                     <span class="flex-line"> {# col in flex-row #}
                         {% if button.getIcon() != null %}
-                            <i class="fa {{ button.getIcon() }}"></i>
+                            <i class="{{ button.getPrefix() }} {{ button.getIcon() }}"></i>
                         {% endif %}
 
                         <span class="icon-title"> {{ button.getTitle() }} </span>

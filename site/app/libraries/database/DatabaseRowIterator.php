@@ -20,7 +20,7 @@ class DatabaseRowIterator implements \Iterator {
     private $result;
     private $key = -1;
     private $valid = true;
-    private $columns = array();
+    private $columns = [];
 
     /**
      * DatabaseRowIterator constructor.

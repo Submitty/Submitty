@@ -52,17 +52,17 @@ function switch_feedback_modes() {
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
             <div id="comments_wrapper">
-            {% for user in ordered_graders if overall_comments[user] is not empty %}
-                <div class="overall-comment-box">
-                    <p class="overall-comment-author">
-                        Overall note from {{peer_aliases[user]}}:
-                    </p>
-                    <p class="overall-comment">
-                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
-                    </p>
-                </div>
+                {% for user in ordered_graders if overall_comments[user] is not empty %}
+                    <div class="overall-comment-box">
+                        <p class="overall-comment-author">
+                            Overall note from {{peer_aliases[user]}}:
+                        </p>
+                        <p class="overall-comment">
+                            <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                        </p>
+                    </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
         {# /Overview #}
         {% if (peer_score >= peer_max) %}
