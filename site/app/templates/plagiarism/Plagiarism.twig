@@ -10,16 +10,15 @@
     <div class="sub">
         <div>
             <table style="border-collapse: separate;border-spacing: 15px 10px;">
-                {# Meat Piece goes in here #}
                 {% for row in plagiarism_results_info %}
-                    {{ self.renderPlagiarismRow(row) }}
+                    {{ _self.renderPlagiarismRow(row) }}
                 {% endfor %}
             </table>
         </div>
     </div>
 </div>
 <script>
-    checkRefreshLichenMainPage("{$this->core->buildCourseUrl(['plagiarism', 'check_refresh'])}" ,"{$semester}", "{$course}");
+    checkRefreshLichenMainPage({{ refreshLichenMainPageLink }});
 </script>
 
 {# refresh page ensures atleast one refresh of lichen mainpage when delete, rerun, edit or new configuration is saved #}
@@ -29,7 +28,7 @@
     </script>
 {% endif %}
 
-{% macro renderPlagiarism(row) %}
+{% macro renderPlagiarismRow(row) %}
     {% if row['in_queue'] %}
         <tr style="color:grey;">
             <td>{{ row['title'] }}
@@ -56,11 +55,11 @@
     {% else %}
         <tr>
         {% if row['ranking_available'] %}
-            <td>{{ row['title'] }}</td>
-        {% else %}
             <td>
                 <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
             </td>
+        {% else %}
+            <td>{{ row['title'] }}</td>
         {% endif %}
             <td>
                 <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}"><i class="fas fa-pencil-alt"></i></a>
@@ -93,7 +92,5 @@
                 </label>
             </td>
         </tr>
-
     {% endif %}
-
 {% endmacro %}
