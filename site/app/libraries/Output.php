@@ -104,10 +104,14 @@ class Output {
             $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
             [$mime_type, $mime_subtype] = explode('/', mime_content_type($path), 2);
             if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
-                // Read image path, convert to base64 encoding
-                $image_data = base64_encode(file_get_contents($path));
+                // Resize image to decrease volume of data being returned
+                $imagick = new \Imagick($path);
+                $imagick->scaleImage(150, 200);
+                $image_data = base64_encode($imagick->getImageBlob());
+
+                // Return html image tag with image embedded as a base64 character string
                 return <<<HTML
-<img alt="${title}" src="data:image/${mime_subtype};base64,${image_data}" width="150" height="200" />
+<img alt="${title}" src="data:image/${mime_subtype};base64,${image_data}" />
 HTML;
             }
             throw new OutputException('Invalid path to image file');

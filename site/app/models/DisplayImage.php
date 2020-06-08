@@ -17,6 +17,7 @@ class DisplayImage extends AbstractModel
 {
     const LEGAL_IMAGE_STATES = ['system', 'preferred', 'flagged'];
 
+    /** @var string|null The file path to the selected image */
     protected $path;
 
     public function __construct(Core $core, string $user_id, string $display_image_state) {

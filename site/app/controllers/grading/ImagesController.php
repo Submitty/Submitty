@@ -14,20 +14,6 @@ class ImagesController extends AbstractController {
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
-        $images_course_path = $this->core->getConfig()->getCoursePath();
-        // FIXME: this code is duplicated in GlobalController.php
-        $images_path = FileUtils::joinPaths($images_course_path, "uploads/student_images");
-        $common_images_path_1 = FileUtils::joinPaths("/var/local/submitty/student_images");
-        $term = explode('/', $this->core->getConfig()->getCoursePath());
-        $term = $term[count($term) - 2];
-        $common_images_path_2 = FileUtils::joinPaths("/var/local/submitty/student_images", $term);
-        // FIXME: consider searching through the common location for matches to my students
-        // (but this would be expensive)
-        $any_images_files = array_merge(
-            FileUtils::getAllFiles($images_path, [], true),
-            FileUtils::getAllFiles($common_images_path_1, [], true),
-            FileUtils::getAllFiles($common_images_path_2, [], true)
-        );
         if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
             $this->core->redirect($this->core->buildCourseUrl());

@@ -21,37 +21,19 @@ class ImagesView extends AbstractView {
         $image_data = [];
         $error_image_data = '_NONE_';
 
-        // image files can be specific to this course (uploaded by instructor)
-        // or in a common path per term (uploaded manually by sysadmin)
-        $term = explode('/', $this->core->getConfig()->getCoursePath());
-        $term = $term[count($term) - 2];
-        // the places we will look for this students photo (in order)
-        $path_locations =
-            [ FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images"),
-              FileUtils::joinPaths("/var/local/submitty", "student_images", $term),
-              FileUtils::joinPaths("/var/local/submitty", "student_images")
-              ];
-        $file_extensions = [ ".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG" ];
-
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
             $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
             if (empty($grader_sections) || in_array($registration, $grader_sections)) {
                 $sections[$registration][] = $student;
-                foreach ($path_locations as $path) {
-                    foreach ($file_extensions as $extension) {
-                        $possible_match =  FileUtils::joinPaths($path, $student->getId() . $extension);
-                        if (file_exists($possible_match) && FileUtils::isValidImage($possible_match)) {
-                            $mime_subtype = explode('/', mime_content_type($possible_match), 2)[1];
-                            $image_data[$student->getId()] =
-                                [
-                                    'subtype' => $mime_subtype,
-                                    'path' => $possible_match
-                                 ];
-                            break;
-                        }
-                    }
+                $image_path = $student->getDisplayImage()->getPath();
+                if (file_exists($image_path) && FileUtils::isValidImage($image_path)) {
+                    $mime_subtype = explode('/', mime_content_type($image_path), 2)[1];
+                    $image_data[$student->getId()] = [
+                        'subtype' => $mime_subtype,
+                        'path' => $image_path
+                    ];
                 }
             }
         }

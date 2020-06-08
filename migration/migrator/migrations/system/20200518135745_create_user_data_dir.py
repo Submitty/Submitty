@@ -12,14 +12,18 @@ def up(config):
     :type config: migrator.config.Config
     """
 
-    path = config.submitty['submitty_data_dir'] + '/user_data'
+    user_data_path = os.path.join(config.submitty['submitty_data_dir'], 'user_data')
     user = config.submitty_users['php_user']
+    script_path = os.path.join(config.submitty['submitty_repository'], '.setup', 'bin', 'setup_sample_user_data.py')
 
-    if not os.path.isdir(path):
-        os.system('mkdir ' + path)
-        os.system('chmod 770 ' + path)
-        shutil.chown(path, user, user)
+    # Generate user_data directory
+    if not os.path.isdir(user_data_path):
+        os.system('mkdir ' + user_data_path)
+        os.system('chmod 770 ' + user_data_path)
+        shutil.chown(user_data_path, user, user)
 
+    # Execute script to populate user_data directory with sample images
+    os.system('python3 ' + script_path)
 
 
 def down(config):
@@ -30,6 +34,3 @@ def down(config):
     :type config: migrator.config.Config
     """
     path = config.submitty['submitty_data_dir'] + '/user_data'
-
-    if os.path.isdir(path):
-        shutil.rmtree(path)

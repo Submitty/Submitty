@@ -191,7 +191,7 @@ class User extends AbstractModel {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
 
-        if (isset($details['user_id']) && isset($details['display_image_state'])) {
+        if (isset($details['display_image_state'])) {
             $this->display_image = new DisplayImage($core, $details['user_id'], $details['display_image_state']);
         }
 
