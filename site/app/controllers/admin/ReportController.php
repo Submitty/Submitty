@@ -41,8 +41,9 @@ class ReportController extends AbstractController {
         }
 
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+        $this->core->getOutput()->enableMobileViewport();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates', $grade_summaries_last_run);
+        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run);
     }
 
     /**
@@ -649,7 +650,7 @@ class ReportController extends AbstractController {
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
-                array('admin', 'Report'),
+                ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file
             )

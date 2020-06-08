@@ -27,9 +27,9 @@ class Output {
     private $buffer_output = true;
 
     private $output_buffer = "";
-    private $breadcrumbs = array();
+    private $breadcrumbs = [];
     private $page_name = "";
-    private $loaded_views = array();
+    private $loaded_views = [];
 
     /** @var Set */
     private $css;
@@ -121,8 +121,6 @@ HTML;
         }, ["is_safe" => ["html"]]));
 
         if ($full_load) {
-            $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
-                ->setTimezone($this->core->getConfig()->getTimezone());
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
@@ -207,7 +205,7 @@ HTML;
         if (is_array($view)) {
             $view = implode("\\", $view);
         }
-        $func = call_user_func_array(array($this->getView($view), $function), $args);
+        $func = call_user_func_array([$this->getView($view), $function], $args);
         if ($func === false) {
             throw new OutputException("Cannot find function '{$function}' in requested view '{$view}'");
         }
@@ -599,5 +597,16 @@ HTML;
      */
     public function buildCourseUrl(array $parts): string {
         return $this->core->buildCourseUrl($parts);
+    }
+
+    /**
+     * Set the time zone that the twig date filter should display times in.  This will typically be set to the
+     * logged in user's time zone.  If a user's time zone has not been set then the server time zone will be used.
+     *
+     * @param string $time_zone A time zone available in DateUtils::getAvailableTimeZones()
+     */
+    public function setTwigTimeZone(string $time_zone): void {
+        $tz = $time_zone === 'NOT_SET/NOT_SET' ? $this->core->getConfig()->getTimezone() : $time_zone;
+        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone($tz);
     }
 }

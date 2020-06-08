@@ -125,3 +125,13 @@ $(window).on('unload', () => {
     }
   }
 });
+function loadPDFToolbar(){
+    let init_pen_size = document.getElementById('pen_size_selector').value;
+    let init_color = document.getElementById('color_selector').style.backgroundColor;
+    localStorage.setItem('pen/size', init_pen_size);
+    localStorage.setItem('main_color', init_color);
+    PDFAnnotate.UI.setPen(init_pen_size, init_color);
+    let init_text_size = document.getElementById('text_size_selector').value;
+    localStorage.setItem('text/size', init_text_size);
+    PDFAnnotate.UI.setText(init_text_size, init_color);
+}

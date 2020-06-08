@@ -15,7 +15,7 @@ abstract class AbstractDatabase {
     /**
      * @var array
      */
-    protected $results = array();
+    protected $results = [];
 
     protected $row_count = 0;
 
@@ -27,7 +27,7 @@ abstract class AbstractDatabase {
     /**
      * @var array
      */
-    protected $all_queries = array();
+    protected $all_queries = [];
 
     /**
      * @var bool
@@ -44,7 +44,7 @@ abstract class AbstractDatabase {
      */
     protected $emulate_prepares = false;
 
-    protected $columns = array();
+    protected $columns = [];
 
     /**
      * Database constructor. This function (overridden in all children) sets our
@@ -92,7 +92,7 @@ abstract class AbstractDatabase {
         // Only start a new connection if we're not already connected to a DB
         if ($this->link === null) {
             $this->query_count = 0;
-            $this->all_queries = array();
+            $this->all_queries = [];
             try {
                 if (isset($this->username) && isset($this->password)) {
                     $this->link = new \PDO($this->getDSN(), $this->username, $this->password);
@@ -140,7 +140,7 @@ abstract class AbstractDatabase {
      *
      * @return boolean true if query suceeded, else false.
      */
-    public function query($query, $parameters = array()) {
+    public function query($query, $parameters = []) {
         try {
             $this->query_count++;
             foreach ($parameters as &$parameter) {
@@ -153,7 +153,7 @@ abstract class AbstractDatabase {
                     }
                 }
             }
-            $this->all_queries[] = array($query, $parameters);
+            $this->all_queries[] = [$query, $parameters];
             $statement = $this->link->prepare($query);
             $result = $statement->execute($parameters);
             $lower = trim(strtolower($query));
@@ -202,14 +202,14 @@ abstract class AbstractDatabase {
      *
      * @throws \app\exceptions\DatabaseException
      */
-    public function queryIterator($query, $parameters = array(), $callback = null) {
+    public function queryIterator($query, $parameters = [], $callback = null) {
         $lower = trim(strtolower($query));
         if (!Utils::startsWith($lower, "select")) {
             return $this->query($query, $parameters);
         }
         try {
             $this->query_count++;
-            $this->all_queries[] = array($query, $parameters);
+            $this->all_queries[] = [$query, $parameters];
             $statement = $this->link->prepare($query);
             $statement->execute($parameters);
             $this->row_count = null;
@@ -226,7 +226,7 @@ abstract class AbstractDatabase {
      * @return array
      */
     public function getColumnData($statement) {
-        $columns = array();
+        $columns = [];
         for ($i = 0; $i < $statement->columnCount(); $i++) {
             $col = $statement->getColumnMeta($i);
             if ($col !== false) {
@@ -296,7 +296,7 @@ abstract class AbstractDatabase {
             return array_shift($this->results);
         }
         else {
-            return array();
+            return [];
         }
     }
 
@@ -311,7 +311,7 @@ abstract class AbstractDatabase {
             return $this->results;
         }
         else {
-            return array();
+            return [];
         }
     }
 

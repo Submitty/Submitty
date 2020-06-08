@@ -1,0 +1,59 @@
+#grade-report-cont.content {
+    padding: 20px;
+    margin: 15px 0;
+}
+#grade-report h1 {
+    font-weight: 500;
+}
+
+.card {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    padding: 24px 12px;
+    margin-bottom: 14px;
+}
+
+.title-cont {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.card-btn-cont {
+    flex: 1;
+    text-align: center;
+    margin: 12px 0;
+}
+
+.card-btn-info {
+    margin-top: 8px;
+}
+
+.card-btn-cont .btn {
+    white-space: normal;
+    width: 90%;
+}
+
+@media (min-width: 541px) {
+    #grade-report-cont.content {
+        padding: 30px;
+        margin: 30px;
+    }
+    #grade-report h1 {
+        font-weight: bold;
+    }
+}
+
+@media (min-width: 780px) {
+    .card {
+        padding: 24px 0;
+        text-align: left;
+        flex-direction: row;
+    }
+    .card-btn-cont {
+        margin: 0;
+    }
+    .card-btn-info {
+        margin-top: 0;
+    }
+}

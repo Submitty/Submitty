@@ -12,7 +12,7 @@ class BaseExceptionTester extends \PHPUnit\Framework\TestCase {
         catch (BaseException $exc) {
             $this->assertTrue($exc->logException());
             $this->assertFalse($exc->displayMessage());
-            $this->assertEquals(array("extra_details" => "Details string"), $exc->getDetails());
+            $this->assertEquals(["extra_details" => "Details string"], $exc->getDetails());
         }
     }
 }
