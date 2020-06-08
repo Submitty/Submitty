@@ -1,0 +1,99 @@
+<div class="content">
+    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
+    <div class="nav-buttons">
+        <a class="btn btn-primary"
+           href="{{ new_plagiarism_config_link }}"
+        >+ Configure New Gradeable for Plagiarism Detection</a>
+    </div>
+    <br/>
+    <br/>
+    <div class="sub">
+        <div>
+            <table style="border-collapse: separate;border-spacing: 15px 10px;">
+                {# Meat Piece goes in here #}
+                {% for row in plagiarism_results_info %}
+                    {{ self.renderPlagiarismRow(row) }}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    checkRefreshLichenMainPage("{$this->core->buildCourseUrl(['plagiarism', 'check_refresh'])}" ,"{$semester}", "{$course}");
+</script>
+
+{# refresh page ensures atleast one refresh of lichen mainpage when delete, rerun, edit or new configuration is saved #}
+{% if refresh_page == "REFRESH_ME" %}
+    <script>
+        localStorage.setItem("last_data", "REFRESH_ME");
+    </script>
+{% endif %}
+
+{% macro renderPlagiarism(row) %}
+    {% if row['in_queue'] %}
+        <tr style="color:grey;">
+            <td>{{ row['title'] }}
+            </td>
+            <td colspan=3>
+                {% if row['processing'] %}
+                    <i>Running</i>
+                {% else %}
+                    <i>In queue</i>
+                {% endif %}
+            </td>
+            <td>
+                Last run: {{ row['timestamp'] }}
+            </td>
+            <td>
+                {{ row['students'] }} students, {{ row['submissions'] }} submissions
+            </td>
+            <td>
+                <label><input type="checkbox" {{ row['nightly_rerun_status'] }}>
+                    Nightly Re-run
+                </label>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+        {% if row['ranking_available'] %}
+            <td>{{ row['title'] }}</td>
+        {% else %}
+            <td>
+                <a href="{{ row['gradeable_link'] }}">{{ row['title'] }}</a>
+            </td>
+        {% endif %}
+            <td>
+                <a href="{{ row['edit_plagiarism_link'] }}" aria-label="Edit {{ row['title'] }}"><i class="fas fa-pencil-alt"></i></a>
+            </td>
+            <td>
+                <a href="{{ row['rerun_plagiarism_link'] }}" aria-label="Rerun {{ row['title'] }}"><i class="fas fa-sync"></i></a>
+            </td>
+            <td>
+                <a aria-label="Delete {{ row['title'] }}"
+                   onclick="deletePlagiarismResultAndConfigForm('{{ row['delete_form_action'] }}', '{{ row['title'] }}');"
+                >
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+            <td>
+                Last run: {{ row['timestamp'] }}
+            </td>
+            <td>
+                {{ row['students'] }} students, {{ row['submissions'] }} submissions
+            </td>
+            <td>
+                {{ row['matches_and_topmatch'] }}
+            </td>
+            <td>
+                <label>
+                    <input type="checkbox"
+                           onclick='window.location.href = {{ row['nightly_rerun_link'] }};'
+                           {{ row['nightly_rerun_status'] }}>
+                    Nightly Re-run
+                </label>
+            </td>
+        </tr>
+
+    {% endif %}
+
+{% endmacro %}

@@ -11,29 +11,32 @@ class PlagiarismView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
 
         $return = "";
-        $return .= <<<HTML
-<div class="content">
-    <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
-    <div class="nav-buttons">
-        <a class="btn btn-primary" href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'new'])}">+ Configure New Gradeable for Plagiarism Detection</a>
-    </div><br /><br />
-    <div class="sub">
-    <div>
-    <table style="border-collapse: separate;border-spacing: 15px 10px;">
-HTML;
+
+        $plagiarism_result_info = [];
+
         $course_path = $this->core->getConfig()->getCoursePath();
         foreach ($gradeables_with_plagiarism_result as $gradeable) {
-            $title = $gradeable['g_title'];
-            $id = $gradeable['g_id'];
+            $plagiarism_row = [];
+            $plagiarism_row['title'] = $gradeable['g_title'];
+            $plagiarism_row['id'] = $gradeable['g_id'];
+            $plagiarism_row['delete_form_action'] = $this->core->buildCourseUrl([
+                'plagiarism',
+                'gradeable',
+                $plagiarism_row['id'],
+                'delete'
+            ]);
 
-            $delete_form_action = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'delete']);
+//            $title = $gradeable['g_title'];
+//            $id = $gradeable['g_id'];
 
-            if (file_exists($course_path . "/lichen/ranking/" . $id . ".txt")) {
-                $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $id . ".txt"));
-                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), ['.', '..']);
+//            $delete_form_action = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'delete']);
+
+            if (file_exists($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt")) {
+                $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $plagiarism_row['id'] . ".txt"));
+                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $plagiarism_row['id']), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
-                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $id . "/" . $student), ['.', '..']));
+                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $plagiarism_row['id'] . "/" . $student), ['.', '..']));
                 }
                 $students = count($students);
             }
@@ -42,122 +45,116 @@ HTML;
                 $students = "N/A";
                 $submissions = "N/A";
             }
-            $night_rerun_status = "";
-            if ($nightly_rerun_info[$id] == true) {
-                $night_rerun_status = "checked";
-            }
+            $plagiarism_row['timestamp'] = $timestamp;
+            $plagiarism_row['students'] = $students;
+            $plagiarism_row['submissions'] = $submissions;
+
+            $plagiarism_row['night_rerun_status'] = $nightly_rerun_info[$plagiarism_row['id']] ? "" : "checked";
 
             // lichen job in queue for this gradeable but processing not started
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
-                $return .= <<<HTML
-        <tr style="color:grey;">
-            <td>$title
-            </td>
-            <td colspan=3><i>in queue</i>
-            </td>
-            <td>
-                Last run: $timestamp
-            </td>
-            <td>
-                $students students, $submissions submissions
-            </td>
-            <td>
-                <label><input type="checkbox" {$night_rerun_status} >Nightly Re-run </label>
-            </td>
-        </tr>
-HTML;
+                $plagiarism_row['in_queue'] = true;
+                $plagiarism_row['processing'] = false;
+                //                $return .= <<<HTML
+//        <tr style="color:grey;">
+//            <td>$title
+//            </td>
+//            <td colspan=3><i>in queue</i>
+//            </td>
+//            <td>
+//                Last run: $timestamp
+//            </td>
+//            <td>
+//                $students students, $submissions submissions
+//            </td>
+//            <td>
+//                <label><input type="checkbox" {$night_rerun_status} >Nightly Re-run </label>
+//            </td>
+//        </tr>
+//HTML;
             }
             elseif (file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
                 // lichen job in processing stage for this gradeable but not completed
-                $return .= <<<HTML
-        <tr style="color:green;">
-            <td>$title
-            </td>
-            <td colspan=3><i>running</i>
-            </td>
-            <td>
-                Last run: $timestamp
-            </td>
-            <td>
-                $students students, $submissions submissions
-            </td>
-            <td>
-                <label><input type="checkbox" {$night_rerun_status} >Nightly Re-run </label>
-            </td>
-        </tr>
-HTML;
+                $plagiarism_row['in_queue'] = true;
+                $plagiarism_row['processing'] = true;
+//                $return .= <<<HTML
+//        <tr style="color:green;">
+//            <td>$title
+//            </td>
+//            <td colspan=3><i>running</i>
+//            </td>
+//            <td>
+//                Last run: $timestamp
+//            </td>
+//            <td>
+//                $students students, $submissions submissions
+//            </td>
+//            <td>
+//                <label><input type="checkbox" {$night_rerun_status} >Nightly Re-run </label>
+//            </td>
+//        </tr>
+//HTML;
             }
             else {
                 // no lichen job
                 $ranking_file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $id . ".txt";
                 if (file_get_contents($ranking_file_path) == "") {
                     $matches_and_topmatch = "0 students matched, N/A top match";
+                    $plagiarism_row['ranking_available'] = false;
+                    $plagiarism_row['matches_and_topmatch'] = "0 students matched, N/A top match";
 
-                    $return .= <<<HTML
-        <tr>
-            <td>$title
-            </td>
-HTML;
+//                    $return .= <<<HTML
+//        <tr>
+//            <td>$title
+//            </td>
+//HTML;
                 }
                 else {
-                    $content = file_get_contents($ranking_file_path);
-                    $content = trim(str_replace(["\r", "\n"], '', $content));
-                    $rankings = preg_split('/ +/', $content);
-                    $rankings = array_chunk($rankings, 3);
-                    $matches_and_topmatch = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
+                    $content = trim(str_replace(["\r", "\n"], '', file_get_contents($ranking_file_path)));
+                    $rankings = array_chunk(preg_split('/ +/', $content), 3);
+                    $plagiarism_row['matches_and_topmatch'] = count($rankings) . " students matched, " . $rankings[0][0] . " top match";;
+                    $plagiarism_row['gradeable_link'] = count($rankings) . " students matched, " . $rankings[0][0] . " top match";;
 
-                    $return .= <<<HTML
-        <tr>
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id])}">$title</a>
-            </td>
-HTML;
+//                    $return .= <<<HTML
+//        <tr>
+//            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id])}">$title</a>
+//            </td>
+//HTML;
                 }
 
-                $return .= <<<HTML
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}" aria-label="Edit {$title}"><i class="fas fa-pencil-alt"></i></a>
-            </td>
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}" aria-label="Rerun {$title}"><i class="fas fa-sync"></i></a>
-            </td>
-            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');" aria-label="Delete {$title}"><i class="fas fa-trash"></i></a>
-            </td>
-            <td>
-                Last run: $timestamp
-            </td>
-            <td>
-                $students students, $submissions submissions
-            </td>
-            <td>
-                $matches_and_topmatch
-            </td>
-            <td>
-                <label><input type="checkbox" onclick='window.location.href = buildCourseUrl(["plagiarism", "gradeable", "{$id}", "nightly_rerun"]);' {$night_rerun_status} >Nightly Re-run </label>
-            </td>
-        </tr>
-HTML;
+//                $return .= <<<HTML
+//            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}" aria-label="Edit {$title}"><i class="fas fa-pencil-alt"></i></a>
+//            </td>
+//            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}" aria-label="Rerun {$title}"><i class="fas fa-sync"></i></a>
+//            </td>
+//            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');" aria-label="Delete {$title}"><i class="fas fa-trash"></i></a>
+//            </td>
+//            <td>
+//                Last run: $timestamp
+//            </td>
+//            <td>
+//                $students students, $submissions submissions
+//            </td>
+//            <td>
+//                $matches_and_topmatch
+//            </td>
+//            <td>
+//                <label><input type="checkbox" onclick='window.location.href = buildCourseUrl(["plagiarism", "gradeable", "{$id}", "nightly_rerun"]);' {$night_rerun_status} >Nightly Re-run </label>
+//            </td>
+//        </tr>
+//HTML;         $
+                $plagiarism_row['rerun_plagiarism_link'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', "{$plagiarism_row['id']}", 'rerun']);
+                $plagiarism_row['edit_plagiarism_link'] = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . "?gradeable_id={$plagiarism_row['id']}";
+                $plagiarism_row['nightly_rerun_link'] = $this->core->buildCourseUrl(["plagiarism", "gradeable", "{$plagiarism_row['id']}", "nightly_rerun"]);
             }
+            $plagiarism_result_info[] = $plagiarism_row;
         }
 
-        $return .= <<<HTML
-    </table></div>
-    </div>
-</div>
-HTML;
+        $this->core->getOutput()->renderTwigTemplate('plagiarism/Plagiarism.twig', [
+            "refresh_page" => $refresh_page,
+            "plagiarism_result_info" => $plagiarism_result_info
 
-        $return .= <<<HTML
-<script>
-    checkRefreshLichenMainPage("{$this->core->buildCourseUrl(['plagiarism', 'check_refresh'])}" ,"{$semester}", "{$course}");
-</script>
-HTML;
-        #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
-        if ($refresh_page == "REFRESH_ME") {
-            $return .= <<<HTML
-<script>
-    var last_data= "REFRESH_ME";
-    localStorage.setItem("last_data", last_data);
-</script>
-HTML;
-        }
-
+        ]);
         return $return;
     }
 
