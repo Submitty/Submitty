@@ -12,8 +12,9 @@
         <input type="radio" id="no_pdf_page" name="pdf_page" value="false" onchange="updatePdfPageSettings()"
                 {{ not is_pdf_page ? 'checked' : '' }} /> <label for="no_pdf_page">No</label>
     </fieldset>
+    <br>
     <fieldset id="pdf_page">
-        Who will assign page numbers to problems/item/components?<br>
+        <legend>Who will assign page numbers to problems/item/components?</legend>
         <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false" onchange="updatePdfPageSettings()"
                 {{ not is_pdf_page_student ? 'checked' : '' }} /> <label for="no_pdf_page_student">Instructor (specify the starting page number for each problem/item/component below)</label><br>
         <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"

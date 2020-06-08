@@ -164,7 +164,7 @@ class WebRouter {
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
 
-        $arguments = array();
+        $arguments = [];
         /** @noinspection PhpUnhandledExceptionInspection */
         $method = new \ReflectionMethod($this->controller_name, $this->method_name);
         foreach ($method->getParameters() as $param) {
@@ -254,6 +254,7 @@ class WebRouter {
                 if (
                     $this->parameters['_method'] !== 'logout'
                     && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                    && !Utils::endsWith($this->parameters['_controller'], 'DockerInterfaceController')
                 ) {
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
