@@ -724,7 +724,7 @@ class NavigationView extends AbstractView {
         ]);
     }
 
-        /**
+    /**
      * @param Gradeable $gradeable
      * @return Button|null
      */

@@ -1,10 +1,12 @@
-$("#gradeable-select").change(function(){
+$(document).ready(function() {
+  $("#gradeable-select").change(function () {
     var g_id = $('#gradeable-select').val();
     var expiration_date = new Date(Date.now());
     expiration_date.setDate(expiration_date.getDate() + 1);
     document.cookie = "exception_gid=" + g_id + "; expires=" + expiration_date.toUTCString();
-    window.location=window.location; // pseudo post/redirect/get pattern
-}
+    window.location = window.location; // pseudo post/redirect/get pattern
+  });
+});
 
 function updateHomeworkExtension() {
     var fd = new FormData($('#extensions-form').get(0));

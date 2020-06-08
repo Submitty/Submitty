@@ -61,7 +61,7 @@ class PDFController extends AbstractController {
             'jquery' => true
         ];
 
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $params);
     }
 
     /**
@@ -134,7 +134,12 @@ class PDFController extends AbstractController {
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
         $page_num = $_POST['page_num'] ?? null;
+        $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
+
+        if ($is_anon) {
+            $id = $this->core->getQueries()->getUserFromAnon($id)[$id];
+        }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
@@ -187,7 +192,7 @@ class PDFController extends AbstractController {
             "is_student" => false,
             "page_num" => $page_num
         ];
-        $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $params);
     }
 
     /**
@@ -198,6 +203,6 @@ class PDFController extends AbstractController {
         //a full-sized annotator, so keeping this in for now.
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->renderOutput(array('grading', 'PDFAnnotation'), 'showAnnotationPage');
+        $this->core->getOutput()->renderOutput(['grading', 'PDFAnnotation'], 'showAnnotationPage');
     }
 }

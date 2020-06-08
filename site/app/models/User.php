@@ -124,10 +124,10 @@ class User extends AbstractModel {
     protected $instructor_updated = false;
 
     /** @prop @var array */
-    protected $grading_registration_sections = array();
+    protected $grading_registration_sections = [];
 
     /** @prop @var array */
-    protected $notification_settings = array();
+    protected $notification_settings = [];
 
     /**
      * User constructor.
@@ -135,7 +135,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details = array()) {
+    public function __construct(Core $core, $details = []) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -417,7 +417,7 @@ class User extends AbstractModel {
                 //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
                 $ex_data = '$data:  ' . var_export(htmlentities($data), true);
-                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
+                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', [$ex_field, $ex_data]);
         }
     }
 

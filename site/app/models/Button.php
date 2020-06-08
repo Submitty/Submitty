@@ -42,7 +42,7 @@ class Button extends AbstractModel {
     /** @prop @var string|null $subtitle */
     protected $subtitle;
     /** @prop @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
-    * grade button then $date may represent the date and time grading begins or ends */
+     * grade button then $date may represent the date and time grading begins or ends */
     protected $date;
     /** @prop @var string|null $href */
     protected $href;

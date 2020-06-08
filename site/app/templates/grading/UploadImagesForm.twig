@@ -19,7 +19,12 @@
             <div id="upload1" class="file-input">
                 <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
                 <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
-                <table class="file-upload-table" id="file-upload-table-1"></table>
+                <table class="file-upload-table" id="file-upload-table-1">
+                  <tr style="background:transparent; display:none;">
+                    <th>File Name:</th>
+                    <th>Size:</th>
+                  </tr>
+                </table>
             </div>
         </div>
         <p>
