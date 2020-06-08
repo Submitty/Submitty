@@ -185,7 +185,7 @@ class DateUtils {
      * @param string $format
      * @return string
      */
-    public static function convertTimeStamp(User $user, string $time_stamp, string $format) {
+    public static function convertTimeStamp(User $user, string $time_stamp, string $format): string {
         $time = self::parseDateTime($time_stamp, $user->getUsableTimeZone());
         return $time->format($format);
     }
