@@ -290,6 +290,7 @@ class HomeworkView extends AbstractView {
         $config = $gradeable->getAutogradingConfig();
         $notebook = null;
         $notebook_inputs = [];
+        $num_parts = $config->getNumParts();
         if ($config->isNotebookGradeable()) {
             $notebook_model = $config->getUserSpecificNotebook(
                 $this->core->getUser()->getId(),
@@ -297,6 +298,7 @@ class HomeworkView extends AbstractView {
             );
 
             $notebook = $notebook_model->getNotebook();
+            $num_parts = $notebook_model->getNumParts();
             $warning = $notebook_model->getWarning();
             if (isset($warning) && $this->core->getUser()->accessGrading()) {
                 $output = $this->core->getOutput()->renderTwigTemplate(
@@ -340,11 +342,12 @@ class HomeworkView extends AbstractView {
         $github_user_id = '';
         $github_repo_id = '';
 
+        $i = $config->isNotebookGradeable() ? 0 : 1;
 
         if (!$gradeable->isVcs()) {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
-                for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
+                for (; $i <= $num_parts; $i++) {
                     foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
                         $size = number_format($file['size'] / 1024, 2);
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);

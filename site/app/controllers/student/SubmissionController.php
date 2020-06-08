@@ -928,6 +928,7 @@ class SubmissionController extends AbstractController {
         }
 
         $this_config_inputs = [];
+        $num_parts = $gradeable->getAutogradingConfig()->getNumParts();
         if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
             //need to force re-parse the notebook serverside again
             $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
@@ -944,6 +945,7 @@ class SubmissionController extends AbstractController {
             FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".submit.notebook"), $json);
 
             $this_config_inputs = $notebook->getInputs();
+            $num_parts = $notebook->getNumParts();
         }
 
         $this->upload_details['version_path'] = $version_path;
@@ -952,7 +954,6 @@ class SubmissionController extends AbstractController {
         $part_path = [];
         // We upload the assignment such that if it's multiple parts, we put it in folders "part#" otherwise
         // put all files in the root folder
-        $num_parts = $gradeable->getAutogradingConfig()->getNumParts();
         if ($num_parts > 1) {
             for ($i = 1; $i <= $num_parts; $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part" . $i);

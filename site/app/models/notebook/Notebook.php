@@ -274,4 +274,16 @@ class Notebook extends AbstractModel {
         }
         return $image_paths;
     }
+
+
+    public function getNumParts() {
+        $ret = 0;
+        foreach ($this->notebook as $arr) {
+            if (in_array("file_submission", $arr, true)) {
+                $ret++;
+            }
+        }
+
+        return $ret;
+    }
 }
