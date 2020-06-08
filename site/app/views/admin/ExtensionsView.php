@@ -26,12 +26,12 @@ class ExtensionsView extends AbstractView {
         $current_gradeable = $g_key === false ? null : $gradeables[$g_key];
 
         $users = $this->core->getQueries()->getUsersWithExtensions($current_gid);
-        $current_exceptions = array();
+        $current_exceptions = [];
         foreach ($users as $user) {
-            $current_exceptions[] = array('user_id' => $user->getId(),
+            $current_exceptions[] = ['user_id' => $user->getId(),
                                           'user_firstname' => $user->getDisplayedFirstName(),
                                           'user_lastname' => $user->getDisplayedLastName(),
-                                          'late_day_exceptions' => $user->getLateDayExceptions());
+                                          'late_day_exceptions' => $user->getLateDayExceptions()];
         }
         if (empty($current_exceptions)) {
             $current_exceptions = null;

@@ -24,9 +24,9 @@ class ImagesController extends AbstractController {
         // FIXME: consider searching through the common location for matches to my students
         // (but this would be expensive)
         $any_images_files = array_merge(
-            FileUtils::getAllFiles($images_path, array(), true),
-            FileUtils::getAllFiles($common_images_path_1, array(), true),
-            FileUtils::getAllFiles($common_images_path_2, array(), true)
+            FileUtils::getAllFiles($images_path, [], true),
+            FileUtils::getAllFiles($common_images_path_1, [], true),
+            FileUtils::getAllFiles($common_images_path_2, [], true)
         );
         if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
@@ -42,7 +42,7 @@ class ImagesController extends AbstractController {
         }
 
         if ($user_group !== User::GROUP_LIMITED_ACCESS_GRADER) {
-            $grader_sections = array();  //reset grader section to nothing so permission for every image
+            $grader_sections = [];  //reset grader section to nothing so permission for every image
         }
         else {
             if (empty($grader_sections)) {
@@ -51,7 +51,7 @@ class ImagesController extends AbstractController {
         }
         $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
         $students = $this->core->getQueries()->getAllUsers();
-        $this->core->getOutput()->renderOutput(array('grading', 'Images'), 'listStudentImages', $students, $grader_sections, $instructor_permission);
+        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $instructor_permission);
     }
 
     /**
@@ -87,7 +87,7 @@ class ImagesController extends AbstractController {
             }
         }
 
-        $uploaded_files = array();
+        $uploaded_files = [];
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
         }
@@ -96,7 +96,7 @@ class ImagesController extends AbstractController {
 
         $file_size = 0;
         if (isset($uploaded_files[1])) {
-            $uploaded_files[1]["is_zip"] = array();
+            $uploaded_files[1]["is_zip"] = [];
             for ($j = 0; $j < $count_item; $j++) {
                 if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
