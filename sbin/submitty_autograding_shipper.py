@@ -775,8 +775,8 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
                 continue
             else:
                 if counter == 0 or counter >= 10:
-                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                        message=f"{my_name} {which_untrusted}: no available job")
+                    # do not log this message, only print it to console when manual testing & debugging
+                    print ("{0} {1}: no available job".format(my_name, which_untrusted))
                     counter=0
                 counter+=1
                 time.sleep(1)

@@ -41,11 +41,11 @@ class ErrorMessages {
     }
 
      /**
-     * Given a response code after opening a Zip Archive, check if anything went wrong
-     * @param bool | int $res Error code or status for opening archive
-     *
-     * @return string Message for what went wront with upload
-     */
+      * Given a response code after opening a Zip Archive, check if anything went wrong
+      * @param bool | int $res Error code or status for opening archive
+      *
+      * @return string Message for what went wront with upload
+      */
     public static function getZipErrorMessage($res) {
        
         if ($res === true) {

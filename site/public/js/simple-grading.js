@@ -137,6 +137,7 @@ function showSimpleGraderStats(action) {
         calcSimpleGraderStats(action);
         $('.popup').css('display', 'none');
         $("#simple-stats-popup").css("display", "block");
+        captureTabInModal("simple-stats-popup");
         $(document).on("click", function(e) {                                           // event handler: when clicking on the document...
             if($(e.target).attr("id") != "simple-stats-btn"                             // ...if neither the stats button..
                && $(e.target).closest('div').attr('id') != "simple-stats-popup") {      // ...nor the stats popup are being clicked...

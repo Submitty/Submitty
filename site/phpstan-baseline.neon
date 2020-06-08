@@ -601,6 +601,16 @@ parameters:
 			path: app/libraries/routers/WebRouter.php
 
 		-
+			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
+			count: 1
+			path: app/libraries/socket/Server.php
+
+		-
+			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$resourceId\\.$#"
+			count: 5
+			path: app/libraries/socket/Server.php
+
+		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected type at offset 350$#"
 			count: 1
 			path: app/models/AbstractModel.php
@@ -766,11 +776,6 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected type at offset 87$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$status\\)\\: Unexpected token \"\\$status\", expected type at offset 68$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
@@ -859,3 +864,4 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
+

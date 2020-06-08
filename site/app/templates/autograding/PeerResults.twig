@@ -38,25 +38,7 @@ $( document ).ready(function() {
                         <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
                     </p>
                 </div>
-                
-                <fieldset>
-                    <legend>Would you like to give {{peer_aliases[user]}} feedback?</legend>
-                    <input type="radio" id = "no_peer_feedback" name="peer_feedback" value="true"
-                            {{ action != 'new'}}> <label for="no_peer_feedback">No Feedback</label>
-
-                    <input type="radio" id = "Thank_you_peer_feedback" name="peer_feedback" value="true"
-                            {{ action != 'new'}}> <label for="Thank_you_peer_feedback">Thank you!</label>
-                    
-                    <input type="radio" id = "helpful_peer_feedback" name="peer_feedback" value="true"
-                            {{ action != 'new'}}> <label for="helpful_peer_feedback">This feedback was helpful to me!</label>
-                            
-                    <input type="radio" id = "detailed_peer_feedback" name="peer_feedback" value="true"
-                            {{ action != 'new' }}> <label for="detailed_peer_feedback">This feedback was detailed, specific, and/or technical.</label>
-                            
-                    <input type="radio" id = "poor_peer_feedback" name="peer_feedback" value="true"
-                            {{ action != 'new' }}> <label for="poor_peer_feedback">This feedback was inaccurate and/or inappropriate.</label>
-                </fieldset>
-                
+   
             {% endfor %}
         </div>
 

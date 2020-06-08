@@ -22,11 +22,11 @@ class PDFView extends AbstractView {
         $pdf_url = $this->core->buildCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
         $is_student = $params["is_student"];
 
-        $localcss = array();
+        $localcss = [];
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdf_embedded.css'), 'css');
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.css'), 'vendor');
 
-        $localjs = array();
+        $localjs = [];
 
         //This jquery file should not need to be added here as jquery should already be in the header on any page
         if (isset($params['jquery']) && $params['jquery'] === true) {
@@ -38,11 +38,6 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-
-        // This initializes the toolbar and activates annotation mode
-        if (!isset($is_student) || !$is_student) {
-            $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
-        }
 
         return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
             'gradeable_id' => $params["gradeable_id"],
