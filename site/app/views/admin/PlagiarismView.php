@@ -97,13 +97,6 @@ class PlagiarismView extends AbstractView {
         ]);
     }
 
-    public function plagiarismPopUpToShowMatches() {
-        return <<<HTML
-    <ul id="popup_to_show_matches_id" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;top:0px;left:0px;width:auto;" >
-    </ul>
-HTML;
-    }
-
     public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config, $title) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');

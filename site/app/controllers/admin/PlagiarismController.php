@@ -149,7 +149,6 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismPopUpToShowMatches');
     }
 
     /**
