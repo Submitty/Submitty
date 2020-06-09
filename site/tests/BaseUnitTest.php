@@ -38,7 +38,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return Core
      */
-    protected function createMockCore($config_values = array(), $user_config = array(), $queries = array(), $access = array()) {
+    protected function createMockCore($config_values = [], $user_config = [], $queries = [], $access = []) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -181,8 +181,8 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $reflection = new \ReflectionClass($class);
-            $methods = array();
-            $matches = array();
+            $methods = [];
+            $matches = [];
             preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
             foreach ($matches[1] as $match) {
                 if (strlen($match) > 0) {

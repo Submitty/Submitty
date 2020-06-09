@@ -472,6 +472,7 @@ if not args.worker:
       shutil.chown(file, 'root',DAEMON_GID)
       os.chmod(file, 0o460)
 
+    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
 ##############################################################################
 # Write database json

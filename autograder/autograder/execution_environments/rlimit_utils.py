@@ -55,6 +55,11 @@ def build_ulimit_argument(resource_limits, container_image):
 
     # fill in instructor resource limits if specified
     for resource, limit in resource_limits.items():
+
+        # Not setting a docker limit should be equivalent to infinity.
+        if limit == 'RLIM_INFINITY':
+            continue
+
         if resource in rlimit_to_ulimit_mapping:
             ulimit_name = rlimit_to_ulimit_mapping[resource]
             ulimit_arg = docker.types.Ulimit(name=ulimit_name, soft=limit, hard=limit)
