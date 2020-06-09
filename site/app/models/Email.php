@@ -54,7 +54,7 @@ class Email extends AbstractModel {
 
     //inject a "do not reply" note in the footer of the body
     //also adds author and a relevant url if one exists
-    private function formatBody(string $body, ?string $relevant_url = null, bool $author = false): string {
+    private function formatBody(string $body, ?string $relevant_url, bool $author): string {
         $extra = [];
         if (!(isset($_POST["Anon"]) && $_POST["Anon"] === "Anon") && $author) {
             $extra[] = "Author: " . $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()[0] . ".";
