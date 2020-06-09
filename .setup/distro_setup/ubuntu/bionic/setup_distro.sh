@@ -89,6 +89,7 @@ update-java-alternatives --set java-1.8.0-openjdk-amd64
 
 # Install Image Magick for image comparison, etc.
 apt-get install -qqy imagemagick
+apt-get install -qqy php-imagick
 
 # miscellaneous usability
 apt-get install -qqy emacs

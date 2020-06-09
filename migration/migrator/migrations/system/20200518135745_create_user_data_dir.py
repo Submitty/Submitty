@@ -25,6 +25,9 @@ def up(config):
     # Execute script to populate user_data directory with sample images
     os.system('python3 ' + script_path)
 
+    # Add php-imagick
+    os.system('apt install php-imagick')
+
 
 def down(config):
     """
@@ -33,4 +36,4 @@ def down(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    path = config.submitty['submitty_data_dir'] + '/user_data'
+    pass
