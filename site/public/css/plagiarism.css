@@ -1,10 +1,6 @@
-#save-configuration-form {
-    width: 80%;
-}
-
 .plag-data-group {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     margin: 26px 0;
 }
 
@@ -12,6 +8,11 @@
     flex: 1;
     font-weight: bold;
     font-size: 18px;
+    margin-bottom: 15px;
+}
+
+input[type="radio"] {
+    margin-left: 0;
 }
 
 .plag-data-group .plag-data {
@@ -60,4 +61,14 @@ input[type="text"], select {
 
 .fa-plus-square {
     margin-right: 10px;
+}
+
+@media (min-width: 768px) {
+    #save-configuration-form {
+        width: 80%;
+    }
+
+    .plag-data-group {
+        flex-direction: row;
+    }
 }
