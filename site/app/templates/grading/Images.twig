@@ -20,12 +20,12 @@
                     {% endif %}
                         <td>
                             {% if imageData[student.getId()] is defined %}
-                                {{ base64_image(imageData[student.getId()].path, student.getId()) }}
+                                {{ base64_image(imageData[student.getId()].path, student.getId(), constant('app\\views\\grading\\ImagesView::IMAGE_COLS'), constant('app\\views\\grading\\ImagesView::IMAGE_ROWS')) }}
                             {% else %}
                                 {% if errorImageData == '_NONE_' %}
                                     <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                                 {% else %}
-                                    {{ base64_image(errorImageData.path, 'No Image Available') }}
+                                    {{ base64_image(errorImageData.path, 'No Image Available', constant('app\\views\\grading\\ImagesView::IMAGE_COLS'), constant('app\\views\\grading\\ImagesView::IMAGE_ROWS')) }}
                                 {% endif %}
                             {% endif %}
                             <div class="name">

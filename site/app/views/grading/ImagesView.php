@@ -8,6 +8,11 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 
 class ImagesView extends AbstractView {
+
+    // Define the height and width for each image displayed on the Student Images page
+    const IMAGE_COLS = 150;
+    const IMAGE_ROWS = 200;
+
     /**
      * @param User[] $students
      * @return string

@@ -100,13 +100,13 @@ class Output {
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title, int $cols, int $rows): string {
             $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
             [$mime_type, $mime_subtype] = explode('/', mime_content_type($path), 2);
             if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
                 // Resize image to decrease volume of data being returned
                 $imagick = new \Imagick($path);
-                $imagick->scaleImage(150, 200);
+                $imagick->scaleImage($cols, $rows);
                 $image_data = base64_encode($imagick->getImageBlob());
 
                 // Return html image tag with image embedded as a base64 character string
