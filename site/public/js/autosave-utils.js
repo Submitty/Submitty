@@ -82,20 +82,25 @@ function saveAndWarnUnsubmitted(e) {
     return true;
 }
 
-let isSaveScheduled = false;
+const isSaveScheduled = {};
 /**
  * Schedules a save action for ten seconds from now if no save has been 
  * scheduled yet. This way we don't re-write minor changes when modifying a
- * text box answer.
+ * text box answer. 
  * 
+ * The key parameter allows for multiple save actions to be queued up in
+ * parallel, e.g. for multiple forum reply boxes to be able to queue their own
+ * save actions independent of one another.
+ * 
+ * @param {String} key - A key to keep track of a single deferred save action.
  * @param {() => void} saveCallback - Callback that triggers the save action.
  */
-function deferredSave(saveCallback) {
-    if (autosaveEnabled && !isSaveScheduled) {
+function deferredSave(key, saveCallback) {
+    if (autosaveEnabled && !isSaveScheduled[key]) {
         setTimeout(() => {
             saveCallback();
-            isSaveScheduled = false;
+            isSaveScheduled[key] = false;
         }, 10 * 1000);
-        isSaveScheduled = true;
+        isSaveScheduled[key] = true;
     }
 }

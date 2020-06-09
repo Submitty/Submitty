@@ -153,6 +153,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
                 return;
             }
             window.location.href = json['data']['next_page'];
+            clearTextAreaAutosave(form[0]);
         },
         error: function(){
             var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + error_message + '</div>';
@@ -1208,6 +1209,7 @@ function loadThreadHandler(){
                 window.history.pushState({"pageTitle":document.title},"", url);
 
                 enableTabsInTextArea('.post_content_reply');
+                setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
                 $(".post_reply_from").submit(publishPost);
@@ -1418,3 +1420,48 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
         }
     });
 }
+
+const FORUM_AUTOSAVE_KEY = `${window.location.pathname}-forum-autosave`;
+
+function autosaveKeyFor(textarea) {
+    return `${window.location.pathname}-${textarea.id}-forum-autosave`;
+}
+
+function saveTextAreaToLocal(textarea) {
+    if (autosaveEnabled) {
+        localStorage.setItem(autosaveKeyFor(textarea), JSON.stringify({
+            timestamp: Date.now(),
+            text_value: textarea.value
+        }));
+    }
+}
+
+function restoreTextAreaFromLocal(textarea) {
+    if (autosaveEnabled) {
+        const json = localStorage.getItem(autosaveKeyFor(textarea));
+        if (json) {
+            const { text_value } = JSON.parse(json);
+            textarea.value = text_value;
+        }
+    }
+}
+
+function clearTextAreaAutosave(textarea) {
+    if (autosaveEnabled) {
+        localStorage.removeItem(autosaveKeyFor(textarea));
+    }
+}
+
+function setupForumAutosave() {
+    $(".post_content_reply").each((_index, textarea) => {
+        restoreTextAreaFromLocal(textarea);
+        $(textarea).on('input', 
+            () => deferredSave(textarea.id, () => saveTextAreaToLocal(textarea))
+        );
+    });
+}
+
+$(() => {
+    cleanupAutosaveHistory('-forum-autosave');
+    setupForumAutosave();
+});

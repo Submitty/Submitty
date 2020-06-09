@@ -65,6 +65,8 @@ function setCodeBox(codebox_id, state)
     }
 }
 
+const NOTEBOOK_DEFER_KEY = 'notebook-autosave';
+
 const NOTEBOOK_AUTOSAVE_KEY = `${window.location.pathname}-notebook-autosave`;
 
 /**
@@ -204,7 +206,7 @@ $(document).ready(function () {
         }
     }));
 
-    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", () => deferredSave(saveNotebookToLocal)));
+    $(".CodeMirror").each((_index, cm) => cm.CodeMirror.on("changes", () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal)));
 
     // Register click handler for multiple choice buttons
     $(".mc-clear, .mc-recent").click(function() {
@@ -318,7 +320,7 @@ $(document).ready(function () {
         }
     });
 
-    $(".sa-box").on('input', () => deferredSave(saveNotebookToLocal));
+    $(".sa-box").on('input', () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal));
 
     restoreNotebookFromLocal();
 
