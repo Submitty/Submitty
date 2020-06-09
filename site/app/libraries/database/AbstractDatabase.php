@@ -8,7 +8,7 @@ use app\libraries\Utils;
 abstract class AbstractDatabase {
 
     /**
-     * @var \PDO
+     * @var \PDO|null
      */
     protected $link = null;
 
@@ -194,15 +194,15 @@ abstract class AbstractDatabase {
      * run it through the query() function which will just return a boolean on if the function suceeded or
      * not. In all cases, it will throw a {@see DatabaseException} on an invalid query.
      *
-     * @param $query
-     * @param $parameters
-     * @param $callback
+     * @param string $query
+     * @param array $parameters
+     * @param callable|null $callback
      *
      * @return DatabaseRowIterator|bool
      *
      * @throws \app\exceptions\DatabaseException
      */
-    public function queryIterator($query, $parameters = [], $callback = null) {
+    public function queryIterator(string $query, array $parameters = [], $callback = null) {
         $lower = trim(strtolower($query));
         if (!Utils::startsWith($lower, "select")) {
             return $this->query($query, $parameters);
@@ -237,12 +237,12 @@ abstract class AbstractDatabase {
     }
 
     /**
-     * @param $result
-     * @param $columns
+     * @param array $result
+     * @param array $columns
      *
      * @return mixed
      */
-    public function transformResult($result, $columns) {
+    public function transformResult(array $result, array $columns) {
         foreach ($result as $col => $value) {
             if (isset($columns[$col])) {
                 $column = $columns[$col];
@@ -262,7 +262,7 @@ abstract class AbstractDatabase {
      * Start a DB transaction, turning off autocommit mode. Queries won't be
      * actually commited to the database till Database::commit() is called.
      */
-    public function beginTransaction() {
+    public function beginTransaction(): void {
         if (!$this->transaction) {
             $this->transaction = $this->link->beginTransaction();
         }
@@ -271,14 +271,14 @@ abstract class AbstractDatabase {
     /**
      * Actually commit/execute all queries to the database since we began the transaction.
      */
-    public function commit() {
+    public function commit(): void {
         if ($this->transaction) {
             $this->link->commit();
             $this->transaction = false;
         }
     }
 
-    public function rollback() {
+    public function rollback(): void {
         if ($this->transaction) {
             $this->link->rollBack();
             $this->transaction = false;
@@ -306,7 +306,7 @@ abstract class AbstractDatabase {
      *
      * @return array
      */
-    public function rows() {
+    public function rows(): array {
         if ($this->results !== null && count($this->results) > 0) {
             return $this->results;
         }
@@ -324,20 +324,18 @@ abstract class AbstractDatabase {
      *
      * @return int
      */
-    public function getRowCount() {
+    public function getRowCount(): int {
         return $this->row_count;
     }
 
     /**
      * Return count of total queries run against current PDO connection
-     *
-     * @return int
      */
-    public function getQueryCount() {
+    public function getQueryCount(): int {
         return count($this->all_queries);
     }
 
-    public function getQueries() {
+    public function getQueries(): array {
         return $this->all_queries;
     }
 
@@ -346,7 +344,7 @@ abstract class AbstractDatabase {
      *
      * @return string[]
      */
-    public function getPrintQueries() {
+    public function getPrintQueries(): array {
         $print = [];
         foreach ($this->all_queries as $query) {
             foreach ($query[1] as $parameter) {
@@ -360,7 +358,7 @@ abstract class AbstractDatabase {
     /**
      * @return bool
      */
-    public function inTransaction() {
+    public function inTransaction(): bool {
         return $this->transaction;
     }
 
@@ -382,9 +380,9 @@ abstract class AbstractDatabase {
      * booleans, we generally use a tinyint(1) and just use 0/1 to represent it else we convert it to whatever
      * works for that given database.
      *
-     * @param $value
+     * @param mixed $value
      *
-     * @return string
+     * @return mixed
      */
     public function convertBoolean($value) {
         return ($value === true) ? 1 : 0;

@@ -2335,8 +2335,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $session_id
      * @param string $user_id
      * @param string $csrf_token
-     *
-     * @return string
      */
     public function newSession($session_id, $user_id, $csrf_token) {
         $this->submitty_db->query(
@@ -3904,10 +3902,9 @@ AND gc_id IN (
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
-        $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
-        return ($this->course_db->row()) ? $row['status'] : 0;
+        $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", [$user_id, $gradeable_id]);
+        return ($this->course_db->getRowCount() > 0) ? $this->course_db->row()['status'] : 0;
     }
-
 
     public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id) {
         $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE, $gc_id];
@@ -3924,11 +3921,13 @@ AND gc_id IN (
             throw $dbException;
         }
     }
+
     public function getNumberGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
         $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, [$gradeable_id]);
         return ($this->course_db->row()['cnt']);
     }
+
     public function getRegradeDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];
@@ -3967,6 +3966,7 @@ AND gc_id IN (
         $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", $regrade_id);
         $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $regrade_id);
     }
+
     public function deleteGradeable($g_id) {
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
     }
