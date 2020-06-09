@@ -214,6 +214,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # twig.js
     mkdir ${VENDOR_FOLDER}/twigjs
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
+    # jspdf
+    mkdir ${VENDOR_FOLDER}/jspdf
+    cp ${NODE_FOLDER}/jspdf/dist/jspdf.min.js ${VENDOR_FOLDER}/jspdf
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;

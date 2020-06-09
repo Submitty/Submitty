@@ -1,4 +1,14 @@
-function renderPDFToolbar(){
+
+if (PDFAnnotate.default) {
+  PDFAnnotate = PDFAnnotate.default;
+}
+
+var loaded = sessionStorage.getItem('toolbar_loaded');
+window.onbeforeunload = function() {
+    sessionStorage.removeItem('toolbar_loaded');
+};
+//Toolbar stuff
+(function () {
     let active_toolbar = true;
     const debounce = (fn, time, ...args) => {
         if (active_toolbar) {
@@ -137,7 +147,7 @@ function renderPDFToolbar(){
             localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
         }
     }
-
+    
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
@@ -165,6 +175,7 @@ function renderPDFToolbar(){
             }
         });
     }
+
 
     function handleToolbarClick(e){
         setActiveToolbarItem(e.target.getAttribute('value'));
