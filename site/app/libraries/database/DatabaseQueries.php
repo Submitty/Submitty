@@ -3180,6 +3180,18 @@ SQL;
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", [$grader, $student, $gradeable_id]);
     }
+    
+    /**
+     * Adds an assignment for someone to grade another person for peer grading
+     *
+     * @param string $student
+     * @param string $grader
+     * @param string $gradeable_id
+     * @param string $feedback
+     */
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
+        $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
+    }
 
     /**
      * Removes all peer grading pairs from a given assignment
@@ -3203,6 +3215,23 @@ SQL;
                 $return[$id['grader_id']] = [];
             }
             array_push($return[$id['grader_id']], $id['user_id']);
+        }
+        return $return;
+    }
+    
+    /**
+     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerFeedback($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            if (!array_key_exists($id['grader_id'], $return)) {
+                $return[$id['grader_id']] = [];
+            }
+            array_push($return[$id['grader_id']], $id['user_id'], $id['feedback']);
         }
         return $return;
     }
