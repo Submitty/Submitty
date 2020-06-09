@@ -1,0 +1,63 @@
+#save-configuration-form {
+    width: 80%;
+}
+
+.plag-data-group {
+    display: flex;
+    flex-direction: row;
+    margin: 26px 0;
+}
+
+.plag-data-group .plag-data-label{
+    flex: 1;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.plag-data-group .plag-data {
+   flex: 1;
+}
+
+input[type="text"], select {
+    width: 100%;
+}
+
+#prev_gradeable_div {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    position: relative;
+    padding-bottom: 30px;
+}
+
+#prev_gradeable_div select {
+    width: calc(100% / 3 - 10px);
+    margin: 5px;
+}
+
+#prev_gradeable_div select:nth-child(3n+2) {
+    margin-left: 0;
+}
+
+#prev_gradeable_div select:nth-child(3n+1) {
+    margin-right: 0;
+}
+
+#ignore_submission_div {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.low-margin-top {
+    margin-top: 5px;
+}
+
+.add-more {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.fa-plus-square {
+    margin-right: 10px;
+}

@@ -150,7 +150,7 @@ class PlagiarismView extends AbstractView {
                 $no_ignore = "";
             }
         }
-
+        $this->core->getOutput()->addInternalCss("plagiarism.css");
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismConfigurationForm.twig', [
             "new_or_edit" => $new_or_edit,
             "form_action_link" => $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']) . "?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}",
