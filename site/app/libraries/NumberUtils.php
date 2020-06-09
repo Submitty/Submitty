@@ -54,7 +54,7 @@ class NumberUtils {
     public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id) {
 
         // creating an array which is holding the indices to be shuffled.
-        $randomizedIndices = array();
+        $randomizedIndices = [];
         for ($i = 0; $i < $array_length; $i++) {
             $randomizedIndices[] = $i;
         }

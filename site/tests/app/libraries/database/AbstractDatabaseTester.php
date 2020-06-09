@@ -9,11 +9,11 @@ use app\libraries\database\SqliteDatabase;
 use app\libraries\FileUtils;
 
 class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
-    private $queries = array(
-        array("CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)", array()),
-        array("INSERT INTO test VALUES (?, ?)", array(1, 'a')),
-        array("INSERT INTO test VALUES (?, ?)", array(2, 'b'))
-    );
+    private $queries = [
+        ["CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)", []],
+        ["INSERT INTO test VALUES (?, ?)", [1, 'a']],
+        ["INSERT INTO test VALUES (?, ?)", [2, 'b']]
+    ];
 
     /**
      * @param AbstractDatabase $database
@@ -27,7 +27,7 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testBasicDatabaseFeatures() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
 
         $this->assertFalse($database->isConnected());
         $database->connect();
@@ -43,10 +43,10 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
 
         $database->query("SELECT * FROM test ORDER BY pid");
         $this->assertEquals(2, $database->getRowCount());
-        $expected = array(
-            0 => array('pid' => 1, 'tcol' => 'a'),
-            1 => array('pid' => 2, 'tcol' => 'b')
-        );
+        $expected = [
+            0 => ['pid' => 1, 'tcol' => 'a'],
+            1 => ['pid' => 2, 'tcol' => 'b']
+        ];
         $results = $database->rows();
         $this->assertEquals(count($expected), count($results));
         for ($i = 0; $i < count($expected); $i++) {
@@ -61,14 +61,14 @@ class AbstractDatabaseTester extends \PHPUnit\Framework\TestCase {
             $this->assertEquals(count($expected) - $i, count($database->rows()));
             $this->assertEquals($expected[$i], $database->row());
         }
-        $this->assertEquals(array(), $database->row());
+        $this->assertEquals([], $database->row());
         $this->assertEmpty($database->rows());
         $database->disconnect();
         $this->assertFalse($database->isConnected());
     }
 
     public function testQueryTrim() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
         $database->query("
@@ -78,32 +78,32 @@ SELECT * FROM test");
     }
 
     public function testTransactions() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
         $this->assertFalse($database->inTransaction());
         $database->beginTransaction();
         $this->assertTrue($database->inTransaction());
-        $database->query("INSERT INTO test VALUES (?, ?)", array(3, 'c'));
+        $database->query("INSERT INTO test VALUES (?, ?)", [3, 'c']);
         $database->commit();
 
         $database->query("SELECT * FROM test ORDER BY pid DESC");
         $this->assertEquals(3, $database->getRowCount());
         $results = $database->rows();
-        $this->assertSame(array('pid' => 3, 'tcol' => 'c'), $results[0]);
+        $this->assertSame(['pid' => 3, 'tcol' => 'c'], $results[0]);
 
         $database->disconnect();
     }
 
     public function testBadTransaction() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
 
         $database->beginTransaction();
-        $database->query("INSERT INTO test VALUES (?, ?)", array(3, 'c'));
+        $database->query("INSERT INTO test VALUES (?, ?)", [3, 'c']);
         try {
-            $database->query("INSERT INTO test VALUES (?, ?)", array(1, 'd'));
+            $database->query("INSERT INTO test VALUES (?, ?)", [1, 'd']);
             $this->fail('Query should have thrown DatabaseException');
         }
         catch (DatabaseException $exception) {
@@ -117,12 +117,12 @@ SELECT * FROM test");
     }
 
     public function testTransactionRollback() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
 
         $database->beginTransaction();
-        $database->query("INSERT INTO test VALUES (?, ?)", array(3, 'c'));
+        $database->query("INSERT INTO test VALUES (?, ?)", [3, 'c']);
         $database->rollback();
         $database->query("SELECT * FROM test");
         $this->assertEquals(2, $database->getRowCount());
@@ -132,15 +132,15 @@ SELECT * FROM test");
 
     public function testTransactionCommitOnDisconnect() {
         $db = FileUtils::joinPaths(sys_get_temp_dir(), uniqid() . ".sq3");
-        $database = new SqliteDatabase(array('path' => $db));
+        $database = new SqliteDatabase(['path' => $db]);
         $database->connect();
         $this->setupDatabase($database);
         $database->query("SELECT * FROM test");
         $this->assertEquals(2, count($database->rows()));
         $database->beginTransaction();
-        $database->query("INSERT INTO test VALUES (?, ?)", array(3, 'c'));
+        $database->query("INSERT INTO test VALUES (?, ?)", [3, 'c']);
         $database->disconnect();
-        $database = new SqliteDatabase(array('path' => $db));
+        $database = new SqliteDatabase(['path' => $db]);
         $database->connect();
         $database->query("SELECT * FROM test");
         $this->assertEquals(2, count($database->rows()));
@@ -152,7 +152,7 @@ SELECT * FROM test");
      * @doesNotPerformAssertions
      */
     public function testUsername() {
-        $database = new SqliteDatabase(array('memory' => true, 'username' => 'test'));
+        $database = new SqliteDatabase(['memory' => true, 'username' => 'test']);
         $database->connect();
         $this->setupDatabase($database);
         $database->disconnect();
@@ -162,17 +162,17 @@ SELECT * FROM test");
      * @doesNotPerformAssertions
      */
     public function testUsernameAndPassword() {
-        $database = new SqliteDatabase(array('memory' => true, 'username' => 'test', 'password' => 'test'));
+        $database = new SqliteDatabase(['memory' => true, 'username' => 'test', 'password' => 'test']);
         $database->connect();
         $this->setupDatabase($database);
         $database->disconnect();
     }
 
     public function testPrintQueries() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $database->query("CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)");
-        $database->query("INSERT INTO test VALUES (?, ?)", array(1, 'a'));
+        $database->query("INSERT INTO test VALUES (?, ?)", [1, 'a']);
         $this->assertEquals([
             "CREATE TABLE test(pid integer PRIMARY KEY, tcol text NOT NULL)",
             "INSERT INTO test VALUES ('1', 'a')"
@@ -181,11 +181,11 @@ SELECT * FROM test");
     }
 
     public function testDatabaseRowIterator() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
         $iterator = $database->queryIterator("SELECT * FROM test ORDER BY pid");
-        $expected = array(0 => array('pid' => 1, 'tcol' => 'a'), 1 => array('pid' => 2, 'tcol' => 'b'));
+        $expected = [0 => ['pid' => 1, 'tcol' => 'a'], 1 => ['pid' => 2, 'tcol' => 'b']];
         $cnt = 0;
         foreach ($iterator as $idx => $item) {
             $this->assertSame($expected[$idx], $item);
@@ -196,12 +196,12 @@ SELECT * FROM test");
     }
 
     public function testDatabaseIteratorTrim() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
         $iterator = $database->queryIterator("
 SELECT * FROM test ORDER BY pid");
-        $expected = array(0 => array('pid' => 1, 'tcol' => 'a'), 1 => array('pid' => 2, 'tcol' => 'b'));
+        $expected = [0 => ['pid' => 1, 'tcol' => 'a'], 1 => ['pid' => 2, 'tcol' => 'b']];
         $cnt = 0;
         foreach ($iterator as $idx => $item) {
             $this->assertSame($expected[$idx], $item);
@@ -212,7 +212,7 @@ SELECT * FROM test ORDER BY pid");
     }
 
     public function testIteratorDatabaseException() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->expectException(\app\exceptions\DatabaseException::class);
         $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1 no such table: test');
@@ -221,13 +221,13 @@ SELECT * FROM test ORDER BY pid");
     }
 
     public function testInsertIterator() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
-        $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', array(3, 'c'));
+        $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', [3, 'c']);
         $this->assertTrue($result);
         $iterator = $database->queryIterator('SELECT * FROM test ORDER BY pid');
-        $expected = array(0 => array('pid' => 1, 'tcol' => 'a'), 1 => array('pid' => 2, 'tcol' => 'b'), 2 => array('pid' => 3, 'tcol' => 'c'));
+        $expected = [0 => ['pid' => 1, 'tcol' => 'a'], 1 => ['pid' => 2, 'tcol' => 'b'], 2 => ['pid' => 3, 'tcol' => 'c']];
         $cnt = 0;
         foreach ($iterator as $idx => $item) {
             $this->assertSame($expected[$idx], $item);
@@ -237,15 +237,15 @@ SELECT * FROM test ORDER BY pid");
     }
 
     public function testIteratorCallback() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
-        $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', array(3, 'c'));
+        $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', [3, 'c']);
         $this->assertTrue($result);
-        $iterator = $database->queryIterator('SELECT * FROM test ORDER BY pid', array(), function ($result) {
-            return array('id' => $result['pid']);
+        $iterator = $database->queryIterator('SELECT * FROM test ORDER BY pid', [], function ($result) {
+            return ['id' => $result['pid']];
         });
-        $expected = array(0 => array('id' => 1), 1 => array('id' => 2), 2 => array('id' => 3));
+        $expected = [0 => ['id' => 1], 1 => ['id' => 2], 2 => ['id' => 3]];
         $cnt = 0;
         foreach ($iterator as $idx => $item) {
             $this->assertSame($expected[$idx], $item);
@@ -255,10 +255,10 @@ SELECT * FROM test ORDER BY pid");
     }
 
     public function testCloseIterator() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->setupDatabase($database);
-        $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', array(3, 'c'));
+        $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', [3, 'c']);
         $this->assertTrue($result);
         $iterator = $database->queryIterator('SELECT * FROM test ORDER BY pid');
         $this->assertTrue($iterator->valid());
@@ -268,58 +268,58 @@ SELECT * FROM test ORDER BY pid");
     }
 
     public function testTransform() {
-        $columns = array(
-            'pid' => array(
+        $columns = [
+            'pid' => [
                 'native_type' => 'integer',
                 'table' => 'test',
-                'flags' => array(),
+                'flags' => [],
                 'name' => 'pid',
                 'pdo_type' => \PDO::PARAM_STR
-            ),
-            'tcol' => array(
+            ],
+            'tcol' => [
                 'native_type' => 'string',
                 'table' => 'test',
-                'flags' => array(),
+                'flags' => [],
                 'name' => 'tcol',
                 'pdo_type' => \PDO::PARAM_STR
-            ),
-            'bcol' => array(
+            ],
+            'bcol' => [
                 'native_type' => 'boolean',
                 'table' => 'test',
-                'flags' => array(),
+                'flags' => [],
                 'name' => 'bcol',
                 'pdo_type' => \PDO::PARAM_STR
-            )
-        );
-        $result = array(
+            ]
+        ];
+        $result = [
             'pid' => '1',
             'tcol' => 'a',
             'bcol' => 'true'
-        );
+        ];
         $database = new SqliteDatabase();
         $result = $database->transformResult($result, $columns);
-        $this->assertSame(array('pid' => 1, 'tcol' => 'a', 'bcol' => true), $result);
+        $this->assertSame(['pid' => 1, 'tcol' => 'a', 'bcol' => true], $result);
     }
 
     public function testInvalidDSN() {
-        $database = new PostgresqlDatabase(array('dbname' => 'invalid_db'));
+        $database = new PostgresqlDatabase(['dbname' => 'invalid_db']);
         $this->expectException(\app\exceptions\DatabaseException::class);
         $database->connect();
     }
 
     public function testBadQuery() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $this->expectException(\app\exceptions\DatabaseException::class);
         $database->query("SELECT * FROM invalid_table");
     }
 
     public function testAutoConvertTypes() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $database->connect();
         $database->query("CREATE TABLE test(val_bool bit, val_date datetime)");
         $now = new \DateTime();
-        $database->query("INSERT INTO test VALUES (?, ?)", array(true, $now));
+        $database->query("INSERT INTO test VALUES (?, ?)", [true, $now]);
         $this->assertEquals(1, $database->getRowCount());
         $database->query("SELECT * FROM test");
         $this->assertEquals($database->rows()[0]["val_bool"], true);
@@ -328,13 +328,13 @@ SELECT * FROM test ORDER BY pid");
     }
 
     public function booleanConverts() {
-        return array(
-            array(true, 1),
-            array(1, 0),
-            array(false, 0),
-            array(null, 0),
-            array("a", 0)
-        );
+        return [
+            [true, 1],
+            [1, 0],
+            [false, 0],
+            [null, 0],
+            ["a", 0]
+        ];
     }
 
     /**
@@ -344,7 +344,7 @@ SELECT * FROM test ORDER BY pid");
      * @param $expected
      */
     public function testConvertBooleanFalseString($value, $expected) {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $this->assertEquals($expected, $database->convertBoolean($value));
     }
 }

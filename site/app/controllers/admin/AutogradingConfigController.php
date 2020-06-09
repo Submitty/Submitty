@@ -25,11 +25,11 @@ class AutogradingConfigController extends AbstractController {
     public function showConfig($g_id = '') {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
-        $all_paths = array();
+        $all_paths = [];
         foreach ($all_files as $file) {
             $all_paths[] = $file['path'];
         }
-        $inuse_config = array();
+        $inuse_config = [];
         foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
             foreach ($all_paths as $path) {
                 if ($gradeable->getAutogradingConfigPath() === $path) {
@@ -199,7 +199,7 @@ class AutogradingConfigController extends AbstractController {
         $config_path = urldecode($config_path);
         // Returns a list of gradeables that are using this config
         if ($config_path) {
-            $inuse_config = array();
+            $inuse_config = [];
             foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
                 if ($gradeable->getAutogradingConfigPath() === $config_path) {
                     $inuse_config[] = $gradeable->getId();

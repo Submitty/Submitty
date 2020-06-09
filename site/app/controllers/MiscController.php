@@ -113,6 +113,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
+        
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
@@ -220,7 +221,10 @@ class MiscController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $version = null, $origin = null) {
+    public function downloadSubmissionZip($gradeable_id, $user_id, $is_anon, $version = null, $origin = null) {
+        if ($is_anon) {
+            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+        }
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
@@ -244,7 +248,7 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $folder_names = array();
+        $folder_names = [];
         //See which directories we are allowed to read.
         if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
             //These two have the same check
@@ -414,7 +418,7 @@ class MiscController extends AbstractController {
                     );
                     $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
                 }
-                $students_array = array();
+                $students_array = [];
                 foreach ($students as $student) {
                     $students_array[] = $student->getId();
                 }

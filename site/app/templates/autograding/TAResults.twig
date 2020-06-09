@@ -89,6 +89,10 @@ $( document ).ready(function() {
                     <div class="box col-sm-3" style="padding: 10px; width: 30%; word-break: break-word; display: inline-block">
                         {% for file in uploaded_pdfs %}
                             {% if file.name in annotated_file_names %}
+                                {% if can_download %}
+                                    <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
+                                        <i class="fas fa-download" title="Download the file"></i></button>
+                                {% endif %}
                                 {% if loop.index != uploaded_pdfs|length %}
                                     <div style="margin-bottom: 1.28em">
                                         <p style="text-align:center"> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}

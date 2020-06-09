@@ -12,11 +12,11 @@ use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
-* Class DockerInterfaceController
-*
-* Works with Docker to provide a user inteface
-*
-*/
+ * Class DockerInterfaceController
+ *
+ * Works with Docker to provide a user inteface
+ *
+ */
 class DockerInterfaceController extends AbstractController {
 
     /**

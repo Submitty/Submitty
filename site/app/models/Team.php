@@ -47,10 +47,10 @@ class Team extends AbstractModel {
         $this->id = $details['team_id'];
         $this->registration_section = $details['registration_section'];
         $this->rotating_section = $details['rotating_section'];
-        $this->member_user_ids = array();
-        $this->invited_user_ids = array();
-        $this->member_users = array();
-        $this->invited_users = array();
+        $this->member_user_ids = [];
+        $this->invited_user_ids = [];
+        $this->member_users = [];
+        $this->invited_users = [];
         foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
             if (array_key_exists('anon_id', $user_details)) {
@@ -87,7 +87,7 @@ class Team extends AbstractModel {
     /**
      * Get registration section
      * @return integer
-    */
+     */
     public function getRegistrationSection() {
         return $this->registration_section;
     }
@@ -95,7 +95,7 @@ class Team extends AbstractModel {
     /**
      * Get rotating section
      * @return integer
-    */
+     */
     public function getRotatingSection() {
         return $this->rotating_section;
     }
@@ -103,7 +103,7 @@ class Team extends AbstractModel {
     /**
      * Get user ids of team members
      * @return string[]
-    */
+     */
     public function getMembers() {
         return $this->member_user_ids;
     }
@@ -111,7 +111,7 @@ class Team extends AbstractModel {
     /**
      * Get users of team, sorted by id
      * @return User[]
-    */
+     */
     public function getMemberUsersSorted() {
         $ret = $this->member_users;
         usort($ret, function ($a, $b) {
@@ -123,7 +123,7 @@ class Team extends AbstractModel {
     /**
      * Get user ids of those invited to the team
      * @return string[]
-    */
+     */
     public function getInvitations() {
         return $this->invited_user_ids;
     }
@@ -131,7 +131,7 @@ class Team extends AbstractModel {
     /**
      * Get string list of team members
      * @return string
-    */
+     */
     public function getMemberList() {
         return $this->member_list;
     }
@@ -139,7 +139,7 @@ class Team extends AbstractModel {
     /**
      * Get number of users in team
      * @return integer
-    */
+     */
     public function getSize() {
         return count($this->member_user_ids);
     }
