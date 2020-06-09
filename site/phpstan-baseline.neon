@@ -526,56 +526,6 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:\\$link \\(PDO\\) does not accept null\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$callback\\)\\: Unexpected token \"\\$callback\", expected type at offset 484$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$parameters\\)\\: Unexpected token \"\\$parameters\", expected type at offset 458$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$query\\)\\: Unexpected token \"\\$query\", expected type at offset 437$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$columns\\)\\: Unexpected token \"\\$columns\", expected type at offset 40$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$result\\)\\: Unexpected token \"\\$result\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$value\\)\\: Unexpected token \"\\$value\", expected type at offset 288$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:convertBoolean\\(\\) should return string but returns int\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:newSession\\(\\) should return string but return statement is missing\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Cannot access offset 'status' on bool\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$type\\)\\: Unexpected token \"\\$type\", expected type at offset 153$#"
 			count: 1
 			path: app/libraries/response/JsonResponse.php
