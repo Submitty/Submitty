@@ -1428,7 +1428,7 @@ function autosaveKeyFor(textarea) {
 }
 
 function saveTextAreaToLocal(textarea) {
-    if (autosaveEnabled) {
+    if (autosaveEnabled && textarea.value) {
         localStorage.setItem(autosaveKeyFor(textarea), JSON.stringify({
             timestamp: Date.now(),
             text_value: textarea.value
