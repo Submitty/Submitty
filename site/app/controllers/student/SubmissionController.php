@@ -929,7 +929,9 @@ class SubmissionController extends AbstractController {
 
         $this_config_inputs = [];
         $num_parts = $gradeable->getAutogradingConfig()->getNumParts();
-        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+        $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+        $notebook = null;
+        if ($is_notebook) {
             //need to force re-parse the notebook serverside again
             $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
                 $who_id,
@@ -954,7 +956,7 @@ class SubmissionController extends AbstractController {
         $part_path = [];
         // We upload the assignment such that if it's multiple parts, we put it in folders "part#" otherwise
         // put all files in the root folder
-        if ($num_parts > 1) {
+        if ($num_parts > 1 && !$is_notebook) {
             for ($i = 1; $i <= $num_parts; $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part" . $i);
                 if (!FileUtils::createDir($part_path[$i])) {
@@ -962,8 +964,17 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-        else {
+        elseif (!$is_notebook) {
             $part_path[1] = $version_path;
+        }elseif ($is_notebook) {
+            //each notebook file submission needs its own dir defined in the config
+            $file_submissions = $notebook->getFileSubmissions();
+            for ($i = 1; $i <= count($file_submissions); $i++) {
+                $part_path[$i] = FileUtils::joinPaths($version_path, $file_submissions[$i - 1]["directory"]);
+                if (!FileUtils::createDir($part_path[$i])) {
+                    return $this->uploadResult("Failed to make the folder for part {$i}.", false);
+                }
+            }
         }
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
@@ -1055,7 +1066,7 @@ class SubmissionController extends AbstractController {
             $previous_files_dst = [];
             $previous_part_path = [];
             $tmp = json_decode($_POST['previous_files']);
-            if (!empty($tmp) && !$gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+            if (!empty($tmp)) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
                         $previous_files_src[$i + 1] = $tmp[$i];
@@ -1076,9 +1087,16 @@ class SubmissionController extends AbstractController {
                 }
 
                 $previous_path = FileUtils::joinPaths($user_path, $highest_version);
-                if ($num_parts > 1) {
+                if ($num_parts > 1 || $is_notebook) {
                     for ($i = 1; $i <= $num_parts; $i++) {
-                        $previous_part_path[$i] = FileUtils::joinPaths($previous_path, "part" . $i);
+                        $path = FileUtils::joinPaths($previous_path, "part" . $i);
+
+                        if ($is_notebook) {
+                            $dir  = $notebook->getFileSubmissions()[$i - 1]["directory"];
+                            $path = FileUtils::joinPaths($previous_path, $dir);
+                        }
+
+                        $previous_part_path[$i] = $path;
                     }
                 }
                 else {

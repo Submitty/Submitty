@@ -177,7 +177,7 @@
 
             {% elseif cell.type == "file_submission" %}
                 {% set num_file_submissions = num_file_submissions + 1 %}
-                {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files) }}
+                {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
                 <button type="button" class="btn btn-primary sa-clear-reset" onclick="clearSubmissionBox({{num_file_submissions}});">Clear</button>
             {% endif %}
 
@@ -198,6 +198,7 @@
             addLabel('{{ file.name }}', '{{ file.size }}', {{ num_file_submissions }}, true);
             readPrevious('{{ file.name }}', {{ num_file_submissions }});
         {% endfor %}
+        setUsePrevious();
     });
 </script>
 
@@ -307,7 +308,7 @@
 
 {# File submission for notebooks #}
 {# TODO: Handle multiple file submission zones #}
-{% macro renderFileSubmission(max_file_uploads, index, old_files) %}
+{% macro renderFileSubmission(max_file_uploads, index, old_files, label) %}
     <div id="upload-boxes">
         {# uploadIndex and input-file + Index required for drag-and-drop.js #}
         <div tabindex="0"
@@ -318,7 +319,7 @@
              aria-label="Press enter to upload your part {{ index }} file"
         >
             <h2 class="label" id="label{{index}}">
-                Drag your file(s) here or click to open file browser
+                Drag your {{ label }} file(s) here or click to open file browser
             </h2>
             <input type="file" name="files" id="input-file{{index}}" 
                    class="hide" onchange="addFilesFromInput({{index}})"

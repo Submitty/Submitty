@@ -291,6 +291,8 @@ class HomeworkView extends AbstractView {
         $notebook = null;
         $notebook_inputs = [];
         $num_parts = $config->getNumParts();
+        $notebook_file_submissions = [];
+        $notebook_model = null;
         if ($config->isNotebookGradeable()) {
             $notebook_model = $config->getUserSpecificNotebook(
                 $this->core->getUser()->getId(),
@@ -313,6 +315,7 @@ class HomeworkView extends AbstractView {
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($h, $notebook);
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
+            $notebook_file_submissions = $notebook_model->getFileSubmissions();
         }
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
@@ -342,23 +345,18 @@ class HomeworkView extends AbstractView {
         $github_user_id = '';
         $github_repo_id = '';
 
-        $i = $config->isNotebookGradeable() ? 0 : 1;
+        $i = $config->isNotebookGradeable() ? $notebook_model->getNumParts() : $config->getNumParts();
 
         if (!$gradeable->isVcs()) {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for (; $i <= $num_parts; $i++) {
                     foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
-                        $size = number_format($file['size'] / 1024, 2);
-                        // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
-                        if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
-                            $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                        }
-                        else {
-                            $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
-                        }
-
-                        $old_files[] = ['name' => $escape_quote_filename, 'size' => $size, 'part' => $i];
+                        $old_files[] = [
+                            'name' => str_replace('\'', '\\\'', $file['name']),
+                            'size' => number_format($file['size'] / 1024, 2),
+                            'part' => $i
+                        ];
                     }
                 }
             }
@@ -385,6 +383,7 @@ class HomeworkView extends AbstractView {
                 }
             }
         }
+
 
         $component_names = array_map(function (Component $component) {
             return $component->getTitle();
@@ -472,7 +471,7 @@ class HomeworkView extends AbstractView {
             'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
-            'max_file_uploads' => ini_get('max_file_uploads')
+            'max_file_uploads' => ini_get('max_file_uploads'),
         ]);
     }
 
