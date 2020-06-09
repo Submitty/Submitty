@@ -9,6 +9,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
+
+    /**
+     * Student photos uploaded by an instructor will be resized.  Their form factor will be maintained.
+     * The larger dimension will be resized to the below constant (in pixels).  This only applies to images being
+     * uploaded.  They will likely be resized again to be smaller before they are displayed on any given page.
+     */
+    const IMG_MAX_DIMENSION = 4000;
+
     /**
      * @Route("/{_semester}/{_course}/student_photos")
      */
@@ -171,5 +179,17 @@ class ImagesController extends AbstractController {
             $message = 'Successfully uploaded!';
         }
         return $this->core->getOutput()->renderResultMessage($message, true);
+    }
+
+    private function saveStudentImage(array $students, $file_to_save) {
+        // Collect the student name
+
+        // Determine if the student is in fact a member of this course
+
+        // Generate the path to the folder where this image should be saved
+
+        // Generate the folder if it does not exist
+
+        // Save the image
     }
 }

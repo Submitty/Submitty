@@ -35,6 +35,15 @@
     </div>
     <div class="content">
         <h1>About You</h1>
+        {% set image_path = user.getDisplayImage().getPath() %}
+        {% if image_path is not null %}
+        <div id="user_image">
+            {{ base64_image(image_path, 'Your personal image', 150, 200) }}
+            <a class="icon" tabindex="0" href="javascript:userImageChange()" aria-label="Change personal image" title="Change personal image">
+                <i class="fas fa-camera"></i>
+            </a>
+        </div>
+        {% endif %}
         <ul class="bare-list">
             <li><b>Username:</b> {{ user.getId() }}</li>
             <li class="flex-row">

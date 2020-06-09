@@ -31,3 +31,10 @@ select {
 #utc_offset_stub {
     font-style: italic;
 }
+
+#user_image {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
