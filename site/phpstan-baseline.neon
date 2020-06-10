@@ -41,11 +41,6 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
-			message: "#^Variable \\$seating_assignment_emails might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/EmailRoomSeatingController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$csv_option string csv_option_overwrite_all or csv_option_preserve_higher\\)\\: Unexpected token \"\\$csv_option\", expected type at offset 18$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
@@ -244,7 +239,7 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 46$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
 			count: 4
@@ -759,7 +754,7 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 179$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 205$#"
 			count: 1
@@ -769,12 +764,12 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$file_name\\)\\: Unexpected token \"\\$file_name\", expected type at offset 155$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$file_path\\)\\: Unexpected token \"\\$file_path\", expected type at offset 180$#"
 			count: 1
@@ -794,17 +789,17 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 211$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 237$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$rerender_annotated_pdf\\)\\: Unexpected token \"\\$rerender_annotated_pdf\", expected type at offset 263$#"
 			count: 1
 			path: app/views/PDFView.php
-		
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
 			count: 2
@@ -814,7 +809,7 @@ parameters:
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:downloadPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
 			count: 1

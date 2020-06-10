@@ -56,6 +56,7 @@ Please email your instructor with any questions or concerns.';
 
         $class_list = $this->core->getQueries()->getEmailListWithIds();
 
+        $seating_assignment_emails = [];
         foreach ($class_list as $user) {
             $user_id = $user['user_id'];
 
