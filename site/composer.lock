@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4fe203daa7ed39d0a03a41bb7343adf8",
+    "content-hash": "9ffbdafb0389cade1ab374d410ec6725",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1778,16 +1778,16 @@
         },
         {
             "name": "textalk/websocket",
-            "version": "1.3.0",
+            "version": "1.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Textalk/websocket-php.git",
-                "reference": "9fbb3b4ebaeb823c97270b409431b0d85617e5a7"
+                "reference": "fe348408a43cc646d08a3ae73e7877370441c7ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/9fbb3b4ebaeb823c97270b409431b0d85617e5a7",
-                "reference": "9fbb3b4ebaeb823c97270b409431b0d85617e5a7",
+                "url": "https://api.github.com/repos/Textalk/websocket-php/zipball/fe348408a43cc646d08a3ae73e7877370441c7ee",
+                "reference": "fe348408a43cc646d08a3ae73e7877370441c7ee",
                 "shasum": ""
             },
             "require": {
@@ -1819,7 +1819,7 @@
                 }
             ],
             "description": "WebSocket client and server",
-            "time": "2020-05-31T08:15:03+00:00"
+            "time": "2020-06-07T12:11:38+00:00"
         },
         {
             "name": "twig/twig",
