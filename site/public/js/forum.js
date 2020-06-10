@@ -152,8 +152,12 @@ function publishFormWithAttachments(form, test_category, error_message) {
                 $('#messages').append(message);
                 return;
             }
+            // Now that we've successfully submitted the form, clear autosave data
+            const textarea = form.find("textarea")[0];
+            cancelDeferredSave(autosaveKeyFor(textarea));
+            clearTextAreaAutosave(textarea);
+
             window.location.href = json['data']['next_page'];
-            clearTextAreaAutosave(form[0]);
         },
         error: function(){
             var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + error_message + '</div>';
@@ -1456,7 +1460,7 @@ function setupForumAutosave() {
     $(".post_content_reply").each((_index, textarea) => {
         restoreTextAreaFromLocal(textarea);
         $(textarea).on('input', 
-            () => deferredSave(textarea.id, () => saveTextAreaToLocal(textarea))
+            () => deferredSave(textarea.id, () => saveTextAreaToLocal(textarea), 1)
         );
     });
 }

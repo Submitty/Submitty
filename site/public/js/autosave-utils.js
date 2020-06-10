@@ -40,7 +40,7 @@ function msToDays(ms) {
  * an autosave entry could not be parsed, or if it does not have a "timestamp"
  * key, then it is assumed to be corrupted and will therefore be deleted.
  * 
- * @param {String} suffix - Suffix of autosave entries to delete.
+ * @param {String} suffix Suffix of autosave entries to delete.
  */
 function cleanupAutosaveHistory(suffix) {
     if (autosaveEnabled) {
@@ -82,25 +82,50 @@ function saveAndWarnUnsubmitted(e) {
     return true;
 }
 
-const isSaveScheduled = {};
+const scheduledSaves = {};
 /**
- * Schedules a save action for ten seconds from now if no save has been 
+ * Schedules a save action for some time from now if no save has been 
  * scheduled yet. This way we don't re-write minor changes when modifying a
  * text box answer. 
  * 
  * The key parameter allows for multiple save actions to be queued up in
  * parallel, e.g. for multiple forum reply boxes to be able to queue their own
- * save actions independent of one another.
+ * save actions independent of one another. This also allows canceling a
+ * deferred save.
  * 
- * @param {String} key - A key to keep track of a single deferred save action.
- * @param {() => void} saveCallback - Callback that triggers the save action.
+ * @param {String} key A key to keep track of a single deferred save action.
+ * @param {() => void} saveCallback Callback that triggers the save action.
+ * @param {Number} timeout The number of seconds to delay. Default 10.
  */
-function deferredSave(key, saveCallback) {
-    if (autosaveEnabled && !isSaveScheduled[key]) {
-        setTimeout(() => {
+function deferredSave(key, saveCallback, timeout) {
+    if (!timeout) {
+        timeout = 10;
+    }
+    if (autosaveEnabled && !scheduledSaves[key]) {
+        scheduledSaves[key] = setTimeout(() => {
             saveCallback();
-            isSaveScheduled[key] = false;
-        }, 10 * 1000);
-        isSaveScheduled[key] = true;
+            scheduledSaves[key] = false;
+        }, timeout * 1000);
+    }
+}
+
+/**
+ * Cancels a previously-deferred save action.
+ * 
+ * @param {String} key A key to keep track of a single deferred save action.
+ */
+function cancelDeferredSave(key) {
+    if (autosaveEnabled && scheduledSaves[key]) {
+        clearTimeout(scheduledSaves[key]);
+    }
+    scheduledSaves[key] = false;
+}
+
+/**
+ * Cancels all deferred save actions.
+ */
+function cancelAllDeferredSaves() {
+    for (const key in scheduledSaves) {
+        cancelDeferredSave(key);
     }
 }
