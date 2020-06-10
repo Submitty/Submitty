@@ -110,6 +110,14 @@ function editUserForm(user_id) {
     })
 }
 
+function deleteUserForm(user_id, firstname, lastname) {
+    $('.popup-form').css('display', 'none');
+    const form = $("#delete-user-form");
+    $('[name="user_id"]', form).val(user_id);
+    $('[name="displayed_fullname"]', form).val(firstname + " " + lastname);
+    $('#user-fullname', form).html(firstname + " " + lastname);
+    form.css("display", "block");
+}
 
 function userFormChange() {
     var user_elem = $("select[name='user_group']")[0];
@@ -174,7 +182,7 @@ function checkValidEntries() {
             break;
         }
 
-    //disable submit button if anythiing is invalid
+    //disable submit button if anything is invalid
     var has_invalid_entry = false;
     $(":text",$("#edit-user-form")).each( function() {
         if (!this.checkValidity()) {

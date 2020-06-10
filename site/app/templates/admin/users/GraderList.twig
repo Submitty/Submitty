@@ -20,12 +20,13 @@
                 <th>User Group</th>
                 <th>Registration Sections</th>
                 <th>Edit Grader</th>
+                <th>Delete Grader</th>
             </thead>
-			{% for grading_group in 1..3 %}
+            {% for grading_group in 1..3 %}
                 <tbody id="section-{{ grading_group }}">
                     {% if graders[grading_group]|length > 0 %}
                         <tr class="info">
-                            <th class="section-break" colspan="7">{{groups[grading_group].name}}</td>
+                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</td>
                         </tr>
                         {% for grader in graders[grading_group] %}
                             <tr id="user-{{ grader.getId() }}">
@@ -35,7 +36,8 @@
                                 <td class="align-left">{{ grader.getDisplayedLastName() }}</td>
                                 <td>{{ groups[grader.getGroup()].name }}</td>
                                 <td>{{ grader.getGradingRegistrationSections()|join(", ") ?: "None" }}</td>
-                                <td><a href="javascript:editUserForm('{{ grader.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                                <td><a href="javascript:editUserForm('{{ grader.getId() }}');" aria-label="edit grader {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                                <td><a href="javascript:deleteUserForm('{{ grader.getId() }}', '{{ grader.getDisplayedFirstName() }}', '{{ grader.getDisplayedLastName() }}');" aria-label="delete grader {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-trash"></i></a></td>
                             </tr>
                         {% endfor %}
                     {% else %}
@@ -44,7 +46,7 @@
                         </tr>
                     {% endif %}
                 </tbody>
-			{% endfor %}
+            {% endfor %}
         </table>
     {% else %}
         <p id="empty-table" class="warning">No graders found</p>
@@ -54,6 +56,7 @@
 {% include('admin/users/GraderListForm.twig') %}
 {% include('admin/users/RegistrationSectionsForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'grader' } %}
+{% include('admin/users/DeleteUserForm.twig') %}
 
 <script>
 
