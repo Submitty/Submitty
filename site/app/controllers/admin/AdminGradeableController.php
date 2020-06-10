@@ -274,9 +274,12 @@ class AdminGradeableController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function adminGradeablePeerSubmit() {
-        ob_start();
-        var_dump($_POST);
-        ob_get_clean();
+        $grader_id = $_POST['grader_id'];
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        $peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+        $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
+        
+
     }
 
     /* Http request methods (i.e. ajax) */

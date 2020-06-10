@@ -123,6 +123,7 @@
         $(".add_user_ids :input").each(function() {
             fd['add_user_ids'].push($(this).val());
         });
+        fd['gradeable_id'] = $("#gradeable_id").val();
         $.ajax({
             url: url,
             type: "POST",
