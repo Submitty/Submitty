@@ -81,6 +81,17 @@ aside {
     display: none;
 }
 
+
+#two-panel-mode-btn.active i.fa-square-o,
+#two-panel-mode-btn i.fa-columns {
+    display: inline-block;
+}
+
+#two-panel-mode-btn.active i.fa-columns,
+#two-panel-mode-btn i.fa-square-o {
+    display: none;
+}
+
 /* Resets server.css pink color */
 a > i.fa:hover,
 a > i.fas:hover,

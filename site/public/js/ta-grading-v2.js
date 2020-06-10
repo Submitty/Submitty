@@ -12,6 +12,7 @@ let panelElements = [
   { str: "peer_info", icon: ".grading_toolbar .fa-users"}
 ];
 
+let currentOpenPanel = null;
 let currentTwoPanels = {
   left: null,
   right: null
@@ -324,7 +325,6 @@ function toggleFullScreenMode () {
 function toggleTwoPanelMode() {
   const twoPanelCont = $('.two-panel-cont');
   isTwoPanelsEnabled = !twoPanelCont.is(":visible");
-  console.log(isTwoPanelsEnabled);
 
   if (isTwoPanelsEnabled) {
     twoPanelCont.addClass("active");
@@ -346,8 +346,20 @@ function toggleTwoPanelMode() {
       });
     }
     updateTwoPanelLayout();
+    $("#two-panel-mode-btn").addClass("active");
   } else {
     twoPanelCont.removeClass("active");
+    if ((currentTwoPanels.left && currentTwoPanels.right) || (!currentTwoPanels.left && currentTwoPanels.right)){
+      document.querySelector('.panels-container').append(document.getElementById(currentTwoPanels.right));
+    } else if (currentTwoPanels.left) {
+      document.querySelector('.panels-container').append(document.getElementById(currentTwoPanels.left));
+    }
+    isTwoPanelsEnabled = false;
+    currentTwoPanels = {
+      left: null,
+      right: null
+    };
+    $("#two-panel-mode-btn").removeClass("active");
   }
 }
 
