@@ -157,7 +157,7 @@ class AutoGradedVersion extends AbstractModel {
                 foreach ($submitted_files as $file => $details) {
                     $dir_name = "part{$i}/";
                     $index = $i;
-                    if ($config->isNotebookGradeable()) {
+                    if ($config->isNotebookGradeable() && isset($notebook_model->getFileSubmissions()[$i])) {
                         $dir_name = $notebook_model->getFileSubmissions()[$i]["directory"];
                         $index = $name;
                     }
