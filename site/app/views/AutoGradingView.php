@@ -392,7 +392,10 @@ class AutoGradingView extends AbstractView {
         }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
+        $annotated_pdf_paths = [];
         $annotated_file_names = [];
+        $annotation_paths = [];
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
@@ -406,6 +409,15 @@ class AutoGradingView extends AbstractView {
                         if (file_get_contents($fileinfo->getPathname()) != "") {
                             $pdf_id = $pdf_id . '.pdf';
                             $annotated_file_names[] = $pdf_id;
+                            if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                                $target_file = scandir($annotation_path)[2];
+                                $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                            }
+                            if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                                $target_file = scandir($pdfs_path)[2];
+                                $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                                $annotated_pdf_paths[$pdf_id] = $pdf_path;
+                            }
                         }
                     }
                 }
@@ -450,7 +462,10 @@ class AutoGradingView extends AbstractView {
             'display_version' => $display_version,
             'display_original_pdf' => $this->core->buildCourseUrl(['display_file']),
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
-            "annotated_file_names" =>  $annotated_file_names
+            'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
+            "annotated_file_names" =>  $annotated_file_names,
+            "annotation_paths" => $annotation_paths,
+            "annotated_pdf_paths" => $annotated_pdf_paths
         ]);
     }
 
@@ -648,6 +663,7 @@ class AutoGradingView extends AbstractView {
             'can_download' => !$gradeable->isVcs(),
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
             "annotated_file_names" =>  $annotated_file_names
         ]);
     }
