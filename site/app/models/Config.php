@@ -54,6 +54,7 @@ use app\libraries\FileUtils;
  * @method string getVcsType()
  * @method string getPrivateRepository()
  * @method string getRoomSeatingGradeableId()
+ * @method void setRoomSeatingGradeableId(string $gradeable_id)
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
  * @method string getSecretSession()
