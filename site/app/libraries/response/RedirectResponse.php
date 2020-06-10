@@ -14,9 +14,9 @@ class RedirectResponse implements ResponseInterface {
 
     /**
      * RedirectResponse constructor.
-     * @param $url
+     * @param string $url
      */
-    public function __construct($url) {
+    public function __construct(string $url) {
         $this->url = $url;
     }
 

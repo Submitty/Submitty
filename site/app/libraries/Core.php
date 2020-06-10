@@ -678,7 +678,7 @@ class Core {
         $this->testing = $testing;
     }
 
-    public function getNotificationFactory() {
+    public function getNotificationFactory(): NotificationFactory {
         return $this->notification_factory;
     }
 
@@ -687,7 +687,7 @@ class Core {
      * a session with that id. If there is no session, then we delete the cookie.
      * @return bool
      */
-    public function isWebLoggedIn() {
+    public function isWebLoggedIn(): bool {
         $logged_in = false;
         $cookie_key = 'submitty_session';
         if (isset($_COOKIE[$cookie_key])) {
@@ -735,7 +735,7 @@ class Core {
      * @param Request $request
      * @return bool
      */
-    public function isApiLoggedIn(Request $request) {
+    public function isApiLoggedIn(Request $request): bool {
         $logged_in = false;
         $jwt = $request->headers->get("authorization");
         if (!empty($jwt)) {
