@@ -296,22 +296,23 @@ class MiscController extends AbstractController {
                 );
                 $zip->addEmptyDir($folder_name);
                 foreach ($files as $name => $file) {
-                    // Skip directories (they would be added automatically)
-                    if (!$file->isDir()) {
-                        $file_path = $file->getRealPath();
-                        $relative_path = substr($file_path, strlen($path) + 1);
+                    // Skip directories (they are added automatically)
+                    if ($file->isDir()) {
+                        continue;
+                    }
+                    $file_path = $file->getRealPath();
+                    $relative_path = substr($file_path, strlen($path) + 1);
 
-                        // For scanned exams, the directories get polluted with the images of the split apart
-                        // pages, so we selectively only grab the PDFs there. For all other types,
-                        // we can grab all files regardless of type.
-                        if ($gradeable->isScannedExam()) {
-                            if (mime_content_type($file_path) === 'application/pdf') {
-                                $zip->addFile($file_path, $folder_name . '/' . $relative_path);
-                            }
+                    // For scanned exams, the directories get polluted with the images of the split apart
+                    // pages, so we selectively only grab the PDFs there. For all other types,
+                    // we can grab all files regardless of type.
+                    if ($gradeable->isScannedExam()) {
+                        if (mime_content_type($file_path) === 'application/pdf') {
+                            $zip->addFile($file_path, $folder_name . '/' . $relative_path);
                         }
-                        else {
-                            $zip->addFile($file_path, $folder_name . "/" . $relative_path);
-                        }
+                    }
+                    else {
+                        $zip->addFile($file_path, $folder_name . "/" . $relative_path);
                     }
                 }
             }
