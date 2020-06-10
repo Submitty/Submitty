@@ -192,7 +192,12 @@ class User extends AbstractModel {
         }
 
         if (isset($details['display_image_state'])) {
-            $this->display_image = new DisplayImage($core, $details['user_id'], $details['display_image_state']);
+            try {
+                $this->display_image = new DisplayImage($core, $details['user_id'], $details['display_image_state']);
+            }
+            catch (\Exception $exception) {
+                $this->display_image = null;
+            }
         }
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';

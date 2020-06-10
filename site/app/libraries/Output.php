@@ -100,21 +100,12 @@ class Output {
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title, int $cols, int $rows): string {
-            $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
-            [$mime_type, $mime_subtype] = explode('/', mime_content_type($path), 2);
-            if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
-                // Resize image to decrease volume of data being returned
-                $imagick = new \Imagick($path);
-                $imagick->scaleImage($cols, $rows);
-                $image_data = base64_encode($imagick->getImageBlob());
-
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 // Return html image tag with image embedded as a base64 character string
                 return <<<HTML
-<img alt="${title}" src="data:image/${mime_subtype};base64,${image_data}" />
+<img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
 HTML;
-            }
-            throw new OutputException('Invalid path to image file');
+            throw new OutputException('Invalid image data');
         }, ['is_safe' => ['html']]));
 
         $this->twig->addFunction(new \Twig\TwigFunction("plurality_picker", function ($num, $single, $plural) {

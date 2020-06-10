@@ -207,6 +207,19 @@ ORDER BY {$orderBy}"
     }
 
     /**
+     * Gets an indexed array of all the user_ids for all users who are members of the current course.
+     *
+     * @return array An array of all the users
+     */
+    public function getListOfCourseUsers() {
+        $sql = 'select user_id from users';
+        $this->course_db->query($sql);
+        return array_map(function ($row) {
+            return $row['user_id'];
+        }, $this->course_db->rows());
+    }
+
+    /**
      * @return User[]
      */
     public function getAllGraders() {

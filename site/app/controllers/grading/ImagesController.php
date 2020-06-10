@@ -3,6 +3,7 @@
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileWriteException;
 use app\libraries\FileUtils;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,9 +14,10 @@ class ImagesController extends AbstractController {
     /**
      * Student photos uploaded by an instructor will be resized.  Their form factor will be maintained.
      * The larger dimension will be resized to the below constant (in pixels).  This only applies to images being
-     * uploaded.  They will likely be resized again to be smaller before they are displayed on any given page.
+     * uploaded from the Student Photos page.  They will likely be resized again to be smaller before they are
+     * displayed on any given page.
      */
-    const IMG_MAX_DIMENSION = 4000;
+    const IMG_MAX_DIMENSION = 500;
 
     /**
      * @Route("/{_semester}/{_course}/student_photos")
@@ -125,7 +127,9 @@ class ImagesController extends AbstractController {
         }
 
         if (isset($uploaded_files[1])) {
+            $users = $this->core->getQueries()->getListOfCourseUsers();
             for ($j = 0; $j < $count_item; $j++) {
+                // Uploaded file was a zip
                 if ($uploaded_files[1]["is_zip"][$j] === true) {
                     $zip = new \ZipArchive();
                     $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
@@ -134,7 +138,11 @@ class ImagesController extends AbstractController {
                         $upload_img_path_tmp = FileUtils::joinPaths($upload_img_path, "tmp");
                         $zip->extractTo($upload_img_path_tmp);
 
-                        FileUtils::recursiveFlattenImageCopy($upload_img_path_tmp, $upload_img_path);
+                        $files = FileUtils::getAllFilesTrimSearchPath($upload_img_path_tmp, 0);
+
+                        foreach ($files as $file) {
+                            $this->saveStudentImage($users, $file);
+                        }
 
                         //delete tmp folder
                         FileUtils::recursiveRmdir($upload_img_path_tmp);
@@ -149,12 +157,11 @@ class ImagesController extends AbstractController {
                         return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: " . $error_message . ".", false);
                     }
                 }
+                // Upload was a single image
                 else {
+                    // TODO: FIX THIS PART
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                        $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
-                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            return $this->core->getOutput()->renderResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
-                        }
+                        $this->saveStudentImage($users, $uploaded_files[1]["tmp_name"][$j]);
                     }
                     else {
                         return $this->core->getOutput()->renderResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
@@ -181,15 +188,52 @@ class ImagesController extends AbstractController {
         return $this->core->getOutput()->renderResultMessage($message, true);
     }
 
-    private function saveStudentImage(array $students, $file_to_save) {
+    /**
+     * Verify that, for the user's image being uploaded the user is a member of the current course.
+     * Then resize and save the image in the user's user_data directory.
+     *
+     * @param array $students
+     * @param $file_to_save
+     * @throws \ImagickException
+     */
+    private function saveStudentImage(array $students, $file_to_save): void {
         // Collect the student name
+        $file_meta = pathinfo($file_to_save);
+        $user_id = $file_meta['filename'];
+        $file_name = $file_meta['basename'];
 
-        // Determine if the student is in fact a member of this course
+        // Verify the student is in fact a member of this course
+        if (!in_array($user_id, $students)) {
+            return;
+        }
 
         // Generate the path to the folder where this image should be saved
+        $folder_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyPath(),
+            'user_data',
+            $user_id,
+            'system_images'
+        );
 
         // Generate the folder if it does not exist
+        if (!FileUtils::createDir($folder_path, true)) {
+            throw new FileWriteException('Error creating the user\'s system images folder.');
+        }
 
-        // Save the image
+        // Decrease image size while maintaining form factor
+        // If bigger image dimension is already smaller then IMG_MAX_DIMENSION don't do any resizing.
+        $imagick = new \Imagick($file_to_save);
+        $cols = $imagick->getImageWidth();
+        $rows = $imagick->getImageHeight();
+
+        if ($cols >= $rows && $cols > self::IMG_MAX_DIMENSION) {
+            $imagick->scaleImage(self::IMG_MAX_DIMENSION, 0);
+        }
+        else if ($rows > self::IMG_MAX_DIMENSION) {
+            $imagick->scaleImage(0, self::IMG_MAX_DIMENSION);
+        }
+
+        // Save file (will overwrite any image with same name)
+        $imagick->writeImage(FileUtils::joinPaths($folder_path, $file_name));
     }
 }

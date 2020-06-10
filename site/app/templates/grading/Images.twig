@@ -19,14 +19,11 @@
                         <tr>
                     {% endif %}
                         <td>
-                            {% if imageData[student.getId()] is defined %}
-                                {{ base64_image(imageData[student.getId()].path, student.getId(), constant('app\\views\\grading\\ImagesView::IMAGE_COLS'), constant('app\\views\\grading\\ImagesView::IMAGE_ROWS')) }}
+                            {% set display_image = student.getDisplayImage() %}
+                            {% if display_image is not null %}
+                                {{ base64_image(display_image.getImageBase64(150, 200), display_image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
                             {% else %}
-                                {% if errorImageData == '_NONE_' %}
-                                    <i><span style="color:var(--no-image-available)">No Image Available</span></i>
-                                {% else %}
-                                    {{ base64_image(errorImageData.path, 'No Image Available', constant('app\\views\\grading\\ImagesView::IMAGE_COLS'), constant('app\\views\\grading\\ImagesView::IMAGE_ROWS')) }}
-                                {% endif %}
+                                <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                             {% endif %}
                             <div class="name">
                                 <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
