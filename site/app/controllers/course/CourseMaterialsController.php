@@ -196,10 +196,10 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
             if (!is_null($sections)) {
-                $json[$file_name] = array('release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
+                $json[$file_name] = ['release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students];
             }
             else {
-                $json[$file_name] = array('release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students);
+                $json[$file_name] = ['release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students];
             }
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
@@ -250,7 +250,7 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files_to_modify as $file) {
             $file_path = $file['path'];
             $file_path_release_datetime = empty($release_time) ? $json[$file_path]['release_datetime'] : $release_time;
-            $json[$file_path] =  array('release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+            $json[$file_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students];
         }
 
         FileUtils::writeJsonFile($fp, $json);
@@ -314,7 +314,7 @@ class CourseMaterialsController extends AbstractController {
             return $this->core->getOutput()->renderResultMessage("ERROR: .. is not supported in a course materials filepath.", false, false);
         }
 
-        $uploaded_files = array();
+        $uploaded_files = [];
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
         }
@@ -441,10 +441,10 @@ class CourseMaterialsController extends AbstractController {
                                 if ($sections_exploded == null) {
                                     $sections_exploded = [];
                                 }
-                                $json[$dst] = array('release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+                                $json[$dst] = ['release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students];
                             }
                             else {
-                                $json[$dst] = array('release_datetime' => $release_time, 'hide_from_students' => $hide_from_students);
+                                $json[$dst] = ['release_datetime' => $release_time, 'hide_from_students' => $hide_from_students];
                             }
                         }
                     }

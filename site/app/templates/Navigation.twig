@@ -51,10 +51,10 @@
                     <div class="course-main">
                         {% if g_info.edit_buttons or g_info.delete_buttons %}
                             {% for button in g_info.edit_buttons %}
-                                {{ self.renderButton(button, g_info.has_build_error) }}
+                                {{ self.renderButton(button, DATE_TIME_FORMAT) }}
                             {% endfor %}
                             {% for button in g_info.delete_buttons %}
-                                {{ self.renderButton(button, g_info.has_build_error) }}
+                                {{ self.renderButton(button, DATE_TIME_FORMAT) }}
                             {% endfor %}
                         {% endif %}
                         <div class="course-title">
@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     {% for button in g_info.buttons %}
-                        <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
+                        <div class="course-button">{{ self.renderButton(button, DATE_TIME_FORMAT) }}</div>
                     {% endfor %}
                 </div>
                 {% endfor %}
@@ -85,7 +85,7 @@
     {% endif %}
 </div>
 
-{% macro renderButton(button) %}
+{% macro renderButton(button, date_format) %}
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
@@ -118,7 +118,11 @@
                 {% if button.getTitle() != null %}
                     <br>
                 {% endif %}
-                <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
+                {% if button.getDate() != null %}
+                    <span class="subtitle">({{ button.getSubtitle()|nl2br }} {{ button.getDate()|date(date_format) }})</span>
+                {% else %}
+                    <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
+                {% endif %}
             {% endif %}
         </a>
         {% if button.getProgress() != null %}

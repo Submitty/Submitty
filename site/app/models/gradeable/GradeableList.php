@@ -36,24 +36,24 @@ class GradeableList extends AbstractModel {
     protected $user;
 
     /** @prop @var Gradeable[]  */
-    protected $gradeables = array();
+    protected $gradeables = [];
 
     /*
      * All elements of $this->gradeables should fall into one of the following six lists. There should
      * be no overlap between them.
      */
     /** @prop @var Gradeable[] These are gradeables which are only viewable by admin users */
-    protected $future_gradeables = array();
+    protected $future_gradeables = [];
     /** @prop @var Gradeable[] These are gradeables which are only viewable by admin & TA users */
-    protected $beta_gradeables = array();
+    protected $beta_gradeables = [];
     /** @prop @var Gradeable[] */
-    protected $open_gradeables = array();
+    protected $open_gradeables = [];
     /** @prop @var Gradeable[] */
-    protected $closed_gradeables = array();
+    protected $closed_gradeables = [];
     /** @prop @var Gradeable[] */
-    protected $grading_gradeables = array();
+    protected $grading_gradeables = [];
     /** @prop @var Gradeable[] */
-    protected $graded_gradeables = array();
+    protected $graded_gradeables = [];
 
     /** @var \DateTime Timestamp of when we initially loaded the GradeableList so that all timestamp comparisons are
      against the same time (and don't have any potential mismatch of seconds */
@@ -128,14 +128,14 @@ class GradeableList extends AbstractModel {
                 $this->future_gradeables[$gradeable->getId()] = $gradeable;
             }
         }
-        $sort_array = array(
+        $sort_array = [
             'future_gradeables' => 'getGradeStartDate',
             'beta_gradeables' => 'getGradeStartDate',
             'open_gradeables' => 'getSubmissionDueDate',
             'closed_gradeables' => 'getSubmissionDueDate',
             'grading_gradeables' => 'getGradeStartDate',
             'graded_gradeables' => 'getGradeReleasedDate'
-        );
+        ];
         foreach ($sort_array as $list => $function) {
             uasort($this->$list, function (Gradeable $a, Gradeable $b) use ($function) {
                 if ($a->$function() == $b->$function()) {
@@ -205,7 +205,7 @@ class GradeableList extends AbstractModel {
      * @return Gradeable[]
      */
     public function getSubmittableElectronicGradeables() {
-        $return = array();
+        $return = [];
         foreach ($this->gradeables as $gradeable) {
             if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
                 continue;

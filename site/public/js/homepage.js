@@ -81,6 +81,10 @@ function populateSpecificTimeZoneDropDown(general_selection, selected_option = n
 
 $(document).ready(function() {
 
+    $('#theme_change_select').change(function() {
+        updateTheme();
+    });
+
     // Populate the general area time zone selector box with options
     let general_area_set = getGeneralTimeZoneOptions();
     general_area_set.forEach(function(elem) {

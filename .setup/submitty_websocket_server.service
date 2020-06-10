@@ -1,0 +1,15 @@
+[Unit]
+Description=Submitty WebSocket Server
+Documentation=http://submitty.org
+
+[Service]
+User=submitty_php
+Group=submitty_php
+Restart=always
+Type=simple
+ExecStart=/usr/bin/env php /usr/local/submitty/site/socket/index.php
+TimeoutSec=1min
+RuntimeMaxSec=infinity
+
+[Install]
+WantedBy=multi-user.target

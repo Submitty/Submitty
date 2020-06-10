@@ -32,14 +32,14 @@ class GradeOverrideController extends AbstractController {
      */
     public function getOverriddenGrades($gradeable_id) {
         $users = $this->core->getQueries()->getUsersWithOverriddenGrades($gradeable_id);
-        $user_table = array();
+        $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment());
+            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment()];
         }
-        return $this->core->getOutput()->renderJsonSuccess(array(
+        return $this->core->getOutput()->renderJsonSuccess([
             'gradeable_id' => $gradeable_id,
             'users' => $user_table,
-        ));
+        ]);
     }
 
     /**
@@ -55,7 +55,7 @@ class GradeOverrideController extends AbstractController {
      */
     public function updateOverriddenGrades($gradeable_id) {
         $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-        $isUserNotInCourse = empty($this->core->getQueries()->getUsersById(array($_POST['user_id'])));
+        $isUserNotInCourse = empty($this->core->getQueries()->getUsersById([$_POST['user_id']]));
         if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
             $error = "Invalid Student ID";
             return $this->core->getOutput()->renderJsonFail($error);
