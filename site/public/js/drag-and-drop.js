@@ -27,7 +27,6 @@ let num_clipboard_files = 0;
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
-
 function initializeDragAndDrop() {
     file_array = [];
     previous_files = [];
@@ -233,6 +232,7 @@ function addFile(file, part, check_duplicate_zip=true){
     }
 
     setButtonStatus()
+    
 }
 
 // REMOVE FILES
