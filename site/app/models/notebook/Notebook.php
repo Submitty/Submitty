@@ -101,6 +101,7 @@ class Notebook extends AbstractModel {
                 && $notebook_cell['type'] === 'file_submission'
                 && !in_array($notebook_cell, $this->file_submissions)
             ) {
+                $notebook_cell['label'] = $notebook_cell['label'] ?? "";
                 $this->file_submissions[] = $notebook_cell;
             }
         }

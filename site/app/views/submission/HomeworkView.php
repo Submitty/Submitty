@@ -345,12 +345,11 @@ class HomeworkView extends AbstractView {
         $github_user_id = '';
         $github_repo_id = '';
 
-        $i = $config->isNotebookGradeable() ? $notebook_model->getNumParts() : $config->getNumParts();
 
         if (!$gradeable->isVcs()) {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
-                for (; $i <= $num_parts; $i++) {
+                for ($i = 1; $i <= $num_parts; $i++) {
                     foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
                         $old_files[] = [
                             'name' => str_replace('\'', '\\\'', $file['name']),

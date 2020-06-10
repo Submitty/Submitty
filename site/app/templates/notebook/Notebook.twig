@@ -177,6 +177,7 @@
 
             {% elseif cell.type == "file_submission" %}
                 {% set num_file_submissions = num_file_submissions + 1 %}
+
                 {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
                 <button type="button" class="btn btn-primary sa-clear-reset" onclick="clearSubmissionBox({{num_file_submissions}});">Clear</button>
             {% endif %}
@@ -194,9 +195,11 @@
 
     $(function(){
         createArray({{ num_file_submissions }});
+
         {% for file in old_files %}
-            addLabel('{{ file.name }}', '{{ file.size }}', {{ num_file_submissions }}, true);
-            readPrevious('{{ file.name }}', {{ num_file_submissions }});
+            console.log("{{file.part}}");
+            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+            readPrevious('{{ file.name }}', {{ file.part }});
         {% endfor %}
         setUsePrevious();
     });

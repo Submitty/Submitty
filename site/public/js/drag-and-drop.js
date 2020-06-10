@@ -232,10 +232,7 @@ function addFile(file, part, check_duplicate_zip=true){
         }
     }
 
-
-    addNotebookFile(file.name, part);
     setButtonStatus()
-
 }
 
 // REMOVE FILES
