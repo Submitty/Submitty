@@ -966,7 +966,8 @@ class SubmissionController extends AbstractController {
         }
         elseif (!$is_notebook) {
             $part_path[1] = $version_path;
-        }elseif ($is_notebook) {
+        }
+        elseif ($is_notebook) {
             //each notebook file submission needs its own dir defined in the config
             $file_submissions = $notebook->getFileSubmissions();
             for ($i = 1; $i <= count($file_submissions); $i++) {

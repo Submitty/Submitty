@@ -179,7 +179,16 @@
                 {% set num_file_submissions = num_file_submissions + 1 %}
 
                 {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
-                <button type="button" class="btn btn-primary sa-clear-reset" onclick="clearSubmissionBox({{num_file_submissions}});">Clear</button>
+
+                <button type="button" class="btn btn-primary 
+                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"> 
+                    Clear
+                </button>
+
+                <button type="button" 
+                    onclick="populatePreviousFiles({{num_file_submissions}});"
+                    class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
+                </button>
             {% endif %}
 
         </div>
@@ -189,19 +198,41 @@
 </div>
 
 <script>
-    function clearSubmissionBox(part){
+    function populatePreviousFiles(part){
+        let prev_files = {
+            {% for file in old_files %}
+                {{file.part}} : {'name' : '{{file.name}}', 'size' : '{{file.size}}' },
+            {% endfor %}
+        };
+
+
+        let tgt = prev_files[part];
+        if (typeof tgt === "undefined"){
+            return;
+        }
+
         deleteFiles(part);
+        addLabel(tgt['name'], tgt['size'], part);
+        readPrevious(tgt['name'], part);
+        setUsePrevious();
     }
+
 
     $(function(){
         createArray({{ num_file_submissions }});
 
         {% for file in old_files %}
-            console.log("{{file.part}}");
             addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
             readPrevious('{{ file.name }}', {{ file.part }});
         {% endfor %}
         setUsePrevious();
+
+        {% if old_files | length == 0 %}
+            let btns = document.getElementsByClassName("fs-recent");
+            for (let btn of btns){
+                btn.disabled = true;
+            }
+        {% endif %}
     });
 </script>
 
