@@ -53,14 +53,20 @@ class ElectronicGraderController extends AbstractController {
     public function arr_rotate($array,$rotate_count) {
         
     }
-/**
+    /**
         * Route for randomizing peer assignments
         * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
         * @AccessControl(role="INSTRUCTOR")
     */ 
     public function ajaxRandomizePeers($gradeable_id){
+        /* How does this function work? 
+        1 - Number of students to grade (Y) is taken from the client using POST
+        2 - Query DB to get students from registration section(X) (Without taking in students in NULL section)
+        3 - Randomize the order of students
+        4 - Randomly Select Y offsets
+        5 - Shift the random order by the offsets to create the matrix, with no duplicates, and exactly Y assignments and & graders for each student.  no student grades self.
+        */
         $number_to_grade=$_POST['number_to_grade'];
-       // $gradeable_id=$_POST['gradeable_id'];
         $gradeable = $this->tryGetGradeable($gradeable_id);
          if ($gradeable === false) {
              $this->core->addErrorMessage('Invalid Gradeable!');
@@ -75,14 +81,21 @@ class ElectronicGraderController extends AbstractController {
               $sorted_students[$reg_sec][] = $student;
               array_push($student_list, [
                   'user_id' => $student->getId(),
-                 // reg_section => $reg_sec,
               ]);
               array_push($student_array,$student->getId());
           }
           $graded_array=$student_array;
-          $final_info=[];
+          /*n_array_peers : An Array of arrays that holds information on to be graded peers
+          [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
+          A grades C and E and is graded by C and E.
+          */
+          $n_array_peers=[];
           shuffle($student_array);
-          array_push($final_info,$student_array);
+          array_push($n_array_peers,$student_array);
+          /*final_grading_info : An Array with clear structure of grading rules for peer grading
+          [ [A,[C,E]],[B,[F,D]], ...]
+          A grades C and E, B grades F and D ..and so on!
+          */
           $final_grading_info=[];
           $max_offset=sizeof($student_array);
           $offset_array=[];
@@ -95,37 +108,17 @@ class ElectronicGraderController extends AbstractController {
             for ($i = 0; $i < $element; $i++) {
                 array_push($temp_array, array_shift($temp_array));
             }
-            //arr_rotate($temp_array,);
-            array_push($final_info,$temp_array);
+            array_push($n_array_peers,$temp_array);
           }
-          for($i=0;$i<sizeof($final_info[0]);++$i){
+          for($i=0;$i<sizeof($n_array_peers[0]);++$i){
               $temp=[];
-              for($j=1;$j<sizeof($final_info);++$j){
-                  array_push($temp,$final_info[$j][$i]);
+              for($j=1;$j<sizeof($n_array_peers);++$j){
+                  array_push($temp,$n_array_peers[$j][$i]);
               }
-           //   $this->core->getOutput()->renderJsonSuccess($temp);
-                  //array_push($temp,$final_info[0][$i],$temp);
-            array_push($final_grading_info,[$final_info[0][$i],$temp]);
+            array_push($final_grading_info,[$n_array_peers[0][$i],$temp]);
           }
-            
-         /* foreach($student_array as $grader){
-              $temp_array=$graded_array;
-              if (($key = array_search($grader, $temp_array)) !== false) {
-                unset($temp_array[$key]);
-            }
-              shuffle($temp_array);
-              $grading_list=[];
-              for($i=0;$i<$number_to_grade;++$i){
-                 array_push($grading_list,$temp_array[$i]);
-                 if (($key = array_search($temp_array[$i], $graded_array)) !== false) {
-                    unset($graded_array[$key]); 
-                }
-              }
-              array_push($final_grading_info,[$grader,$grading_list]);
-          }*/
           $this->core->getOutput()->renderJsonSuccess($final_grading_info);
-        $gradeable->setRandomPeerGradersList($final_grading_info);
-        // $response_data=json_encode($download_info,true); 
+          $gradeable->setRandomPeerGradersList($final_grading_info);
        
          }
     /**
