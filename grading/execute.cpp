@@ -71,6 +71,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
     { "uniq",                    "/usr/bin/uniq" },
+    { "echo",                    "/bin/echo" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
