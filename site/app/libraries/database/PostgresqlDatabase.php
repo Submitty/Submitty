@@ -148,7 +148,7 @@ class PostgresqlDatabase extends AbstractDatabase {
             else {
                 $lower = strtolower($element);
                 if ($parse_bools && in_array($lower, ["true", "t", "false", "f"])) {
-                    $return[] = ($lower === "true" || $lower === "t") ? true : false;
+                    $return[] = ($lower === "true" || $lower === "t");
                 }
                 elseif ($lower == "null") {
                     $return[] = null;

@@ -148,7 +148,7 @@ class ConfigurationController extends AbstractController {
                 ]
             )
         ) {
-            $entry = $entry === "true" ? true : false;
+            $entry = $entry === "true";
         }
         elseif ($name == "course_home_url") {
             if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {
@@ -176,7 +176,7 @@ class ConfigurationController extends AbstractController {
                 }
             }
 
-            $entry = $entry === "true" ? true : false;
+            $entry = $entry === "true";
         }
 
         if ($name === 'forum_enabled' && $entry == 1) {

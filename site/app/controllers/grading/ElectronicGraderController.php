@@ -737,7 +737,7 @@ class ElectronicGraderController extends AbstractController {
      */
     public function adminTeamSubmit($gradeable_id) {
         $view = $_POST['view'] ?? '';
-        $new_team = ($_POST['new_team'] ?? '') === 'true' ? true : false;
+        $new_team = ($_POST['new_team'] ?? '') === 'true';
         $leader_id = $_POST['new_team_user_id'] ?? '';
         $team_id = $_POST['edit_team_team_id'] ?? '';
         $reg_section = $_POST['reg_section'] ?? 'NULL';
@@ -901,11 +901,11 @@ class ElectronicGraderController extends AbstractController {
             else {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
             }
-            
+
             if ($from_graded_gradeable === false) {
                  $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
             }
-            
+
             // Get the user ID of the user we were viewing on the TA grading interface
             $from_id = $from_graded_gradeable->getSubmitter();
 

@@ -361,6 +361,30 @@ class UsersController extends AbstractController {
     }
 
     /**
+     * @Route("/{_semester}/{_course}/delete_user", methods={"POST"})
+     * @param "users"|"graders" $type
+     * @return RedirectResponse
+     */
+    public function deleteUser(string $type = 'users'): RedirectResponse {
+        $user_id = trim($_POST['user_id']);
+        $displayed_fullname = trim($_POST['displayed_fullname']);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        if ($user_id === $this->core->getUser()->getId()) {
+            $this->core->addErrorMessage('You cannot delete yourself.');
+        }
+        elseif ($this->core->getQueries()->deleteUser($user_id, $semester, $course)) {
+             $this->core->addSuccessMessage("{$displayed_fullname} has been removed from your course.");
+        }
+        else {
+            $this->core->addErrorMessage("Could not remove {$displayed_fullname}.  They may have recorded activity in your course.");
+        }
+
+        return new RedirectResponse($this->core->buildCourseUrl([$type]));
+    }
+
+    /**
      * @Route("/{_semester}/{_course}/sections", methods={"GET"})
      */
     public function sectionsForm() {
