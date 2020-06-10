@@ -49,7 +49,7 @@ aside {
 .navigation-box {
     margin: 4px auto;
     display: flex;
-    width: fit-content;
+    width: max-content;
 }
 
 
@@ -248,13 +248,60 @@ progress::-webkit-progress-value {
 }
 
 /* Grading Panels CSS */
+
+.panels-container {
+    height: calc(100% - 140px);
+    margin: 6px;
+}
+
+.two-panel-cont {
+    display: none;
+    height: 100%;
+}
+
+.two-panel-cont.active {
+    display: flex;
+    border: none;
+}
+
+.two-panel-item {
+    flex: 1;
+}
+
+.two-panel-left {}
+
+.two-panel-right {}
+
+.two-panel-drag-bar {
+    cursor: col-resize;
+    position: relative;
+    width: 20px;
+    background: transparent;
+}
+
+.two-panel-drag-bar span {
+    position: absolute;
+    width: 10px;
+    height: 30%;
+    max-height: 60px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50px;
+    background: var(--submitty-logo-blue);
+    transition: all 0.5s;
+}
+
+.two-panel-drag-bar:hover span {
+    filter: blur(3px);
+}
+
 #regrade_inner_info .inner-container {
     padding: 20px;
 }
 
 #autograding_results.rubric_panel {
     display: block;
-    margin: 10px;
     border:5px solid var(--standard-vibrant-pink-red);
 }
 
@@ -276,6 +323,22 @@ progress::-webkit-progress-value {
 
 #peer_info.rubric_panel {
     border:5px solid var(--standard-plum-purple);
+}
+
+.rubric_panel {
+    font-size: 90%;
+    background-color: var(--standard-pale-blue-gray);
+    display: none;
+    overflow: auto;
+    height: 100%;
+    opacity: 0.95;
+}
+
+.grading_label {
+    display: inline-block;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16pt;
 }
 
 .banner {
@@ -411,24 +474,6 @@ progress::-webkit-progress-value {
 .ta-nav-wrapper {
     width: 100%;
     background: #5bc0de;
-}
-
-.rubric_panel {
-    font-size: 90%;
-    background-color: var(--standard-pale-blue-gray);
-    display: none;
-    overflow: auto;
-    margin: 10px;
-    height: calc(100% - 140px);
-    opacity: 0.95;
-}
-
-
-.grading_label {
-    display: inline-block;
-    padding: 10px;
-    font-weight: bold;
-    font-size: 16pt;
 }
 
 .file-viewer{

@@ -1,8 +1,26 @@
 //Used to reset users cookies
-var cookie_version = 1;
+let cookie_version = 1;
+
+// Panel elements info to be used for layout designs
+let panelElements = [
+  { str: "autograding_results", icon: ".grading_toolbar .fa-list"},
+  { str: "grading_rubric", icon: ".grading_toolbar .fa-edit"},
+  { str: "submission_browser", icon: "grading_toolbar .fa-folder-open.icon-header"},
+  { str: "student_info", icon: ".grading_toolbar .fa-user"},
+  { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
+  { str: "peer_info", icon: ".grading_toolbar .fa-users"}
+];
+
+let currentTwoPanels = {
+  left: null,
+  right: null
+};
+
+let isTwoPanelsEnabled = false; // update this with localstorage for persistence ?
 
 //Check if cookie version is/is not the same as the current version
-var versionMatch = false;
+let versionMatch = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
   //bring regrade panel to the front if grade inquiry is pending
@@ -12,18 +30,19 @@ $(function() {
     $('#regrade_info').css({'z-index':'40'});
   }
   updateCookies();
-  var progressbar = $(".progressbar"),
+  let progressbar = $(".progressbar"),
     value = progressbar.val();
   $(".progress-value").html("<b>" + value + '%</b>');
 });
 
 function createCookie(name,value,seconds)  {
+  let expires = "";
   if(seconds) {
-    var date = new Date();
+    let date = new Date();
     date.setTime(date.getTime()+(seconds*1000));
-    var expires = "; expires="+date.toGMTString();
+    expires = "; expires="+date.toGMTString();
   }
-  else var expires = "";
+
   document.cookie = name+"="+value+expires+"; path=/";
 }
 
@@ -33,7 +52,7 @@ function eraseCookie(name) {
 
 function deleteCookies(){
   $.each(document.cookie.split(/; */), function(){
-    var cookie = this.split("=");
+    let cookie = this.split("=");
     if(!cookie[1] || cookie[1] == 'undefined'){
       document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       document.cookie = "cookie_version=-1; path=/;";
@@ -45,15 +64,15 @@ function onAjaxInit() {}
 
 function readCookies(){
 
-  var silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
+  let silent_edit_enabled = document.cookie.replace(/(?:(?:^|.*;\s*)silent_edit_enabled\s*\=\s*([^;]*).*$)|^.*$/, "$1") === 'true';
 
-  var autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  var opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-  var scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let autoscroll = document.cookie.replace(/(?:(?:^|.*;\s*)autoscroll\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let opened_mark = document.cookie.replace(/(?:(?:^|.*;\s*)opened_mark\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let scroll_pixel = document.cookie.replace(/(?:(?:^|.*;\s*)scroll_pixel\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-  var testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let testcases = document.cookie.replace(/(?:(?:^|.*;\s*)testcases\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-  var files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+  let files = document.cookie.replace(/(?:(?:^|.*;\s*)files\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
   $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
@@ -65,11 +84,11 @@ function readCookies(){
   };
 
   if (autoscroll == "on") {
-    var files_array = JSON.parse(files);
+    let files_array = JSON.parse(files);
     files_array.forEach(function(element) {
-      var file_path = element.split('#$SPLIT#$');
-      var current = $('#file-container');
-      for (var x = 0; x < file_path.length; x++) {
+      let file_path = element.split('#$SPLIT#$');
+      let current = $('#file-container');
+      for (let x = 0; x < file_path.length; x++) {
         current.children().each(function() {
           if (x == file_path.length - 1) {
             $(this).children('div[id^=file_viewer_]').each(function() {
@@ -95,26 +114,18 @@ function readCookies(){
       }
     });
   }
-  for(var x=0; x<testcases.length; x++){
-    if(testcases[x]!='[' && testcases[x]!=']')
+  for(let x=0; x<testcases.length; x++){
+    if(testcases[x]!=='[' && testcases[x]!==']')
       openAutoGrading(testcases[x]);
   }
 }
 
 function updateCookies(){
-
   document.cookie = "silent_edit_enabled=" + isSilentEditModeEnabled() + "; path=/;";
-
-  var autoscroll = "on";
-  if ($('#autoscroll_id').is(":checked")) {
-    autoscroll = "on";
-  }
-  else {
-    autoscroll = "off";
-  }
+  let autoscroll = $('#autoscroll_id').is(":checked") ? "on" : "off";
   document.cookie = "autoscroll=" + autoscroll + "; path=/;";
 
-  var files = [];
+  let files = [];
   $('#file-container').children().each(function() {
     $(this).children('div[id^=div_viewer_]').each(function() {
       files = files.concat(findAllOpenedFiles($(this), "", $(this)[0].dataset.file_name, [], true));
@@ -130,8 +141,8 @@ function updateCookies(){
 // Student navigation
 function gotoPrevStudent(to_ungraded = false) {
 
-  var selector;
-  var window_location;
+  let selector;
+  let window_location;
 
   if(to_ungraded === true) {
     selector = "#prev-ungraded-student";
@@ -162,8 +173,8 @@ function gotoPrevStudent(to_ungraded = false) {
 
 function gotoNextStudent(to_ungraded = false) {
 
-  var selector;
-  var window_location;
+  let selector;
+  let window_location;
 
   if(to_ungraded === true) {
     selector = "#next-ungraded-student";
@@ -210,62 +221,155 @@ registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, fu
 // Panel show/hide
 //
 
+function setTwoPanelModeVisibilities () {
+    panelElements.forEach((panel) => {
+      if (currentTwoPanels.left === panel.str || currentTwoPanels.right === panel.str) {
+        $("#" + panel.str).toggle(true);
+        $(panel.icon).toggleClass('icon-selected', true);
+        $("#" + panel.str + "_btn").toggleClass('active', true);
+        console.log(panel.str);
+      } else {
+        $("#" + panel.str).toggle(false);
+        $(panel.icon).toggleClass('icon-selected', false);
+        $("#" + panel.str + "_btn").toggleClass('active', false);
+      }
+    })
+}
+
 function setPanelsVisiblilities (ele) {
-  let panelElements = [
-      { str: "#autograding_results", icon: ".grading_toolbar .fa-list"},
-      { str: "#grading_rubric", icon: ".grading_toolbar .fa-edit"},
-      { str: "#submission_browser", icon: "grading_toolbar .fa-folder-open.icon-header"},
-      { str: "#student_info", icon: ".grading_toolbar .fa-user"},
-      { str: "#regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
-      { str: "#discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
-      { str: "#peer_info", icon: ".grading_toolbar .fa-users"}
-    ];
   panelElements.forEach((panel) => {
-    //hide all panels but given one
-    if (panel.str !== ele) {
-      $(panel.str).hide();
+    //only hide those panels which are not given panel and not in recentTwoPanel array
+    if (panel.str !== ele && currentTwoPanels.right !== panel.str && currentTwoPanels.left !== panel.str) {
+      $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
-      $(panel.str + "_btn").removeClass('active');
-    } else {
-      const eleVisibility = !$(panel.str).is(":visible");
-      $(panel.str).toggle(eleVisibility);
+      $("#" + panel.str + "_btn").removeClass('active');
+    } else if (panel.str === ele) {
+      const eleVisibility = !$("#" + panel.str).is(":visible");
+      $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
-      $(panel.str + "_btn").toggleClass('active', eleVisibility);
+      $("#" + panel.str + "_btn").toggleClass('active', eleVisibility);
+      debugger;
+      if (isTwoPanelsEnabled) {
+        if (eleVisibility) {
+          // panel is going to be added on the screen
+          if ((currentTwoPanels.left && currentTwoPanels.right) || !currentTwoPanels.left && currentTwoPanels.right) {
+            currentTwoPanels.left = currentTwoPanels.right;
+            currentTwoPanels.right = panel.str;
+          } else if (currentTwoPanels.left) {
+            currentTwoPanels.right = panel.str;
+          } else {
+            currentTwoPanels.left = panel.str;
+          }
+        } else {
+          // panel is going to be removed from screen
+          // check one out of the left and right is going to be hidden
+          let positionOfPanel = undefined;
+          if (currentTwoPanels.left === panel.str ) {
+            positionOfPanel = "left" ;
+          }
+          if (currentTwoPanels.right === panel.str ) {
+            positionOfPanel = "right" ;
+          }
+
+          if (!positionOfPanel) {
+            // How come this happen ???
+          } else if (positionOfPanel === "left") {
+            currentTwoPanels.left = currentTwoPanels.right;
+            currentTwoPanels.right = null;
+          } else {
+            currentTwoPanels.right = null;
+          }
+        }
+      }
     }
   });
+
+  if (isTwoPanelsEnabled) {
+    updateTwoPanelLayout();
+  }
 }
 
 function toggleAutograding() {
-  setPanelsVisiblilities("#autograding_results");
+  setPanelsVisiblilities("autograding_results");
 }
 
 function toggleRubric() {
-  setPanelsVisiblilities("#grading_rubric");
+  setPanelsVisiblilities("grading_rubric");
 }
 
 function toggleSubmissions() {
-  setPanelsVisiblilities("#submission_browser");
+  setPanelsVisiblilities("submission_browser");
 }
 
 function toggleInfo() {
-  setPanelsVisiblilities("#student_info");
+  setPanelsVisiblilities("student_info");
 }
 function toggleRegrade() {
-  setPanelsVisiblilities("#regrade_info");
+  setPanelsVisiblilities("regrade_info");
 }
 
 function toggleDiscussion() {
-  setPanelsVisiblilities("#discussion_browser");
+  setPanelsVisiblilities("discussion_browser");
 }
 
 function togglePeer() {
-  setPanelsVisiblilities("#peer_info");
+  setPanelsVisiblilities("peer_info");
 }
 
 function toggleFullScreenMode () {
   $("main#main").toggleClass('full-screen-mode');
   $("#fullscreen-btn-cont").toggleClass('active');
 }
+
+function toggleTwoPanelMode() {
+  const twoPanelCont = $('.two-panel-cont');
+  isTwoPanelsEnabled = !twoPanelCont.is(":visible");
+  console.log(isTwoPanelsEnabled);
+
+  if (isTwoPanelsEnabled) {
+    twoPanelCont.addClass("active");
+    // if there is no recently opened panels fill it with the first two
+    if (!currentTwoPanels.left && !currentTwoPanels.right) {
+      console.log("There is nothing in here");
+      currentTwoPanels = {
+        left: panelElements[0].str,
+        right: panelElements[1].str
+      };
+    } else if (!currentTwoPanels.right) {
+      panelElements.every((panel, idx) => {
+        if (currentTwoPanels.left === panel.str) {
+          let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
+          currentTwoPanels.right = panelElements[nextIdx].str;
+          return false;
+        }
+        return true;
+      });
+    }
+    updateTwoPanelLayout();
+  } else {
+    twoPanelCont.removeClass("active");
+  }
+}
+
+function updateTwoPanelLayout() {
+  // fetch the panels by their ids
+  const leftPanel = document.getElementById(currentTwoPanels.left);
+  const rightPanel = document.getElementById(currentTwoPanels.right);
+
+  setTwoPanelModeVisibilities();
+
+  document.querySelector(".two-panel-cont .two-panel-left").appendChild(leftPanel);
+  document.querySelector(".two-panel-cont .two-panel-right").appendChild(rightPanel);
+}
+
+/*
+
+  Use a parent div with classes left and right
+  but in this case if you would toggle one of the panel how to maintain the position of other one
+
+  Use a predefined left and right divs and make them visible only in two panel mode
+  how to inject panels in these divs
+ */
 
 function resetModules() {
   deleteCookies();
@@ -465,12 +569,12 @@ function openAutoGrading(num){
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
   // show all divs whose id starts with testcase_
-  var clickable_divs  = $("[id^='tc_']");
+  let clickable_divs  = $("[id^='tc_']");
 
-  for(var i = 0; i < clickable_divs.length; i++){
-    var clickable_div = clickable_divs[i];
-    var num = clickable_div.id.split("_")[1];
-    var content_div = $('#testcase_' + num);
+  for(let i = 0; i < clickable_divs.length; i++){
+    let clickable_div = clickable_divs[i];
+    let num = clickable_div.id.split("_")[1];
+    let content_div = $('#testcase_' + num);
     if(content_div.css("display") == "none"){
       clickable_div.click();
     }
@@ -487,7 +591,7 @@ function closeAllAutoGrading() {
 
 
 function openDiv(num) {
-  var elem = $('#div_viewer_' + num);
+  let elem = $('#div_viewer_' + num);
   if (elem.hasClass('open')) {
     elem.hide();
     elem.removeClass('open');
@@ -501,19 +605,9 @@ function openDiv(num) {
   return false;
 }
 
-function resizeFrame(id) {
-  var height = parseInt($("iframe#" + id).contents().find("body").css('height').slice(0,-2));
-  if (height > 500) {
-    document.getElementById(id).height= "500px";
-  }
-  else {
-    document.getElementById(id).height = (height+18) + "px";
-  }
-}
-
 // delta in this function is the incremental step of points, currently hardcoded to 0.5pts
 function validateInput(id, question_total, delta){
-  var ele = $('#' + id);
+  let ele = $('#' + id);
   if(isNaN(parseFloat(ele.val())) || ele.val() == ""){
     ele.val("");
     return;
@@ -550,8 +644,8 @@ function hideIfEmpty(element) {
 }
 
 function findOpenTestcases() {
-  var testcase_num = [];
-  var current_testcase;
+  let testcase_num = [];
+  let current_testcase;
   $(".box").each(function() {
     current_testcase = $(this).find('div[id^=testcase_]');
     if (typeof current_testcase[0] !== 'undefined'){
@@ -597,10 +691,4 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
   });
 
   return stored_paths;
-}
-
-function adjustSize(name) {
-  var textarea = document.getElementById(name);
-  textarea.style.height = "";
-  textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }

@@ -742,6 +742,19 @@ HTML;
 HTML;
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderGradingPanelHeader', $graded_gradeable);
+
+        $return .= <<<HTML
+                <div class="panels-container">
+                    <div class="two-panel-cont">
+                         <div class="two-panel-item two-panel-left"></div>
+                         <div class="two-panel-drag-bar">
+                            <span></span>
+                         </div>
+                         <div class="two-panel-item two-panel-right">
+                         </div>   
+                    </div>
+HTML;
+
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -819,6 +832,7 @@ HTML;
             }
         }
         $return .= <<<HTML
+            </div>
 		</div>
 HTML;
         return $return;
