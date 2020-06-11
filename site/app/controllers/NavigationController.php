@@ -51,7 +51,7 @@ class NavigationController extends AbstractController {
 
         //Remove gradeables we are not allowed to view
         foreach ($sections_to_lists as $key => $value) {
-            $sections_to_lists[$key] = array_filter($value, array($this, "filterCanView"));
+            $sections_to_lists[$key] = array_filter($value, [$this, "filterCanView"]);
         }
 
         //Clear empty sections
