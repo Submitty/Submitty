@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\exceptions\BadArgumentException;
 use app\exceptions\FileReadException;
+use app\exceptions\FileWriteException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 
@@ -16,7 +17,18 @@ use app\libraries\FileUtils;
  */
 class DisplayImage extends AbstractModel
 {
+    /** @var string[] The set of legal display_image_state which may be collected from the DB */
     const LEGAL_IMAGE_STATES = ['system', 'preferred', 'flagged'];
+
+    /** @var string[] The set of directories for which it is legal to save a DisplayImage to */
+    const LEGAL_FOLDERS = ['system_images', 'user_images'];
+
+    /** @var int
+     * When a new DisplayImage is saved, this is the maximum dimension either side may be.  Non-square images will
+     * have the larger dimension resized to this constant, while the other dimension will be reduced to maintain the
+     * original form factor of the image.
+     */
+    const IMG_MAX_DIMENSION = 500;
 
     /** @var string The file path to the selected image */
     protected $path;
@@ -102,5 +114,55 @@ class DisplayImage extends AbstractModel
         }
 
         return base64_encode($imagick->getImageBlob());
+    }
+
+    /**
+     * Save a new DisplayImage image
+     *
+     * @param Core $core The application core
+     * @param string $user_id The user_id who will own this image
+     * @param string $new_image_name Name of the file to be saved, without the extension.  For example 'aphacker'
+     * @param string $image_extension File extension, for example 'jpeg' or 'gif'
+     * @param string $tmp_file_path Path to the temporary location of the file to work with.  This may be the temporary
+     *                              path in the $_FILES array or the location of a file after unzipping a zip archive
+     * @param string $folder The folder to save to, for example 'system_images' or 'user_images'
+     * @throws BadArgumentException $folder is not a member of self::LEGAL_FOLDERS
+     * @throws FileWriteException Unable to write to the image directory
+     * @throws \ImagickException
+     */
+    public static function saveUserImage(Core $core, string $user_id, string $new_image_name, string $image_extension, string $tmp_file_path, string $folder): void {
+        // Validate folder
+        if (!in_array($folder, self::LEGAL_FOLDERS)) {
+            throw new BadArgumentException('The $folder parameter must be a member of DisplayImage::LEGAL_FOLDERS.');
+        }
+
+        // Generate the path to the folder where this image should be saved
+        $folder_path = FileUtils::joinPaths(
+            $core->getConfig()->getSubmittyPath(),
+            'user_data',
+            $user_id,
+            $folder
+        );
+
+        // Generate the folder if it does not exist
+        if (!FileUtils::createDir($folder_path, true)) {
+            throw new FileWriteException('Error creating the user\'s system images folder.');
+        }
+
+        // Decrease image size while maintaining form factor
+        // If bigger image dimension is already smaller then IMG_MAX_DIMENSION don't do any resizing.
+        $imagick = new \Imagick($tmp_file_path);
+        $cols = $imagick->getImageWidth();
+        $rows = $imagick->getImageHeight();
+
+        if ($cols >= $rows && $cols > self::IMG_MAX_DIMENSION) {
+            $imagick->scaleImage(self::IMG_MAX_DIMENSION, 0);
+        }
+        else if ($rows > self::IMG_MAX_DIMENSION) {
+            $imagick->scaleImage(0, self::IMG_MAX_DIMENSION);
+        }
+
+        // Save file (will overwrite any image with same name)
+        $imagick->writeImage(FileUtils::joinPaths($folder_path, $new_image_name . '.' . $image_extension));
     }
 }

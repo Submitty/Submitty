@@ -7,14 +7,6 @@ function userNameChange() {
     $("#user-firstname-change").focus();
 }
 
-function userImageChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-user-image-form");
-    form.css("display", "block");
-    form.find('.form-body').scrollTop(0);
-    $('[name="user_image_change"]', form).val("");
-    $("#user-image-change").focus();
-}
 
 function passwordChange() {
     $('.popup-form').css('display', 'none');

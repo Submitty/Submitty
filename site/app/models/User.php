@@ -244,6 +244,37 @@ class User extends AbstractModel {
         return DateUtils::getUTCOffset($this->time_zone);
     }
 
+
+    /**
+     * Update the user's display image if they have uploaded a new one
+     *
+     * @param string $new_image_name File name of the image without the extension, for example 'my_image'
+     * @param string $image_extension The extension, for example 'jpeg' or 'gif'
+     * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
+     *                              elsewhere.
+     * @return bool true if the update was successful, false otherwise
+     * @throws \ImagickException
+     */
+    public function setDisplayImage(string $new_image_name, string $image_extension, string $tmp_file_path): bool {
+        $image_saved = true;
+
+        // Try saving image to its new spot in the file directory
+        try {
+            DisplayImage::saveUserImage($this->core, $this->id, $new_image_name, $image_extension, $tmp_file_path, 'user_images');
+        }
+        catch (\Exception $exception) {
+            $image_saved = false;
+        }
+
+        // Update the DB to 'preferred' and reset $this->display_image
+        if ($this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred') && $image_saved) {
+            $this->display_image = new DisplayImage($this->core, $this->id, 'preferred');
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Gets whether the user is allowed to access the grading interface
      * @return bool

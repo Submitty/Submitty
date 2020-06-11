@@ -3,21 +3,13 @@
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
-use app\exceptions\FileWriteException;
 use app\libraries\FileUtils;
+use app\models\DisplayImage;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
-
-    /**
-     * Student photos uploaded by an instructor will be resized.  Their form factor will be maintained.
-     * The larger dimension will be resized to the below constant (in pixels).  This only applies to images being
-     * uploaded from the Student Photos page.  They will likely be resized again to be smaller before they are
-     * displayed on any given page.
-     */
-    const IMG_MAX_DIMENSION = 500;
 
     /**
      * @Route("/{_semester}/{_course}/student_photos")
@@ -128,7 +120,6 @@ class ImagesController extends AbstractController {
 
         if (isset($uploaded_files[1])) {
             $users = $this->core->getQueries()->getListOfCourseUsers();
-
             // For each item that was uploaded
             for ($j = 0; $j < $count_item; $j++) {
                 // Item was a zip file
@@ -143,8 +134,14 @@ class ImagesController extends AbstractController {
                         $files = FileUtils::getAllFilesTrimSearchPath($upload_img_path_tmp, 0);
 
                         foreach ($files as $file) {
-                            $true_file_name = pathinfo($file)['basename'];
-                            $this->saveStudentImage($users, $true_file_name, $file);
+                            $meta = pathinfo($file);
+                            $user_id = $meta['filename'];
+                            $extension = $meta['extension'];
+
+                            // If user is a member of this course then go ahead and save
+                            if(in_array($user_id, $users)) {
+                                DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $file, 'system_images');
+                            }
                         }
 
                         //delete tmp folder
@@ -163,8 +160,16 @@ class ImagesController extends AbstractController {
                 // Item was an individual image
                 else {
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                        $true_file_name = $uploaded_files[1]['name'][$j];
-                        $this->saveStudentImage($users, $true_file_name, $uploaded_files[1]["tmp_name"][$j]);
+                        $tmp_path = $uploaded_files[1]["tmp_name"][$j];
+
+                        $meta = explode('.', $uploaded_files[1]['name'][$j]);
+                        $user_id = $meta[0];
+                        $extension = $meta[1];
+
+                        // If user is a member of this course then go ahead and save
+                        if(in_array($user_id, $users)) {
+                            DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $tmp_path, 'system_images');
+                        }
                     }
                     else {
                         return $this->core->getOutput()->renderResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
@@ -189,56 +194,5 @@ class ImagesController extends AbstractController {
             $message = 'Successfully uploaded!';
         }
         return $this->core->getOutput()->renderResultMessage($message, true);
-    }
-
-    /**
-     * Verify that, for the user's image being uploaded the user is a member of the current course.
-     * Then resize and save the image in the user's user_data directory.
-     *
-     * @param array $user_ids String array which contains all the user's in the course
-     * @param string $true_file_name File name with extension, for example 'aphacker.jpeg'
-     * @param string $tmp_file_path Path to the temporary location of the file to work with.  This may be the temporary
-     *                              found in the $_FILES array or the location of a file after unzipping a zip archive
-     * @throws \ImagickException
-     */
-    private function saveStudentImage(array $user_ids, string $true_file_name, string $tmp_file_path): void {
-        // Extract important parts
-        $meta = explode('.', $true_file_name);
-        $user_id = $meta[0];
-        $extension = $meta[1];
-
-        // Verify the student is in fact a member of this course
-        if (!in_array($user_id, $user_ids)) {
-            return;
-        }
-
-        // Generate the path to the folder where this image should be saved
-        $folder_path = FileUtils::joinPaths(
-            $this->core->getConfig()->getSubmittyPath(),
-            'user_data',
-            $user_id,
-            'system_images'
-        );
-
-        // Generate the folder if it does not exist
-        if (!FileUtils::createDir($folder_path, true)) {
-            throw new FileWriteException('Error creating the user\'s system images folder.');
-        }
-
-        // Decrease image size while maintaining form factor
-        // If bigger image dimension is already smaller then IMG_MAX_DIMENSION don't do any resizing.
-        $imagick = new \Imagick($tmp_file_path);
-        $cols = $imagick->getImageWidth();
-        $rows = $imagick->getImageHeight();
-
-        if ($cols >= $rows && $cols > self::IMG_MAX_DIMENSION) {
-            $imagick->scaleImage(self::IMG_MAX_DIMENSION, 0);
-        }
-        else if ($rows > self::IMG_MAX_DIMENSION) {
-            $imagick->scaleImage(0, self::IMG_MAX_DIMENSION);
-        }
-
-        // Save file (will overwrite any image with same name)
-        $imagick->writeImage(FileUtils::joinPaths($folder_path, $user_id . '.' . $extension));
     }
 }
