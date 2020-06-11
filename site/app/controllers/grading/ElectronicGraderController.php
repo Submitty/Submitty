@@ -2373,4 +2373,23 @@ class ElectronicGraderController extends AbstractController {
             $total_total += $value * $num_components;
         }
     }
+    
+    /**
+    * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
+    */
+    public function setPeerFeedback($gradeable_id) {
+        $grader_id = $_POST['grader_id'] ?? '';
+        $user_id = $_POST['user_id'] ?? '';
+        $feedback_full = $_POST['feedback_full'];
+        $feedback_id = $_POST['feedback_id'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return null;
+        }
+        
+        $gradeable->setPeerFeedback($grader_id, $user_id, $feedback_full, $feedback_id);
+        
+        $this->core->getOutput()->renderJsonSuccess('Feeback saved successfully!');
+        return true;
+    }
 }

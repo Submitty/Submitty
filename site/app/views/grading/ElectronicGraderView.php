@@ -1089,6 +1089,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('gradeable.js');
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
+            "gradeable" => $gradeable,
             "is_ta_grading" => $gradeable->isTaGrading(),
             "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
             "show_verify_all" => $show_verify_all,

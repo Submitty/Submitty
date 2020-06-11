@@ -3189,8 +3189,14 @@ SQL;
      * @param string $gradeable_id
      * @param string $feedback
      */
-    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
-        $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback_full, $feedback_id) {
+        $this->course_db->query("SELECT feedback_full FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
+        if(sizeof($this->course_db->rows()) > 0){
+            $this->course_db->query("UPDATE peer_feedback SET feedback_full = ?, feedback_id = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback_full, $feedback_id, $grader, $student, $gradeable_id]);
+        }
+        else{
+            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback_full, feedback_id) VALUES (?,?,?,?,?)", [$grader, $student, $gradeable_id, $feedback_full, $feedback_id]);
+        }
     }
 
     /**
@@ -3225,13 +3231,11 @@ SQL;
      * @param string $gradeable_id
      */
     public function getPeerFeedback($gradeable_id) {
-        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $this->course_db->query("SELECT grader_id, user_id, feedback_full, feedback_id FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
         $return = [];
         foreach ($this->course_db->rows() as $id) {
-            if (!array_key_exists($id['grader_id'], $return)) {
-                $return[$id['grader_id']] = [];
-            }
-            array_push($return[$id['grader_id']], $id['user_id'], $id['feedback']);
+            $return[$id['grader_id']][$id['user_id']]['feedback_full'] = $id['feedback_full'];
+            $return[$id['grader_id']][$id['user_id']]['feedback_id'] = $id['feedback_id'];
         }
         return $return;
     }

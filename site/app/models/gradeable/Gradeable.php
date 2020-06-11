@@ -82,7 +82,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
- * @method object[] getPeerGradingFeedback()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -139,8 +138,6 @@ class Gradeable extends AbstractModel {
     /** @prop @var array */
     protected $peer_grading_pairs = [];
     
-    protected $peer_grading_feedback = [];
-
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
     /** @prop @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
@@ -501,15 +498,13 @@ class Gradeable extends AbstractModel {
         }
     }
     
-    public function setPeerFeedback($grader_id, $student_id, $feedback) {
+    public function setPeerFeedback($grader_id, $student_id, $feedback_full, $feedback_id) {
         $bad_input = [];
-        foreach ($input as $row_num => $vals) {
-            if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
-                array_push($bad_input, ($vals["student"]));
-            }
-            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
-                array_push($bad_input, ($vals["grader"]));
-            }
+        if ($this->core->getQueries()->getUserById($grader_id) == null) {
+            array_push($bad_input, ($grader_id));
+        }
+        if ($this->core->getQueries()->getUserById($student_id) == null) {
+            array_push($bad_input, ($student_id));
         }
         if (!empty($bad_input)) {
             $msg = "The given user id is not valid: ";
@@ -519,10 +514,18 @@ class Gradeable extends AbstractModel {
             $this->core->addErrorMessage($msg);
         }
         else {
-            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
-            $this->modified = true;
-            $this->peer_grading_feedback = $this->core->getQueries()->getPeerGradingFeedback($this->getId());
+            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback_full, $feedback_id);
         }
+        var_dump($this->core->getQueries()->getPeerFeedback($this->getId()));
+    }
+    
+    public function getPeerFeedback($grader_id, $anon_id) {
+        $feedback = $this->core->getQueries()->getPeerFeedback($this->getId());
+        $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
+        if(array_key_exists($grader_id, $feedback)){
+            return $feedback[$grader_id][$user_id]['feedback_full'];
+        }
+        return null;
     }
 
     /**

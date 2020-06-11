@@ -17,13 +17,15 @@ function open_peer_feedback_tab(user, ordered_graders) {
     }
     $('#peer_feedback_nav_'+user).addClass('active-btn');
 }
-function set_peer_feedback(grader_id, user_id, g_id, feedback) {
+function set_peer_feedback(grader_id, user_id, g_id, feedback_id, feedback_full) {
     $('#peer_feedback_no_response_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_thanks_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_helpful_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_detailed_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_inappropriate_'+grader_id).removeClass('active-btn');
-    $('#peer_feedback_'+feedback+'_'+grader_id).addClass('active-btn');
+    $('#peer_feedback_'+feedback_id+'_'+grader_id).addClass('active-btn');
+    peerFeedbackUpload(grader_id, user_id, g_id, feedback_full, feedback_id);
+    
 }
 function switch_feedback_modes() {
     if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
@@ -99,7 +101,7 @@ function switch_feedback_modes() {
                 {% endif %}                
             {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback)  }}
             {# /Peer Component boxes #}
         {% endif %}
     {# /Total auto + manual #}
@@ -217,7 +219,7 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% for grader in ordered_graders %}
@@ -273,15 +275,23 @@ function switch_feedback_modes() {
                 {% endif %}
 
             {% endfor %}
-            
-            <div class = "feedback_row">
+            </br>
+            <b>Peer Feedback:</b>
+            <div class="box grade-results">
                 </br>
-                <a class="nav-bar key_to_click" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'no_response');">No Response</a>
-                <a class="nav-bar key_to_click" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks');">Thank You!</a>
-                <a class="nav-bar key_to_click" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'helpful');">This feedback was helpful to me!</a>
-                <a class="nav-bar key_to_click" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed');">This feedback was detailed, specific, and/or technical</a>
-                <a class="nav-bar key_to_click" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate');">This feedback was inaccurate and/or inappropriate</a>
+                <a class="nav-bar key_to_click" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
+                <a class="nav-bar key_to_click" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
+                <a class="nav-bar key_to_click" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
+                <a class="nav-bar key_to_click" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
+                <a class="nav-bar key_to_click" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{gradeable_id}}', '{{user_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
             </div>
+            <script>
+                var feedbackArray = {{peer_feedback|json_encode|raw}};
+                if('{{grader}}' in feedbackArray){
+                    var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback_id'];
+                    $('#peer_feedback_'+feedback+'_'+'{{grader}}').addClass('active-btn');
+                }
+            </script>
         </div> 
         {% endfor %}
     </div>

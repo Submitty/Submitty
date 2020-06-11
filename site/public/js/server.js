@@ -1773,3 +1773,31 @@ function enableKeyToClick(){
     });
   }
 }
+function peerFeedbackUpload(grader_id, user_id, g_id, feedback_full, feedback_id){
+    var url = buildCourseUrl(['gradeable', g_id, 'feedback' , 'set']);
+    let formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('grader_id', grader_id);
+    formData.append('user_id', user_id);
+    formData.append('feedback_full', feedback_full);
+    formData.append('feedback_id', feedback_id);
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                console.log(data);
+            } catch(err){
+                return;
+            }
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+}
+
