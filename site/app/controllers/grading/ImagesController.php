@@ -128,8 +128,10 @@ class ImagesController extends AbstractController {
 
         if (isset($uploaded_files[1])) {
             $users = $this->core->getQueries()->getListOfCourseUsers();
+
+            // For each item that was uploaded
             for ($j = 0; $j < $count_item; $j++) {
-                // Uploaded file was a zip
+                // Item was a zip file
                 if ($uploaded_files[1]["is_zip"][$j] === true) {
                     $zip = new \ZipArchive();
                     $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
@@ -141,7 +143,8 @@ class ImagesController extends AbstractController {
                         $files = FileUtils::getAllFilesTrimSearchPath($upload_img_path_tmp, 0);
 
                         foreach ($files as $file) {
-                            $this->saveStudentImage($users, $file);
+                            $true_file_name = pathinfo($file)['basename'];
+                            $this->saveStudentImage($users, $true_file_name, $file);
                         }
 
                         //delete tmp folder
@@ -157,11 +160,11 @@ class ImagesController extends AbstractController {
                         return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: " . $error_message . ".", false);
                     }
                 }
-                // Upload was a single image
+                // Item was an individual image
                 else {
-                    // TODO: FIX THIS PART
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                        $this->saveStudentImage($users, $uploaded_files[1]["tmp_name"][$j]);
+                        $true_file_name = $uploaded_files[1]['name'][$j];
+                        $this->saveStudentImage($users, $true_file_name, $uploaded_files[1]["tmp_name"][$j]);
                     }
                     else {
                         return $this->core->getOutput()->renderResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
@@ -192,18 +195,20 @@ class ImagesController extends AbstractController {
      * Verify that, for the user's image being uploaded the user is a member of the current course.
      * Then resize and save the image in the user's user_data directory.
      *
-     * @param array $students
-     * @param $file_to_save
+     * @param array $user_ids String array which contains all the user's in the course
+     * @param string $true_file_name File name with extension, for example 'aphacker.jpeg'
+     * @param string $tmp_file_path Path to the temporary location of the file to work with.  This may be the temporary
+     *                              found in the $_FILES array or the location of a file after unzipping a zip archive
      * @throws \ImagickException
      */
-    private function saveStudentImage(array $students, $file_to_save): void {
-        // Collect the student name
-        $file_meta = pathinfo($file_to_save);
-        $user_id = $file_meta['filename'];
-        $file_name = $file_meta['basename'];
+    private function saveStudentImage(array $user_ids, string $true_file_name, string $tmp_file_path): void {
+        // Extract important parts
+        $meta = explode('.', $true_file_name);
+        $user_id = $meta[0];
+        $extension = $meta[1];
 
         // Verify the student is in fact a member of this course
-        if (!in_array($user_id, $students)) {
+        if (!in_array($user_id, $user_ids)) {
             return;
         }
 
@@ -222,7 +227,7 @@ class ImagesController extends AbstractController {
 
         // Decrease image size while maintaining form factor
         // If bigger image dimension is already smaller then IMG_MAX_DIMENSION don't do any resizing.
-        $imagick = new \Imagick($file_to_save);
+        $imagick = new \Imagick($tmp_file_path);
         $cols = $imagick->getImageWidth();
         $rows = $imagick->getImageHeight();
 
@@ -234,6 +239,6 @@ class ImagesController extends AbstractController {
         }
 
         // Save file (will overwrite any image with same name)
-        $imagick->writeImage(FileUtils::joinPaths($folder_path, $file_name));
+        $imagick->writeImage(FileUtils::joinPaths($folder_path, $user_id . '.' . $extension));
     }
 }
