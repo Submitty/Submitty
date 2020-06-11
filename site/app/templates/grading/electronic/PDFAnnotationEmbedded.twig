@@ -4,7 +4,6 @@
 {% for script in localjs %}
     <script src="{{ script }}"></script>
 {% endfor %}
-
 <div id="content-wrapper">
     <div id="viewer" class="pdfViewer"></div>
 </div>
@@ -28,7 +27,9 @@
         console.error(err);
         alert("Can't fetch annotations");
     }
-    {% if student_popup %}
+    {% if student_download %}
+    download_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}" , "{{ rerender_annotated_pdf }}");
+    {% elseif student_popup %}
     render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ file_path }}", "{{ pdf_url_base | raw}}");
     {% else %}
     render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}', "{{ file_path }}", {{ page_num }}, "{{ pdf_url_base | raw}}");
