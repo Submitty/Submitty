@@ -4,7 +4,8 @@
 {% block body %}
 	<input type="hidden" id="peer_grader_pairs" value='{{ pair_grader_pairs }}'/>
 	<input type="hidden" id="student_autofill" value='{{ student_autofill }}'/>
-	<input type="hidden" id="gradeable_id" value='{{ gradeable_id }}'/>
+	<input type="hidden" id="peers_submit_url" value='{{ peers_submit_url }}'/>
+	<input type="hidden" id="csrf_token" value='{{ csrf_token }}'/>
 	<div id="students-to-edit" class="left-panel"></div>
 	<div id="students-to-add" class="right-panel"></div>
 	<div id="removed-all"></div>

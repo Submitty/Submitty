@@ -3180,12 +3180,32 @@ SQL;
     }
 
     /**
+     * Removes a specific grader's student from a given assignment
+     *
+     * @param string $gradeable_id
+     * @param string $grader_id
+     */
+    public function removePeerAssignment($gradeable_id, $grader_id, $student_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ? AND student_id = ?", [$gradeable_id], [$grader_id], [$student_id]);
+    }
+
+    /**
      * Removes all peer grading pairs from a given assignment
      *
      * @param string $gradeable_id
      */
     public function clearPeerGradingAssignment($gradeable_id) {
         $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ?", [$gradeable_id]);
+    }
+
+    /**
+     * Removes a specific grader and their students from a given assignment
+     *
+     * @param string $gradeable_id
+     * @param string $grader_id
+     */
+    public function removePeerAssignmentsForGrader($gradeable_id, $grader_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ?", [$gradeable_id], [$grader_id]);
     }
 
     /**

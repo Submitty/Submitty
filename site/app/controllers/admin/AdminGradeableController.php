@@ -267,17 +267,51 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'AdminGradeablePeersForm', $gradeable);
+
+        $peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+        $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader('browna');
+        var_dump($peer_grading_assignments);
+        var_dump($grading_assignment_for_grader);
+
     }
 
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
      */
-    public function adminGradeablePeerSubmit() {
-        $grader_id = $_POST['grader_id'];
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
-        $peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
-        $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
+    public function adminGradeablePeerSubmit($gradeable_id) {
+        /*
+        try {
+            //$return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '5']);
+            $grader_id = $_POST['grader_id'];
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            //$old_peers_list = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+            //if entire grader row is removed, just remove grader and their students
+            if (!empty($_POST['remove_grader'])) {
+                $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
+            } else {
+                //otherwise, check if any of the individual current students were removed
+                $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
+                $grading_assignment_for_grading = $tmp[$gradeable_id];
+                foreach($grading_assignment_for_grader as $i => $student_id) {
+                    if (!in_array($student_id, $_POST['curr_student_ids'])) {
+                        $this->core->getQueries()->removePeerAssignment($gradeble_id, $grader_id, $student_id);
+                    }
+                }
+                //then, add new students
+                foreach($_POST['add_user_ids'] as $i => $student_id) {
+                    if (in_array($student_id, $grading_assignment_for_grader)) {
+                        $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
+                    } else {
+                        $this->core->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
+                    }
+                }
+            }
+            //$gradeable->editPeerGradersList();
+            $this->core->getOutput()->renderJsonSuccess($this->core->getQueries()->getPeerGradingAssignment($gradeable_id));
+        } catch (Exception $e) {
+            $this->core->getOutput()->renderJsonFail('Peer assignment failed');
+        }*/
+        $this->core->getOutput()->renderJsonSuccess();
     }
 
     /* Http request methods (i.e. ajax) */
