@@ -233,10 +233,10 @@ function setTwoPanelModeVisibilities () {
         $(panel.icon).toggleClass('icon-selected', false);
         $("#" + panel.str + "_btn").toggleClass('active', false);
       }
-    })
+    });
 }
 
-function setPanelsVisiblilities (ele, forceVisible) {
+function setPanelsVisibilities (ele, forceVisible) {
   panelElements.forEach((panel) => {
     //only hide those panels which are not given panel and not in recentTwoPanel array
     if (panel.str !== ele && currentTwoPanels.right !== panel.str && currentTwoPanels.left !== panel.str) {
@@ -263,7 +263,7 @@ function setPanelsVisiblilities (ele, forceVisible) {
           }
         } else {
           // panel is going to be removed from screen
-          // check one out of the left and right is going to be hidden
+          // check which one out of the left and right is going to be hidden
           let positionOfPanel = undefined;
           if (currentTwoPanels.left === panel.str ) {
             positionOfPanel = "left" ;
@@ -291,30 +291,30 @@ function setPanelsVisiblilities (ele, forceVisible) {
 }
 
 function toggleAutograding() {
-  setPanelsVisiblilities("autograding_results");
+  setPanelsVisibilities("autograding_results");
 }
 
 function toggleRubric() {
-  setPanelsVisiblilities("grading_rubric");
+  setPanelsVisibilities("grading_rubric");
 }
 
 function toggleSubmissions() {
-  setPanelsVisiblilities("submission_browser");
+  setPanelsVisibilities("submission_browser");
 }
 
 function toggleInfo() {
-  setPanelsVisiblilities("student_info");
+  setPanelsVisibilities("student_info");
 }
 function toggleRegrade() {
-  setPanelsVisiblilities("regrade_info");
+  setPanelsVisibilities("regrade_info");
 }
 
 function toggleDiscussion() {
-  setPanelsVisiblilities("discussion_browser");
+  setPanelsVisibilities("discussion_browser");
 }
 
 function togglePeer() {
-  setPanelsVisiblilities("peer_info");
+  setPanelsVisibilities("peer_info");
 }
 
 function toggleFullScreenMode () {
@@ -331,11 +331,11 @@ function toggleTwoPanelMode() {
     $("#two-panel-exchange-btn").addClass("active");
     // If there is any panel opened just use that and fetch the next one for left side...
     if (currentOpenPanel) {
-      currentTwoPanels.right = currentOpenPanel;
+      currentTwoPanels.left = currentOpenPanel;
       panelElements.every((panel, idx) => {
-        if (currentTwoPanels.right === panel.str) {
+        if (currentTwoPanels.left === panel.str) {
           let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          currentTwoPanels.left = panelElements[nextIdx].str;
+          currentTwoPanels.right = panelElements[nextIdx].str;
           return false;
         }
         return true;
@@ -362,18 +362,17 @@ function toggleTwoPanelMode() {
       right: null
     };
 
-    if (leftPanelId) {
-      document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
-    }
-
     if (rightPanelId) {
       document.querySelector('.panels-container').append(document.getElementById(rightPanelId));
-      setPanelsVisiblilities(rightPanelId, true);
+    }
+    if (leftPanelId) {
+      document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
+      setPanelsVisibilities(leftPanelId, true);
     }
   }
 }
 
-function updateTwoPanelLayout() {
+function updateTwoPanelLayout () {
   // fetch the panels by their ids
   const leftPanel = document.getElementById(currentTwoPanels.left);
   const rightPanel = document.getElementById(currentTwoPanels.right);
@@ -394,13 +393,13 @@ function updateTwoPanelLayout() {
   }
 }
 
-function exchangeTwoPanels() {
+function exchangeTwoPanels () {
   if (currentTwoPanels.left && currentTwoPanels.right) {
     const leftPanel = currentTwoPanels.left;
     currentTwoPanels = {
       left: currentTwoPanels.right,
       right: leftPanel
-    }
+    };
     updateTwoPanelLayout();
   } else {
       alert("Exchange works only when there are two panels...");

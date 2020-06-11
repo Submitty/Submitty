@@ -58,7 +58,6 @@ aside {
     display: block;
     padding-top:3px;
     padding-bottom:3px;
-    /*background-color: #var(--standard-pale-blue-gray);*/
 }
 
 .grading_toolbar i:not(.icon-disabled):hover {
@@ -208,7 +207,7 @@ progress::-webkit-progress-value {
     font-size: 17px;
 }
 
-.grade-panel:hover button {
+.grade-panel.active button, .grade-panel:hover button {
     color: white;
 }
 
@@ -271,6 +270,7 @@ progress::-webkit-progress-value {
 .panels-container {
     height: calc(100% - 140px);
     margin: 6px;
+    background: var(--standard-medium-gray);
 }
 
 .two-panel-cont {
@@ -285,6 +285,7 @@ progress::-webkit-progress-value {
 
 .two-panel-item {
     flex: 1;
+    min-width: 0;
     background: var(--standard-medium-gray);
 }
 
