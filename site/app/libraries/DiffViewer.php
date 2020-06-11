@@ -11,9 +11,13 @@ namespace app\libraries;
  */
 class DiffViewer {
 
+    /** @var string */
     private $actual_file;
+    /** @var string */
     private $expected_file;
+    /** @var string */
     private $diff_file;
+    /** @var string */
     private $image_difference;
 
     private $built = false;
@@ -133,15 +137,21 @@ class DiffViewer {
      * Load the actual file, expected file, and diff json, using them to populate the necessary arrays for
      * display them later back to the user
      *
-     * @param $actual_file
-     * @param $expected_file
-     * @param $diff_file
-     * @param $image_difference
-     * @param $id_prepend
+     * @param string $actual_file
+     * @param string $expected_file
+     * @param string $diff_file
+     * @param string $image_difference
+     * @param string $id_prepend
      *
      * @throws \Exception
      */
-    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend = "id") {
+    public function __construct(
+        string $actual_file,
+        string $expected_file,
+        string $diff_file,
+        string $image_difference,
+        string $id_prepend = "id"
+    ) {
         $this->id = rtrim($id_prepend, "_") . "_";
         $this->actual_file = $actual_file;
         $this->expected_file = $expected_file;
@@ -182,18 +192,18 @@ class DiffViewer {
             else {
                 if (filesize($actual_file) < $size_limit) {
                     $this->actual_file_name = $actual_file;
-                    $this->actual = file_get_contents($actual_file);
-                    $this->has_actual = trim($this->actual) !== "";
-                    $this->actual = explode("\n", $this->actual);
+                    $tmp_actual = file_get_contents($actual_file);
+                    $this->has_actual = trim($tmp_actual) !== "";
+                    $this->actual = explode("\n", $tmp_actual);
                     $this->display_actual = true;
                 }
                 else {
                     $this->actual_file_name = $actual_file;
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
-                    $this->actual = file_get_contents($actual_file, null, null, 0, $size_limit);
-                    $this->has_actual = trim($this->actual) !== "";
-                    $this->actual = explode("\n", $this->actual);
+                    $tmp_actual = file_get_contents($actual_file, null, null, 0, $size_limit);
+                    $this->has_actual = trim($tmp_actual) !== "";
+                    $this->actual = explode("\n", $tmp_actual);
                     $this->display_actual = true;
                 }
             }
@@ -208,17 +218,17 @@ class DiffViewer {
             }
             else {
                 if (filesize($expected_file) < $size_limit) {
-                    $this->expected = file_get_contents($expected_file);
-                    $this->has_expected = trim($this->expected) !== "";
-                    $this->expected = explode("\n", $this->expected);
+                    $tmp_expected = file_get_contents($expected_file);
+                    $this->has_expected = trim($tmp_expected) !== "";
+                    $this->expected = explode("\n", $tmp_expected);
                     $this->display_expected = true;
                 }
                 else {
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
-                    $this->expected = file_get_contents($expected_file, null, null, 0, $size_limit);
-                    $this->has_expected = trim($this->expected) !== "";
-                    $this->expected = explode("\n", $this->expected);
+                    $tmp_expected = file_get_contents($expected_file, null, null, 0, $size_limit);
+                    $this->has_expected = trim($tmp_expected) !== "";
+                    $this->expected = explode("\n", $tmp_expected);
                     $this->display_expected = true;
                 }
             }
@@ -434,7 +444,7 @@ class DiffViewer {
 
     /**
      * Return the output HTML for the actual display
-     * @param string Option for displaying. Currently only supports show empty space
+     * @param string $option Option for displaying. Currently only supports show empty space
      *
      * @return string actual html
      * @throws \Exception
@@ -487,7 +497,7 @@ class DiffViewer {
 
     /**
      * Return the HTML for the expected display
-     * @param string Option for displaying. Currently only supports show empty space
+     * @param string $option Option for displaying. Currently only supports show empty space
      *
      * @return string expected html
      * @throws \Exception
@@ -640,38 +650,37 @@ class DiffViewer {
     }
 
     /**
-     * @param $html the original HTML before any text transformation
-     * @param $with_escape Show escape characters instead of character representations
+     * @param string $html the original HTML before any text transformation
+     * @param bool $with_escape Show escape characters instead of character representations
      *
      * Add to this function (Or the one below it) in the future for any other special characters that needs to be replaced.
      *
      * @return string HTML after white spaces replaced with visuals
      */
-    private function replaceEmptyChar($html, $with_escape) {
+    private function replaceEmptyChar(string $html, bool $with_escape): string {
+        $idx = $with_escape ? 2 : 1;
         $return = $html;
-        if ($with_escape) {
-            foreach (self::SPECIAL_CHARS_LIST as $name => $representations) {
-                $this->replaceUTF($representations[0], $representations[2], $return, $name);
-            }
-        }
-        else {
-            foreach (self::SPECIAL_CHARS_LIST as $name => $representations) {
-                $this->replaceUTF($representations[0], $representations[1], $return, $name);
-            }
+        foreach (self::SPECIAL_CHARS_LIST as $name => $representations) {
+            $this->replaceUTF($representations[0], $representations[$idx], $return, $name);
         }
         return $return;
     }
 
     /**
-     * @param $text String
-     * @param $what String
-     * @param $which String(Reference)
-     * @param $description (What is the description of this character)
+     * @param string $text String
+     * @param string $what String
+     * @param string $which String(Reference)
+     * @param string $description (What is the description of this character)
      * @return string (The newly formed string)
      *
      * This function replaces string $text with string $what in string $which.
      */
-    private function replaceUTF($text, $what, &$which, $description) {
+    private function replaceUTF(
+        string $text,
+        string $what,
+        string &$which,
+        string $description
+    ): string {
         $count = 0;
         $what = '<span class="whitespace">' . $what . '</span>';
         $which = str_replace($text, $what, $which, $count);
@@ -693,7 +702,7 @@ class DiffViewer {
      *
      * @return array A condensed array with ranges
      */
-    private function compressRange($range) {
+    private function compressRange(array $range): array {
         sort($range);
         $range[] = -100;
         $last = -100;
