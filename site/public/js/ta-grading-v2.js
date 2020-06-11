@@ -226,18 +226,15 @@ function setTwoPanelModeVisibilities () {
     panelElements.forEach((panel) => {
       if (currentTwoPanels.left === panel.str || currentTwoPanels.right === panel.str) {
         $("#" + panel.str).toggle(true);
-        $(panel.icon).toggleClass('icon-selected', true);
-        $("#" + panel.str + "_btn").toggleClass('active', true);
-        console.log(panel.str);
       } else {
         $("#" + panel.str).toggle(false);
-        $(panel.icon).toggleClass('icon-selected', false);
-        $("#" + panel.str + "_btn").toggleClass('active', false);
       }
+      $(panel.icon).toggleClass('icon-selected', true);
+      $("#" + panel.str + "_btn").toggleClass('active', true);
     })
 }
 
-function setPanelsVisiblilities (ele) {
+function setPanelsVisiblilities (ele, forceVisible) {
   panelElements.forEach((panel) => {
     //only hide those panels which are not given panel and not in recentTwoPanel array
     if (panel.str !== ele && currentTwoPanels.right !== panel.str && currentTwoPanels.left !== panel.str) {
@@ -245,11 +242,11 @@ function setPanelsVisiblilities (ele) {
       $(panel.icon).removeClass('icon-selected');
       $("#" + panel.str + "_btn").removeClass('active');
     } else if (panel.str === ele) {
-      const eleVisibility = !$("#" + panel.str).is(":visible");
+      const eleVisibility = forceVisible ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $("#" + panel.str + "_btn").toggleClass('active', eleVisibility);
-      debugger;
+
       if (isTwoPanelsEnabled) {
         if (eleVisibility) {
           // panel is going to be added on the screen
@@ -330,7 +327,6 @@ function toggleTwoPanelMode() {
     twoPanelCont.addClass("active");
     // if there is no recently opened panels fill it with the first two
     if (!currentTwoPanels.left && !currentTwoPanels.right) {
-      console.log("There is nothing in here");
       currentTwoPanels = {
         left: panelElements[0].str,
         right: panelElements[1].str
@@ -349,17 +345,24 @@ function toggleTwoPanelMode() {
     $("#two-panel-mode-btn").addClass("active");
   } else {
     twoPanelCont.removeClass("active");
-    if ((currentTwoPanels.left && currentTwoPanels.right) || (!currentTwoPanels.left && currentTwoPanels.right)){
-      document.querySelector('.panels-container').append(document.getElementById(currentTwoPanels.right));
-    } else if (currentTwoPanels.left) {
-      document.querySelector('.panels-container').append(document.getElementById(currentTwoPanels.left));
-    }
-    isTwoPanelsEnabled = false;
+    $("#two-panel-mode-btn").removeClass("active");
+
+    const leftPanelId = currentTwoPanels.left;
+    const rightPanelId = currentTwoPanels.right;
+
     currentTwoPanels = {
       left: null,
       right: null
     };
-    $("#two-panel-mode-btn").removeClass("active");
+
+    if (leftPanelId) {
+      document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
+    }
+
+    if (rightPanelId) {
+      document.querySelector('.panels-container').append(document.getElementById(rightPanelId));
+      setPanelsVisiblilities(rightPanelId, true);
+    }
   }
 }
 
@@ -369,9 +372,19 @@ function updateTwoPanelLayout() {
   const rightPanel = document.getElementById(currentTwoPanels.right);
 
   setTwoPanelModeVisibilities();
+  for (const key in currentTwoPanels) {
+    const panelCont = document.querySelector(`.two-panel-item.two-panel-${key}`).childNodes;
 
-  document.querySelector(".two-panel-cont .two-panel-left").appendChild(leftPanel);
-  document.querySelector(".two-panel-cont .two-panel-right").appendChild(rightPanel);
+    for (let idx = 0; idx < panelCont.length; idx++) {
+      document.querySelector(".panels-container").append(panelCont[idx]);
+    }
+  }
+  if (leftPanel) {
+    document.querySelector(".two-panel-cont .two-panel-left").appendChild(leftPanel);
+  }
+  if (rightPanel) {
+    document.querySelector(".two-panel-cont .two-panel-right").appendChild(rightPanel);
+  }
 }
 
 /*
