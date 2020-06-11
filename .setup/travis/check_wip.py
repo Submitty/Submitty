@@ -33,6 +33,10 @@ def main():
                 json = res.json()
                 print(f"Draft => {json['draft']}")
                 if json['draft'] is True:
+                    print(
+                        "Draft PR detected, build failed. Must be marked ready "
+                        "for review for this to pass."
+                    )
                     sys.exit(1)
                 title = json['title'].lower()
                 if title is None or title == 'null':
