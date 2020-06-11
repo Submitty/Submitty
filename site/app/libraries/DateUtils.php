@@ -12,6 +12,12 @@ class DateUtils {
     /** @var string Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
     const MAX_TIME = '9999-02-01 00:00:00';
 
+    /** @var string Default date time formatting used in gradeable open/close/due dates and other places */
+    const DATE_TIME_FORMAT = 'm/d/Y @ h:i A T';
+
+    /** @var string Same as DATE_TIME_FORMAT but includes seconds */
+    const DATE_TIME_FORMAT_WITH_SECONDS = 'm/d/Y @ h:i:s A T';
+
     /**
      * Given two dates, give the interval of time in days between these two times. Any partial "days" are rounded
      * up to the nearest day in the positive direction. Thus if there's a difference of 2 days and 3 hours, then
@@ -159,22 +165,18 @@ class DateUtils {
     }
 
     /**
-     * Compute the offset in hours and minutes between the given time zone identifier string, and the UTC timezone.
+     * Compute the offset in hours:minutes between the given time zone identifier string, and the UTC timezone.
      *
      * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
-     * @return string The UTC offset, for example '+9.5 Hours' or '-5 Hours'
+     * @return string The UTC offset, for example '+9:30' or '-4:00'
      */
     public static function getUTCOffset(string $time_zone): string {
         if ($time_zone === 'NOT_SET/NOT_SET') {
-            return 'NOT_SET';
+            return 'NOT SET';
         }
 
-        // Convert offset to hours and then to string
-        $time_zone_obj = new \DateTimeZone($time_zone);
-        $offset = $time_zone_obj->getOffset(new \DateTime());
-        $offset_as_string = strval($offset / 3600) . ' Hours';
+        $time_stamp = new \DateTime('now', new \DateTimeZone($time_zone));
 
-        // Prepend a plus for non-negative offsets, minus is already included for negative offsets
-        return $offset >= 0 ? '+' . $offset_as_string : $offset_as_string;
+        return $time_stamp->format('P');
     }
 }

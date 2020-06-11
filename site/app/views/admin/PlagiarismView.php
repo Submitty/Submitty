@@ -30,10 +30,10 @@ HTML;
 
             if (file_exists($course_path . "/lichen/ranking/" . $id . ".txt")) {
                 $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $id . ".txt"));
-                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), array('.', '..'));
+                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
-                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $id . "/" . $student), array('.', '..')));
+                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $id . "/" . $student), ['.', '..']));
                 }
                 $students = count($students);
             }
@@ -101,7 +101,7 @@ HTML;
                 }
                 else {
                     $content = file_get_contents($ranking_file_path);
-                    $content = trim(str_replace(array("\r", "\n"), '', $content));
+                    $content = trim(str_replace(["\r", "\n"], '', $content));
                     $rankings = preg_split('/ +/', $content);
                     $rankings = array_chunk($rankings, 3);
                     $matches_and_topmatch = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
@@ -304,7 +304,7 @@ HTML;
             $language[$saved_config['language']] = "selected";
 
             if ($saved_config["instructor_provided_code"] == true) {
-                $provided_code_filename_array = (array_diff(scandir($saved_config["instructor_provided_code_path"]), array(".", "..")));
+                $provided_code_filename_array = (array_diff(scandir($saved_config["instructor_provided_code_path"]), [".", ".."]));
                 foreach ($provided_code_filename_array as $filename) {
                     $provided_code_filename = $filename;
                 }

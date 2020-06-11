@@ -63,6 +63,14 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-new-course",
                     "icon" => "fa-plus-square"
                 ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['admin', 'docker']),
+                    "title" => "Docker UI",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-docker-link",
+                    "icon" => "fa-docker",
+                    "prefix" => "fab",
+                ]);
             }
 
             if ($unread_notifications_count !== null) {
@@ -223,9 +231,9 @@ class GlobalController extends AbstractController {
                 // FIXME: consider searching through the common location for matches to my students
                 // (but this would be expensive)
                 $any_images_files = array_merge(
-                    FileUtils::getAllFiles($images_path, array(), true),
-                    FileUtils::getAllFiles($common_images_path_1, array(), true),
-                    FileUtils::getAllFiles($common_images_path_2, array(), true)
+                    FileUtils::getAllFiles($images_path, [], true),
+                    FileUtils::getAllFiles($common_images_path_1, [], true),
+                    FileUtils::getAllFiles($common_images_path_2, [], true)
                 );
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;

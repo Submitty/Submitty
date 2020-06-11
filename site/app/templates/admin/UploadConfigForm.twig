@@ -29,12 +29,12 @@
 
     <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        Upload Config: <input type="file" name="config_upload" /><br />
+        <label>Upload Config: <input type="file" name="config_upload" /><br /></label>
         <input type="submit" value="Upload" /><br />
         <button type='reset'>Cancel Upload</button>
     </form>
     <br>
-    
+
     <br>
     {% if gradeable_id|length %}
         <a class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
@@ -69,14 +69,14 @@
         }
 
         function openDeletePopup(file_path) {
-            let message = $('[name="delete-config-message"]');
+            let message = $('[data-name="delete-config-message"]');
             message.html('');
             message.append('<b>'+file_path+'</b>');
             $('[name="config_path"]').val(file_path);
             $('#delete_config_popup').css("display", "block");
         }
     </script>
-    <ul>
+    <ul style="list-style-type: none;">
         {{ self.display_files(self, all_files, 1, false, inuse_config, display_url) }}
     </ul>
 </div>
@@ -88,7 +88,7 @@
     {% for name, file in files %}
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         {% if file.files != null %}
-            <div>
+            <li>
                 {% if indent == 1 %}
                     <a class="fas fa-pencil-alt key_to_click" tabindex="0" onclick="openRenamePopup('{{ file.path }}')"></a>
                     {% if file.path not in inuse_config %}
@@ -99,7 +99,7 @@
                 <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
                     {{ self.display_files(self, file.files, indent + 1, true, inuse_config, display_url) }}
                 </div>
-            </div>
+            </li>
         {% else %}
             <div>
                 <div class="file-viewer"><a class="key_to_click" tabindex="0" onclick='openFrame("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}", "{{ id }}", "{{ file.name }}")'>

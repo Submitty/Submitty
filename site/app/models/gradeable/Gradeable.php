@@ -1388,8 +1388,8 @@ class Gradeable extends AbstractModel {
      */
     public function getGradingProgress(User $grader) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
-        $total_users = array();
-        $graded_components = array();
+        $total_users = [];
+        $graded_components = [];
         if ($this->isGradeByRegistration()) {
             if (!$grader->accessFullGrading()) {
                 $sections = $grader->getGradingRegistrationSections();
@@ -1429,13 +1429,13 @@ class Gradeable extends AbstractModel {
         }
 
         $num_components = $this->core->getQueries()->getTotalComponentCount($this->getId());
-        $sections = array();
+        $sections = [];
         if (count($total_users) > 0) {
             foreach ($num_submitted as $key => $value) {
-                $sections[$key] = array(
+                $sections[$key] = [
                     'total_components' => $value * $num_components,
                     'graded_components' => 0,
-                );
+                ];
                 if (isset($graded_components[$key])) {
                     // Clamp to total components if unsubmitted assigment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
@@ -1775,11 +1775,11 @@ class Gradeable extends AbstractModel {
             . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
 
-        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
-            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId())));
+        $json = ["team_history" => [["action" => "admin_create", "time" => $current_time,
+            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId()]]];
         foreach ($members as $member) {
-            $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
-                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId());
+            $json["team_history"][] = ["action" => "admin_add_user", "time" => $current_time,
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId()];
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");

@@ -53,7 +53,7 @@ class LateController extends AbstractController {
      */
     public function updateLateDays($csv_option = null) {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            $data = array();
+            $data = [];
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "late"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->addErrorMessage($error);
@@ -133,7 +133,7 @@ class LateController extends AbstractController {
      */
     public function updateExtension() {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            $data = array();
+            $data = [];
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->addErrorMessage($error);
@@ -219,7 +219,7 @@ class LateController extends AbstractController {
                 }
                 else {
                     $team_member_ids = explode(", ", $team->getMemberList());
-                    $team_members = array();
+                    $team_members = [];
                     for ($i = 0; $i < count($team_member_ids); $i++) {
                         $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
                             $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
@@ -246,9 +246,9 @@ class LateController extends AbstractController {
      */
     private function getLateDays() {
         $users = $this->core->getQueries()->getUsersWithLateDays();
-        $user_table = array();
+        $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
+            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
         }
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
