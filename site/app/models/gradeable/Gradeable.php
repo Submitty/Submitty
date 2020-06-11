@@ -522,7 +522,7 @@ class Gradeable extends AbstractModel {
     public function getPeerFeedback($grader_id, $anon_id) {
         $feedback = $this->core->getQueries()->getPeerFeedback($this->getId());
         $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
-        if(array_key_exists($grader_id, $feedback)){
+        if (array_key_exists($grader_id, $feedback)) {
             return $feedback[$grader_id][$user_id]['feedback_full'];
         }
         return null;

@@ -2375,8 +2375,8 @@ class ElectronicGraderController extends AbstractController {
     }
     
     /**
-    * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
-    */
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
+     */
     public function setPeerFeedback($gradeable_id) {
         $grader_id = $_POST['grader_id'] ?? '';
         $user_id = $_POST['user_id'] ?? '';

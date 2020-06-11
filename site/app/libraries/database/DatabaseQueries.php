@@ -3187,14 +3187,15 @@ SQL;
      * @param string $student
      * @param string $grader
      * @param string $gradeable_id
-     * @param string $feedback
+     * @param string $feedback_full
+     * @param string $feedback_id
      */
     public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback_full, $feedback_id) {
         $this->course_db->query("SELECT feedback_full FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
-        if(sizeof($this->course_db->rows()) > 0){
+        if (count($this->course_db->rows()) > 0) {
             $this->course_db->query("UPDATE peer_feedback SET feedback_full = ?, feedback_id = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback_full, $feedback_id, $grader, $student, $gradeable_id]);
         }
-        else{
+        else {
             $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback_full, feedback_id) VALUES (?,?,?,?,?)", [$grader, $student, $gradeable_id, $feedback_full, $feedback_id]);
         }
     }
