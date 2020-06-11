@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\Utils;
 
 /**
  * Class Email
@@ -32,7 +31,7 @@ class Email extends AbstractModel {
    * @param array $details
    */
 
-    public function __construct(Core $core, $details = []) {
+    public function __construct(Core $core, array $details = []) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -40,31 +39,32 @@ class Email extends AbstractModel {
         $this->setUserId($details["to_user_id"]);
         $this->setSubject($this->formatSubject($details["subject"]));
 
-        $relevant_url = null;
-        if (array_key_exists("relevant_url", $details)) {
-            $relevant_url = $details["relevant_url"];
-        }
-
-        $author = $details["author"];
-        $this->setBody($this->formatBody($details["body"], $relevant_url, $author));
+        $this->setBody($this->formatBody(
+            $details["body"],
+            $details['relevant_url'] ?? null,
+            $details['author'] ?? false
+        ));
     }
 
     //inject course label into subject
-    private function formatSubject($subject) {
+    private function formatSubject(string $subject): string {
         $course = $this->core->getConfig()->getCourse();
         return "[Submitty $course]: " . $subject;
     }
 
     //inject a "do not reply" note in the footer of the body
     //also adds author and a relevant url if one exists
-    private function formatBody($body, $relevant_url = null, $author = false) {
-        $body .= "\n\n";
-        $anon = (isset($_POST["Anon"]) && $_POST["Anon"] === "Anon") ? 1 : 0;
-        if (!($anon) && $author) {
-            $body .= "Author: " . $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()[0] . ".\n";
+    private function formatBody(string $body, ?string $relevant_url, bool $author): string {
+        $extra = [];
+        if (!(isset($_POST["Anon"]) && $_POST["Anon"] === "Anon") && $author) {
+            $extra[] = "Author: " . $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()[0] . ".";
         }
         if (!is_null($relevant_url)) {
-            $body .= "Click here for more info: " . $relevant_url;
+            $extra[] = "Click here for more info: " . $relevant_url;
+        }
+
+        if (count($extra) > 0) {
+            $body .= "\n\n" . implode("\n", $extra);
         }
         return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     }

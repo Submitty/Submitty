@@ -342,7 +342,7 @@ HTML;
         try {
             return $this->twig->render($filename, $context);
         }
-        catch (\Twig_Error $e) {
+        catch (\Twig\Error\Error $e) {
             throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
         }
     }

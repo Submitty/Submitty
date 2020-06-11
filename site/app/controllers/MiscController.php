@@ -286,36 +286,34 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
 
-        $paths = [];
-        foreach ($folder_names as $folder_name) {
-            $paths[] = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
-        }
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-        for ($x = 0; $x < count($paths); $x++) {
-            if (is_dir($paths[$x])) {
+        foreach ($folder_names as $folder_name) {
+            $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
+            if (is_dir($path)) {
                 $files = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($paths[$x]),
+                    new \RecursiveDirectoryIterator($path),
                     \RecursiveIteratorIterator::LEAVES_ONLY
                 );
-                $zip->addEmptyDir($folder_names[$x]);
+                $zip->addEmptyDir($folder_name);
                 foreach ($files as $name => $file) {
-                    // Skip directories (they would be added automatically)
-                    if (!$file->isDir()) {
-                        $file_path = $file->getRealPath();
-                        $relative_path = substr($file_path, strlen($paths[$x]) + 1);
+                    // Skip directories (they are added automatically)
+                    if ($file->isDir()) {
+                        continue;
+                    }
+                    $file_path = $file->getRealPath();
+                    $relative_path = substr($file_path, strlen($path) + 1);
 
-                        // For scanned exams, the directories get polluted with the images of the split apart
-                        // pages, so we selectively only grab the PDFs there. For all other types,
-                        // we can grab all files regardless of type.
-                        if ($gradeable->isScannedExam()) {
-                            if (mime_content_type($file_path) === 'application/pdf') {
-                                $zip->addFile($file_path, $folder_names[$x] . '/' . $relative_path);
-                            }
+                    // For scanned exams, the directories get polluted with the images of the split apart
+                    // pages, so we selectively only grab the PDFs there. For all other types,
+                    // we can grab all files regardless of type.
+                    if ($gradeable->isScannedExam()) {
+                        if (mime_content_type($file_path) === 'application/pdf') {
+                            $zip->addFile($file_path, $folder_name . '/' . $relative_path);
                         }
-                        else {
-                            $zip->addFile($file_path, $folder_names[$x] . "/" . $relative_path);
-                        }
+                    }
+                    else {
+                        $zip->addFile($file_path, $folder_name . "/" . $relative_path);
                     }
                 }
             }
