@@ -10,7 +10,12 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
+use app\libraries\routers\FeatureFlag;
 
+
+/**
+ * @FeatureFlag("polls")
+ */
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
