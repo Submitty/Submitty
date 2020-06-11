@@ -82,14 +82,22 @@ aside {
 }
 
 
-#two-panel-mode-btn.active i.fa-square-o,
+#two-panel-mode-btn.active i.fa-square,
 #two-panel-mode-btn i.fa-columns {
     display: inline-block;
 }
 
 #two-panel-mode-btn.active i.fa-columns,
-#two-panel-mode-btn i.fa-square-o {
+#two-panel-mode-btn i.fa-square {
     display: none;
+}
+
+#two-panel-exchange-btn {
+    display: none;
+}
+
+#two-panel-exchange-btn.active {
+    display: inline-block;
 }
 
 /* Resets server.css pink color */
@@ -277,6 +285,7 @@ progress::-webkit-progress-value {
 
 .two-panel-item {
     flex: 1;
+    background: var(--standard-medium-gray);
 }
 
 .two-panel-left {}

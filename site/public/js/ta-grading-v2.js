@@ -226,11 +226,13 @@ function setTwoPanelModeVisibilities () {
     panelElements.forEach((panel) => {
       if (currentTwoPanels.left === panel.str || currentTwoPanels.right === panel.str) {
         $("#" + panel.str).toggle(true);
+        $(panel.icon).toggleClass('icon-selected', true);
+        $("#" + panel.str + "_btn").toggleClass('active', true);
       } else {
         $("#" + panel.str).toggle(false);
+        $(panel.icon).toggleClass('icon-selected', false);
+        $("#" + panel.str + "_btn").toggleClass('active', false);
       }
-      $(panel.icon).toggleClass('icon-selected', true);
-      $("#" + panel.str + "_btn").toggleClass('active', true);
     })
 }
 
@@ -246,7 +248,8 @@ function setPanelsVisiblilities (ele, forceVisible) {
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $("#" + panel.str + "_btn").toggleClass('active', eleVisibility);
-
+      // update the global variable
+      currentOpenPanel = eleVisibility ? panel.str : null;
       if (isTwoPanelsEnabled) {
         if (eleVisibility) {
           // panel is going to be added on the screen
@@ -325,27 +328,31 @@ function toggleTwoPanelMode() {
 
   if (isTwoPanelsEnabled) {
     twoPanelCont.addClass("active");
-    // if there is no recently opened panels fill it with the first two
-    if (!currentTwoPanels.left && !currentTwoPanels.right) {
-      currentTwoPanels = {
-        left: panelElements[0].str,
-        right: panelElements[1].str
-      };
-    } else if (!currentTwoPanels.right) {
+    $("#two-panel-exchange-btn").addClass("active");
+    // If there is any panel opened just use that and fetch the next one for left side...
+    if (currentOpenPanel) {
+      currentTwoPanels.right = currentOpenPanel;
       panelElements.every((panel, idx) => {
-        if (currentTwoPanels.left === panel.str) {
+        if (currentTwoPanels.right === panel.str) {
           let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          currentTwoPanels.right = panelElements[nextIdx].str;
+          currentTwoPanels.left = panelElements[nextIdx].str;
           return false;
         }
         return true;
       });
+    } else {
+      // if there is no currently opened panel fill the panels with the first two
+      currentTwoPanels = {
+        left: panelElements[0].str,
+        right: panelElements[1].str
+      };
     }
     updateTwoPanelLayout();
     $("#two-panel-mode-btn").addClass("active");
   } else {
     twoPanelCont.removeClass("active");
     $("#two-panel-mode-btn").removeClass("active");
+    $("#two-panel-exchange-btn").removeClass("active");
 
     const leftPanelId = currentTwoPanels.left;
     const rightPanelId = currentTwoPanels.right;
@@ -384,6 +391,19 @@ function updateTwoPanelLayout() {
   }
   if (rightPanel) {
     document.querySelector(".two-panel-cont .two-panel-right").appendChild(rightPanel);
+  }
+}
+
+function exchangeTwoPanels() {
+  if (currentTwoPanels.left && currentTwoPanels.right) {
+    const leftPanel = currentTwoPanels.left;
+    currentTwoPanels = {
+      left: currentTwoPanels.right,
+      right: leftPanel
+    }
+    updateTwoPanelLayout();
+  } else {
+      alert("Exchange works only when there are two panels...");
   }
 }
 
