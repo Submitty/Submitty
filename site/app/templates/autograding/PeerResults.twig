@@ -1,4 +1,5 @@
 {% import 'functions/Badge.twig' as Badge %}
+{% import 'functions/TAResultsFunctions.twig' as TAResultsFunctions %}
 {% import _self as self %}
 
 <script>
@@ -219,28 +220,9 @@ function switch_feedback_modes() {
         {% for grader in ordered_graders %}
         
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
-                <table class="mobile-table" id="peer-feedback-table-{{grader}}">
-                    <tbody>
-                        {% for component in peer_components %}
-                            <div class="box-info">
-                                    <h4>{{ component.title|escape }}
-                                    </h4>
-                                    <p>
-                                        {% for mark in component.marks %}
-                                            {% if mark.earned[grader] %}
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            {% else %}
-                                                <i class="far fa-square fa-1g"></i>
-                                            {% endif %}
-                                            {{ mark.points|number_format(num_decimals) }}
-                                            {{ mark.title|nl2br }}
-                                            </br>
-                                        {% endfor %}
-                                    </p>
-                            </div>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                {% for component in peer_components %}
+                    {{ TAResultsFunctions.renderComponent(component, true) }}
+                {% endfor %}
                 {% if overall_comments[grader] is not empty %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">
