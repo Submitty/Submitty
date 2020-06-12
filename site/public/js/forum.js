@@ -466,23 +466,30 @@ function socketUnpinThreadHandler(thread_id) {
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
-    if(msg.type === "new_thread"){
-      socketNewThreadHandler(msg.thread_id);
-    }
-    else if (msg.type === "delete_thread"){
-      socketDeleteOrMergeThreadHandler(msg.thread_id);
-    }
-    else if (msg.type === "resolve_thread"){
-      socketResolveThreadHandler(msg.thread_id);
-    }
-    else if (msg.type === "announce_thread"){
-      socketAnnounceThreadHandler(msg.thread_id);
-    }
-    else if (msg.type === "merge_thread"){
-      socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
-    }
-    else if (msg.type === "unpin_thread"){
-      socketUnpinThreadHandler(msg.thread_id);
+    switch (msg.type) {
+      case "new_thread":
+        socketNewThreadHandler(msg.thread_id);
+        break;
+      case "delete_thread":
+        socketDeleteOrMergeThreadHandler(msg.thread_id);
+        break;
+      case "resolve_thread":
+        socketNewThreadHandler(msg.thread_id);
+        break;
+      case "announce_thread":
+        socketAnnounceThreadHandler(msg.thread_id);
+        break;
+      case "unpin_thread":
+        socketUnpinThreadHandler(msg.thread_id);
+        break;
+      case "unresolve_thread":
+        socketUnresolveThreadHandler(msg.thread_id);
+        break;
+      case "merge_thread":
+        socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
+        break;
+      default:
+        console.log("Undefined message recieved.");
     }
     thread_post_handler();
     loadThreadHandler();
