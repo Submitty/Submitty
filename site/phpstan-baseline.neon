@@ -239,7 +239,7 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 46$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
 			count: 4
@@ -446,31 +446,6 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$type\\)\\: Unexpected token \"\\$type\", expected type at offset 153$#"
-			count: 1
-			path: app/libraries/response/JsonResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 55$#"
-			count: 1
-			path: app/libraries/response/RedirectResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view_class\\)\\: Unexpected token \"\\$view_class\", expected type at offset 204$#"
-			count: 1
-			path: app/libraries/response/WebResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view_function\\)\\: Unexpected token \"\\$view_function\", expected type at offset 230$#"
-			count: 1
-			path: app/libraries/response/WebResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$logged_in\\)\\: Unexpected token \"\\$logged_in\", expected type at offset 96$#"
-			count: 1
-			path: app/libraries/routers/WebRouter.php
-
-		-
 			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
@@ -674,7 +649,7 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 179$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 205$#"
 			count: 1
@@ -684,12 +659,12 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$file_name\\)\\: Unexpected token \"\\$file_name\", expected type at offset 155$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$file_path\\)\\: Unexpected token \"\\$file_path\", expected type at offset 180$#"
 			count: 1
@@ -709,17 +684,17 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 211$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 237$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$rerender_annotated_pdf\\)\\: Unexpected token \"\\$rerender_annotated_pdf\", expected type at offset 263$#"
 			count: 1
 			path: app/views/PDFView.php
-		
+
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
 			count: 2
@@ -729,7 +704,7 @@ parameters:
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
 			count: 1
 			path: app/views/PDFView.php
-			
+
 		-
 			message: "#^Method app\\\\views\\\\PDFView\\:\\:downloadPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
 			count: 1

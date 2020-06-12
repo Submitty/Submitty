@@ -24,11 +24,11 @@ class WebResponse implements ResponseInterface {
      * The first argument is a string if it's a top level view or an
      * array of strings if its a view in a subdirectory/sub-namespace.
      *
-     * @param $view_class
-     * @param $view_function
+     * @param string|array $view_class
+     * @param string $view_function
      * @param mixed ...$parameters
      */
-    public function __construct($view_class, $view_function, ...$parameters) {
+    public function __construct($view_class, string $view_function, ...$parameters) {
         $this->view_class = $view_class;
         $this->view_function = $view_function;
         $this->parameters = $parameters;
