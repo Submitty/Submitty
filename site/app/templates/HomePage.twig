@@ -36,14 +36,12 @@
     <div class="content">
         <h1>About You</h1>
         <div id="user_card">
-            <div id="user_card_image">
-                {% set display_image = user.getDisplayImage() %}
-                {% if display_image is not null %}
-                    <div id="user_image">
-                        {{ base64_image(display_image.getImageBase64(250, null), display_image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
-                    </div>
-                {% endif %}
-            </div>
+            {% set display_image = user.getDisplayImage() %}
+            {% if display_image is not null %}
+                <div id="user_card_image">
+                    {{ base64_image(display_image.getImageBase64MaxDimension(250), display_image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
+                </div>
+            {% endif %}
             <div id="user_card_info">
                 <div><b>Username:</b> {{ user.getId() }}</div>
                 <div class="flex-row">

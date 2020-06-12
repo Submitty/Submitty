@@ -45,12 +45,11 @@ class DisplayImage extends AbstractModel
      * @param Core $core
      * @param string $user_id
      * @param string $display_image_state
-     * @throws \ImagickException There was a problem converting the image to an Imagick object
      * @throws BadArgumentException An illegal display_image_state was passed in
      * @throws FileReadException Unable to read the file at the selected location for whatever reason
+     * @throws \ImagickException
      */
     public function __construct(Core $core, string $user_id, string $display_image_state) {
-
         parent::__construct($core);
 
         // Validate passed image state
@@ -72,19 +71,21 @@ class DisplayImage extends AbstractModel
             throw new FileReadException('Unable to read from the image folder.');
         }
 
-        // Search directory for image with the highest timestamp
-        $files = scandir($image_folder_dir, 1);
-        $full_path = FileUtils::joinPaths($image_folder_dir, $files[0]);
+        // Order files by newest time stamp first
+        $files = FileUtils::getAllFilesTrimSearchPath($image_folder_dir, 0);
+        usort($files, function ($a, $b) {
+            return filemtime($a) <= filemtime($b);
+        });
 
         // Ensure image is readable
-        if(!is_readable($full_path) || $files[0] == '.' || $files[0] == '..') {
+        if(!is_readable($files[0])) {
             throw new FileReadException('Unable to read the display image.');
         }
 
-        $imagick = new \Imagick($full_path);
+        $imagick = new \Imagick($files[0]);
 
         $this->mime_type = $imagick->getImageMimeType();
-        $this->path = $full_path;
+        $this->path = $files[0];
     }
 
     /**
@@ -100,7 +101,7 @@ class DisplayImage extends AbstractModel
      * @param int|null $cols Length in pixels to resize this dimension to
      * @param int|null $rows Length in pixels to resize this dimension to
      * @return string The base64 encoding of the image
-     * @throws \ImagickException Unable to convert the file at $this->path to an Imagick object.
+     * @throws \ImagickException
      */
     public function getImageBase64(int $cols = null, int $rows = null): string {
         $imagick = new \Imagick($this->path);
@@ -117,7 +118,45 @@ class DisplayImage extends AbstractModel
     }
 
     /**
-     * Save a new DisplayImage image
+     * Get the display image encoded as a base64 string.  Resize the image so that the greater dimension is equal
+     * to $max_dimension.  This resize maintains form factor of the image, so the other dimension will always be
+     * smaller than $max_dimension, unless the image was square, then it will be equal to $max_dimension.
+     *
+     * @param int $max_dimension Length in pixels the greater image dimension should be resized to
+     * @return string The base64 encoding of the image
+     * @throws \ImagickException
+     */
+    public function getImageBase64MaxDimension(int $max_dimension) {
+        $imagick = new \Imagick($this->path);
+
+        // Handle resizing
+        self::resizeMaxDimension($imagick, $max_dimension);
+
+        return base64_encode($imagick->getImageBlob());
+    }
+
+    /**
+     * Resize an imagick object so that the larger of it's two dimensions is now equal to $max_dimension.  Maintain
+     * form factor.  If the larger dimension is already smaller than $max_dimension then don't do anything.
+     *
+     * @param \Imagick $image The image to resize
+     * @param int $max_dimension Length in pixels to resize the larger dimension to
+     * @throws \ImagickException
+     */
+    public static function resizeMaxDimension(\Imagick &$image, int $max_dimension): void {
+        $cols = $image->getImageWidth();
+        $rows = $image->getImageHeight();
+
+        if ($cols >= $rows && $cols > $max_dimension) {
+            $image->scaleImage($max_dimension, 0);
+        }
+        else if ($rows > $max_dimension) {
+            $image->scaleImage(0, $max_dimension);
+        }
+    }
+
+    /**
+     * Save a new DisplayImage image into the file directory
      *
      * @param Core $core The application core
      * @param string $user_id The user_id who will own this image
@@ -152,15 +191,7 @@ class DisplayImage extends AbstractModel
         // Decrease image size while maintaining form factor
         // If bigger image dimension is already smaller then IMG_MAX_DIMENSION don't do any resizing.
         $imagick = new \Imagick($tmp_file_path);
-        $cols = $imagick->getImageWidth();
-        $rows = $imagick->getImageHeight();
-
-        if ($cols >= $rows && $cols > self::IMG_MAX_DIMENSION) {
-            $imagick->scaleImage(self::IMG_MAX_DIMENSION, 0);
-        }
-        else if ($rows > self::IMG_MAX_DIMENSION) {
-            $imagick->scaleImage(0, self::IMG_MAX_DIMENSION);
-        }
+        self::resizeMaxDimension($imagick, self::IMG_MAX_DIMENSION);
 
         // Save file (will overwrite any image with same name)
         $imagick->writeImage(FileUtils::joinPaths($folder_path, $new_image_name . '.' . $image_extension));
