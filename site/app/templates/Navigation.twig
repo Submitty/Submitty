@@ -51,10 +51,10 @@
                     <div class="course-main">
                         {% if g_info.edit_buttons or g_info.delete_buttons %}
                             {% for button in g_info.edit_buttons %}
-                                {{ self.renderButton(button, DATE_TIME_FORMAT) }}
+                                {{ self.renderButton(button, date_time_format) }}
                             {% endfor %}
                             {% for button in g_info.delete_buttons %}
-                                {{ self.renderButton(button, DATE_TIME_FORMAT) }}
+                                {{ self.renderButton(button, date_time_format) }}
                             {% endfor %}
                         {% endif %}
                         <div class="course-title">
@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     {% for button in g_info.buttons %}
-                        <div class="course-button">{{ self.renderButton(button, DATE_TIME_FORMAT) }}</div>
+                        <div class="course-button">{{ self.renderButton(button, date_time_format) }}</div>
                     {% endfor %}
                 </div>
                 {% endfor %}
