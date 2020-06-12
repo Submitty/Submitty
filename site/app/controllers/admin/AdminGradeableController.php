@@ -256,7 +256,7 @@ class AdminGradeableController extends AbstractController {
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
-            'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
+            'timezone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
 
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $gradeable->getId(),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),

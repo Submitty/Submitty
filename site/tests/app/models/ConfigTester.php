@@ -309,6 +309,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_message' => '',
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
+            'date_time_format' => ['modified' => false]
         ];
         $actual = $config->toArray();
 

@@ -270,7 +270,7 @@ class ForumController extends AbstractController {
         }
 
         if (!empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()) {
-            $lock_thread_date = $_POST['lock_thread_date'];
+            $lock_thread_date = DateUtils::parseDateTime($_POST['lock_thread_date'], $this->core->getUser()->getUsableTimeZone());
         }
         else {
             $lock_thread_date = null;
