@@ -106,25 +106,73 @@ class RainbowCustomization extends AbstractModel {
 
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
-            $json_gradeables = $this->RCJSON->getGradeables();
+            $json_buckets = $this->RCJSON->getGradeables();
 
-            foreach ($json_gradeables as $json_gradeable) {
+            foreach ($json_buckets as $json_bucket) {
                 // Place those buckets in $this->used_buckets
-                $this->used_buckets[] = $json_gradeable->type;
+                $this->used_buckets[] = $json_bucket->type;
 
                 // When preparing the count of how many items are in the bucket, if the instructor has previously
                 // entered a value which was greater than the number of gradeables in the database, we should use the
                 // instructor entered value instead
-                $bucket = $json_gradeable->type;
+                $bucket = $json_bucket->type;
 
-                if ($json_gradeable->count > $this->bucket_counts[$bucket]) {
-                    $this->bucket_counts[$bucket] = $json_gradeable->count;
+                if ($json_bucket->count > $this->bucket_counts[$bucket]) {
+                    $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
             }
         }
 
         //XXX: Assuming that the contents of these buckets will be lowercase
         $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
+    }
+
+    /**
+     * Gets curve data for each gradeable
+     *
+     * In the case no rainbow grades customization.json was found the return value will be an empty array.
+     * In the case a customization.json was found the return array will have the form
+     * $retArray[bucket_id][gradeable_id] = curve_values
+     *
+     * If no curve values were found for gradeable_id then gradeable_id will not be present in the return array
+     *
+     * @return array
+     */
+    public function getPerGradeableCurves() {
+        $retArray = [];
+
+        if (!is_null($this->RCJSON)) {
+            $json_buckets = $this->RCJSON->getGradeables();
+
+            foreach ($json_buckets as $json_bucket) {
+                $retArray[$json_bucket->type] = [];
+
+                foreach ($json_bucket->ids as $json_gradeable) {
+                    if (property_exists($json_gradeable, 'curve')) {
+                        $curve_data = $json_gradeable->curve;
+                        $curve_data_pos = 0;
+                        $selected_benchmarks = $this->RCJSON->getDisplayBenchmarks();
+                        $benchmarks_with_input_fields = array_slice($this->RCJSON::allowed_display_benchmarks, 3);
+
+                        $retArray[$json_bucket->type][$json_gradeable->id] = [];
+
+                        foreach ($benchmarks_with_input_fields as $benchmark) {
+                            if (in_array($benchmark, $selected_benchmarks)) {
+                                $val = $curve_data[$curve_data_pos];
+                                $curve_data_pos++;
+                            }
+                            else {
+                                $val = '';
+                            }
+
+                            array_push($retArray[$json_bucket->type][$json_gradeable->id], $val);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $retArray;
     }
 
     /**
@@ -144,16 +192,16 @@ class RainbowCustomization extends AbstractModel {
         $retArray = [];
 
         if (!is_null($this->RCJSON)) {
-            $json_gradeables = $this->RCJSON->getGradeables();
+            $json_buckets = $this->RCJSON->getGradeables();
 
             $sum = 0;
 
-            foreach ($json_gradeables as $json_gradeable) {
+            foreach ($json_buckets as $json_bucket) {
                 // Get percentage, cast back to whole number integer
-                $retArray[$json_gradeable->type] = (int) ($json_gradeable->percent * 100);
+                $retArray[$json_bucket->type] = (int) ($json_bucket->percent * 100);
 
                 // Keep track of the sum
-                $sum += $retArray[$json_gradeable->type];
+                $sum += $retArray[$json_bucket->type];
             }
 
             // Save the sum of used percentages to special key in array

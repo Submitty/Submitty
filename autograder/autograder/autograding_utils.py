@@ -97,6 +97,7 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
 
     now = dateutils.get_current_time()
     datefile = "{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
+    os.makedirs(log_path, exist_ok=True)
     autograding_log_file = os.path.join(log_path, datefile)
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     batch_string = "BATCH" if is_batch else ""
@@ -121,7 +122,7 @@ def log_container_meta(log_path, event="", name="", container="", time=0):
 
 def write_to_log(log_path, message):
     """ Given a log file, create or append message to log file"""
-    with open(log_path, 'a') as log_file:
+    with open(log_path, 'a+') as log_file:
         try:
             fcntl.flock(log_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
             print(' | '.join((str(x) for x in message)), file=log_file)

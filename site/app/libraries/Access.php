@@ -221,6 +221,14 @@ class Access {
                 "path.write" => "path.write.submissions",
             ]
         ];
+        $this->directories["annotated_pdfs"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/annotated_pdfs",
+            "subparts" => ["gradeable", "submitter", "version"],
+            "permissions" => [
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.submissions",
+            ]
+        ];
         $this->directories["checkout"] = [
             "base" => $this->core->getConfig()->getCoursePath() . "/checkout",
             "subparts" => ["gradeable", "submitter", "version"],

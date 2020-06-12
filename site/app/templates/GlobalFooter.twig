@@ -14,12 +14,19 @@
                     {% if link['icon'] is defined %}
                         <i class="footer-link-icon fa fa-lg {{ link['icon'] }}"></i>
                     {% endif %}
-                    <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
+                    {% if link['is_email'] is defined %}
+                        <a href="mailto:{{ link['url'] }}" class="black-btn">{{ link['title'] }}</a>
+                    {% else %}
+                         <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
+                    {% endif %}
+
                 {% endfor %}
 
                 {% if is_debug %}
                     <span class="footer-separator">|</span>
                     <a href="#" onClick="togglePageDetails();" class="black-btn key_to_click" tabindex="0">Show Page Details</a>
+                    <span class="footer-separator">|</span>
+                    <a href="#" onClick="validateHtml();" class="black-btn key_to_click" tabindex="0">Validate HTML</a>
                 {% endif %}
             </footer>
         </div> {# /#submitty-body #}
@@ -34,7 +41,7 @@
 {% if is_debug %}
     <div id='page-info'>
         Runtime: {{ runtime }}<br /><br />
-        <h3>Site Details</h3>
+        <h2>Site Details</h2>
         Total Submitty Details: {{ submitty_queries|length }}<br /><br />
         Submitty Queries:<br /> {{ self.query_list(submitty_queries) }}
 

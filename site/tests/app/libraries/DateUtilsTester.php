@@ -8,20 +8,20 @@ use app\models\Config;
 
 class DateUtilsTester extends \PHPUnit\Framework\TestCase {
     public function dayDiffData() {
-        return array(
-            array(1, "Now", "Tomorrow"),
-            array(0, "2017-01-12 19:10:53.000000", "2017-01-12 19:10:53.000000"),
-            array(1, "2016-07-19 00:00:00", "2016-07-19 00:00:30"),
-            array(0, "2016-07-19 00:00:30", "2016-07-19 00:00:00"),
-            array(1, "2016-07-19 00:00:00", "2016-07-19 00:01:00"),
-            array(0, "2016-07-19 00:01:00", "2016-07-19 00:00:00"),
-            array(1, "2016-07-19 00:00:00", "2016-07-19 01:00:00"),
-            array(0, "2016-07-19 01:00:00", "2016-07-19 00:00:00"),
-            array(10, "2016-07-19 00:00:00", "2016-07-28 12:00:00"),
-            array(0, "2016-07-19 00:00:00", "2016-07-18 23:55:00"),
-            array(-1, "2016-07-19 00:00:00", "2016-07-17 23:00:00"),
-            array(-6, "2016-07-19 00:00:00", "2016-07-12 12:00:00")
-        );
+        return [
+            [1, "Now", "Tomorrow"],
+            [0, "2017-01-12 19:10:53.000000", "2017-01-12 19:10:53.000000"],
+            [1, "2016-07-19 00:00:00", "2016-07-19 00:00:30"],
+            [0, "2016-07-19 00:00:30", "2016-07-19 00:00:00"],
+            [1, "2016-07-19 00:00:00", "2016-07-19 00:01:00"],
+            [0, "2016-07-19 00:01:00", "2016-07-19 00:00:00"],
+            [1, "2016-07-19 00:00:00", "2016-07-19 01:00:00"],
+            [0, "2016-07-19 01:00:00", "2016-07-19 00:00:00"],
+            [10, "2016-07-19 00:00:00", "2016-07-28 12:00:00"],
+            [0, "2016-07-19 00:00:00", "2016-07-18 23:55:00"],
+            [-1, "2016-07-19 00:00:00", "2016-07-17 23:00:00"],
+            [-6, "2016-07-19 00:00:00", "2016-07-12 12:00:00"]
+        ];
     }
 
     /**
@@ -136,6 +136,95 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         );
         $this->assertEquals('2019-01-20 13:24:55', $actual);
     }
+
+    /**
+     * Time stamp with -04 offset into America/New_York
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-06-01 12:00:00-04
+     * UTC time: 2020-06-01 16:00:00
+     *
+     * Expected: 2020-06-01 12:00:00
+     */
+    public function testParseDateTimeNYOne() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/New_York');
+
+        $time_stamp = '2020-06-01 12:00:00-04';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-06-01 12:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+    /**
+     * Time stamp with -05 offset into America/New_York
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-12-01 12:00:00-05
+     * UTC time: 2020-12-01 17:00:00
+     *
+     * Expected: 2020-12-01 12:00:00
+     */
+    public function testParseDateTimeNYTwo() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/New_York');
+
+        $time_stamp = '2020-12-01 12:00:00-05';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-12-01 12:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+    /**
+     * Time stamp with -04 offset into America/Los_Angeles
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-06-01 12:00:00-04
+     * UTC time: 2020-06-01 16:00:00
+     *
+     * Expected: 2020-06-01 09:00:00
+     */
+    public function testParseDateTimeLAOne() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/Los_Angeles');
+
+        $time_stamp = '2020-06-01 12:00:00-04';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-06-01 09:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+    /**
+     * Time stamp with -05 offset into America/Los_Angeles
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-12-01 12:00:00-05
+     * UTC time: 2020-12-01 17:00:00
+     *
+     * Expected: 2020-12-01 09:00:00
+     */
+    public function testParseDateTimeLATwo() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/Los_Angeles');
+
+        $time_stamp = '2020-12-01 12:00:00-05';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-12-01 09:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
 
     public function testGetServerTime() {
         $core = new Core();

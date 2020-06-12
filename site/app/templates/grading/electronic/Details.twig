@@ -6,10 +6,10 @@
         Limited grader does not have "View All" option
         If nothing to grade, Instructor will see all sections
     #}
-    <div class="row" style="justify-content: space-between;margin-bottom: 5px">
+    <div class="row details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
-        <div style="display: flex;flex-wrap: wrap;">
-            <ul style="justify-self: flex-end" id="details-legend" class="table-bordered">
+        <div class="markers-container">
+            <ul id="details-legend">
                 <li>
                     <i class="fas fa-circle grader-NULL"></i>
                     Ungraded component
@@ -36,49 +36,65 @@
                 </li>
             </ul>
 
-            <div style="display:flex; flex-direction: column; justify-self: flex-end;flex-wrap: wrap;margin-left: 5px">
+            <div class="action-btn-cont">
                 {% if show_all_sections_button %}
                 <a class="btn btn-default"
                    href="{{ view_all_toggle_url }}">
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </a>
                 {% endif %}
-                <a style="margin-top: 10px" class="btn btn-default"
+                <a class="btn btn-default"
                    href="{{ order_toggle_url }}">
                     {{ sort == 'random' ? "Default Order" : "Random Order" }}
                 </a>
             </div>
         </div>
     </div>
-    {# Import+Export teams buttons #}
-    {% if show_import_teams_button %}
-        <a style="float: right;" class="btn btn-primary" href="{{ export_teams_url }}">Export Teams Members</a>
-    {% endif %}
-    {% if show_export_teams_button %}
-        <button style="float: right;" class="btn btn-primary key_to_click" tabindex="0" onclick="importTeamForm();">Import Teams Members</button>
-    {% endif %}
-    {# /Import+Export teams buttons #}
+    <div class="details-action-box">
+        {# Import+Export teams buttons #}
+        {% if show_import_teams_button %}
+            <a class="btn btn-primary"
+               href="{{ export_teams_url }}"
+            >Export Teams Members</a>
+        {% endif %}
+        {% if show_export_teams_button %}
+            <button class="btn btn-primary key_to_click"
+                    tabindex="0"
+                    onclick="importTeamForm();"
+            >
+                Import Teams Members
+            </button>
+        {% endif %}
+        {# /Import+Export teams buttons #}
 
-	{# Randomize team button #}
-	{% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
-		{% if past_grade_start_date %}
-			<Button style="float: left;" class="btn btn-default key_to_click" tabindex="0" onclick="randomizeRotatingGroupsButton()"> Randomly Re-Assign Teams to Rotating Sections</Button>
-		{% else %}
-			<a style="float: left;" class="btn btn-default" href="{{ randomize_team_rotating_sections_url }}"> Randomly Re-Assign Teams to Rotating Sections</a>
-		{% endif %}
-	{% endif %}
+        {# Randomize team button #}
+        {% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
+            {% if past_grade_start_date %}
+                <button class="btn btn-default key_to_click"
+                        tabindex="0"
+                        onclick="randomizeRotatingGroupsButton()"
+                >
+                    Randomly Re-Assign Teams to Rotating Sections
+                </button>
+            {% else %}
+                <a class="btn btn-default"
+                   href="{{ randomize_team_rotating_sections_url }}"
+                >
+                    Randomly Re-Assign Teams to Rotating Sections
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
 
-    <br />
-    <br />
     {# This is a data table #}
-    <table class="table table-striped table-bordered persist-area table-text-left">
+    <table id="details-table" class="table table-striped table-bordered persist-area table-text-left">
         <caption />
         {# Table header #}
         <thead>
             <tr>
                 {% for column in columns %}
                     {% if column.sort_type %}
-                        <td style="width:{{ column.width }}">
+                        <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">
                             <a href="{{ details_base_url }}?view={{ (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null }}&sort={{ column.sort_type }}&direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
@@ -91,9 +107,9 @@
                                     <i class="fa fa-sort"></i>
                                 {% endif %}
                             </a>
-                        </td>
+                        </th>
                     {% else %}
-                        <th style="width:{{ column.width }}">{{ column.title }}</th>
+                        <th style="width:{{ column.width }}" data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>
@@ -101,7 +117,7 @@
         {# /Table header #}
         {# Sections #}
         {% if sections|length == 0 %}
-            <tbody>
+            <tbody class="empty-info-header">
                 <tr class="info">
                     <td colspan="{{ 42 + gradeable.getComponents()|length }}" style="text-align: center"> No Grading To Be Done! :) </td>
                 </tr>
@@ -109,10 +125,12 @@
         {% else %}
             {% for section in sections %}
                 {# Section heading #}
-                <tbody>
+                <tbody class="details-info-header panel-head-active">
                     <tr class="info">
                         {% if core.getUser().getGroup() < 4 %}
                             <td colspan="{{ columns|length }}" style="text-align: center">
+                                <i class="collapse-icon fas fa-caret-right"></i>
+                                <i class="expand-icon fas fa-caret-down"></i>
                                 {% if gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
                                 {% else %}
@@ -127,7 +145,7 @@
                 </tbody>
                 {# /Section heading #}
                 {# Student list #}
-                <tbody>
+                <tbody class="details-content panel-content-active">
                     {% for info in section.rows %}
                         {{ self.render_student(self, _context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
                     {% endfor %}
@@ -192,6 +210,8 @@
                 {{ self.render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
                 {{ self.render_column_grading(self, context, section, graded_gradeable, index, info, column) }}
+            {% elseif column.function == "grading_peer" %}
+                {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading_peer" %}
                 {{ self.render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "index" %}
@@ -310,13 +330,15 @@
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) %}
     <td class="td-graded-questions">
-        {%- for index in 0..info.graded_groups|length-1 -%}
-            {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
-                <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-            {% else %}
-                <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
-            {% endif %}
-        {%- endfor -%}
+        <span>
+            {%- for index in 0..info.graded_groups|length-1 -%}
+                {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
+                    <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                {% else %}
+                    <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                {% endif %}
+            {%- endfor -%}
+        </span>
     </td>
 {% endmacro %}
 
@@ -369,33 +391,55 @@
     </td>
 {% endmacro %}
 
-{# Grading Button (peer) TODO: fix this for peer grading support
-{% macro render_column_grading_peer(self, context, section, gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently)
-    {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
-    {% if components|length == 0 %}
+{# Grading Button (peer) TODO: fix this for peer grading support #}
+{% macro render_column_grading_peer(self, context, section, graded_gradeable, index, info, column) %}
+    {% if  graded_gradeable.hasOverriddenGrades() %}
+        {% set contents = "Overridden" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
+        {% set contents = "No Submission" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
+        {% set contents = "Cancelled Submission" %}
+        {% set btn_class = "btn-default" %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
+        {%  endif %}
+    {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+            {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
+                {% set contents = "Version Conflict" %}
+                {% set btn_class = "btn-primary" %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = "Grading Incomplete" %}
+            {% elseif graded_gradeable.isTaGradingComplete() or core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
+                {% set btn_class = "btn-default" %}
+            {% endif %}
+        {% endif %}
+        {% if graded_gradeable.hasActiveRegradeRequest() %}
+            {% set contents = contents ~ " + Grade Inquiry" %}
+            {% set btn_class = "btn-danger" %}
+            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
+        {%  endif %}
     {% else %}
-        {% set score = 0 %}
-        {% for component in components %}
-            {% set score = score + component.getScore() %}
-        {% endfor %}
-
-        {% set contents = score ~ " / " ~ gradeable.getTotalPeerGradingPoints() %}
-        {% set btn_class = "btn-default" %}
+        {% set contents = "View" %}
+        {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        {% if gradeable.isTeamAssignment() and gradeable.getTeam() == null %}
-            <b><i>No Team</i></b>
-        {% else %}
-            <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable.getId(), 'who_id': gradeable.getUser().getAnonId(), 'sort': context.sort, 'direction': context.direction}) }}">
-                {{ contents }}
-            </a>
-        {% endif %}
+        <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
+            {{ contents }}
+            {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
+                <span class="notification-badge">{{ badge_count }}</span>
+            {% endif %}
+        </a>
     </td>
 {% endmacro %}
-#}
+
 
 {# Index #}
 {% macro render_column_index(self, context, section, graded_gradeable, index, info, column) %}
@@ -430,7 +474,7 @@
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedFirstName() }}
             {{ graded_gradeable.getSubmitter().getUser().getDisplayedLastName() }}
         {% else %}
-            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsers() -%}
+            {%- for member in graded_gradeable.getSubmitter().getTeam().getMemberUsersSorted() -%}
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}

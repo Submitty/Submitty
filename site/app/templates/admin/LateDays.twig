@@ -14,7 +14,7 @@
                 <input class="option-input" type="text" name="user_id" id="user_id">
             </label>
             <label for="datestamp">
-                Datestamp (YYYY-MM-DD):
+                Datestamp:
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
@@ -84,37 +84,34 @@
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
-    flatpickr("#datestamp", {
-            plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Now"
-                            },
-                            {
-                                label: "End of time"
-                            }
-                        ],
-                        label: "or",
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0:
-                                    date = new Date();
-                                    break;
-                                case 1:
-                                    date = new Date("01/01/9998");
-                                    break;
-                            }
-                            fp.setDate(date, true);
-                        }
-                    }
-                )],
-            allowInput: true,
-            dateFormat: "Y-m-d",
-            onReady: (a, b, fp) => {
-              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-            }
-        });
 
+    flatpickr("#datestamp", {
+        plugins: [ShortcutButtonsPlugin(
+            {
+                button: [
+                    {
+                        label: "Now"
+                    }
+                ],
+                onClick: (index, fp) => {
+                    let date;
+                    switch (index) {
+                        case 0:
+                            date = new Date();
+                            break;
+                    }
+                    fp.setDate(date);
+                }
+            }
+        )],
+        allowInput: true,
+        enableTime: true,
+        enableSeconds: true,
+        time_24hr: true,
+        dateFormat: "Y-m-d H:i:S",
+        onReady: (a, b, fp) => {
+            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+        }
+    });
 </script>

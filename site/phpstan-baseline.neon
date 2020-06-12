@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Offset int does not exist on array\\(\\?0 \\=\\> 'results'\\|'results_public'\\|'submissions', \\?1 \\=\\> 'checkout'\\|'results_public', \\?2 \\=\\> 'results'\\|'results_public', \\?3 \\=\\> 'results_public'\\)\\.$#"
-			count: 3
-			path: app/controllers/MiscController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$show_all\\)\\: Unexpected token \"\\$show_all\", expected type at offset 18$#"
 			count: 1
 			path: app/controllers/NotificationController.php
@@ -237,12 +232,17 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 46$#"
+			count: 2
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 46$#"
 			count: 1
 			path: app/controllers/pdf/PDFController.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 3
+			count: 4
 			path: app/controllers/pdf/PDFController.php
 
 		-
@@ -296,11 +296,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^PHPDoc tag @param for parameter \\$iterators with type array\\<Iterator\\> is not subtype of native type array\\<int, mixed\\>\\.$#"
-			count: 1
-			path: app/libraries/CascadingIterator.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$course\\)\\: Unexpected token \"\\$course\", expected type at offset 484$#"
 			count: 1
 			path: app/libraries/Core.php
@@ -324,81 +319,6 @@ parameters:
 			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected type at offset 230$#"
 			count: 1
 			path: app/libraries/DateUtils.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$actual_file\\)\\: Unexpected token \"\\$actual_file\", expected type at offset 175$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$diff_file\\)\\: Unexpected token \"\\$diff_file\", expected type at offset 231$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$expected_file\\)\\: Unexpected token \"\\$expected_file\", expected type at offset 202$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$id_prepend\\)\\: Unexpected token \"\\$id_prepend\", expected type at offset 288$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$image_difference\\)\\: Unexpected token \"\\$image_difference\", expected type at offset 256$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$actual \\(array\\) does not accept string\\|false\\.$#"
-			count: 2
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$expected \\(array\\) does not accept string\\|false\\.$#"
-			count: 2
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string Option for displaying\\. Currently only supports show empty space\\)\\: Unexpected token \"Option\", expected variable at offset 78$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string Option for displaying\\. Currently only supports show empty space\\)\\: Unexpected token \"Option\", expected variable at offset 73$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$html the original HTML before any text transformation\\)\\: Unexpected token \"\\$html\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$with_escape Show escape characters instead of character representations\\)\\: Unexpected token \"\\$with_escape\", expected type at offset 87$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$description \\(What is the description of this character\\)\\)\\: Unexpected token \"\\$description\", expected type at offset 111$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$text String\\)\\: Unexpected token \"\\$text\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$what String\\)\\: Unexpected token \"\\$what\", expected type at offset 45$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$which String\\(Reference\\)\\)\\: Unexpected token \"\\$which\", expected type at offset 72$#"
-			count: 1
-			path: app/libraries/DiffViewer.php
 
 		-
 			message: "#^Call to an undefined method Throwable\\:\\:getDetails\\(\\)\\.$#"
@@ -526,79 +446,14 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:\\$link \\(PDO\\) does not accept null\\.$#"
+			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$httpRequest\\.$#"
 			count: 1
-			path: app/libraries/database/AbstractDatabase.php
+			path: app/libraries/socket/Server.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$callback\\)\\: Unexpected token \"\\$callback\", expected type at offset 484$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$parameters\\)\\: Unexpected token \"\\$parameters\", expected type at offset 458$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$query\\)\\: Unexpected token \"\\$query\", expected type at offset 437$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$columns\\)\\: Unexpected token \"\\$columns\", expected type at offset 40$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$result\\)\\: Unexpected token \"\\$result\", expected type at offset 18$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$value\\)\\: Unexpected token \"\\$value\", expected type at offset 288$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:convertBoolean\\(\\) should return string but returns int\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:newSession\\(\\) should return string but return statement is missing\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Cannot access offset 'status' on bool\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$type\\)\\: Unexpected token \"\\$type\", expected type at offset 153$#"
-			count: 1
-			path: app/libraries/response/JsonResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected type at offset 55$#"
-			count: 1
-			path: app/libraries/response/RedirectResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view_class\\)\\: Unexpected token \"\\$view_class\", expected type at offset 204$#"
-			count: 1
-			path: app/libraries/response/WebResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$view_function\\)\\: Unexpected token \"\\$view_function\", expected type at offset 230$#"
-			count: 1
-			path: app/libraries/response/WebResponse.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$logged_in\\)\\: Unexpected token \"\\$logged_in\", expected type at offset 96$#"
-			count: 1
-			path: app/libraries/routers/WebRouter.php
+			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$resourceId\\.$#"
+			count: 5
+			path: app/libraries/socket/Server.php
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected type at offset 350$#"
@@ -766,11 +621,6 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected type at offset 87$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$status\\)\\: Unexpected token \"\\$status\", expected type at offset 68$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
@@ -801,13 +651,33 @@ parameters:
 			path: app/views/PDFView.php
 
 		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 205$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$file_name\\)\\: Unexpected token \"\\$file_name\", expected type at offset 155$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
 			count: 1
 			path: app/views/PDFView.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 104$#"
+			message: "#^PHPDoc tag @param has invalid value \\(\\$file_path\\)\\: Unexpected token \"\\$file_path\", expected type at offset 180$#"
 			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$page_num\\)\\: Unexpected token \"\\$page_num\", expected type at offset 301$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 104$#"
+			count: 2
 			path: app/views/PDFView.php
 
 		-
@@ -816,8 +686,18 @@ parameters:
 			path: app/views/PDFView.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
+			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 237$#"
 			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$rerender_annotated_pdf\\)\\: Unexpected token \"\\$rerender_annotated_pdf\", expected type at offset 263$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
+			count: 2
 			path: app/views/PDFView.php
 
 		-
@@ -826,8 +706,13 @@ parameters:
 			path: app/views/PDFView.php
 
 		-
-			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
+			message: "#^Method app\\\\views\\\\PDFView\\:\\:downloadPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
 			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
+			count: 2
 			path: app/views/PDFView.php
 
 		-
@@ -859,3 +744,4 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
+
