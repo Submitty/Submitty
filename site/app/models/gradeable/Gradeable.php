@@ -472,7 +472,7 @@ class Gradeable extends AbstractModel {
     }
 
    
-    public function setRandomPeerGradersList(&$input) {
+    public function setRandomPeerGradersList(&$input)   {
         $bad_rows = [];
         foreach ($input as $grader => $grading_list) {
             if ($this->core->getQueries()->getUserById($grading_list[0]) == null) {
@@ -489,13 +489,11 @@ class Gradeable extends AbstractModel {
         else {
             $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
             foreach ($input as $grading_list) {
-                    for($j=0;$j<sizeof($grading_list[1]);$j++){
-                    $this->core->getQueries()->insertPeerGradingAssignment($grading_list[0], $grading_list[1][$j], $this->getId());
-                    $this->modified = true;
-                    $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
-                } 
-           
-               
+                for ($j = 0; $j < count($grading_list[1]); $j++) {
+                $this->core->getQueries()->insertPeerGradingAssignment($grading_list[0], $grading_list[1][$j], $this->getId());
+                $this->modified = true;
+                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+                    }           
             }
         }
     }
