@@ -33,6 +33,7 @@ use app\libraries\FileUtils;
  * @method string getConfigPath()
  * @method string getAuthentication()
  * @method \DateTimeZone getTimezone()
+ * @method setTimezone(\DateTimeZone $timezone)
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
  * @method string getCourseJsonPath()
