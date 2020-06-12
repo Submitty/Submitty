@@ -126,7 +126,7 @@ class AutoGradedVersion extends AbstractModel {
             $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
 
             // Now load all files in the directory, flattening the results
-            $submitted_files = FileUtils::getAllFiles($path, array(), true);
+            $submitted_files = FileUtils::getAllFiles($path, [], true);
             foreach ($submitted_files as $file => $details) {
                 if (substr(basename($file), 0, 1) === '.') {
                     $this->meta_files[$dir][$file] = $details;
@@ -156,7 +156,7 @@ class AutoGradedVersion extends AbstractModel {
     public function getTestcaseMessages() {
         $this->loadTestcases();
 
-        $output = array();
+        $output = [];
 
         // If results were found then append message arrays to output array
         // where key is the testcase_label
@@ -169,7 +169,7 @@ class AutoGradedVersion extends AbstractModel {
                     // If this testcase_label doesn't already exist as a key in the output array, then create a
                     // child array for that testcase_label
                     if (!array_key_exists($testcase_label, $output)) {
-                        $output[$testcase_label] = array();
+                        $output[$testcase_label] = [];
                     }
 
                     $autochecks = $graded_testcase->getAutochecks();
@@ -290,10 +290,10 @@ class AutoGradedVersion extends AbstractModel {
         if ($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return array(
+        return [
             'submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [],
             'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []
-        );
+        ];
     }
 
     /**
@@ -304,7 +304,7 @@ class AutoGradedVersion extends AbstractModel {
         if ($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return array('submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []);
+        return ['submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []];
     }
 
     /**

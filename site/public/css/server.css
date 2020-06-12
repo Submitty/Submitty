@@ -512,7 +512,7 @@ td>a.active-sort {
     margin: 5px auto;
 }
 
-.file-upload-table td {
+.file-upload-table td, .file-upload-table th {
     border: none;
     vertical-align: middle;
     padding: 1px 10px;
@@ -1955,4 +1955,8 @@ header > * {
 .pre_forum {
     font-family: inherit;
     max-width: 70vw;
+}
+
+.block {
+  display: block;
 }

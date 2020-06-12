@@ -18,7 +18,7 @@ class PlagiarismView extends AbstractView {
         <a class="btn btn-primary" href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'new'])}">+ Configure New Gradeable for Plagiarism Detection</a>
     </div><br /><br />
     <div class="sub">
-    <center>
+    <div>
     <table style="border-collapse: separate;border-spacing: 15px 10px;">
 HTML;
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -30,10 +30,10 @@ HTML;
 
             if (file_exists($course_path . "/lichen/ranking/" . $id . ".txt")) {
                 $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $id . ".txt"));
-                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), array('.', '..'));
+                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), ['.', '..']);
                 $submissions = 0;
                 foreach ($students as $student) {
-                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $id . "/" . $student), array('.', '..')));
+                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $id . "/" . $student), ['.', '..']));
                 }
                 $students = count($students);
             }
@@ -101,7 +101,7 @@ HTML;
                 }
                 else {
                     $content = file_get_contents($ranking_file_path);
-                    $content = trim(str_replace(array("\r", "\n"), '', $content));
+                    $content = trim(str_replace(["\r", "\n"], '', $content));
                     $rankings = preg_split('/ +/', $content);
                     $rankings = array_chunk($rankings, 3);
                     $matches_and_topmatch = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
@@ -138,7 +138,7 @@ HTML;
         }
 
         $return .= <<<HTML
-    </table></center>
+    </table></div>
     </div>
 </div>
 HTML;
@@ -240,7 +240,7 @@ HTML;
                         <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
                         <p>Note: Deleting plagiarism results will also delete the saved configuration for the gradeable.</p><br>
                         Are you sure to delete Plagiarism Results for
-                        <b><div name="gradeable_title"></div></b>
+                        <div name="gradeable_title"></div>
                         <div class="form-buttons">
                             <div class="form-button-container">
                                 <a onclick="$('#delete-plagiarism-result-and-config-form').css('display', 'none');" class="btn btn-default">Cancel</a>
@@ -304,7 +304,7 @@ HTML;
             $language[$saved_config['language']] = "selected";
 
             if ($saved_config["instructor_provided_code"] == true) {
-                $provided_code_filename_array = (array_diff(scandir($saved_config["instructor_provided_code_path"]), array(".", "..")));
+                $provided_code_filename_array = (array_diff(scandir($saved_config["instructor_provided_code_path"]), [".", ".."]));
                 foreach ($provided_code_filename_array as $filename) {
                     $provided_code_filename = $filename;
                 }

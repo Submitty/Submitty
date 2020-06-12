@@ -190,9 +190,9 @@ def send_email():
     """Send queued emails."""
     db, metadata = setup_db()
     queued_emails = get_email_queue(db)
-    mail_client = construct_mail_client()
-    if not EMAIL_ENABLED or len(queued_emails) == 0:
+    if len(queued_emails) == 0:
         return
+    mail_client = construct_mail_client()
 
     success_count = 0
 
@@ -230,6 +230,8 @@ def send_email():
 
 
 def main():
+    if not EMAIL_ENABLED:
+        return
     """Send queued Submitty emails and log any errors."""
     try:
         send_email()

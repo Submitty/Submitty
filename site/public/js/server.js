@@ -303,10 +303,17 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
     }
     $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
+    captureTabInModal("edit-course-materials-form");
 }
-function captureTabInModal(formName){
 
-  var form = $("#".concat(formName));
+var lastActiveElement = null;
+function captureTabInModal(formName, resetFocus=true){
+    if(resetFocus){
+        lastActiveElement = document.activeElement;
+    }
+
+    var form = $("#".concat(formName));
+    form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -314,7 +321,9 @@ function captureTabInModal(formName){
     var lastInput = inputs.last();
 
     /*set focus on first element*/
-    firstInput.focus();
+    if(resetFocus){
+      firstInput.focus();
+    }
 
     /*redirect last tab to first element*/
     form.on('keydown', function (e) {
@@ -328,15 +337,19 @@ function captureTabInModal(formName){
         }
     });
 
-    form.on('hidden.bs.modal', function () {
-        releaseTabFromModal(formName);
-    })
+    //Watch for the modal to be hidden
+    let observer = new MutationObserver(function(){
+        if(form[0].style.display === 'none'){
+            releaseTabFromModal(formName);
+        }
+    });
+    observer.observe(form[0], { attributes: true, childList: true });
 }
 
 function releaseTabFromModal(formName){
-
     var form = $("#".concat(formName));
     form.off('keydown');
+    lastActiveElement.focus();
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
@@ -518,7 +531,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'First Name,Last Name,User ID,Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -528,7 +541,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -536,7 +549,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -544,7 +557,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -553,17 +566,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -572,10 +585,15 @@ function downloadCSV(code) {
         }
     });
 
+    // Setup default name for the CSV file
+    let course = $('#download_info_json_id').data('course');
+    let semester = $('#download_info_json_id').data('semester');
+    let csv_name = [semester, course, 'users', 'data'].join('_') + '.csv'
+
     var temp_element = $('<a id="downloadlink"></a>');
     var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
     temp_element.attr('href', address);
-    temp_element.attr('download', 'submitty_user_emails.csv');
+    temp_element.attr('download', csv_name);
     temp_element.css('display', 'none');
     $(document.body).append(temp_element);
     $('#downloadlink')[0].click();
@@ -807,6 +825,52 @@ function togglePageDetails() {
 }
 
 /**
+ * Opens a new tab on https://validator.w3.org with the contents of the current html page
+ */
+function validateHtml() {
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  function c(a, b) {
+    const c = document.createElement("textarea");
+    c.name = a;
+    c.value = b;
+    d.appendChild(c)
+  }
+  const e = ((a) => {
+      for (var b = "", a = a.firstChild; a;) {
+        switch (a.nodeType) {
+          case Node.ELEMENT_NODE:
+            b += a.outerHTML;
+            break;
+          case Node.TEXT_NODE:
+            b += a.nodeValue;
+            break;
+          case Node.CDATA_SECTION_NODE:
+            b += "<![CDATA[" + a.nodeValue + "]]\>";
+            break;
+          case Node.COMMENT_NODE:
+            b += "<\!--" + a.nodeValue + "--\>";
+            break;
+          case Node.DOCUMENT_TYPE_NODE:
+            b += "<!DOCTYPE " + a.name + ">\n"
+        }
+        a = a.nextSibling
+      }
+      return b
+  })(document);
+  const d = document.createElement("form");
+  d.method = "POST";
+  d.action = "https://validator.w3.org/nu/";
+  d.enctype = "multipart/form-data";
+  d.target = "_blank";
+  d.acceptCharset = "utf-8";
+  c("showsource", "yes");
+  c("content", e);
+  document.body.appendChild(d);
+  d.submit();
+  d.outerHTML = "";
+}
+
+/**
  * Remove an alert message from display. This works for successes, warnings, or errors to the
  * user
  * @param elem
@@ -905,6 +969,11 @@ function check_lichen_jobs(url, semester, course) {
 
 function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+}
+
+function downloadStudentAnnotations(url, path, dir) {
+    window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
+    //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
 function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
@@ -1272,19 +1341,23 @@ function loadOverriddenGrades(g_id) {
 }
 
 function refreshOnResponseOverriddenGrades(json) {
-    var form = $("#load-overridden-grades");
-    $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
-    $('#title').replaceWith(title);
+    const form = $("#load-overridden-grades");
+    $('#grade-override-table tr:gt(0)').remove();
+    let title = 'Overridden Grades for ' + json['data']['gradeable_id'];
+    $('#title').text(title);
     if(json['data']['users'].length === 0){
-        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+      $("#load-overridden-grades").addClass('d-none');
+      $("#empty-table").removeClass('d-none');
+      $('#empty-table').text('There are no overridden grades for this homework');
     }
     else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
-            $('#my_table').append(bits.join('</td><td>'));
+            let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
+      $("#load-overridden-grades").removeClass('d-none');
+      $("#empty-table").addClass('d-none');
     }
 }
 
