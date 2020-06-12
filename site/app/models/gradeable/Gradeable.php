@@ -475,12 +475,9 @@ class Gradeable extends AbstractModel {
     public function setRandomPeerGradersList(&$input) {
         $bad_rows = [];
         foreach ($input as $grader => $grading_list) {
-           /* if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
-                array_push($bad_rows, ($vals["student"]));
+            if ($this->core->getQueries()->getUserById($grading_list[0]) == null) {
+                array_push($bad_rows, ($grading_list[0]));
             }
-            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
-                array_push($bad_rows, ($vals["grader"]));
-            }*/
         }
         if (!empty($bad_rows)) {
             $msg = "The given user id is not valid: ";
@@ -492,13 +489,12 @@ class Gradeable extends AbstractModel {
         else {
             $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
             foreach ($input as $grading_list) {
-              //  for($i=0;$i<sizeof($grading_list);++$i){
                     for($j=0;$j<sizeof($grading_list[1]);$j++){
                     $this->core->getQueries()->insertPeerGradingAssignment($grading_list[0], $grading_list[1][$j], $this->getId());
                     $this->modified = true;
                     $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
                 } 
-            //}
+           
                
             }
         }
