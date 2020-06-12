@@ -16,7 +16,7 @@ class ImagesController extends AbstractController {
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
-        if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
+        if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER))) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
             $this->core->redirect($this->core->buildCourseUrl());
             return;
@@ -139,7 +139,7 @@ class ImagesController extends AbstractController {
                             $extension = $meta['extension'];
 
                             // If user is a member of this course then go ahead and save
-                            if(in_array($user_id, $users)) {
+                            if (in_array($user_id, $users)) {
                                 DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $file, 'system_images');
                             }
                         }
@@ -157,8 +157,8 @@ class ImagesController extends AbstractController {
                         return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: " . $error_message . ".", false);
                     }
                 }
-                // Item was an individual image
                 else {
+                    // Item was an individual image
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $tmp_path = $uploaded_files[1]["tmp_name"][$j];
 
@@ -167,7 +167,7 @@ class ImagesController extends AbstractController {
                         $extension = $meta[1];
 
                         // If user is a member of this course then go ahead and save
-                        if(in_array($user_id, $users)) {
+                        if (in_array($user_id, $users)) {
                             DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $tmp_path, 'system_images');
                         }
                     }

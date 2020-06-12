@@ -99,7 +99,6 @@ class HomePageController extends AbstractController {
 
             // If we received an image file attempt to save it
             if ($_FILES['user_image']['tmp_name'] !== '') {
-
                 $meta = explode('.', $_FILES['user_image']['name']);
                 $file_name = $meta[0];
                 $extension = $meta[1];

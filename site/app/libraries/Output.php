@@ -105,7 +105,6 @@ class Output {
                 return <<<HTML
 <img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
 HTML;
-            throw new OutputException('Invalid image data');
         }, ['is_safe' => ['html']]));
 
         $this->twig->addFunction(new \Twig\TwigFunction("plurality_picker", function ($num, $single, $plural) {

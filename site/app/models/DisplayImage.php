@@ -15,8 +15,7 @@ use app\libraries\FileUtils;
  * DisplayImage model represents a user's personal head shot.  Users may have multiple images in their user_data
  * directory, and DisplayImage takes care of selecting the single most appropriate image for display.
  */
-class DisplayImage extends AbstractModel
-{
+class DisplayImage extends AbstractModel {
     /** @var string[] The set of legal display_image_state which may be collected from the DB */
     const LEGAL_IMAGE_STATES = ['system', 'preferred', 'flagged'];
 
@@ -57,9 +56,11 @@ class DisplayImage extends AbstractModel
             throw new BadArgumentException('Unknown display_image_state!');
         }
 
+        $sub_dir = null;
         if ($display_image_state === 'system' || $display_image_state === 'flagged') {
             $sub_dir = 'system_images';
-        } else if ($display_image_state === 'preferred') {
+        }
+        elseif ($display_image_state === 'preferred') {
             $sub_dir = 'user_images';
         }
 
@@ -78,7 +79,7 @@ class DisplayImage extends AbstractModel
         });
 
         // Ensure image is readable
-        if(!is_readable($files[0])) {
+        if (!is_readable($files[0])) {
             throw new FileReadException('Unable to read the display image.');
         }
 
@@ -150,7 +151,7 @@ class DisplayImage extends AbstractModel
         if ($cols >= $rows && $cols > $max_dimension) {
             $image->scaleImage($max_dimension, 0);
         }
-        else if ($rows > $max_dimension) {
+        elseif ($rows > $max_dimension) {
             $image->scaleImage(0, $max_dimension);
         }
     }
