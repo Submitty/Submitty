@@ -248,7 +248,19 @@ int main(int argc, char *argv[]) {
               out_notebook_cell["width"] = width;
           }
       }
+      // Handle file_submission
+      else if(type == "file_submission"){
+          // required field
+          std::string directory = in_notebook_cell.value("directory","");
+          assert (directory != "");
 
+          // optional field
+          std::string label = in_notebook_cell.value("label","");
+
+          // Pass forward populated items
+          out_notebook_cell["directory"] = directory;
+          out_notebook_cell["label"] = label;
+      }
       // Handle short_answer data
       else if(type == "short_answer"){
           // Get req short_answer items
