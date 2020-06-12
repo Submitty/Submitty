@@ -402,7 +402,7 @@ class AutoGradingView extends AbstractView {
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
             if (is_dir($annotation_path)) {
-            $dir_iter = new \DirectoryIterator($annotation_path);
+                $dir_iter = new \DirectoryIterator($annotation_path);
                 foreach ($dir_iter as $fileInfo) {
                     if ($fileInfo->isFile() && !$fileInfo->isDot()) {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
