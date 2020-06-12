@@ -47,20 +47,17 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-    /* Used in ajaxRandomizePeets as a helper function.
-    @param  $type
-    */
-    public function arr_rotate($array,$rotate_count) {
-        
-    }
+
+    
     /**
-        * Route for randomizing peer assignments
+        * Route for randomizing peer assignments with 'One Grades Many'
         * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
         * @AccessControl(role="INSTRUCTOR")
     */ 
     public function ajaxRandomizePeers($gradeable_id){
         /* How does this function work? 
         1 - Number of students to grade (Y) is taken from the client using POST
+            1.1 - If the number is > number of students, then ALL grade ALL. 
         2 - Query DB to get students from registration section(X) (Without taking in students in NULL section)
         3 - Randomize the order of students
         4 - Randomly Select Y offsets
@@ -72,6 +69,7 @@ class ElectronicGraderController extends AbstractController {
              $this->core->addErrorMessage('Invalid Gradeable!');
              $this->core->redirect($this->core->buildCourseUrl());
          }
+         $all_grade_all=false;
          $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
          $student_array= [];
          $student_list= [];
@@ -84,6 +82,26 @@ class ElectronicGraderController extends AbstractController {
               ]);
               array_push($student_array,$student->getId());
           }
+         $number_of_students=sizeof($student_list);
+         if($number_to_grade>$number_of_students){
+            $all_grade_all=true;}
+       
+           if($all_grade_all){
+            $this->core->getOutput()->renderJSONSuccess("Invalid Number of Students Entered");
+               $final_grading_info=[];
+                for($grader=0;$grader<sizeof($student_array);++$grader){
+                    $peer_array=[];
+                    for($peer=0;$peer<sizeof($student_array);++$peer){
+                     if($grader === $peer) {continue; }
+                     else {
+                        array_push($peer_array,$student_array[$peer]);
+                     }
+                }
+               array_push($final_grading_info,[$student_array[$grader],$peer_array]);
+            }   
+            $gradeable->setRandomPeerGradersList($final_grading_info); 
+            return; 
+         }
           $graded_array=$student_array;
           /*n_array_peers : An Array of arrays that holds information on to be graded peers
           [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
@@ -119,8 +137,11 @@ class ElectronicGraderController extends AbstractController {
           }
           $this->core->getOutput()->renderJsonSuccess($final_grading_info);
           $gradeable->setRandomPeerGradersList($final_grading_info);
-       
-         }
+          if($number_to_grade<1){
+            $this->core->getOutput()->renderJsonError("Clear Peer Matrix");
+            return;
+        }
+    }
     /**
      * Route for getting whitespace information for the diff viewer
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output/remove")
