@@ -105,12 +105,13 @@ jobs:
             - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
           packages:
             - imagemagick
+            - php-imagick
       before_install:
         - phpenv config-rm xdebug.ini
       install:
         - pecl install ds
         - pecl install pcov
-        - pecl install imagemagick
+        - pecl install imagick
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
         - popd
@@ -202,12 +203,13 @@ jobs:
             - libboost-all-dev
             - jq
             - imagemagick
+            - php-imagick
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - phpenv config-rm xdebug.ini
       install:
         - pecl install ds
-        - pecl install imagemagick
+        - pecl install imagick
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
         - sudo add-apt-repository -y ppa:ondrej/php
         - sudo apt-get -qq update
