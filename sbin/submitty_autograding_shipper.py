@@ -21,6 +21,8 @@ import random
 
 import requests
 
+from math import floor
+
 from autograder import autograding_utils
 from autograder import packer_unpacker
 
@@ -319,6 +321,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         else:
           local_done_queue_file = target_done_queue_file
           local_results_zip = target_results_zip
+          upload_file(local_results_zip, 'results.zip')
     else:
         ssh = sftp = fd1 = fd2 = local_done_queue_file = local_results_zip = None
         try:
@@ -805,47 +808,131 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
 
 # ==================================================================================
 # ==================================================================================
-def can_short_circuit_job(job: str) -> bool:
-    """
-    Check whether a job can be short-circuited.
+def can_short_circuit_job(autograding_config: str) -> bool:
+    """Check if a job can be short-circuited.
 
-    Currently, a job can be short-circuited if its autograding configuration
-    has at least one autograding test case. This is available through the
-    `autograde_count` value in the queue file JSON. If this value is not in
-    the JSON, or if the file could not be opened, we assume it cannot be
-    short-circuited.
+    Currently, a job can be short-circuited if either:
+
+    * It has no autograding test cases
+    * It has one autograding test case and that test case is the submission limit check.
     """
     try:
-        with open(job) as queue_file_json:
-            queue_file = json.loads(queue_file_json)
-    except Exception:
-        # We couldn't read this file for some reason. It's safer to assume it
-        # can't be short-circuited.
+        with open(autograding_config) as f:
+            config = json.load(f)
+    except:
         return False
-    if 'autograde_count' in queue_file:
-        return queue_file['autograde_count'] > 0
+
+    testcases = config['testcases']
+    if len(testcases) == 0:
+        # No test cases, so this is trivially short-circuitable.
+        return True
+    elif len(testcases) == 1:
+        # We have only one test case; check if it's a submission limit check
+        testcase = testcases[0]
+        return testcase['type'] == 'FileCheck' and testcase['title'] == 'Submission Limit'
     else:
         return False
 
 
-# ==================================================================================
-# ==================================================================================
-def short_circuit(job: str):
-    """
-    Short-circuit a job.
-
-    This function creates the results for the given job.
-    """
-    try:
-        with open(job) as queue_file_json:
-            queue_file = json.loads(queue_file_json)
-    except Exception as ex:
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                      message=f"Could not open queue file: {ex}")
-        return
+def check_submission_limit_penalty_inline(autograding_config: str,
+                                          queue_obj: dict,
+                                          results_json: str,
+                                          grade_txt: str) -> dict:
+    """Check if a submission violates the submission limit.
     
-    # If the job is a VCS job, we want to check the directory out.
+    Note that this function makes the assumption that the file being graded is
+    short-circuitable (i.e. only has one test case; the sentinel "submission
+    limit" test case).
+    """
 
+    ###########################################################################
+    #
+    # NOTE: Editing this? Make sure this function stays in-sync with the
+    #       my_testcase.isSubmissionLimit() branch in
+    #       grading/main_validator.cpp::ValidateATestCase()
+    #
+    ###########################################################################
+
+    with open(autograding_config) as f:
+        config = json.load(f)
+    subnum = queue_obj['version']
+    testcase = config['testcases'][0]
+    penalty = testcase['penalty']
+    possible_points = testcase['points']
+    max_submissions = testcase['max_submissions']
+
+    excessive = max(subnum - max_submissions, 0)
+    points = floor(excessive * penalty)
+    points = max(points, possible_points)
+    view_testcase = points == 0
+    
+    return {
+        'test_name': f"Test 1 {testcase['title']}",
+        'view_testcase': view_testcase,
+        'points_awarded': points
+    }
+
+
+def write_grading_outputs(testcases: list,
+                          testcase_outputs: list,
+                          results_json: str,
+                          grade_txt: str):
+    """Write the grading output data to the specified paths."""
+
+    ###########################################################################
+    #
+    # NOTE: Editing this file? Make sure that this function stays in-sync with
+    #       grading/main_validator.cpp::validateTestCase()
+    #
+    ###########################################################################
+
+    with open(results_json, 'w') as fd:
+        json.dump(results, fd)
+    
+    with open(config_json) as fd:
+        config = json.load(fd)
+
+    max_auto_points = sum(tc['points'] for tc in testcases)
+    max_nonhidden_auto_points = sum(
+        tc['points'] for tc in testcases if not tc.get('hidden', False)
+    )
+
+    auto_points = sum(r['points_awarded'] for r in testcase_outputs)
+    nonhidden_auto_points = sum(
+        r['points_awarded']
+        for r, tc in zip(testcase_outputs, testcases)
+        if not tc.get('hidden', False)
+    )
+    
+    with open(grade_txt, 'w') as fd:
+        # Write each test case's individual output
+        for i, tc in enumerate(testcases):
+            title = tc['title']
+            extra_credit = tc.get('extra_credit', False)
+            max_points = tc['points']
+            points = testcase_outputs[i]['points_awarded']
+            fd.write(f"Testcase {i:3}: {title:<50} ")
+
+            if extra_credit:
+                if points > 0:
+                    fd.write(f"+{points:2} points")
+                else:
+                     fd.write(' ' * 10)
+            elif max_points < 0:
+                if points < 0:
+                    fd.write(f"{points:3} points")
+                else:
+                    fd.write(' ' * 10)
+            else:
+                fd.write(f"{points:3} / {max_points:3}  ")
+            
+            if tc.get('hidden', False):
+                fd.write("  [ HIDDEN ]")
+            fd.write('\n')
+        
+        # Write the final lines
+        fd.write(f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n")
+        fd.write(f"{'Non-hidden automatic grading total:':<64}{nonhidden_auto_points:3} /{max_nonhidden_auto_points:3}\n")
 
 
 # ==================================================================================
