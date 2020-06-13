@@ -362,7 +362,7 @@ class UsersController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/delete_user", methods={"POST"})
-     * @param "users"|"graders" $type
+     * @param string $type
      * @return RedirectResponse
      */
     public function deleteUser(string $type = 'users'): RedirectResponse {
