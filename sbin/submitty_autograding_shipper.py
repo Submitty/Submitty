@@ -413,6 +413,12 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
+    # Try to short-circuit this job. If it's possible, then great! Clean
+    # everything up and return.
+    if try_short_circuit(queue_file):
+        grading_cleanup(queue_file, grading_file)
+        return
+
     #TODO: break which_machine into id, address, and passphrase.
     
     try:
@@ -444,6 +450,10 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         print (my_name, " ERROR attempting to grade item: ", queue_file, " exception=",str(e))
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
+    grading_cleanup(queue_file, grading_file)
+
+
+def grading_cleanup(queue_file, grading_file):
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
     try:
