@@ -47,6 +47,7 @@ def worker_folder(worker_name):
     return os.path.join(IN_PROGRESS_PATH, worker_name)
 
 def upload_file(local, remote):
+    return
     with open(local, 'rb') as fd:
         buf = fd.read()
     resp = requests.put(f'http://localhost:8080/{remote}', data=buf)
@@ -808,7 +809,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
 
 # ==================================================================================
 # ==================================================================================
-def can_short_circuit_job(autograding_config: str) -> bool:
+def can_short_circuit(config_obj: str) -> bool:
     """Check if a job can be short-circuited.
 
     Currently, a job can be short-circuited if either:
@@ -816,13 +817,8 @@ def can_short_circuit_job(autograding_config: str) -> bool:
     * It has no autograding test cases
     * It has one autograding test case and that test case is the submission limit check.
     """
-    try:
-        with open(autograding_config) as f:
-            config = json.load(f)
-    except:
-        return False
 
-    testcases = config['testcases']
+    testcases = config_obj['testcases']
     if len(testcases) == 0:
         # No test cases, so this is trivially short-circuitable.
         return True
@@ -834,10 +830,8 @@ def can_short_circuit_job(autograding_config: str) -> bool:
         return False
 
 
-def check_submission_limit_penalty_inline(autograding_config: str,
-                                          queue_obj: dict,
-                                          results_json: str,
-                                          grade_txt: str) -> dict:
+def check_submission_limit_penalty_inline(config_obj: dict,
+                                          queue_obj: dict) -> dict:
     """Check if a submission violates the submission limit.
     
     Note that this function makes the assumption that the file being graded is
@@ -853,10 +847,8 @@ def check_submission_limit_penalty_inline(autograding_config: str,
     #
     ###########################################################################
 
-    with open(autograding_config) as f:
-        config = json.load(f)
     subnum = queue_obj['version']
-    testcase = config['testcases'][0]
+    testcase = config_obj['testcases'][0]
     penalty = testcase['penalty']
     possible_points = testcase['points']
     max_submissions = testcase['max_submissions']
@@ -871,6 +863,80 @@ def check_submission_limit_penalty_inline(autograding_config: str,
         'view_testcase': view_testcase,
         'points_awarded': points
     }
+
+
+def try_short_circuit(queue_file: str) -> bool:
+    with open(queue_file) as fd:
+        queue_obj = json.load(fd)
+    
+    course_path = os.path.join(SUBMITTY_DATA_DIR,
+                               'courses',
+                               obj['semester'],
+                               obj['course'])
+
+    config_path = os.path.join(course_path,
+                               'config',
+                               'complete_config',
+                               f'complete_config_{obj["gradeable"]}.json')
+
+    with open(config_path) as fd:
+        config_obj = json.load(fd)
+
+    if not can_short_circuit(config_obj):
+        return False
+
+    gradeable_id = f"{obj['semester']}/{obj['course']}/{obj['gradeable']}"
+    autograding_utils.log_message(f"Short-circuiting {gradeable_id}",
+                                  job_id=JOB_ID)
+
+    base_dir = tempfile.mkdtemp()
+    results_dir = os.path.join(base_dir, 'TMP_RESULTS')    
+    results_json_path = os.path.join(results_dir, 'results.json')
+    grade_txt_path = os.path.join(results_dir, 'grade.txt')
+    queue_file_json_path = os.path.join(results_dir, 'queue_file.json')
+    logs_dir = os.path.join(results_dir 'logs')
+
+    os.makedirs(results_dir, exist_ok=True)
+    os.makedirs(logs_dir, exist_ok=True)
+    shutil.copy(queue_file, queue_file_json_path)
+
+    testcases = config_obj['testcases']
+    testcase_outputs = []
+
+    testcase_outputs.append(
+        check_submission_limit_penalty_inline(config_obj, queue_obj)
+    )
+
+    write_grading_outputs(testcases, testcase_outputs,
+                          results_json_path, grade_txt_path)
+
+    try:
+        autograding_utils.archive_autograding_results(base_dir,
+                                                    queue_obj['job_id'],
+                                                    'localhost',
+                                                    config_obj,
+                                                    queue_obj,
+                                                    AUTOGRADING_LOG_PATH,
+                                                    AUTOGRADING_STACKTRACE_PATH,
+                                                    False)
+
+        results_zip_path = os.path.join(base_dir, 'results.zip')
+        autograding_utils.zip_my_directory(results_dir, results_zip_path)
+        packer_unpacker.unpack_grading_results_zip('localhost',
+                                                'localhost',
+                                                results_zip_path)
+    except Exception as e:
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                      message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade."
+                                      job_id=JOB_ID)
+        autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH,
+                                          trace=traceback.format_exc(),
+                                          job_id=JOB_ID)
+        return False
+    finally:
+        shutil.rmtree(base_dir, ignore_errors=True)
+
+    return True
 
 
 def write_grading_outputs(testcases: list,
