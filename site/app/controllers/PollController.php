@@ -12,7 +12,6 @@ use app\libraries\routers\AccessControl;
 use app\libraries\DateUtils;
 use app\libraries\routers\FeatureFlag;
 
-
 /**
  * @FeatureFlag("polls")
  */
@@ -22,9 +21,9 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/polls", methods={"GET"})
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls", methods={"GET"})
+     * @return MultiResponse
+     */
     public function showPollsPage() {
         if ($this->core->getUser()->accessAdmin()) {
             return MultiResponse::webOnlyResponse(
@@ -50,9 +49,9 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/polls/viewPoll", methods={"POST"})
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls/viewPoll", methods={"POST"})
+     * @return MultiResponse
+     */
     public function showPoll() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -88,10 +87,10 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/polls/newPoll", methods={"GET"})
-    * @AccessControl(role="INSTRUCTOR")
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls/newPoll", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return MultiResponse
+     */
     public function showNewPollPage() {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -103,10 +102,10 @@ class PollController extends AbstractController {
 
 
     /**
-    * @Route("/{_semester}/{_course}/polls/newPoll", methods={"POST"})
-    * @AccessControl(role="INSTRUCTOR")
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls/newPoll", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return MultiResponse
+     */
     public function addNewPoll() {
         if (!isset($_POST["response_count"]) || !isset($_POST["name"]) || !isset($_POST["question"]) || !isset($_POST["release_date"])) {
             $this->core->addErrorMessage("Error occured in adding poll");
@@ -128,9 +127,9 @@ class PollController extends AbstractController {
             );
         }
         $response_count = $_POST["response_count"];
-        $responses = array();
-        $answers = array();
-        $orders = array();
+        $responses = [];
+        $answers = [];
+        $orders = [];
         for ($i = 0; $i < $response_count; $i++) {
             if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
                 $this->core->addErrorMessage("Error occured in adding poll");
@@ -152,10 +151,10 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/polls/setOpen", methods={"POST"})
-    * @AccessControl(role="INSTRUCTOR")
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls/setOpen", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return MultiResponse
+     */
     public function openPoll() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -171,10 +170,10 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/polls/setEnded", methods={"POST"})
-    * @AccessControl(role="INSTRUCTOR")
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls/setEnded", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     * @return MultiResponse
+     */
     public function endPoll() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -190,9 +189,9 @@ class PollController extends AbstractController {
     }
 
     /**
-    * @Route("/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
-    * @return MultiResponse
-    */
+     * @Route("/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
+     * @return MultiResponse
+     */
     public function submitResponse() {
         if (!isset($_POST["poll_id"])) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -295,9 +294,9 @@ class PollController extends AbstractController {
             );
         }
         $response_count = $_POST["response_count"];
-        $responses = array();
-        $answers = array();
-        $orders = array();
+        $responses = [];
+        $answers = [];
+        $orders = [];
         for ($i = 0; $i < $response_count; $i++) {
             if (!isset($_POST["option_id_" . $i]) || !isset($_POST["response_" . $i]) || !isset($_POST["order_" . $i])) {
                 $this->core->addErrorMessage("Error occured in adding poll");
