@@ -533,6 +533,11 @@ function togglePeer() {
     setPeerVisible(!isPeerVisible());
 }
 
+function renderNewTaGradingPage () {
+  // Just add beta as the prefix
+  window.location = window.location.pathname + '/beta' + window.location.search;
+}
+
 function resetModules() {
     var width = $("main").width();
     var height = $("main").height();

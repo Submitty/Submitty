@@ -1,7 +1,7 @@
 #bar_wrapper {
     position: absolute;
     height: 41px;
-    width: 650px;
+    width: max-content;
     top: -90px;
     left: 45%;
     background-color: var(--standard-pale-blue-gray);
