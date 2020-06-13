@@ -284,16 +284,21 @@ progress::-webkit-progress-value {
 }
 
 .two-panel-item {
-    flex: 1;
-    min-width: 0;
+    /*flex: 1;*/
+    min-width: 200px;
+    width: 50%;
+    transition: 0.3s;
     background: var(--standard-medium-gray);
 }
 
 .two-panel-left {}
 
-.two-panel-right {}
+.two-panel-right {
+    flex: 1 1 0%;
+}
 
 .two-panel-drag-bar {
+    flex: 0 0 auto;
     cursor: col-resize;
     position: relative;
     width: 20px;
@@ -304,7 +309,7 @@ progress::-webkit-progress-value {
     position: absolute;
     width: 10px;
     height: 30%;
-    max-height: 60px;
+    max-height: 160px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

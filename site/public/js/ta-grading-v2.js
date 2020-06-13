@@ -24,6 +24,58 @@ let isTwoPanelsEnabled = false; // update this with localstorage for persistence
 let versionMatch = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
+
+  // Select all the DOM elements for dragging in two-panel-mode
+  const panelCont = document.querySelector(".two-panel-cont");
+  const leftPanel = document.querySelector(".two-panel-item.two-panel-left");
+  const rightPanel = document.querySelector(".two-panel-item.two-panel-right");
+  const dragbar = document.querySelector(".two-panel-drag-bar");
+
+  let xPos = 0, yPos = 0, leftPanelWidth = 0;
+
+  // Width of left side
+  const mouseDownHandler = function(e) {
+    // Get the current mouse position
+    xPos = e.clientX;
+    yPos = e.clientY;
+    leftPanelWidth = leftPanel.getBoundingClientRect().width;
+
+    // Attach the listeners to `document`
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseUpHandler = () => {
+    // remove the dragging CSS props to go back to initial styling
+    dragbar.style.removeProperty("cursor");
+    document.body.style.removeProperty("cursor");
+    leftPanel.style.removeProperty("user-select");
+    leftPanel.style.removeProperty("pointer-events");
+    rightPanel.style.removeProperty("user-select");
+    rightPanel.style.removeProperty("pointer-events");
+
+    // Remove the handlers of `mousemove` and `mouseup`
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    document.removeEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseMoveHandler = (e) => {
+    const dx = e.clientX - xPos;
+    const updateLeftPanelWidth = (leftPanelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
+    leftPanel.style.width = `${updateLeftPanelWidth}%`;
+
+    // consistent mouse pointer during dragging
+    document.body.style.cursor = "col-resize";
+    leftPanel.style.userSelect = "none";
+    leftPanel.style.pointerEvents = "none";
+    // Disable text selection when dragging
+    rightPanel.style.userSelect = "none";
+    rightPanel.style.pointerEvents = "none";
+
+
+  };
+  dragbar.addEventListener("mousedown", mouseDownHandler);
+
   //bring regrade panel to the front if grade inquiry is pending
   if ($(".fa-exclamation")[0]) {
     if (!isRegradeVisible())
@@ -340,6 +392,9 @@ function toggleTwoPanelMode() {
         }
         return true;
       });
+
+
+
     } else {
       // if there is no currently opened panel fill the panels with the first two
       currentTwoPanels = {
