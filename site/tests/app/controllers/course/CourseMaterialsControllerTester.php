@@ -22,7 +22,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->config['use_mock_time'] = true;
         $_POST['csrf_token'] = "";
         $this->core = $this->createMockCore($this->config);
-        $_POST['release_time'] = $this->core->getDateTimeNow()->format("Y-m-d H:i:s");
+        $_POST['release_time'] = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
 
         FileUtils::createDir($this->core->getConfig()->getCoursePath() . "/uploads/course_materials", true);
         $this->json_path = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -161,7 +161,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     /**
      * @runInSeparateProcess
      */
-
     public function testModifyCourseMaterials() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
@@ -190,7 +189,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_POST['fn'][] = FileUtils::joinPaths($this->upload_path, $name);
         $new_date = new \DateTime('2005-01-01');
-        $new_date = $new_date->format('Y-m-d H:i:s');
+        $new_date = $new_date->format('Y-m-d H:i:sO');
 
         $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date);
 

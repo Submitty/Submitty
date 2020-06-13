@@ -135,16 +135,17 @@
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        updateToServerTime(fp);
+                                        date = new Date();
                                         break;
                                     case 1:
-                                        updateToTomorrowServerTime(fp);
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
                                         break;
                                     case 2:
                                         date = new Date("9998-01-01 00:00:00");
-                                        fp.setDate(date,true);
                                         break;
                                 }
+                                fp.setDate(date);
                             }
                         }
                     )],

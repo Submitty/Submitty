@@ -318,6 +318,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'polls_pts_for_incorrect'        => 0.0,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
+            'date_time_format' => ['modified' => false]
         ];
         $actual = $config->toArray();
 
