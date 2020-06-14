@@ -859,7 +859,8 @@ def check_submission_limit_penalty_inline(config_obj: dict,
     #
     ###########################################################################
 
-    subnum = queue_obj['version']
+    # regrade.py seems to make this into a str, so force into int
+    subnum = int(queue_obj['version'])
     testcase = config_obj['testcases'][0]
     penalty = testcase['penalty']
     possible_points = testcase['points']
