@@ -828,7 +828,7 @@ def can_short_circuit(config_obj: str) -> bool:
         return True
     elif len(testcases) == 1:
         # We have only one test case; check if it's a submission limit check
-        return is_testcase_submission_limit[testcases[0]]
+        return is_testcase_submission_limit(testcases[0])
     else:
         return False
 
