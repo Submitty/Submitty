@@ -48,16 +48,6 @@ JOB_ID = '~SHIP~'
 def worker_folder(worker_name):
     return os.path.join(IN_PROGRESS_PATH, worker_name)
 
-def upload_file(local, remote):
-    return
-    with open(local, 'rb') as fd:
-        buf = fd.read()
-    resp = requests.put(f'http://localhost:8080/{remote}', data=buf)
-    try:
-        resp.raise_for_status()
-    except Exception as e:
-        autograding_utils.log_message(f"Error putting file {local} in http://localhost:8080/{remote}: {str(e)}")
-
 # ==================================================================================
 def initialize(untrusted_queue):
     """
@@ -217,9 +207,6 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
     try:
         autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
 
-        upload_file(autograding_zip_tmp, 'autograding.zip')
-        upload_file(submission_zip_tmp, 'submission.zip')
-
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -324,7 +311,6 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         else:
           local_done_queue_file = target_done_queue_file
           local_results_zip = target_results_zip
-          upload_file(local_results_zip, 'results.zip')
     else:
         ssh = sftp = fd1 = fd2 = local_done_queue_file = local_results_zip = None
         try:
@@ -821,6 +807,12 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
 
 # ==================================================================================
 # ==================================================================================
+def is_testcase_submission_limit(testcase: dict) -> bool:
+    """Check whether the given testcase object is a submission limit check."""
+    return (testcase['type'] == 'FileCheck' and
+            testcase['title'] == 'Submission Limit')
+
+
 def can_short_circuit(config_obj: str) -> bool:
     """Check if a job can be short-circuited.
 
@@ -836,8 +828,7 @@ def can_short_circuit(config_obj: str) -> bool:
         return True
     elif len(testcases) == 1:
         # We have only one test case; check if it's a submission limit check
-        testcase = testcases[0]
-        return testcase['type'] == 'FileCheck' and testcase['title'] == 'Submission Limit'
+        return is_testcase_submission_limit[testcases[0]]
     else:
         return False
 
@@ -882,6 +873,7 @@ def history_short_circuit_helper(base_path: str,
                                  course_path: str,
                                  queue_obj: dict,
                                  gradeable_config_obj: dict) -> dict:
+    """Figure out parameter values for just_write_grade_history."""
     user_path = os.path.join(course_path,
                              'submissions',
                              queue_obj['gradeable'],
@@ -920,6 +912,22 @@ def history_short_circuit_helper(base_path: str,
 
 
 def try_short_circuit(queue_file: str) -> bool:
+    """Attempt to short-circuit the job represented by the given queue file.
+
+    Returns True if the job is short-circuitable and was successfully
+    short-circuited.
+
+    This function will first check if the queue file represents a gradeable
+    that supports short-circuiting. If so, then this function will attempt to
+    short-circuit the job within this child shipper process.
+
+    Once the job is finished grading, then this function will write the history
+    JSON file, zip up the results, and use the standard
+    unpack_grading_results_zip function to place the results where they are
+    expected. If something goes wrong during this process, then this function
+    will return False, signalling to the caller that this job should be graded
+    normally.
+    """
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
 
@@ -980,9 +988,12 @@ def try_short_circuit(queue_file: str) -> bool:
     testcases = config_obj['testcases']
     testcase_outputs = []
 
-    testcase_outputs.append(
-        check_submission_limit_penalty_inline(config_obj, queue_obj)
-    )
+    # This will probably always run, but it gives us a degree of
+    # future-proofing.
+    if len(testcases) > 0:
+        testcase_outputs.append(
+            check_submission_limit_penalty_inline(config_obj, queue_obj)
+        )
 
     autograde_result_msg = write_grading_outputs(testcases, testcase_outputs,
                                                  results_json_path,
@@ -1023,9 +1034,9 @@ def try_short_circuit(queue_file: str) -> bool:
 
         results_zip_path = os.path.join(base_dir, 'results.zip')
         autograding_utils.zip_my_directory(results_dir, results_zip_path)
-        packer_unpacker.unpack_grading_results_zip('localhost',
-                                                'localhost',
-                                                results_zip_path)
+        packer_unpacker.unpack_grading_results_zip('(short-circuit)',
+                                                   '(short-circuit)',
+                                                   results_zip_path)
     except Exception as e:
         autograding_utils.log_message(AUTOGRADING_LOG_PATH,
                                       message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade.",
@@ -1037,6 +1048,9 @@ def try_short_circuit(queue_file: str) -> bool:
     finally:
         shutil.rmtree(base_dir, ignore_errors=True)
 
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                  message=f"Successfully short-circuited {gradeable_id}!",
+                                  job_id=job_id)
     return True
 
 
