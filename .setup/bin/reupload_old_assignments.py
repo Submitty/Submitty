@@ -73,14 +73,6 @@ def main():
     else:
         print("SUCCESS: The directory " + CURRENT_assignment_path + " does exist.")    
 
-    CURRENT_assignment_config_path = os.path.join(CURRENT_course_path,
-                                                  "build",
-                                                  args.assignment_name,
-                                                  "config_no_comments.json")
-    print("Current assignment config path:", CURRENT_assignment_config_path)
-    with open(CURRENT_assignment_config_path) as f:
-        config = json.load(f)
-
     #Make a connection to the database and grab the necessary tables.
     database = "submitty_" + args.semester + "_" + args.course_name
     print("Connecting to database: ", end="")
@@ -183,8 +175,7 @@ def main():
                                "required_capabilities" : "default",
                                "queue_time": queue_time,
                                "regrade": True,
-                               "max_possible_grading_time": -1,
-                               "autograde_count": len(config['testcases'])}, open_file)
+                               "max_possible_grading_time": -1}, open_file)
 
     conn.close()
 
