@@ -3,6 +3,7 @@
 import os
 import time
 import signal
+import string
 import json
 
 import shutil
@@ -878,37 +879,63 @@ def check_submission_limit_penalty_inline(config_obj: dict,
 def try_short_circuit(queue_file: str) -> bool:
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
-    
+
+    # Augment the queue object
+    base, path = os.path.split(queue_file)
+    queue_time = packer_unpacker.get_queue_time(base, path)
+    queue_time_longstring = dateutils.write_submitty_date(queue_time)
+    grading_began = dateutils.get_current_time()
+    wait_time = (grading_began - queue_time).total_seconds()
+    job_id =''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+
+    queue_obj.update(queue_time=queue_time_longstring,
+                     regrade=queue_obj.get('regrade', False),
+                     waittime=wait_time,
+                     job_id=job_id)
+
     course_path = os.path.join(SUBMITTY_DATA_DIR,
                                'courses',
-                               obj['semester'],
-                               obj['course'])
+                               queue_obj['semester'],
+                               queue_obj['course'])
 
     config_path = os.path.join(course_path,
                                'config',
                                'complete_config',
-                               f'complete_config_{obj["gradeable"]}.json')
+                               f'complete_config_{queue_obj["gradeable"]}.json')
+
+    gradeable_config_path = os.path.join(course_path,
+                                         'config',
+                                         'form',
+                                         f'form_{queue_obj["gradeable"]}.json')
 
     with open(config_path) as fd:
         config_obj = json.load(fd)
 
+    with open(gradeable_config_path) as fd:
+        gradeable_config_obj = json.load(fd)
+
     if not can_short_circuit(config_obj):
         return False
 
-    gradeable_id = f"{obj['semester']}/{obj['course']}/{obj['gradeable']}"
-    autograding_utils.log_message(f"Short-circuiting {gradeable_id}",
-                                  job_id=JOB_ID)
+    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                  message=f"Short-circuiting {gradeable_id}",
+                                  job_id=job_id)
 
     base_dir = tempfile.mkdtemp()
     results_dir = os.path.join(base_dir, 'TMP_RESULTS')    
     results_json_path = os.path.join(results_dir, 'results.json')
     grade_txt_path = os.path.join(results_dir, 'grade.txt')
     queue_file_json_path = os.path.join(results_dir, 'queue_file.json')
-    logs_dir = os.path.join(results_dir 'logs')
+    logs_dir = os.path.join(results_dir, 'logs')
 
     os.makedirs(results_dir, exist_ok=True)
     os.makedirs(logs_dir, exist_ok=True)
-    shutil.copy(queue_file, queue_file_json_path)
+
+    # Save the augmented queue object
+    with open(queue_file_json_path, 'w') as fd:
+        json.dump(queue_obj, fd, indent=4, sort_keys=True,
+                  separators=(',', ':'))
 
     testcases = config_obj['testcases']
     testcase_outputs = []
@@ -922,13 +949,15 @@ def try_short_circuit(queue_file: str) -> bool:
 
     try:
         autograding_utils.archive_autograding_results(base_dir,
-                                                    queue_obj['job_id'],
-                                                    'localhost',
-                                                    config_obj,
-                                                    queue_obj,
-                                                    AUTOGRADING_LOG_PATH,
-                                                    AUTOGRADING_STACKTRACE_PATH,
-                                                    False)
+                                                      job_id,
+                                                      'localhost',
+                                                      queue_obj['regrade'],
+                                                      config_obj,
+                                                      gradeable_config_obj,
+                                                      queue_obj,
+                                                      AUTOGRADING_LOG_PATH,
+                                                      AUTOGRADING_STACKTRACE_PATH,
+                                                      False)
 
         results_zip_path = os.path.join(base_dir, 'results.zip')
         autograding_utils.zip_my_directory(results_dir, results_zip_path)
@@ -937,11 +966,11 @@ def try_short_circuit(queue_file: str) -> bool:
                                                 results_zip_path)
     except Exception as e:
         autograding_utils.log_message(AUTOGRADING_LOG_PATH,
-                                      message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade."
-                                      job_id=JOB_ID)
+                                      message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade.",
+                                      job_id=job_id)
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH,
                                           trace=traceback.format_exc(),
-                                          job_id=JOB_ID)
+                                          job_id=job_id)
         return False
     finally:
         shutil.rmtree(base_dir, ignore_errors=True)
@@ -962,11 +991,9 @@ def write_grading_outputs(testcases: list,
     #
     ###########################################################################
 
+    results = {'testcases': testcases}
     with open(results_json, 'w') as fd:
         json.dump(results, fd)
-    
-    with open(config_json) as fd:
-        config = json.load(fd)
 
     max_auto_points = sum(tc['points'] for tc in testcases)
     max_nonhidden_auto_points = sum(
