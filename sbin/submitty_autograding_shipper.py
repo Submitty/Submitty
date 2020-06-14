@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import collections
 import os
 import time
 import signal
@@ -867,7 +868,7 @@ def check_submission_limit_penalty_inline(config_obj: dict,
     excessive = max(subnum - max_submissions, 0)
     points = floor(excessive * penalty)
     points = max(points, possible_points)
-    view_testcase = points == 0
+    view_testcase = points != 0
     
     return {
         'test_name': f"Test 1 {testcase['title']}",
@@ -876,22 +877,50 @@ def check_submission_limit_penalty_inline(config_obj: dict,
     }
 
 
+def history_short_circuit_helper(base_path: str,
+                                 course_path: str,
+                                 queue_obj: dict,
+                                 gradeable_config_obj: dict) -> dict:
+    user_path = os.path.join(course_path,
+                             'submissions',
+                             queue_obj['gradeable'],
+                             queue_obj['who'])
+    submit_timestamp_path = os.path.join(user_path,
+                                         str(queue_obj['version']),
+                                         '.submit.timestamp')
+    user_assignment_access_path = os.path.join(user_path,
+                                               'user_assignment_access.json')
+
+    gradeable_deadline = gradeable_config_obj['date_due']
+    with open(submit_timestamp_path) as fd:
+        submit_timestamp = dateutils.read_submitty_date(fd.read().rstrip())
+    submit_time = dateutils.write_submitty_date(submit_timestamp)
+    gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
+
+    seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
+
+    first_access = ''
+    access_duration = -1
+    if os.path.exists(user_assignment_access_path):
+        with open(user_assignment_access_path) as fd:
+            obj = json.load(fd, object_pairs_hook=collections.OrderedDict)
+        first_access = obj['page_load_history'][0]['time']
+        first_access = dateutils.normalize_submitty_date(first_access)
+        first_access_dt = dateutils.read_submitty_date(first_access)
+        access_duration = int((submit_timestamp - first_access_dt).total_seconds())
+
+    return {
+        'gradeable_deadline': gradeable_deadline,
+        'submission': submit_time,
+        'seconds_late': seconds_late,
+        'first_access': first_access,
+        'access_duration': access_duration
+    }
+
+
 def try_short_circuit(queue_file: str) -> bool:
     with open(queue_file) as fd:
         queue_obj = json.load(fd)
-
-    # Augment the queue object
-    base, path = os.path.split(queue_file)
-    queue_time = packer_unpacker.get_queue_time(base, path)
-    queue_time_longstring = dateutils.write_submitty_date(queue_time)
-    grading_began = dateutils.get_current_time()
-    wait_time = (grading_began - queue_time).total_seconds()
-    job_id =''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-
-    queue_obj.update(queue_time=queue_time_longstring,
-                     regrade=queue_obj.get('regrade', False),
-                     waittime=wait_time,
-                     job_id=job_id)
 
     course_path = os.path.join(SUBMITTY_DATA_DIR,
                                'courses',
@@ -911,31 +940,41 @@ def try_short_circuit(queue_file: str) -> bool:
     with open(config_path) as fd:
         config_obj = json.load(fd)
 
-    with open(gradeable_config_path) as fd:
-        gradeable_config_obj = json.load(fd)
-
     if not can_short_circuit(config_obj):
         return False
 
+    job_id =''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
     gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
     autograding_utils.log_message(AUTOGRADING_LOG_PATH,
                                   message=f"Short-circuiting {gradeable_id}",
                                   job_id=job_id)
 
+    with open(gradeable_config_path) as fd:
+        gradeable_config_obj = json.load(fd)
+
+    # Augment the queue object
+    base, path = os.path.split(queue_file)
+    queue_time = packer_unpacker.get_queue_time(base, path)
+    queue_time_longstring = dateutils.write_submitty_date(queue_time)
+    grading_began = dateutils.get_current_time()
+    wait_time = (grading_began - queue_time).total_seconds()
+
+    queue_obj.update(queue_time=queue_time_longstring,
+                     regrade=queue_obj.get('regrade', False),
+                     waittime=wait_time,
+                     job_id=job_id)
+
     base_dir = tempfile.mkdtemp()
+
     results_dir = os.path.join(base_dir, 'TMP_RESULTS')    
     results_json_path = os.path.join(results_dir, 'results.json')
     grade_txt_path = os.path.join(results_dir, 'grade.txt')
     queue_file_json_path = os.path.join(results_dir, 'queue_file.json')
+    history_json_path = os.path.join(results_dir, 'history.json')
     logs_dir = os.path.join(results_dir, 'logs')
 
     os.makedirs(results_dir, exist_ok=True)
     os.makedirs(logs_dir, exist_ok=True)
-
-    # Save the augmented queue object
-    with open(queue_file_json_path, 'w') as fd:
-        json.dump(queue_obj, fd, indent=4, sort_keys=True,
-                  separators=(',', ':'))
 
     testcases = config_obj['testcases']
     testcase_outputs = []
@@ -944,20 +983,42 @@ def try_short_circuit(queue_file: str) -> bool:
         check_submission_limit_penalty_inline(config_obj, queue_obj)
     )
 
-    write_grading_outputs(testcases, testcase_outputs,
-                          results_json_path, grade_txt_path)
+    autograde_result_msg = write_grading_outputs(testcases, testcase_outputs,
+                                                 results_json_path,
+                                                 grade_txt_path)
+
+    grading_finished = dateutils.get_current_time()
+    grading_time = (grading_finished - grading_began).total_seconds()
+
+    queue_obj['gradingtime'] = grading_time
+    queue_obj['grade_result'] = autograde_result_msg
+    queue_obj['which_untrusted'] = '(short-circuited)'
+
+    # Save the augmented queue object
+    with open(queue_file_json_path, 'w') as fd:
+        json.dump(queue_obj, fd, indent=4, sort_keys=True,
+                  separators=(',', ':'))
+
+    h = history_short_circuit_helper(base_dir,
+                                     course_path,
+                                     queue_obj,
+                                     gradeable_config_obj)
 
     try:
-        autograding_utils.archive_autograding_results(base_dir,
-                                                      job_id,
-                                                      'localhost',
-                                                      queue_obj['regrade'],
-                                                      config_obj,
-                                                      gradeable_config_obj,
-                                                      queue_obj,
-                                                      AUTOGRADING_LOG_PATH,
-                                                      AUTOGRADING_STACKTRACE_PATH,
-                                                      False)
+        autograding_utils.just_write_grade_history(history_json_path,
+                                                   h['gradeable_deadline'],
+                                                   h['submission'],
+                                                   h['seconds_late'],
+                                                   h['first_access'],
+                                                   h['access_duration'],
+                                                   queue_obj['queue_time'],
+                                                   'BATCH' if queue_obj.get('regrade', False) else 'INTERACTIVE',
+                                                   dateutils.write_submitty_date(grading_began),
+                                                   int(queue_obj['waittime']),
+                                                   dateutils.write_submitty_date(grading_finished),
+                                                   int(grading_time),
+                                                   autograde_result_msg,
+                                                   queue_obj.get('revision', None))
 
         results_zip_path = os.path.join(base_dir, 'results.zip')
         autograding_utils.zip_my_directory(results_dir, results_zip_path)
@@ -981,7 +1042,7 @@ def try_short_circuit(queue_file: str) -> bool:
 def write_grading_outputs(testcases: list,
                           testcase_outputs: list,
                           results_json: str,
-                          grade_txt: str):
+                          grade_txt: str) -> str:
     """Write the grading output data to the specified paths."""
 
     ###########################################################################
@@ -991,7 +1052,7 @@ def write_grading_outputs(testcases: list,
     #
     ###########################################################################
 
-    results = {'testcases': testcases}
+    results = {'testcases': testcase_outputs}
     with open(results_json, 'w') as fd:
         json.dump(results, fd)
 
@@ -1034,8 +1095,10 @@ def write_grading_outputs(testcases: list,
             fd.write('\n')
         
         # Write the final lines
-        fd.write(f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n")
+        autograde_total_msg = f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n"
+        fd.write(autograde_total_msg)
         fd.write(f"{'Non-hidden automatic grading total:':<64}{nonhidden_auto_points:3} /{max_nonhidden_auto_points:3}\n")
+    return autograde_total_msg
 
 
 # ==================================================================================
