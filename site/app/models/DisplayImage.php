@@ -28,7 +28,7 @@ class DisplayImage extends AbstractModel {
     const LEGAL_FOLDERS = ['system_images', 'user_images'];
 
     /**
-     * @prop @var int
+     * int
      * When a new DisplayImage is saved, this is the maximum dimension either side may be.  Non-square images will
      * have the larger dimension resized to this constant, while the other dimension will be reduced to maintain the
      * original form factor of the image.

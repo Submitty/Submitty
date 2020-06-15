@@ -26,8 +26,7 @@ def up(config):
     os.system('python3 ' + script_path)
 
     # Add image magick
-    os.system('apt install imagemagick -y')
-    os.system('apt install php-imagick -y')
+    os.system('apt install imagemagick php-imagick -y')
 
 
 def down(config):

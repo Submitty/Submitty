@@ -184,10 +184,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_email' => 'user@email.com',
             'time_zone' => 'NOT_SET/NOT_SET'
         ]);
-
-        $result = $user->getNiceFormatTimeZone();
-
-        $this->assertEquals('NOT SET', $result);
+        $this->assertEquals('NOT SET', $user->getNiceFormatTimeZone());
     }
 
     public function testGetUTCOffsetExplicitlySet() {
