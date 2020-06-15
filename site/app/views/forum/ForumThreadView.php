@@ -569,13 +569,14 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $ajax=false) {
-        $tempArray = array();
+    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $ajax = false) {
+        $tempArray = [];
         $threadAnnouncement = false;
         $activeThreadTitle = "";
-        if ($ajax){
-            for($i=0; $i<count($threads); $i++){
-                if($threads[$i]["id"] == $thread_id){
+        $thread = "";
+        if ($ajax) {
+            for ($i = 0; $i < count($threads); $i++) {
+                if ($threads[$i]["id"] == $thread_id) {
                     $thread = $threads[$i];
                     break;
                 }

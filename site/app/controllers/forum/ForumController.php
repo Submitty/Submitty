@@ -779,7 +779,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/threads/single", methods={"POST"})
      */
-    public function getSingleThread(){
+    public function getSingleThread() {
         $thread_id = $_POST['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
         $categories_ids = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
