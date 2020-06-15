@@ -469,7 +469,7 @@ function initSocketClient() {
         socketDeleteOrMergeThreadHandler(msg.thread_id);
         break;
       case "resolve_thread":
-        socketNewThreadHandler(msg.thread_id);
+        socketResolveThreadHandler(msg.thread_id);
         break;
       case "announce_thread":
         socketAnnounceThreadHandler(msg.thread_id);
