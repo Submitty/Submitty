@@ -575,7 +575,7 @@ class ForumThreadView extends AbstractView {
         $thread = "";
         if ($ajax) {
             for ($i = 0; $i < count($threads); $i++) {
-                if($threads[$i]["id"] == $thread_id) {
+                if ($threads[$i]["id"] == $thread_id) {
                     $thread = $threads[$i];
                     break;
                 }
