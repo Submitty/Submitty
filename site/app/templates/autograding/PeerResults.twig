@@ -85,8 +85,8 @@ $( document ).ready(function() {
                     </div>
                     <div class="box col-sm-5" style="float: center; padding: 20px; width: 40%; word-break: break-word; display: inline-block">
                         {% for file in files %}
-                            <p>
-                                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                            <p style="text-align:center; vertical-align: middle;">
+                                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')" style="margin-right:20px;">View Popup <i class="fas fa-window-restore"></i></a>
                                     {# download icon if student can download files #}
                                     {% if can_download %}
                                         <button class = 'btn btn-default' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download

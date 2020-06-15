@@ -94,9 +94,6 @@ $( document ).ready(function() {
                 </div>
             {% endfor %}
         <div class="box" style="padding: 10px; word-break: break-word;">
-            {% if regrade_available %}
-                <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
-            {% endif %}
             {% for user in overall_comments | keys | sort %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
@@ -127,9 +124,9 @@ $( document ).ready(function() {
                     </div>
                     <div class="box col-sm-5" style="float: center; padding: 20px; width: 40%; word-break: break-word; display: inline-block">
                         {% for file in files %}
-                            <p>
+                            <p style="text-align:center; vertical-align: middle;">
                                 {# download icon if student can download files #}
-                                <a class="btn btn-primary key_to_click" tabindex="0" onclick="openFile('{{ display_original_pdf }}?dir=submissions&path={{ file.path|url_encode }}')">View Popup<i class="fas fa-window-restore"></i></a>
+                                <a class="btn btn-primary key_to_click" tabindex="0" style="margin-right:20px;" onclick="openFile('{{ display_original_pdf }}?dir=submissions&path={{ file.path|url_encode }}')">View Popup<i class="fas fa-window-restore"></i></a>
                                 {% if can_download %}
                                     <button class = 'btn btn-default key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
@@ -182,6 +179,9 @@ $( document ).ready(function() {
     {% if regrade_available %}
         <div id="ShowRegradeRequestButton">
             <button type="button" title="Open Grade Inquiry" onclick="$('#regradeBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#regradeBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
+            {% if regrade_available %}
+                <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
+            {% endif %}
         </div>
     {% endif %}
 {% endif %}
