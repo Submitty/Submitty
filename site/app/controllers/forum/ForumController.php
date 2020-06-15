@@ -816,6 +816,22 @@ class ForumController extends AbstractController {
     }
 
     /**
+     * @Route("/{_semester}/{_course}/forum/threads/single", methods={"POST"})
+     */
+    public function getSingleThread() {
+        $thread_id = $_POST['thread_id'];
+        $thread = $this->core->getQueries()->getThread($thread_id);
+        $categories_ids = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $show_deleted = $this->showDeleted();
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
+        $pageNumber = 1;
+        $threads = $this->getSortedThreads($categories_ids, 0, $show_deleted, $show_merged_thread, [$thread['status']], false, $pageNumber, $thread_id);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', $threads, false, $thread_id, $categories_ids, true);
+        return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
      * @Route("/{_semester}/{_course}/forum", methods={"GET"})
      * @Route("/{_semester}/{_course}/forum/threads", methods={"GET"})
      * @Route("/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
