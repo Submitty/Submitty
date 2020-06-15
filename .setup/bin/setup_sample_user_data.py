@@ -65,6 +65,9 @@ def main():
                     shutil.copy(src, dest)
                     shutil.chown(dest, PHP_USER, PHP_USER)
 
+            # Only do one image from each zip
+            break
+
     # Clean up temp
     shutil.rmtree('temp')
 
