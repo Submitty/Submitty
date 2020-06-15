@@ -36,7 +36,7 @@ Please email your instructor with any questions or concerns.';
     }
 
     /**
-     * @Route("/{_semester}/{_course}/email_room_seating")
+     * @Route("/courses/{_semester}/{_course}/email_room_seating")
      * @return MultiResponse
      */
     public function renderEmailTemplate() {
@@ -51,7 +51,7 @@ Please email your instructor with any questions or concerns.';
     }
 
     /**
-     * @Route("/{_semester}/{_course}/email_room_seating/send", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/email_room_seating/send", methods={"POST"})
      * @return MultiResponse
      */
     public function emailSeatingAssignments() {

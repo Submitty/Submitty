@@ -59,7 +59,7 @@ function buildUrl(parts = []) {
  * @returns {string} - Built up URL to use
  */
 function buildCourseUrl(parts = []) {
-    return document.body.dataset.courseUrl + '/' + parts.join('/');
+    return document.body.dataset.courseUrl + '/courses/' + parts.join('/');
 }
 
 function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
