@@ -13,7 +13,7 @@ use tests\BaseUnitTest;
 class DisplayImageTester extends BaseUnitTest {
 
     const TEST_USER_NAME = 'abc_test_user';
-    const TEST_IMAGE = 'test_image.jpeg';
+    const TEST_IMAGE = 'test_image.gif';
 
     private $core;
     private $test_image_path;
@@ -38,6 +38,9 @@ class DisplayImageTester extends BaseUnitTest {
         }
     }
 
+    /**
+     * Helpers
+     */
     private function mockCore() {
         $core = $this->createMockModel(Core::class);
 
@@ -88,61 +91,93 @@ class DisplayImageTester extends BaseUnitTest {
         $this->assertEquals($display_image->getImageBase64(), $test_image_base64);
     }
 
-    public function testGetImageBase64ColResize() {
-        $new_col = 200;
-
-        $test_imagick = new \Imagick($this->test_image_path);
-        $test_imagick->scaleImage($new_col, 0);
-
-        $display_image = new DisplayImage($this->core, self::TEST_USER_NAME, 'system');
-
-        $real_imagick = new \Imagick();
-        $real_imagick->readImageBlob(base64_decode($display_image->getImageBase64($new_col, null)));
-
-        $this->assertEquals($test_imagick->getImageWidth(), $real_imagick->getImageWidth());
-        $this->assertEquals($test_imagick->getImageHeight(), $real_imagick->getImageHeight());
+    public function getImageBase64ResizeProvider() {
+        return [
+            [null, null],
+            [200, null],
+            [null, 200],
+        ];
     }
 
-    public function testGetImageBase64RowResize() {
-        $new_row = 200;
-
+    /**
+     * @dataProvider getImageBase64ResizeProvider
+     */
+    public function testGetImageBase64Resize($new_cols, $new_rows) {
         $test_imagick = new \Imagick($this->test_image_path);
-        $test_imagick->scaleImage(0, $new_row);
+
+        if (!is_null($new_cols) || !is_null($new_rows)) {
+            $test_cols = $new_cols ?? 0;
+            $test_rows = $new_rows ?? 0;
+            $test_imagick->scaleImage($test_cols, $test_rows);
+        }
+
+        $test_image_base64 = base64_encode($test_imagick->getImageBlob());
 
         $display_image = new DisplayImage($this->core, self::TEST_USER_NAME, 'system');
 
-        $real_imagick = new \Imagick();
-        $real_imagick->readImageBlob(base64_decode($display_image->getImageBase64(null, $new_row)));
+        $display_imagick = new \Imagick();
+        $display_image_base64 = $display_image->getImageBase64($new_cols, $new_rows);
+        $display_imagick->readImageBlob(base64_decode($display_image_base64));
 
-        $this->assertEquals($test_imagick->getImageWidth(), $real_imagick->getImageWidth());
-        $this->assertEquals($test_imagick->getImageHeight(), $real_imagick->getImageHeight());
-    }
-
-    public function testGetImageBase64BothResize() {
-        $new_col = 200;
-        $new_row = 200;
-
-        $test_imagick = new \Imagick($this->test_image_path);
-        $test_imagick->scaleImage($new_col, $new_row);
-
-        $display_image = new DisplayImage($this->core, self::TEST_USER_NAME, 'system');
-
-        $real_imagick = new \Imagick();
-        $real_imagick->readImageBlob(base64_decode($display_image->getImageBase64($new_col, $new_row)));
-
-        $this->assertEquals($test_imagick->getImageWidth(), $real_imagick->getImageWidth());
-        $this->assertEquals($test_imagick->getImageHeight(), $real_imagick->getImageHeight());
+        $this->assertEquals($test_imagick->getImageWidth(), $display_imagick->getImageWidth());
+        $this->assertEquals($test_imagick->getImageHeight(), $display_imagick->getImageHeight());
+        $this->assertEquals($display_image_base64, $test_image_base64);
     }
 
     /**
      * getImageBase64MaxDimension() tests
      */
+    public function testGetImageBase64MaxDimension() {
+        // Test image has cols > rows
+        // Result should be 500 cols and rows < 500
+        $new_col = 500;
 
-    /**
-     * resizeMaxDimension() tests
-     */
+        $display_image = new DisplayImage($this->core, self::TEST_USER_NAME, 'system');
+
+        $imagick = new \Imagick();
+        $imagick->readImageBlob(base64_decode($display_image->getImageBase64MaxDimension($new_col)));
+
+        $this->assertEquals($imagick->getImageWidth(), $new_col);
+        $this->assertTrue($imagick->getImageWidth() > $imagick->getImageHeight());
+    }
 
     /**
      * saveUserImage() tests
      */
+    public function testSaveUserImageBadArgument() {
+        $this->expectException(BadArgumentException::class);
+        $this->expectExceptionMessage('The $folder parameter must be a member of DisplayImage::LEGAL_FOLDERS.');
+        DisplayImage::saveUserImage(
+            $this->core,
+            self::TEST_USER_NAME,
+            'test',
+            'gif',
+            $this->test_image_path,
+            'bad_folder'
+        );
+    }
+
+    public function saveUserImageProvider() {
+        $meta = explode('.', self::TEST_IMAGE);
+        $file_name = $meta[0];
+        $file_extension = $meta[1];
+
+        $core = $this->mockCore();
+        $test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
+
+        return [
+            [$core, self::TEST_USER_NAME, $file_name, $file_extension, $test_image_path, 'system_images'],
+            [$core, self::TEST_USER_NAME, $file_name, $file_extension, $test_image_path, 'user_images'],
+        ];
+    }
+
+    /**
+     * @dataProvider saveUserImageProvider
+     */
+    public function testSaveUserImage($core, string $user_id, string $new_image_name, string $image_extension, string $tmp_file_path, string $folder) {
+        DisplayImage::saveUserImage($core, $user_id, $new_image_name, $image_extension, $tmp_file_path, $folder);
+
+        $path = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'user_data', $user_id, $folder, "$new_image_name.$image_extension");
+        $this->assertFileExists($path);
+    }
 }

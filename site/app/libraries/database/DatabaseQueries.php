@@ -211,7 +211,7 @@ ORDER BY {$orderBy}"
      *
      * @return array An array of all the users
      */
-    public function getListOfCourseUsers() {
+    public function getListOfCourseUsers(): array {
         $sql = 'select user_id from users';
         $this->course_db->query($sql);
         return array_map(function ($row) {
@@ -219,7 +219,14 @@ ORDER BY {$orderBy}"
         }, $this->course_db->rows());
     }
 
-    public function updateUserDisplayImageState(string $user_id, string $state) {
+    /**
+     * Update master and course database user's display_image_state to a new state
+     *
+     * @param string $user_id
+     * @param string $state
+     * @return bool
+     */
+    public function updateUserDisplayImageState(string $user_id, string $state): bool {
         $sql = 'update users set display_image_state = ? where user_id = ?';
         $this->submitty_db->query($sql, [$state, $user_id]);
         return ($this->submitty_db->getRowCount() === 1);

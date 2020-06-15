@@ -14,26 +14,31 @@ use app\libraries\FileUtils;
  *
  * DisplayImage model represents a user's personal head shot.  Users may have multiple images in their user_data
  * directory, and DisplayImage takes care of selecting the single most appropriate image for display.
+ *
+ * @method string getPath()
+ * @method string setPath()
+ * @method string getMimeType()
+ * @method string setMimeType()
  */
 class DisplayImage extends AbstractModel {
-    /** @var string[] The set of legal display_image_state which may be collected from the DB */
+    /** string[] The set of legal display_image_state which may be collected from the DB */
     const LEGAL_IMAGE_STATES = ['system', 'preferred', 'flagged'];
 
-    /** @var string[] The set of directories for which it is legal to save a DisplayImage to */
+    /** string[] The set of directories for which it is legal to save a DisplayImage to */
     const LEGAL_FOLDERS = ['system_images', 'user_images'];
 
     /**
-     * @var int
+     * @prop @var int
      * When a new DisplayImage is saved, this is the maximum dimension either side may be.  Non-square images will
      * have the larger dimension resized to this constant, while the other dimension will be reduced to maintain the
      * original form factor of the image.
      */
     const IMG_MAX_DIMENSION = 500;
 
-    /** @var string The file path to the selected image */
+    /** @prop @var string The file path to the selected image */
     protected $path;
 
-    /** @var string The image mime type */
+    /** @prop @var string The image mime type */
     protected $mime_type;
 
     /**
