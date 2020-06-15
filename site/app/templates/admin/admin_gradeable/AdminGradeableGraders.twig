@@ -90,7 +90,7 @@ Form
             <div class="table-scroll">
                 <table id="grader-history">
                     <tr>
-                        <th></th>
+                        <th>Name(id):</th>
                         {% for row in rotating_gradeables|filter((row) => row != gradeable.getId()) %}
                             <th>{{ row }}</th>
                         {% endfor %}
@@ -113,30 +113,33 @@ Form
         {# Helpful debuging line.  Uncomment to view graders data #}
         {# <tr>{{ all_graders|json_encode() }}</tr> #}
         {% if num_rotating_sections > 0 %}
-            <tr>
-                <th />
+            <br>
+            <tr class="g1">
+                <th>Instructor Graders</th>
                 <th>All</th>
                 {% for rs in section_numbers %}
                     <th>{{ rs }}</th>
                 {% endfor %}
-            </tr>
-            <tr class="g1">
-                <th>Instructor Graders</th>
-                <th colspan="{{section_numbers|length + 1}}"></th>
             </tr>
             <!-- Instructors -->
             {{ self.display_graders(graders_from_usertypes[1], 'g1',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
             <tr class="g2">
                 <th>Full Access Graders</th>
-                <th colspan="{{section_numbers|length + 1}}"></th>
+                <th>All</th>
+                {% for rs in section_numbers %}
+                    <th>{{ rs }}</th>
+                {% endfor %}
             </tr>
             <!-- Full Access Graders -->
             {{ self.display_graders(graders_from_usertypes[2], 'g2',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
             <tr class="g3">
                 <th>Limited Access Graders</th>
-                <th colspan="{{section_numbers|length + 1}}"></th>
+                <th>All</th>
+                {% for rs in section_numbers %}
+                    <th>{{ rs }}</th>
+                {% endfor %}
             </tr>
             <!-- Limited Access Graders -->
             {{ self.display_graders(graders_from_usertypes[3], 'g3',

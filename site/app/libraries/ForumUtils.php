@@ -18,7 +18,7 @@ class ForumUtils {
 
     public static function checkGoodAttachment($isThread, $thread_id, $file_post) {
         if ((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE) {
-            return array(0);
+            return [0];
         }
         if (count($_FILES[$file_post]['tmp_name']) > 5) {
             //return $this->returnUserContentToPage("Max file upload size is 5. Please try again.", $isThread, $thread_id);
@@ -27,7 +27,7 @@ class ForumUtils {
         if ($imageCheck == 0 && !empty($_FILES[$file_post]['tmp_name'])) {
             //return $this->returnUserContentToPage("Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)", $isThread, $thread_id);
         }
-        return array($imageCheck);
+        return [$imageCheck];
     }
 
     public static function isValidCategories($rows, $inputCategoriesIds = -1, $inputCategoriesName = -1) {

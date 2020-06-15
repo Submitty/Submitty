@@ -1,0 +1,22 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}delete-user-form{% endblock %}
+{% block title %}Delete User{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="hidden" name="user_id" />
+    <input type="hidden" name="displayed_fullname" />
+    {# Javascript will fill in user's fullname within <span> #}
+    <p class="black-message">Remove <span class="red-message" id="user-fullname"></span> from your course?
+    <p>They must not have any recorded activity such as assignments submitted,
+    grades issued, team enrollments, forum messages posted, etc.  Otherwise,
+    removal will not work.
+{% endblock %}
+{% block form %}
+    <form method="post" action="{{ delete_user_url }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Confirm" />
+{% endblock %}
