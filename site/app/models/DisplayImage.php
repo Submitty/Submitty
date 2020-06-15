@@ -22,7 +22,8 @@ class DisplayImage extends AbstractModel {
     /** @var string[] The set of directories for which it is legal to save a DisplayImage to */
     const LEGAL_FOLDERS = ['system_images', 'user_images'];
 
-    /** @var int
+    /**
+     * @var int
      * When a new DisplayImage is saved, this is the maximum dimension either side may be.  Non-square images will
      * have the larger dimension resized to this constant, while the other dimension will be reduced to maintain the
      * original form factor of the image.
@@ -79,7 +80,7 @@ class DisplayImage extends AbstractModel {
         });
 
         // Ensure image is readable
-        if (!is_readable($files[0])) {
+        if (empty($files) || !is_readable($files[0])) {
             throw new FileReadException('Unable to read the display image.');
         }
 
