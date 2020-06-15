@@ -3,15 +3,6 @@
 <div class="content">
 
     <script>
-        var year = parseInt("{{ server_time['year'] }}", 10);
-        var month = parseInt("{{ server_time['month'] }}", 10) - 1;
-        var day = parseInt("{{ server_time['day'] }}", 10);
-        var hour = parseInt("{{ server_time['hour'] }}", 10);
-        var minute = parseInt("{{ server_time['minute'] }}", 10);
-        var second = parseInt("{{ server_time['second'] }}", 10);
-
-        server_time = new Date(year, month, day, hour, minute, second);
-
         green = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-green');
         yellow = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-yellow');
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
@@ -105,9 +96,8 @@
                 {% endif %}
 
                 <script>
-
                     function determineRelease(inputID){
-                        var now = server_time;
+                        var now = new Date();
 
                         function pad(str){
                             return ('0'+str).slice(-2);
@@ -135,58 +125,8 @@
                         } else {
                             return yellow;
                         }
-
                     }
                     document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
-
-                    flatpickr("#date_to_release_{{ id }}",{
-                    plugins: [ShortcutButtonsPlugin(
-                        {
-                            button: [
-                                {
-                                    label: "Now"
-                                },
-                                {
-                                    label: "Tomorrow"
-                                },
-                                {
-                                    label: "End of time"
-                                }
-
-                            ],
-                            onClick: (index, fp) => {
-                                let date;
-                                switch (index) {
-                                    case 0:
-                                        updateToServerTime(fp);
-                                        break;
-                                    case 1:
-                                        updateToTomorrowServerTime(fp);
-                                        break;
-                                    case 2:
-                                        date = new Date("9998-01-01");
-                                        fp.setDate(date,true);
-                                        break;
-
-                                }
-                            }
-                        }
-                    )],
-                    allowInput: true,
-                    enableTime: true,
-                    enableSeconds: true,
-                    time_24hr: true,
-                    dateFormat: "Y-m-d H:i:S",
-                    onReady: (a, b, fp) => {
-                      fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                      fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
-                    },
-                    onOpen: handleTimeZones('{{ core.getConfig().getTimezone().getName() }}'),
-                    onClose: function() {
-                                            setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
-                                            changePermission('{{ path }}','1');
-                                         }
-                    });
                 </script>
             {% endif %}
         </div>

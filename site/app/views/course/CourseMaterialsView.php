@@ -105,7 +105,7 @@ class CourseMaterialsView extends AbstractView {
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
-                $file_release_dates[$expected_file_path] = $releaseData;
+                $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             }
 
             if ($json == false) {
@@ -145,11 +145,10 @@ class CourseMaterialsView extends AbstractView {
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $server_time = DateUtils::getServerTimeJson($this->core);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
-            'date_format' => 'Y-m-d H:i:sO',
+            'date_format' => 'Y-m-d H:i:s',
             "folderPath" => $expected_path,
             "uploadFolderPath" => $upload_path,
             "submissions" => $submissions,
@@ -160,7 +159,6 @@ class CourseMaterialsView extends AbstractView {
             "delete_url" => $this->core->buildCourseUrl(["course_materials", "delete"]),
             "delete_folder_url" => $this->core->buildCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
-            'server_time' => $server_time,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_section" => $user_section,
             "reg_sections" => $reg_sections,

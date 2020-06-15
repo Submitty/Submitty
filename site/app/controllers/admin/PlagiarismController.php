@@ -606,7 +606,7 @@ class PlagiarismController extends AbstractController {
                 $tokens_user_2 = json_decode(file_get_contents($file_path), true);
             }
             while (!$matches->isEmpty()) {
-                $match = $matches->top();
+                $match = $matches->peek();
                 $s_pos = $match->getStart();
                 $e_pos = $match->getEnd();
                 $start_pos = $tokens_user_1[$s_pos - 1]["char"] - 1;
@@ -634,7 +634,7 @@ class PlagiarismController extends AbstractController {
                                 $end_line_2 = $tokens_user_2[$matchPosEnd - 1]["line"] - 1;
                                 $start_value_2 = $tokens_user_2[$matchPosStart - 1]["value"];
                                 $end_value_2 = $tokens_user_2[$matchPosEnd - 1]["value"];
-                                    
+
                                 $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $matchPosStart, $matchPosEnd];
                                 $userMatchesStarts[] = $matchPosStart;
                                 $userMatchesEnds[] = $matchPosEnd;
