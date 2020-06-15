@@ -2,43 +2,53 @@
 
 namespace app\libraries\plagiarism;
 
+use Ds\Stack;
+
 class PlagiarismUtils {
-
-    public static function compareInterval($intervalOne, $intervalTwo) {
-        return $intervalOne->getStart() > $intervalTwo->getStart();
-    }
-
-    public static function constructIntervals($filename) {
+    /**
+     * @return Interval[]
+     */
+    public static function constructIntervals($filename): array {
         $content = file_get_contents($filename);
         $arr = json_decode($content, true);
         $resultArray = [];
         foreach ($arr as $match) {
-            $i = new Interval($match['start'], $match['end']);
+            $interval = new Interval($match['start'], $match['end']);
             foreach ($match['others'] as $o) {
-                $s = new Submission($o['username'], $o['version'], $o['matchingpositions'], $match['start'], $match['end']);
-                $i->addUser($s);
+                $interval->addUser(new Submission(
+                    $o['username'],
+                    $o['version'],
+                    $o['matchingpositions'],
+                    $match['start'],
+                    $match['end']
+                ));
             }
-            $resultArray[] = $i;
+            $resultArray[] = $interval;
         }
-        usort($resultArray, "self::compareInterval");
+        usort($resultArray, function (Interval $a, Interval $b) {
+            return $a->getStart() > $b->getStart();
+        });
         return $resultArray;
     }
 
-    public static function mergeIntervals($iArr) {
+    /**
+     * @param Interval[] $intervalArray
+     */
+    public static function mergeIntervals(array $intervalArray): Stack {
         $stack = new Stack();
-        $stack->push($iArr[0]);
-        for ($i = 1; $i < count($iArr); $i++) {
-            $cI = $stack->top();
-            if ($cI->getEnd() < $iArr[$i]->getStart()) {
-                $stack->push($iArr[$i]);
+        $stack->push($intervalArray[0]);
+        for ($i = 1; $i < count($intervalArray); $i++) {
+            $current = $stack->peek();
+            if ($current->getEnd() < $intervalArray[$i]->getStart()) {
+                $stack->push($intervalArray[$i]);
             }
-            elseif ($cI->getEnd() < $iArr[$i]->getEnd()) {
-                $cI->updateEnd($iArr[$i]->getEnd());
-                foreach ($iArr[$i]->getUsers() as $u) {
-                    $cI->addUser($u);
+            elseif ($current->getEnd() < $intervalArray[$i]->getEnd()) {
+                $current->updateEnd($intervalArray[$i]->getEnd());
+                foreach ($intervalArray[$i]->getUsers() as $user) {
+                    $current->addUser($user);
                 }
                 $stack->pop();
-                $stack->push($cI);
+                $stack->push($current);
             }
         }
         return $stack;
