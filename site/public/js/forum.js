@@ -248,11 +248,6 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_i
     window.location.reload();
 }
 
-function sendMergeSocketMessage(child_thread_id, parent_thread_id){
-  window.socketClient.send({'type': "merge_thread", 'thread_id': child_thread_id, 'merge_thread_id': parent_thread_id});
-  return true;
-}
-
 function socketResolveThreadHandler(thread_id){
   var icon_to_update = $("[data-thread_id='" + thread_id + "']").find("i.fa-question");
   $(icon_to_update).fadeOut(400, function () {
