@@ -374,6 +374,12 @@ function toggleFullScreenMode () {
   $("#fullscreen-btn-cont").toggleClass('active');
 }
 
+function toggleFullLeftColumnMode () {
+  $(".content-item-right").toggleClass("active");
+  $(".content-drag-bar").toggleClass("active");
+  $("#full-left-column-btn").toggleClass("active");
+}
+
 function toggleTwoPanelMode() {
   const twoPanelCont = $('.two-panel-cont');
   isTwoPanelsEnabled = !twoPanelCont.is(":visible");
@@ -381,6 +387,7 @@ function toggleTwoPanelMode() {
   if (isTwoPanelsEnabled) {
     twoPanelCont.addClass("active");
     $("#two-panel-exchange-btn").addClass("active");
+    $("#full-left-column-btn").addClass("visible");
     // If there is any panel opened just use that and fetch the next one for left side...
     if (currentOpenPanel) {
       currentTwoPanels.left = currentOpenPanel;

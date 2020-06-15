@@ -30,13 +30,15 @@ main#main.full-screen-mode .content {
 aside {
     margin: 0;
     padding-top: 0;
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #electronic-gradeable-container {
     height: 100%;
     padding: 0;
     margin: 0 20px 0 0;
+    position: relative;
 }
 
 #bar_wrapper {
@@ -44,6 +46,7 @@ aside {
     padding-bottom: 5px;
     /*border: solid 6px var(--important-post);*/
     box-sizing: content-box;
+    overflow-x: auto;
 }
 
 .navigation-box {
@@ -52,7 +55,38 @@ aside {
     width: max-content;
 }
 
+/* Content Panels CSS */
 
+.content-items-container {
+    display: flex;
+    height: 100%;
+}
+
+.content-items {
+    min-width: 250px;
+}
+
+.content-item-right {
+    display: none;
+    width: 50%;
+    background: var(--standard-medium-gray);
+}
+
+.content-item-left {
+    flex: 1 1 0%;
+}
+
+.content-drag-bar {
+    display: none;
+}
+
+.content-item-right.active, .content-drag-bar.active {
+    display: block;
+}
+
+.active {
+    border: unset;
+}
 /* Toolbar CSS*/
 .grading_toolbar {
     display: block;
@@ -60,8 +94,10 @@ aside {
     padding-bottom:3px;
 }
 
-.grading_toolbar i:not(.icon-disabled):hover {
+.grading_toolbar .ta-navlink-cont:hover {
+    transform: translate(0 , -2px);
     cursor: pointer;
+    transition: transform 0.2s;
     box-shadow: 0px 0px 5px 5px var(--subheading-underscore-grey);
     background-color: var(--subheading-underscore-grey);
 }
@@ -137,6 +173,22 @@ button > i.fas:hover {
 
 #grade-inquiry-navlink {
     background: #36e08e;
+}
+
+#full-left-column-btn {
+    display: none;
+}
+
+#full-left-column-btn.visible {
+    display: inline-block;
+}
+
+#full-left-column-btn.active i {
+    transform: rotate(140deg);
+}
+
+#full-left-column-btn i {
+    transform: rotate(-40deg);
 }
 
 .progressbar {
@@ -296,7 +348,7 @@ progress::-webkit-progress-value {
     flex: 1 1 0%;
 }
 
-.two-panel-drag-bar {
+.two-panel-drag-bar, .content-drag-bar {
     flex: 0 0 auto;
     cursor: col-resize;
     position: relative;
@@ -304,7 +356,7 @@ progress::-webkit-progress-value {
     background: transparent;
 }
 
-.two-panel-drag-bar span {
+.two-panel-drag-bar span, .content-drag-bar span {
     position: absolute;
     width: 10px;
     height: 30%;

@@ -739,6 +739,12 @@ HTML;
 
         $return = <<<HTML
         		<div class="content" id="electronic-gradeable-container">
+        		    <div class="content-items-container">
+                    <div class="content-items content-item-right"></div>
+                    <div class="content-drag-bar">
+                        <span></span>
+                    </div>
+                    <div class="content-items content-item-left">
 HTML;
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderGradingPanelHeader', $graded_gradeable);
@@ -832,6 +838,8 @@ HTML;
             }
         }
         $return .= <<<HTML
+                    </div>
+                </div>
             </div>
 		</div>
 HTML;
