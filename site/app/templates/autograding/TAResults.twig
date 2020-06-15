@@ -122,7 +122,7 @@ $( document ).ready(function() {
 
                         {% endfor %}
                     </div>
-                    <div class="box col-sm-5" style="float: center; padding: 20px; width: 40%; word-break: break-word; display: inline-block">
+                    <div class="box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
                         {% for file in files %}
                             <p style="text-align:center; vertical-align: middle;">
                                 {# download icon if student can download files #}
@@ -151,17 +151,13 @@ $( document ).ready(function() {
                                     <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
-                            {% else %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 3.4em"></div>
-                                {% endif %}
                             {% endif %}
 
                         {% endfor %}
                     </div>
-                        <div class="box col-sm-3" style="padding: 10px; width: 40%; word-break: break-word; display: inline-block">
+                        <div class="box col-sm-3" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
                         {% if can_download %}
-                            <p>
+                            <p style="text-align:center; vertical-align: middle;">
                                 Download all files: <button class = "btn btn-default key_to_click" tabindex="0" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
                                     <i class="fas fa-download" title="Download zip of all files"></i></button>
                             </p>

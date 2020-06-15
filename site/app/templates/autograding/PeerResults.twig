@@ -98,11 +98,13 @@ $( document ).ready(function() {
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <div class="box col-sm-3" style="padding: 10px; width: 30%; word-break: break-word; display: inline-block">
+                    <div class="box col-sm-3" style="float: center; padding: 40px; width: 30%; word-break: break-word; display: inline-block">
                         
                         {% if can_download %}
+                            <p style="text-align:center; vertical-align: middle;">    
                                 Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
                                     <i class="fas fa-download" title="Download zip of all files"></i></button>
+                            </p>
                         {% endif %}
                         
                         {% for file in uploaded_pdfs %}
