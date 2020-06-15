@@ -206,9 +206,9 @@ function socketNewThreadHandler(thread_id){
         var last = last_pinned.length == 0 ? last_announcement : last_pinned;
 
         if (last.length == 0) {
-          $(result.data).insertBefore($('.thread_box_link').first());
+          $(result.data).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
         } else {
-          $(result.data).insertAfter(last.next());
+          $(result.data).insertAfter(last.next()).hide().fadeIn("slow");
         }
 
         $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
@@ -257,6 +257,103 @@ function socketResolveThreadHandler(thread_id){
   }
 }
 
+function socketAnnounceThreadHandler(thread_id) {
+  /*
+  * 1. get announced thread with thread_id
+  * 2. find correct new place according to the following order:
+  *     announcements & pins --> announcements only --> pins only --> other
+  *     each group should be sorted chronologically
+  * 3. if thread is "active" thread update related elements
+  * */
+  var thread_to_announce = "[data-thread_id='" + thread_id + "']";
+  var hr = $(thread_to_announce).next(); // saving the <hr> for inserting later below the thread div
+  hr.remove(); // removing this sibling <hr>
+  // if there exists other announcements
+  if ($('.thread-announcement').length != 0) {
+    // if thread to announce is already bookmarked
+    if ($(thread_to_announce).find(".thread-favorite").length != 0) {
+      // if there exists other bookmarked announcements
+      if ($('.thread-announcement').siblings('.thread-favorite').length != 0) {
+        // notice that ids in desc order are also in a chronological order (newest : oldest)
+        // get announcement threads ids as an array -> [7, 6, 4, 3]
+        var announced_pinned_threads_ids = $('.thread-announcement').siblings('.thread-favorite').parent().parent().map(function() {
+          return Number($(this).attr("data-thread_id"));
+        }).get();
+        // look for thread to insert before -> thread_id 4 if inserting thread_id = 5
+        for (let i=0; i<announced_pinned_threads_ids.length; i++){
+          if (announced_pinned_threads_ids[i] < thread_id){
+            var thread_to_insert_before = "[data-thread_id='" + announced_pinned_threads_ids[i] + "']";
+            $(thread_to_announce).insertBefore($(thread_to_insert_before)).hide().fadeIn("slow");
+            break;
+          }
+
+          // if last thread then insert after -> if inserting thread_id = 2
+          if (i == announced_pinned_threads_ids.length-1){
+            var thread_to_insert_after = "[data-thread_id='" + announced_pinned_threads_ids[i] + "']";
+            $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+          }
+        }
+      }
+      // no bookmarked announcements -> insert already-bookmarked new announcment at the beginning
+      else {
+        $(thread_to_announce).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+      }
+    }
+    // thread to announce is not bookmarked
+    else {
+      // find announcements that are not bookmarked
+      var announced_pinned_threads = $(".thread-announcement").siblings(".thread-favorite").parent().parent();
+      var announced_only_threads = $(".thread-announcement").parent().parent().not(announced_pinned_threads);
+      if (announced_only_threads.length != 0){
+        var announced_only_threads_ids = $(announced_only_threads).map(function() {
+          return Number($(this).attr("data-thread_id"));
+        }).get();
+        for (let i=0; i<announced_only_threads_ids.length; i++){
+          if (announced_only_threads_ids[i] < thread_id){
+            var thread_to_insert_before = "[data-thread_id='" + announced_only_threads_ids[i] + "']";
+            $(thread_to_announce).insertBefore($(thread_to_insert_before)).hide().fadeIn("slow");
+            break;
+          }
+
+          if (i == announced_only_threads_ids.length-1){
+            var thread_to_insert_after = "[data-thread_id='" + announced_only_threads_ids[i] + "']";
+            $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+          }
+        }
+      }
+      // if all announcements are bookmarked -> insert new annoucement after the last one
+      else {
+        var thread_to_insert_after = announced_pinned_threads.last();
+        $(thread_to_announce).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+      }
+    }
+  }
+  // no annoucements at all -> insert new announcement at the beginning
+  else {
+    $(thread_to_announce).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+  }
+
+  var announcement_icon = "<i class=\"fas fa-thumbtack thread-announcement\" title = \"Pinned to the top\" aria-label=\"Pinned to the top\"></i>";
+  $(thread_to_announce).children().prepend(announcement_icon);
+  $(hr).insertAfter($(thread_to_announce)); // insert <hr> right after thread div
+  // if user's current thread is the one modified -> update
+  if ($("#current-thread").val() == thread_id){
+    // if is instructor
+    var instructor_pin = $(".not-active-thread-announcement");
+    if (instructor_pin.length){
+      instructor_pin.removeClass(".not-active-thread-announcement").addClass("active-thread-remove-announcement");
+      instructor_pin.attr("onClick", instructor_pin.attr("onClick").replace("1,", "0,").replace("pin this thread to the top?", "unpin this thread?"));
+      instructor_pin.attr("title", "Unpin Thread");
+      instructor_pin.attr("aria-label", "Unpin Thread");
+      instructor_pin.children().removeClass("golden_hover").addClass("reverse_golden_hover");
+    }
+    else {
+      announcement_icon = "<i class=\"fas fa-thumbtack active-thread-announcement\" title = \"Pinned Thread\" aria-label=\"Pinned Thread\"></i>";
+      $("#posts_list").find("h2").prepend(announcement_icon);
+    }
+  }
+}
+
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
@@ -269,6 +366,9 @@ function initSocketClient() {
         break;
       case "resolve_thread":
         socketResolveThreadHandler(msg.thread_id);
+        break;
+      case "announce_thread":
+        socketAnnounceThreadHandler(msg.thread_id);
         break;
       default:
         console.log("Undefined message recieved.");
@@ -1161,7 +1261,8 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 
             },
             success: function(data){
-                window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
+                window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                window.location.reload();
             },
             error: function(){
                 window.alert("Something went wrong while trying to remove announcement. Please try again.");
