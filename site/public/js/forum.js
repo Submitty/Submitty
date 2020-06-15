@@ -34,12 +34,15 @@ function openFileForum(directory, file, path ){
     window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
 }
 
-function checkForumFileExtensions(files){
-    var count = 0;
+function checkForumFileExtensions(post_box_id, files){
+    var count = files.length;
     for(var i = 0; i < files.length; i++){
         var extension = getFileExtension(files[i].name);
-        if(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp"){
-            count++;
+        if( !(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp") ){
+            deleteSingleFile(files[i].name, post_box_id, false);
+            removeLabel(files[i].name, post_box_id);
+            files.splice(i, 1);
+            i--;
         }
     } return count == files.length;
 }
@@ -100,7 +103,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         return false;
     }
     else {
-        if(!checkForumFileExtensions(files)){
+        if(!checkForumFileExtensions(post_box_id, files)){
             displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             return false;
         }
