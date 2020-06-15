@@ -52,10 +52,16 @@ class WebRouter {
     }
 
 
+    /**
+     * If a request is a post request check too see if its less than the post_max_size or if its empty
+     * @return MultiResponse|bool
+     */
     private function checkPostMaxSize(Request $request) {
         if ($request->isMethod('POST')) {
             $max_post_length = ini_get("post_max_size");
             $max_post_bytes = Utils::returnBytes($max_post_length);
+            /** if a post request exceeds the max length set in the ini, php will drop everything set under $_POST, however the router might add routing information later so check both cases
+            */
             if (($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) || empty($_POST)) {
                 $msg = "POST request exceeds maximum size of " . $max_post_length;
                 $this->core->addErrorMessage($msg);
