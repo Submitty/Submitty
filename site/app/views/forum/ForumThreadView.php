@@ -316,7 +316,7 @@ class ForumThreadView extends AbstractView {
             $displayThreadContent = $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds, false);
 
             if (count($activeThread) == 0) {
-                $activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+                $activeThread = $this->core->getQueries()->getThread($currentThread);
             }
 
             $currentThreadArrValues = array_values($currentThreadArr);
@@ -394,7 +394,7 @@ class ForumThreadView extends AbstractView {
 
     public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false, $render = true) {
 
-        $activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+        $activeThread = $this->core->getQueries()->getThread($currentThread);
 
         $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . $activeThread['title'];
         $activeThreadAnnouncement = $activeThread['pinned'];
