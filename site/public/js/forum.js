@@ -354,6 +354,96 @@ function socketAnnounceThreadHandler(thread_id) {
   }
 }
 
+function socketUnpinThreadHandler(thread_id) {
+  var thread_to_unpin = "[data-thread_id='" + thread_id + "']";
+
+  var hr = $(thread_to_unpin).next(); // saving the <hr> for inserting later below the thread div
+  hr.remove(); // removing this sibling <hr>
+
+  var not_pinned_threads = $(".thread_box").not($(".thread-announcement").parent()).parent();
+  // if there exists other threads that are not pinned
+  if (not_pinned_threads.length){
+    // if thread is bookmarked
+    if ($(thread_to_unpin).find(".thread-favorite").length != 0){
+      // if there exists other threads that are bookmarked
+      if (not_pinned_threads.find(".thread-favorite").length != 0){
+        var bookmarked_threads_ids = not_pinned_threads.find(".thread-favorite").parent().parent().map(function() {
+          return Number($(this).attr("data-thread_id"));
+        }).get();
+
+        for (let i=0; i<bookmarked_threads_ids.length; i++){
+          if (bookmarked_threads_ids[i] < thread_id){
+            var thread_to_insert_before = "[data-thread_id='" + bookmarked_threads_ids[i] + "']";
+            $(thread_to_unpin).insertBefore($(thread_to_insert_before)).hide().fadeIn("slow");
+            break;
+          }
+
+          if (i == bookmarked_threads_ids.length-1){
+            var thread_to_insert_after = "[data-thread_id='" + bookmarked_threads_ids[i] + "']";
+            $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+          }
+        }
+      }
+      // no other bookmarked threads -> insert thread at the beginning of not announced threads
+      else {
+        $(thread_to_unpin).insertBefore(not_pinned_threads.first()).hide().fadeIn("slow");
+      }
+    }
+    // thread is not bookmarked
+    else {
+      // if there exists other threads that are neither bookmarked nor pinned
+      var not_bookmarked_threads = not_pinned_threads.not($(".thread-favorite").parent().parent());
+      if (not_bookmarked_threads.length){
+        var not_bookmarked_threads_ids = not_bookmarked_threads.map(function() {
+          return Number($(this).attr("data-thread_id"));
+        }).get();
+
+        for (let i=0; i<not_bookmarked_threads_ids.length; i++){
+          if (not_bookmarked_threads_ids[i] < thread_id){
+            var thread_to_insert_before = "[data-thread_id='" + not_bookmarked_threads_ids[i] + "']";
+            $(thread_to_unpin).insertBefore($(thread_to_insert_before)).hide().fadeIn("slow");
+            break;
+          }
+
+          if (i == not_bookmarked_threads_ids.length-1){
+            var thread_to_insert_after = "[data-thread_id='" + not_bookmarked_threads_ids[i] + "']";
+            $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+          }
+        }
+      }
+      // no other threads -> insert thread at the end
+      else {
+        var thread_to_insert_after = $(".thread_box").last().parent();
+        $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+      }
+    }
+  }
+  // no unpinned threads -> insert thread at the end
+  else {
+    var thread_to_insert_after = $(".thread_box").last().parent();
+    $(thread_to_unpin).insertAfter($(thread_to_insert_after).next()).hide().fadeIn("slow");
+  }
+
+  $(hr).insertAfter($(thread_to_unpin)); // insert <hr> right after thread div
+  $(thread_to_unpin).find(".thread-announcement").remove();
+
+  // if user's current thread is the one modified -> update
+  if ($("#current-thread").val() == thread_id){
+    // if is instructor
+    var instructor_pin = $(".active-thread-remove-announcement");
+    if (instructor_pin.length){
+      instructor_pin.removeClass("active-thread-remove-announcement").addClass("not-active-thread-announcement");
+      instructor_pin.attr("onClick", instructor_pin.attr("onClick").replace("0,", "1,").replace("unpin this thread?", "pin this thread to the top?"));
+      instructor_pin.attr("title", "Make thread an announcement");
+      instructor_pin.attr("aria-label", "Pin Thread");
+      instructor_pin.children().removeClass("reverse_golden_hover").addClass("golden_hover");
+    }
+    else {
+      $(".active-thread-announcement").remove();
+    }
+  }
+}
+
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
@@ -369,6 +459,9 @@ function initSocketClient() {
         break;
       case "announce_thread":
         socketAnnounceThreadHandler(msg.thread_id);
+        break;
+      case "unpin_thread":
+        socketUnpinThreadHandler(msg.thread_id);
         break;
       default:
         console.log("Undefined message recieved.");
@@ -1261,7 +1354,9 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 
             },
             success: function(data){
-                window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                if (type)
+                  window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
                 window.location.reload();
             },
             error: function(){
