@@ -224,15 +224,15 @@ class WebRouterTester extends BaseUnitTest {
         ];
 
         $response = WebRouter::getApiResponse($request, $core);
-        $this->assertEquals($expected,$response->json_response->json);
+        $this->assertEquals($expected, $response->json_response->json);
         $response = WebRouter::getWebResponse($web_request, $core);
-        $this->assertEquals($expected,$response->json_response->json);
+        $this->assertEquals($expected, $response->json_response->json);
 
         $_SERVER["CONTENT_LENGTH"] = 0;
         $_POST = [];
         $response = WebRouter::getApiResponse($request, $core);
-        $this->assertEquals($expected,$response->json_response->json);
+        $this->assertEquals($expected, $response->json_response->json);
         $response = WebRouter::getWebResponse($web_request, $core);
-        $this->assertEquals($expected,$response->json_response->json);
+        $this->assertEquals($expected, $response->json_response->json);
     }
 }
