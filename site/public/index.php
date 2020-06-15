@@ -9,8 +9,6 @@ use app\libraries\routers\WebRouter;
 use app\libraries\response\ResponseInterface;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
-use app\libraries\response\MultiResponse;
-use app\libraries\response\JsonResponse;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -118,26 +116,6 @@ if (empty($_COOKIE['submitty_token'])) {
     Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
-
-if ($request->isMethod('POST')) {
-    $max_post_length = ini_get("post_max_size");
-    $max_post_bytes = Utils::returnBytes($max_post_length);
-    if (($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) || empty($_POST)) {
-        $msg = "POST request exceeds maximum size of " . $max_post_length;
-        $core->addErrorMessage($msg);
-
-        $response = MultiResponse::JsonOnlyResponse(
-            JsonResponse::getFailResponse($msg)
-        );
-
-        if ($response instanceof ResponseInterface) {
-            $response->render($core);
-        }
-
-        return $core->getOutput()->displayOutput();
-    }
-}
-
 $is_api = explode('/', $request->getPathInfo())[1] === 'api';
 if ($is_api) {
     if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
@@ -148,7 +126,6 @@ if ($is_api) {
 else {
     $response = WebRouter::getWebResponse($request, $core);
 }
-
 
 if ($response instanceof ResponseInterface) {
     $response->render($core);

@@ -22,6 +22,8 @@ let MAX_NUM_OF_FILES;
 
 var empty_inputs = true;
 
+let num_clipboard_files = 0;
+
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
@@ -34,6 +36,7 @@ function initializeDragAndDrop() {
     empty_inputs = true;
     student_ids = [];
     student_without_ids = [];
+    num_clipboard_files=0;
 }
 
 // initializing file_array and previous_files
@@ -777,10 +780,17 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['status'] !== 'success') {
-                    alert(data['message']);
+                if (data['status'] === 'success') {
+                    window.location.href = return_url;
                 }
-                window.location.href = return_url;
+                else {
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! \n\n" + data['message']);
+                    }
+                }
             }
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
@@ -973,10 +983,17 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['status'] !== 'success') {
-                    alert(data['message']);
+                if (data['status'] === 'success') {
+                    window.location.href = return_url;
                 }
-                window.location.href = return_url;
+                else {
+                    if (data['message'] == "You do not have access to that page.") {
+                        window.location.href = return_url;
+                    }
+                    else {
+                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
+                    }
+                }
             }
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
@@ -1131,11 +1148,12 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             try {
                 var jsondata = JSON.parse(data);
 
-                if (jsondata['status'] !== 'success') {
+                if (jsondata['status'] === 'success') {
+                    window.location.href = return_url;
+                }
+                else {
                     alert(jsondata['message']);
                 }
-                
-                window.location.href = return_url;
             }
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
