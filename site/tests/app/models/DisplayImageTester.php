@@ -24,12 +24,21 @@ class DisplayImageTester extends BaseUnitTest {
 
         $this->test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
 
+        echo "Test Image Path: $this->test_image_path\n";
+
         // Generate test folders
         $this->user_data_dir = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'user_data', self::TEST_USER_NAME, 'system_images');
-        FileUtils::createDir($this->user_data_dir, true);
+
+        echo "User data dir: $this->user_data_dir\n";
+
+        $res1 = FileUtils::createDir($this->user_data_dir, true);
+        echo "User data dir created successfully: " . $res1;
+        echo "\n";
 
         // Copy a test image in
-        copy($this->test_image_path, FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE));
+        $res2 = copy($this->test_image_path, FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE));
+        echo "Image copy successfully: " . $res2;
+        echo "\n";
     }
 
     public function tearDown(): void {
