@@ -20,25 +20,22 @@ class DisplayImageTester extends BaseUnitTest {
     private $user_data_dir;
 
     public function setUp(): void {
+        echo 'Good before mock core';
         $this->core = $this->mockCore();
+        echo 'Good after mock core';
 
+        echo 'Good before test_image_path';
         $this->test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
-
-        echo "Test Image Path: $this->test_image_path\n";
+        echo 'Good after test_image_path';
 
         // Generate test folders
         $this->user_data_dir = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'user_data', self::TEST_USER_NAME, 'system_images');
 
-        echo "User data dir: $this->user_data_dir\n";
 
         $res1 = FileUtils::createDir($this->user_data_dir, true);
-        echo "User data dir created successfully: " . $res1;
-        echo "\n";
 
         // Copy a test image in
         $res2 = copy($this->test_image_path, FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE));
-        echo "Image copy successfully: " . $res2;
-        echo "\n";
     }
 
     public function tearDown(): void {
