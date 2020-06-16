@@ -1069,7 +1069,7 @@ def write_grading_outputs(testcases: list,
 
     results = {'testcases': testcase_outputs}
     with open(results_json, 'w') as fd:
-        json.dump(results, fd)
+        json.dump(results, fd, indent=4)
 
     max_auto_points = sum(tc['points'] for tc in testcases)
     max_nonhidden_auto_points = sum(
