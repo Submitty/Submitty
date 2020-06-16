@@ -682,6 +682,10 @@ class Core {
         return $this->notification_factory;
     }
 
+    public function setNotificationFactory(NotificationFactory $factory) {
+        $this->notification_factory = $factory;
+    }
+
     /**
      * Check if we have a saved cookie with a session id and then that there exists
      * a session with that id. If there is no session, then we delete the cookie.
