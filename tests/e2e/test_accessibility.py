@@ -24,6 +24,7 @@ class TestAccessibility(BaseTestCase):
         '/{}/{}/gradeable/future_no_tas_lab/grading?view=all',
         '/{}/{}/gradeable/future_no_tas_test/grading?view=all',
         '/{}/{}/gradeable/open_homework/grading/status',
+        '/{}/{}/gradeable/open_homework/bulk_stats',
         '/{}/{}/gradeable/open_homework/grading/details?view=all',
         '/{}/{}/gradeable/open_homework',
         '/{}/{}/gradeable/open_team_homework/team',
@@ -50,7 +51,6 @@ class TestAccessibility(BaseTestCase):
         '/{}/{}/plagiarism/configuration/new',
         '/{}/{}/reports',
         '/{}/{}/late_table',
-        '/{}/{}/theme',
         '/{}/{}/grades',
     ]
 
@@ -60,10 +60,6 @@ class TestAccessibility(BaseTestCase):
         # Uncomment this to generate a new baseline for all pages on the website
         # Then run 'python3 -m unittest e2e.test_accessibility' from inside the tests folder
         # self.genBaseline()
-
-        # Uncomment this to generate a new baseline for a specific url
-        # url = '' # your url here
-        # self.genBaseline(url)
 
         self.validatePages()
 

@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\response\RedirectResponse;
-use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\models\Email;
+use app\views\admin\EmailRoomSeatingView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -31,30 +32,22 @@ Seat: {$exam_seat}
 
 Please email your instructor with any questions or concerns.';
 
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
-
     /**
      * @Route("/{_semester}/{_course}/email_room_seating")
-     * @return MultiResponse
      */
-    public function renderEmailTemplate() {
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['admin', 'EmailRoomSeating'],
-                'displayPage',
-                EmailRoomSeatingController::DEFAULT_EMAIL_SUBJECT,
-                EmailRoomSeatingController::DEFAULT_EMAIL_BODY
-            )
+    public function renderEmailTemplate(): WebResponse {
+        return new WebResponse(
+            EmailRoomSeatingView::class,
+            'displayPage',
+            EmailRoomSeatingController::DEFAULT_EMAIL_SUBJECT,
+            EmailRoomSeatingController::DEFAULT_EMAIL_BODY
         );
     }
 
     /**
      * @Route("/{_semester}/{_course}/email_room_seating/send", methods={"POST"})
-     * @return MultiResponse
      */
-    public function emailSeatingAssignments() {
+    public function emailSeatingAssignments(): RedirectResponse {
         $seating_assignment_subject = $_POST["room_seating_email_subject"];
         $seating_assignment_body = $_POST["room_seating_email_body"];
 
@@ -63,6 +56,7 @@ Please email your instructor with any questions or concerns.';
 
         $class_list = $this->core->getQueries()->getEmailListWithIds();
 
+        $seating_assignment_emails = [];
         foreach ($class_list as $user) {
             $user_id = $user['user_id'];
 
@@ -83,12 +77,10 @@ Please email your instructor with any questions or concerns.';
         }
         $this->core->getNotificationFactory()->sendEmails($seating_assignment_emails);
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl())
-        );
+        return new RedirectResponse($this->core->buildCourseUrl());
     }
 
-    private function replacePlaceholders($message, $data) {
+    private function replacePlaceholders(string $message, array $data): string {
         $replaces = [
             'gradeable' => 'gradeable_id',
             'date' => 'exam_date',

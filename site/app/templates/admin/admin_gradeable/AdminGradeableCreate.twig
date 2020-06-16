@@ -89,7 +89,7 @@
             <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="fa-question-circle"></i></a></div>
             <span class="required_type" >(Required)</span>
         {% else %}
-            <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
+            <fieldset><legend><b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span></legend>
             <br />
         {% endif %}
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
@@ -103,15 +103,15 @@
                     {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> <label for="radio_numeric"> {{ gradeable_type_strings['numeric'] }} </label>
             </div>
 
-            <div aria-hidden="true" hidden>
+            <div hidden>
                 <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
-                        {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
+                        {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}>  <label for="radio_electronic_file"> Electronic File (multiple types) </label>
             </div>
 
             {# Real input fields to back the exposed configurations options #}
-            <div aria-hidden="true" hidden>
-                <input id="scanned_exam" name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}">
-                <input id="vcs" name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}">
+            <div hidden>
+                <input id="scanned_exam" name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" aria-label="scanned exam">
+                <input id="vcs" name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" aria-label="vcs">
             </div>
 
             <div>
@@ -129,10 +129,8 @@
                         {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> <label for="radio_ef_scanned_exam"> {{ gradeable_type_strings['electronic_exam'] }} </label>
             </div>
         </div>
-        {% if action == 'new' or action == 'template' %}
-            {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}
-            </fieldset>
-        {% endif %}
+        {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}
+        </fieldset>
 
       <!-- This is only relevant to Electronic Files -->
         <div class="gradeable_type_options electronic_file" id="electronic_file">
@@ -184,8 +182,8 @@
                     {# (VPAT) fieldset/legend needed for team assignment radio group #}
                     <fieldset><legend>Is this a team assignment?</legend>
                 {% else %}
-                    Team Settings:
-                    {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
+                    <fieldset><legend>Team Settings:
+                    {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}</legend>
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
                     <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
@@ -194,10 +192,8 @@
                     <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
                             {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
                 </div>
-                {% if action == 'new' or action == 'template' %}
-                    {# (VPAT) Closes fieldset for team assignment radio group #}
-                    </fieldset>
-                {% endif %}
+                {# (VPAT) Closes fieldset for team assignment radio group #}
+                </fieldset>
             </div>
 
             <!-- Team settings (read only in edit mode) -->

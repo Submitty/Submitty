@@ -82,19 +82,19 @@ class Core {
 
         // initialize our alert queue if it doesn't exist
         if (!isset($_SESSION['messages'])) {
-            $_SESSION['messages'] = array();
+            $_SESSION['messages'] = [];
         }
 
         // initialize our alert types if one of them doesn't exist
-        foreach (array('error', 'notice', 'success') as $key) {
+        foreach (['error', 'notice', 'success'] as $key) {
             if (!isset($_SESSION['messages'][$key])) {
-                $_SESSION['messages'][$key] = array();
+                $_SESSION['messages'][$key] = [];
             }
         }
 
         // we cast each of our controller markers to lower to normalize our controller switches
         // and prevent any unexpected page failures for users in entering a capitalized controller
-        foreach (array('component', 'page', 'action') as $key) {
+        foreach (['component', 'page', 'action'] as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
         $this->notification_factory = new NotificationFactory($this);
@@ -299,6 +299,7 @@ class Core {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
+        $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
 
     public function setUser(User $user): void {
@@ -502,7 +503,7 @@ class Core {
      *
      * @return string
      */
-    public function buildUrl($parts = array()) {
+    public function buildUrl($parts = []) {
         return $this->getConfig()->getBaseUrl() . implode("/", $parts);
     }
 
@@ -516,7 +517,7 @@ class Core {
      *
      * @return string
      */
-    public function buildCourseUrl($parts = array()) {
+    public function buildCourseUrl($parts = []) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
@@ -542,7 +543,7 @@ class Core {
      * @return array
      */
     public function getControllerTypes() {
-        return array('component', 'page', 'action');
+        return ['component', 'page', 'action'];
     }
 
     /**
@@ -560,10 +561,10 @@ class Core {
     }
 
      /**
-     * Returns either the 'actual' coursename or the coursename set by the professor.
-     *
-     * @return string
-     */
+      * Returns either the 'actual' coursename or the coursename set by the professor.
+      *
+      * @return string
+      */
     public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
@@ -677,8 +678,12 @@ class Core {
         $this->testing = $testing;
     }
 
-    public function getNotificationFactory() {
+    public function getNotificationFactory(): NotificationFactory {
         return $this->notification_factory;
+    }
+
+    public function setNotificationFactory(NotificationFactory $factory) {
+        $this->notification_factory = $factory;
     }
 
     /**
@@ -686,7 +691,7 @@ class Core {
      * a session with that id. If there is no session, then we delete the cookie.
      * @return bool
      */
-    public function isWebLoggedIn() {
+    public function isWebLoggedIn(): bool {
         $logged_in = false;
         $cookie_key = 'submitty_session';
         if (isset($_COOKIE[$cookie_key])) {
@@ -734,7 +739,7 @@ class Core {
      * @param Request $request
      * @return bool
      */
-    public function isApiLoggedIn(Request $request) {
+    public function isApiLoggedIn(Request $request): bool {
         $logged_in = false;
         $jwt = $request->headers->get("authorization");
         if (!empty($jwt)) {

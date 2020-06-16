@@ -32,7 +32,7 @@ SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
 source ${THIS_DIR}/bin/versions.sh
 
-DAEMONS=( submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 
 ########################################################################################################################
 ########################################################################################################################
@@ -263,6 +263,9 @@ if [ "${WORKER}" == 0 ]; then
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
     chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
+
+    # php needs to be able to read containers config
+    chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json
 fi
 
 # Set permissions of all files in the logs directories

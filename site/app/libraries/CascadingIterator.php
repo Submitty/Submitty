@@ -13,7 +13,7 @@ namespace app\libraries;
 class CascadingIterator implements \Iterator {
 
     /** @var \Iterator[] */
-    private $iterators = [];
+    private $iterators;
     /** @var int */
     private $iterator_key = 0;
     /** @var int  */
@@ -21,7 +21,7 @@ class CascadingIterator implements \Iterator {
 
     /**
      * MultiIterator constructor.
-     * @param \Iterator[] $iterators
+     * @param \Iterator ...$iterators
      */
     public function __construct(...$iterators) {
         $this->iterators = $iterators;
