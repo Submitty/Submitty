@@ -97,7 +97,7 @@
                 {% if cell.randomize_order == true %}
                     {% set choices_indices = numberUtils.getRandomIndices(cell.choices|length, student_id, gradeable_id ) %}
                 {% else %}
-                    {% set choices_indices = numberUtils.getIndices(cell.choices) %}
+                    {% set choices_indices = cell.choices|keys %}
                 {% endif %}
 
                 <fieldset id="mc_field_{{ num_multiple_choice }}"

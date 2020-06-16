@@ -988,17 +988,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__" . $touch_file));
     }
 
-    public function testEmptyPost() {
-        $_POST = [];
-
-        $controller = new SubmissionController($this->core);
-        $return = $controller->ajaxUploadSubmission('test');
-
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertRegExp("/Empty POST request. This may mean that the sum size of your files are greater than [0-9]*M./", $return['message']);
-        $this->assertFalse($return['status'] == 'success');
-    }
-
     /**
      * Test that error is thrown when trying to upload to a gradeable id that does not exist in
      * our gradeable list
