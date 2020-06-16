@@ -408,7 +408,7 @@ class AutoGradingView extends AbstractView {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileInfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = explode("_", $fileInfo)[0];
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
+                        if (file_get_contents($fileInfo->getPathname()) != "") {
                             $pdf_id = $pdf_id . '.pdf';
                             $annotated_file_names[] = $pdf_id;
                             if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
