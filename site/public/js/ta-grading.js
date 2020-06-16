@@ -891,3 +891,17 @@ function adjustSize(name) {
     textarea.style.height = "";
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
+
+function getNonAnonPath(path){
+    nonAnonPath = "";
+    pathPieces = path.split("/");
+    for (i = 1; i < pathPieces.length; i++) {
+        if(i == 9){
+            nonAnonPath += "/" + "{{submitter_id}}"; 
+        }
+        else{
+            nonAnonPath += "/" + pathPieces[i];
+        }
+    }
+    return nonAnonPath;
+}

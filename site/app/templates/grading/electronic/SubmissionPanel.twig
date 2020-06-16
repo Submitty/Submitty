@@ -116,21 +116,6 @@
         }
         return false;
     }
-    
-    function getNonAnonPath(path){
-        nonAnonPath = "";
-        pathPieces = path.split("/");
-        for (i = 1; i < pathPieces.length; i++) {
-            if(i == 9){
-                user_id = "{{submitter_id}}";
-                nonAnonPath += "/" + user_id; 
-            }
-            else{
-                nonAnonPath += "/" + pathPieces[i];
-            }
-        }
-        return nonAnonPath;
-    }
 
     function openFile(html_file, url_file) {
         var directory = "";
