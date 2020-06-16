@@ -35,16 +35,17 @@ function openFileForum(directory, file, path ){
 }
 
 function checkForumFileExtensions(post_box_id, files){
-    var count = files.length;
-    for(var i = 0; i < files.length; i++){
-        var extension = getFileExtension(files[i].name);
-        if( !(extension == "gif" || extension == "png" || extension == "jpg" || extension == "jpeg" || extension == "bmp") ){
+    let count = files.length;
+    for(let i = 0; i < files.length; i++) {
+        let extension = getFileExtension(files[i].name);
+        if( !['gif', 'png', 'jpg', 'jpeg', 'bmp'].includes(extension) ) {
             deleteSingleFile(files[i].name, post_box_id, false);
             removeLabel(files[i].name, post_box_id);
             files.splice(i, 1);
             i--;
         }
-    } return count == files.length;
+    } 
+    return count == files.length;
 }
 
 function resetForumFileUploadAfterError(displayPostId){
