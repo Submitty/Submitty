@@ -88,14 +88,14 @@ def parse_datetime(date_string):
     """
     Given a string that should either represent an absolute date or an arbitrary date,
     parse this into a datetime object that is then used. Absolute dates should be in
-    the format of YYYY-MM-DD HH:MM:SS while arbitrary dates are of the format
+    the format of YYYY-MM-DD HH:MM:SS+ZZZZ while arbitrary dates are of the format
     "+/-# day(s) [at HH:MM:SS]" where the last part is optional. If the time is
-    omitted, then it uses midnight of whatever day was specified. Datetimew without
-    timezones assume local timezone
+    omitted, then it uses midnight of whatever day was specified. Datetimes without
+    timezones assume local timezone.
 
     Examples of allowed strings:
     2016-10-14
-    2016-10-13 22:11:32
+    2016-10-13 22:11:32+0100
     -1 day
     +2 days at 00:01:01
 
@@ -110,7 +110,10 @@ def parse_datetime(date_string):
         if my_timezone is None:
             my_timezone = get_timezone()
             date_string = my_timezone.localize(date_string)
+
         return date_string
+    elif not isinstance(date_string, str):
+        raise TypeError(f'Invalid type, expected str, got {type(date_string)}')
 
     try:
         return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S%z')
@@ -118,22 +121,32 @@ def parse_datetime(date_string):
         pass
 
     try:
-        return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S%z').replace(
-            hour=23,
-            minute=59,
-            second=59
+        return get_timezone().localize(
+            datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+        )
+        return
+    except ValueError:
+        pass
+
+    try:
+        return get_timezone().localize(
+            datetime.strptime(date_string, '%Y-%m-%d').replace(
+                hour=23,
+                minute=59,
+                second=59,
+            )
         )
     except ValueError:
         pass
 
     m = re.search(
-        '([+|-][0-9]+) (days|day) at [0-2][0-9]:[0-5][0-9]:[0-5][0-9]',
+        '([+|-][0-9]+) (days|day) at ([0-2][0-9]):([0-5][0-9]):([0-5][0-9])',
         date_string
     )
     if m is not None:
-        hour = int(m.group(2))
-        minu = int(m.group(3))
-        sec = int(m.group(4))
+        hour = int(m.group(3))
+        minu = int(m.group(4))
+        sec = int(m.group(5))
         days = int(m.group(1))
         return get_current_time().replace(
             hour=hour,
