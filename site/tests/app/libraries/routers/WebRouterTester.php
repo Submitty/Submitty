@@ -124,6 +124,8 @@ class WebRouterTester extends BaseUnitTest {
             "/current_user/change_username",
             "POST"
         );
+        $_SERVER["CONTENT_LENGTH"] = 0;
+        $_POST = ["foo"];
         $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
             [
@@ -201,5 +203,36 @@ class WebRouterTester extends BaseUnitTest {
             'status' => "fail",
             'message' => "API is open to faculty only."
         ], $response->json_response->json);
+    }
+
+    public function testCheckPostMaxSize() {
+        $core = $this->createMockCore(['logged_in' => true], ['access_faculty' => true]);
+        $request = Request::create(
+            "/api/token",
+            "POST"
+        );
+        $web_request = Request::create(
+            "/current_user/change_username",
+            "POST"
+        );
+
+        $_SERVER["CONTENT_LENGTH"] = 9000000;
+        $_POST = ["test"];
+        $expected = [
+            "status" => "fail",
+            "message" => "POST request exceeds maximum size of 8M"
+        ];
+
+        $response = WebRouter::getApiResponse($request, $core);
+        $this->assertEquals($expected, $response->json_response->json);
+        $response = WebRouter::getWebResponse($web_request, $core);
+        $this->assertEquals($expected, $response->json_response->json);
+
+        $_SERVER["CONTENT_LENGTH"] = 0;
+        $_POST = [];
+        $response = WebRouter::getApiResponse($request, $core);
+        $this->assertEquals($expected, $response->json_response->json);
+        $response = WebRouter::getWebResponse($web_request, $core);
+        $this->assertEquals($expected, $response->json_response->json);
     }
 }
