@@ -37,11 +37,11 @@ class WebRouterTester extends BaseUnitTest {
     public function testRedirectToLoginFromCourse() {
         $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
         $request = Request::create(
-            "/s19/sample"
+            "/courses/s19/sample"
         );
         $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
-            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath('/s19/sample')),
+            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath('/courses/s19/sample')),
             $response->redirect_response->url
         );
     }
@@ -69,14 +69,14 @@ class WebRouterTester extends BaseUnitTest {
     public function testParamAttackNotLoggedIn() {
         $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
         $request = Request::create(
-            "/s19/sample",
+            "/courses/s19/sample",
             "GET",
             ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
         );
         $response = WebRouter::getWebResponse($request, $core);
         /* `\' is represented as '%5C' which in turn itself is represented as '%255C' (coz, % encodes to %25) */
         $this->assertEquals(
-            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath('/s19/sample') . '?_controller=app%5Ccontrollers%5COtherController&_method=otherMethod'),
+            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath('/courses/s19/sample') . '?_controller=app%5Ccontrollers%5COtherController&_method=otherMethod'),
             $response->redirect_response->url
         );
     }
@@ -106,15 +106,15 @@ class WebRouterTester extends BaseUnitTest {
     public function randomUrlProvider() {
         return [
             ["/everywhere"],
-            ["/s19"],
+            ["/courses/s19"],
             ["/sample"],
-            ["/s19/../../sample"],
+            ["/courses/s19/../../sample"],
             ["/../../s19/sample"],
             ["/index.php?semester=s19&course=sample"],
-            ["/s19/sample/random/invalid/endpoint"],
+            ["/courses/s19/sample/random/invalid/endpoint"],
             ["/aaa?_controller=otherController&_method=otherMethod"],
             ["/authentication/check_login"],
-            ["/s19/sample/course_materials/upload"]
+            ["/courses/s19/sample/course_materials/upload"]
         ];
     }
 
