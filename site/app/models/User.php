@@ -282,7 +282,7 @@ class User extends AbstractModel {
         }
 
         // Update the DB to 'preferred' and reset $this->display_image
-        if ($this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred') && $image_saved) {
+        if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
             $this->display_image = new DisplayImage($this->core, $this->id, 'preferred');
             return true;
         }
