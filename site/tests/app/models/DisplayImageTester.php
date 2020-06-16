@@ -30,8 +30,9 @@ class DisplayImageTester extends BaseUnitTest {
         $this->user_data_dir = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'user_data', self::TEST_USER_NAME, 'system_images');
         echo $this->user_data_dir;
 
-        $res = FileUtils::createDir($this->user_data_dir, true);
-        echo $res;
+//        $res = FileUtils::createDir($this->user_data_dir, true);
+//        echo $res;
+        mkdir($this->user_data_dir, 0777, true);
 
         // Copy a test image in
         $res2 = copy($this->test_image_path, FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE));
