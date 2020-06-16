@@ -68,11 +68,7 @@ function switch_feedback_modes() {
 
         {% if peer_components | length > 0 %}
             <div class="box submission-page-total-header">
-                <div class="box-title-total"
-                    {% if peer_score >= peer_max %}
-                        onclick="addConfetti();" style="cursor:pointer;"
-                    {% endif %}>
-
+                <div class="box-title-total">
                     <h4>Peer Grading Total</h4>
                     <a id="switch_feedback_button" class="btn btn-default" onclick="switch_feedback_modes()">Switch to Feedback Mode</a>
                 </div>
