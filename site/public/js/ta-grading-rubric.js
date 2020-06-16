@@ -1556,6 +1556,9 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
     // Create an array of links for each submitter
     let submitterHtmlElements = [];
     let [base_url, search_params] = location.href.split('?');
+    if(base_url.slice(base_url.length - 6) == "update") {
+        base_url = base_url.slice(0, -6) + "grading/grade";
+    }
     search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
         search_params.set('who_id', id);

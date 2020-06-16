@@ -36,10 +36,10 @@ class GradedComponent extends AbstractModel {
     private $grader = null;
 
     /** @var Mark[] References to the marks this graded component received */
-    private $marks = array();
+    private $marks = [];
 
     /** @prop @var int[] The mark ids the submitter received for this component */
-    protected $mark_ids = array();
+    protected $mark_ids = [];
     /** @prop @var int[]|null The mark ids the submitter received for this component as reflected in the db */
     private $db_mark_ids = null;
 

@@ -53,6 +53,8 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
     //todo check up on how this works.
     whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
+    // archive the timestamped dispatcher actions
+    whole_config["autograding"]["work_to_details"].push_back("**/dispatched_actions.txt");
   }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
@@ -804,8 +806,12 @@ void InflateTestcases(nlohmann::json &whole_config){
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
 
-  if(!whole_config["timestamped_stdout"].is_boolean()){
+  if (!whole_config["timestamped_stdout"].is_boolean()) {
     whole_config["timestamped_stdout"] = false;
+  }
+
+  if (!whole_config["publish_actions"].is_boolean()) {
+    whole_config["publish_actions"] = false;
   }
 
   int testcase_num = 0;
@@ -828,8 +834,12 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
   //move to load_json
   General_Helper(single_testcase);
 
-  if(!single_testcase["timestamped_stdout"].is_boolean()){
+  if (!single_testcase["timestamped_stdout"].is_boolean()){
     single_testcase["timestamped_stdout"] = whole_config["timestamped_stdout"];
+  }
+
+  if (!single_testcase["publish_actions"].is_boolean()) {
+    single_testcase["publish_actions"] = whole_config["publish_actions"];
   }
 
   if (single_testcase.value("type","Execution") == "FileCheck") {

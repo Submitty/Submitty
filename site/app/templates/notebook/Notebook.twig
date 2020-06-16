@@ -94,7 +94,6 @@
 
             {# Handle if cell is multiple choice #}
             {% elseif cell.type == "multiple_choice" %}
-                {{ cell.randomize_order }}
                 {% if cell.randomize_order == true %}
                     {% set choices_indices = numberUtils.getRandomIndices(cell.choices|length, student_id, gradeable_id ) %}
                 {% else %}

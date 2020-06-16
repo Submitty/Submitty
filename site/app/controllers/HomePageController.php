@@ -38,11 +38,8 @@ class HomePageController extends AbstractController {
      * Will return a json success or failure response depending on the result of the operation.
      */
     public function changeTimeZone() {
-
-        $failure_message = 'Error encountered updating user time zone.';
-
         if (isset($_POST['time_zone'])) {
-            $updated = $this->core->getUser()->updateTimeZone($_POST['time_zone']);
+            $updated = $this->core->getUser()->setTimeZone($_POST['time_zone']);
 
             // Updating went smoothly, so return success
             if ($updated) {
@@ -52,7 +49,7 @@ class HomePageController extends AbstractController {
         }
 
         // Some failure occurred
-        return JsonResponse::getFailResponse($failure_message);
+        return JsonResponse::getFailResponse('Error encountered updating user time zone.');
     }
 
     /**
