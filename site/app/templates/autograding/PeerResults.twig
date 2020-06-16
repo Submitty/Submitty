@@ -50,7 +50,7 @@ function switch_feedback_modes() {
         <div class="box" style="padding: 10px; word-break: break-word;">
             <p>Version #{{ ta_graded_version }}</p>
             {% if regrade_available %}
-                <i>Grade inquiries are due by {{ regrade_date }}</i>
+                <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
             {% endif %}
             <div id="comments_wrapper">
                 {% for user in ordered_graders if overall_comments[user] is not empty %}

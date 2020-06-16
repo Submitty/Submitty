@@ -218,10 +218,10 @@ class WebRouter {
 
     /**
      * Check if the user needs a redirection depending on their login status.
-     * @param $logged_in
+     * @param bool $logged_in
      * @return MultiResponse|bool
      */
-    private function loginRedirectCheck($logged_in) {
+    private function loginRedirectCheck(bool $logged_in) {
         if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
 
