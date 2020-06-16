@@ -1,0 +1,27 @@
+#notebook-builder {
+    background-color: lightblue;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/**
+ * Styles common to all notebook builder widgets
+ */
+.notebook-builder-widget {
+    background-color: lightgrey;
+    margin: 20px;
+    padding: 20px;
+}
+
+/**
+ * Selector widget styles
+ */
+.selector-widget {
+    display: flex;
+    justify-content: space-between;
+}
+
+.selector-widget select {
+    margin-top: 0;
+    width: 90%;
+}
