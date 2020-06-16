@@ -23,7 +23,7 @@ class DisplayImageTester extends BaseUnitTest {
 
     public function setUp(): void {
         // Travis can't write to /var/local/submitty so instead use a temp dir for testing
-        $this->tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());;
+        $this->tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
 
         $this->core = $this->getMockCore($this->tmp_dir);
 
