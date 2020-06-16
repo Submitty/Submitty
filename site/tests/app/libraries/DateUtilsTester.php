@@ -137,6 +137,95 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('2019-01-20 13:24:55', $actual);
     }
 
+    /**
+     * Time stamp with -04 offset into America/New_York
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-06-01 12:00:00-04
+     * UTC time: 2020-06-01 16:00:00
+     *
+     * Expected: 2020-06-01 12:00:00
+     */
+    public function testParseDateTimeNYOne() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/New_York');
+
+        $time_stamp = '2020-06-01 12:00:00-04';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-06-01 12:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+    /**
+     * Time stamp with -05 offset into America/New_York
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-12-01 12:00:00-05
+     * UTC time: 2020-12-01 17:00:00
+     *
+     * Expected: 2020-12-01 12:00:00
+     */
+    public function testParseDateTimeNYTwo() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/New_York');
+
+        $time_stamp = '2020-12-01 12:00:00-05';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-12-01 12:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+    /**
+     * Time stamp with -04 offset into America/Los_Angeles
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-06-01 12:00:00-04
+     * UTC time: 2020-06-01 16:00:00
+     *
+     * Expected: 2020-06-01 09:00:00
+     */
+    public function testParseDateTimeLAOne() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/Los_Angeles');
+
+        $time_stamp = '2020-06-01 12:00:00-04';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-06-01 09:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+    /**
+     * Time stamp with -05 offset into America/Los_Angeles
+     * Date format: YYYY-MM-DD HH:MM:SS
+     *
+     * Time stamp: 2020-12-01 12:00:00-05
+     * UTC time: 2020-12-01 17:00:00
+     *
+     * Expected: 2020-12-01 09:00:00
+     */
+    public function testParseDateTimeLATwo() {
+        $format = 'Y-m-d H:i:s';
+        $time_zone = new \DateTimeZone('America/Los_Angeles');
+
+        $time_stamp = '2020-12-01 12:00:00-05';
+        $date_time = DateUtils::parseDateTime($time_stamp, $time_zone);
+
+        $expected_string = '2020-12-01 09:00:00';
+        $captured_string = $date_time->format($format);
+
+        $this->assertEquals($expected_string, $captured_string);
+    }
+
+
     public function testGetServerTime() {
         $core = new Core();
         $config = new Config($core);
