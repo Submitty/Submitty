@@ -313,11 +313,6 @@ class SubmissionController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
      */
     public function ajaxBulkUpload($gradeable_id) {
-        if (empty($_POST)) {
-            $max_size =  Utils::returnBytes(ini_get('post_max_size'));
-            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
-        }
-
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
@@ -828,10 +823,6 @@ class SubmissionController extends AbstractController {
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
-        if (empty($_POST)) {
-            $max_size = ini_get('post_max_size');
-            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
-        }
 
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
