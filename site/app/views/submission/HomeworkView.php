@@ -455,7 +455,11 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'team_assignment' => $gradeable->isTeamAssignment(),
             'student_id' => $student_id,
-            'numberUtils' => $numberUtils,
+            'numberUtils' => new class () {
+                public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
+                    return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
+                }
+            },
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
