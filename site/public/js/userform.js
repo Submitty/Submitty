@@ -15,7 +15,7 @@ $("#edit-user-form").ready(function() {
                 change: () => $('[name="user_id"]').change()
             });
 
-            $(":text",$("#edit-user-form")).change(checkValidEntries);
+            $(":text", $("#edit-user-form")).change(checkValidEntries);
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
@@ -170,14 +170,6 @@ function checkValidEntries() {
         case "user_preferred_firstname":
         case "user_preferred_lastname":
             var valid_expression = /^[a-zA-Z'`\-\.\(\) ]{0,30}$/;
-            setRedOrTransparent(input,valid_expression);
-            break;
-        case "user_email":
-            if (input.val() == '') {
-                input.css("background-color", "transparent");
-                break;
-            }
-            var valid_expression = /^[^(),:;\<\>@\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?!\-)(\.[a-zA-Z0-9]+)+$/;
             setRedOrTransparent(input,valid_expression);
             break;
         }
