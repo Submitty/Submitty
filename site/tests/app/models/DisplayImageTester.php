@@ -6,6 +6,7 @@ use app\exceptions\BadArgumentException;
 use app\exceptions\FileReadException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\models\Config;
 use app\models\DisplayImage;
 use tests\BaseUnitTest;
@@ -17,42 +18,40 @@ class DisplayImageTester extends BaseUnitTest {
 
     private $core;
     private $test_image_path;
+    private $tmp_dir;
     private $user_data_dir;
 
     public function setUp(): void {
-        $this->core = $this->mockCore();
+        // Travis can't write to /var/local/submitty so instead use a temp dir for testing
+        $this->tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());;
 
-//        $this->test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
-        $this->test_image_path = __DIR__ . '/../../data/images/' . self::TEST_IMAGE;
-        echo $this->test_image_path;
+        $this->core = $this->getMockCore($this->tmp_dir);
+
+        $this->test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
 
         // Generate test folders
-        $this->user_data_dir = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'user_data', self::TEST_USER_NAME, 'system_images');
-        echo $this->user_data_dir;
+        $this->user_data_dir = FileUtils::joinPaths($this->tmp_dir, 'user_data', self::TEST_USER_NAME, 'system_images');
 
-//        $res = FileUtils::createDir($this->user_data_dir, true);
-//        echo $res;
-        mkdir($this->user_data_dir, 0777, true);
+        FileUtils::createDir($this->user_data_dir, true);
 
         // Copy a test image in
-        $res2 = copy($this->test_image_path, FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE));
-        echo $res2;
+        copy($this->test_image_path, FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE));
     }
 
     public function tearDown(): void {
-        if (file_exists($this->user_data_dir)) {
-            FileUtils::recursiveRmdir($this->user_data_dir);
+        if (file_exists($this->tmp_dir)) {
+            FileUtils::recursiveRmdir($this->tmp_dir);
         }
     }
 
     /**
      * Helpers
      */
-    private function mockCore() {
+    private function getMockCore(string $tmp_dir) {
         $core = $this->createMockModel(Core::class);
 
         $config = $this->createMockModel(Config::class);
-        $config->method('getSubmittyPath')->willReturn('/var/local/submitty');
+        $config->method('getSubmittyPath')->willReturn($tmp_dir);
         $core->method('getConfig')->willReturn($config);
 
         return $core;
@@ -61,13 +60,13 @@ class DisplayImageTester extends BaseUnitTest {
     /**
      * Constructor exception tests
      */
-    public function testConstructorBadArgument() {
+    public function testConstructorBadArgument(): void {
         $this->expectException(BadArgumentException::class);
         $this->expectExceptionMessage('Unknown display_image_state!');
         new DisplayImage($this->core, self::TEST_USER_NAME, 'bad_image_state');
     }
 
-    public function testConstructorNoImageFolder() {
+    public function testConstructorNoImageFolder(): void {
         // Remove image folder that was created by setUp()
         FileUtils::recursiveRmdir($this->user_data_dir);
 
@@ -76,7 +75,7 @@ class DisplayImageTester extends BaseUnitTest {
         new DisplayImage($this->core, self::TEST_USER_NAME, 'system');
     }
 
-    public function testConstructorNoImageFile() {
+    public function testConstructorNoImageFile(): void {
         // Remove image that was created by setUp()
         $path = FileUtils::joinPaths($this->user_data_dir, self::TEST_IMAGE);
         unlink($path);
@@ -89,7 +88,7 @@ class DisplayImageTester extends BaseUnitTest {
     /**
      * getImageBase64() tests
      */
-    public function testGetImageBase64NoResize() {
+    public function testGetImageBase64NoResize(): void {
         $imagick = new \Imagick($this->test_image_path);
         $test_image_base64 = base64_encode($imagick->getImageBlob());
 
@@ -98,7 +97,7 @@ class DisplayImageTester extends BaseUnitTest {
         $this->assertEquals($display_image->getImageBase64(), $test_image_base64);
     }
 
-    public function getImageBase64ResizeProvider() {
+    public function getImageBase64ResizeProvider(): array {
         return [
             [null, null],
             [200, null],
@@ -109,7 +108,7 @@ class DisplayImageTester extends BaseUnitTest {
     /**
      * @dataProvider getImageBase64ResizeProvider
      */
-    public function testGetImageBase64Resize($new_cols, $new_rows) {
+    public function testGetImageBase64Resize($new_cols, $new_rows): void {
         $test_imagick = new \Imagick($this->test_image_path);
 
         if (!is_null($new_cols) || !is_null($new_rows)) {
@@ -134,7 +133,7 @@ class DisplayImageTester extends BaseUnitTest {
     /**
      * getImageBase64MaxDimension() tests
      */
-    public function testGetImageBase64MaxDimension() {
+    public function testGetImageBase64MaxDimension(): void {
         // Test image has cols > rows
         // Result should be 500 cols and rows < 500
         $new_col = 500;
@@ -151,7 +150,7 @@ class DisplayImageTester extends BaseUnitTest {
     /**
      * saveUserImage() tests
      */
-    public function testSaveUserImageBadArgument() {
+    public function testSaveUserImageBadArgument(): void {
         $this->expectException(BadArgumentException::class);
         $this->expectExceptionMessage('The $folder parameter must be a member of DisplayImage::LEGAL_FOLDERS.');
         DisplayImage::saveUserImage(
@@ -164,12 +163,12 @@ class DisplayImageTester extends BaseUnitTest {
         );
     }
 
-    public function saveUserImageProvider() {
+    public function saveUserImageProvider(): array {
         $meta = explode('.', self::TEST_IMAGE);
         $file_name = $meta[0];
         $file_extension = $meta[1];
 
-        $core = $this->mockCore();
+        $core = $this->getMockCore(FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString()));
         $test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
 
         return [
@@ -181,10 +180,10 @@ class DisplayImageTester extends BaseUnitTest {
     /**
      * @dataProvider saveUserImageProvider
      */
-    public function testSaveUserImage($core, string $user_id, string $new_image_name, string $image_extension, string $tmp_file_path, string $folder) {
+    public function testSaveUserImage($core, string $user_id, string $new_image_name, string $image_extension, string $tmp_file_path, string $folder): void {
         DisplayImage::saveUserImage($core, $user_id, $new_image_name, $image_extension, $tmp_file_path, $folder);
 
-        $path = FileUtils::joinPaths('/', 'var', 'local', 'submitty', 'user_data', $user_id, $folder, "$new_image_name.$image_extension");
+        $path = FileUtils::joinPaths($core->getConfig()->getSubmittyPath(), 'user_data', $user_id, $folder, "$new_image_name.$image_extension");
         $this->assertFileExists($path);
     }
 }
