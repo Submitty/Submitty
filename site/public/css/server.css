@@ -574,6 +574,19 @@ td>a.active-sort {
     padding: 5px 5px 10px;
 }
 
+.no-border-box {
+    border-radius: 3px;
+    border: 1px solid var(--default-white);
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    position: relative;
+    float: left;
+    background: var(--default-white);
+    box-shadow: 2px 2px 4px -3px var(--default-white);
+    padding: 5px 5px 10px;
+}
+
 .overall-comment-box {
   margin-top:10px;
 }

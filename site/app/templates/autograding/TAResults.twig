@@ -93,7 +93,7 @@ $( document ).ready(function() {
                     </div>
                 </div>
             {% endfor %}
-        <div class="box" style="padding: 10px; word-break: break-word;">
+        <div class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in overall_comments | keys | sort %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
@@ -106,9 +106,9 @@ $( document ).ready(function() {
             {% endfor %}
         </div>
         {% if uploaded_pdfs|length >= 1 %}
-            <div class = "box">
+            <div class = "no-border-box">
                 <div class="row">
-                    <div class="box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
                         <b>Grader Feedback</b>
                         </br>
                         {% for file in files %}
@@ -122,7 +122,7 @@ $( document ).ready(function() {
 
                         {% endfor %}
                     </div>
-                    <div class="box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
                         {% for file in files %}
                             <p style="text-align:center; vertical-align: middle;">
                                 {# download icon if student can download files #}
@@ -155,7 +155,7 @@ $( document ).ready(function() {
 
                         {% endfor %}
                     </div>
-                        <div class="box col-sm-3" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
+                        <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
                         {% if can_download %}
                             <p style="text-align:center; vertical-align: middle;">
                                 Download all files: <button class = "btn btn-default key_to_click" tabindex="0" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip

@@ -31,7 +31,7 @@ $( document ).ready(function() {
         {% endif %}
 
         {% if peer_components | length > 0 %}
-            <div class="box submission-page-total-header">
+            <div class="no-border-box submission-page-total-header">
                 <div class="box-title-total"
                     {% if peer_score >= peer_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
@@ -53,7 +53,7 @@ $( document ).ready(function() {
         {% endif %}
         
         {# Overview #}
-        <div class="box" style="padding: 10px; word-break: break-word;">
+        <div class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in ordered_graders if overall_comments[user] is not empty %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
@@ -68,10 +68,10 @@ $( document ).ready(function() {
         </div>
         
         {% if uploaded_pdfs|length >= 1 %}
-            <div class = "box">
+            <div class = "no-border-box">
     
                 <div class="row">
-                    <div class="box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
                         {% for file in files %}
                             {% if loop.index != uploaded_pdfs|length %}
                                 <div style="margin-bottom: 2em">
@@ -83,7 +83,7 @@ $( document ).ready(function() {
 
                         {% endfor %}
                     </div>
-                    <div class="box col-sm-5" style="float: center; padding: 20px; width: 40%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-5" style="float: center; padding: 20px; width: 40%; word-break: break-word; display: inline-block">
                         {% for file in files %}
                             <p style="text-align:center; vertical-align: middle;">
                                 <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')" style="margin-right:20px;">View Popup <i class="fas fa-window-restore"></i></a>
@@ -98,7 +98,7 @@ $( document ).ready(function() {
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <div class="box col-sm-3" style="float: center; padding: 40px; width: 30%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 30%; word-break: break-word; display: inline-block">
                         
                         {% if can_download %}
                             <p style="text-align:center; vertical-align: middle;">    
@@ -137,7 +137,7 @@ $( document ).ready(function() {
 
 
 {%- macro renderManyPeerResults(component) -%}
-    <div class="box grade-results">
+    <div class="no-border-box grade-results">
         <div class="box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
         </div>
@@ -184,7 +184,7 @@ $( document ).ready(function() {
 
 
 {%- macro renderFewPeerResults(component, peer_aliases, ordered_graders) -%}
-    <div class="box grade-results">
+    <div class="no-border-box grade-results">
         <div class="box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
         </div>
