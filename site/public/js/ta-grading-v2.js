@@ -18,64 +18,19 @@ let currentTwoPanels = {
   right: null
 };
 
+let panelsBucket = {
+  leftSelector : ".two-panel-item.two-panel-left",
+  rightSelector : ".two-panel-item.two-panel-right",
+  dragBarSelector: ".two-panel-drag-bar",
+};
+
 let isTwoPanelsEnabled = false; // update this with localstorage for persistence ?
 
 //Check if cookie version is/is not the same as the current version
 let versionMatch = false;
 //Set positions and visibility of configurable ui elements
 $(function() {
-
-  // Select all the DOM elements for dragging in two-panel-mode
-  const panelCont = document.querySelector(".two-panel-cont");
-  const leftPanel = document.querySelector(".two-panel-item.two-panel-left");
-  const rightPanel = document.querySelector(".two-panel-item.two-panel-right");
-  const dragbar = document.querySelector(".two-panel-drag-bar");
-
-  let xPos = 0, yPos = 0, leftPanelWidth = 0;
-
-  // Width of left side
-  const mouseDownHandler = function(e) {
-    // Get the current mouse position
-    xPos = e.clientX;
-    yPos = e.clientY;
-    leftPanelWidth = leftPanel.getBoundingClientRect().width;
-
-    // Attach the listeners to `document`
-    document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mouseup", mouseUpHandler);
-  };
-
-  const mouseUpHandler = () => {
-    // remove the dragging CSS props to go back to initial styling
-    dragbar.style.removeProperty("cursor");
-    document.body.style.removeProperty("cursor");
-    leftPanel.style.removeProperty("user-select");
-    leftPanel.style.removeProperty("pointer-events");
-    rightPanel.style.removeProperty("user-select");
-    rightPanel.style.removeProperty("pointer-events");
-
-    // Remove the handlers of `mousemove` and `mouseup`
-    document.removeEventListener("mousemove", mouseMoveHandler);
-    document.removeEventListener("mouseup", mouseUpHandler);
-  };
-
-  const mouseMoveHandler = (e) => {
-    const dx = e.clientX - xPos;
-    const updateLeftPanelWidth = (leftPanelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
-    leftPanel.style.width = `${updateLeftPanelWidth}%`;
-
-    // consistent mouse pointer during dragging
-    document.body.style.cursor = "col-resize";
-    leftPanel.style.userSelect = "none";
-    leftPanel.style.pointerEvents = "none";
-    // Disable text selection when dragging
-    rightPanel.style.userSelect = "none";
-    rightPanel.style.pointerEvents = "none";
-
-
-  };
-  dragbar.addEventListener("mousedown", mouseDownHandler);
-
+  initializeTwoPanelsDrag();
   //bring regrade panel to the front if grade inquiry is pending
   if ($(".fa-exclamation")[0]) {
     if (!isRegradeVisible())
@@ -113,6 +68,57 @@ function deleteCookies(){
   });
 }
 
+function initializeTwoPanelsDrag () {
+  // Select all the DOM elements for dragging in two-panel-mode
+  const leftPanel = document.querySelector(panelsBucket.leftSelector);
+  const rightPanel = document.querySelector(panelsBucket.rightSelector);
+  const panelCont = leftPanel.parentElement;
+  const dragbar = document.querySelector(panelsBucket.dragBarSelector);
+
+  let xPos = 0, yPos = 0, leftPanelWidth = 0;
+
+  // Width of left side
+  const mouseDownHandler = function(e) {
+    // Get the current mouse position
+    xPos = e.clientX;
+    yPos = e.clientY;
+    leftPanelWidth = leftPanel.getBoundingClientRect().width;
+    console.log(leftPanelWidth);
+    // Attach the listeners to `document`
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseUpHandler = () => {
+    // remove the dragging CSS props to go back to initial styling
+    dragbar.style.removeProperty("cursor");
+    document.body.style.removeProperty("cursor");
+    leftPanel.style.removeProperty("user-select");
+    leftPanel.style.removeProperty("pointer-events");
+    rightPanel.style.removeProperty("user-select");
+    rightPanel.style.removeProperty("pointer-events");
+
+    // Remove the handlers of `mousemove` and `mouseup`
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    document.removeEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseMoveHandler = (e) => {
+    const dx = e.clientX - xPos;
+    const updateLeftPanelWidth = (leftPanelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
+    leftPanel.style.width = `${updateLeftPanelWidth}%`;
+
+    // consistent mouse pointer during dragging
+    document.body.style.cursor = "col-resize";
+    leftPanel.style.userSelect = "none";
+    leftPanel.style.pointerEvents = "none";
+    // Disable text selection when dragging
+    rightPanel.style.userSelect = "none";
+    rightPanel.style.pointerEvents = "none";
+
+  };
+  dragbar.addEventListener("mousedown", mouseDownHandler);
+}
 function onAjaxInit() {}
 
 function readCookies(){
@@ -375,9 +381,30 @@ function toggleFullScreenMode () {
 }
 
 function toggleFullLeftColumnMode () {
-  $(".content-item-right").toggleClass("active");
+  $(".content-item-left").toggleClass("active");
   $(".content-drag-bar").toggleClass("active");
+  $(".two-panel-item.two-panel-left").toggleClass("active");
+  $(".two-panel-drag-bar").toggleClass("active");
   $("#full-left-column-btn").toggleClass("active");
+
+  // Update the DOM selector for the right container
+  let newLeftPanelBucketSelector, newDragBarSelector;
+  if ($(".content-item-left").is(':visible')) {
+    newLeftPanelBucketSelector = ".content-item-left";
+    newDragBarSelector = ".content-drag-bar";
+  } else {
+    newLeftPanelBucketSelector = ".two-panel-item.two-panel-left";
+    newDragBarSelector = ".two-panel-drag-bar";
+  }
+  // Move the children from previous right column to new "full sized" right column bucket
+  const leftPanelBucket = document.querySelector(panelsBucket.leftSelector).childNodes;
+  for(let idx = 0; idx < leftPanelBucket.length; idx++) {
+    document.querySelector(newLeftPanelBucketSelector).append(leftPanelBucket[idx]);
+  }
+  panelsBucket.leftSelector = newLeftPanelBucketSelector;
+  panelsBucket.dragBarSelector = newDragBarSelector;
+  // update the dragging event for two panels
+  initializeTwoPanelsDrag();
 }
 
 function toggleTwoPanelMode() {
@@ -415,6 +442,7 @@ function toggleTwoPanelMode() {
     twoPanelCont.removeClass("active");
     $("#two-panel-mode-btn").removeClass("active");
     $("#two-panel-exchange-btn").removeClass("active");
+    $("#full-left-column-btn").removeClass("visible");
 
     const leftPanelId = currentTwoPanels.left;
     const rightPanelId = currentTwoPanels.right;
@@ -431,6 +459,15 @@ function toggleTwoPanelMode() {
       document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
       setPanelsVisibilities(leftPanelId, true);
     }
+    // Remove the full-left-column view as if is meant for two-panel-mode only
+    $(".content-item-left").removeClass("active");
+    $(".content-drag-bar").removeClass("active");
+    $(".two-panel-item.two-panel-left").addClass("active");
+    $(".two-panel-drag-bar").addClass("active");
+    panelsBucket.leftSelector = ".two-panel-item.two-panel-left";
+    panelsBucket.dragBarSelector = ".two-panel-drag-bar";
+    $("#full-left-column-btn").removeClass("active");
+    initializeTwoPanelsDrag();
   }
 }
 
@@ -440,18 +477,18 @@ function updateTwoPanelLayout () {
   const rightPanel = document.getElementById(currentTwoPanels.right);
 
   setTwoPanelModeVisibilities();
-  for (const key in currentTwoPanels) {
-    const panelCont = document.querySelector(`.two-panel-item.two-panel-${key}`).childNodes;
+  for (const panelIdx in panelsBucket) {
+    const panelCont = document.querySelector(panelsBucket[panelIdx]).childNodes;
 
     for (let idx = 0; idx < panelCont.length; idx++) {
       document.querySelector(".panels-container").append(panelCont[idx]);
     }
   }
   if (leftPanel) {
-    document.querySelector(".two-panel-cont .two-panel-left").appendChild(leftPanel);
+    document.querySelector(panelsBucket.leftSelector).append(leftPanel);
   }
   if (rightPanel) {
-    document.querySelector(".two-panel-cont .two-panel-right").appendChild(rightPanel);
+    document.querySelector(panelsBucket.rightSelector).append(rightPanel);
   }
 }
 

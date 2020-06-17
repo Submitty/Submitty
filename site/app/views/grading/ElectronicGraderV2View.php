@@ -740,11 +740,11 @@ HTML;
         $return = <<<HTML
         		<div class="content" id="electronic-gradeable-container">
         		    <div class="content-items-container">
-                    <div class="content-items content-item-right"></div>
+                    <div class="content-items content-item-left"></div>
                     <div class="content-drag-bar">
                         <span></span>
                     </div>
-                    <div class="content-items content-item-left">
+                    <div class="content-items content-item-right">
 HTML;
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGraderV2'), 'renderGradingPanelHeader', $graded_gradeable);
@@ -752,8 +752,8 @@ HTML;
         $return .= <<<HTML
                 <div class="panels-container">
                     <div class="two-panel-cont">
-                         <div class="two-panel-item two-panel-left"></div>
-                         <div class="two-panel-drag-bar">
+                         <div class="two-panel-item two-panel-left active"></div>
+                         <div class="two-panel-drag-bar active">
                             <span></span>
                          </div>
                          <div class="two-panel-item two-panel-right">

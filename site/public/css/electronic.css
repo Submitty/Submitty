@@ -63,24 +63,25 @@ aside {
 }
 
 .content-items {
+    width: 50%;
     min-width: 250px;
 }
 
 .content-item-right {
-    display: none;
-    width: 50%;
-    background: var(--standard-medium-gray);
+    flex: 1 1 0%;
 }
 
 .content-item-left {
-    flex: 1 1 0%;
+    background: var(--standard-medium-gray);
+    display: none;
+    width: 50%;
 }
 
 .content-drag-bar {
     display: none;
 }
 
-.content-item-right.active, .content-drag-bar.active {
+.content-item-left.active, .content-drag-bar.active {
     display: block;
 }
 
@@ -342,7 +343,13 @@ progress::-webkit-progress-value {
     background: var(--standard-medium-gray);
 }
 
-.two-panel-left {}
+.two-panel-left, .two-panel-drag-bar {
+    display: none;
+}
+
+.two-panel-left.active, .two-panel-drag-bar.active {
+    display: block;
+}
 
 .two-panel-right {
     flex: 1 1 0%;
