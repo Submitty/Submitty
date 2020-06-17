@@ -14,10 +14,10 @@ class RedirectResponse implements ResponseInterface {
 
     /**
      * RedirectResponse constructor.
-     * @param $url
+     * @param string|null $url
      */
-    public function __construct($url) {
-        $this->url = $url;
+    public function __construct(?string $url) {
+        $this->url = $url ?? "";
     }
 
     /**

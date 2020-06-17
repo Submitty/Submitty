@@ -385,11 +385,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
         #    We should standardize this logging eventually, but
         #    keeping it as is because we are mid-semester with this
         #    new feature and I don't want to break things.
-        words = first_access_string.split(' ')
-        date_parts = words[0].split('-')
-        if len(date_parts[0]) == 2:
-            words[0] = date_parts[2]+'-'+date_parts[0]+'-'+date_parts[1]
-            first_access_string = ' '.join(words)
+        first_access_string = dateutils.normalize_submitty_date(first_access_string)
         
         submission_datetime = dateutils.read_submitty_date(submission_string)
         gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)

@@ -642,6 +642,26 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::formatBytes($format, $bytes));
     }
 
+    public function formatBytesRoundingProvider() {
+        return [
+            ['b', 0, '0B'],
+            ['b', 1000, '1000B'],
+            ['kb', 999, '1KB'],
+            ['kb', 1023, '1KB'],
+            ['kb', 500, '0KB'],
+            ['kb', 1049999, '1025KB'],
+            ['mb', 1, '0MB'],
+            ['mb', 5000123, '5MB'],
+        ];
+    }
+
+    /**
+     * @dataProvider formatBytesRoundingProvider
+     */
+    public function testFormatBytesRounding($format, $bytes, $expected) {
+        $this->assertEquals($expected, Utils::formatBytes($format, $bytes, true));
+    }
+
     public function testMbStrSplitRegularString() {
         $this->assertEquals(str_split('abcdef'), Utils::mb_str_split('abcdef'));
     }

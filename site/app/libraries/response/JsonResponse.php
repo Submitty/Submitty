@@ -17,12 +17,12 @@ class JsonResponse implements ResponseInterface {
      * JsonResponse constructor.
      * Returns a Jsend format json response
      * (see http://submitty.org/developer/json_responses)
-     * @param $type
+     * @param string $type
      * @param mixed|null $data
      * @param string|null $message
      * @param string|null $code
      */
-    private function __construct($type, $data = null, $message = null, $code = null) {
+    private function __construct(string $type, $data = null, $message = null, $code = null) {
         $this->json = [
             'status' => $type
         ];
@@ -53,7 +53,7 @@ class JsonResponse implements ResponseInterface {
      * @param mixed|null $data
      * @return JsonResponse
      */
-    public static function getSuccessResponse($data = null) {
+    public static function getSuccessResponse($data = null): JsonResponse {
         return new self('success', $data);
     }
 
@@ -63,7 +63,7 @@ class JsonResponse implements ResponseInterface {
      * @param mixed|null $data
      * @return JsonResponse
      */
-    public static function getFailResponse($message, $data = null) {
+    public static function getFailResponse($message, $data = null): JsonResponse {
         return new self('fail', $data, $message);
     }
 
@@ -74,7 +74,7 @@ class JsonResponse implements ResponseInterface {
      * @param string|null $code
      * @return JsonResponse
      */
-    public static function getErrorResponse($message, $data = null, $code = null) {
+    public static function getErrorResponse($message, $data = null, $code = null): JsonResponse {
         return new self('error', $data, $message, $code);
     }
 }
