@@ -264,54 +264,51 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
-        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'AdminGradeablePeersForm', $gradeable);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
 
         $peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
-        $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader('browna');
+        $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader('aphacker');
         var_dump($peer_grading_assignments);
         var_dump($grading_assignment_for_grader);
 
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
      */
     public function adminGradeablePeerSubmit($gradeable_id) {
-        /*
-        try {
-            //$return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '5']);
-            $grader_id = $_POST['grader_id'];
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            //$old_peers_list = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
-            //if entire grader row is removed, just remove grader and their students
-            if (!empty($_POST['remove_grader'])) {
-                $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
-            } else {
-                //otherwise, check if any of the individual current students were removed
-                $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
-                $grading_assignment_for_grading = $tmp[$gradeable_id];
-                foreach($grading_assignment_for_grader as $i => $student_id) {
-                    if (!in_array($student_id, $_POST['curr_student_ids'])) {
-                        $this->core->getQueries()->removePeerAssignment($gradeble_id, $grader_id, $student_id);
-                    }
-                }
-                //then, add new students
-                foreach($_POST['add_user_ids'] as $i => $student_id) {
-                    if (in_array($student_id, $grading_assignment_for_grader)) {
-                        $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
+        $grader_id = $_POST['grader_id'];
+        // $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        //if entire grader row is removed, just remove grader and their students
+        if (!empty($_POST['remove_grader'])) {
+            $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
+        } else {
+            //otherwise, check if any of the individual current students were removed
+            $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
+            $grading_assignment_for_grader = $tmp[$gradeable_id];
+            foreach($grading_assignment_for_grader as $i => $student_id) {
+                if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
+                    if ($this->core->getQueries()->getUserById($student_id) == null) {
+                        $this->core->addErrorMessage("{$student_id} is not a valid student");
                     } else {
-                        $this->core->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
+                        $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                     }
                 }
             }
-            //$gradeable->editPeerGradersList();
-            $this->core->getOutput()->renderJsonSuccess($this->core->getQueries()->getPeerGradingAssignment($gradeable_id));
-        } catch (Exception $e) {
-            $this->core->getOutput()->renderJsonFail('Peer assignment failed');
-        }*/
-        $this->core->getOutput()->renderJsonSuccess();
+            //then, add new students
+            foreach(json_decode($_POST['add_student_ids']) as $i => $student_id) {
+                if (in_array($student_id, $grading_assignment_for_grader)) {
+                    $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
+                } else if ($this->core->getQueries()->getUserById($student_id) == null) {
+                    $this->core->addErrorMessage("{$student_id} is not a valid student");
+                } else {
+                    $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
+                }
+            }
+        }
+        $this->core->getOutput()->renderJsonSuccess($this->core->getQueries()->getPeerGradingAssignment($gradeable_id));
     }
 
     /* Http request methods (i.e. ajax) */
@@ -324,7 +321,7 @@ class AdminGradeableController extends AbstractController {
             $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
             $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
             if ($make_peer_assignments) {
-                $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
+                $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
 
                 $users = $this->core->getQueries()->getAllUsers();
                 $user_ids = [];

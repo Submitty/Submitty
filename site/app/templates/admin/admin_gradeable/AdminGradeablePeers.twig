@@ -112,22 +112,21 @@
 
     function submitFormAjax() {
         let url = $('#peers_submit_url').val();
-        console.log(url);
         var form = $("#admin-gradeable-peers-form");
         let fd = new FormData();
-        console.log($("#csrf_token", form).val());
         fd.append('csrf_token', $("#csrf_token").val());
-        //fd.append('grader_id', $("#admin-gradeable-peers-title").text().substr(18));
-        //fd.append('remove_grader', $('#removed-all').text());
-        /*
-        fd['curr_student_ids'] = [];
+        fd.append('grader_id', $("#admin-gradeable-peers-title").text().substr(18));
+        fd.append('remove_grader', $('#removed-all').text());
+        let curr_student_ids = [];
         $(".edit_user_ids :input.peerstudents").each(function() {
-            fd['curr_student_ids'].push($(this).val());
+            if ($(this).val() != "") curr_student_ids.push($(this).val());
         });
-        fd['add_user_ids'] = [];
+        fd.append('curr_student_ids', JSON.stringify(curr_student_ids));
+        let add_student_ids = [];
         $(".add_user_ids :input").each(function() {
-            fd['add_user_ids'].push($(this).val());
-        });*/
+            if ($(this).val() != "") add_student_ids.push($(this).val());
+        });
+        fd.append('add_student_ids', JSON.stringify(add_student_ids));
         $.ajax({
             url: url,
             type: "POST",
@@ -137,7 +136,6 @@
             contentType: false,
             success: function(data) {
                 $('.popup-form').css('display', 'none');
-                console.log(fd);
                 console.log(data);
             },
             error: function() {
