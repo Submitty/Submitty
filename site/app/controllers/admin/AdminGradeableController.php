@@ -210,8 +210,8 @@ class AdminGradeableController extends AbstractController {
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         // Setup notebook builder
-        $this->core->getOutput()->addInternalJs('notebook_builder/abstract-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');

@@ -11,6 +11,39 @@
     background-color: lightgrey;
     margin: 20px;
     padding: 20px;
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.heading-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-main {
+    border: 1px solid grey;
+    padding: 10px;
+    margin-right: 10px;
+    width: 100%;
+}
+
+.widget-controls {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid grey;
+    justify-content: space-around;
+}
+
+.widget-controls input[type='button'] {
+    margin: 10px;
+}
+
+.interactive-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
 }
 
 /**
@@ -18,10 +51,18 @@
  */
 .selector-widget {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
 }
 
 .selector-widget select {
     margin-top: 0;
     width: 90%;
+}
+
+/**
+ * Markdown widget styles
+ */
+.markdown-widget textarea {
+    width: 100%;
+    margin-right: 10px
 }

@@ -93,7 +93,8 @@ $(document).ready(function () {
     ajaxCheckBuildStatus();
 
     $('input,select,textarea').change(function () {
-        if ($(this).hasClass('ignore')) {
+        const notebook_builder_elem = document.getElementById('notebook-builder');
+        if ($(this).hasClass('ignore') || notebook_builder_elem.contains(this)) {
             return;
         }
         // If its rubric-related, then make different request
