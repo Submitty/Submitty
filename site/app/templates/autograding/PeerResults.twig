@@ -50,7 +50,7 @@ function switch_feedback_modes() {
         <div class="box" style="padding: 10px; word-break: break-word;">
             <p>Version #{{ ta_graded_version }}</p>
             {% if regrade_available %}
-                <i>Grade inquiries are due by {{ regrade_date }}</i>
+                <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
             {% endif %}
             <div id="comments_wrapper">
                 {% for user in ordered_graders if overall_comments[user] is not empty %}
@@ -69,6 +69,7 @@ function switch_feedback_modes() {
         {% if peer_components | length > 0 %}
             <div class="box submission-page-total-header">
                 <div class="box-title-total">
+                    {{ Badge.render(peer_score, peer_max, false) }}
                     <h4>Peer Grading Total</h4>
                     <a id="switch_feedback_button" class="btn btn-default" onclick="switch_feedback_modes()">Switch to Feedback Mode</a>
                 </div>
