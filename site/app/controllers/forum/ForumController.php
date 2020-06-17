@@ -814,7 +814,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads/single", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/single", methods={"POST"})
      */
     public function getSingleThread() {
         $thread_id = $_POST['thread_id'];
