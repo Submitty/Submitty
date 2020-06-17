@@ -12,6 +12,7 @@ let panelElements = [
   { str: "peer_info", icon: ".grading_toolbar .fa-users"}
 ];
 
+// Tracks the currently opened panels
 let currentOpenPanel = null;
 let currentTwoPanels = {
   left: null,
@@ -26,49 +27,13 @@ let panelsBucket = {
 
 let isTwoPanelsEnabled = false; // update this with localstorage for persistence ?
 
-//Check if cookie version is/is not the same as the current version
-let versionMatch = false;
-//Set positions and visibility of configurable ui elements
 $(function() {
-  initializeTwoPanelsDrag();
-  //bring regrade panel to the front if grade inquiry is pending
-  if ($(".fa-exclamation")[0]) {
-    if (!isRegradeVisible())
-      toggleRegrade();
-    $('#regrade_info').css({'z-index':'40'});
-  }
-  updateCookies();
-  let progressbar = $(".progressbar"),
-    value = progressbar.val();
+  initializeTwoPanelDrag();
+  let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
 });
 
-function createCookie(name,value,seconds)  {
-  let expires = "";
-  if(seconds) {
-    let date = new Date();
-    date.setTime(date.getTime()+(seconds*1000));
-    expires = "; expires="+date.toGMTString();
-  }
-
-  document.cookie = name+"="+value+expires+"; path=/";
-}
-
-function eraseCookie(name) {
-  createCookie(name,"",-3600);
-}
-
-function deleteCookies(){
-  $.each(document.cookie.split(/; */), function(){
-    let cookie = this.split("=");
-    if(!cookie[1] || cookie[1] == 'undefined'){
-      document.cookie = cookie[0] + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-      document.cookie = "cookie_version=-1; path=/;";
-    }
-  });
-}
-
-function initializeTwoPanelsDrag () {
+function initializeTwoPanelDrag () {
   // Select all the DOM elements for dragging in two-panel-mode
   const leftPanel = document.querySelector(panelsBucket.leftSelector);
   const rightPanel = document.querySelector(panelsBucket.rightSelector);
@@ -83,7 +48,7 @@ function initializeTwoPanelsDrag () {
     xPos = e.clientX;
     yPos = e.clientY;
     leftPanelWidth = leftPanel.getBoundingClientRect().width;
-    console.log(leftPanelWidth);
+
     // Attach the listeners to `document`
     document.addEventListener("mousemove", mouseMoveHandler);
     document.addEventListener("mouseup", mouseUpHandler);
@@ -115,7 +80,6 @@ function initializeTwoPanelsDrag () {
     // Disable text selection when dragging
     rightPanel.style.userSelect = "none";
     rightPanel.style.pointerEvents = "none";
-
   };
   dragbar.addEventListener("mousedown", mouseDownHandler);
 }
@@ -280,6 +244,42 @@ registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, fu
 // Panel show/hide
 //
 
+function resetTwoPanelLayout() {
+  // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
+  $(".content-item-left, .content-drag-bar, #full-left-column-btn").removeClass("active");
+  $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+  // reset other variables
+  panelsBucket.leftSelector = ".two-panel-item.two-panel-left";
+  panelsBucket.dragBarSelector = ".two-panel-drag-bar";
+  initializeTwoPanelDrag();
+}
+
+function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null) {
+  // update the global variable
+  if (isPanelAdded) {
+    // panel is going to be added on the screen, so rotate the panels
+    if ((currentTwoPanels.left && currentTwoPanels.right) || !currentTwoPanels.left && currentTwoPanels.right) {
+      currentTwoPanels.left = currentTwoPanels.right;
+      currentTwoPanels.right = panelId;
+    } else if (currentTwoPanels.left) {
+      currentTwoPanels.right = panelId;
+    } else { // there is no panels
+      currentTwoPanels.left = panelId;
+    }
+  } else {
+    // panel is going to be removed from screen
+    // check which one out of the left or right is going to be hidden
+    if (currentTwoPanels.left === panelId ) {
+      currentTwoPanels.left = currentTwoPanels.right;
+      currentTwoPanels.right = null;
+    }
+    if (currentTwoPanels.right === panelId ) {
+      currentTwoPanels.right = null;
+    }
+  }
+}
+
+// Keep only those panels which are part of the two panel layout
 function setTwoPanelModeVisibilities () {
     panelElements.forEach((panel) => {
       if (currentTwoPanels.left === panel.str || currentTwoPanels.right === panel.str) {
@@ -296,7 +296,7 @@ function setTwoPanelModeVisibilities () {
 
 function setPanelsVisibilities (ele, forceVisible) {
   panelElements.forEach((panel) => {
-    //only hide those panels which are not given panel and not in recentTwoPanel array
+    //only hide those panels which are not given panel and not in currentTwoPanels
     if (panel.str !== ele && currentTwoPanels.right !== panel.str && currentTwoPanels.left !== panel.str) {
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
@@ -309,40 +309,11 @@ function setPanelsVisibilities (ele, forceVisible) {
       // update the global variable
       currentOpenPanel = eleVisibility ? panel.str : null;
       if (isTwoPanelsEnabled) {
-        if (eleVisibility) {
-          // panel is going to be added on the screen
-          if ((currentTwoPanels.left && currentTwoPanels.right) || !currentTwoPanels.left && currentTwoPanels.right) {
-            currentTwoPanels.left = currentTwoPanels.right;
-            currentTwoPanels.right = panel.str;
-          } else if (currentTwoPanels.left) {
-            currentTwoPanels.right = panel.str;
-          } else {
-            currentTwoPanels.left = panel.str;
-          }
-        } else {
-          // panel is going to be removed from screen
-          // check which one out of the left and right is going to be hidden
-          let positionOfPanel = undefined;
-          if (currentTwoPanels.left === panel.str ) {
-            positionOfPanel = "left" ;
-          }
-          if (currentTwoPanels.right === panel.str ) {
-            positionOfPanel = "right" ;
-          }
-
-          if (!positionOfPanel) {
-            // How come this happen ???
-          } else if (positionOfPanel === "left") {
-            currentTwoPanels.left = currentTwoPanels.right;
-            currentTwoPanels.right = null;
-          } else {
-            currentTwoPanels.right = null;
-          }
-        }
+        checkForTwoPanelLayoutChange(eleVisibility, panel.str);
       }
     }
   });
-
+  // update the two-panels-layout if it's enabled
   if (isTwoPanelsEnabled) {
     updateTwoPanelLayout();
   }
@@ -381,13 +352,11 @@ function toggleFullScreenMode () {
 }
 
 function toggleFullLeftColumnMode () {
-  $(".content-item-left").toggleClass("active");
-  $(".content-drag-bar").toggleClass("active");
-  $(".two-panel-item.two-panel-left").toggleClass("active");
-  $(".two-panel-drag-bar").toggleClass("active");
-  $("#full-left-column-btn").toggleClass("active");
+  // toggle between the normal left and full left panel mode
+  $(".content-item-left, .content-drag-bar, .two-panel-item.two-panel-left, .two-panel-drag-bar, #full-left-column-btn")
+    .toggleClass("active");
 
-  // Update the DOM selector for the right container
+  // Update the DOM selector for the left container
   let newLeftPanelBucketSelector, newDragBarSelector;
   if ($(".content-item-left").is(':visible')) {
     newLeftPanelBucketSelector = ".content-item-left";
@@ -396,7 +365,7 @@ function toggleFullLeftColumnMode () {
     newLeftPanelBucketSelector = ".two-panel-item.two-panel-left";
     newDragBarSelector = ".two-panel-drag-bar";
   }
-  // Move the children from previous right column to new "full sized" right column bucket
+  // Move the children from previous left column to new "full sized" left column bucket
   const leftPanelBucket = document.querySelector(panelsBucket.leftSelector).childNodes;
   for(let idx = 0; idx < leftPanelBucket.length; idx++) {
     document.querySelector(newLeftPanelBucketSelector).append(leftPanelBucket[idx]);
@@ -404,7 +373,7 @@ function toggleFullLeftColumnMode () {
   panelsBucket.leftSelector = newLeftPanelBucketSelector;
   panelsBucket.dragBarSelector = newDragBarSelector;
   // update the dragging event for two panels
-  initializeTwoPanelsDrag();
+  initializeTwoPanelDrag();
 }
 
 function toggleTwoPanelMode() {
@@ -426,8 +395,6 @@ function toggleTwoPanelMode() {
         }
         return true;
       });
-
-
 
     } else {
       // if there is no currently opened panel fill the panels with the first two
@@ -459,18 +426,11 @@ function toggleTwoPanelMode() {
       document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
       setPanelsVisibilities(leftPanelId, true);
     }
-    // Remove the full-left-column view as if is meant for two-panel-mode only
-    $(".content-item-left").removeClass("active");
-    $(".content-drag-bar").removeClass("active");
-    $(".two-panel-item.two-panel-left").addClass("active");
-    $(".two-panel-drag-bar").addClass("active");
-    panelsBucket.leftSelector = ".two-panel-item.two-panel-left";
-    panelsBucket.dragBarSelector = ".two-panel-drag-bar";
-    $("#full-left-column-btn").removeClass("active");
-    initializeTwoPanelsDrag();
+    resetTwoPanelLayout();
   }
 }
 
+// Handles the DOM manipulation to update the two panel layout
 function updateTwoPanelLayout () {
   // fetch the panels by their ids
   const leftPanel = document.getElementById(currentTwoPanels.left);
@@ -479,11 +439,12 @@ function updateTwoPanelLayout () {
   setTwoPanelModeVisibilities();
   for (const panelIdx in panelsBucket) {
     const panelCont = document.querySelector(panelsBucket[panelIdx]).childNodes;
-
+    // Move all the panels from the left and right buckets to the main panels-container
     for (let idx = 0; idx < panelCont.length; idx++) {
       document.querySelector(".panels-container").append(panelCont[idx]);
     }
   }
+  // finally append the latest panels to their respective buckets
   if (leftPanel) {
     document.querySelector(panelsBucket.leftSelector).append(leftPanel);
   }
@@ -492,6 +453,7 @@ function updateTwoPanelLayout () {
   }
 }
 
+// Exchanges positions of left and right panels
 function exchangeTwoPanels () {
   if (currentTwoPanels.left && currentTwoPanels.right) {
     const leftPanel = currentTwoPanels.left;
@@ -505,24 +467,7 @@ function exchangeTwoPanels () {
   }
 }
 
-/*
-
-  Use a parent div with classes left and right
-  but in this case if you would toggle one of the panel how to maintain the position of other one
-
-  Use a predefined left and right divs and make them visible only in two panel mode
-  how to inject panels in these divs
- */
-
-function resetModules() {
-  deleteCookies();
-  updateCookies();
-}
-
-registerKeyHandler({name: "Reset Panel Positions", code: "KeyR"}, function() {
-  resetModules();
-  updateCookies();
-});
+// Key handler / shorthand for toggling in between panels
 registerKeyHandler({name: "Toggle Autograding Panel", code: "KeyA"}, function() {
   toggleAutograding();
   updateCookies();
