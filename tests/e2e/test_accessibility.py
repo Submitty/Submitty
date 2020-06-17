@@ -52,7 +52,7 @@ class TestAccessibility(BaseTestCase):
         '/{}/{}/late_table',
         '/{}/{}/theme',
         '/{}/{}/grades',
-        '/{}/{}/stats',
+        '/courses/{}/{}/stats',
     ]
 
     baseline_path = ''
