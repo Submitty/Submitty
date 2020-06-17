@@ -15,6 +15,7 @@ use app\exceptions\IOException;
  * @method array getInputs()
  * @method array getNotebook()
  * @method array getImagePaths()
+ * @method array getFileSubmissions()
  */
 
 class Notebook extends AbstractModel {
@@ -26,6 +27,8 @@ class Notebook extends AbstractModel {
     protected $gradeable_id;
     /** @prop @var array of image names and their locations */
     protected $image_paths;
+    /** @prop @var array of file_submission notebook cells */
+    protected $file_submissions = [];
 
 
     public function __construct(Core $core, array $details, string $gradeable_id) {
@@ -91,6 +94,15 @@ class Notebook extends AbstractModel {
             // If cell is a type of input add it to the $actual_inputs array
             if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
+            }
+
+            if (
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'file_submission'
+                && !in_array($notebook_cell, $this->file_submissions)
+            ) {
+                $notebook_cell['label'] = $notebook_cell['label'] ?? "";
+                $this->file_submissions[] = $notebook_cell;
             }
         }
         
@@ -273,5 +285,10 @@ class Notebook extends AbstractModel {
             }
         }
         return $image_paths;
+    }
+
+
+    public function getNumParts(): int {
+        return count($this->file_submissions);
     }
 }

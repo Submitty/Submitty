@@ -137,16 +137,33 @@ class AutoGradedVersion extends AbstractModel {
             }
             // If there is only one part (no separation of upload files),
             //  be sure to set the "Part 1" files to the "all" files
-            if ($config->getNumParts() === 1) {
+            if ($config->getNumParts() === 1 && !$config->isNotebookGradeable()) {
                 $this->files[$dir][1] = $this->files[$dir][0];
             }
 
+            $part_names = $config->getPartNames();
+            $notebook_model = null;
+            if ($config->isNotebookGradeable()) {
+                $notebook_model = $config->getUserSpecificNotebook(
+                    $submitter_id,
+                    $gradeable->getId()
+                );
+
+                $part_names = range(1, $notebook_model->getNumParts());
+            }
+
             // A second time, look through the folder, but now split up based on part number
-            foreach ($config->getPartNames() as $i => $name) {
+            foreach ($part_names as $i => $name) {
                 foreach ($submitted_files as $file => $details) {
                     $dir_name = "part{$i}/";
-                    if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
-                        $this->files[$dir][$i][substr($file, strlen($dir_name))] = $details;
+                    $index = $i;
+                    if ($config->isNotebookGradeable() && isset($notebook_model->getFileSubmissions()[$i])) {
+                        $dir_name = $notebook_model->getFileSubmissions()[$i]["directory"];
+                        $index = $name;
+                    }
+
+                    if (substr($file, 0, strlen($dir_name)) === $dir_name) {
+                        $this->files[$dir][$index][substr($file, strlen($dir_name))] = $details;
                     }
                 }
             }
