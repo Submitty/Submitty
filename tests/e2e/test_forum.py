@@ -265,12 +265,18 @@ class TestForum(BaseTestCase):
         self.find_posts(reply3, must_exists=True, move_to_thread=title3)
 
         # Merging success
+        self.ws = create_connection("ws://localhost:1501/ws")
         self.merge_threads(title2, title1, press_cancel=False)
-        content2 = f"Merged Thread Title: {title2}\n\n{content2}"
 
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'merge_thread')
+        self.ws.close()
+
+        content2 = "Merged Thread Title: {}\n\n{}".format(title2, content2)
         self.find_posts(content1, must_exists=True, move_to_thread=title1, check_attachment=content1_attachment)
         self.find_posts(reply1, must_exists=True)
-        self.find_posts(content2, must_exists=True)
+        self.find_posts(content2, must_exists=True, move_to_thread=title1)
         self.find_posts(reply2, must_exists=True, check_attachment=reply2_attachment)
         self.find_posts(content3, must_exists=True, move_to_thread=title3)
         self.find_posts(reply3, must_exists=True)
