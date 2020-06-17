@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
+from websocket import create_connection
+import json
 
 
 class TestForum(BaseTestCase):
@@ -206,9 +208,16 @@ class TestForum(BaseTestCase):
         reply_content3 = "E2E sample reply 3 content E2E"
 
         self.init_and_enable_discussion()
+        self.ws = create_connection("ws://localhost:1501/ws")
+
         for upload_attachment in [False, True]:
             assert not self.thread_exists(title)
             attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
+            assert self.thread_exists(title)
+
+            ws_msg = json.loads(self.ws.recv())
+            self.assertIn('type', ws_msg.keys())
+            self.assertEqual(ws_msg['type'], 'new_thread')
 
             self.find_posts(content, must_exists=True, check_attachment=attachment)
             self.view_thread(title)
@@ -217,9 +226,14 @@ class TestForum(BaseTestCase):
             self.reply_and_test(reply_content1, reply_content2, first_post=False)
             self.reply_and_test(reply_content2, reply_content3, first_post=False, upload_attachment=upload_attachment)
 
-            assert self.thread_exists(title)
             self.delete_thread(title)
             assert not self.thread_exists(title)
+
+            ws_msg = json.loads(self.ws.recv())
+            self.assertIn('type', ws_msg.keys())
+            self.assertEqual(ws_msg['type'], 'delete_thread')
+
+        self.ws.close()
 
     def test_forum_merge_thread(self):
         self.init_and_enable_discussion()
