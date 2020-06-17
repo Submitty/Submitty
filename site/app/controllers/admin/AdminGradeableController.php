@@ -277,6 +277,7 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function adminGradeablePeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
