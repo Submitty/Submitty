@@ -21,7 +21,7 @@ class StatsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/stats", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/stats", methods={"GET"})
      */
     public function showall($something = null) {
         $this->core->getOutput()->renderOutput('Stats', 'showStats');
