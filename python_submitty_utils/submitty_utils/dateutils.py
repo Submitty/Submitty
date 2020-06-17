@@ -41,31 +41,29 @@ def get_current_time():
     return datetime.now(get_timezone())
 
 
-def write_submitty_date(d=None, microseconds=False):
+def write_submitty_date(d=None, milliseconds=False):
     """
     Converts a datetime object to a string with a timezone. If the datetime object
     does not have a timezone, it'll use the server's timezone.
 
     :param d: datetime object you want to convert to string
+    :param milliseconds: add milliseconds to returned string
     :return:
-
-    FIXME: We should not be printing anything out here
     """
     if d is None:
         d = get_current_time()
     if not isinstance(d, datetime):
-        print("ERROR:  ", d, " is not a datetime object, it is of type ", type(d))
-        return d
-    my_timezone = d.tzinfo
-    if my_timezone is None:
-        print("ERROR: NO TIMEZONE ", d, " assuming local timezone")
-        my_timezone = get_timezone()
-        d = my_timezone.localize(d)
-    answer = d.strftime("%Y-%m-%d %H:%M:%S%z")
-    if microseconds:
-        mlsec = d.strftime("%f")
-        mlsec = mlsec[0:3]
-        answer = d.strftime("%Y-%m-%d %H:%M:%S.{} %z".format(mlsec))
+        raise TypeError(
+            f"Invalid type. Expected datetime or datetime string, got {type(d)}."
+        )
+    if d.tzinfo is None:
+        d = get_timezone().localize(d)
+
+    if milliseconds:
+        mlsec = d.strftime("%f")[0:3]
+        answer = d.strftime(f"%Y-%m-%d %H:%M:%S.{mlsec}%z")
+    else:
+        answer = d.strftime("%Y-%m-%d %H:%M:%S%z")
     return answer
 
 
