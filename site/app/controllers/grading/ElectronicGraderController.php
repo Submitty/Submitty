@@ -55,7 +55,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxRandomizePeers($gradeable_id) {
