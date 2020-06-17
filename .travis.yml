@@ -18,7 +18,7 @@ jobs:
   include:
     # Test if the name of the PR starts with [WIP] and fail at this stage if it does
     - if: type = pull_request
-      stage: pr test for wip
+      stage: pr test for wip or draft
       language: python
       python: 3.6
       install:

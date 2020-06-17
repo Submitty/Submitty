@@ -22,7 +22,7 @@
             {% endif %}
         </h1>
         {% if has_due_date %}
-            <h2>Due: {{ due_date|date(DATE_TIME_FORMAT) }}</h2>
+            <h2>Due: {{ due_date|date(date_time_format) }}</h2>
         {% endif %}
         <div class="loading-bar-wrapper">
             <span>Upload progress: <span id="loading-bar-percentage"></span></span>

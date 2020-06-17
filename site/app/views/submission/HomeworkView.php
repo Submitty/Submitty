@@ -430,7 +430,7 @@ class HomeworkView extends AbstractView {
             'gradeable_name' => $gradeable->getTitle(),
             'gradeable_url' => $gradeable->getInstructionsUrl(),
             'due_date' => $gradeable->getSubmissionDueDate(),
-            'DATE_TIME_FORMAT' => DateUtils::DATE_TIME_FORMAT,
+            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
@@ -456,7 +456,11 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'team_assignment' => $gradeable->isTeamAssignment(),
             'student_id' => $student_id,
-            'numberUtils' => $numberUtils,
+            'numberUtils' => new class () {
+                public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
+                    return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
+                }
+            },
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
@@ -951,7 +955,7 @@ class HomeworkView extends AbstractView {
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
             'csrf_token' => $this->core->getCsrfToken(),
-            'DATE_TIME_FORMAT' => DateUtils::DATE_TIME_FORMAT_WITH_SECONDS
+            'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds')
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
@@ -1077,7 +1081,7 @@ class HomeworkView extends AbstractView {
                     $content = $post['content'];
                     $posts[] = [
                         'is_staff' => $is_staff,
-                        'date' => date_format($date, DateUtils::DATE_TIME_FORMAT),
+                        'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,
