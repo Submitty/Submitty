@@ -2,6 +2,8 @@
 
 namespace app\libraries\routers;
 
+use InvalidArgumentException;
+
 /**
  * Annotation class for @FeatureFlag().
  *
@@ -22,6 +24,9 @@ class FeatureFlag {
     private $flag;
 
     public function __construct(array $data) {
+        if (empty($data['value']) || !is_string($data['value'])) {
+            throw new InvalidArgumentException('Must have non-empty string "value" for FeatureFlag annotation');
+        }
         $this->flag = $data['value'];
     }
 

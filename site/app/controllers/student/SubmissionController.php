@@ -68,8 +68,8 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
      * @return array
      */
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
@@ -212,7 +212,7 @@ class SubmissionController extends AbstractController {
      * If failure, also returns message explaining what happened.
      * If success, also returns highest version of the student gradeable.
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
      */
     public function ajaxValidGradeable($gradeable_id) {
 
@@ -310,14 +310,9 @@ class SubmissionController extends AbstractController {
      * Its error checking has overlap with ajaxUploadSubmission.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
      */
     public function ajaxBulkUpload($gradeable_id) {
-        if (empty($_POST)) {
-            $max_size =  Utils::returnBytes(ini_get('post_max_size'));
-            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
-        }
-
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
@@ -470,7 +465,7 @@ class SubmissionController extends AbstractController {
      * Has overlap with ajaxUploadSubmission
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods={"POST"})
      * @return boolean
      */
     public function ajaxUploadSplitItem($gradeable_id, $merge = null, $clobber = null) {
@@ -766,7 +761,7 @@ class SubmissionController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
      * @return boolean
      */
     public function ajaxDeleteSplitItem($gradeable_id) {
@@ -824,14 +819,10 @@ class SubmissionController extends AbstractController {
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
-        if (empty($_POST)) {
-            $max_size = ini_get('post_max_size');
-            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
-        }
 
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
@@ -886,7 +877,7 @@ class SubmissionController extends AbstractController {
             "submissions",
             $gradeable->getId()
         );
-                   
+
 
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -928,7 +919,10 @@ class SubmissionController extends AbstractController {
         }
 
         $this_config_inputs = [];
-        if ($gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+        $num_parts = $gradeable->getAutogradingConfig()->getNumParts();
+        $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+        $notebook = null;
+        if ($is_notebook) {
             //need to force re-parse the notebook serverside again
             $notebook = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
                 $who_id,
@@ -944,6 +938,7 @@ class SubmissionController extends AbstractController {
             FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, ".submit.notebook"), $json);
 
             $this_config_inputs = $notebook->getInputs();
+            $num_parts = $notebook->getNumParts();
         }
 
         $this->upload_details['version_path'] = $version_path;
@@ -952,8 +947,7 @@ class SubmissionController extends AbstractController {
         $part_path = [];
         // We upload the assignment such that if it's multiple parts, we put it in folders "part#" otherwise
         // put all files in the root folder
-        $num_parts = $gradeable->getAutogradingConfig()->getNumParts();
-        if ($num_parts > 1) {
+        if ($num_parts > 1 && !$is_notebook) {
             for ($i = 1; $i <= $num_parts; $i++) {
                 $part_path[$i] = FileUtils::joinPaths($version_path, "part" . $i);
                 if (!FileUtils::createDir($part_path[$i])) {
@@ -961,8 +955,18 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-        else {
+        elseif (!$is_notebook) {
             $part_path[1] = $version_path;
+        }
+        elseif ($is_notebook) {
+            //each notebook file submission needs its own dir defined in the config
+            $file_submissions = $notebook->getFileSubmissions();
+            for ($i = 1; $i <= count($file_submissions); $i++) {
+                $part_path[$i] = FileUtils::joinPaths($version_path, $file_submissions[$i - 1]["directory"]);
+                if (!FileUtils::createDir($part_path[$i])) {
+                    return $this->uploadResult("Failed to make the folder for part {$i}.", false);
+                }
+            }
         }
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
@@ -1025,7 +1029,7 @@ class SubmissionController extends AbstractController {
                 }
                 elseif ($this_input instanceof SubmissionMultipleChoice) {
                     $answers = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
-                  
+
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1054,7 +1058,7 @@ class SubmissionController extends AbstractController {
             $previous_files_dst = [];
             $previous_part_path = [];
             $tmp = json_decode($_POST['previous_files']);
-            if (!empty($tmp) && !$gradeable->getAutogradingConfig()->isNotebookGradeable()) {
+            if (!empty($tmp)) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
                         $previous_files_src[$i + 1] = $tmp[$i];
@@ -1075,9 +1079,16 @@ class SubmissionController extends AbstractController {
                 }
 
                 $previous_path = FileUtils::joinPaths($user_path, $highest_version);
-                if ($num_parts > 1) {
+                if ($num_parts > 1 || $is_notebook) {
                     for ($i = 1; $i <= $num_parts; $i++) {
-                        $previous_part_path[$i] = FileUtils::joinPaths($previous_path, "part" . $i);
+                        $path = FileUtils::joinPaths($previous_path, "part" . $i);
+
+                        if ($is_notebook) {
+                            $dir  = $notebook->getFileSubmissions()[$i - 1]["directory"];
+                            $path = FileUtils::joinPaths($previous_path, $dir);
+                        }
+
+                        $previous_part_path[$i] = $path;
                     }
                 }
                 else {
@@ -1429,7 +1440,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
      */
     public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): MultiResponse {
         $ta = $ta === "true" ?? false;
@@ -1583,7 +1594,7 @@ class SubmissionController extends AbstractController {
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
      */
     public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);
@@ -1641,7 +1652,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
      */
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
