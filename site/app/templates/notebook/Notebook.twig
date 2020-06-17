@@ -1,11 +1,13 @@
-{# Notebook #}
-{% macro renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version) %}
+
+
+{% macro renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version, max_file_uploads, old_files) %}
 <div class="notebook">
 
     {# Render content #}
     {% set num_short_answer = 0 %}
     {% set num_codeboxes = 0 %}
-    {% set num_multiple_choice = 0%}
+    {% set num_multiple_choice = 0 %}
+    {% set num_file_submissions = 0 %}
     {% for cell in notebook %}
         <div id="content_{{ loop.index0 }}">
 
@@ -173,6 +175,20 @@
 
                 {% set num_multiple_choice = num_multiple_choice + 1 %}
 
+            {% elseif cell.type == "file_submission" %}
+                {% set num_file_submissions = num_file_submissions + 1 %}
+
+                {{ _self.renderFileSubmission(max_file_uploads,num_file_submissions, old_files, cell.label) }}
+
+                <button type="button" class="btn btn-primary 
+                    sa-clear-reset" onclick="deleteFiles({{num_file_submissions}});"> 
+                    Clear
+                </button>
+
+                <button type="button" 
+                    onclick="populatePreviousFiles({{num_file_submissions}});"
+                    class="btn btn-primary mc-recent fs-recent">Use Most Recent Submission
+                </button>
             {% endif %}
 
         </div>
@@ -180,6 +196,45 @@
     {% endfor %}
 
 </div>
+
+<script>
+    function populatePreviousFiles(part){
+        let prev_files = {
+            {% for file in old_files %}
+                {{file.part}} : {'name' : '{{file.name}}', 'size' : '{{file.size}}' },
+            {% endfor %}
+        };
+
+
+        let tgt = prev_files[part];
+        if (typeof tgt === "undefined"){
+            return;
+        }
+
+        deleteFiles(part);
+        addLabel(tgt['name'], tgt['size'], part);
+        readPrevious(tgt['name'], part);
+        setUsePrevious();
+    }
+
+
+    $(function(){
+        createArray({{ num_file_submissions }});
+
+        {% for file in old_files %}
+            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+            readPrevious('{{ file.name }}', {{ file.part }});
+        {% endfor %}
+        setUsePrevious();
+
+        {% if old_files | length == 0 %}
+            let btns = document.getElementsByClassName("fs-recent");
+            for (let btn of btns){
+                btn.disabled = true;
+            }
+        {% endif %}
+    });
+</script>
 
 {% endmacro %}
 
@@ -283,4 +338,41 @@
 
         </script>
     </p>
+{% endmacro %}
+
+{# File submission for notebooks #}
+{% macro renderFileSubmission(max_file_uploads, index, old_files, label) %}
+    <div id="upload-boxes">
+        {# uploadIndex and input-file + Index required for drag-and-drop.js #}
+        <div tabindex="0"
+             id="upload{{index}}"
+             class="upload-box"
+             onkeypress="clicked_on_box(event)"
+             role="text"
+             aria-label="Press enter to upload your part {{ index }} file"
+        >
+            <h2 class="label" id="label{{index}}">
+                Drag your {{ label }} file(s) here or click to open file browser
+            </h2>
+            <input type="file" name="files" id="input-file{{index}}" 
+                   class="hide" onchange="addFilesFromInput({{index}})"
+                   multiple aria-label="Select Files to upload" 
+            />
+            <table class="file-upload-table" id="file-upload-table-{{index}}">
+            <tr style="background:transparent; display:none;">
+                <th>File Name:</th>
+                <th>Size:</th>
+            </tr>
+            </table>
+            <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
+        </div>
+    </div>
+
+    <script>
+        $(function(){
+            //initialize the dropzone just created
+            initMaxNoFiles({{max_file_uploads}});
+            initializeDropZone("upload{{ index }}");
+        });
+    </script>
 {% endmacro %}
