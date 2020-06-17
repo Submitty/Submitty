@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import collections
 import os
 import time
 import signal
+import string
 import json
 
 import shutil
@@ -18,6 +20,10 @@ import socket
 import traceback
 import subprocess
 import random
+
+import requests
+
+from math import floor
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
@@ -41,7 +47,6 @@ JOB_ID = '~SHIP~'
 
 def worker_folder(worker_name):
     return os.path.join(IN_PROGRESS_PATH, worker_name)
-
 
 # ==================================================================================
 def initialize(untrusted_queue):
@@ -201,6 +206,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
     # prepare the zip files
     try:
         autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
+
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -395,6 +401,12 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
+    # Try to short-circuit this job. If it's possible, then great! Clean
+    # everything up and return.
+    if try_short_circuit(queue_file):
+        grading_cleanup(queue_file, grading_file)
+        return
+
     #TODO: break which_machine into id, address, and passphrase.
     
     try:
@@ -426,6 +438,10 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         print (my_name, " ERROR attempting to grade item: ", queue_file, " exception=",str(e))
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
+    grading_cleanup(queue_file, grading_file)
+
+
+def grading_cleanup(queue_file, grading_file):
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
     try:
@@ -787,6 +803,317 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
 
+
+
+# ==================================================================================
+# ==================================================================================
+def is_testcase_submission_limit(testcase: dict) -> bool:
+    """Check whether the given testcase object is a submission limit check."""
+    return (testcase['type'] == 'FileCheck' and
+            testcase['title'] == 'Submission Limit')
+
+
+def can_short_circuit(config_obj: str) -> bool:
+    """Check if a job can be short-circuited.
+
+    Currently, a job can be short-circuited if either:
+
+    * It has no autograding test cases
+    * It has one autograding test case and that test case is the submission limit check.
+    """
+
+    testcases = config_obj['testcases']
+    if len(testcases) == 0:
+        # No test cases, so this is trivially short-circuitable.
+        return True
+    elif len(testcases) == 1:
+        # We have only one test case; check if it's a submission limit check
+        return is_testcase_submission_limit(testcases[0])
+    else:
+        return False
+
+
+def check_submission_limit_penalty_inline(config_obj: dict,
+                                          queue_obj: dict) -> dict:
+    """Check if a submission violates the submission limit.
+    
+    Note that this function makes the assumption that the file being graded is
+    short-circuitable (i.e. only has one test case; the sentinel "submission
+    limit" test case).
+    """
+
+    ###########################################################################
+    #
+    # NOTE: Editing this? Make sure this function stays in-sync with the
+    #       my_testcase.isSubmissionLimit() branch in
+    #       grading/main_validator.cpp::ValidateATestCase()
+    #
+    ###########################################################################
+
+    # regrade.py seems to make this into a str, so force into int
+    subnum = int(queue_obj['version'])
+    testcase = config_obj['testcases'][0]
+    penalty = testcase['penalty']
+    possible_points = testcase['points']
+    max_submissions = testcase['max_submissions']
+
+    excessive = max(subnum - max_submissions, 0)
+    points = floor(excessive * penalty)
+    points = max(points, possible_points)
+    view_testcase = points != 0
+    
+    return {
+        'test_name': f"Test 1 {testcase['title']}",
+        'view_testcase': view_testcase,
+        'points_awarded': points
+    }
+
+
+def history_short_circuit_helper(base_path: str,
+                                 course_path: str,
+                                 queue_obj: dict,
+                                 gradeable_config_obj: dict) -> dict:
+    """Figure out parameter values for just_write_grade_history."""
+    user_path = os.path.join(course_path,
+                             'submissions',
+                             queue_obj['gradeable'],
+                             queue_obj['who'])
+    submit_timestamp_path = os.path.join(user_path,
+                                         str(queue_obj['version']),
+                                         '.submit.timestamp')
+    user_assignment_access_path = os.path.join(user_path,
+                                               'user_assignment_access.json')
+
+    gradeable_deadline = gradeable_config_obj['date_due']
+    with open(submit_timestamp_path) as fd:
+        submit_timestamp = dateutils.read_submitty_date(fd.read().rstrip())
+    submit_time = dateutils.write_submitty_date(submit_timestamp)
+    gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
+
+    seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
+
+    first_access = ''
+    access_duration = -1
+    if os.path.exists(user_assignment_access_path):
+        with open(user_assignment_access_path) as fd:
+            obj = json.load(fd, object_pairs_hook=collections.OrderedDict)
+        first_access = obj['page_load_history'][0]['time']
+        first_access = dateutils.normalize_submitty_date(first_access)
+        first_access_dt = dateutils.read_submitty_date(first_access)
+        access_duration = int((submit_timestamp - first_access_dt).total_seconds())
+
+    return {
+        'gradeable_deadline': gradeable_deadline,
+        'submission': submit_time,
+        'seconds_late': seconds_late,
+        'first_access': first_access,
+        'access_duration': access_duration
+    }
+
+
+def try_short_circuit(queue_file: str) -> bool:
+    """Attempt to short-circuit the job represented by the given queue file.
+
+    Returns True if the job is short-circuitable and was successfully
+    short-circuited.
+
+    This function will first check if the queue file represents a gradeable
+    that supports short-circuiting. If so, then this function will attempt to
+    short-circuit the job within this child shipper process.
+
+    Once the job is finished grading, then this function will write the history
+    JSON file, zip up the results, and use the standard
+    unpack_grading_results_zip function to place the results where they are
+    expected. If something goes wrong during this process, then this function
+    will return False, signalling to the caller that this job should be graded
+    normally.
+    """
+    with open(queue_file) as fd:
+        queue_obj = json.load(fd)
+
+    course_path = os.path.join(SUBMITTY_DATA_DIR,
+                               'courses',
+                               queue_obj['semester'],
+                               queue_obj['course'])
+
+    config_path = os.path.join(course_path,
+                               'config',
+                               'complete_config',
+                               f'complete_config_{queue_obj["gradeable"]}.json')
+
+    gradeable_config_path = os.path.join(course_path,
+                                         'config',
+                                         'form',
+                                         f'form_{queue_obj["gradeable"]}.json')
+
+    with open(config_path) as fd:
+        config_obj = json.load(fd)
+
+    if not can_short_circuit(config_obj):
+        return False
+
+    job_id =''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                  message=f"Short-circuiting {gradeable_id}",
+                                  job_id=job_id)
+
+    with open(gradeable_config_path) as fd:
+        gradeable_config_obj = json.load(fd)
+
+    # Augment the queue object
+    base, path = os.path.split(queue_file)
+    queue_time = packer_unpacker.get_queue_time(base, path)
+    queue_time_longstring = dateutils.write_submitty_date(queue_time)
+    grading_began = dateutils.get_current_time()
+    wait_time = (grading_began - queue_time).total_seconds()
+
+    queue_obj.update(queue_time=queue_time_longstring,
+                     regrade=queue_obj.get('regrade', False),
+                     waittime=wait_time,
+                     job_id=job_id)
+
+    base_dir = tempfile.mkdtemp()
+
+    results_dir = os.path.join(base_dir, 'TMP_RESULTS')    
+    results_json_path = os.path.join(results_dir, 'results.json')
+    grade_txt_path = os.path.join(results_dir, 'grade.txt')
+    queue_file_json_path = os.path.join(results_dir, 'queue_file.json')
+    history_json_path = os.path.join(results_dir, 'history.json')
+    logs_dir = os.path.join(results_dir, 'logs')
+
+    os.makedirs(results_dir, exist_ok=True)
+    os.makedirs(logs_dir, exist_ok=True)
+
+    testcases = config_obj['testcases']
+    testcase_outputs = []
+
+    # This will probably always run, but it gives us a degree of
+    # future-proofing.
+    if len(testcases) > 0:
+        testcase_outputs.append(
+            check_submission_limit_penalty_inline(config_obj, queue_obj)
+        )
+
+    autograde_result_msg = write_grading_outputs(testcases, testcase_outputs,
+                                                 results_json_path,
+                                                 grade_txt_path)
+
+    grading_finished = dateutils.get_current_time()
+    grading_time = (grading_finished - grading_began).total_seconds()
+
+    queue_obj['gradingtime'] = grading_time
+    queue_obj['grade_result'] = autograde_result_msg
+    queue_obj['which_untrusted'] = '(short-circuited)'
+
+    # Save the augmented queue object
+    with open(queue_file_json_path, 'w') as fd:
+        json.dump(queue_obj, fd, indent=4, sort_keys=True,
+                  separators=(',', ':'))
+
+    h = history_short_circuit_helper(base_dir,
+                                     course_path,
+                                     queue_obj,
+                                     gradeable_config_obj)
+
+    try:
+        autograding_utils.just_write_grade_history(history_json_path,
+                                                   h['gradeable_deadline'],
+                                                   h['submission'],
+                                                   h['seconds_late'],
+                                                   h['first_access'],
+                                                   h['access_duration'],
+                                                   queue_obj['queue_time'],
+                                                   'BATCH' if queue_obj.get('regrade', False) else 'INTERACTIVE',
+                                                   dateutils.write_submitty_date(grading_began),
+                                                   int(queue_obj['waittime']),
+                                                   dateutils.write_submitty_date(grading_finished),
+                                                   int(grading_time),
+                                                   autograde_result_msg,
+                                                   queue_obj.get('revision', None))
+
+        results_zip_path = os.path.join(base_dir, 'results.zip')
+        autograding_utils.zip_my_directory(results_dir, results_zip_path)
+        packer_unpacker.unpack_grading_results_zip('(short-circuit)',
+                                                   '(short-circuit)',
+                                                   results_zip_path)
+    except Exception as e:
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                      message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade.",
+                                      job_id=job_id)
+        autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH,
+                                          trace=traceback.format_exc(),
+                                          job_id=job_id)
+        return False
+    finally:
+        shutil.rmtree(base_dir, ignore_errors=True)
+
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                  message=f"Successfully short-circuited {gradeable_id}!",
+                                  job_id=job_id)
+    return True
+
+
+def write_grading_outputs(testcases: list,
+                          testcase_outputs: list,
+                          results_json: str,
+                          grade_txt: str) -> str:
+    """Write the grading output data to the specified paths."""
+
+    ###########################################################################
+    #
+    # NOTE: Editing this file? Make sure that this function stays in-sync with
+    #       grading/main_validator.cpp::validateTestCase()
+    #
+    ###########################################################################
+
+    results = {'testcases': testcase_outputs}
+    with open(results_json, 'w') as fd:
+        json.dump(results, fd, indent=4)
+
+    max_auto_points = sum(tc['points'] for tc in testcases)
+    max_nonhidden_auto_points = sum(
+        tc['points'] for tc in testcases if not tc.get('hidden', False)
+    )
+
+    auto_points = sum(r['points_awarded'] for r in testcase_outputs)
+    nonhidden_auto_points = sum(
+        r['points_awarded']
+        for r, tc in zip(testcase_outputs, testcases)
+        if not tc.get('hidden', False)
+    )
+    
+    with open(grade_txt, 'w') as fd:
+        # Write each test case's individual output
+        for i, tc in enumerate(testcases):
+            title = tc['title']
+            extra_credit = tc.get('extra_credit', False)
+            max_points = tc['points']
+            points = testcase_outputs[i]['points_awarded']
+            fd.write(f"Testcase {i:3}: {title:<50} ")
+
+            if extra_credit:
+                if points > 0:
+                    fd.write(f"+{points:2} points")
+                else:
+                     fd.write(' ' * 10)
+            elif max_points < 0:
+                if points < 0:
+                    fd.write(f"{points:3} points")
+                else:
+                    fd.write(' ' * 10)
+            else:
+                fd.write(f"{points:3} / {max_points:3}  ")
+            
+            if tc.get('hidden', False):
+                fd.write("  [ HIDDEN ]")
+            fd.write('\n')
+        
+        # Write the final lines
+        autograde_total_msg = f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n"
+        fd.write(autograde_total_msg)
+        fd.write(f"{'Non-hidden automatic grading total:':<64}{nonhidden_auto_points:3} /{max_nonhidden_auto_points:3}\n")
+    return autograde_total_msg
 
 
 # ==================================================================================

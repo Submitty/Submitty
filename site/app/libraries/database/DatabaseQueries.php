@@ -2909,7 +2909,7 @@ ORDER BY gt.{$section_key}",
         $this->course_db->query(
             "
         SELECT u.user_id, user_firstname, user_preferred_firstname,
-          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp::timestamp::date
+          user_lastname, user_preferred_lastname, allowed_late_days, since_timestamp
         FROM users AS u
         FULL OUTER JOIN late_days AS l
           ON u.user_id=l.user_id

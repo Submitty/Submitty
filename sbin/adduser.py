@@ -8,7 +8,7 @@ import argparse
 import json
 from os import path
 import subprocess
-from sqlalchemy import create_engine, MetaData, Table, bindparam, and_
+from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
 with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
@@ -21,9 +21,10 @@ AUTHENTICATION_METHOD = DATABASE_DETAILS['authentication_method']
 
 def get_php_db_password(password):
     """
-    Generates a password to be used within the site for database authentication. The password_hash
-    function (http://php.net/manual/en/function.password-hash.php) generates us a nice secure
-    password and takes care of things like salting and hashing.
+    Generates a password to be used within the site for database authentication. The
+    password_hash function (http://php.net/manual/en/function.password-hash.php)
+    generates us a nice secure password and takes care of things like salting and
+    hashing.
     :param password:
     :return: password hash to be inserted into the DB for a user
     """
@@ -47,8 +48,9 @@ def get_input(question, default="", blank=False):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Utility that given a user will create them'
-                                                 'into the database')
+    parser = argparse.ArgumentParser(
+        description='Utility that given a user will create them into the database'
+    )
 
     parser.add_argument('user_id', help='user_id of the user to create')
 
@@ -59,10 +61,11 @@ def main():
     args = parse_args()
     user_id = args.user_id
 
+    engine_str = f"postgresql://{DATABASE_USER}:{DATABASE_PASS}@"
     if path.isdir(DATABASE_HOST):
-        engine_str = "postgresql://{}:{}@/submitty?host={}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST)
+        engine_str += f"/submitty?host={DATABASE_HOST}"
     else:
-        engine_str = "postgresql://{}:{}@{}/submitty".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST)
+        engine_str += f"{DATABASE_HOST}/submitty"
 
     engine = create_engine(engine_str)
     connection = engine.connect()
@@ -70,17 +73,25 @@ def main():
     users_table = Table('users', metadata, autoload=True)
     select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
     user = connection.execute(select, user_id=user_id).fetchone()
-    defaults = {'user_firstname': None,
-                'user_preferred_firstname': None,
-                'user_lastname': None,
-                'user_email': None
-                }
+    defaults = {
+        'user_firstname': None,
+        'user_preferred_firstname': None,
+        'user_lastname': None,
+        'user_email': None
+    }
     if user is not None:
-        print('User already exists! Hit enter on any question to use existing value for that field.')
+        print(
+            'User already exists! Hit enter on any question to use '
+            'existing value for that field.'
+        )
         defaults = user
 
     firstname = get_input('User firstname', defaults['user_firstname'])
-    preferred = get_input('User preferred name', defaults['user_preferred_firstname'], True)
+    preferred = get_input(
+        'User preferred name',
+        defaults['user_preferred_firstname'],
+        True
+    )
     lastname = get_input('User lastname', defaults['user_lastname'])
     email = get_input('User email', defaults['user_email'], True)
 
@@ -103,7 +114,9 @@ def main():
             break
 
     if user is not None:
-        query = users_table.update(values=update).where(users_table.c.user_id == bindparam('b_user_id'))
+        query = users_table.update(values=update).where(
+            users_table.c.user_id == bindparam('b_user_id')
+        )
         connection.execute(query, b_user_id=user_id)
     else:
         update['user_id'] = user_id
