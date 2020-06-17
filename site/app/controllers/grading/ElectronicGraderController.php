@@ -235,7 +235,7 @@ class ElectronicGraderController extends AbstractController {
      * @param string $gradeable_id verify all components or not
      * @param bool $verify_all false be default
      *
-     @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
+     @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
      * @AccessControl(permission="grading.electronic.verify_grader")
      */
     public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
