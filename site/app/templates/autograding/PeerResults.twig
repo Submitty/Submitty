@@ -137,11 +137,11 @@ $( document ).ready(function() {
 
 
 {%- macro renderManyPeerResults(component) -%}
-    <div class="no-border-box grade-results">
-        <div class="box-badge">
+    <div class="box grade-results">
+        <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
         </div>
-        <div class="box-info" style="width:100%">
+        <div class="no-border-box-info" style="width:100%">
             <h4>
                 {{ component.title|escape }}
             </h4>
@@ -152,7 +152,7 @@ $( document ).ready(function() {
                 <p>
 
                 {# This is a layout table #}
-                <table class="mobile-table">
+                <table class="mobile-table" style="border-color:white;">
                      <thead>
                         <tr>
                             <th class="peer-table-header" style="width:90px;"># of Peers</th>
@@ -184,11 +184,11 @@ $( document ).ready(function() {
 
 
 {%- macro renderFewPeerResults(component, peer_aliases, ordered_graders) -%}
-    <div class="no-border-box grade-results">
-        <div class="box-badge">
+    <div class="box grade-results">
+        <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
         </div>
-        <div class="box-info" style="width:100%">
+        <div class="no-border-box-info" style="width:100%">
             <h4>
                 {{ component.title|escape }}
             </h4>
@@ -197,7 +197,7 @@ $( document ).ready(function() {
                 <p>
 
                 {# This is a layout table #}
-                <table class="mobile-table">
+                <table class="mobile-table" style="border-color:white;">
                      <thead>
                         <tr>
                             {% for grader in ordered_graders if grader in component.peer_ids %}
