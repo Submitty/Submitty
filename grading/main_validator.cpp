@@ -320,6 +320,13 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
     bool view_testcase = true;
 
     if (my_testcase.isSubmissionLimit()) {
+      /////////////////////////////////////////////////////////////////////////
+      //
+      // NOTE: Editing this? Make sure this branch stays in-sync with the
+      //       check_submission_limit_penalty_inline() function in
+      //       sbin/submitty_autograding_shipper.py
+      //
+      /////////////////////////////////////////////////////////////////////////
       int max = my_testcase.getMaxSubmissions();
       float penalty = my_testcase.getPenalty();
       assert (penalty <= 0);
@@ -393,6 +400,14 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
 
 /* Runs through each test case, pulls in the correct files, validates, and outputs the results */
 int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime) {
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //
+  // NOTE: Editing this file? Make sure that the parts of this function that
+  //       write to the output files stay in-sync with the write_grading_outputs
+  //       function in sbin/submitty_autograding_shipper.py
+  //
+  ///////////////////////////////////////////////////////////////////////////////
 
   // LOAD HW CONFIGURATION JSON
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
