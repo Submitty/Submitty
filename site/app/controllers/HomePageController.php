@@ -326,10 +326,10 @@ class HomePageController extends AbstractController {
 
     /**
      * @Route("/term/new", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function addNewTerm() {
-        $response = new Response();
+        $response = new MultiResponse();
         if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
             $term_id = $_POST['term_id'];
             $term_name = $_POST['term_name'];
