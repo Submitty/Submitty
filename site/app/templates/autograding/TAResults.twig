@@ -117,10 +117,6 @@ $( document ).ready(function() {
         {% endif %}
         {# /Overview #}
 
-        {% if (ta_score >= ta_max) %}
-            <canvas id="confetti_canvas"></canvas>
-        {% endif %}
-
         {% if ta_components | length > 0 %}
             {# TA/Instructor Manual total #}
             <div class="box submission-page-total-header">
