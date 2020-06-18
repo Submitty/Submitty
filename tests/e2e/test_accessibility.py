@@ -99,9 +99,12 @@ class TestAccessibility(BaseTestCase):
                 for error in response.json()['messages']:
                     # For some reason the test fails to detect this even though when you actually look at the rendered
                     # pages this error is not there. So therefore the test is set to just ignore this error.
-                    if error['message'].startswith("Start tag seen without seeing a doctype first"):
-                        continue
-                    if error['message'].startswith("Possible misuse of “aria-label”"):
+                    skip_messages = [
+                        "Start tag seen without seeding a doctype first",
+                        "Possible misuse of “aria-label”",
+                        "The 'date' input type is not supported in all browsers. Please be sure to test, and consider using a polyfill.",
+                    ]
+                    if error['message'] in skip_messages:
                         continue
 
                     if error['message'] not in baseline[url] and error['message'] not in foundErrorMessages:
