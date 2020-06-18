@@ -417,6 +417,21 @@ CREATE TABLE peer_assign (
     user_id character varying NOT NULL
 );
 
+--
+-- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE peer_feedback (
+    pf_id integer NOT NULL,
+    grader_id character varying(255) NOT NULL,
+    user_id character varying(255),
+    team_id character varying(255),
+    g_id character varying(255) NOT NULL,
+    feedback_full character varying(255),
+    feedback_id character varying(255),
+    CONSTRAINT user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL)
+);
+
 
 --
 -- Name: late_day_exceptions; Type: TABLE; Schema: public; Owner: -
@@ -1166,6 +1181,44 @@ ALTER TABLE ONLY peer_assign
 ALTER TABLE ONLY peer_assign
     ADD CONSTRAINT peer_assign_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
+--
+-- Name: peer_feedback_pkey; Type: PK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_feedback
+            ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (pf_id);
+
+--
+-- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_feedback
+            ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+--
+-- Name: peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_feedback
+            ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
+
+--
+-- Name: peer_feedback_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_feedback
+            ADD CONSTRAINT peer_feedback_team_id_fkey FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
+
+CREATE SEQUENCE IF NOT EXISTS peer_feedback_pf_id_seq
+            START WITH 1
+            INCREMENT BY 1
+            NO MINVALUE
+            NO MAXVALUE
+            CACHE 1;
+            
+
+ALTER SEQUENCE peer_feedback_pf_id_seq OWNED BY peer_feedback.pf_id;
+ALTER TABLE ONLY peer_feedback ALTER COLUMN pf_id SET DEFAULT nextval('peer_feedback_pf_id_seq'::regclass);
 
 --
 -- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -

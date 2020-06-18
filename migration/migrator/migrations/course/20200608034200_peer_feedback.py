@@ -14,12 +14,6 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    
-    database.execute(
-        """
-       DROP TABLE IF EXISTS peer_feedback
-        """
-    )
 
     # Create overall comment table
     database.execute(
