@@ -273,8 +273,8 @@ WHERE status = 1"
     /**
      * @param string $term_id
      * @param string $term_name
-     * @param date $start_date
-     * @param date $end_date
+     * @param \DateTime $start_date
+     * @param \DateTime $end_date
      */
     public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
         $this->submitty_db->query(
