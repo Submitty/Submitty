@@ -21,9 +21,9 @@ class ImagesView extends AbstractView {
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
-            $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-            if (empty($grader_sections) || in_array($registration, $grader_sections)) {
-                $sections[$registration][] = $student;
+            $student_section = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+            if ($instructor_permission || in_array($student_section, $grader_sections)) {
+                $sections[$student_section][] = $student;
             }
         }
 

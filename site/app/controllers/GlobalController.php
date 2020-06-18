@@ -211,29 +211,14 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getUser()->accessGrading()) {
-                if ($this->core->getUser()->accessAdmin()) {
-                    $at_least_one_grader_link = true;
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildCourseUrl(['student_photos']),
-                        "title" => "Student Photos",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-photos",
-                        "icon" => "fa-id-card"
-                    ]);
-                }
-                elseif ($this->core->getUser()->accessGrading()) {
-                    $sections = $this->core->getUser()->getGradingRegistrationSections();
-                    if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
-                        $at_least_one_grader_link = true;
-                        $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $this->core->buildCourseUrl(['student_photos']),
-                            "title" => "Student Photos",
-                            "class" => "nav-row",
-                            "id" => "nav-sidebar-photos",
-                            "icon" => "fa-id-card"
-                        ]);
-                    }
-                }
+                $at_least_one_grader_link = true;
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(['student_photos']),
+                    "title" => "Student Photos",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-photos",
+                    "icon" => "fa-id-card"
+                ]);
             }
 
             if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {

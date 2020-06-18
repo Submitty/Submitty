@@ -16,27 +16,13 @@ class ImagesController extends AbstractController {
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
-        if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER))) { // student has no permissions to view image page
+        if ($user_group === User::GROUP_STUDENT) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
             $this->core->redirect($this->core->buildCourseUrl());
             return;
         }
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
 
-        //limited-access graders with no assigned sections have no permissions to view images
-        if ($user_group === User::GROUP_LIMITED_ACCESS_GRADER && empty($grader_sections)) {
-            $this->core->addErrorMessage("You have no assigned sections and no permissions to see images.");
-            return;
-        }
-
-        if ($user_group !== User::GROUP_LIMITED_ACCESS_GRADER) {
-            $grader_sections = [];  //reset grader section to nothing so permission for every image
-        }
-        else {
-            if (empty($grader_sections)) {
-                return;
-            }
-        }
         $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
         $students = $this->core->getQueries()->getAllUsers();
         $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $instructor_permission);
