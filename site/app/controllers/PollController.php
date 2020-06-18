@@ -21,7 +21,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/polls", methods={"GET"})
      * @return MultiResponse
      */
     public function showPollsPage() {
@@ -49,7 +49,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/viewPoll", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/viewPoll", methods={"POST"})
      * @return MultiResponse
      */
     public function showPoll() {
@@ -87,7 +87,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/newPoll", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -102,7 +102,7 @@ class PollController extends AbstractController {
 
 
     /**
-     * @Route("/{_semester}/{_course}/polls/newPoll", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -151,7 +151,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/setOpen", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/setOpen", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -170,7 +170,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/setEnded", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/setEnded", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -189,7 +189,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
      * @return MultiResponse
      */
     public function submitResponse() {
@@ -233,7 +233,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/editPoll", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/editPoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -263,7 +263,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/editPoll/submitEdits", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -318,7 +318,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
@@ -336,7 +336,7 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/polls/viewResults", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/polls/viewResults", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      * @return MultiResponse
      */
