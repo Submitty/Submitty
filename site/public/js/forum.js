@@ -1358,8 +1358,6 @@ function thread_post_handler(){
     $('.post_reply_from').submit(function(){
         var post = $(this).find("[name=post]");
         var post_unresolve = $(this).find("[name=post_and_unresolve]");
-        post.attr("disabled", "true").val('Submitting post...');
-        post_unresolve.attr("disabled", "true").val('Submitting post...');
         return true;
     });
 }
