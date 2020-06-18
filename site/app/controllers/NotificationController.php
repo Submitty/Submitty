@@ -51,7 +51,7 @@ class NotificationController extends AbstractController {
     }
     /**
      * @param $show_all
-     * @Route("/{_semester}/{_course}/notifications")
+     * @Route("/courses/{_semester}/{_course}/notifications")
      * @return MultiResponse
      */
     public function showNotifications($show_all = null) {
@@ -72,7 +72,7 @@ class NotificationController extends AbstractController {
     /**
      * @param $nid
      * @param $seen
-     * @Route("/{_semester}/{_course}/notifications/{nid}", requirements={"nid": "[1-9]\d*"})
+     * @Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements={"nid": "[1-9]\d*"})
      * @return MultiResponse
      */
     public function openNotification($nid, $seen) {
@@ -89,7 +89,7 @@ class NotificationController extends AbstractController {
 
     /**
      * @param $nid
-     * @Route("/{_semester}/{_course}/notifications/{nid}/seen", requirements={"nid": "[1-9]\d*"})
+     * @Route("/courses/{_semester}/{_course}/notifications/{nid}/seen", requirements={"nid": "[1-9]\d*"})
      * @return MultiResponse
      */
     public function markNotificationAsSeen($nid) {
@@ -100,7 +100,7 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/notifications/seen")
+     * @Route("/courses/{_semester}/{_course}/notifications/seen")
      * @return MultiResponse
      */
     public function markAllNotificationsAsSeen() {
@@ -111,7 +111,7 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/notifications/settings", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/notifications/settings", methods={"GET"})
      * @return MultiResponse
      */
     public function viewNotificationSettings() {
@@ -125,7 +125,7 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/notifications/settings", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/notifications/settings", methods={"POST"})
      * @return MultiResponse
      */
     public function changeSettings() {

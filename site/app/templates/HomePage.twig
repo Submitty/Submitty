@@ -16,7 +16,7 @@
                             <ul class="bare-list course-list">
                         {% endif %}
                                 <li>
-                                    <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl([course['semester'], course['title']]) }}">
+                                    <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}">
                                         {{ course['display_semester'] }} &nbsp; &nbsp;
                                         {{ course['title'] | upper }} &nbsp; &nbsp;
                                         {% if course['display_name'] != "" %}
