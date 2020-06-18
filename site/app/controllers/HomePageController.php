@@ -3,11 +3,12 @@
 namespace app\controllers;
 
 use app\authentication\DatabaseAuthentication;
+use app\libraries\DateUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,8 +30,34 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * @Route("/current_user/change_time_zone", methods={"POST"})
+     * @return JsonResponse
+     *
+     * Handle ajax request to update the currently logged in user's time zone data.
+     *
+     * Will return a json success or failure response depending on the result of the operation.
+     */
+    public function changeTimeZone() {
+
+        $failure_message = 'Error encountered updating user time zone.';
+
+        if (isset($_POST['time_zone'])) {
+            $updated = $this->core->getUser()->updateTimeZone($_POST['time_zone']);
+
+            // Updating went smoothly, so return success
+            if ($updated) {
+                $offset = DateUtils::getUTCOffset($_POST['time_zone']);
+                return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
+            }
+        }
+
+        // Some failure occurred
+        return JsonResponse::getFailResponse($failure_message);
+    }
+
+    /**
      * @Route("/current_user/change_password", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function changePassword() {
         $user = $this->core->getUser();
@@ -46,14 +73,14 @@ class HomePageController extends AbstractController {
         else {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
     /**
      * @Route("/current_user/change_username", methods={"POST"})
-     * @return Response
+     * @return MultiResponse
      */
     public function changeUserName() {
         $user = $this->core->getUser();
@@ -72,7 +99,7 @@ class HomePageController extends AbstractController {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
-        return Response::RedirectOnlyResponse(
+        return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
@@ -83,7 +110,7 @@ class HomePageController extends AbstractController {
      *
      * @param string|null $user_id
      * @param bool|string $as_instructor
-     * @return Response
+     * @return MultiResponse
      */
     public function getCourses($user_id = null, $as_instructor = false) {
         if ($as_instructor === 'true') {
@@ -111,7 +138,7 @@ class HomePageController extends AbstractController {
             return $course->getCourseInfo();
         };
 
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
                 "unarchived_courses" => array_map($callback, $unarchived_courses),
                 "archived_courses" => array_map($callback, $archived_courses)
@@ -123,12 +150,12 @@ class HomePageController extends AbstractController {
      * Display the HomePageView to the student.
      *
      * @Route("/home")
-     * @return Response
+     * @return MultiResponse
      */
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
 
-        return new Response(
+        return new MultiResponse(
             null,
             new WebResponse(
                 ['HomePage'],
@@ -150,7 +177,7 @@ class HomePageController extends AbstractController {
     public function createCourse() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
@@ -163,7 +190,7 @@ class HomePageController extends AbstractController {
         ) {
             $error = "Semester, course title or head instructor not set.";
             $this->core->addErrorMessage($error);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($error),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home']))
@@ -177,7 +204,7 @@ class HomePageController extends AbstractController {
         if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
             $error = "You can only create course for yourself.";
             $this->core->addErrorMessage($error);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($error),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home']))
@@ -187,7 +214,7 @@ class HomePageController extends AbstractController {
         if (empty($this->core->getQueries()->getSubmittyUser($head_instructor))) {
             $error = "Head instructor doesn't exist.";
             $this->core->addErrorMessage($error);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse($error),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home']))
@@ -220,7 +247,7 @@ class HomePageController extends AbstractController {
             if (empty($group_check) || empty($base_course_semester) || empty($base_course_title)) {
                 $error = "Invalid base course.";
                 $this->core->addErrorMessage($error);
-                return new Response(
+                return new MultiResponse(
                     JsonResponse::getFailResponse($error),
                     null,
                     new RedirectResponse($this->core->buildUrl(['home']))
@@ -230,7 +257,7 @@ class HomePageController extends AbstractController {
             if (json_decode($group_check, true)['status'] === 'fail') {
                 $error = "The instructor is not in the correct Linux group.\n Please contact sysadmin for more information.";
                 $this->core->addErrorMessage($error);
-                return new Response(
+                return new MultiResponse(
                     JsonResponse::getFailResponse($error),
                     null,
                     new RedirectResponse($this->core->buildUrl(['home']))
@@ -240,7 +267,7 @@ class HomePageController extends AbstractController {
         catch (\Exception $e) {
             $error = "Server error.";
             $this->core->addErrorMessage($error);
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getErrorResponse($error),
                 null,
                 new RedirectResponse($this->core->buildUrl(['home']))
@@ -260,7 +287,7 @@ class HomePageController extends AbstractController {
         file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
 
         $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
-        return new Response(
+        return new MultiResponse(
             JsonResponse::getSuccessResponse(null),
             null,
             new RedirectResponse($this->core->buildUrl(['home']))
@@ -273,7 +300,7 @@ class HomePageController extends AbstractController {
     public function createCoursePage() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
-            return new Response(
+            return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
             );
@@ -283,7 +310,7 @@ class HomePageController extends AbstractController {
             $faculty = $this->core->getQueries()->getAllFaculty();
         }
 
-        return new Response(
+        return new MultiResponse(
             null,
             new WebResponse(
                 ['HomePage'],

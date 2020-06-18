@@ -48,7 +48,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
-     * Get gradeables array
+     * Get gradeable buckets array
      *
      * @return array
      */
@@ -63,6 +63,15 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function getDisplayBenchmarks() {
         return $this->display_benchmark;
+    }
+
+    /**
+     * Gets the benchmark percentages object
+     *
+     * @return object The benchmark percentages object
+     */
+    public function getBenchmarkPercent() {
+        return $this->benchmark_percent;
     }
 
     /**
@@ -180,6 +189,22 @@ class RainbowCustomizationJSON extends AbstractModel {
         $this->section->$sectionID = $label;
     }
 
+
+    /**
+     * Add a benchmark percent
+     *
+     * @param string $benchmark The benchmark - this is the key for this json field
+     * @param float $percent The percent - this is the value for this json field
+     * @throws BadArgumentException The passed in percent was empty
+     */
+    public function addBenchmarkPercent($benchmark, $percent) {
+        if (empty($percent)) {
+            throw new BadArgumentException('The benchmark percent may not be empty.');
+        }
+
+        $this->benchmark_percent->$benchmark = (float) $percent;
+    }
+
     /**
      * Get the section object
      *
@@ -195,7 +220,6 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param object $gradeable
      */
     public function addGradeable(object $gradeable) {
-        // TODO: Validate gradeable data
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
         $emptyObject = (object) [];

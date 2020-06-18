@@ -8,7 +8,7 @@ use app\models\OfficeHoursQueueModel;
 class OfficeHoursQueueView extends AbstractView {
 
     public function showTheQueue($viewer) {
-        $this->core->getOutput()->addBreadcrumb("Office Hours/Lab Queue");
+        $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
         $this->core->getOutput()->enableMobileViewport();
 
@@ -23,6 +23,14 @@ class OfficeHoursQueueView extends AbstractView {
 
     public function renderCurrentQueue($viewer) {
         return $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig");
+    }
+
+    public function renderQueueHistory($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/QueueHistory.twig");
+    }
+
+    public function renderNewStatus($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/QueueStatus.twig");
     }
 
     private function renderPart($viewer, $twig_location) {

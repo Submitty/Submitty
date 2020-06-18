@@ -34,7 +34,7 @@
 
             {# disable changing submissions or cancelling assignment if student submit not allowed #}
             {% if not can_change_submissions %}
-                <script type="text/javascript">
+                <script>
                     $(function() {
                         $("#do_not_grade").prop("disabled", true);
                         $("#version_change").prop("disabled", true);
@@ -44,7 +44,7 @@
 
             {# disable looking at other submissions if student any version not allowed #}
             {% if not can_see_all_versions %}
-                <script type="text/javascript">
+                <script>
                     $(function() {
                         $('select[name=submission_version]').hide();
                         $('#do_not_grade').hide();

@@ -3,9 +3,11 @@ import subprocess
 
 def get_php_db_password(password):
     """
-    Generates a password to be used within the site for database authentication. The password_hash
-    function (http://php.net/manual/en/function.password-hash.php) generates us a nice secure
-    password and takes care of things like salting and hashing.
+    Generates a password to be used within the site for database authentication. The
+    password_hash function (http://php.net/manual/en/function.password-hash.php)
+    generates us a nice secure password and takes care of things like salting and
+    hashing.
+
     :param password:
     :type: str
     :return: password hash to be inserted into the DB for a user

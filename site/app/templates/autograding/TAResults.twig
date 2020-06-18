@@ -22,20 +22,22 @@ $( document ).ready(function() {
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
-
         {# Overview #}
-        <div class="box half" style="padding: 10px; width: 30%; word-break: break-word;">
+        <div class="box" style="padding: 10px; word-break: break-word;">
             <p>Version #{{ ta_graded_version }}</p>
             {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
-            <p>
-                {% if overall_comment|length != 0 %}
-            <hr>
-            Overall note from Grader:
-            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
-            {% endif %}
-            </p>
+            {% for user in overall_comments | keys | sort %}
+                <div class="overall-comment-box">
+                    <p class="overall-comment-author">
+                        Overall note from {{user}}:
+                    </p>
+                    <p class="overall-comment">
+                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                    </p>
+                </div>
+            {% endfor %}
         </div>
 
         {% if uploaded_pdfs|length >= 1 %}
@@ -70,7 +72,7 @@ $( document ).ready(function() {
                                     <button class = 'btn btn-default key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
-                                <a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                                <a class="btn btn-primary key_to_click" tabindex="0" onclick="openFile('{{ display_original_pdf }}?dir=submissions&path={{ file.path|url_encode }}')">View Popup<i class="fas fa-window-restore"></i></a>
                             </p>
                             {% if loop.index != files|length %}
                                 <br />

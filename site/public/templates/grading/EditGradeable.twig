@@ -7,7 +7,7 @@
 
 {% block components_block %}
     {% for component in gradeable.components %}
-        <div class="component-container edit-component-container">
+        <div class="component-container edit-component-container{{ (component.peer) ? ' peer-component-container' : '' }}">
             {% include "EditComponent.twig" with {
                 'precision': gradeable.precision,
                 'show_mark_list': false,
@@ -19,7 +19,7 @@
 
 {% block footer_content %}
     <input type="button" class="btn btn-primary key_to_click" tabindex="0" value="Add New Component" onclick="onAddComponent(false)" />
-    <input type="button" class="btn btn-danger key_to_click" tabindex="0" value="(DO NOT USE) Add New Peer Component" onclick="onAddComponent(true)"  />
+    <input type="button" class="btn peer-button key_to_click" tabindex="0" value="Add New Peer Component" onclick="onAddComponent(true)"  />
     <a href="{{ export_components_url }}" class="btn btn-default">Export Components</a>
     <label for="import-components-file" class="btn btn-default">Import Components</label>
     <input id="import-components-file" type="file" class="btn ignore" onchange="importComponentsFromFile();" style="display: none;"/>

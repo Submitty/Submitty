@@ -20,13 +20,18 @@
     </div>
 {% endif %}
 
-<div class="content">
+<div id="gradeables-content" class="content">
     <h1>Gradeables</h1>
     {% if sections|length > 0 %}
         <div id="gradeables">
         {% for list_section, info in sections %}
-            <div id="{{ info.section_id }}" class="course-section-heading">
+            <div id="{{ info.section_id }}"
+                 class="course-section-heading
+                 {% if info.is_panel_expanded %} panel-head-active {% endif %}"
+            >
                 <div class="course-section-title">
+                    <i class="collapse-icon fas fa-caret-right"></i>
+                    <i class="expand-icon fas fa-caret-down"></i>
                     {{ info.title }}
                     {% if info.subtitle != "" %}
                         &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
@@ -37,7 +42,10 @@
                 {% endfor %}
             </div>
 
-            <div id="{{ info.section_id }}-section" class="course-section">
+            <div id="{{ info.section_id }}-section"
+                 class="course-section
+                 {% if info.is_panel_expanded %} panel-active {% endif %}"
+            >
                 {% for g_info in info.gradeables %}
                 <div id="{{ g_info.id }}" class="gradeable-row">
                     <div class="course-main">
@@ -52,7 +60,11 @@
                         <div class="course-title">
                             {{ g_info.name }}
                             {% if g_info.url|trim != "" %}
-                                <a class="external" href="{{ g_info.url }}" target="_blank" aria-label="Go to instructions for {{ g_info.name }}">
+                                <a class="external"
+                                   href="{{ g_info.url }}"
+                                   target="_blank"
+                                   aria-label="Go to instructions for {{ g_info.name }}"
+                                >
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}

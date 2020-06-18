@@ -29,6 +29,7 @@
 {
     width: 80%;
     height: 10vh;
+    margin-top: 10px;
 }
 
 #buckets_available_list li{
@@ -41,19 +42,24 @@
     list-style-type: none;
 }
 
+.bucket_detail_div
+{
+    padding: 3px;
+}
+
 .bucket_detail_div:nth-child(2n){
-    background-color: mediumorchid;
+    background-color: var(--standard-mediumorchid);
 }
 
 .bucket_detail_div:nth-child(2n+1){
-    background-color: lightskyblue;
+    background-color: var(--standard-lightskyblue);
 }
 
 #save_status_container
 {
     display: inline-block;
     width: 100%;
-    background-color: lightgrey;
+    background-color: var(--standard-hover-light-gray);
     border: none;
 }
 
@@ -94,4 +100,71 @@
 #limited_func_messages p
 {
     margin: 12px
+}
+
+.fa-gradeable-curve
+{
+    margin-right: 5px;
+}
+
+.fa-rb
+{
+    color: black
+}
+
+.fa-rb:hover
+{
+    color: red;
+}
+
+.gradeable-li
+{
+    display: flex;
+    flex-direction: row;
+    margin: 3px;
+    align-items: center;
+}
+
+.gradeable-li-right-of-input
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.gradeable-li-info
+{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.gradeable-id
+{
+    margin-left: 5px;
+}
+
+.gradeable-li-curve
+{
+    display: none;
+}
+
+.gradeable-li-curve input
+{
+    width: 50px;
+}
+
+hr
+{
+    margin: 7px 10px;
+    border-top: 1px solid var(--viewed_content);
+}
+
+.rg_info_message
+{
+    margin-bottom: 10px;
+}
+
+#rg_web_ui
+{
+    display: none;
 }

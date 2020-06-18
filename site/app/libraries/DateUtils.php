@@ -129,7 +129,7 @@ class DateUtils {
      * @param $core Core core
      * @return array
      */
-    public static function getServerTimeJson($core): array {
+    public static function getServerTimeJson(Core $core): array {
         $time = new \DateTime('now', $core->getConfig()->getTimezone());
 
         return [
@@ -140,5 +140,41 @@ class DateUtils {
             'minute' => $time->format('i'),
             'second' => $time->format('s')
         ];
+    }
+
+    /**
+     * Get the complete set of time zones a user may select.  This is essentially just the list of time zone
+     * identifiers made available by PHP, however 'NOT_SET/NOT_SET' has been added to accommodate users that
+     * have not yet set their time zone.  'UTC' has also been removed as users need not select this option.
+     *
+     * @return array All user selectable time zones
+     */
+    public static function getAvailableTimeZones(): array {
+        $available_time_zones = array_merge(['NOT_SET/NOT_SET'], \DateTimeZone::listIdentifiers());
+
+        // Get rid of 'UTC' time zone
+        unset($available_time_zones[count($available_time_zones) - 1]);
+
+        return $available_time_zones;
+    }
+
+    /**
+     * Compute the offset in hours and minutes between the given time zone identifier string, and the UTC timezone.
+     *
+     * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
+     * @return string The UTC offset, for example '+9.5 Hours' or '-5 Hours'
+     */
+    public static function getUTCOffset(string $time_zone): string {
+        if ($time_zone === 'NOT_SET/NOT_SET') {
+            return 'NOT_SET';
+        }
+
+        // Convert offset to hours and then to string
+        $time_zone_obj = new \DateTimeZone($time_zone);
+        $offset = $time_zone_obj->getOffset(new \DateTime());
+        $offset_as_string = strval($offset / 3600) . ' Hours';
+
+        // Prepend a plus for non-negative offsets, minus is already included for negative offsets
+        return $offset >= 0 ? '+' . $offset_as_string : $offset_as_string;
     }
 }

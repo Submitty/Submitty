@@ -71,6 +71,6 @@ class SimpleLateUser extends AbstractModel {
     }
 
     public function getSinceTimestamp() {
-        return $this->since_timestamp->format("m/d/Y h:i:s A");
+        return $this->since_timestamp->format("m/d/Y h:i:s A T");
     }
 }

@@ -1,8 +1,16 @@
 <div class="content">
-    <h1 class="label">Rainbow Grades</h1>
-    {% if show_summary %}
-        {{ grade_file|raw }}
+    <h1 class="label">
+    {% if extra_label is defined %}
+        Rainbow Grades {{extra_label}}
     {% else %}
-        No grades are available...
+        Rainbow Grades
     {% endif %}
+    </h1>
+    <div id="rainbow_grades">
+      {% if show_summary %}
+          {{ grade_file|raw }}
+      {% else %}
+          No grades are available...
+      {% endif %}
+    </div>
 </div>

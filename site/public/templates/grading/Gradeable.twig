@@ -5,6 +5,16 @@
     {# twig.js doesn't support blocks inside of for loops ... ANNOYING #}
     <div id="component-list">
         {% block components_block %}
+            {% for component in gradeable.components %}
+                <div class="component-container">
+                    {% set graded_component = graded_gradeable.graded_components[component.id] %}
+                    {% include "GradingComponent.twig" with {
+                        'precision': gradeable.precision,
+                        'show_mark_list': false,
+                        'component_version_conflict': graded_component.graded_version is defined and graded_component.graded_version != display_version,
+                    } %}
+                </div>
+            {% endfor %}
         {% endblock %}
     </div>
 {# /Components #}
