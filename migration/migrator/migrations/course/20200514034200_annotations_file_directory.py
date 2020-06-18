@@ -2,7 +2,6 @@ import os
 import grp
 import hashlib
 import shutil
-import stat
 from pathlib import Path
 
 def up(config, database, semester, course):
@@ -31,11 +30,10 @@ def up(config, database, semester, course):
                             file_path = Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)
                             shutil.copyfile(Path(annotation_full_path,name), Path(annotation_full_path, md5_file_name.hexdigest() + "_" + grader_id))
                             os.remove(Path(annotation_full_path,name))
-                            shutil.chown(annotation_full_path, php_user, course_group)
-                            os.chmod(annotation_full_path, stat.S_IRWXU)
-                            os.chmod(annotation_full_path, stat.S_IRWXO)
-                            os.chmod(annotation_full_path, stat.S_IRGRP)
-                            os.chmod(annotation_full_path, stat.S_IXGRP)
+                            os.system("chown -R "+php_user+":"+course_group+ " "+ str(annotation_full_path))
+                            os.system("chmod -R u+rwx "+str(annotation_full_path))
+                            os.system("chmod -R g+rxs "+str(annotation_full_path))
+                            os.system("chmod -R o-rwx "+str(annotation_full_path))
                 
                 
 def down(config, database, semester, course):

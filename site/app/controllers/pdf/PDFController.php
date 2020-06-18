@@ -228,7 +228,7 @@ class PDFController extends AbstractController {
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
                 if (explode('_', $annotation_file)[0] === md5($file_path)) {
-                    $file_contents = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file);
+                    $file_contents = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
                     $annotation_decoded = json_decode($file_contents, true);
                     if ($annotation_decoded != null) {
                         $grader_id = $annotation_decoded["annotations"][0]["userId"];
