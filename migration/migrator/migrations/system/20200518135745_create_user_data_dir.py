@@ -14,7 +14,7 @@ def up(config):
 
     user_data_path = os.path.join(config.submitty['submitty_data_dir'], 'user_data')
     user = config.submitty_users['php_user']
-    script_path = os.path.join(config.submitty['submitty_repository'], '.setup', 'bin', 'setup_sample_user_data.py')
+    script_path = os.path.join(config.submitty['submitty_install_dir'], '.setup', 'bin', 'setup_sample_user_data.py')
 
     # Generate user_data directory
     if not os.path.isdir(user_data_path):

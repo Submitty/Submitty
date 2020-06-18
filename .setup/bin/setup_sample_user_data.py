@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-Setup script that scans over the user_photo zips inside the submitty repo sample files and then generates sample
-user_data for each sample user name it finds an image for.
+Setup script that scans over the user_photo zips inside the submitty repo sample files and then generates sample data
+in the user_data directory.  We are only grabbing one image from each zip.
 """
 
 import os
 import shutil
 import json
-from datetime import datetime
 from zipfile import ZipFile
 
 
@@ -45,8 +44,6 @@ def main():
         with ZipFile(zip_path, 'r') as zipObj:
             zipObj.extractall('temp')
 
-    time_stamp = datetime.now()
-
     # Traverse subdirectories for images
     for sub_dir in os.listdir('temp'):
         for file in os.listdir(os.path.join('temp', sub_dir)):
@@ -59,7 +56,7 @@ def main():
             if extension == 'png':
                 user_folder_path = os.path.join(user_data_dir, user_name)
                 user_images_path = os.path.join(user_data_dir, user_name, 'system_images')
-                new_file_name = time_stamp.strftime("%Y%m%d") + '.png'
+                new_file_name = user_name + '.png'
                 access = 0o770
 
                 if not os.path.isdir(user_folder_path):
