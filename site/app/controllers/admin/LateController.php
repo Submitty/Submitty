@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LateController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/late_days")
+     * @Route("/courses/{_semester}/{_course}/late_days")
      * @return MultiResponse
      */
     public function viewLateDays() {
@@ -32,7 +32,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions")
+     * @Route("/courses/{_semester}/{_course}/extensions")
      * @return MultiResponse
      */
     public function viewExtensions() {
@@ -48,7 +48,7 @@ class LateController extends AbstractController {
     /**
      * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
-     * @Route("/{_semester}/{_course}/late_days/update", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse
      */
     public function updateLateDays($csv_option = null) {
@@ -103,7 +103,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/late_days/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/late_days/delete", methods={"POST"})
      * @return MultiResponse
      */
     public function deleteLateDays() {
@@ -131,7 +131,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions/update", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/extensions/update", methods={"POST"})
      * @return MultiResponse
      */
     public function updateExtension() {

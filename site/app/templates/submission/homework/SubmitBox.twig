@@ -218,7 +218,7 @@
         {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-        {{ renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version) }}
+        {{ renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version,max_file_uploads, old_files) }}
 
         {# File upload boxes #}
         <div id="upload-boxes">
@@ -294,18 +294,26 @@
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
-            var num_parts = {{ part_names|length }};
+            if (typeof num_parts === "undefined"){
+                var num_parts = {{ part_names|length }};
+            }
             createArray(num_parts);
             var assignment_version = {{ display_version }};
             var highest_version = {{ highest_version }};
             for (var i = 1; i <= num_parts; i++ ){
-                var dropzone = document.getElementById("upload" + i);
+                initializeDropZone("upload" + String(i));
+            }
+
+
+            function initializeDropZone(id){
+                var dropzone = document.getElementById(id);
                 dropzone.addEventListener("click", clicked_on_box, false);
                 dropzone.addEventListener("dragenter", draghandle, false);
                 dropzone.addEventListener("dragover", draghandle, false);
                 dropzone.addEventListener("dragleave", draghandle, false);
                 dropzone.addEventListener("drop", drop, false);
             }
+
 
             $("#startnew").click(function(e){ // Clear all the selected files in the buckets
                 for (var i = 1; i <= num_parts; i++){
@@ -458,3 +466,5 @@
         });
     });
 </script>
+
+
