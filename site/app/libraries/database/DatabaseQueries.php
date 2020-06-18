@@ -275,7 +275,7 @@ WHERE status = 1"
         $this->submitty_db->query(
             "SELECT term_id FROM terms ORDER BY start_date DESC"
         );
-        $return = array();
+        $return = [];
         foreach ($this->submitty_db->rows() as $row) {
             $return[] = $row['term_id'];
         }
