@@ -209,12 +209,6 @@ class AdminGradeableController extends AbstractController {
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
-        // Setup notebook builder
-        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
-        $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
