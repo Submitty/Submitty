@@ -20,7 +20,6 @@
         for(let grader in annotations){
             if(annotations[grader] !== ""){
                 let annotations_parsed = JSON.parse(annotations[grader]);
-                console.log(annotations_parsed["annotations"]);
                 localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations_parsed["annotations"]);
             }
         }

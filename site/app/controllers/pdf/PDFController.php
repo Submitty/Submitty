@@ -37,9 +37,10 @@ class PDFController extends AbstractController {
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
                 if (explode('_', $annotation_file)[0] === md5($decoded_path)) {
-                    $annotation_decoded = json_decode($annotation_file);
+                    $file_content = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                    $annotation_decoded = json_decode($file_content);
                     $grader_id = $annotation_decoded["userId"];
-                    $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                    $annotation_jsons[$grader_id] = $file_content;
                 }
             }
         }
@@ -172,9 +173,9 @@ class PDFController extends AbstractController {
         
         $annotation_body = [];
         
-        $annotation_body["annotations"] = json_decode($_POST['annotation_layer'], true);                    
         $annotation_body["file_path"] = $partial_path;
         $annotation_body["grader_id"] = $grader_id;
+        $annotation_body["annotations"] = $_POST['annotation_layer'];                    
         
         $annotation_json = json_encode($annotation_body);
                         
@@ -227,10 +228,11 @@ class PDFController extends AbstractController {
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
                 if (explode('_', $annotation_file)[0] === md5($file_path)) {
-                    $annotation_decoded = json_decode(file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file)), true);
+                    $file_contents = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file);
+                    $annotation_decoded = json_decode($file_contents, true);
                     if ($annotation_decoded != null) {
                         $grader_id = $annotation_decoded["annotations"][0]["userId"];
-                        $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                        $annotation_jsons[$grader_id] = $file_contents;
                     }
                 }
             }
