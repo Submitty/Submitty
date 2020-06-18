@@ -74,7 +74,6 @@ function checkNumFilesForumUpload(input, post_id){
 
 function testAndGetAttachments(post_box_id, dynamic_check) {
     var index = post_box_id - 1;
-    // Files selected
     var files = [];
     for (var j = 0; j < file_array[index].length; j++) {
         if (file_array[index][j].name.indexOf("'") != -1 ||
@@ -94,10 +93,13 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         }
         files.push(file_array[index][j]);
     }
+    
+    var valid = true;
     if(!checkForumFileExtensions(post_box_id, files)){
         displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
-        return false;
+        valid = false;
     }
+
     if(files.length > 5){
         if(dynamic_check) {
             displayErrorMessage('Max file upload size is 5. Please remove attachments accordingly.');
@@ -105,10 +107,15 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         else {
             displayErrorMessage('Max file upload size is 5. Please try again.');
         }
+        valid = false;
+    }
+
+    if(!valid) {
         return false;
     }
-    
-    return files;
+    else {
+        return files;
+    }
 }
 
 function publishFormWithAttachments(form, test_category, error_message) {
@@ -1352,12 +1359,6 @@ function thread_post_handler(){
     $('.submit_unresolve').click(function(event){
         var post_box_id = $(this).data("post_box_id");
         $('#thread_status_input_'+post_box_id).val(-1);
-        return true;
-    });
-
-    $('.post_reply_from').submit(function(){
-        var post = $(this).find("[name=post]");
-        var post_unresolve = $(this).find("[name=post_and_unresolve]");
         return true;
     });
 }
