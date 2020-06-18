@@ -272,7 +272,6 @@ class AdminGradeableController extends AbstractController {
         $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader('aphacker');
         var_dump($peer_grading_assignments);
         var_dump($grading_assignment_for_grader);
-
     }
 
     /**
@@ -285,26 +284,30 @@ class AdminGradeableController extends AbstractController {
         //if entire grader row is removed, just remove grader and their students
         if (!empty($_POST['remove_grader'])) {
             $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
-        } else {
+        }
+        else {
             //otherwise, check if any of the individual current students were removed
             $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
             $grading_assignment_for_grader = $tmp[$gradeable_id];
-            foreach($grading_assignment_for_grader as $i => $student_id) {
+            foreach ($grading_assignment_for_grader as $i => $student_id) {
                 if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
                     if ($this->core->getQueries()->getUserById($student_id) == null) {
                         $this->core->addErrorMessage("{$student_id} is not a valid student");
-                    } else {
+                    }
+                    else {
                         $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                     }
                 }
             }
             //then, add new students
-            foreach(json_decode($_POST['add_student_ids']) as $i => $student_id) {
+            foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
                 if (in_array($student_id, $grading_assignment_for_grader)) {
                     $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
-                } else if ($this->core->getQueries()->getUserById($student_id) == null) {
+                }
+                elseif ($this->core->getQueries()->getUserById($student_id) == null) {
                     $this->core->addErrorMessage("{$student_id} is not a valid student");
-                } else {
+                }
+                else {
                     $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
                 }
             }
