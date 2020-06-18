@@ -28,6 +28,8 @@ from math import floor
 from autograder import autograding_utils
 from autograder import packer_unpacker
 
+from submitty_utils import string_utils
+
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -192,7 +194,7 @@ def establish_ssh_connection(my_name, user, host, only_try_once = False):
     return ssh
 
 # ==================================================================================
-def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
+def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade,random_identifier):
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: must be run by DAEMON_USER")
@@ -218,6 +220,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             queue_obj["which_untrusted"] = which_untrusted
             queue_obj["which_machine"] = which_machine
             queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
+            queue_obj['identifier'] = random_identifier
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))
@@ -279,7 +282,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 
 # ==================================================================================
 # ==================================================================================
-def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
+def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,random_identifier):
 
     # variables needed for logging
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
@@ -366,23 +369,32 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
             if not success:
                 return False
-    # archive the results of grading
+
     try:
-        success = packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+        with open(local_done_queue_file, 'r') as infile:
+            local_done_queue_obj = json.load(infile)
+        # Check to make certain that the job we received was the correct job
+        if random_identifier != local_done_queue_obj['identifier']:
+            success= False
+            msg = f"{which_machine} returned a stale job (ids don't match). Discarding."
+        else:
+            # archive the results of grading
+            success = packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+            msg = "Unpacked job from " + which_machine
     except:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip. For more details, see traces entry.")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
+        msg = "ERROR: failure returned from worker machine"
         success = False
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(local_done_queue_file)
 
-    msg = "Unpacked job from " + which_machine if success else "ERROR: failure returned from worker machine"
     print(msg)
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message=msg)
-    return True
+    return success
 
 
 # ==================================================================================
@@ -412,9 +424,9 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     try:
         # prepare the job
         shipper_counter=0
-
+        random_identifier = string_utils.generate_random_string(64)
         #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
-        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
+        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file, random_identifier):
             time.sleep(5)
 
         prep_job_success = True
@@ -426,7 +438,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         else:
             # then wait for grading to be completed
             shipper_counter=0
-            while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
+            while not unpack_job(which_machine, which_untrusted, my_dir, queue_file, random_identifier):
                 shipper_counter+=1
                 time.sleep(1)
                 if shipper_counter >= 10:
