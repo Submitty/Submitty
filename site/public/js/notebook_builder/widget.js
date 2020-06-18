@@ -32,7 +32,7 @@ class Widget {
         const container = document.createElement('div');
         container.classList.add('heading-container');
 
-        const heading = document.createElement('h4');
+        const heading = document.createElement('h3');
         heading.innerText = heading_text;
 
         container.appendChild(heading);
@@ -98,7 +98,7 @@ class Widget {
         // Setup remove button
         const remove_button = this.getButton('Remove');
         remove_button.addEventListener('click', () => {
-            notebook_builder.removeWidget(this);
+            notebook_builder.widgetRemove(this);
         })
         container.appendChild(remove_button);
 

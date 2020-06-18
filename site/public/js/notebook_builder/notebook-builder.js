@@ -41,24 +41,24 @@ class NotebookBuilder {
      *
      * @param widget
      */
-    addWidget(widget) {
+    widgetAdd(widget) {
         this.widgets.splice(this.widgets.length - 1, 0, widget);
         this.render();
     }
 
     /**
-     * Remove the passed widget from the notebook builder form
+     * Remove a widget from the notebook builder form
      *
      * @param widget
      */
-    removeWidget(widget) {
+    widgetRemove(widget) {
         const index = this.widgets.indexOf(widget);
         this.widgets.splice(index, 1);
         this.render();
     }
 
     /**
-     * Move the passed in widget up one position in the notebook builder form
+     * Move a widget up one position in the notebook builder form
      *
      * @param widget
      */
@@ -76,7 +76,7 @@ class NotebookBuilder {
     }
 
     /**
-     * Move the passed in widget down one position in the notebook builder form
+     * Move a widget down one position in the notebook builder form
      *
      * @param widget
      */

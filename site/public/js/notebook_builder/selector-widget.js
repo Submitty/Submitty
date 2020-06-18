@@ -27,9 +27,10 @@ class SelectorWidget extends Widget {
 
             switch (selected) {
                 case 'Markdown':
-                    notebook_builder.addWidget(new MarkdownWidget());
+                    notebook_builder.widgetAdd(new MarkdownWidget());
                     break;
                 case 'Multiple Choice':
+                    notebook_builder.widgetAdd(new MultipleChoiceWidget());
                     break;
                 case 'Short Answer':
                     break;
