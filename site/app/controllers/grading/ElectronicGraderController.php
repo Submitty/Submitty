@@ -2386,6 +2386,10 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return null;
         }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        if ($graded_gradeable === false) {
+            return null;
+        }
         
         $gradeable->setPeerFeedback($grader_id, $user_id, $feedback_full, $feedback_id);
         

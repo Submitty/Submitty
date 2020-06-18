@@ -285,7 +285,7 @@ function switch_feedback_modes() {
                 <a class="nav-bar key_to_click" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
                 <a class="nav-bar key_to_click" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
                 <a class="nav-bar key_to_click" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
-                <a class="nav-bar key_to_click" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{gradeable_id}}', '{{user_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
+                <a class="nav-bar key_to_click" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
             </div>
             <script>
                 var feedbackArray = {{peer_feedback|json_encode|raw}};
