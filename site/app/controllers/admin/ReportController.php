@@ -35,7 +35,7 @@ class ReportController extends AbstractController {
     private $all_overrides = [];
 
     /**
-     * @Route("/{_semester}/{_course}/reports")
+     * @Route("/courses/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -51,8 +51,8 @@ class ReportController extends AbstractController {
     /**
      * Generates grade summary files for every user
      *
-     * @Route("/{_semester}/{_course}/reports/summaries")
-     * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/reports/summaries")
+     * @Route("/api/courses/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -119,7 +119,7 @@ class ReportController extends AbstractController {
     /**
      * Generates and offers download of CSV grade report
      *
-     * @Route("/{_semester}/{_course}/reports/csv")
+     * @Route("/courses/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -524,7 +524,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
@@ -577,7 +577,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/reports/rainbow_grades_status")
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")
      */
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
@@ -642,7 +642,7 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/{_semester}/{_course}/gradebook")
+     * @Route("/courses/{_semester}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function displayGradebook() {

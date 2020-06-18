@@ -22,7 +22,7 @@ class LateDaysTableController extends AbstractController {
 
     /**
      * Renders the 'my late days' page
-     * @Route("/{_semester}/{_course}/late_table")
+     * @Route("/courses/{_semester}/{_course}/late_table")
      */
     public function showLateTablePage() {
         $this->core->getOutput()->renderOutput(['LateDaysTable'], 'showLateTablePage', LateDays::fromUser($this->core, $this->core->getUser()));
