@@ -14,12 +14,18 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    
+    database.execute(
+        """
+       DROP TABLE IF EXISTS peer_feedback
+        """
+    )
 
     # Create overall comment table
     database.execute(
         """
        CREATE TABLE IF NOT EXISTS peer_feedback (
-            uid integer NOT NULL,
+            pf_id integer NOT NULL,
             grader_id character varying(255) NOT NULL,
             user_id character varying(255),
             team_id character varying(255),
@@ -36,7 +42,7 @@ def up(config, database, semester, course):
     database.execute(
         """
         ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (uid);
+            ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (pf_id);
         """
     )
     
@@ -77,7 +83,7 @@ def up(config, database, semester, course):
 
     database.execute(
         """
-        CREATE SEQUENCE IF NOT EXISTS peer_feedback_uid_seq
+        CREATE SEQUENCE IF NOT EXISTS peer_feedback_pf_id_seq
             START WITH 1
             INCREMENT BY 1
             NO MINVALUE
@@ -85,8 +91,8 @@ def up(config, database, semester, course):
             CACHE 1;
         """)
 
-    database.execute("ALTER SEQUENCE peer_feedback_uid_seq OWNED BY peer_feedback.uid;")
-    database.execute("ALTER TABLE ONLY peer_feedback ALTER COLUMN uid SET DEFAULT nextval('peer_feedback_uid_seq'::regclass);")
+    database.execute("ALTER SEQUENCE peer_feedback_pf_id_seq OWNED BY peer_feedback.pf_id;")
+    database.execute("ALTER TABLE ONLY peer_feedback ALTER COLUMN pf_id SET DEFAULT nextval('peer_feedback_pf_id_seq'::regclass);")
 
 
 def down(config, database, semester, course):

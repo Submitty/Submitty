@@ -3238,6 +3238,12 @@ SQL;
         }
         return $return;
     }
+    
+    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id){
+        $this->course_db->query("SELECT feedback_full FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
+        $return = [];
+        return $this->course_db->rows()[0]['feedback_full'];
+    }
 
     /**
      * Get all assignments a student is assigned to peer grade

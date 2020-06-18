@@ -474,10 +474,10 @@ class Gradeable extends AbstractModel {
     public function setPeerGradersList($input) {
         $bad_rows = [];
         foreach ($input as $row_num => $vals) {
-            if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
+            if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
                 array_push($bad_rows, ($vals["student"]));
             }
-            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
+            if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
                 array_push($bad_rows, ($vals["grader"]));
             }
         }
@@ -500,10 +500,10 @@ class Gradeable extends AbstractModel {
     
     public function setPeerFeedback($grader_id, $student_id, $feedback_full, $feedback_id) {
         $bad_input = [];
-        if ($this->core->getQueries()->getUserById($grader_id) == null) {
+        if ($this->core->getQueries()->getUserById($grader_id) === null) {
             array_push($bad_input, ($grader_id));
         }
-        if ($this->core->getQueries()->getUserById($student_id) == null) {
+        if ($this->core->getQueries()->getUserById($student_id) === null) {
             array_push($bad_input, ($student_id));
         }
         if (!empty($bad_input)) {
@@ -516,16 +516,12 @@ class Gradeable extends AbstractModel {
         else {
             $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback_full, $feedback_id);
         }
-        var_dump($this->core->getQueries()->getPeerFeedback($this->getId()));
     }
     
     public function getPeerFeedback($grader_id, $anon_id) {
-        $feedback = $this->core->getQueries()->getPeerFeedback($this->getId());
         $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
-        if (array_key_exists($grader_id, $feedback)) {
-            return $feedback[$grader_id][$user_id]['feedback_full'];
-        }
-        return null;
+        $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        return $feedback;
     }
 
     /**

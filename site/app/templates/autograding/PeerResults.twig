@@ -9,6 +9,8 @@ $( document ).ready(function() {
         $("#ShowRegradeRequestButton").hide();
     }
 });
+
+{# When the user clicks on a peer tab in peer feedback mode, hide all other peer feedback panels, set all other tabs to unselected, set the clicked peer tab to selected and show the corresponding peer feedback panel #}
 function open_peer_feedback_tab(user, ordered_graders) {
     $('.page-content').hide();
     $('#peer-feedback-'+user).show();
