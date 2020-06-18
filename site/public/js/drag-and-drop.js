@@ -231,8 +231,7 @@ function addFile(file, part, check_duplicate_zip=true){
         }
     }
 
-    setButtonStatus()
-
+    setButtonStatus();
 }
 
 // REMOVE FILES

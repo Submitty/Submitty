@@ -10,7 +10,7 @@ use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/student_photos")
+     * @Route("/courses/{_semester}/{_course}/student_photos")
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
@@ -55,16 +55,11 @@ class ImagesController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/student_photos/upload")
+     * @Route("/courses/{_semester}/{_course}/student_photos/upload")
      */
     public function ajaxUploadImagesFiles() {
         if (!$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);
-        }
-
-        if (empty($_POST)) {
-            $max_size = ini_get('post_max_size');
-            return $this->core->getOutput()->renderResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {

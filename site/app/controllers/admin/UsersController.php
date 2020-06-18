@@ -24,8 +24,8 @@ use app\exceptions\DatabaseException;
  */
 class UsersController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/users", methods={"GET"})
-     * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/users", methods={"GET"})
      * @return MultiResponse
      */
     public function getStudents() {
@@ -37,7 +37,7 @@ class UsersController extends AbstractController {
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-            $formatted_tzs[$student->getId()] = $student->getTimeZoneNiceFormat() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
+            $formatted_tzs[$student->getId()] = $student->getNiceFormatTimeZone() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
                 case User::GROUP_INSTRUCTOR:
@@ -59,7 +59,7 @@ class UsersController extends AbstractController {
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'utc_offset' => $student->getUTCOffset(),
-                'time_zone' => $student->getTimeZoneNiceFormat(),
+                'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
@@ -82,8 +82,8 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/graders", methods={"GET"})
-     * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/graders", methods={"GET"})
      * @return MultiResponse
      */
     public function getGraders() {
@@ -145,7 +145,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
      */
     public function reassignRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['graders']);
@@ -176,7 +176,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users/details", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/users/details", methods={"GET"})
      */
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
@@ -200,7 +200,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/user_information", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/user_information", methods={"GET"})
      */
     public function ajaxGetSubmittyUsers() {
         $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
@@ -233,7 +233,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})
      */
     public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
@@ -361,7 +361,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/delete_user", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
      * @param "users"|"graders" $type
      * @return RedirectResponse
      */
@@ -385,7 +385,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/sections", methods={"GET"})
      */
     public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
@@ -420,7 +420,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/sections/registration", methods={"POST"})
      */
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
@@ -476,7 +476,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/sections/rotating", methods={"POST"})
      */
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
@@ -802,7 +802,7 @@ class UsersController extends AbstractController {
      * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
-     * @Route("/{_semester}/{_course}/users/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/users/upload", methods={"POST"})
      */
     public function uploadUserList($list_type = "classlist") {
         // A few places have different behaviors depending on $list_type.
@@ -1083,7 +1083,7 @@ class UsersController extends AbstractController {
 
     /**
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/{_semester}/{_course}/users/view_grades", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
     public function viewStudentGrades() {
         if (!isset($_POST["student_id"])) {

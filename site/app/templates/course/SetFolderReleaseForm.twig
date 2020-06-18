@@ -31,32 +31,6 @@
             releaseDate.value = newDateTime;
         }
 
-        function determineRelease(nDT) {
-            //get current date and time to determine what color the box is based
-            //on time you want released and the current date
-            var now = new Date();
-
-            function pad(str){
-                return ('0'+str).slice(-2);
-            }
-
-            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
-            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-            var currentDT = date+' '+time;
-            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
-
-            if (new Date(nDT).getTime() <= new Date(currentDT).getTime()) {
-                return "var(--date-picker-green)";
-            }
-            else if(new Date(nDT).getTime()>=new Date(neverDT).getTime()){
-                return "var(--date-picker-red)";
-            }
-            else {
-                return "var(--date-picker-yellow)";
-            }
-        }
-
         function setChild(dirArr,releaseDate,handleData) {
             //send the array of folder paths and set the time to the new one
             changeFolderNewDateTime(dirArr,releaseDate.value,function (output) {
@@ -65,7 +39,6 @@
                         handleData(true);
                     }
                 }
-
             });
         }
 
@@ -84,9 +57,7 @@
                 //when done reload
                 if (output) {
                     var selectedDiv = 'date_to_release_' + ID;
-                    //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
                     $("[id^=" + selectedDiv + "]").val(releaseDate.value);
-                    $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
                     //delay so function can finish most of the way
                     //window.setTimeout('parent.location.reload()',100);
                     parent.location.reload();
@@ -114,17 +85,17 @@
                                 let date;
                                 switch (index) {
                                     case 0:
-                                        updateToServerTime(fp);
+                                        date = new Date();
                                         break;
                                     case 1:
-                                        updateToTomorrowServerTime(fp);
+                                        date = new Date();
+                                        date.setDate(date.getDate() + 1);
                                         break;
                                     case 2:
                                         date = new Date("9998-01-01 00:00:00");
-                                        fp.setDate(date,true);
                                         break;
-
                                 }
+                                fp.setDate(date);
                             }
                         }
                     )],
