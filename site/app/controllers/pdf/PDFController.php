@@ -30,7 +30,7 @@ class PDFController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = preg_replace('/\\.[^.\\s]{3,4}$/', '', FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version));
+        $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $decoded_path = urldecode($path);
         $json_path = substr($decoded_path, 0, -3) . "json";
         $annotation_jsons = [];
@@ -170,16 +170,15 @@ class PDFController extends AbstractController {
         
         $partial_path = substr_replace($annotation_info["file_path"], "", 0, strlen($annotation_version_path) + 1);
         
-        $annotation_layer_decoded = json_decode($_POST['annotation_layer'], true);
+        $annotation_body = [];
         
-        for ($i = 0; $i < count($annotation_layer_decoded); $i++) {
-            $annotation_layer_decoded[$i]["file_path"] = $partial_path;
-            $annotation_layer_decoded[$i]["grader_id"] = $grader_id;
-        }
+        $annotation_body["annotations"] = json_decode($_POST['annotation_layer'], true);                    
+        $annotation_body["file_path"] = $partial_path;
+        $annotation_body["grader_id"] = $grader_id;
         
-        $annotation_layer = json_encode($annotation_layer_decoded);
+        $annotation_json = json_encode($annotation_body);
                         
-        file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($annotation_info["file_path"])) . "_" . $grader_id . '.json', $annotation_layer);
+        file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($annotation_info["file_path"])) . "_" . $grader_id . '.json', $annotation_json);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
     }
@@ -230,7 +229,7 @@ class PDFController extends AbstractController {
                 if (explode('_', $annotation_file)[0] === md5($file_path)) {
                     $annotation_decoded = json_decode(file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file)), true);
                     if ($annotation_decoded != null) {
-                        $grader_id = $annotation_decoded[0]["userId"];
+                        $grader_id = $annotation_decoded["annotations"][0]["userId"];
                         $annotation_jsons[$grader_id] = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
                     }
                 }

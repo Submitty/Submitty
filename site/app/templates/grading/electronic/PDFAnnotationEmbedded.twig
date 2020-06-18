@@ -19,7 +19,9 @@
         let annotations = JSON.parse({{ annotation_jsons|json_encode|raw }});
         for(let grader in annotations){
             if(annotations[grader] !== ""){
-                localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
+                let annotations_parsed = JSON.parse(annotations[grader]);
+                console.log(annotations_parsed["annotations"]);
+                localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations_parsed["annotations"]);
             }
         }
     }

@@ -403,12 +403,12 @@ class AutoGradingView extends AbstractView {
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
             if (is_dir($annotation_path)) {
                 $dir_iter = new \DirectoryIterator($annotation_path);
-                foreach ($dir_iter as $fileInfo) {
-                    if ($fileInfo->isFile() && !$fileInfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileInfo->getFilename());
+                foreach ($dir_iter as $file_info) {
+                    if ($file_info->isFile() && !$file_info->isDot()) {
+                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file_info->getFilename());
                         $pdf_info = explode('_', $no_extension);
-                        $pdf_id = explode("_", $fileInfo)[0];
-                        if (file_get_contents($fileInfo->getPathname()) != "") {
+                        $pdf_id = explode("_", $file_info)[0];
+                        if (file_get_contents($file_info->getPathname()) != "") {
                             $pdf_id = $pdf_id . '.pdf';
                             $annotated_file_names[] = $pdf_id;
                             if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
@@ -609,14 +609,12 @@ class AutoGradingView extends AbstractView {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
         $annotated_file_names = [];
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            //$first_file = scandir($annotation_path)[2];
-            //$annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
             if (is_dir($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $dirInfo) {
-                    if ($dirInfo->isDir() && !$dirInfo->isDot() && count(scandir($dirInfo->getPathname()))) {
-                        if (file_get_contents($dirInfo->getPathname()) != "") {
-                            $pdf_id = $dirInfo . '.pdf';
+                $dir_iter = new FilesystemIterator(dirname($annotation_path . '/'));
+                foreach ($dir_iter as $dir_info) {
+                    if ($dir_info->isDir() && !$dir_info->isDot() && count(scandir($dir_info->getPathname()))) {
+                        if (file_get_contents($dir_info->getPathname()) !== "") {
+                            $pdf_id = $dir_info . '.pdf';
                             $annotated_file_names[] = $pdf_id;
                         }
                     }

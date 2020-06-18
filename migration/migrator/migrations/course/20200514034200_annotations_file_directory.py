@@ -1,10 +1,9 @@
 import os
 import grp
 import hashlib
-
+import shutil
 from pathlib import Path
-from shutil import copyfile
-from shutil import rmtree
+
 def up(config, database, semester, course):
       
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
@@ -19,23 +18,22 @@ def up(config, database, semester, course):
     course_group = grp.getgrgid(course_group_id)[0]
     
     #Go down to version directory.
-    for dir in os.listdir(annotations_dir):
-        for dirSecond in os.listdir(Path(annotations_dir, dir)):
-            for dirThrid in os.listdir(Path(annotations_dir, dir, dirSecond)):
-                for dirPath, dirName, files in os.walk(Path(annotations_dir, dir, dirSecond, dirThrid)):
+    for gradeable_level_dir in os.scandir(annotations_dir):
+        for user_level_dir in os.scandir(Path(annotations_dir, gradeable_level_dir)):
+            for version_level_dir in os.scandir(Path(annotations_dir, gradeable_level_dir, user_level_dir)):
+                for annotation_full_path, annotation_name, files in os.walk(Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)):
                     for name in files:
                         if "_" in name:
-                            file_name = name.split('_', 1)[0]
-                            grader_id = name.split('_', 1)[1]
+                            [file_name, grader_id] = name.split('_', 1)
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
-                            md5_file_name = hashlib.md5((dirPath + file_name).encode())
-                            file_path = Path(annotations_dir, dir, dirSecond, dirThrid)
-                            copyfile(Path(dirPath,name), Path(dirPath, md5_file_name.hexdigest() + "_" + grader_id + '.json'))
-                            os.remove(Path(dirPath,name))
-                            os.system("chown -R "+php_user+":"+course_group+ " "+ str(dirPath))
-                            os.system("chmod -R u+rwx "+str(dirPath))
-                            os.system("chmod -R g+rxs "+str(dirPath))
-                            os.system("chmod -R o-rwx "+str(dirPath))
+                            md5_file_name = hashlib.md5((annotation_full_path + file_name).encode())
+                            file_path = Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)
+                            shutil.copyfile(Path(annotation_full_path,name), Path(annotation_full_path, md5_file_name.hexdigest() + "_" + grader_id + '.json'))
+                            os.remove(Path(annotation_full_path,name))
+                            shutil.chown(annotation_full_path, php_user, course_group)
+                            os.system("chmod -R u+rwx "+str(annotation_full_path))
+                            os.system("chmod -R g+rxs "+str(annotation_full_path))
+                            os.system("chmod -R o-rwx "+str(annotation_full_path))
                 
                 
 def down(config, database, semester, course):
