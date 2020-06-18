@@ -6,19 +6,32 @@ user_data for each sample user name it finds an image for.
 
 import os
 import shutil
+import json
 from datetime import datetime
 from zipfile import ZipFile
-
-PHP_USER = 'submitty_php'
-SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
-SUBMITTY_DATA_DIR = "/var/local/submitty"
-SUBMITTY_REPOSITORY = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT/Submitty")
 
 
 def main():
 
-    user_data_dir = os.path.join(SUBMITTY_DATA_DIR, 'user_data')
-    sample_images_dir = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos')
+    # Get path to current file directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Collect other path information from configuration file
+    config_file = os.path.join(current_dir, '..', '..', 'config', 'submitty.json')
+    submitty_users_file = os.path.join(current_dir, '..', '..', 'config',
+                                       'submitty_users.json')
+
+    with open(config_file) as f:
+        data = json.load(f)
+        submitty_data_dir = data['submitty_data_dir']
+        submitty_repository = data['submitty_repository']
+
+    with open(submitty_users_file) as f:
+        data = json.load(f)
+        php_user = data['php_user']
+
+    user_data_dir = os.path.join(submitty_data_dir, 'user_data')
+    sample_images_dir = os.path.join(submitty_repository, 'sample_files', 'user_photos')
 
     # Clean up any old installations
     for item in os.listdir(user_data_dir):
@@ -52,18 +65,18 @@ def main():
                 if not os.path.isdir(user_folder_path):
                     os.makedirs(user_folder_path)
                     os.chmod(user_folder_path, access)
-                    shutil.chown(user_folder_path, PHP_USER, PHP_USER)
+                    shutil.chown(user_folder_path, php_user, php_user)
 
                 if not os.path.isdir(user_images_path):
                     os.makedirs(user_images_path)
                     os.chmod(user_images_path, access)
-                    shutil.chown(user_images_path, PHP_USER, PHP_USER)
+                    shutil.chown(user_images_path, php_user, php_user)
 
                     src = os.path.join('.', 'temp', sub_dir, file)
                     dest = os.path.join(user_images_path, new_file_name)
 
                     shutil.copy(src, dest)
-                    shutil.chown(dest, PHP_USER, PHP_USER)
+                    shutil.chown(dest, php_user, php_user)
 
             # Only do one image from each zip
             break
