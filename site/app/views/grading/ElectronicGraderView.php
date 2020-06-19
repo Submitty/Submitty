@@ -782,7 +782,7 @@ HTML;
 HTML;
         }
         else {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
         }
 
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $showNewInterface);

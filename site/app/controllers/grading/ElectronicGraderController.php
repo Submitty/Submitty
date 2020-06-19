@@ -964,11 +964,11 @@ class ElectronicGraderController extends AbstractController {
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/beta")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1") {
-        // Helps in differentiating if user requested for new interface or not
-        $showNewInterface = true;
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1",  $version = null) {
+        // If the version is set, user is requesting for new TA grading interface
+        $showNewInterface = isset($version);
 
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
