@@ -209,7 +209,6 @@ class AdminGradeableController extends AbstractController {
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
-
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
             $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
