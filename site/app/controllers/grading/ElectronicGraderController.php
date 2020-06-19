@@ -35,9 +35,10 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
+
     /**
      * Checks that a given diff viewer type is valid using DiffViewer::isValidType
-     * @param  string $type
+     * @param string $type
      * @return bool
      */
     private function validateDiffViewerType(string $type) {
@@ -445,10 +446,10 @@ class ElectronicGraderController extends AbstractController {
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
                 if ($gradeable->isTeamAssignment()) {
-                        $sections['stu_grad']['no_team'] = 0;
-                        $sections['stu_grad']['team'] = 0;
-                        $sections['all']['no_team'] = 0;
-                        $sections['all']['team'] = 0;
+                    $sections['stu_grad']['no_team'] = 0;
+                    $sections['stu_grad']['team'] = 0;
+                    $sections['all']['no_team'] = 0;
+                    $sections['all']['team'] = 0;
                 }
             }
             else {
@@ -784,7 +785,7 @@ class ElectronicGraderController extends AbstractController {
                         $team->getId(),
                         $team->getRegistrationSection(),
                         $team->getRotatingSection()
-                        ]);
+                    ]);
                     $csvdata .= $nl;
                 }
             }
@@ -963,8 +964,12 @@ class ElectronicGraderController extends AbstractController {
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/beta")
      */
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1") {
+        // Helps in differentiating if user requested for new interface or not
+        $showNewInterface = true;
+
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -1189,13 +1194,18 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
+        if ($showNewInterface) {
+            $this->core->getOutput()->addInternalCss('electronic.css');
+        }
+        else {
+            $this->core->getOutput()->addInternalCss('ta-grading.css');
+        }
         $this->core->getOutput()->addInternalCss('forum.css');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $showNewInterface);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
