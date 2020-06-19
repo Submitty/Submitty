@@ -38,10 +38,11 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         $request = $conn->httpRequest;
         $client_id = $conn->resourceId;
-        $userAgent = $request->getHeader('user-agent');
+        $origin = $request->getHeader('origin')[0];
 
-        if ($userAgent[0] === "websocket-client-php") {
-            return true;
+        if (!strpos($origin, "localhost")) {
+            $conn->close();
+            return false;
         }
         else {
             $cookieString = $request->getHeader("cookie");
@@ -59,7 +60,6 @@ class Server implements MessageComponentInterface {
                 $user_id = $token->getClaim('sub');
                 $logged_in = $this->core->getSession($session_id, $user_id);
                 if (!$logged_in) {
-                    $conn->send('{"sys": "Unauthenticated User"}');
                     $conn->close();
                     return false;
                 }
@@ -156,7 +156,9 @@ class Server implements MessageComponentInterface {
      * to check auth here as that is done on every message.
      */
     public function onOpen(ConnectionInterface $conn) {
-        $this->clients->attach($conn);
+        if ($this->checkAuth($conn)) {
+            $this->clients->attach($conn);
+        }
     }
 
     /**
@@ -170,10 +172,9 @@ class Server implements MessageComponentInterface {
             return;
         }
 
-        if ($this->checkAuth($from)) {
-            $msg = json_decode($msgString, true);
+        $msg = json_decode($msgString, true);
 
-            switch ($msg["type"]) {
+        switch ($msg["type"]) {
 //                case "new_thread":
 //                case "new_post":
 //                    $user_id = $msg["data"]["user_id"];
@@ -184,10 +185,9 @@ class Server implements MessageComponentInterface {
 //                        $this->broadcast($from, $msgString, true);
 //                    }
 //                    break;
-                default:
-                    $this->broadcast($from, $msgString, false);
-                    break;
-            }
+            default:
+                $this->broadcast($from, $msgString, false);
+                break;
         }
     }
 
