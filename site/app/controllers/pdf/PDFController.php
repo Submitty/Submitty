@@ -178,6 +178,8 @@ class PDFController extends AbstractController {
         $annotation_body["annotations"] = $_POST['annotation_layer'];                    
         
         $annotation_json = json_encode($annotation_body);
+        
+        var_dump($annotation_info["file_path"]);
                         
         file_put_contents(FileUtils::joinPaths($annotation_version_path, md5($annotation_info["file_path"])) . "_" . $grader_id . '.json', $annotation_json);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
