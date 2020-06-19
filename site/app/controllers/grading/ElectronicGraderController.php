@@ -545,7 +545,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Shows the list of submitters
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/detail
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/detail)
      */
     public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
