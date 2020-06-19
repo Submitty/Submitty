@@ -2377,7 +2377,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
      */
-    public function ajaxsetPeerFeedback($gradeable_id) {
+    public function ajaxSetPeerFeedback($gradeable_id) {
         $grader_id = $_POST['grader_id'] ?? '';
         $user_id = $_POST['user_id'] ?? '';
         $feedback_full = $_POST['feedback_full'];
@@ -2386,7 +2386,7 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return null;
         }
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() == $gradeable_id;
         if ($graded_gradeable === false) {
             return null;
         }
