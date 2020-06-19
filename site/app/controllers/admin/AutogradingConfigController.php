@@ -224,6 +224,7 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig');

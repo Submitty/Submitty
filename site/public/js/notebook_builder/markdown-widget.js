@@ -20,6 +20,11 @@ class MarkdownWidget extends Widget {
     }
 
     getJSON() {
+        // If there was no value entered then return nothing
+        if (this.text_area.value === '') {
+            return;
+        }
+
         return {
             type: 'markdown',
             markdown_string: this.text_area.value

@@ -5,9 +5,6 @@ class Widget {
      * @returns {HTMLDivElement}
      */
     getContainer(heading_text, instruction_text = null) {
-        const container = document.createElement('div');
-        container.classList.add('notebook-builder-widget');
-
         const widget_main = document.createElement('div');
         widget_main.classList.add('widget-main');
         widget_main.appendChild(this.getHeadingContainer(heading_text, instruction_text))
@@ -15,6 +12,8 @@ class Widget {
 
         const widget_controls = this.getControls();
 
+        const container = document.createElement('div');
+        container.classList.add('notebook-builder-widget');
         container.appendChild(widget_main);
         container.appendChild(widget_controls);
 
@@ -29,12 +28,11 @@ class Widget {
      * @returns {HTMLDivElement}
      */
     getHeadingContainer(heading_text, instruction_text = null) {
-        const container = document.createElement('div');
-        container.classList.add('heading-container');
-
         const heading = document.createElement('h3');
         heading.innerText = heading_text;
 
+        const container = document.createElement('div');
+        container.classList.add('heading-container');
         container.appendChild(heading);
 
         if (instruction_text) {

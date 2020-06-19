@@ -2,7 +2,7 @@
 window.addEventListener('DOMContentLoaded', (event) => {
     window.notebook_builder = new NotebookBuilder();
     notebook_builder.render();
-})
+});
 
 class NotebookBuilder {
     constructor() {
@@ -28,7 +28,12 @@ class NotebookBuilder {
         // Iterate but dont include the final widget which is the selector widget
         let i;
         for (i = 0; i < this.widgets.length - 1; i++) {
-            notebook_array.push(this.widgets[i].getJSON());
+
+            // Ensure we got something back before adding to the notebook_array
+            const widget_json = this.widgets[i].getJSON();
+            if (widget_json) {
+                notebook_array.push(widget_json);
+            }
         }
 
         return {

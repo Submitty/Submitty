@@ -1,15 +1,12 @@
-#notebook-builder {
-    background-color: lightblue;
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 /**
  * Styles common to all notebook builder widgets
  */
 .notebook-builder-widget {
-    background-color: lightgrey;
-    margin: 20px;
+    border: 3px solid var(--viewed_content);
+    background-color: var(--viewed_content);
+    border-radius: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     padding: 20px;
     display:flex;
     flex-direction: row;
@@ -22,7 +19,6 @@
 }
 
 .widget-main {
-    border: 1px solid grey;
     padding: 10px;
     margin-right: 10px;
     width: 100%;
@@ -31,7 +27,9 @@
 .widget-controls {
     display: flex;
     flex-direction: column;
-    border: 1px solid grey;
+    border: 3px solid white;
+    border-radius: 25px;
+    background-color: white;
     justify-content: space-around;
 }
 
@@ -68,8 +66,42 @@
 }
 
 /**
+ * Short answer widget styles
+ */
+.short-answer-widget .interactive-container form div {
+    margin: 10px;
+    display: flex;
+    align-items: center;
+}
+
+/**
  * Multiple choice widget styles
  */
 .multiple-choice-widget td {
     text-align: center;
+}
+
+.multiple-choice-options {
+    flex-grow: 1;
+}
+
+.multiple-choice-options table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 10px;
+}
+
+.multiple-choice-options table input {
+    width: 80%;
+}
+
+.multiple-choice-config {
+    display: flex;
+    align-items: center;
+}
+
+.multiple-choice-config fieldset {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
 }
