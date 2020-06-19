@@ -25,29 +25,33 @@ class Testcase():
 
         # Create either a container network or a jailed sandbox based on autograding method.
         if complete_config_obj.get("autograding_method", "") == "docker":
-            self.secure_environment = container_network.ContainerNetwork(job_id,
-                                                                         untrusted_user,
-                                                                         self.testcase_directory,
-                                                                         is_vcs,
-                                                                         is_batch_job,
-                                                                         complete_config_obj,
-                                                                         testcase_info,
-                                                                         autograding_directory,
-                                                                         log_path,
-                                                                         stack_trace_log_path,
-                                                                         is_test_environment)
+            self.secure_environment = container_network.ContainerNetwork(
+                job_id,
+                untrusted_user,
+                self.testcase_directory,
+                is_vcs,
+                is_batch_job,
+                complete_config_obj,
+                testcase_info,
+                autograding_directory,
+                log_path,
+                stack_trace_log_path,
+                is_test_environment
+            )
         else:
-            self.secure_environment = jailed_sandbox.JailedSandbox(job_id,
-                                                                   untrusted_user,
-                                                                   self.testcase_directory,
-                                                                   is_vcs,
-                                                                   is_batch_job,
-                                                                   complete_config_obj,
-                                                                   testcase_info,
-                                                                   autograding_directory,
-                                                                   log_path,
-                                                                   stack_trace_log_path,
-                                                                   is_test_environment)
+            self.secure_environment = jailed_sandbox.JailedSandbox(
+                job_id,
+                untrusted_user,
+                self.testcase_directory,
+                is_vcs,
+                is_batch_job,
+                complete_config_obj,
+                testcase_info,
+                autograding_directory,
+                log_path,
+                stack_trace_log_path,
+                is_test_environment
+            )
 
         # Determine whether or not this testcase has an input generation phase.
         gen_cmds = complete_config_obj["testcases"][number-1].get('input_generation_commands', None)
@@ -58,8 +62,9 @@ class Testcase():
 
         # Determine whether or not this testcase has an output generation phase.
         solution_containers = complete_config_obj["testcases"][number-1].get(
-                                                                             'solution_containers',
-                                                                             None)
+            'solution_containers',
+            None
+        )
 
         if solution_containers is not None and len(solution_containers) > 0:
             self.has_solution_commands = len(solution_containers[0]['commands']) > 0
@@ -142,8 +147,12 @@ class Testcase():
 
             try:
                 # Execute this testcase using our secure environment.
-                success = self.secure_environment.execute(self.untrusted_user, 'my_compile.out',
-                                                          arguments, logfile)
+                success = self.secure_environment.execute(
+                    self.untrusted_user,
+                    'my_compile.out',
+                    arguments,
+                    logfile
+                )
             except Exception:
                 success = -1
                 self.secure_environment.log_message("ERROR thrown by main compile. See traces entry"
@@ -167,23 +176,23 @@ class Testcase():
         with open(log_directory, 'a') as logfile:
 
             arguments = [
-              self.queue_obj['gradeable'],
-              self.queue_obj['who'],
-              str(self.queue_obj['version']),
-              self.submission_string,
-              '--testcase', str(self.number),
-              '--generation_type', str('input')
+                self.queue_obj['gradeable'],
+                self.queue_obj['who'],
+                str(self.queue_obj['version']),
+                self.submission_string,
+                '--testcase', str(self.number),
+                '--generation_type', str('input')
             ]
 
             try:
                 # Generate input using our secure environment.
-                success = self.secure_environment.execute_random_input(self.untrusted_user,
-                                                                       'my_runner.out',
-                                                                       arguments,
-                                                                       logfile,
-                                                                       cwd=self
-                                                                           .secure_environment
-                                                                           .random_input_directory)
+                success = self.secure_environment.execute_random_input(
+                    self.untrusted_user,
+                    'my_runner.out',
+                    arguments,
+                    logfile,
+                    cwd=self.secure_environment.random_input_directory
+                )
             except Exception:
                 success = -1
                 self.secure_environment.log_message("ERROR thrown by input generator. See traces "
@@ -191,9 +200,9 @@ class Testcase():
                 self.secure_environment.log_stack_trace(traceback.format_exc())
             finally:
                 # Lock down permissions on our input generation folder.
-                self.secure_environment.lockdown_directory_after_execution(self
-                                                                           .secure_environment
-                                                                           .random_input_directory)
+                self.secure_environment.lockdown_directory_after_execution(
+                    self.secure_environment.random_input_directory
+                )
 
             t_name = f"INPUT GENERATION TESTCASE {self.number}"
             if success == 0:
@@ -240,13 +249,13 @@ class Testcase():
 
             try:
                 # Generate random outputs for this testcase using our secure environment.
-                success = self.secure_environment \
-                              .execute_random_output(self.untrusted_user,
-                                                     'my_runner.out',
-                                                     arguments,
-                                                     logfile,
-                                                     cwd=self.secure_environment
-                                                             .random_output_directory)
+                success = self.secure_environment.execute_random_output(
+                    self.untrusted_user,
+                    'my_runner.out',
+                    arguments,
+                    logfile,
+                    cwd=self.secure_environment.random_output_directory
+                )
             except Exception:
                 success = -1
                 self.secure_environment.log_message("ERROR thrown by output generator. "
@@ -254,9 +263,9 @@ class Testcase():
                 self.secure_environment.log_stack_trace(traceback.format_exc())
             finally:
                 # Lock down permissions on our output generation folder.
-                self.secure_environment \
-                    .lockdown_directory_after_execution(self.secure_environment
-                                                            .random_output_directory)
+                self.secure_environment.lockdown_directory_after_execution(
+                    self.secure_environment.random_output_directory
+                )
 
             t_name = f"OUTPUT GENERATION TESTCASE {self.number}"
             if success == 0:
