@@ -3239,10 +3239,10 @@ SQL;
         return $return;
     }
     
-    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id){
+    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
         $this->course_db->query("SELECT feedback_full FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
         $results = $this->course_db->rows();
-        if(sizeof($results) > 0){
+        if (count($results) > 0) {
             return $results[0]['feedback_full'];
         }
         return null;

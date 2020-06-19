@@ -581,7 +581,7 @@ class AutoGradingView extends AbstractView {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
                 $graders = [];
                 $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
-                if(is_dir($annotation_path)){
+                if (is_dir($annotation_path)) {
                     $first_file = scandir($annotation_path)[2];
                     $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
                     if (is_file($annotation_path)) {
