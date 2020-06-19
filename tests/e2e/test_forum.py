@@ -208,7 +208,7 @@ class TestForum(BaseTestCase):
         reply_content3 = "E2E sample reply 3 content E2E"
 
         self.init_and_enable_discussion()
-        self.ws = create_connection("ws://localhost:41983")
+        self.ws = create_connection("ws://localhost")
 
         for upload_attachment in [False, True]:
             assert not self.thread_exists(title)
@@ -265,7 +265,7 @@ class TestForum(BaseTestCase):
         self.find_posts(reply3, must_exists=True, move_to_thread=title3)
 
         # Merging success
-        self.ws = create_connection("ws://localhost:41983")
+        self.ws = create_connection("ws://localhost")
         self.merge_threads(title2, title1, press_cancel=False)
 
         ws_msg = json.loads(self.ws.recv())
