@@ -1,0 +1,387 @@
+{
+    "assignment_message": "Submit each part of your homework to the right bucket or you will not receive credit.",
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "part2/*.txt"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
+            "**/dispatched_actions.txt",
+            "test01/STDOUT_0.txt",
+            "test01/STDOUT_1.txt",
+            "test01/STDERR_0.txt",
+            "test01/STDERR_1.txt",
+            "test02/part2/*.txt",
+            "test03/STDOUT_0.txt",
+            "test03/STDOUT_1.txt",
+            "test03/STDOUT_2.txt",
+            "test03/STDOUT_3.txt",
+            "test03/STDERR_0.txt",
+            "test03/STDERR_1.txt",
+            "test03/STDERR_2.txt",
+            "test03/STDERR_3.txt",
+            "test04/STDOUT_0.txt",
+            "test04/STDOUT_1.txt",
+            "test04/STDERR_0.txt",
+            "test04/STDERR_1.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest",
+        "number_of_ports": 1,
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "part_names": [
+        "Problem 1: Temperature",
+        "Problem 2: Variables",
+        "Problem 3: Area & Volume",
+        "Problem 4: Count Odd"
+    ],
+    "publish_actions": false,
+    "resource_limits": {
+        "RLIMIT_AS": "RLIM_INFINITY",
+        "RLIMIT_CPU": 60,
+        "RLIMIT_NPROC": 100,
+        "RLIMIT_SIGPENDING": 100
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 part1/*.py",
+                        "submitty_count call -l python print part1/*.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Convert Temperature",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0.5,
+                    "description": "Program Output",
+                    "expected_file": "p1_out.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "comparison": "ge",
+                    "deduction": 0.5,
+                    "description": "Number of print statements",
+                    "failure_message": "Looks like you forgot the 'print' statement.",
+                    "method": "intComparison",
+                    "show_actual": "never",
+                    "show_message": "on_failure",
+                    "term": 1
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Legal Variable Names",
+            "type": "FileCheck",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "part2/*.txt",
+                    "deduction": 1.0,
+                    "description": "Program Output",
+                    "expected_file": "p2_out.txt",
+                    "failure_message": "Incorrect Answer",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "never",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 part3/*.py",
+                        "submitty_count token -l python Equal part3/*.py",
+                        "submitty_count token -l python Asterisk part3/*.py",
+                        "submitty_count token -l python Plus part3/*.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Volume and Area",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0.25,
+                    "description": "Program Output",
+                    "expected_file": "p3_out.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "comparison": "ge",
+                    "deduction": 0.25,
+                    "description": "Number of assignments",
+                    "failure_message": "Re-read the problem instructions.",
+                    "method": "intComparison",
+                    "show_actual": "never",
+                    "show_message": "on_failure",
+                    "term": 5
+                },
+                {
+                    "actual_file": "STDOUT_2.txt",
+                    "comparison": "ge",
+                    "deduction": 0.25,
+                    "description": "Number of multiplications",
+                    "failure_message": "Re-read the problem instructions.",
+                    "method": "intComparison",
+                    "show_actual": "never",
+                    "show_message": "on_failure",
+                    "term": 7
+                },
+                {
+                    "actual_file": "STDOUT_3.txt",
+                    "comparison": "ge",
+                    "deduction": 0.25,
+                    "description": "Number of additions",
+                    "failure_message": "Re-read the problem instructions.",
+                    "method": "intComparison",
+                    "show_actual": "never",
+                    "show_message": "on_failure",
+                    "term": 2
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_2.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_2.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_3.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_3.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 part4/*.py",
+                        "submitty_count token -l python While part4/*.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Count Odd",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0.5,
+                    "description": "Program Output",
+                    "expected_file": "p4_out.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "comparison": "ge",
+                    "deduction": 0.5,
+                    "description": "Number of while loops",
+                    "failure_message": "Re-read the problem instructions.",
+                    "method": "intComparison",
+                    "show_actual": "never",
+                    "show_message": "on_failure",
+                    "term": 1
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "publish_actions": false,
+            "timestamped_stdout": false,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ],
+    "timestamped_stdout": false
+}
