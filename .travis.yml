@@ -164,8 +164,8 @@ jobs:
         postgresql: "9.5"
         apt:
           sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
           packages:
             - apache2
             - libapache2-mod-fastcgi
@@ -302,8 +302,8 @@ jobs:
         postgresql: "9.5"
         apt:
           sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
           packages:
             - build-essential
             - automake
