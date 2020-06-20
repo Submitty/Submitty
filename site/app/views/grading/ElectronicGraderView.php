@@ -937,8 +937,8 @@ HTML;
         $anon_path = "";
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
-                $user_id = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id]->getAnonId();
+                $user_id[] = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id[0]]->getAnonId();
                 $anon_path = $anon_path . "/" . $anon_id;
             }
             else {
@@ -955,7 +955,6 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        $user_ids = [];
         $add_files = function (&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = [];
             if ($new_files) {
@@ -995,6 +994,13 @@ HTML;
             $add_files($results, $display_version_instance->getResultsFiles(), 'results');
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
+        $student_grader = false;
+        if($this->core->getUser()->getGroup() == User::GROUP_STUDENT){
+            $student_grader = true;
+        }
+        $submitter_id = $graded_gradeable->getSubmitter()->getId();
+        $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId();
+        $user_ids[$anon_submitter_id] = $submitter_id;
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
@@ -1003,8 +1009,9 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
-            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
-            "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
+            "submitter_id" => $submitter_id,
+            "student_grader" => $student_grader,
+            "anon_submitter_id" => $anon_submitter_id,
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
             "submissions" => $submissions,
