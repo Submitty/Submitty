@@ -87,7 +87,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         // testing with empty notification details
         $emptyViewOnlyNotification =  Notification::createViewOnlyNotification($this->core, $this->notify_details['empty_view_only']);
         // notification should be null
-        $this->assertEquals(null, $emptyViewOnlyNotification);
+        $this->assertNull( $emptyViewOnlyNotification);
 
         // Creating a simple view-only notification object
         $viewOnlyNotificationDetails = $this->notify_details['view_only'];
@@ -128,8 +128,8 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $viewOnlyNotification = Notification::createViewOnlyNotification($this->core, $this->notify_details['view_only']);
 
         // Initially the metadata is empty array so the getUrl should return null
-        $this->assertEquals(null, Notification::getUrl($this->core, $simpleNotification->getNotifyMetadata()));
-        $this->assertEquals(null, Notification::getUrl($this->core, $viewOnlyNotification->getNotifyMetadata()));
+        $this->assertNull(Notification::getUrl($this->core, $simpleNotification->getNotifyMetadata()));
+        $this->assertNull(Notification::getUrl($this->core, $viewOnlyNotification->getNotifyMetadata()));
 
         // set the metadata with some data other than url
         $simpleNotification->setNotifyMetadata(json_encode(["extra" => "some_extra_metadata"]));
