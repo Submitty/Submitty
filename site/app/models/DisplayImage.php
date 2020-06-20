@@ -15,6 +15,8 @@ use app\libraries\FileUtils;
  * DisplayImage model represents a user's personal head shot.  Users may have multiple images in their user_data
  * directory, and DisplayImage takes care of selecting the single most appropriate image for display.
  *
+ * @method string getDisplayImageState()
+ * @method string setDisplayImageState()
  * @method string getPath()
  * @method string setPath()
  * @method string getMimeType()
@@ -34,6 +36,9 @@ class DisplayImage extends AbstractModel {
      * original form factor of the image.
      */
     const IMG_MAX_DIMENSION = 500;
+
+    /** @prop @var string Display image state, should match database field */
+    protected $display_image_state;
 
     /** @prop @var string The file path to the selected image */
     protected $path;
@@ -92,6 +97,7 @@ class DisplayImage extends AbstractModel {
         $imagick = new \Imagick($files[0]);
 
         $this->mime_type = $imagick->getImageMimeType();
+        $this->display_image_state = $display_image_state;
         $this->path = $files[0];
     }
 
