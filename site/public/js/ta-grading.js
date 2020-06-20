@@ -892,12 +892,12 @@ function adjustSize(name) {
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
 
-function getNonAnonPath(path){
+function getNonAnonPath(path, submitter_id){
     nonAnonPath = "";
     pathPieces = path.split("/");
     for (i = 1; i < pathPieces.length; i++) {
         if(i == 9){
-            nonAnonPath += "/" + "{{submitter_id}}"; 
+            nonAnonPath += "/" + submitter_id; 
         }
         else{
             nonAnonPath += "/" + pathPieces[i];

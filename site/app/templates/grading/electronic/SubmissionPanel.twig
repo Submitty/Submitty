@@ -77,7 +77,7 @@
             var directory = "";
             if (url_file.includes("submissions")) {
                 directory = "submissions";
-                url_file = getNonAnonPath(url_file);
+                url_file = getNonAnonPath(url_file, "{{submitter_id}}");
             }
             else if (url_file.includes("results_public")) {
                 directory = "results_public";
@@ -121,7 +121,7 @@
         var directory = "";
         if (url_file.includes("submissions")) {
             directory = "submissions";
-            url_file = getNonAnonPath(url_file);
+            url_file = getNonAnonPath(url_file, "{{submitter_id}}");
         }
         else if (url_file.includes("results_public")) {
             directory = "results_public";

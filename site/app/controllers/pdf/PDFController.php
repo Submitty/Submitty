@@ -268,6 +268,7 @@ class PDFController extends AbstractController {
             "is_student" => false,
             "page_num" => $page_num
         ];
+        var_dump($params);
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $params);
     }
 
