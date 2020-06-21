@@ -76,6 +76,11 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
             return None
         self.wait_after_ajax()
+
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'new_thread')
+
         assert '/threads' in self.driver.current_url
         return attachment_file
 
@@ -178,12 +183,21 @@ class TestForum(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
 
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'delete_thread')
+
+
     def resolve_thread(self, title):
         assert self.icon_exists(title, "fa-question")
         self.view_thread(title)
         self.driver.find_element(By.XPATH, "//a[@title='Mark thread as resolved']").click()
         self.wait_after_ajax()
         assert self.icon_exists(title, "fa-check")
+
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'resolve_thread')
 
     def announce_thread(self, title):
         assert not self.icon_exists(title, "thread-announcement")
@@ -192,6 +206,10 @@ class TestForum(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
         assert self.icon_exists(title, "thread-announcement")
+
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'announce_thread')
 
     def create_dummy_file(self):
         # Download image to create dummy image file
@@ -218,6 +236,9 @@ class TestForum(BaseTestCase):
                 cancel_button.click()
             else:
                 submit_button.click()
+                ws_msg = json.loads(self.ws.recv())
+                self.assertIn('type', ws_msg.keys())
+                self.assertEqual(ws_msg['type'], 'merge_thread')
             assert self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display") == "none"
 
     def test_basic_operations_thread(self):
@@ -228,16 +249,12 @@ class TestForum(BaseTestCase):
         reply_content3 = "E2E sample reply 3 content E2E"
 
         self.init_and_enable_discussion()
-        self.ws = create_connection("ws://localhost")
+        self.ws = create_connection("ws://localhost:1501/ws", header={"User-Agent": "python-websocket-client"})
 
         for upload_attachment in [False, True]:
             assert not self.thread_exists(title)
             attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
             assert self.thread_exists(title)
-
-            ws_msg = json.loads(self.ws.recv())
-            self.assertIn('type', ws_msg.keys())
-            self.assertEqual(ws_msg['type'], 'new_thread')
 
             self.find_posts(content, must_exists=True, check_attachment=attachment)
             self.view_thread(title)
@@ -250,10 +267,6 @@ class TestForum(BaseTestCase):
             self.announce_thread(title)
             self.delete_thread(title)
             assert not self.thread_exists(title)
-
-            ws_msg = json.loads(self.ws.recv())
-            self.assertIn('type', ws_msg.keys())
-            self.assertEqual(ws_msg['type'], 'delete_thread')
 
         self.ws.close()
 
@@ -270,6 +283,7 @@ class TestForum(BaseTestCase):
         reply2 = "E2E Reply 2 E2E"
         reply3 = "E2E Reply 3 E2E"
 
+        self.ws = create_connection("ws://localhost:1501/ws", header={"User-Agent": "python-websocket-client"})
         content1_attachment = self.create_thread(title1, content1, upload_attachment=True)
         self.reply_and_test(content1, reply1, first_post=True)
         self.create_thread(title2, content2)
@@ -287,13 +301,7 @@ class TestForum(BaseTestCase):
         self.find_posts(reply3, must_exists=True, move_to_thread=title3)
 
         # Merging success
-        self.ws = create_connection("ws://localhost")
         self.merge_threads(title2, title1, press_cancel=False)
-
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'merge_thread')
-        self.ws.close()
 
         content2 = "Merged Thread Title: {}\n\n{}".format(title2, content2)
         self.find_posts(content1, must_exists=True, move_to_thread=title1, check_attachment=content1_attachment)
@@ -307,6 +315,7 @@ class TestForum(BaseTestCase):
         # Cleanup
         self.delete_thread(title3)
         self.delete_thread(title1)
+        self.ws.close()
 
     def test_categories(self):
         title1 = "E2E Sample Title 1 E2E"
