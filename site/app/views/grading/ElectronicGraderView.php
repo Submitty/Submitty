@@ -995,7 +995,7 @@ HTML;
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
         $student_grader = false;
-        if($this->core->getUser()->getGroup() == User::GROUP_STUDENT){
+        if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $student_grader = true;
         }
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
