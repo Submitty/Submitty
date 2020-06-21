@@ -33,6 +33,8 @@ class Team extends AbstractModel {
     protected $invited_users;
     /** @prop @var string containing comma-seperated list of team members */
     protected $member_list;
+    /** @prop @var string The anonymous id of this team which should be unique for each course they are in*/
+    protected $anon_id;
     /** @var array $assignment_settings */
     protected $assignment_settings;
 
@@ -73,15 +75,34 @@ class Team extends AbstractModel {
             }
         }
         $this->member_list = count($this->member_user_ids) === 0 ? "[empty team]" : implode(", ", $this->member_user_ids);
+        if (!empty($details['anon_id'])) {
+            $this->anon_id = $details['anon_id'];
+        }
     }
 
     /**
      * Gets the anonymous id of this team
-     * TODO: this is to create symmetry with the User class, teams' anon ids are just their ids for now
      * @return string
      */
     public function getAnonId() {
-        return $this->id;
+        if ($this->anon_id === null) {
+            $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            $anon_ids = $this->core->getQueries()->getAllAnonIds();
+            $alpha_length = strlen($alpha) - 1;
+            do {
+                $random = "";
+                for ($i = 0; $i < 15; $i++) {
+                    // this throws an exception if there's no avaiable source for generating
+                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // so just ignore this fact
+                    /** @noinspection PhpUnhandledExceptionInspection */
+                    $random .= $alpha[random_int(0, $alpha_length)];
+                }
+            } while (in_array($random, $anon_ids));
+            $this->anon_id = $random;
+            $this->core->getQueries()->setTeamAnonId($this->getId(), $random);
+        }
+        return $this->anon_id;
     }
 
     /**
