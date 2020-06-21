@@ -155,7 +155,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
 
             if (is_thread){
               var thread_id = json['data']['thread_id'];
-              window.socketClient.send({'type': "new_thread", 'thread_id': thread_id});
+              var course = document.body.dataset.courseUrl.split('/').pop();
+              window.socketClient.send({'course': course, 'type': "new_thread", 'thread_id': thread_id});
             }
             window.location.href = json['data']['next_page'];
         },
@@ -457,30 +458,32 @@ function socketUnpinThreadHandler(thread_id) {
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
-    switch (msg.type) {
-      case "new_thread":
-        socketNewThreadHandler(msg.thread_id);
-        break;
-      case "delete_thread":
-        socketDeleteOrMergeThreadHandler(msg.thread_id);
-        break;
-      case "resolve_thread":
-        socketResolveThreadHandler(msg.thread_id);
-        break;
-      case "announce_thread":
-        socketAnnounceThreadHandler(msg.thread_id);
-        break;
-      case "unpin_thread":
-        socketUnpinThreadHandler(msg.thread_id);
-        break;
-      case "merge_thread":
-        socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
-        break;
-      default:
-        console.log("Undefined message recieved.");
+    if (msg.course === document.body.dataset.courseUrl.split('/').pop()) {
+      switch (msg.type) {
+        case "new_thread":
+          socketNewThreadHandler(msg.thread_id);
+          break;
+        case "delete_thread":
+          socketDeleteOrMergeThreadHandler(msg.thread_id);
+          break;
+        case "resolve_thread":
+          socketResolveThreadHandler(msg.thread_id);
+          break;
+        case "announce_thread":
+          socketAnnounceThreadHandler(msg.thread_id);
+          break;
+        case "unpin_thread":
+          socketUnpinThreadHandler(msg.thread_id);
+          break;
+        case "merge_thread":
+          socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
+          break;
+        default:
+          console.log("Undefined message recieved.");
+      }
+      thread_post_handler();
+      loadThreadHandler();
     }
-    thread_post_handler();
-    loadThreadHandler();
   };
   window.socketClient.open();
 }
@@ -507,7 +510,8 @@ function changeThreadStatus(thread_id) {
                 $('#messages').append(message);
                 return;
             }
-            window.socketClient.send({'type': "resolve_thread", 'thread_id': thread_id});
+            var course = document.body.dataset.courseUrl.split('/').pop();
+            window.socketClient.send({'course': course, 'type': "resolve_thread", 'thread_id': thread_id});
             window.location.reload();
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
             $('#messages').append(message);
@@ -1335,7 +1339,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 var new_url = "";
                 switch(json['data']['type']){
                     case "thread":
-                      window.socketClient.send({'type': "delete_thread", 'thread_id': thread_id});
+                      var course = document.body.dataset.courseUrl.split('/').pop();
+                      window.socketClient.send({'course': course, 'type': "delete_thread", 'thread_id': thread_id});
                       new_url = buildCourseUrl(['forum', 'threads']);
                       break;
                     case "post":
@@ -1367,9 +1372,10 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 
             },
             success: function(data){
-                if (type)
-                  window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
-                else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
+              var course = document.body.dataset.courseUrl.split('/').pop();
+              if (type)
+                  window.socketClient.send({'course': course, 'type': "announce_thread", 'thread_id': thread_id});
+                else window.socketClient.send({'course': course, 'type': "unpin_thread", 'thread_id': thread_id});
                 window.location.reload();
             },
             error: function(){
