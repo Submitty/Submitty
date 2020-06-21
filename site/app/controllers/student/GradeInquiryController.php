@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestGradeInquiry($gradeable_id) {
@@ -67,7 +67,7 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function makeGradeInquiryPost($gradeable_id) {
@@ -129,7 +129,7 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function changeGradeInquiryStatus($gradeable_id) {
