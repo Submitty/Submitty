@@ -8,7 +8,7 @@ window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
 //Toolbar stuff
-(function () {
+function renderPDFToolbar() {
     let active_toolbar = true;
     const debounce = (fn, time, ...args) => {
         if (active_toolbar) {

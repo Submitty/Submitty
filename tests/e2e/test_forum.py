@@ -100,6 +100,12 @@ class TestForum(BaseTestCase):
             thread_count = new_thread_count
         return len(self.driver.find_elements(By.XPATH, target_xpath)) > 0
 
+    def icon_exists(self, thread_title, icon_class):
+        assert self.thread_exists(thread_title)
+        div = self.driver.find_element(By.XPATH, "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(thread_title))
+        icons = div.find_elements(By.XPATH, ".//i[contains(@class, '{}')]".format(icon_class))
+        return len(icons) > 0
+
     def view_thread(self, title, return_info=False):
         assert '/threads' in self.driver.current_url
         assert self.thread_exists(title)
@@ -170,8 +176,22 @@ class TestForum(BaseTestCase):
         self.view_thread(title)
         self.driver.find_elements(By.XPATH, "//a[@title='Remove post']")[0].click()
         self.driver.switch_to.alert.accept()
-        # Workaround, not working without force redirection
-        self.driver.get(self.forum_page_url)
+        self.wait_after_ajax()
+
+    def resolve_thread(self, title):
+        assert self.icon_exists(title, "fa-question")
+        self.view_thread(title)
+        self.driver.find_element(By.XPATH, "//a[@title='Mark thread as resolved']").click()
+        self.wait_after_ajax()
+        assert self.icon_exists(title, "fa-check")
+
+    def announce_thread(self, title):
+        assert not self.icon_exists(title, "thread-announcement")
+        self.view_thread(title)
+        self.driver.find_element(By.XPATH, "//a[@title='Make thread an announcement']").click()
+        self.driver.switch_to.alert.accept()
+        self.wait_after_ajax()
+        assert self.icon_exists(title, "thread-announcement")
 
     def create_dummy_file(self):
         # Download image to create dummy image file
@@ -226,6 +246,8 @@ class TestForum(BaseTestCase):
             self.reply_and_test(reply_content1, reply_content2, first_post=False)
             self.reply_and_test(reply_content2, reply_content3, first_post=False, upload_attachment=upload_attachment)
 
+            self.resolve_thread(title)
+            self.announce_thread(title)
             self.delete_thread(title)
             assert not self.thread_exists(title)
 
