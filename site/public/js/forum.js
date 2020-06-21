@@ -1465,6 +1465,53 @@ function setupForumAutosave() {
     });
 }
 
+const CREATE_THREAD_DEFER_KEY = `create-thread`;
+const CREATE_THREAD_AUTOSAVE_KEY = `${window.location.pathname}-create-autosave`;
+
+function saveCreateThreadToLocal() {
+    if (autosaveEnabled) {
+        const title = $("#title").val();
+        const isAnonymous = $("input.thread-anon-checkbox").prop("checked");
+        const categories = $("div.cat-buttons.btn-selected").get().map(e => e.innerText);
+        const status = $("#thread_status").val();
+        localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            title,
+            isAnonymous,
+            categories,
+            status
+        }));
+    }
+}
+
+function restoreCreateThreadFromLocal() {
+    if (autosaveEnabled) {
+        const json = localStorage.getItem(CREATE_THREAD_AUTOSAVE_KEY);
+        if (!json) {
+            return;
+        }
+
+        const { title, isAnonymous, categories, status } = JSON.parse(json);
+        $("#title").val(title);
+        $("#input.thread-anon-checkbox").prop("checked", isAnonymous);
+        $("#thread_status").val(status);
+        $("div.cat-buttons").each((_i, e) => {
+            if (categories.includes(e.innerText)) {
+                e.classList.add("btn-selected");
+                $(e).find("input[type='checkbox']").prop("checked", true);
+            } else {
+                e.classList.remove("btn-selected");
+                $(e).find("input[type='checkbox']").prop("checked", false);
+            }
+            $(e).trigger("eventChangeCatClass");
+        });
+    }
+}
+
+function clearCreateThreadAutosave() {
+    localStorage.removeItem(CREATE_THREAD_AUTOSAVE_KEY);
+}
+
 $(() => {
     cleanupAutosaveHistory('-forum-autosave');
     setupForumAutosave();
