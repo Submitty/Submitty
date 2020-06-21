@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace tests\app\models\forum;
+
 use app\libraries\Core;
 use app\models\Config;
 use app\models\forum\Post;
@@ -13,7 +15,7 @@ class PostTester extends \PHPUnit\Framework\TestCase {
      */
     private $core;
 
-    public function setup() : void {
+    public function setup(): void {
         $this->core = new Core();
         $config = new Config($this->core);
         $config->setSemester('s20');
@@ -29,7 +31,7 @@ class PostTester extends \PHPUnit\Framework\TestCase {
         $this->core->setConfig($config);
     }
 
-    public function testEmptyPost() : void {
+    public function testEmptyPost(): void {
         // Create a Post object with no post-details
         $post = new Post($this->core);
         // all of its properties such as thread_id, parent_id, content, and anon should be null
