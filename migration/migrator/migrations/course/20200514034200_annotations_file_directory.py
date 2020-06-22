@@ -26,6 +26,7 @@ def up(config, database, semester, course):
                         if "_" in name:
                             [file_name, grader_id] = name.split('_', 1)
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
+                            print(annotation_full_path + '/'+ file_name + '.pdf')
                             md5_file_name = hashlib.md5((annotation_full_path + '/'+ file_name + '.pdf').encode())
                             file_path = Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)
                             shutil.copyfile(Path(annotation_full_path,name), Path(annotation_full_path, md5_file_name.hexdigest() + "_" + grader_id))
@@ -38,4 +39,3 @@ def up(config, database, semester, course):
                 
 def down(config, database, semester, course):
     pass
-            
