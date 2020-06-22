@@ -460,7 +460,7 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
     # Try to short-circuit this job. If it's possible, then great! Clean
     # everything up and return.
     if try_short_circuit(queue_file):
-        grading_cleanup(queue_file, grading_file)
+        grading_cleanup(my_name, queue_file, grading_file)
         return
 
     # TODO: break which_machine into id, address, and passphrase.
