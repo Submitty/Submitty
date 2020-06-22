@@ -231,7 +231,7 @@ class PDFController extends AbstractController {
                     $file_contents = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
                     $annotation_decoded = json_decode($file_contents, true);
                     if ($annotation_decoded != null) {
-                        $grader_id = $annotation_decoded["annotations"][0]["userId"];
+                        $grader_id = $annotation_decoded["grader_id"];
                         $annotation_jsons[$grader_id] = $file_contents;
                     }
                 }
