@@ -1749,7 +1749,9 @@ end of styles used in the admin gradeable page
 }
 
 #skip-nav {
-    margin: 90px 10px 10px; /* 90px for header */
+    /* 90px is the heigth of the navbar and this makes sure the
+    skip-nav shows up below the navbar instead of on top of it */
+    margin: 90px 10px 10px;
 }
 
 .float-right {

@@ -1419,10 +1419,8 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
     });
 }
 
+//When the user uses tab navigation on the thread list, this function
+//helps to make sure the current thread is always visible on the page
 function scrollThreadListTo(element){
-  var offset = $(element).position();
-  $('#thread_list').animate({
-      scrollTop: offset.top-100,
-      scrollLeft: offset.left
-  });
+  $(element).get(0).scrollIntoView({behavior: "smooth", block: "center"});
 }
