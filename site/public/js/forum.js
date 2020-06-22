@@ -210,16 +210,26 @@ function socketNewThreadHandler(thread_id){
     data: {'thread_id': thread_id, 'csrf_token': window.csrfToken},
     success: function (response) {
       try {
-        var result = JSON.parse(response);
+        var new_thread = JSON.parse(response).data;
 
-        var last_announcement = $('.thread-announcement').last().parent().parent();
-        var last_pinned = $('.thread-favorite').last().parent().parent();
-        var last = last_pinned.length == 0 ? last_announcement : last_pinned;
+        if ($(new_thread).find(".thread-announcement").length != 0) {
+          var last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
+          if (last_bookmarked_announcement.length != 0) {
+            $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn("slow");
+          } else {
+            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+          }
+        }
+        else {
+          var last_announcement = $('.thread-announcement').last().parent().parent();
+          var last_bookmarked = $('.thread-favorite').last().parent().parent();
+          var last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
 
-        if (last.length == 0) {
-          $(result.data).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
-        } else {
-          $(result.data).insertAfter(last.next()).hide().fadeIn("slow");
+          if (last.length == 0) {
+            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+          } else {
+            $(new_thread).insertAfter(last.next()).hide().fadeIn("slow");
+          }
         }
 
         $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
