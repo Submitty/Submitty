@@ -68,6 +68,10 @@
 /**
  * Short answer widget styles
  */
+.short-answer-widget .interactive-container {
+    align-items: center;
+}
+
 .short-answer-widget .interactive-container form div {
     margin: 10px;
     display: flex;

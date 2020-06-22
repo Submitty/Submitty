@@ -10,6 +10,9 @@ class MultipleChoiceWidget extends Widget {
 
         this.randomize_order_toggle = document.createElement('input');
         this.randomize_order_toggle.setAttribute('type', 'checkbox');
+
+        this.filename = document.createElement('input');
+        this.filename.setAttribute('type', 'text');
     }
 
     render() {
@@ -44,6 +47,10 @@ class MultipleChoiceWidget extends Widget {
 
         if (this.allow_multiple_toggle.checked) {
             result.allow_multiple = true;
+        }
+
+        if (this.filename.value) {
+            result.filename = this.filename.value;
         }
 
         return result;
@@ -128,9 +135,15 @@ class MultipleChoiceWidget extends Widget {
         randomize_order_label.innerText = 'Randomize order: ';
         randomize_order_label.appendChild(this.randomize_order_toggle);
 
+        const filename_label = document.createElement('label');
+        filename_label.innerText = 'Filename: ';
+        filename_label.appendChild(this.filename);
+
         const fieldset = document.createElement('fieldset');
         fieldset.appendChild(allow_multiple_label);
         fieldset.appendChild(randomize_order_label);
+        fieldset.appendChild(document.createElement('hr'));
+        fieldset.appendChild(filename_label);
 
         const container = document.createElement('div');
         container.classList.add('multiple-choice-config');

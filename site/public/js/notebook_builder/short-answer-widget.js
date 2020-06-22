@@ -4,6 +4,9 @@ class ShortAnswerWidget extends Widget {
 
         this.size_selector = document.createElement('form');
         this.size_selector.innerHTML = this.getSizeSelectorTemplate();
+
+        this.filename = document.createElement('input');
+        this.filename.setAttribute('type', 'text');
     }
 
     render() {
@@ -11,9 +14,14 @@ class ShortAnswerWidget extends Widget {
         const container = this.getContainer('Short Answer');
         container.classList.add('short-answer-widget');
 
+        const filename_label = document.createElement('label');
+        filename_label.innerText = 'Filename: ';
+        filename_label.appendChild(this.filename);
+
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
         interactive_area.appendChild(this.size_selector);
+        interactive_area.appendChild(filename_label);
 
         return container;
     }
@@ -25,6 +33,10 @@ class ShortAnswerWidget extends Widget {
 
         if (this.getSizeSelection() === 'large') {
             result.rows = 5;
+        }
+
+        if (this.filename.value) {
+            result.filename = this.filename.value;
         }
 
         return result;
