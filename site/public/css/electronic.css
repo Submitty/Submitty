@@ -385,7 +385,6 @@ progress::-webkit-progress-value {
 }
 
 #autograding_results.rubric_panel {
-    display: block;
     border:5px solid var(--standard-vibrant-pink-red);
 }
 
