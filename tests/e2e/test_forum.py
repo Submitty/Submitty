@@ -15,6 +15,14 @@ class TestForum(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn")
 
+    def setUp(self):
+        super().setUp()
+        self.ws = create_connection("ws://localhost:1501/ws", header={"User-Agent": "python-websocket-client"})
+
+    def tearDown(self):
+        self.ws.close()
+        super().tearDown()
+
     def init_and_enable_discussion(self):
         self.click_class('sample')
         if len(self.driver.find_elements(By.XPATH, "//a[@id='nav-sidebar-forum']")) == 0:
@@ -249,8 +257,6 @@ class TestForum(BaseTestCase):
         reply_content3 = "E2E sample reply 3 content E2E"
 
         self.init_and_enable_discussion()
-        self.ws = create_connection("ws://localhost:1501/ws", header={"User-Agent": "python-websocket-client"})
-
         for upload_attachment in [False, True]:
             assert not self.thread_exists(title)
             attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
@@ -268,8 +274,6 @@ class TestForum(BaseTestCase):
             self.delete_thread(title)
             assert not self.thread_exists(title)
 
-        self.ws.close()
-
     def test_forum_merge_thread(self):
         self.init_and_enable_discussion()
         title1 = "E2E Test 1 E2E"
@@ -283,7 +287,6 @@ class TestForum(BaseTestCase):
         reply2 = "E2E Reply 2 E2E"
         reply3 = "E2E Reply 3 E2E"
 
-        self.ws = create_connection("ws://localhost:1501/ws", header={"User-Agent": "python-websocket-client"})
         content1_attachment = self.create_thread(title1, content1, upload_attachment=True)
         self.reply_and_test(content1, reply1, first_post=True)
         self.create_thread(title2, content2)
@@ -315,7 +318,6 @@ class TestForum(BaseTestCase):
         # Cleanup
         self.delete_thread(title3)
         self.delete_thread(title1)
-        self.ws.close()
 
     def test_categories(self):
         title1 = "E2E Sample Title 1 E2E"
