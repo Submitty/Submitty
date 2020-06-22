@@ -937,6 +937,7 @@ CREATE TABLE public.users (
     instructor_updated boolean DEFAULT false NOT NULL,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
+    time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
@@ -1247,34 +1248,8 @@ ALTER TABLE ONLY public.notification_settings
 -- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-<<<<<<< HEAD
 ALTER TABLE ONLY public.notifications
     ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
-=======
-CREATE TABLE users (
-    user_id character varying NOT NULL,
-    anon_id character varying,
-    user_numeric_id character varying,
-    user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying,
-    user_lastname character varying NOT NULL,
-    user_preferred_lastname character varying,
-    user_email character varying NOT NULL,
-    user_group integer NOT NULL,
-    registration_section character varying(255),
-    rotating_section integer,
-    user_updated boolean NOT NULL DEFAULT false,
-    instructor_updated boolean NOT NULL DEFAULT false,
-    manual_registration boolean DEFAULT false,
-    last_updated timestamp(6) with time zone,
-    time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
-    CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
-);
-
-CREATE INDEX users_user_numeric_id_idx ON users using btree (
-    user_numeric_id ASC NULLS LAST
-);
->>>>>>> master
 
 
 --
