@@ -283,13 +283,10 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback)
         url: buildCourseUrl(['gradeable', gradeable_id, 'ajaxRandomizePeers']),
         data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade},
         success: function(response){
-           
-            console.log("Success: Response is Ready");
             console.log(response);
             let res=JSON.parse(response);
             if (res.data === "Invalid Number of Students Entered") {
                 confirm("Do you Want to go with ALL grade ALL?");
-                console.log("Hello");
             }
             if (res.message=== "Clear Peer Matrix") {
                 confirm("WARNING: This will clear or Peer Matrix Data! Continue?");

@@ -73,27 +73,21 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
         }
-         $all_grade_all = false;
-         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
-         $student_array = [];
-         $student_list = [];
-         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+        $all_grade_all = false;
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+        $student_array = [];
+        $student_list = [];
+        $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
         foreach ($students as $student) {
              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
              $sorted_students[$reg_sec][] = $student;
-            array_push(
-                $student_list,
-                [
-                 'user_id' => $student->getId(),
-                  ]
-            );
+             array_push($student_list,['user_id' => $student->getId()]);
              array_push($student_array, $student->getId());
         }
         $number_of_students = count($student_list);
         if ($number_to_grade > $number_of_students) {
             $all_grade_all = true;
         }
-       
         if ($all_grade_all) {
             $this->core->getOutput()->renderJSONSuccess("Invalid Number of Students Entered");
             $final_grading_info = [];
@@ -107,26 +101,26 @@ class ElectronicGraderController extends AbstractController {
                         array_push($peer_array, $student_array[$peer]);
                     }
                 }
-                   array_push($final_grading_info, [$student_array[$grader],$peer_array]);
+                array_push($final_grading_info, [$student_array[$grader],$peer_array]);
             }
-                $gradeable->setRandomPeerGradersList($final_grading_info);
-                return;
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return;
         }
-          $graded_array = $student_array;
+        $graded_array = $student_array;
           /*n_array_peers : An Array of arrays that holds information on to be graded peers
           [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
           A grades C and E and is graded by C and E.
           */
-          $n_array_peers = [];
-          shuffle($student_array);
-          array_push($n_array_peers, $student_array);
+        $n_array_peers = [];
+        shuffle($student_array);
+        array_push($n_array_peers, $student_array);
           /*final_grading_info : An Array with clear structure of grading rules for peer grading
           [ [A,[C,E]],[B,[F,D]], ...]
           A grades C and E, B grades F and D ..and so on!
           */
-          $final_grading_info = [];
-          $max_offset = count($student_array);
-          $offset_array = [];
+        $final_grading_info = [];
+        $max_offset = count($student_array);
+        $offset_array = [];
         for ($i = 0; $i < $number_to_grade; ++$i) {
             $random_offset = rand(1, $max_offset);
             array_push($offset_array, $random_offset);
@@ -145,8 +139,8 @@ class ElectronicGraderController extends AbstractController {
             }
             array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
         }
-          $this->core->getOutput()->renderJsonSuccess($final_grading_info);
-          $gradeable->setRandomPeerGradersList($final_grading_info);
+        $this->core->getOutput()->renderJsonSuccess($final_grading_info);
+        $gradeable->setRandomPeerGradersList($final_grading_info);
         if ($number_to_grade < 1) {
             $this->core->getOutput()->renderJsonError("Clear Peer Matrix");
             return;
@@ -545,7 +539,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Shows the list of submitters
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/detail)
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
     public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
@@ -678,7 +672,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Imports teams from a csv file upload
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/import", methods={"POST"}
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/import", methods={"POST"})
      */
     public function importTeams($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
