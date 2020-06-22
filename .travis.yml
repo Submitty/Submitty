@@ -163,11 +163,10 @@ jobs:
         postgresql: "9.5"
         apt:
           sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
           packages:
             - apache2
-            - libapache2-mod-fastcgi
             - apache2-suexec-custom
             - libapache2-mod-authnz-external
             - libapache2-mod-authz-unixgroup
@@ -200,8 +199,7 @@ jobs:
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
         - sudo add-apt-repository -y ppa:ondrej/php
         - sudo apt-get -qq update
-        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds
-        - sudo a2enmod php${PHP_VERSION}
+        - sudo apt-get -y install php${PHP_VERSION}-fpm php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
@@ -238,10 +236,10 @@ jobs:
         - sudo bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
         - sudo bash .setup/travis/setup_test_suite.sh
-        - sudo a2enmod include rewrite actions cgi alias headers fastcgi suexec authnz_external headers proxy_fcgi
+        - sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
         - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
-        - sudo mkdir /run/php
+        - sudo mkdir -p /run/php
         - sudo chown www-data:www-data /run/php
         - sudo chmod 755 /run/php
         - sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
@@ -300,8 +298,8 @@ jobs:
         postgresql: "9.5"
         apt:
           sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
           packages:
             - build-essential
             - automake
