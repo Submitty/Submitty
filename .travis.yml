@@ -101,8 +101,8 @@ jobs:
       addons:
         apt:
           sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
+            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
           packages:
             - imagemagick
             - php-imagick
