@@ -1615,3 +1615,26 @@ function enableKeyToClick(){
     });
   }
 }
+
+function flagUserImage(user_id) {
+    const confirmed = confirm(`You are flagging ${user_id}'s image as inappropriate.  Are you sure you wish to proceed?`);
+
+    if (confirmed) {
+        const input = document.createElement('input');
+        input.setAttribute('name', 'user_id');
+        input.setAttribute('value', user_id);
+
+        const token = document.createElement('input');
+        token.setAttribute('name', 'csrf_token');
+        token.setAttribute('value', csrfToken);
+
+        const form = document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', buildCourseUrl(['flag_user_image']));
+        form.appendChild(input);
+        form.appendChild(token);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+}

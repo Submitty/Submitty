@@ -8,6 +8,7 @@ use app\models\DisplayImage;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
+use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
 
@@ -175,5 +176,22 @@ class ImagesController extends AbstractController {
             $message = 'Successfully uploaded!';
         }
         return $this->core->getOutput()->renderResultMessage($message, true);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function flagUserImage() {
+        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], 'flagged');
+
+        if ($result) {
+            $this->core->addSuccessMessage($_POST['user_id'] . '\'s image was successfully flagged.');
+            $this->core->redirect($this->core->buildCourseUrl(['student_photos']));
+        }
+        else {
+            $this->core->addErrorMessage('Some error occurred flagging ' . $_POST['user_id'] . '\'s image.');
+            $this->core->redirect($this->core->buildCourseUrl(['student_photos']));
+        }
     }
 }
