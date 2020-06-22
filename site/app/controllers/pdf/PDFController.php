@@ -32,15 +32,16 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $decoded_path = urldecode($path);
-        $json_path = substr($decoded_path, 0, -3) . "json";
         $annotation_jsons = [];
         if (is_dir($annotation_dir)) {
             foreach (scandir($annotation_dir) as $annotation_file) {
                 if (explode('_', $annotation_file)[0] === md5($decoded_path)) {
-                    $file_content = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
-                    $annotation_decoded = json_decode($file_content);
-                    $grader_id = $annotation_decoded["userId"];
-                    $annotation_jsons[$grader_id] = $file_content;
+                    $file_contents = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
+                    $annotation_decoded = json_decode($file_contents, true);
+                    if ($annotation_decoded != null) {
+                        $grader_id = $annotation_decoded["grader_id"];
+                        $annotation_jsons[$grader_id] = $file_contents;
+                    }
                 }
             }
         }
@@ -78,21 +79,20 @@ class PDFController extends AbstractController {
         $annotation_jsons = [];
         $rerender_annotated_pdf = true;
         $latest_timestamp = filemtime(urldecode($path));
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode('_', array_slice($pdf_info, 0, -1));
-                        $grader_id = $pdf_info[count($pdf_info) - 1];
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \DirectoryIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                if ($file_info->isFile() && !$file_info->isDot()) {
+                    $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file_info->getFilename());
+                    $file_contents = file_get_contents($file_info->getPathname());
+                    $annotation_decoded = json_decode($file_contents, true);
+                    if ($annotation_decoded != null) {
+                        $pdf_id = $annotation_decoded["file_name"];
+                        $grader_id = $annotation_decoded["grader_id"];
                         if ($pdf_id . '.pdf' === $filename) {
-                            $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
-                            if ($latest_timestamp < $fileinfo->getMTime()) {
-                                $latest_timestamp = $fileinfo->getMTime();
+                            $annotation_jsons[$grader_id] = $file_contents;
+                            if ($latest_timestamp < $file_info->getMTime()) {
+                                $latest_timestamp = $file_info->getMTime();
                             }
                         }
                     }
@@ -241,7 +241,7 @@ class PDFController extends AbstractController {
             "gradeable_id" => $gradeable_id,
             "id" => $id,
             "file_name" => $filename,
-            "file_path" => $_POST['file_path'],
+            "file_path" => $file_path,
             "annotation_jsons" => $annotation_jsons,
             "is_student" => false,
             "page_num" => $page_num

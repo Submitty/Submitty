@@ -40,7 +40,7 @@ def up(config, database, semester, course):
                             new_json_file = open(Path(annotation_full_path, md5_file_name.hexdigest() + "_" + grader_id), 'x')
                             json.dump(json_data, new_json_file)
                             new_json_file.close()
-                            #os.remove(Path(annotation_full_path,name))
+                            os.remove(Path(annotation_full_path,name))
                             os.system("chown -R "+php_user+":"+course_group+ " "+ str(annotation_full_path))
                             os.system("chmod -R u+rwx "+str(annotation_full_path))
                             os.system("chmod -R g+rxs "+str(annotation_full_path))

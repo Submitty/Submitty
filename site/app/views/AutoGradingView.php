@@ -398,28 +398,24 @@ class AutoGradingView extends AbstractView {
         $annotated_pdf_paths = [];
         $annotated_file_names = [];
         $annotation_paths = [];
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_dir($annotation_path)) {
-                $dir_iter = new \DirectoryIterator($annotation_path);
-                foreach ($dir_iter as $file_info) {
-                    if ($file_info->isFile() && !$file_info->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file_info->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = explode("_", $file_info)[0];
-                        if (file_get_contents($file_info->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
-                            $annotated_file_names[] = $pdf_id;
-                            if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-                                $target_file = scandir($annotation_path)[2];
-                                $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
-                            }
-                            if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
-                                $target_file = scandir($pdfs_path)[2];
-                                $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
-                                $annotated_pdf_paths[$pdf_id] = $pdf_path;
-                            }
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \DirectoryIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                if ($file_info->isFile() && !$file_info->isDot()) {
+                    $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file_info->getFilename());
+                    $pdf_info = explode('_', $no_extension);
+                    $pdf_id = explode("_", $file_info)[0];
+                    if (file_get_contents($file_info->getPathname()) != "") {
+                        $annotated_file_names[] = $pdf_id;
+                        $pdf_id = $pdf_id . '.pdf';
+                        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                            $target_file = scandir($annotation_path)[2];
+                            $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                        }
+                        if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                            $target_file = scandir($pdfs_path)[2];
+                            $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                            $annotated_pdf_paths[$pdf_id] = $pdf_path;
                         }
                     }
                 }
@@ -442,6 +438,7 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$display_name] = $comment;
             }
         }
+        
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -610,9 +607,9 @@ class AutoGradingView extends AbstractView {
         $annotated_file_names = [];
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
             if (is_dir($annotation_path)) {
-                $dir_iter = new FilesystemIterator(dirname($annotation_path . '/'));
+                $dir_iter = new \FilesystemIterator(dirname($annotation_path));
                 foreach ($dir_iter as $dir_info) {
-                    if ($dir_info->isDir() && !$dir_info->isDot() && count(scandir($dir_info->getPathname()))) {
+                    if ($dir_info->isDir() && count(scandir($dir_info->getPathname()))) {
                         if (file_get_contents($dir_info->getPathname()) !== "") {
                             $pdf_id = $dir_info . '.pdf';
                             $annotated_file_names[] = $pdf_id;
