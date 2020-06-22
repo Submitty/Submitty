@@ -57,7 +57,6 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb|
-
     vb.memory = 2048
     vb.cpus = 2
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
@@ -74,6 +73,11 @@ Vagrant.configure(2) do |config|
     # See https://serverfault.com/a/453260 for more info.
     # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  end
+    
+  config.vm.provider "vmware_desktop" do |vm|
+    vm.vmx["memsize"] = "2048"
+    vm.vmx["numvcpus"] = "2"
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"

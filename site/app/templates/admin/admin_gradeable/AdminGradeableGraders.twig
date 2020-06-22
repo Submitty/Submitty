@@ -90,7 +90,7 @@ Form
             <div class="table-scroll">
                 <table id="grader-history">
                     <tr>
-                        <th></th>
+                        <th>Name(id):</th>
                         {% for row in rotating_gradeables|filter((row) => row != gradeable.getId()) %}
                             <th>{{ row }}</th>
                         {% endfor %}
@@ -113,30 +113,33 @@ Form
         {# Helpful debuging line.  Uncomment to view graders data #}
         {# <tr>{{ all_graders|json_encode() }}</tr> #}
         {% if num_rotating_sections > 0 %}
-            <tr>
-                <th />
+            <br>
+            <tr class="g1">
+                <th>Instructor Graders</th>
                 <th>All</th>
                 {% for rs in section_numbers %}
                     <th>{{ rs }}</th>
                 {% endfor %}
-            </tr>
-            <tr class="g1">
-                <th>Instructor Graders</th>
-                <th colspan="{{section_numbers|length + 1}}"></th>
             </tr>
             <!-- Instructors -->
             {{ self.display_graders(graders_from_usertypes[1], 'g1',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
             <tr class="g2">
                 <th>Full Access Graders</th>
-                <th colspan="{{section_numbers|length + 1}}"></th>
+                <th>All</th>
+                {% for rs in section_numbers %}
+                    <th>{{ rs }}</th>
+                {% endfor %}
             </tr>
             <!-- Full Access Graders -->
             {{ self.display_graders(graders_from_usertypes[2], 'g2',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
             <tr class="g3">
                 <th>Limited Access Graders</th>
-                <th colspan="{{section_numbers|length + 1}}"></th>
+                <th>All</th>
+                {% for rs in section_numbers %}
+                    <th>{{ rs }}</th>
+                {% endfor %}
             </tr>
             <!-- Limited Access Graders -->
             {{ self.display_graders(graders_from_usertypes[3], 'g3',
@@ -147,31 +150,6 @@ Form
         {% endif %}
     </table>
 </div>
-
-{% if peer %}
-        <legend>
-        Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column:<input type="file" name="peer_graders_list" id="peer_graders_list">
-        </br>
-        <div class="table-wrapper">
-            <table class = "peer table">
-                <tr>
-                    <td> grader </td>
-                    <td> student </td>
-                </tr>
-            {% for key,value in peer_grader_pairs %}
-                <tr>
-                    <td>{{key}}</td>
-                    <td>
-                        {% for entry in value %}
-                            <span>{{entry}} </span>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endfor %}
-            </table>
-        </div>
-        </legend>
-{% endif %}
 
 <script>
 

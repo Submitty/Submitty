@@ -2,6 +2,7 @@
 
 namespace app\views;
 
+use app\libraries\DateUtils;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -19,7 +20,7 @@ class HomePageView extends AbstractView {
         bool $database_authentication,
         string $csrf_token
     ) {
-        $statuses = array();
+        $statuses = [];
         $course_types = [$unarchived_courses, $archived_courses];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",
@@ -29,7 +30,7 @@ class HomePageView extends AbstractView {
         ];
 
         foreach ($course_types as $course_type) {
-            $ranks = array();
+            $ranks = [];
 
             //Create rank lists
             for ($i = 1; $i < 5; $i++) {
@@ -79,7 +80,10 @@ class HomePageView extends AbstractView {
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
             "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
-            "change_username_url" => $this->output->buildUrl(['current_user', 'change_username'])
+            "change_username_url" => $this->output->buildUrl(['current_user', 'change_username']),
+            'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
+            'user_time_zone' => $user->getTimeZone(),
+            'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
         ]);
     }
 

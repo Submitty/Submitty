@@ -303,10 +303,17 @@ function newEditCourseMaterialsForm(path, this_file_section, this_hide_from_stud
     }
     $("#material-edit-form", form).attr('data-directory', path);
     form.css("display", "block");
+    captureTabInModal("edit-course-materials-form");
 }
-function captureTabInModal(formName){
 
-  var form = $("#".concat(formName));
+var lastActiveElement = null;
+function captureTabInModal(formName, resetFocus=true){
+    if(resetFocus){
+        lastActiveElement = document.activeElement;
+    }
+
+    var form = $("#".concat(formName));
+    form.off('keydown');//Remove any old redirects
 
     /*get all the elements to tab through*/
     var inputs = form.find(':focusable').filter(':visible');
@@ -314,7 +321,9 @@ function captureTabInModal(formName){
     var lastInput = inputs.last();
 
     /*set focus on first element*/
-    firstInput.focus();
+    if(resetFocus){
+      firstInput.focus();
+    }
 
     /*redirect last tab to first element*/
     form.on('keydown', function (e) {
@@ -328,15 +337,19 @@ function captureTabInModal(formName){
         }
     });
 
-    form.on('hidden.bs.modal', function () {
-        releaseTabFromModal(formName);
-    })
+    //Watch for the modal to be hidden
+    let observer = new MutationObserver(function(){
+        if(form[0].style.display === 'none'){
+            releaseTabFromModal(formName);
+        }
+    });
+    observer.observe(form[0], { attributes: true, childList: true });
 }
 
 function releaseTabFromModal(formName){
-
     var form = $("#".concat(formName));
     form.off('keydown');
+    lastActiveElement.focus();
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
@@ -518,7 +531,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'First Name,Last Name,User ID,Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -528,7 +541,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -536,7 +549,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -544,7 +557,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -553,17 +566,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -572,10 +585,15 @@ function downloadCSV(code) {
         }
     });
 
+    // Setup default name for the CSV file
+    let course = $('#download_info_json_id').data('course');
+    let semester = $('#download_info_json_id').data('semester');
+    let csv_name = [semester, course, 'users', 'data'].join('_') + '.csv'
+
     var temp_element = $('<a id="downloadlink"></a>');
     var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
     temp_element.attr('href', address);
-    temp_element.attr('download', 'submitty_user_emails.csv');
+    temp_element.attr('download', csv_name);
     temp_element.css('display', 'none');
     $(document.body).append(temp_element);
     $('#downloadlink')[0].click();
@@ -807,6 +825,52 @@ function togglePageDetails() {
 }
 
 /**
+ * Opens a new tab on https://validator.w3.org with the contents of the current html page
+ */
+function validateHtml() {
+  //Code copied from https://validator.w3.org/nu/about.html under "Check serialized DOM of current page" secton
+  function c(a, b) {
+    const c = document.createElement("textarea");
+    c.name = a;
+    c.value = b;
+    d.appendChild(c)
+  }
+  const e = ((a) => {
+      for (var b = "", a = a.firstChild; a;) {
+        switch (a.nodeType) {
+          case Node.ELEMENT_NODE:
+            b += a.outerHTML;
+            break;
+          case Node.TEXT_NODE:
+            b += a.nodeValue;
+            break;
+          case Node.CDATA_SECTION_NODE:
+            b += "<![CDATA[" + a.nodeValue + "]]\>";
+            break;
+          case Node.COMMENT_NODE:
+            b += "<\!--" + a.nodeValue + "--\>";
+            break;
+          case Node.DOCUMENT_TYPE_NODE:
+            b += "<!DOCTYPE " + a.name + ">\n"
+        }
+        a = a.nextSibling
+      }
+      return b
+  })(document);
+  const d = document.createElement("form");
+  d.method = "POST";
+  d.action = "https://validator.w3.org/nu/";
+  d.enctype = "multipart/form-data";
+  d.target = "_blank";
+  d.acceptCharset = "utf-8";
+  c("showsource", "yes");
+  c("content", e);
+  document.body.appendChild(d);
+  d.submit();
+  d.outerHTML = "";
+}
+
+/**
  * Remove an alert message from display. This works for successes, warnings, or errors to the
  * user
  * @param elem
@@ -905,6 +969,11 @@ function check_lichen_jobs(url, semester, course) {
 
 function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+}
+
+function downloadStudentAnnotations(url, path, dir) {
+    window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
+    //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
 function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
@@ -1272,19 +1341,23 @@ function loadOverriddenGrades(g_id) {
 }
 
 function refreshOnResponseOverriddenGrades(json) {
-    var form = $("#load-overridden-grades");
-    $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
-    $('#title').replaceWith(title);
+    const form = $("#load-overridden-grades");
+    $('#grade-override-table tr:gt(0)').remove();
+    let title = 'Overridden Grades for ' + json['data']['gradeable_id'];
+    $('#title').text(title);
     if(json['data']['users'].length === 0){
-        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+      $("#load-overridden-grades").addClass('d-none');
+      $("#empty-table").removeClass('d-none');
+      $('#empty-table').text('There are no overridden grades for this homework');
     }
     else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
-            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
-            $('#my_table').append(bits.join('</td><td>'));
+            let delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            let bits = ['<tr><td class="align-left">' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
+      $("#load-overridden-grades").removeClass('d-none');
+      $("#empty-table").addClass('d-none');
     }
 }
 
@@ -1347,99 +1420,6 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function handleTimeZones(timezone) {
-
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-
-            // Collect server time
-            var server_time = JSON.parse(data)['data'];
-            server_time = new Date(parseInt(server_time.year),
-                parseInt(server_time.month) - 1,
-                parseInt(server_time.day),
-                parseInt(server_time.hour),
-                parseInt(server_time.minute),
-                parseInt(server_time.second));
-
-            // Collect client time
-            var client_time = new Date();
-
-            // Calculate difference in minutes
-            var diff_in_minutes = Math.abs(server_time.valueOf() - client_time.valueOf());
-            diff_in_minutes = diff_in_minutes / 1000 / 60;
-
-            // If difference in minutes is greater than 10 minutes then append message to flatpickr
-            if(diff_in_minutes > 10) {
-                $('.flatpickr-calendar').append('<p>Enter all times relative to the server timezone</p>');
-                $('.flatpickr-calendar').append('<p>Server timezone: '+timezone+'</p>');
-            }
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-
-function setNewDateTime(id, path) {
-    // pass filename to server to record the new date and time of the file to be released
-    var me = $('#'+id);
-    var newDateTime = me.val();
-
-    var success = changeNewDateTime(path, newDateTime);
-    if(success === false){
-        return;
-    }
-
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-            var now = JSON.parse(data)['data'];
-            now = new Date(parseInt(now.year),
-                parseInt(now.month) - 1,
-                parseInt(now.day),
-                parseInt(now.hour),
-                parseInt(now.minute),
-                parseInt(now.second));
-
-            function pad(str){
-                return ('0'+str).slice(-2);
-            }
-
-            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
-            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-            var currentDT = date+' '+time;
-            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
-
-            //get the value in each file so the color can be assigned
-            //based on the time chosen
-            var fileDT = newDateTime;
-            fileDT = fileDT.replace(/\s/, 'T');
-            currentDT = currentDT.replace(/\s/, 'T');
-            neverDT = neverDT.replace(/\s/, 'T');
-            //also custom colors for this page for readability
-            if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
-                $('#'+id).css("backgroundColor", green);
-                return green;
-             } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
-                 $('#'+id).css("backgroundColor", red);
-                return red;
-             } else {
-                $('#'+id).css("backgroundColor", yellow);
-                return yellow;
-             }
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-
 function setChildNewDateTime(path, changeDate,handleData) {
     //change the date and time of the subfiles in the folder with the time chosen for the whole
     //folder (passed in)
@@ -1453,76 +1433,6 @@ function setChildNewDateTime(path, changeDate,handleData) {
             }
         }
     });
-}
-
-function updateToServerTime(fp) {
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-            var time = JSON.parse(data)['data'];
-            time = new Date(parseInt(time.year),
-                            parseInt(time.month) - 1,
-                            parseInt(time.day),
-                            parseInt(time.hour),
-                            parseInt(time.minute),
-                            parseInt(time.second));
-            fp.setDate(time,true);
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-function updateToTomorrowServerTime(fp) {
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-            var time = JSON.parse(data)['data'];
-            time = new Date(parseInt(time.year),
-                parseInt(time.month) - 1,
-                parseInt(time.day),
-                parseInt(time.hour),
-                parseInt(time.minute),
-                parseInt(time.second));
-            nextDay = new Date(time);
-            nextDay.setDate(time.getDate()+1);
-            fp.setDate(nextDay,true);
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-function changeNewDateTime(filename, newdatatime,handleData) {
-    // send to server to handle file date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
-    var tbr = false;
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filename,csrf_token: csrfToken},
-        success: function(data) {
-            var jsondata = JSON.parse(data);
-            if (jsondata.status === 'fail') {
-                alert("ERROR: Invalid date.");
-                return false;
-            }
-
-            tbr=true;
-            if(handleData){
-                handleData(data);
-            }
-            return true;
-        },
-        error: function(e) {
-             alert("Encounter saving the NewDateTime.");
-             return false;
-        }
-    })
 }
 
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
@@ -1578,35 +1488,42 @@ function checkSidebarCollapse() {
     }
 }
 
-//Changes the theme from light to dark mode or the reverse
-//if mode='black' it will toggle the black mode instead of the normal mode
-function toggleTheme(mode='normal'){
-  if(mode==='normal'){
-    if((!localStorage.getItem("theme") && document.documentElement.getAttribute("data-theme") !== "dark") || localStorage.getItem("theme") === "light"){
-        localStorage.setItem("theme", "dark");
-        document.documentElement.setAttribute("data-theme", "dark");
-    }else{
-      localStorage.setItem("theme", "light");
-      document.documentElement.setAttribute("data-theme", "light");
-    }
-  }else if(mode === 'black'){
-    if(localStorage.getItem('black_mode') !== 'black'){
-        localStorage.setItem("black_mode", "black");
-        document.documentElement.setAttribute("data-black_mode", "black");
-    }else{
-      localStorage.setItem("black_mode", "");
-      document.documentElement.setAttribute("data-black_mode", "");
-    }
+function updateTheme(){
+  let choice = $("#theme_change_select option:selected").val();
+  if(choice === "system_black"){
+    localStorage.removeItem("theme");
+    localStorage.setItem("black_mode", "black");
+  }else if(choice === "light"){
+    localStorage.setItem("theme", "light");
+  }else if(choice === "dark"){
+    localStorage.setItem("theme", "dark");
+    localStorage.setItem("black_mode", "dark");
+  }else if(choice === "dark_black"){
+    localStorage.setItem("theme", "dark");
+    localStorage.setItem("black_mode", "black");
+  }else{ //choice === "system"
+    localStorage.removeItem("black_mode");
+    localStorage.removeItem("theme");
   }
+  detectColorScheme();
 }
 $(document).ready(function() {
-  if(localStorage.getItem("theme") === "dark"){
-    $('#theme_change').prop('checked', true);
-  }else if(localStorage.getItem("theme") === null && window.matchMedia("(prefers-color-scheme: dark)").matches){
-    $('#theme_change').prop('checked', true);
-  }
-  if(localStorage.getItem("black_mode") === "black"){
-    $('#theme_change_black').prop('checked', true);
+  if(localStorage.getItem("theme")){
+      if(localStorage.getItem("theme") === "dark"){
+        if(localStorage.getItem("black_mode") === "black"){
+          $("#theme_change_select").val("dark_black");
+        }else{
+          $("#theme_change_select").val("dark");
+        }
+      }else{
+        $("#theme_change_select").val("light");
+      }
+  }else{
+    if(localStorage.getItem("black_mode") === "black"){
+      $("#theme_change_select").val("system_black");
+    }else{
+      $("#theme_change_select").val("system");
+    }
   }
 });
 

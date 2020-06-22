@@ -374,8 +374,14 @@ CREATE TABLE public.users (
     user_updated boolean DEFAULT false NOT NULL,
     instructor_updated boolean DEFAULT false NOT NULL,
     last_updated timestamp(6) with time zone,
+<<<<<<< HEAD
     api_key character varying(255) DEFAULT encode(public.gen_random_bytes(16), 'hex'::text) NOT NULL,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
+=======
+    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
+    time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
+    CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3))
+>>>>>>> master
 );
 
 
@@ -499,14 +505,24 @@ CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON public.cour
 -- Name: courses_users user_sync_courses_users; Type: TRIGGER; Schema: public; Owner: -
 --
 
+<<<<<<< HEAD
 CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_courses_user();
+=======
+ALTER TABLE ONLY emails
+    ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+>>>>>>> master
 
 
 --
 -- Name: users user_sync_users; Type: TRIGGER; Schema: public; Owner: -
 --
 
+<<<<<<< HEAD
 CREATE TRIGGER user_sync_users AFTER UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.sync_user();
+=======
+ALTER TABLE ONLY sessions
+    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+>>>>>>> master
 
 
 --
@@ -540,6 +556,43 @@ ALTER TABLE ONLY public.courses_users
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
+<<<<<<< HEAD
+=======
+CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
+-- TRIGGER function to sync users data on UPDATE of user_record in table users.
+-- NOTE: INSERT should not trigger this function as function sync_courses_users
+-- will also sync users -- but only on INSERT.
+$$
+DECLARE
+    course_row RECORD;
+    db_conn VARCHAR;
+    query_string TEXT;
+    preferred_name_change_details TEXT;
+BEGIN
+    -- Check for changes in users.user_preferred_firstname and users.user_preferred_lastname.
+    IF coalesce(OLD.user_preferred_firstname, '') <> coalesce(NEW.user_preferred_firstname, '') THEN
+        preferred_name_change_details := format('PREFERRED_FIRSTNAME OLD: "%s" NEW: "%s" ', OLD.user_preferred_firstname, NEW.user_preferred_firstname);
+    END IF;
+    IF coalesce(OLD.user_preferred_lastname, '') <> coalesce(NEW.user_preferred_lastname, '') THEN
+        preferred_name_change_details := format('%sPREFERRED_LASTNAME OLD: "%s" NEW: "%s"', preferred_name_change_details, OLD.user_preferred_lastname, NEW.user_preferred_lastname);
+    END IF;
+    -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
+    IF preferred_name_change_details IS NOT NULL THEN
+        preferred_name_change_details := format('USER_ID: "%s" %s', NEW.user_id, preferred_name_change_details);
+        RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
+    END IF;
+    -- Propagate UPDATE to course DBs
+    FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+        RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
+        db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
+        query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', time_zone=' || quote_literal(NEW.time_zone) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+        -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+        IF query_string IS NULL THEN
+            RAISE EXCEPTION 'query_string error in trigger function sync_user()';
+        END IF;
+        PERFORM dblink_exec(db_conn, query_string);
+    END LOOP;
+>>>>>>> master
 
 --
 -- Name: emails emails_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -564,8 +617,75 @@ ALTER TABLE ONLY public.mapped_courses
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
+<<<<<<< HEAD
+=======
+CREATE OR REPLACE FUNCTION sync_delete_user() RETURNS TRIGGER AS $$
+-- BEFORE DELETE trigger function to DELETE users from course DB.
+DECLARE
+    db_conn VARCHAR;
+    query_string TEXT;
+BEGIN
+    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    query_string := 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
+    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+    IF query_string IS NULL THEN
+        RAISE EXCEPTION 'query_string error in trigger function sync_delete_user()';
+    END IF;
+    PERFORM dblink_exec(db_conn, query_string);
+
+    -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
+    RETURN OLD;
+
+-- Trying to delete a user with existing data (via foreign keys) will raise an integrity constraint violation exception.
+-- We should catch this exception and stop execution with no rows processed.
+-- No rows processed will indicate that deletion had an error and did not occur.
+EXCEPTION WHEN integrity_constraint_violation THEN
+    -- Show that an exception occurred, and what was the exception.
+    RAISE NOTICE 'User ''%'' still has existing data in course DB ''%''', OLD.user_id, substring(db_conn FROM 8);
+    RAISE NOTICE '%', SQLERRM;
+    -- Return NULL so we do not proceed with original triggering DELETE query.
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sync_delete_user_cleanup() RETURNS TRIGGER AS $$
+-- AFTER DELETE trigger function removes user from master.users if they have no
+-- existing course enrollment.  (i.e. no entries in courses_users)
+DECLARE
+    user_courses INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO user_courses FROM courses_users WHERE user_id = OLD.user_id;
+    IF user_courses = 0 THEN
+        DELETE FROM users WHERE user_id = OLD.user_id;
+    END IF;
+    RETURN NULL;
+
+-- The SELECT Count(*) / If check should prevent this exception, but this
+-- exception handling is provided 'just in case' so process isn't interrupted.
+EXCEPTION WHEN integrity_constraint_violation THEN
+    -- Show that an exception occurred, and what was the exception.
+    RAISE NOTICE 'Integrity constraint prevented user ''%'' from being deleted from master.users table.', OLD.user_id;
+    RAISE NOTICE '%', SQLERRM;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
+-- Updates can happen in either users and/or courses_users.
+CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
+CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE sync_user();
+>>>>>>> master
 
 --
 -- PostgreSQL database dump complete
 --
 
+<<<<<<< HEAD
+=======
+-- Generate API key when a user is created or its password is changed.
+CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON users FOR EACH ROW EXECUTE PROCEDURE generate_api_key();
+
+-- DELETE triggers for user data.
+CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_delete_user();
+CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_delete_user_cleanup();
+>>>>>>> master

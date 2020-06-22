@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import collections
 import os
 import time
 import signal
+import string
 import json
 
 import shutil
@@ -17,9 +19,16 @@ import tempfile
 import socket
 import traceback
 import subprocess
+import random
+
+import requests
+
+from math import floor
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
+
+from submitty_utils import string_utils
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -34,9 +43,12 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
+IN_PROGRESS_PATH = os.path.join(SUBMITTY_DATA_DIR, "grading")
 
 JOB_ID = '~SHIP~'
 
+def worker_folder(worker_name):
+    return os.path.join(IN_PROGRESS_PATH, worker_name)
 
 # ==================================================================================
 def initialize(untrusted_queue):
@@ -182,7 +194,7 @@ def establish_ssh_connection(my_name, user, host, only_try_once = False):
     return ssh
 
 # ==================================================================================
-def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
+def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade,random_identifier):
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: must be run by DAEMON_USER")
@@ -196,6 +208,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
     # prepare the zip files
     try:
         autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
+
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -207,6 +220,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             queue_obj["which_untrusted"] = which_untrusted
             queue_obj["which_machine"] = which_machine
             queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
+            queue_obj['identifier'] = random_identifier
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))
@@ -268,7 +282,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 
 # ==================================================================================
 # ==================================================================================
-def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
+def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade,random_identifier):
 
     # variables needed for logging
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
@@ -355,23 +369,32 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
             if not success:
                 return False
-    # archive the results of grading
+
     try:
-        success = packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+        with open(local_done_queue_file, 'r') as infile:
+            local_done_queue_obj = json.load(infile)
+        # Check to make certain that the job we received was the correct job
+        if random_identifier != local_done_queue_obj['identifier']:
+            success= False
+            msg = f"{which_machine} returned a stale job (ids don't match). Discarding."
+        else:
+            # archive the results of grading
+            success = packer_unpacker.unpack_grading_results_zip(which_machine,which_untrusted,local_results_zip)
+            msg = "Unpacked job from " + which_machine
     except:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,jobname=item_name,message="ERROR: Exception when unpacking zip. For more details, see traces entry.")
         with contextlib.suppress(FileNotFoundError):
             os.remove(local_results_zip)
+        msg = "ERROR: failure returned from worker machine"
         success = False
 
     with contextlib.suppress(FileNotFoundError):
         os.remove(local_done_queue_file)
 
-    msg = "Unpacked job from " + which_machine if success else "ERROR: failure returned from worker machine"
     print(msg)
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch, message=msg)
-    return True
+    return success
 
 
 # ==================================================================================
@@ -390,14 +413,20 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     name = os.path.basename(os.path.realpath(queue_file))
     grading_file = os.path.join(directory, "GRADING_" + name)
 
+    # Try to short-circuit this job. If it's possible, then great! Clean
+    # everything up and return.
+    if try_short_circuit(queue_file):
+        grading_cleanup(queue_file, grading_file)
+        return
+
     #TODO: break which_machine into id, address, and passphrase.
     
     try:
         # prepare the job
         shipper_counter=0
-
+        random_identifier = string_utils.generate_random_string(64)
         #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
-        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
+        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file, random_identifier):
             time.sleep(5)
 
         prep_job_success = True
@@ -409,7 +438,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         else:
             # then wait for grading to be completed
             shipper_counter=0
-            while not unpack_job(which_machine, which_untrusted, my_dir, queue_file):
+            while not unpack_job(which_machine, which_untrusted, my_dir, queue_file, random_identifier):
                 shipper_counter+=1
                 time.sleep(1)
                 if shipper_counter >= 10:
@@ -421,6 +450,10 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         print (my_name, " ERROR attempting to grade item: ", queue_file, " exception=",str(e))
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR attempting to grade item: " + queue_file + " exception " + repr(e))
 
+    grading_cleanup(queue_file, grading_file)
+
+
+def grading_cleanup(queue_file, grading_file):
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
     try:
@@ -615,125 +648,121 @@ def checkout_vcs_repo(my_file):
     return obj
 
 # ==================================================================================
-def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
+def get_job(my_name,which_machine,my_capabilities,which_untrusted):
     """
-    Picks a job from the queue
-
-    :param overall_lock: a lock on the directory containing all queue files
+    Pick a job from the queue.
     """
 
     time_get_job_begin = dateutils.get_current_time()
 
-    with overall_lock:
-        folder= INTERACTIVE_QUEUE
+    folder = worker_folder(my_name)
+
+    '''
+    ----------------------------------------------------------------
+    Our first priority is to perform any awaiting VCS checkouts
+
+    Note: This design is imperfect:
+    
+        * If all shippers are busy working on long-running autograding
+        tasks there will be a delay of seconds or minutes between
+        a student pressing the submission button and clone happening.
+        This is a minor exploit allowing them to theoretically
+        continue working on their submission past the deadline for
+        the time period of the delay.
+        -- This is not a significant, practical problem.
+    
+        * If multiple and/or large git submissions arrive close
+        together, this shipper job will be tied up performing these
+        clone operations.  Because we don't release the lock, any
+        other shippers that complete their work will also be blocked
+        from either helping with the clones or tackling the next
+        autograding job.
+        -- Based on experience with actual submission patterns, we
+            do not anticipate that this will be a significant
+            bottleneck at this time.
+    
+        * If a git clone takes a very long time and/or hangs because of
+        network problems, this could halt all work on the server.
+        -- We'll need to monitor the production server.
+    
+    We plan to do a complete overhaul of the
+    scheduler/shipper/worker and refactoring this design should be
+    part of the project.
+    ----------------------------------------------------------------
+    '''
+
+    # Grab all the VCS files currently in the folder...
+    vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
+    for f in vcs_files:
+        vcs_file = f[len(folder)+1:]
+        no_vcs_file = f[len(folder)+1+5:]
+        # do the checkout
+        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+        # save the regular grading queue file
+        with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
+            json.dump(updated_obj, queue_file)
+        # cleanup the vcs queue file
+        os.remove(folder+"/"+vcs_file)
+    # ----------------------------------------------------------------
 
 
-        '''
-        ----------------------------------------------------------------
-        Our first priority is to perform any awaiting VCS checkouts
+    # Grab all the files currently in the folder, sorted by creation
+    # time, and put them in the queue to be graded
+    files = [str(f) for f in Path(folder).glob('*')]
+    files_and_times = list()
+    for f in files:
+        try:
+            my_time = os.path.getctime(f)
+        except:
+            continue
+        tup = (f, my_time)
+        files_and_times.append(tup)
 
-        Note: This design is imperfect:
-        
-          * If all shippers are busy working on long-running autograding
-            tasks there will be a delay of seconds or minutes between
-            a student pressing the submission button and clone happening.
-            This is a minor exploit allowing them to theoretically
-            continue working on their submission past the deadline for
-            the time period of the delay.
-            -- This is not a significant, practical problem.
-        
-          * If multiple and/or large git submissions arrive close
-            together, this shipper job will be tied up performing these
-            clone operations.  Because we don't release the lock, any
-            other shippers that complete their work will also be blocked
-            from either helping with the clones or tackling the next
-            autograding job.
-            -- Based on experience with actual submission patterns, we
-               do not anticipate that this will be a significant
-               bottleneck at this time.
-        
-          * If a git clone takes a very long time and/or hangs because of
-            network problems, this could halt all work on the server.
-            -- We'll need to monitor the production server.
-        
-        We plan to do a complete overhaul of the
-        scheduler/shipper/worker and refactoring this design should be
-        part of the project.
-        ----------------------------------------------------------------
-        '''
+    files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
+    my_job=""
 
-        # Grab all the VCS files currently in the folder...
-        vcs_files = [str(f) for f in Path(folder).glob('VCS__*')]
-        for f in vcs_files:
-            vcs_file = f[len(folder)+1:]
-            no_vcs_file = f[len(folder)+1+5:]
-            # do the checkout
-            updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
-            # save the regular grading queue file
-            with open(os.path.join(folder,no_vcs_file), "w") as queue_file:
-                json.dump(updated_obj, queue_file)
-            # cleanup the vcs queue file
-            os.remove(folder+"/"+vcs_file)
-        # ----------------------------------------------------------------
+    for full_path_file, file_time in files_and_times:
+        # get the file name (without the path)
+        just_file = full_path_file[len(folder)+1:]
 
+        # skip items that are already being graded
+        if (just_file[0:8]=="GRADING_"):
+            continue
+        grading_file = os.path.join(folder,"GRADING_"+just_file)
+        if grading_file in files:
+            continue
 
-        # Grab all the files currently in the folder, sorted by creation
-        # time, and put them in the queue to be graded
-        files = [str(f) for f in Path(folder).glob('*')]
-        files_and_times = list()
-        for f in files:
-            try:
-                my_time = os.path.getctime(f)
-            except:
-                continue
-            tup = (f, my_time)
-            files_and_times.append(tup)
+        # skip items (very recently added!) that are already waiting for a VCS checkout
+        if (just_file[0:5]=="VCS__"):
+            continue
 
-        files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
-        my_job=""
+        # found something to do
+        try:
+            with open(full_path_file, 'r') as infile:
+                queue_obj = json.load(infile)
+        except:
+            continue
 
-        for full_path_file, file_time in files_and_times:
-            # get the file name (without the path)
-            just_file = full_path_file[len(folder)+1:]
+        #Check to make sure that we are capable of grading this submission
+        required_capabilities = queue_obj["required_capabilities"]
+        if not required_capabilities in my_capabilities:
+            continue
 
-            # skip items that are already being graded
-            if (just_file[0:8]=="GRADING_"):
-                continue
-            grading_file = os.path.join(folder,"GRADING_"+just_file)
-            if grading_file in files:
-                continue
+        # prioritize interactive jobs over (batch) regrades
+        # if you've found an interactive job, exit early (since they are sorted by timestamp)
+        if not "regrade" in queue_obj or not queue_obj["regrade"]:
+            my_job = just_file
+            break
 
-            # skip items (very recently added!) that are already waiting for a VCS checkout
-            if (just_file[0:5]=="VCS__"):
-                continue
+        # otherwise it's a regrade, and if we don't already have a
+        # job, take it, but we have to search the rest of the list
+        if my_job == "":
+            my_job = just_file
 
-            # found something to do
-            try:
-                with open(full_path_file, 'r') as infile:
-                    queue_obj = json.load(infile)
-            except:
-                continue
-
-            #Check to make sure that we are capable of grading this submission
-            required_capabilities = queue_obj["required_capabilities"]
-            if not required_capabilities in my_capabilities:
-                continue
-
-            # prioritize interactive jobs over (batch) regrades
-            # if you've found an interactive job, exit early (since they are sorted by timestamp)
-            if not "regrade" in queue_obj or not queue_obj["regrade"]:
-                my_job = just_file
-                break
-
-            # otherwise it's a regrade, and if we don't already have a
-            # job, take it, but we have to search the rest of the list
-            if my_job == "":
-                my_job = just_file
-
-        if not my_job == "":
-            grading_file = os.path.join(folder, "GRADING_" + my_job)
-            # create the grading file
-            with open(os.path.join(grading_file), "w") as queue_file:
+    if not my_job == "":
+        grading_file = os.path.join(folder, "GRADING_" + my_job)
+        # create the grading file
+        with open(os.path.join(grading_file), "w") as queue_file:
                 json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
 
     time_get_job_end = dateutils.get_current_time()
@@ -748,7 +777,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
+def shipper_process(my_name,my_data,full_address,which_untrusted):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -758,7 +787,8 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     """
 
     which_machine   = full_address
-    my_capabilities = my_data[my_name]['capabilities']
+    my_capabilities = my_data['capabilities']
+    my_folder = worker_folder(my_name)
 
     # ignore keyboard interrupts in the shipper processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -766,13 +796,14 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     counter=0
     while True:
         try:
-            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
+            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted)
             if not my_job == "":
                 counter=0
-                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
+                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(my_folder, my_job))
                 continue
             else:
                 if counter == 0 or counter >= 10:
+                    # do not log this message, only print it to console when manual testing & debugging
                     print ("{0} {1}: no available job".format(my_name, which_untrusted))
                     counter=0
                 counter+=1
@@ -780,11 +811,321 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
 
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
-            my_message = "ERROR in get_job {0} {1} {2}. For more details, see traces entry".format(which_machine,which_untrusted,str(e))
-            print (my_message)
+            my_message = f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. For more details, see traces entry"
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
 
+
+
+# ==================================================================================
+# ==================================================================================
+def is_testcase_submission_limit(testcase: dict) -> bool:
+    """Check whether the given testcase object is a submission limit check."""
+    return (testcase['type'] == 'FileCheck' and
+            testcase['title'] == 'Submission Limit')
+
+
+def can_short_circuit(config_obj: str) -> bool:
+    """Check if a job can be short-circuited.
+
+    Currently, a job can be short-circuited if either:
+
+    * It has no autograding test cases
+    * It has one autograding test case and that test case is the submission limit check.
+    """
+
+    testcases = config_obj['testcases']
+    if len(testcases) == 0:
+        # No test cases, so this is trivially short-circuitable.
+        return True
+    elif len(testcases) == 1:
+        # We have only one test case; check if it's a submission limit check
+        return is_testcase_submission_limit(testcases[0])
+    else:
+        return False
+
+
+def check_submission_limit_penalty_inline(config_obj: dict,
+                                          queue_obj: dict) -> dict:
+    """Check if a submission violates the submission limit.
+    
+    Note that this function makes the assumption that the file being graded is
+    short-circuitable (i.e. only has one test case; the sentinel "submission
+    limit" test case).
+    """
+
+    ###########################################################################
+    #
+    # NOTE: Editing this? Make sure this function stays in-sync with the
+    #       my_testcase.isSubmissionLimit() branch in
+    #       grading/main_validator.cpp::ValidateATestCase()
+    #
+    ###########################################################################
+
+    # regrade.py seems to make this into a str, so force into int
+    subnum = int(queue_obj['version'])
+    testcase = config_obj['testcases'][0]
+    penalty = testcase['penalty']
+    possible_points = testcase['points']
+    max_submissions = testcase['max_submissions']
+
+    excessive = max(subnum - max_submissions, 0)
+    points = floor(excessive * penalty)
+    points = max(points, possible_points)
+    view_testcase = points != 0
+    
+    return {
+        'test_name': f"Test 1 {testcase['title']}",
+        'view_testcase': view_testcase,
+        'points_awarded': points
+    }
+
+
+def history_short_circuit_helper(base_path: str,
+                                 course_path: str,
+                                 queue_obj: dict,
+                                 gradeable_config_obj: dict) -> dict:
+    """Figure out parameter values for just_write_grade_history."""
+    user_path = os.path.join(course_path,
+                             'submissions',
+                             queue_obj['gradeable'],
+                             queue_obj['who'])
+    submit_timestamp_path = os.path.join(user_path,
+                                         str(queue_obj['version']),
+                                         '.submit.timestamp')
+    user_assignment_access_path = os.path.join(user_path,
+                                               'user_assignment_access.json')
+
+    gradeable_deadline = gradeable_config_obj['date_due']
+    with open(submit_timestamp_path) as fd:
+        submit_timestamp = dateutils.read_submitty_date(fd.read().rstrip())
+    submit_time = dateutils.write_submitty_date(submit_timestamp)
+    gradeable_deadline_dt = dateutils.read_submitty_date(gradeable_deadline)
+
+    seconds_late = int((submit_timestamp - gradeable_deadline_dt).total_seconds())
+
+    first_access = ''
+    access_duration = -1
+    if os.path.exists(user_assignment_access_path):
+        with open(user_assignment_access_path) as fd:
+            obj = json.load(fd, object_pairs_hook=collections.OrderedDict)
+        first_access = obj['page_load_history'][0]['time']
+        first_access = dateutils.normalize_submitty_date(first_access)
+        first_access_dt = dateutils.read_submitty_date(first_access)
+        access_duration = int((submit_timestamp - first_access_dt).total_seconds())
+
+    return {
+        'gradeable_deadline': gradeable_deadline,
+        'submission': submit_time,
+        'seconds_late': seconds_late,
+        'first_access': first_access,
+        'access_duration': access_duration
+    }
+
+
+def try_short_circuit(queue_file: str) -> bool:
+    """Attempt to short-circuit the job represented by the given queue file.
+
+    Returns True if the job is short-circuitable and was successfully
+    short-circuited.
+
+    This function will first check if the queue file represents a gradeable
+    that supports short-circuiting. If so, then this function will attempt to
+    short-circuit the job within this child shipper process.
+
+    Once the job is finished grading, then this function will write the history
+    JSON file, zip up the results, and use the standard
+    unpack_grading_results_zip function to place the results where they are
+    expected. If something goes wrong during this process, then this function
+    will return False, signalling to the caller that this job should be graded
+    normally.
+    """
+    with open(queue_file) as fd:
+        queue_obj = json.load(fd)
+
+    course_path = os.path.join(SUBMITTY_DATA_DIR,
+                               'courses',
+                               queue_obj['semester'],
+                               queue_obj['course'])
+
+    config_path = os.path.join(course_path,
+                               'config',
+                               'complete_config',
+                               f'complete_config_{queue_obj["gradeable"]}.json')
+
+    gradeable_config_path = os.path.join(course_path,
+                                         'config',
+                                         'form',
+                                         f'form_{queue_obj["gradeable"]}.json')
+
+    with open(config_path) as fd:
+        config_obj = json.load(fd)
+
+    if not can_short_circuit(config_obj):
+        return False
+
+    job_id =''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+    gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                  message=f"Short-circuiting {gradeable_id}",
+                                  job_id=job_id)
+
+    with open(gradeable_config_path) as fd:
+        gradeable_config_obj = json.load(fd)
+
+    # Augment the queue object
+    base, path = os.path.split(queue_file)
+    queue_time = packer_unpacker.get_queue_time(base, path)
+    queue_time_longstring = dateutils.write_submitty_date(queue_time)
+    grading_began = dateutils.get_current_time()
+    wait_time = (grading_began - queue_time).total_seconds()
+
+    queue_obj.update(queue_time=queue_time_longstring,
+                     regrade=queue_obj.get('regrade', False),
+                     waittime=wait_time,
+                     job_id=job_id)
+
+    base_dir = tempfile.mkdtemp()
+
+    results_dir = os.path.join(base_dir, 'TMP_RESULTS')    
+    results_json_path = os.path.join(results_dir, 'results.json')
+    grade_txt_path = os.path.join(results_dir, 'grade.txt')
+    queue_file_json_path = os.path.join(results_dir, 'queue_file.json')
+    history_json_path = os.path.join(results_dir, 'history.json')
+    logs_dir = os.path.join(results_dir, 'logs')
+
+    os.makedirs(results_dir, exist_ok=True)
+    os.makedirs(logs_dir, exist_ok=True)
+
+    testcases = config_obj['testcases']
+    testcase_outputs = []
+
+    # This will probably always run, but it gives us a degree of
+    # future-proofing.
+    if len(testcases) > 0:
+        testcase_outputs.append(
+            check_submission_limit_penalty_inline(config_obj, queue_obj)
+        )
+
+    autograde_result_msg = write_grading_outputs(testcases, testcase_outputs,
+                                                 results_json_path,
+                                                 grade_txt_path)
+
+    grading_finished = dateutils.get_current_time()
+    grading_time = (grading_finished - grading_began).total_seconds()
+
+    queue_obj['gradingtime'] = grading_time
+    queue_obj['grade_result'] = autograde_result_msg
+    queue_obj['which_untrusted'] = '(short-circuited)'
+
+    # Save the augmented queue object
+    with open(queue_file_json_path, 'w') as fd:
+        json.dump(queue_obj, fd, indent=4, sort_keys=True,
+                  separators=(',', ':'))
+
+    h = history_short_circuit_helper(base_dir,
+                                     course_path,
+                                     queue_obj,
+                                     gradeable_config_obj)
+
+    try:
+        autograding_utils.just_write_grade_history(history_json_path,
+                                                   h['gradeable_deadline'],
+                                                   h['submission'],
+                                                   h['seconds_late'],
+                                                   h['first_access'],
+                                                   h['access_duration'],
+                                                   queue_obj['queue_time'],
+                                                   'BATCH' if queue_obj.get('regrade', False) else 'INTERACTIVE',
+                                                   dateutils.write_submitty_date(grading_began),
+                                                   int(queue_obj['waittime']),
+                                                   dateutils.write_submitty_date(grading_finished),
+                                                   int(grading_time),
+                                                   autograde_result_msg,
+                                                   queue_obj.get('revision', None))
+
+        results_zip_path = os.path.join(base_dir, 'results.zip')
+        autograding_utils.zip_my_directory(results_dir, results_zip_path)
+        packer_unpacker.unpack_grading_results_zip('(short-circuit)',
+                                                   '(short-circuit)',
+                                                   results_zip_path)
+    except Exception as e:
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                      message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade.",
+                                      job_id=job_id)
+        autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH,
+                                          trace=traceback.format_exc(),
+                                          job_id=job_id)
+        return False
+    finally:
+        shutil.rmtree(base_dir, ignore_errors=True)
+
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH,
+                                  message=f"Successfully short-circuited {gradeable_id}!",
+                                  job_id=job_id)
+    return True
+
+
+def write_grading_outputs(testcases: list,
+                          testcase_outputs: list,
+                          results_json: str,
+                          grade_txt: str) -> str:
+    """Write the grading output data to the specified paths."""
+
+    ###########################################################################
+    #
+    # NOTE: Editing this file? Make sure that this function stays in-sync with
+    #       grading/main_validator.cpp::validateTestCase()
+    #
+    ###########################################################################
+
+    results = {'testcases': testcase_outputs}
+    with open(results_json, 'w') as fd:
+        json.dump(results, fd, indent=4)
+
+    max_auto_points = sum(tc['points'] for tc in testcases)
+    max_nonhidden_auto_points = sum(
+        tc['points'] for tc in testcases if not tc.get('hidden', False)
+    )
+
+    auto_points = sum(r['points_awarded'] for r in testcase_outputs)
+    nonhidden_auto_points = sum(
+        r['points_awarded']
+        for r, tc in zip(testcase_outputs, testcases)
+        if not tc.get('hidden', False)
+    )
+    
+    with open(grade_txt, 'w') as fd:
+        # Write each test case's individual output
+        for i, tc in enumerate(testcases):
+            title = tc['title']
+            extra_credit = tc.get('extra_credit', False)
+            max_points = tc['points']
+            points = testcase_outputs[i]['points_awarded']
+            fd.write(f"Testcase {i:3}: {title:<50} ")
+
+            if extra_credit:
+                if points > 0:
+                    fd.write(f"+{points:2} points")
+                else:
+                     fd.write(' ' * 10)
+            elif max_points < 0:
+                if points < 0:
+                    fd.write(f"{points:3} points")
+                else:
+                    fd.write(' ' * 10)
+            else:
+                fd.write(f"{points:3} / {max_points:3}  ")
+            
+            if tc.get('hidden', False):
+                fd.write("  [ HIDDEN ]")
+            fd.write('\n')
+        
+        # Write the final lines
+        autograde_total_msg = f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n"
+        fd.write(autograde_total_msg)
+        fd.write(f"{'Non-hidden automatic grading total:':<64}{nonhidden_auto_points:3} /{max_nonhidden_auto_points:3}\n")
+    return autograde_total_msg
 
 
 # ==================================================================================
@@ -795,13 +1136,6 @@ def launch_shippers(worker_status_map):
         raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="grade_scheduler.py launched")
 
-    # Clean up old files from previous shipping/autograding (any
-    # partially completed work will be re-done)
-    for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*"):
-        file_path = str(file_path)
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove old queue file: " + file_path)
-        os.remove(file_path)
-
     for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
         file_path = str(file_path)
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding TODO file: " + file_path)
@@ -810,9 +1144,6 @@ def launch_shippers(worker_status_map):
         file_path = str(file_path)
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
-
-    # this lock will be used to edit the queue or new job event
-    overall_lock = multiprocessing.Lock()
 
     # The names of the worker machines, the capabilities of each
     # worker machine, and the number of workers per machine are stored
@@ -843,6 +1174,16 @@ def launch_shippers(worker_status_map):
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+        thread_count = machine["num_autograding_workers"]
+        
+        # Cleanup previous in-progress submissions
+        worker_folders = [worker_folder(f'{name}_{i}') for i in range(thread_count)]
+        for folder in worker_folders:
+            os.makedirs(folder, exist_ok=True)
+            # Clear out in-progress files, as these will be re-done.
+            for grading in Path(folder).glob('GRADING_*'):
+                os.remove(grading)
+
         if worker_status_map[name] == False:
             print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="{0} could not be reached, so we are not spinning up shipper threads.".format(name))
@@ -874,25 +1215,46 @@ def launch_shippers(worker_status_map):
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1} For more details, see trace entry.".format(name,e))
             continue
         # launch the shipper threads
-        for i in range(0,num_workers_on_machine):
+        for i in range(thread_count):
+            thread_name = f'{name}_{i}'
             u = "untrusted" + str(i).zfill(2)
-            p = multiprocessing.Process(target=shipper_process,args=(name,single_machine_data,full_address, u,overall_lock))
+            p = multiprocessing.Process(target=shipper_process,args=(thread_name,single_machine_data[name],full_address, u))
             p.start()
-            processes.append(p)
+            processes.append((thread_name, p))
         total_num_workers += num_workers_on_machine
 
     # main monitoring loop
     try:
         while True:
             alive = 0
-            for i in range(0,total_num_workers):
-                if processes[i].is_alive:
+            for name, p in processes:
+                if p.is_alive:
                     alive = alive+1
                 else:
-                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+str(i)+" is not alive")
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+name+" is not alive")
             if alive != total_num_workers:
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
-            #print ("shippers= ",total_num_workers,"  alive=",alive)
+
+            # Find which workers are currently idle, as well as any autograding
+            # jobs which need to be scheduled.
+            workers = [name for (name, p) in processes if p.is_alive]
+            idle_workers = list(filter(
+                lambda n: len(os.listdir(worker_folder(n))) == 0,
+                workers))
+            jobs = filter(os.path.isfile, 
+                map(lambda f: os.path.join(INTERACTIVE_QUEUE, f), 
+                    os.listdir(INTERACTIVE_QUEUE)))
+            
+            # Distribute available jobs randomly among workers currently idle.
+            for job in jobs:
+                if len(idle_workers) == 0:
+                    break
+                dest = random.choice(idle_workers)
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, 
+                    message=f"Pushing job {os.path.basename(job)} to {dest}.")
+                shutil.move(job, worker_folder(dest))
+                idle_workers.remove(dest)
+
             time.sleep(1)
 
     except KeyboardInterrupt:

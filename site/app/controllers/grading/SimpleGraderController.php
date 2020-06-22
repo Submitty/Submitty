@@ -24,7 +24,7 @@ class SimpleGraderController extends AbstractController {
      * @param $section
      * @param $section_type
      * @param $sort
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return MultiResponse
      */
     public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
@@ -65,10 +65,10 @@ class SimpleGraderController extends AbstractController {
 
         //Grab the students in section, sectiontype.
         if ($section_type === "rotating_section") {
-            $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRotatingSections([$section], $sort_by);
         }
         elseif ($section_type === "registration_section") {
-            $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRegistrationSections([$section], $sort_by);
         }
         else {
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
@@ -96,7 +96,7 @@ class SimpleGraderController extends AbstractController {
      * @param $gradeable_id
      * @param $view
      * @param $sort
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return MultiResponse
      */
     public function gradePage($gradeable_id, $view = null, $sort = null) {
@@ -190,7 +190,7 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
      * @return MultiResponse
      */
     public function save($gradeable_id) {
@@ -233,7 +233,7 @@ class SimpleGraderController extends AbstractController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         // Return ids and scores of updated components in success response so frontend can validate
-        $return_data = array();
+        $return_data = [];
 
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
@@ -277,7 +277,7 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
      * @return MultiResponse
      */
     public function UploadCSV($gradeable_id) {
@@ -296,9 +296,9 @@ class SimpleGraderController extends AbstractController {
 
         $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
         $arr_length = count($csv_array);
-        $return_data = array();
+        $return_data = [];
 
-        $data_array = array();
+        $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
             $temp_array = explode(',', $csv_array[$i]);
             $data_array[] = $temp_array;
@@ -312,7 +312,7 @@ class SimpleGraderController extends AbstractController {
                     continue;
                 }
 
-                $temp_array = array();
+                $temp_array = [];
                 $temp_array['username'] = $username;
                 $index1 = 0;
                 $index2 = 3; //3 is the starting index of the grades in the csv

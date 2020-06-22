@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
 
 /**
  * Class User
@@ -95,6 +96,8 @@ class User extends AbstractModel {
     protected $registration_section = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
+    /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
+    protected $time_zone;
 
     /**
      * @prop
@@ -121,10 +124,10 @@ class User extends AbstractModel {
     protected $instructor_updated = false;
 
     /** @prop @var array */
-    protected $grading_registration_sections = array();
+    protected $grading_registration_sections = [];
 
     /** @prop @var array */
-    protected $notification_settings = array();
+    protected $notification_settings = [];
 
     /**
      * User constructor.
@@ -132,7 +135,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details = array()) {
+    public function __construct(Core $core, $details = []) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -184,6 +187,64 @@ class User extends AbstractModel {
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
+
+        $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
+    }
+
+    /**
+     * Set $this->time_zone
+     * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
+     * @return bool True if time zone was able to be updated, False otherwise
+     */
+    public function setTimeZone(string $time_zone): bool {
+
+        // Validate the $time_zone string
+        if (in_array($time_zone, DateUtils::getAvailableTimeZones())) {
+            // Attempt to update database
+            $result = $this->core->getQueries()->updateSubmittyUserTimeZone($this, $time_zone);
+
+            // Return true if we were able to update the database
+            if ($result === 1) {
+                $this->time_zone = $time_zone;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the UTC offset for this user's time zone.
+     *
+     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
+    }
+
+    /**
+     * Gets a \DateTimeZone instantiation for the user's time zone if they have one set, or the server time zone
+     * if they don't.
+     *
+     * @return \DateTimeZone
+     */
+    public function getUsableTimeZone(): \DateTimeZone {
+        if ($this->time_zone === 'NOT_SET/NOT_SET') {
+            return $this->core->getConfig()->getTimezone();
+        }
+        else {
+            return new \DateTimeZone($this->time_zone);
+        }
+    }
+
+    /**
+     * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
+     * user has not set their time zone.
+     *
+     * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
+     */
+    public function getNiceFormatTimeZone(): string {
+        return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
     }
 
     /**
@@ -356,7 +417,7 @@ class User extends AbstractModel {
                 //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
                 $ex_data = '$data:  ' . var_export(htmlentities($data), true);
-                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
+                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', [$ex_field, $ex_data]);
         }
     }
 
