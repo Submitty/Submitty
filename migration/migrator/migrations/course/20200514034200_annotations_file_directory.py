@@ -25,6 +25,7 @@ def up(config, database, semester, course):
                     for name in files:
                         if "_" in name:
                             [file_name, grader_id] = name.split('_', 1)
+                            annotation_full_path.replace("annotations", "submissions");
                             #Hash folder + file_name + grader_id where folder is the directory structure after the version directory
                             print(annotation_full_path + '/'+ file_name + '.pdf')
                             md5_file_name = hashlib.md5((annotation_full_path + '/'+ file_name + '.pdf').encode())
