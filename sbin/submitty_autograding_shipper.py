@@ -134,7 +134,8 @@ def update_worker_json(name, entry):
             shutil.move(tmp_json_path, foreign_json)
             print("Successfully updated local autograding_TODO/autograding_worker.json")
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                          message="Successfully updated local autograding_TODO/autograding_worker.json")  # noqa: E501
+                                          message="Successfully updated local autograding_TODO/"
+                                                  "autograding_worker.json")
             return True
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
@@ -180,7 +181,7 @@ def update_worker_json(name, entry):
             os.remove(tmp_json_path)
             sftp.close()
             ssh.close()
-            return success
+        return success
 
 
 def establish_ssh_connection(my_name, user, host, only_try_once=False):
@@ -298,7 +299,7 @@ def prepare_job(my_name, which_machine, which_untrusted, next_directory, next_to
                 ssh.close()
             os.remove(autograding_zip_tmp)
             os.remove(submission_zip_tmp)
-            return success
+        return success
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(JOB_ID, next_directory, next_to_grade)
@@ -408,8 +409,8 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
                     except Exception:
                         pass
 
-            if not success:
-                return False
+        if not success:
+            return False
 
     try:
         with open(local_done_queue_file, 'r') as infile:
@@ -795,7 +796,7 @@ def get_job(my_name, which_machine, my_capabilities, which_untrusted):
     files_and_times = sorted(files_and_times, key=operator.itemgetter(1))
     my_job = ""
 
-    for full_path_file, file_time in files_and_times:
+    for full_path_file, _file_time in files_and_times:
         # get the file name (without the path)
         just_file = full_path_file[len(folder)+1:]
 
@@ -1245,7 +1246,7 @@ def launch_shippers(worker_status_map):
 
     # One (or more) of the machines must accept "default" jobs.
     default_present = False
-    for name, machine in autograding_workers.items():
+    for _name, machine in autograding_workers.items():
         if "default" in machine["capabilities"]:
             default_present = True
             break
