@@ -1,0 +1,327 @@
+{
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class",
+            "test01/hw0/Factorial.class",
+            "test02/hw0/test/FactorialTest.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt",
+            "test01/hw0/Factorial.class",
+            "test02/hw0/test/FactorialTest.class"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "**/*.csv",
+            "test01/STDERR.txt",
+            "test01/STDOUT.txt",
+            "test02/STDERR.txt",
+            "test02/STDOUT.txt",
+            "test03/STDOUT_0.txt",
+            "test03/STDOUT_1.txt",
+            "test03/jacoco_report.csv",
+            "test03/STDERR_0.txt",
+            "test03/STDERR_1.txt",
+            "test04/STDOUT.txt",
+            "test04/STDERR.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest",
+        "number_of_ports": 1,
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "publish_actions": false,
+    "resource_limits": {
+        "RLIMIT_AS": "RLIM_INFINITY",
+        "RLIMIT_CPU": 60,
+        "RLIMIT_NPROC": 100
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "javac -cp submitty_junit.jar hw0/Factorial.java"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "hw0/Factorial.class",
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Class Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "jvm_memory": true,
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "hw0/Factorial.class",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "javac -cp submitty_junit.jar:. hw0/test/*Test.java"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "hw0/test/FactorialTest.class",
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Student and Instructor JUnit Test Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "jvm_memory": true,
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "hw0/test/FactorialTest.class",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "java -noverify -javaagent:submitty_jacocoagent.jar=destfile=coverage.exec -cp submitty_junit.jar:submitty_hamcrest.jar:submitty_junit/:. TestRunner hw0",
+                        "java -jar submitty_jacococli.jar report coverage.exec --classfiles hw0 --csv jacoco_report.csv"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 10,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0.5,
+                    "description": "TestRunner output",
+                    "method": "MultipleJUnitTestGrader",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "deduction": 0,
+                    "description": "JaCoCo report generation output",
+                    "method": "errorIfEmpty",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "jacoco_report.csv",
+                    "deduction": 0.5,
+                    "description": "JaCoCo coverage report",
+                    "instruction_coverage_threshold": 90,
+                    "method": "JaCoCoCoverageReportGrader",
+                    "package": "hw0",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running java",
+                    "jvm_memory": true,
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running java",
+                    "jvm_memory": true,
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "java -noverify -cp submitty_junit.jar:submitty_hamcrest.jar:. org.junit.runner.JUnitCore hw0.test.FactorialTest"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 6,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "JaCoCo - Instructor JUnit Tests",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 1.0,
+                    "description": "JUnit output",
+                    "method": "JUnitTestGrader",
+                    "num_tests": 4,
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running java",
+                    "jvm_memory": true,
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "publish_actions": false,
+            "timestamped_stdout": false,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ],
+    "timestamped_stdout": false
+}
