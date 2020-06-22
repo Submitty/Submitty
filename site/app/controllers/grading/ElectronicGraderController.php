@@ -81,7 +81,7 @@ class ElectronicGraderController extends AbstractController {
         foreach ($students as $student) {
              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
              $sorted_students[$reg_sec][] = $student;
-             array_push($student_list,['user_id' => $student->getId()]);
+             array_push($student_list, ['user_id' => $student->getId()]);
              array_push($student_array, $student->getId());
         }
         $number_of_students = count($student_list);
