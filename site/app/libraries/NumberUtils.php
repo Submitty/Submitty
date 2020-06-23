@@ -10,12 +10,12 @@ namespace app\libraries;
 class NumberUtils {
 
     /**
-     *  Gives the closest number to the `value` with respect to `precision`
+     * Gives the closest number to the `value` with respect to `precision`
      * @param float $value The number to round
      * @param float $precision The precision with calculation to be made
      * @return float The rounded result to the nearest multiple of precision
      */
-    public static function roundPointValue(float $value, float $precision) {
+    public static function roundPointValue(float $value, float $precision): float {
 
         // No $precision, no rounding
         if ($precision === 0.0) {
@@ -47,19 +47,17 @@ class NumberUtils {
 
     /**
      * @param int $array_length
-     * @param string $student_id
-     * @param string $gradeable_id
+     * @param string $seed
      * @return array the randomized indices array
      */
-    public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id) {
-
+    public static function getRandomIndices(int $array_length, string $seed): array {
         // creating an array which is holding the indices to be shuffled.
         $randomizedIndices = [];
         for ($i = 0; $i < $array_length; $i++) {
             $randomizedIndices[] = $i;
         }
 
-        $hash = str_split(hash('sha256', '' . $student_id . $gradeable_id));
+        $hash = str_split(hash('sha256', $seed));
         // generating a seed value for the random function
         $seedValue = 0;
         foreach ($hash as $hashChar) {
@@ -77,13 +75,5 @@ class NumberUtils {
         }
 
         return $randomizedIndices;
-    }
-
-    /**
-     * @param array $array
-     * @return array indices for the given array
-     */
-    public function getIndices(array $array) {
-        return array_keys($array);
     }
 }

@@ -3,6 +3,7 @@
 namespace app\controllers\course;
 
 use app\controllers\AbstractController;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\ErrorMessages;
@@ -12,7 +13,7 @@ use app\models\CourseMaterial;
 
 class CourseMaterialsController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/course_materials")
+     * @Route("/courses/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage() {
         $this->core->getOutput()->renderOutput(
@@ -41,7 +42,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/delete")
+     * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      */
     public function deleteCourseMaterial($path) {
         // security check
@@ -90,7 +91,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/download_zip")
+     * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
      */
     public function downloadCourseMaterialZip($dir_name, $path) {
         $root_path = realpath(htmlspecialchars_decode(urldecode($path)));
@@ -155,7 +156,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/modify_timestamp")
+     * @Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
@@ -167,10 +168,16 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $new_data_time = htmlspecialchars($newdatatime);
+        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
+        $new_data_time = DateUtils::dateTimeToString($new_data_time);
+
         //Check if the datetime is correct
-        if (\DateTime::createFromFormat('Y-m-d H:i:s', $new_data_time) === false) {
+        if (\DateTime::createFromFormat('Y-m-d H:i:sO', $new_data_time) === false) {
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
+
+        $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
+        $new_data_time = DateUtils::dateTimeToString($new_data_time);
 
         //only one will not iterate correctly
         if (is_string($data)) {
@@ -208,9 +215,9 @@ class CourseMaterialsController extends AbstractController {
 
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
-    
+
     /**
-     * @Route("/{_semester}/{_course}/course_materials/edit", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxEditCourseMaterialsFiles() {
@@ -218,27 +225,28 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sections'])) {
             $sections = $_POST['sections'] ?? null;
         }
-        
+
         if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
-        
+
         $sections_exploded = $sections;
-        
+
         if (!(is_null($sections)) && !empty($sections)) {
             $sections_exploded = explode(",", $sections);
         }
-        
+
         $hide_from_students = $_POST['hide_from_students'];
-        
+
         $requested_path = "";
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'] ?? '';
         }
-        
+
         $release_time = "";
         if (isset($_POST['release_time'])) {
-            $release_time = $_POST['release_time'];
+            $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getUser()->getUsableTimeZone());
+            $release_time = DateUtils::dateTimeToString($date_time);
         }
         if ($requested_path === '') {
             return $this->core->getOutput()->renderResultMessage('Requested path cannot be empty');
@@ -258,15 +266,10 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/course_materials/upload", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxUploadCourseMaterialsFiles() {
-        if (empty($_POST)) {
-            $max_size = ini_get('post_max_size');
-            return $this->core->getOutput()->renderResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
-        }
-
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             return $this->core->getOutput()->renderResultMessage("Invalid CSRF token.", false, false);
         }
@@ -283,7 +286,8 @@ class CourseMaterialsController extends AbstractController {
 
         $release_time = "";
         if (isset($_POST['release_time'])) {
-            $release_time = $_POST['release_time'];
+            $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getUser()->getUsableTimeZone());
+            $release_time = DateUtils::dateTimeToString($date_time);
         }
 
         $sections = null;
@@ -301,7 +305,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //Check if the datetime is correct
-        if (\DateTime::createFromFormat('Y-m-d H:i:s', $release_time) === false) {
+        if (\DateTime::createFromFormat('Y-m-d H:i:sO', $release_time) === false) {
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
