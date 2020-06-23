@@ -229,7 +229,7 @@ ORDER BY {$orderBy}"
     public function updateUserDisplayImageState(string $user_id, string $state): bool {
         $sql = 'update users set display_image_state = ? where user_id = ?';
         $this->submitty_db->query($sql, [$state, $user_id]);
-        return ($this->submitty_db->getRowCount() === 1);
+        return $this->submitty_db->getRowCount() === 1;
     }
 
     /**
