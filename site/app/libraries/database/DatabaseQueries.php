@@ -212,7 +212,7 @@ ORDER BY {$orderBy}"
      * @return array An array of all the users
      */
     public function getListOfCourseUsers(): array {
-        $sql = 'select user_id from users';
+        $sql = 'SELECT user_id FROM users';
         $this->course_db->query($sql);
         return array_map(function ($row) {
             return $row['user_id'];
