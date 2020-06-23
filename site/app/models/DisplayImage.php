@@ -6,6 +6,7 @@ use app\exceptions\BadArgumentException;
 use app\exceptions\FileReadException;
 use app\exceptions\FileWriteException;
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 
 /**
@@ -79,9 +80,7 @@ class DisplayImage extends AbstractModel {
 
         // Order files by newest time stamp first
         $files = FileUtils::getAllFilesTrimSearchPath($image_folder_dir, 0);
-        usort($files, function ($a, $b) {
-            return filemtime($a) <= filemtime($b);
-        });
+        rsort($files);
 
         // Ensure image is readable
         if (empty($files) || !is_readable($files[0])) {
@@ -167,7 +166,6 @@ class DisplayImage extends AbstractModel {
      *
      * @param Core $core The application core
      * @param string $user_id The user_id who will own this image
-     * @param string $new_image_name Name of the file to be saved, without the extension.  For example 'aphacker'
      * @param string $image_extension File extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path Path to the temporary location of the file to work with.  This may be the temporary
      *                              path in the $_FILES array or the location of a file after unzipping a zip archive
@@ -176,7 +174,7 @@ class DisplayImage extends AbstractModel {
      * @throws FileWriteException Unable to write to the image directory
      * @throws \ImagickException
      */
-    public static function saveUserImage(Core $core, string $user_id, string $new_image_name, string $image_extension, string $tmp_file_path, string $folder): void {
+    public static function saveUserImage(Core $core, string $user_id, string $image_extension, string $tmp_file_path, string $folder): void {
         // Validate folder
         if (!in_array($folder, self::LEGAL_FOLDERS)) {
             throw new BadArgumentException('The $folder parameter must be a member of DisplayImage::LEGAL_FOLDERS.');
@@ -200,7 +198,7 @@ class DisplayImage extends AbstractModel {
         $imagick = new \Imagick($tmp_file_path);
         self::resizeMaxDimension($imagick, self::IMG_MAX_DIMENSION);
 
-        // Save file (will overwrite any image with same name)
-        $imagick->writeImage(FileUtils::joinPaths($folder_path, $new_image_name . '.' . $image_extension));
+        // Save file where the image name is the current time stamp
+        $imagick->writeImage(FileUtils::joinPaths($folder_path, DateUtils::getFileNameTimeStamp() . '.' . $image_extension));
     }
 }

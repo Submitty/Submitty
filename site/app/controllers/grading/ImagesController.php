@@ -119,7 +119,7 @@ class ImagesController extends AbstractController {
 
                             // If user is a member of this course then go ahead and save
                             if (in_array($user_id, $users)) {
-                                DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $file, 'system_images');
+                                DisplayImage::saveUserImage($this->core, $user_id, $extension, $file, 'system_images');
                             }
                         }
 
@@ -147,7 +147,7 @@ class ImagesController extends AbstractController {
 
                         // If user is a member of this course then go ahead and save
                         if (in_array($user_id, $users)) {
-                            DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $tmp_path, 'system_images');
+                            DisplayImage::saveUserImage($this->core, $user_id, $extension, $tmp_path, 'system_images');
                         }
                     }
                     else {

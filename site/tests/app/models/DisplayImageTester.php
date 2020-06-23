@@ -156,7 +156,6 @@ class DisplayImageTester extends BaseUnitTest {
         DisplayImage::saveUserImage(
             $this->core,
             self::TEST_USER_NAME,
-            'test',
             'gif',
             $this->test_image_path,
             'bad_folder'
@@ -172,18 +171,20 @@ class DisplayImageTester extends BaseUnitTest {
         $test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
 
         return [
-            [$core, self::TEST_USER_NAME, $file_name, $file_extension, $test_image_path, 'system_images'],
-            [$core, self::TEST_USER_NAME, $file_name, $file_extension, $test_image_path, 'user_images'],
+            [$core, self::TEST_USER_NAME, $file_extension, $test_image_path, 'system_images'],
+            [$core, self::TEST_USER_NAME, $file_extension, $test_image_path, 'user_images'],
         ];
     }
 
     /**
      * @dataProvider saveUserImageProvider
      */
-    public function testSaveUserImage($core, string $user_id, string $new_image_name, string $image_extension, string $tmp_file_path, string $folder): void {
-        DisplayImage::saveUserImage($core, $user_id, $new_image_name, $image_extension, $tmp_file_path, $folder);
+    public function testSaveUserImage($core, string $user_id, string $image_extension, string $tmp_file_path, string $folder): void {
+        DisplayImage::saveUserImage($core, $user_id, $image_extension, $tmp_file_path, $folder);
 
-        $path = FileUtils::joinPaths($core->getConfig()->getSubmittyPath(), 'user_data', $user_id, $folder, "$new_image_name.$image_extension");
-        $this->assertFileExists($path);
+        $path = FileUtils::joinPaths($core->getConfig()->getSubmittyPath(), 'user_data', $user_id, $folder);
+
+        // Ensure a file was saved, can't know precisely what the name will be since it is based on a time stamp
+        $this->assertCount(1, FileUtils::getAllFilesTrimSearchPath($path, 0));
     }
 }
