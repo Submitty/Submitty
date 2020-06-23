@@ -21,7 +21,7 @@
                         <td>
                             {% set display_image = student.getDisplayImage() %}
                             {% if display_image is not null %}
-                                {{ base64_image(display_image.getImageBase64(150, 200), display_image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
+                                {{ base64_image(display_image.getImageBase64MaxDimension(200), display_image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
                             {% else %}
                                 <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                             {% endif %}
