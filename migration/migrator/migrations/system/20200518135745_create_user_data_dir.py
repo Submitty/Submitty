@@ -1,5 +1,6 @@
 import os
 import shutil
+import stat
 
 """Migration for the Submitty system."""
 
@@ -14,16 +15,12 @@ def up(config):
 
     user_data_path = os.path.join(config.submitty['submitty_data_dir'], 'user_data')
     user = config.submitty_users['php_user']
-    script_path = os.path.join(config.submitty['submitty_install_dir'], '.setup', 'bin', 'setup_sample_user_data.py')
 
     # Generate user_data directory
     if not os.path.isdir(user_data_path):
-        os.system('mkdir ' + user_data_path)
-        os.system('chmod 770 ' + user_data_path)
+        os.mkdir(user_data_path)
+        os.chmod(user_data_path, stat.S_IRWXU | stat.S_IRWXG)
         shutil.chown(user_data_path, user, user)
-
-    # Execute script to populate user_data directory with sample images
-    os.system('python3 ' + script_path)
 
     # Add image magick
     os.system('apt install imagemagick php-imagick -y')

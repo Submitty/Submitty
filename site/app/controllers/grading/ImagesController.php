@@ -4,6 +4,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
 use app\models\DisplayImage;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,14 +15,10 @@ class ImagesController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/student_photos")
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
-        if ($user_group === User::GROUP_STUDENT) { // student has no permissions to view image page
-            $this->core->addErrorMessage("You have no permissions to see images.");
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
-        }
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
 
         $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
@@ -187,11 +184,11 @@ class ImagesController extends AbstractController {
 
         if ($result) {
             $this->core->addSuccessMessage($_POST['user_id'] . '\'s image was successfully flagged.');
-            $this->core->redirect($this->core->buildCourseUrl(['student_photos']));
         }
         else {
             $this->core->addErrorMessage('Some error occurred flagging ' . $_POST['user_id'] . '\'s image.');
-            $this->core->redirect($this->core->buildCourseUrl(['student_photos']));
         }
+
+        return new RedirectResponse($this->core->buildCourseUrl(['student_photos']));
     }
 }

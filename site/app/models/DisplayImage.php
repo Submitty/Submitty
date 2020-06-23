@@ -67,13 +67,7 @@ class DisplayImage extends AbstractModel {
             throw new BadArgumentException('Unknown display_image_state!');
         }
 
-        $sub_dir = null;
-        if ($display_image_state === 'system' || $display_image_state === 'flagged') {
-            $sub_dir = 'system_images';
-        }
-        elseif ($display_image_state === 'preferred') {
-            $sub_dir = 'user_images';
-        }
+        $sub_dir = $display_image_state === 'preferred' ? 'user_images' : 'system_images';
 
         $data_dir = $this->core->getConfig()->getSubmittyPath();
         $image_folder_dir = FileUtils::joinPaths($data_dir, 'user_data', $user_id, $sub_dir);
