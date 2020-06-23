@@ -39,21 +39,10 @@ class Server implements MessageComponentInterface {
         $request = $conn->httpRequest;
         $client_id = $conn->resourceId;
         $origin = $request->getHeader('origin')[0];
-        $user_agent = $request->getHeader('user-agent')[0];
 
-        if ($user_agent == 'python-websocket-client') {
-            // pass authentication when testing
-            return true;
-        }
-
-        if (!strpos($origin, "localhost")) {
-            $conn->close();
-            return false;
-        }
-        else {
-            $cookieString = $request->getHeader("cookie");
-            parse_str(strtr($cookieString[0], ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
-
+        if (strpos($origin, "localhost")) {
+            $cookieString = $request->getHeader("cookie")[0];
+            parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
             $sessid = $cookies['submitty_session'];
 
             try {
@@ -77,6 +66,10 @@ class Server implements MessageComponentInterface {
             catch (\InvalidArgumentException $exc) {
                 die($exc);
             }
+        }
+        else {
+            $conn->close();
+            return false;
         }
     }
 

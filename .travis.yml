@@ -245,6 +245,7 @@ jobs:
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
         - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
         - sudo mkdir /run/php
+        - proxy_http proxy_wstunnel
         - sudo chown www-data:www-data /run/php
         - sudo chmod 755 /run/php
         - sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
