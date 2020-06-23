@@ -183,6 +183,22 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
     }
+    
+    public function getAnonPath($file_path) {
+        $file_path_parts = explode("/", $file_path);
+        $anon_path = "";
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index == 9) {
+                $user_id = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+                $anon_path = $anon_path . "/" . $anon_id;
+            }
+            else {
+                $anon_path = $anon_path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $anon_path;
+    }
 
     /**
      * @param $gradeable_id
