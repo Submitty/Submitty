@@ -28,7 +28,8 @@
     "doctrine/cache": "1.10.1",
     "php-ds/php-ds": "1.2.0",
     "cboden/ratchet": "0.4.2",
-    "textalk/websocket": "1.3.1"
+    "textalk/websocket": "1.3.1",
+    "egulias/email-validator": "2.1.18"
   },
   "require-dev": {
     "phpunit/phpunit": "8.5.8",
