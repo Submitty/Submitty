@@ -18,6 +18,7 @@ use app\libraries\Logger;
 use app\models\GradingOrder;
 use app\models\User;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -139,12 +140,12 @@ class ElectronicGraderController extends AbstractController {
             }
             array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
         }
-        $this->core->getOutput()->renderJsonSuccess($final_grading_info);
-        $gradeable->setRandomPeerGradersList($final_grading_info);
         if ($number_to_grade < 1) {
-            $this->core->getOutput()->renderJsonError("Clear Peer Matrix");
-            return;
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse("Clear Peer Matrix");
         }
+        $gradeable->setRandomPeerGradersList($final_grading_info);
+        return JsonResponse::getSuccessResponse($final_grading_info);
     }
     /**
      * Route for getting whitespace information for the diff viewer
