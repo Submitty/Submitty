@@ -1492,6 +1492,9 @@ end of styles used in the admin gradeable page
     color: var(--standard-vibrant-green) /* green */
 }
 
+.hideHighlights{
+    display:none;
+}
 /* color for double graded */
 .grader-double {
     color: var(--standard-vibrant-dark-blue)  /* dark blue */
