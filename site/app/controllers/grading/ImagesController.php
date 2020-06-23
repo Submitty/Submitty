@@ -10,7 +10,7 @@ use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/student_photos")
+     * @Route("/courses/{_semester}/{_course}/student_photos")
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
@@ -55,7 +55,7 @@ class ImagesController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/student_photos/upload")
+     * @Route("/courses/{_semester}/{_course}/student_photos/upload")
      */
     public function ajaxUploadImagesFiles() {
         if (!$this->core->getUser()->accessAdmin()) {
