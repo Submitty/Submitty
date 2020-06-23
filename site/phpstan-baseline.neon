@@ -36,11 +36,6 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
-			message: "#^Variable \\$seating_assignment_emails might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/EmailRoomSeatingController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$csv_option string csv_option_overwrite_all or csv_option_preserve_higher\\)\\: Unexpected token \"\\$csv_option\", expected type at offset 18$#"
 			count: 1
 			path: app/controllers/admin/LateController.php

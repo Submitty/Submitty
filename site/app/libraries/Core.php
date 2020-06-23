@@ -518,7 +518,7 @@ class Core {
      * @return string
      */
     public function buildCourseUrl($parts = []) {
-        array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        array_unshift($parts, "courses", $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
 
@@ -680,6 +680,10 @@ class Core {
 
     public function getNotificationFactory(): NotificationFactory {
         return $this->notification_factory;
+    }
+
+    public function setNotificationFactory(NotificationFactory $factory) {
+        $this->notification_factory = $factory;
     }
 
     /**

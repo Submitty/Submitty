@@ -51,6 +51,32 @@ class WebRouter {
         $this->parameters = $matcher->matchRequest($this->request);
     }
 
+
+    /**
+     * If a request is a post request check too see if its less than the post_max_size or if its empty
+     * @return MultiResponse|bool
+     */
+    private function checkPostMaxSize(Request $request) {
+        if ($request->isMethod('POST')) {
+            $max_post_length = ini_get("post_max_size");
+            $max_post_bytes = Utils::returnBytes($max_post_length);
+            /** if a post request exceeds the max length set in the ini, php will drop everything set under $_POST, however the router might add routing information later so check both cases
+            */
+            if (($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) || empty($_POST)) {
+                $msg = "POST request exceeds maximum size of " . $max_post_length;
+                $this->core->addErrorMessage($msg);
+
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse($msg)
+                );
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+
     /**
      * @param Request $request
      * @param Core $core
@@ -87,6 +113,11 @@ class WebRouter {
                     JsonResponse::getFailResponse('Feature is not yet available.')
                 );
             }
+
+            $check_post_max_size = $router->checkPostMaxSize($request);
+            if ($check_post_max_size instanceof MultiResponse) {
+                return $check_post_max_size;
+            }
         }
         catch (ResourceNotFoundException $e) {
             return new MultiResponse(JsonResponse::getFailResponse("Endpoint not found."));
@@ -120,6 +151,11 @@ class WebRouter {
             $login_check_response = $router->loginRedirectCheck($logged_in);
             if ($login_check_response instanceof MultiResponse || $login_check_response instanceof WebResponse) {
                 return $login_check_response;
+            }
+
+            $check_post_max_size = $router->checkPostMaxSize($request);
+            if ($check_post_max_size instanceof MultiResponse) {
+                return $check_post_max_size;
             }
 
             $csrf_check_response = $router->csrfCheck();
