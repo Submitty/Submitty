@@ -110,7 +110,7 @@ class DisplayImage extends AbstractModel {
      * @return string The base64 encoding of the image
      * @throws \ImagickException
      */
-    public function getImageBase64(int $cols = null, int $rows = null): string {
+    public function getImageBase64(?int $cols = null, ?int $rows = null): string {
         $imagick = new \Imagick($this->path);
 
         // Handling any resizing that might need to be done
