@@ -156,6 +156,10 @@ class TestDump(TestCase):
             course_db = data_dir / 'course_tables.sql'
             self.assertTrue(course_db.exists())
             self.assertEqual(COURSE_DB_EXPECTED, course_db.read_text())
+            self.assertRegex(sys.stdout.getvalue(), r"""
+Dumping master environment to .*/data/submitty_db.sql... DONE
+Dumping course environment to .*/data/course_tables.sql... DONE
+""")
 
     @patch('migrator.main.subprocess.check_output', side_effect=[
         MASTER_DB_FRAGMENT
@@ -176,6 +180,9 @@ class TestDump(TestCase):
             submitty_db = data_dir / 'submitty_db.sql'
             self.assertTrue(submitty_db.exists())
             self.assertEqual(MASTER_DB_EXPECTED, submitty_db.read_text())
+            self.assertRegex(sys.stdout.getvalue(), r"""
+Dumping master environment to .*/data/submitty_db.sql... DONE
+""")
 
     @patch('migrator.main.subprocess.check_output', side_effect=[
         COURSE_DB_EXPECTED
@@ -196,6 +203,9 @@ class TestDump(TestCase):
             course_db = data_dir / 'course_tables.sql'
             self.assertTrue(course_db.exists())
             self.assertEqual(COURSE_DB_EXPECTED, course_db.read_text())
+            self.assertRegex(sys.stdout.getvalue(), r"""
+Dumping course environment to .*/data/course_tables.sql... DONE
+""")
 
     def test_dump_non_psql_driver(self):
         with self.assertRaises(SystemExit) as cm:

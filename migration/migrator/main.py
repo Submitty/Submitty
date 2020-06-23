@@ -430,6 +430,8 @@ def dump(args):
     data_dir = Path(args.path) if 'path' in args else Path(__file__).resolve().parent
     data_dir /= 'data'
 
+    print('test')
+
     if 'master' in args.environments:
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
@@ -438,7 +440,7 @@ def dump(args):
             '-',
             'postgres',
             '-c',
-            f'pg_dump -d submitty --schema-only --no-privileges --no-owner'
+            'pg_dump -d submitty --schema-only --no-privileges --no-owner'
         ], universal_newlines=True)
 
         out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
@@ -451,14 +453,13 @@ def dump(args):
         print(f'Dumping course environment to {str(out_file)}... ', end='')
         today = datetime.today()
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
-        db_name = f"submitty_{semester}_sample"
 
         out = subprocess.check_output([
             'su',
             '-',
             'postgres',
             '-c',
-            f'pg_dump -d {db_name} --schema-only --no-privileges --no-owner'
+            f'pg_dump -d submitty_{semester}_sample --schema-only --no-privileges --no-owner'
         ], universal_newlines=True)
         out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
         out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
