@@ -175,7 +175,7 @@ class PDFController extends AbstractController {
         
         $annotation_body["file_path"] = $partial_path;
         $annotation_body["grader_id"] = $grader_id;
-        $annotation_body["annotations"] = $_POST['annotation_layer'];                    
+        $annotation_body["annotations"] = $_POST['annotation_layer'];
         
         $annotation_json = json_encode($annotation_body);
                                         
