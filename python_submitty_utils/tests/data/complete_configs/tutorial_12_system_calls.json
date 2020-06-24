@@ -1,0 +1,241 @@
+{
+    "allow_system_calls": [
+        "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+        "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD"
+    ],
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class",
+            "test01/a.out"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt",
+            "test01/a.out"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
+            "**/dispatched_actions.txt",
+            "test01/STDERR.txt",
+            "test01/STDOUT.txt",
+            "test02/STDOUT.txt",
+            "test02/STDERR.txt",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest",
+        "number_of_ports": 1,
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "publish_actions": false,
+    "resource_limits": {
+        "RLIMIT_CPU": 10,
+        "RLIMIT_NPROC": 20
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "/usr/bin/gcc -Wall -o a.out *.c"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "a.out",
+            "points": 2,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "a.out",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out 10"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "./a.out 10",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "data": [
+                        "ALL DONE! 10 successful forks"
+                    ],
+                    "deduction": 1,
+                    "description": "Standard Output (STDOUT)",
+                    "method": "searchToken",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out 30"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 4,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "./a.out 30",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "data": [
+                        "ALL DONE! 30 successful forks"
+                    ],
+                    "deduction": 1,
+                    "description": "Standard Output (STDOUT)",
+                    "method": "searchToken",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "publish_actions": false,
+            "timestamped_stdout": false,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ],
+    "timestamped_stdout": false
+}

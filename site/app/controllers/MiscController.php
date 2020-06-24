@@ -26,7 +26,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return MultiResponse
      */
     public function encodePDF($gradeable_id) {
@@ -73,7 +73,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/display_file")
+     * @Route("/courses/{_semester}/{_course}/display_file")
      */
     public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
         //Is this per-gradeable?
@@ -113,7 +113,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
-        
+
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
@@ -138,7 +138,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/read_file")
+     * @Route("/courses/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
@@ -174,7 +174,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/download")
+     * @Route("/courses/{_semester}/{_course}/download")
      */
     public function downloadCourseFile($dir, $path) {
         // security check
@@ -219,7 +219,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
     public function downloadSubmissionZip($gradeable_id, $user_id, $is_anon, $version = null, $origin = null) {
         if ($is_anon) {
@@ -330,7 +330,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function downloadAssignedZips($gradeable_id, $type = null) {
@@ -462,7 +462,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
      */
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";

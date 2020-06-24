@@ -1,0 +1,947 @@
+{
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
+            "**/dispatched_actions.txt",
+            "test01/alpha/STDOUT.txt",
+            "test01/beta/STDOUT.txt",
+            "test01/charlie/STDOUT.txt",
+            "test01/charlie/STDOUT.txt",
+            "test01/alpha/STDERR.txt",
+            "test01/beta/STDERR.txt",
+            "test01/charlie/STDERR.txt",
+            "test01/client/STDOUT.txt",
+            "test01/client/STDERR.txt",
+            "test02/alpha/STDOUT.txt",
+            "test02/beta/STDOUT.txt",
+            "test02/charlie/STDOUT.txt",
+            "test02/router/sequence_diagram.txt",
+            "test02/alpha/STDERR.txt",
+            "test02/beta/STDERR.txt",
+            "test02/charlie/STDERR.txt",
+            "test02/client/STDOUT.txt",
+            "test02/client/STDERR.txt",
+            "test02/router/STDOUT.txt",
+            "test02/router/STDERR.txt",
+            "test03/alpha/STDOUT.txt",
+            "test03/beta/STDOUT.txt",
+            "test03/charlie/STDOUT.txt",
+            "test03/router/sequence_diagram.txt",
+            "test03/alpha/STDERR.txt",
+            "test03/beta/STDERR.txt",
+            "test03/charlie/STDERR.txt",
+            "test03/client/STDOUT.txt",
+            "test03/client/STDERR.txt",
+            "test03/router/STDOUT.txt",
+            "test03/router/STDERR.txt",
+            "test04/alpha/STDOUT.txt",
+            "test04/beta/STDOUT.txt",
+            "test04/charlie/STDOUT.txt",
+            "test04/delta/STDOUT.txt",
+            "test04/router/sequence_diagram.txt",
+            "test04/alpha/STDERR.txt",
+            "test04/beta/STDERR.txt",
+            "test04/charlie/STDERR.txt",
+            "test04/delta/STDERR.txt",
+            "test04/client/STDOUT.txt",
+            "test04/client/STDERR.txt",
+            "test04/router/STDOUT.txt",
+            "test04/router/STDERR.txt"
+        ]
+    },
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest",
+        "number_of_ports": 1,
+        "single_port_per_container": false,
+        "use_router": true
+    },
+    "publish_actions": true,
+    "resource_limits": {
+        "RLIMIT_DATA": 2000000000,
+        "RLIMIT_NPROC": 100,
+        "RLIMIT_STACK": 10000000
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "alpha",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "beta",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "beta",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "charlie",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "beta"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 client.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "client",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [
+                {
+                    "action": "delay",
+                    "seconds": 3
+                },
+                {
+                    "action": "stdin",
+                    "containers": [
+                        "client"
+                    ],
+                    "string": "alpha-beta:charlie\n"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 5
+                },
+                {
+                    "action": "stop",
+                    "containers": [
+                        "alpha",
+                        "beta",
+                        "charlie",
+                        "client"
+                    ]
+                }
+            ],
+            "points": 5,
+            "pre_commands": [],
+            "publish_actions": false,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Simple Testcase, No Router",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "alpha/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "alpha_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "beta_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "charlie_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "charlie_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "alpha/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (alpha/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (beta/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (charlie/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (client/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (client/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "alpha",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "beta",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "beta",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "charlie",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "beta"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 client.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "client",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 -u submitty_router.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "router",
+                    "import_default_router": true,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [
+                {
+                    "action": "delay",
+                    "seconds": 3
+                },
+                {
+                    "action": "stdin",
+                    "containers": [
+                        "client"
+                    ],
+                    "string": "alpha-beta:charlie\n"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 5
+                },
+                {
+                    "action": "stop",
+                    "containers": [
+                        "alpha",
+                        "beta",
+                        "charlie",
+                        "client"
+                    ]
+                }
+            ],
+            "points": 5,
+            "pre_commands": [],
+            "publish_actions": true,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Simple Testcase, With Router",
+            "use_router": true,
+            "validation": [
+                {
+                    "actual_file": "alpha/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "alpha_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "beta_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "charlie_simple.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/sequence_diagram.txt",
+                    "deduction": 0,
+                    "points": 0,
+                    "sequence_diagram": true,
+                    "show_actual": "always",
+                    "show_message": "always",
+                    "title": "Sequence Diagram Text File",
+                    "type": "FileCheck"
+                },
+                {
+                    "actual_file": "alpha/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (alpha/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (beta/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (charlie/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (client/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (client/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (router/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "alpha",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "beta",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "beta",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "charlie",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "beta"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 client.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "client",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 -u submitty_router.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "router",
+                    "import_default_router": true,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [
+                {
+                    "action": "delay",
+                    "seconds": 3
+                },
+                {
+                    "action": "stdin",
+                    "containers": [
+                        "client"
+                    ],
+                    "string": "alpha-beta:charlie:alpha:beta:charlie\n"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 5
+                },
+                {
+                    "action": "stop",
+                    "containers": [
+                        "alpha",
+                        "beta",
+                        "charlie",
+                        "client"
+                    ]
+                }
+            ],
+            "points": 5,
+            "pre_commands": [],
+            "publish_actions": true,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Moderate Testcase, With Router",
+            "use_router": true,
+            "validation": [
+                {
+                    "actual_file": "alpha/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "alpha_moderate.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "beta_moderate.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "charlie_moderate.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/sequence_diagram.txt",
+                    "deduction": 0,
+                    "points": 0,
+                    "sequence_diagram": true,
+                    "show_actual": "always",
+                    "show_message": "always",
+                    "title": "Sequence Diagram Text File",
+                    "type": "FileCheck"
+                },
+                {
+                    "actual_file": "alpha/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (alpha/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (beta/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (charlie/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (client/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (client/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (router/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "alpha",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "beta",
+                        "charlie",
+                        "delta"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "beta",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "charlie",
+                        "delta"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "charlie",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "beta",
+                        "delta"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 server.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "delta",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [
+                        "alpha",
+                        "beta",
+                        "charlie"
+                    ],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 client.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "client",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                },
+                {
+                    "actual_file": "router/sequence_diagram.txt",
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container5",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "points": 0,
+                    "sequence_diagram": true,
+                    "server": false,
+                    "title": "Sequence Diagram Text File",
+                    "type": "FileCheck"
+                },
+                {
+                    "commands": [
+                        "python3 -u submitty_router.py"
+                    ],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "router",
+                    "import_default_router": true,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [
+                {
+                    "action": "delay",
+                    "seconds": 3
+                },
+                {
+                    "action": "stdin",
+                    "containers": [
+                        "client"
+                    ],
+                    "string": "beta-alpha:charlie:delta:beta:charlie:alpha:beta:delta:charlie:alpha\n"
+                },
+                {
+                    "action": "delay",
+                    "seconds": 5
+                },
+                {
+                    "action": "stop",
+                    "containers": [
+                        "alpha",
+                        "beta",
+                        "charlie",
+                        "delta",
+                        "client"
+                    ]
+                }
+            ],
+            "points": 5,
+            "pre_commands": [],
+            "publish_actions": true,
+            "single_port_per_container": false,
+            "solution_containers": [
+                {
+                    "commands": [],
+                    "container_image": "submitty/autograding-default:latest",
+                    "container_name": "container0",
+                    "number_of_ports": 1,
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "timestamped_stdout": false,
+            "title": "Large Testcase, With Router",
+            "use_router": true,
+            "validation": [
+                {
+                    "actual_file": "alpha/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "alpha_large.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "beta_large.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "charlie_large.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "delta/STDOUT.txt",
+                    "deduction": 0.5,
+                    "expected_file": "delta_large.txt",
+                    "failure_message": "ERROR: Your code did not match the expected output.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/sequence_diagram.txt",
+                    "deduction": 0,
+                    "points": 0,
+                    "sequence_diagram": true,
+                    "show_actual": "always",
+                    "show_message": "always",
+                    "title": "Sequence Diagram Text File",
+                    "type": "FileCheck"
+                },
+                {
+                    "actual_file": "alpha/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (alpha/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "beta/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (beta/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "charlie/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (charlie/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "delta/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (delta/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (client/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "client/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (client/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (router/STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "router/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (router/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "publish_actions": true,
+            "timestamped_stdout": false,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ],
+    "timestamped_stdout": false
+}
