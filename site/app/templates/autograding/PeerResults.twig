@@ -1,4 +1,5 @@
 {% import 'functions/Badge.twig' as Badge %}
+{% import 'functions/TAResultsFunctions.twig' as TAResultsFunctions %}
 {% import _self as self %}
 
 <script>
@@ -9,6 +10,28 @@ $( document ).ready(function() {
         $("#ShowRegradeRequestButton").hide();
     }
 });
+function open_peer_feedback_tab(user, ordered_graders) {
+    $('.page-content').hide();
+    $('#peer-feedback-'+user).show();
+    for (var i = 0 ; i<{{ordered_graders|json_encode|raw}}.length;i++){
+        $('#peer_feedback_nav_'+{{ordered_graders|json_encode|raw}}[i]).removeClass('active-btn');
+    }
+    $('#peer_feedback_nav_'+user).addClass('active-btn');
+}
+function switch_feedback_modes() {
+    if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
+        $('#switch_feedback_button')[0].textContent = "Switch to Normal Display";
+        $('#peer_feedback_wrapper').show();
+        $('#comments_wrapper').hide();
+        $('#normal_peer_wrapper').hide();
+    }
+    else{
+        $('#switch_feedback_button')[0].textContent = "Switch to Feedback Mode";
+        $('#normal_peer_wrapper').show();
+        $('#comments_wrapper').show();
+        $('#peer_feedback_wrapper').hide();
+    }
+}
 </script>
 
 {% if not been_ta_graded %}
@@ -29,114 +52,40 @@ $( document ).ready(function() {
             {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
             {% endif %}
-            {% for user in ordered_graders if overall_comments[user] is not empty %}
-                <div class="overall-comment-box">
-                    <p class="overall-comment-author">
-                        Overall note from {{peer_aliases[user]}}:
-                    </p>
-                    <p class="overall-comment">
-                        <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
-                    </p>
-                </div>
-   
-            {% endfor %}
-        </div>
-
-        {% if uploaded_pdfs|length >= 1 %}
-            <div class = "row" style="float: right">
-                    <div class="col-sm-2" style=" padding: 10px; width: 25%; word-break: break-word; display: inline-block">
-                        <p style="text-align:center">File Name:</p>
+            <div id="comments_wrapper">
+                {% for user in ordered_graders if overall_comments[user] is not empty %}
+                    <div class="overall-comment-box">
+                        <p class="overall-comment-author">
+                            Overall note from {{peer_aliases[user]}}:
+                        </p>
+                        <p class="overall-comment">
+                            <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
+                        </p>
                     </div>
-                    <div class="col-sm-3" style="text-align:center; padding: 10px; width: 25%; word-break: break-word; display: inline-block">
-                        <p style="text-align:center">&nbsp;&nbsp;Original:</p>
-                    </div>
-                    <div class="col-sm-3" style="text-align:center; padding: 10px; width: 25%; word-break: break-word; display: inline-block">
-                        <p style="text-align:center"> &nbsp;&nbsp;&nbsp;&nbsp;Grader Feedback:</p>
-                    </div>
-                <div class="row">
-                    <div class="box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
-                        {% for file in files %}
-                            {% if loop.index != uploaded_pdfs|length %}
-                                <div style="margin-bottom: 2em">
-                                    {{ file.relative_name }}
-                                </div>
-                            {% else %}
-                                {{ file.relative_name }}
-                            {% endif %}
-
-                        {% endfor %}
-                    </div>
-                    <div class="box col-sm-6" style="padding: 10px; width: 40%; word-break: break-word; display: inline-block">
-                        {% for file in files %}
-                            <p style="text-align:center">
-                                {# download icon if student can download files #}
-                                {% if can_download %}
-                                    <button class = 'btn btn-default' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
-                                        <i class="fas fa-download" title="Download the file"></i></button>
-                                {% endif %}
-                                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                            </p>
-                            {% if loop.index != files|length %}
-                                <br />
-                            {% endif %}
-                        {% endfor %}
-                        {% if can_download and files|length > 1 %}
-                            <hr>
-                            <p style="text-align:center">
-                                Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
-                                    <i class="fas fa-download" title="Download zip of all files"></i></button>
-                            </p>
-                        {% endif %}
-                    </div>
-                    <div class="box col-sm-3" style="padding: 10px; width: 30%; word-break: break-word; display: inline-block">
-                        {% for file in uploaded_pdfs %}
-                            {% if file.name in annotated_file_names %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 1.28em">
-                                        <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                                            <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
-                                    </div>
-                                {% else %}
-                                    <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
-                                {% endif %}
-                            {% else %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 3.4em"></div>
-                                {% endif %}
-                            {% endif %}
-
-                        {% endfor %}
-                    </div>
-                </div>
-
+                {% endfor %}
             </div>
-        {% endif %}
-        {# /Overview #}
-
-        {% if (peer_score >= peer_max) %}
-            <canvas id="confetti_canvas"></canvas>
-        {% endif %}
+        </div>
 
         {% if peer_components | length > 0 %}
             <div class="box submission-page-total-header">
-                <div class="box-title-total"
-                    {% if peer_score >= peer_max %}
-                        onclick="addConfetti();" style="cursor:pointer;"
-                    {% endif %}>
-
+                <div class="box-title-total">
+                    {{ Badge.render(peer_score, peer_max, false) }}
                     <h4>Peer Grading Total</h4>
+                    <a id="switch_feedback_button" class="btn btn-default" onclick="switch_feedback_modes()">Switch to Feedback Mode</a>
                 </div>
             </div>
 
             {# Peer Component boxes #}
+            <div id="normal_peer_wrapper">
             {% for component in peer_components %}
                 {% if component.peer_ids | length <= 5 %}
-                    {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
+                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
                 {% else %}
-                    {{ self.renderManyPeerResults(component) }}
+                        {{ self.renderManyPeerResults(component) }}
                 {% endif %}                
             {% endfor %}
+            </div>
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url)  }}
             {# /Peer Component boxes #}
         {% endif %}
     {# /Total auto + manual #}
@@ -251,5 +200,79 @@ $( document ).ready(function() {
                 </p>
             </div>
         </div>
+    </div>
+{%- endmacro -%}
+
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url) -%}
+    <div id="peer_feedback_wrapper" style="display: none;">
+        <div class="box grade-results">
+            {% set first_grader = true %}
+            {% for grader in ordered_graders %}
+                {% if first_grader == true %}
+                    <a class="nav-bar key_to_click active-btn" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
+                    {% set first_grader = false %}
+                {% else %}
+                    <a class="nav-bar key_to_click" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% set first_grader = true %}
+        {% for grader in ordered_graders %}
+            {% if first_grader == true %}
+                <div class="page-content" id="peer-feedback-{{grader}}">
+                {% set first_grader = false %}
+            {% else %}
+                <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
+            {% endif %}
+                <table class="mobile-table" id="peer-feedback-table-{{grader}}">
+                    <tbody>
+                        {% for component in peer_components %}
+                            <div class="box-info">
+                                    <h4>{{ component.title|escape }}
+                                    </h4>
+                                    <p>
+                                        {% for mark in component.marks %}
+                                            {% if mark.earned[grader] %}
+                                                <i class="far fa-check-square fa-1g"></i>
+                                            {% else %}
+                                                <i class="far fa-square fa-1g"></i>
+                                            {% endif %}
+                                            {{ mark.points|number_format(num_decimals) }}
+                                            {{ mark.title|nl2br }}
+                                            </br>
+                                        {% endfor %}
+                                    </p>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if overall_comments[grader] is not empty %}
+                    <div class="overall-comment-box">
+                        <p class="overall-comment-author">
+                            Overall note from grader:
+                        </p>
+                        <p class="overall-comment">
+                            <span class='gradeable_comment'>{{ overall_comments[grader] | nl2br }}</span>
+                        </p>
+                    </div>
+                {% endif %}
+            
+            {% for file in uploaded_pdfs %}
+                {% if file.name in annotated_file_names and grader in file.graders%}
+                    </br>
+                    <p>
+                        {{file.name}} :
+                    </p>
+                    <p>
+                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&grader={{ grader|url_encode }}')">View Popup <i class="fas fa-window-restore"></i>
+                        </a>
+                    </p>
+                {% endif %}
+
+            {% endfor %}
+            
+            </div>
+            
+        {% endfor %}
     </div>
 {%- endmacro -%}
