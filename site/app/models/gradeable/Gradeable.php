@@ -498,7 +498,7 @@ class Gradeable extends AbstractModel {
         }
     }
     
-    public function setPeerFeedback($grader_id, $student_id, $feedback_full, $feedback_id) {
+    public function setPeerFeedback($grader_id, $student_id, $feedback) {
         $bad_input = [];
         if ($this->core->getQueries()->getUserById($grader_id) === null) {
             array_push($bad_input, ($grader_id));
@@ -514,13 +514,26 @@ class Gradeable extends AbstractModel {
             $this->core->addErrorMessage($msg);
         }
         else {
-            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback_full, $feedback_id);
+            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
     }
     
     public function getPeerFeedback($grader_id, $anon_id) {
         $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
-        return $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        if ($feedback == 'thanks') {
+            return 'Thank you!';
+        }
+        else if ($feedback == 'helpful') {
+            return 'This feedback was helpful to me!';
+        }
+        else if($feedback == 'detailed'){
+            return 'This feedback was detailed, specific, and/or technical';
+        }
+        else if($feedback == 'inappropriate'){
+            return 'This feedback was inaccurate and/or inappropriate';
+        }
+        return 'No response';
     }
 
     /**

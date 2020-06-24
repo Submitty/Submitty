@@ -19,14 +19,14 @@ function open_peer_feedback_tab(user, ordered_graders) {
     }
     $('#peer_feedback_nav_'+user).addClass('active-btn');
 }
-function set_peer_feedback(grader_id, user_id, g_id, feedback_id, feedback_full) {
+function set_peer_feedback(grader_id, user_id, g_id, feedback) {
     $('#peer_feedback_no_response_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_thanks_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_helpful_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_detailed_'+grader_id).removeClass('active-btn');
     $('#peer_feedback_inappropriate_'+grader_id).removeClass('active-btn');
-    $('#peer_feedback_'+feedback_id+'_'+grader_id).addClass('active-btn');
-    peerFeedbackUpload(grader_id, user_id, g_id, feedback_full, feedback_id);
+    $('#peer_feedback_'+feedback+'_'+grader_id).addClass('active-btn');
+    peerFeedbackUpload(grader_id, user_id, g_id, feedback);
     
 }
 function switch_feedback_modes() {
@@ -290,7 +290,7 @@ function switch_feedback_modes() {
             <script>
                 var feedbackArray = {{peer_feedback|json_encode|raw}};
                 if('{{grader}}' in feedbackArray){
-                    var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback_id'];
+                    var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback'];
                     $('#peer_feedback_'+feedback+'_'+'{{grader}}').addClass('active-btn');
                 }
             </script>
