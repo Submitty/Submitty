@@ -105,9 +105,9 @@ class ElectronicGraderController extends AbstractController {
                 array_push($final_grading_info, [$student_array[$grader],$peer_array]);
             }
             $gradeable->setRandomPeerGradersList($final_grading_info);
-            return;
+            return JsonResponse::getSuccessResponse($final_grading_info);
         }
-        $graded_array = $student_array;
+        $graded_array = $student_array; 
           /*n_array_peers : An Array of arrays that holds information on to be graded peers
           [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
           A grades C and E and is graded by C and E.
@@ -124,6 +124,9 @@ class ElectronicGraderController extends AbstractController {
         $offset_array = [];
         for ($i = 0; $i < $number_to_grade; ++$i) {
             $random_offset = rand(1, $max_offset);
+            if (in_array($random_offset, $offset_array)) {
+                $random_offset = rand($random_offset+1, $max_offset);
+            }
             array_push($offset_array, $random_offset);
         }
         foreach ($offset_array as $element) {
