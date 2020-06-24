@@ -5,6 +5,8 @@ namespace app\models;
 use app\libraries\Core;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\RFCValidation;
 
 /**
  * Class User
@@ -381,7 +383,7 @@ class User extends AbstractModel {
      * @param mixed $data
      * @return bool
      */
-    public static function validateUserData($field, $data) {
+    public static function validateUserData($field, $data): bool {
 
         switch ($field) {
             case 'user_id':
@@ -401,8 +403,9 @@ class User extends AbstractModel {
                     return true;
                 }
                 // -- or ---
-                // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-                return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+                // validate email address against email RFCs
+                $validator = new EmailValidator();
+                return $validator->isValid($data, new RFCValidation());
             case 'user_group':
                 //user_group check is a digit between 1 - 4.
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
@@ -416,7 +419,7 @@ class User extends AbstractModel {
             default:
                 //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
-                $ex_data = '$data:  ' . var_export(htmlentities($data), true);
+                $ex_data = '$data: ' . var_export(htmlentities($data), true);
                 throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', [$ex_field, $ex_data]);
         }
     }
