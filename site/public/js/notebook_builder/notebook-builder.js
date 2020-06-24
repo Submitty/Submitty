@@ -6,7 +6,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 class NotebookBuilder {
     constructor() {
-        this.widgets = [new SelectorWidget()];
+        this.widgets = [new MultipleChoiceWidget(), new SelectorWidget()];
     }
 
     render() {

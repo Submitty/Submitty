@@ -15,7 +15,11 @@
 
 .heading-container {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+}
+
+.heading-container h3 {
+    margin-right: 5px;
 }
 
 .widget-main {
@@ -62,7 +66,8 @@
  */
 .markdown-widget textarea {
     width: 100%;
-    margin-right: 10px
+    margin-right: 10px;
+    min-height: 100px;
 }
 
 /**
@@ -81,12 +86,20 @@
 /**
  * Multiple choice widget styles
  */
-.multiple-choice-widget td {
-    text-align: center;
+.multiple-choice-widget td ,
+.multiple-choice-widget th {
+    text-align: left;
+    white-space: pre-wrap;
+}
+
+.multiple-choice-options td {
 }
 
 .multiple-choice-options {
-    flex-grow: 1;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .multiple-choice-options table {
@@ -95,8 +108,9 @@
     border-spacing: 10px;
 }
 
-.multiple-choice-options table input {
-    width: 80%;
+.multiple-choice-options textarea {
+    width: 100%;
+    min-height: 50px;
 }
 
 .multiple-choice-config {

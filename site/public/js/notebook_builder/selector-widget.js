@@ -38,7 +38,7 @@ class SelectorWidget extends Widget {
         interactive_container.appendChild(this.drop_down);
         interactive_container.appendChild(add_button);
 
-        const heading_container = this.getHeadingContainer('Selector', 'Select a new item to add:');
+        const heading_container = this.getHeadingContainer('Add New Notebook Cell');
 
         const container = document.createElement('div');
         container.classList.add('notebook-builder-widget');

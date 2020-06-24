@@ -4,10 +4,10 @@ class Widget {
      *
      * @returns {HTMLDivElement}
      */
-    getContainer(heading_text, instruction_text = null) {
+    getContainer(heading_text) {
         const widget_main = document.createElement('div');
         widget_main.classList.add('widget-main');
-        widget_main.appendChild(this.getHeadingContainer(heading_text, instruction_text))
+        widget_main.appendChild(this.getHeadingContainer(heading_text))
         widget_main.appendChild(this.getInteractiveContainer());
 
         const widget_controls = this.getControls();
@@ -21,25 +21,18 @@ class Widget {
     }
 
     /**
-     * Gets a div which contains a heading and instructional text about how to use a widget
+     * Gets a div which contains a heading text
      *
      * @param heading_text The heading
-     * @param instruction_text Optional text indicating how to use the widget's interactive features
      * @returns {HTMLDivElement}
      */
-    getHeadingContainer(heading_text, instruction_text = null) {
+    getHeadingContainer(heading_text) {
         const heading = document.createElement('h3');
         heading.innerText = heading_text;
 
         const container = document.createElement('div');
         container.classList.add('heading-container');
         container.appendChild(heading);
-
-        if (instruction_text) {
-            const instructions = document.createElement('p');
-            instructions.innerHTML = instruction_text;
-            container.appendChild(instructions);
-        }
 
         return container;
     }

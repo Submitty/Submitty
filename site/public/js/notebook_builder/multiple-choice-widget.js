@@ -74,6 +74,7 @@ class MultipleChoiceWidget extends Widget {
 
     getMultipleChoice() {
         const add_button = this.getButton('Add');
+        add_button.setAttribute('id', 'add_button');
         add_button.addEventListener('click', () => {
             // Collect value and description from input boxes
             const value = this.choices_table.getElementsByClassName('value-input')[0];
@@ -121,7 +122,7 @@ class MultipleChoiceWidget extends Widget {
         <tfoot>
             <tr>
                 <td><input type="text" class="value-input"></td>
-                <td><input type="text" class="description-input"></td>
+                <td><textarea class="description-input"></textarea></td>
             </tr>
         </tfoot>`;
     }
