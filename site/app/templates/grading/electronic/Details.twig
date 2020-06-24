@@ -343,7 +343,9 @@
                     {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
                         <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                     {% else %}
-                        {%  if info.graded_groups[index] < 4   %}
+                        {%  if info.graded_groups[index] == "peer-null"   %}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                        {% elseif info.graded_groups[index] < 4   %}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
                         {% else %}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
