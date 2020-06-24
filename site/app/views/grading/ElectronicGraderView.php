@@ -740,7 +740,7 @@ HTML;
         $return = "";
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $gradeable->isTeamAssignment());
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
@@ -932,14 +932,20 @@ HTML;
      * @param string $file_path
      * @return string $anon_path
      */
-    public function setAnonPath($file_path) {
+    public function setAnonPath($file_path, $is_team) {
         $file_path_parts = explode("/", $file_path);
         $anon_path = "";
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id[0]]->getAnonId();
-                $anon_path = $anon_path . "/" . $anon_id;
+                if($is_team){
+                    $anon_id = $this->core->getQueries()->getTeamsById($user_id)[$user_id[0]]->getAnonId();
+                    $anon_path = $anon_path . "/" . $anon_id;
+                }
+                else{
+                    $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id[0]]->getAnonId();
+                    $anon_path = $anon_path . "/" . $anon_id;
+                }
             }
             else {
                 $anon_path = $anon_path . "/" . $file_path_parts[$index];
@@ -954,13 +960,13 @@ HTML;
      * @param int $display_version
      * @return string by reference
      */
-    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        $add_files = function (&$files, $new_files, $start_dir_name) {
+    public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $is_team) {
+        $add_files = function (&$files, $new_files, $start_dir_name, $is_team) {
             $files[$start_dir_name] = [];
             if ($new_files) {
                 foreach ($new_files as $file) {
                     if ($start_dir_name == "submissions") {
-                        $file["path"] = $this->setAnonPath($file["path"]);
+                        $file["path"] = $this->setAnonPath($file["path"], $is_team);
                     }
                     $path = explode('/', $file['relative_name']);
                     array_pop($path);
@@ -989,10 +995,10 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
-            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
-            $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
-            $add_files($results, $display_version_instance->getResultsFiles(), 'results');
-            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $is_team);
+            $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $is_team);
+            $add_files($results, $display_version_instance->getResultsFiles(), 'results', $is_team);
+            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $is_team);
         }
         $student_grader = false;
         if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {

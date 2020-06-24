@@ -3616,35 +3616,9 @@ AND gc_id IN (
         return array_merge($this->course_db->rows(), $user_array);
     }
 
-    /**
-     * Gets the team ids from the provided anonymous ids
-     * TODO: This function is in place for when teams get anonymous ids
-     *
-     * @param  array $anon_ids
-     * @return array
-     */
-    public function getTeamIdsFromAnonIds(array $anon_ids) {
-        /*
-        $placeholders = $this->createParamaterList(count($anon_ids));
-        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$placeholders}", $anon_ids);
-
-        $team_ids = [];
-        foreach ($this->course_db->row() as $row) {
-            $team_ids[$row['anon_id']] = $row['team_id'];
-        }
-        return $team_ids;
-        */
-        // TODO: team ids are the same as their anonymous ids for now
-        return array_combine($anon_ids, $anon_ids);
-    }
-
-    public function getTeamIdFromAnonId(string $anon_id) {
-        return $this->getTeamIdsFromAnonIds([$anon_id])[$anon_id] ?? null;
-    }
-
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id);
+            $this->getTeamFromAnon($anon_id)[$anon_id];
     }
 
     // NOTIFICATION/EMAIL QUERIES

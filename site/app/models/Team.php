@@ -96,7 +96,7 @@ class Team extends AbstractModel {
                     // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
-                    $random .= $alpha[random_int(0, $alpha_length)];
+                    $random = "check";
                 }
             } while (in_array($random, $anon_ids));
             $this->anon_id = $random;
