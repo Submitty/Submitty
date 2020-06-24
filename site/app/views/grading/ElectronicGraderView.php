@@ -522,6 +522,10 @@ HTML;
                 if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
                     $info["graded_groups"][] = 4;
                 }
+                elseif ($component->isPeer() && $graded_component === null) {
+                    //not graded
+                    $info["graded_groups"][] = "peer-null";
+                }
                 elseif ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
