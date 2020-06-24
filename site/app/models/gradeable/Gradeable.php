@@ -498,7 +498,7 @@ class Gradeable extends AbstractModel {
         }
     }
     
-    public function setPeerFeedback($grader_id, $student_id, $feedback_full, $feedback_id) {
+    public function setPeerFeedback($grader_id, $student_id, $feedback) {
         $bad_input = [];
         if ($this->core->getQueries()->getUserById($grader_id) === null) {
             array_push($bad_input, ($grader_id));
@@ -514,7 +514,7 @@ class Gradeable extends AbstractModel {
             $this->core->addErrorMessage($msg);
         }
         else {
-            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback_full, $feedback_id);
+            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
     }
     

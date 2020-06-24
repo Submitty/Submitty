@@ -3185,16 +3185,15 @@ SQL;
      * @param string $student
      * @param string $grader
      * @param string $gradeable_id
-     * @param string $feedback_full
-     * @param string $feedback_id
+     * @param string $feedback
      */
-    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback_full, $feedback_id) {
-        $this->course_db->query("SELECT feedback_full FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
         if (count($this->course_db->rows()) > 0) {
-            $this->course_db->query("UPDATE peer_feedback SET feedback_full = ?, feedback_id = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback_full, $feedback_id, $grader, $student, $gradeable_id]);
+            $this->course_db->query("UPDATE peer_feedback SET feedback = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback, $grader, $student, $gradeable_id]);
         }
         else {
-            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback_full, feedback_id) VALUES (?,?,?,?,?)", [$grader, $student, $gradeable_id, $feedback_full, $feedback_id]);
+            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
         }
     }
 
@@ -3230,20 +3229,19 @@ SQL;
      * @param string $gradeable_id
      */
     public function getPeerFeedback($gradeable_id) {
-        $this->course_db->query("SELECT grader_id, user_id, feedback_full, feedback_id FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
         $return = [];
         foreach ($this->course_db->rows() as $id) {
-            $return[$id['grader_id']][$id['user_id']]['feedback_full'] = $id['feedback_full'];
-            $return[$id['grader_id']][$id['user_id']]['feedback_id'] = $id['feedback_id'];
+            $return[$id['grader_id']][$id['user_id']]['feedback'] = $id['feedback'];
         }
         return $return;
     }
     
     public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
-        $this->course_db->query("SELECT feedback_full FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
         $results = $this->course_db->rows();
         if (count($results) > 0) {
-            return $results[0]['feedback_full'];
+            return $results[0]['feedback'];
         }
         return null;
     }
