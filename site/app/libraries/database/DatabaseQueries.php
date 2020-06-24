@@ -632,7 +632,7 @@ WHERE status = 1"
 
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row();
     }
 
     public function removeNotificationsPost($post_id) {

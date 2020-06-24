@@ -428,8 +428,24 @@ class ForumController extends AbstractController {
                 $this->core->getNotificationFactory()->onNewPost($event);
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
+                $result['post_id'] = $post_id;
+                $result['thread_id'] = $thread_id;
             }
         }
+        return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/forum/posts/single", methods={"POST"})
+     */
+    public function getSinglePost() {
+        $post_id = $_POST['post_id'];
+        $reply_level = $_POST['reply_level'];
+        $post = $this->core->getQueries()->getPost($post_id);
+        $thread_id = $post['thread_id'];
+        $GLOBALS['totalAttachments'] = 0;
+        $unviewed_posts = [$post_id];
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, false, $reply_level, 'tree', true, true);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 

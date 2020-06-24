@@ -163,10 +163,16 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 return;
             }
 
+            var course = document.body.dataset.courseUrl.split('/').pop();
+            var thread_id = json['data']['thread_id'];
             if (is_thread){
-              var thread_id = json['data']['thread_id'];
-              var course = document.body.dataset.courseUrl.split('/').pop();
               window.socketClient.send({'course': course, 'type': "new_thread", 'thread_id': thread_id});
+            }
+            else {
+              var post_id = json['data']['post_id'];
+              var reply_level = form[0].hasAttribute('id') ? parseInt(form.prev().attr('data-reply_level')) : 0;
+              reply_level = reply_level < 7 ? reply_level+1 : reply_level;
+              window.socketClient.send({'course': course, 'type': "new_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level});
             }
             window.location.href = json['data']['next_page'];
         },
@@ -201,6 +207,44 @@ function publishPost(e) {
         alert("Something went wrong. Please try again.");
         return false;
     }
+}
+
+function socketNewPostHandler(post_id, reply_level) {
+  $.ajax({
+    type: 'POST',
+    url: buildCourseUrl(['forum', 'posts', 'single']),
+    data: {'post_id': post_id, 'reply_level': reply_level, 'csrf_token': window.csrfToken},
+    success: function (response) {
+      try {
+        var new_post = JSON.parse(response).data;
+
+        var parent_id = $($(new_post)[0]).attr('parent_id');
+        var parent_post = $("#" + parent_id);
+        if (parent_post.hasClass('first_post')) {
+          $(new_post).insertBefore('#post-hr').hide().fadeIn();
+        }
+        else {
+          var sibling_posts = $('[parent_id="' + parent_id + '"]');
+          if (sibling_posts.length == 0) {
+            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+          }
+          else {
+            var last_sibling = $('#' + parent_id + ' ~ .post_box').map(function() {
+              return $(this).attr('data-reply_level') > $('#' + parent_id).attr('data-reply_level') ? this : null;
+            }).last();
+            $(new_post).insertAfter(last_sibling.next()).hide().fadeIn();
+          }
+        }
+        $('#'+ post_id + '-reply').css("display","none");
+        $(".post_reply_form").submit(publishPost);
+
+      } catch (error) {
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new post. Please refresh the page.</div>';
+        $('#messages').append(message);
+        return;
+      }
+    }
+  });
 }
 
 function socketNewThreadHandler(thread_id){
@@ -497,6 +541,10 @@ function initSocketClient() {
           break;
         case "merge_thread":
           socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
+          break;
+        case "new_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketNewPostHandler(msg.post_id, msg.reply_level);
           break;
         default:
           console.log("Undefined message recieved.");
@@ -1540,7 +1588,7 @@ function loadThreadHandler(){
                 enableTabsInTextArea('.post_content_reply');
                 saveScrollLocationOnRefresh('posts_list');
 
-                $(".post_reply_from").submit(publishPost);
+                $(".post_reply_form").submit(publishPost);
 
             },
             error: function(){
