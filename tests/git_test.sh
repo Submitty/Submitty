@@ -1,8 +1,9 @@
 SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
 
 test_git() {
-    git clone http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/instructor instructor_open_homework
-    cd instructor_open_homework
+    random_string=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
+    git clone http://${1}:${1}@localhost/git/${SEMESTER}/sample/open_homework/$2 ${random_string}_open_homework
+    cd ${random_string}_open_homework
     touch test.txt
     git add .
     git commit -m "First commit"
@@ -34,9 +35,9 @@ mkdir /tmp/submitty_git
 pushd /tmp/submitty_git
 
 
-test_git instructor
-test_git student
-
+test_git instructor instructor
+test_git instructor student
+test_git student student
 
 EXIT_CODE=0
 git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor 2> /tmp/submitty_git/git_log || EXIT_CODE=$?
