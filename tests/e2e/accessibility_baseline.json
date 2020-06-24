@@ -34,10 +34,10 @@
     "/courses/s20/sample/office_hours_queue": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/polls": [],
-    "/s20/sample/polls/newPoll": [],
-    "/s20/sample/course_materials": [],
-    "/s20/sample/forum": [
+    "/courses/s20/sample/polls": [],
+    "/courses/s20/sample/polls/newPoll": [],
+    "/courses/s20/sample/course_materials": [],
+    "/courses/s20/sample/forum": [
         "The element “input” must not appear as a descendant of the “a” element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools)."
