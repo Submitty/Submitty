@@ -2,6 +2,7 @@
 
 namespace tests\app\models;
 
+use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\models\User;
 
@@ -195,5 +196,69 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'time_zone' => 'NOT_SET/NOT_SET'
         ]);
         $this->assertEquals('NOT SET', $user->getUTCOffset());
+    }
+
+
+    public function validateUserDataProvider(): array {
+        $return = [
+            ['user_id', 'test', true],
+            ['user_id', 'system_user-1', true],
+            ['user_id', 'te#t', false],
+            ['user_email', '', true],
+            ['user_email', 'pevelm@rpi.edu', true],
+            ['user_email', 'student@faculty.university-of-xy.edu', true],
+            ['user_email', '_______@example.com', true],
+            ['user_email', 'firstname-lastname@example.com', true],
+            ['user_email', 'invalid', false],
+            ['user_email', '@example.com', false],
+            ['user_email', 'Abc..123@example.com', false],
+            ['user_group', '0', false],
+            ['user_group', '1', true],
+            ['user_group', '2', true],
+            ['user_group', '3', true],
+            ['user_group', '4', true],
+            ['user_group', '5', false],
+            ['registration_section', null, true],
+            ['registration_section', 'test', true],
+            ['registration_section', '1', true],
+            ['registration_section', 'section-1', true],
+            ['registration_section', 'section 1', false],
+            ['registration_section', 'Section_1-2', true],
+            ['user_password', '', false],
+            ['user_password', 'test', true],
+        ];
+
+        foreach (['firstname', 'lastname'] as $key) {
+            $return[] = ["user_legal_{$key}", '', false];
+            $return[] = ["user_legal_{$key}", 'Test', true];
+            $return[] = ["user_legal_{$key}", "Test-Phil Mc'Duffy Sr.", true];
+            $return[] = ["user_legal_{$key}", 'Test!!', false];
+            $return[] = ["user_legal_{$key}", "A very long name that goes on for a long time and uses a lot of characters and holy smokes what a name it just keeps going", true];
+            $return[] = ["user_preferred_{$key}", '', true];
+            $return[] = ["user_preferred_{$key}", 'Test', true];
+            $return[] = ["user_preferred_{$key}", "Test-Phil Mc'Duffy Sr.", true];
+            $return[] = ["user_preferred_{$key}", 'Test!!', false];
+            $return[] = ["user_preferred_{$key}", "A very long name that goes on for a long time and uses a lot of characters and holy smokes what a name it just keeps going", false];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @dataProvider validateUserDataProvider
+     */
+    public function testValidateUserData(string $field, ?string $value, bool $expected): void {
+        $this->assertSame($expected, User::validateUserData($field, $value));
+    }
+
+    public function testInvalidFieldForValidate(): void {
+        try {
+            User::validateUserData('invalid_field', 'blah');
+            $this->fail('ValidationException should have been thrown');
+        }
+        catch (ValidationException $exc) {
+            $this->assertSame('User::validateUserData() called with unknown $field.  See extra details, below.', $exc->getMessage());
+            $this->assertSame(['$field: \'invalid_field\'', '$data: \'blah\''], $exc->getDetails());
+        }
     }
 }
