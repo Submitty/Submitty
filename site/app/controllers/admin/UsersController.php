@@ -929,7 +929,7 @@ class UsersController extends AbstractController {
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_row_details = [];
-        $bad_columns = array(); //Tracks columns in which errors occured
+        $bad_columns = []; //Tracks columns in which errors occured
 
         // Mapping column with its validation formats
         $column_formats = [
