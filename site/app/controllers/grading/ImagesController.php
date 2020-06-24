@@ -180,15 +180,19 @@ class ImagesController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function flagUserImage() {
-        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], 'flagged');
-
-        if ($result) {
-            $this->core->addSuccessMessage($_POST['user_id'] . '\'s image was successfully flagged.');
+        if ($_POST['flag'] === 'true') {
+            $new_state = 'flagged';
+            $success_msg = $_POST['user_id'] . '\'s image was successfully flagged.';
+            $fail_msg = 'Some error occurred flagging ' . $_POST['user_id'] . '\'s image.';
         }
         else {
-            $this->core->addErrorMessage('Some error occurred flagging ' . $_POST['user_id'] . '\'s image.');
+            $new_state = 'preferred';
+            $success_msg = $_POST['user_id'] . '\'s image was successfully unflagged.';
+            $fail_msg = 'Some error occurred unflagging ' . $_POST['user_id'] . '\'s image.';
         }
 
+        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], $new_state);
+        $result ? $this->core->addSuccessMessage($success_msg) : $this->core->addErrorMessage($fail_msg);
         return new RedirectResponse($this->core->buildCourseUrl(['student_photos']));
     }
 }

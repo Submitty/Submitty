@@ -270,11 +270,6 @@ class User extends AbstractModel {
      * @throws \ImagickException
      */
     public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
-        // Check if user's current display image state is set to flagged, if so they may not continue
-        if (!is_null($this->display_image) && $this->display_image->getDisplayImageState() === 'flagged') {
-            return false;
-        }
-
         $image_saved = true;
 
         // Try saving image to its new spot in the file directory

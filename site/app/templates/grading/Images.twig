@@ -28,8 +28,12 @@
                             <div class="name">
                                 <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                                 <br />{{student.getId()}}
-                                {% if hasInstructorPermission and display_image is not null and display_image.getDisplayImageState() == 'preferred' %}
-                                    <a href="javascript:flagUserImage('{{ student.getId() }}')"><i class="fas fa-flag"></i></a>
+                                {% if hasInstructorPermission and display_image is not null %}
+                                    {% if display_image.getDisplayImageState() == 'preferred' %}
+                                        <a href="javascript:flagUserImage('{{ student.getId() }}', true)"><i class="fas fa-flag"></i></a>
+                                    {% elseif display_image.getDisplayImageState() == 'flagged' %}
+                                        <a href="javascript:flagUserImage('{{ student.getId() }}', false)"><i class="fas fa-undo"></i></a>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </td>
