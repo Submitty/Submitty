@@ -524,13 +524,13 @@ class Gradeable extends AbstractModel {
         if ($feedback == 'thanks') {
             return 'Thank you!';
         }
-        else if ($feedback == 'helpful') {
+        elseif ($feedback == 'helpful') {
             return 'This feedback was helpful to me!';
         }
-        else if($feedback == 'detailed'){
+        elseif ($feedback == 'detailed') {
             return 'This feedback was detailed, specific, and/or technical';
         }
-        else if($feedback == 'inappropriate'){
+        elseif ($feedback == 'inappropriate') {
             return 'This feedback was inaccurate and/or inappropriate';
         }
         return 'No response';
