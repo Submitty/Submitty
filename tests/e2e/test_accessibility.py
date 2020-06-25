@@ -66,13 +66,11 @@ class TestAccessibility(BaseTestCase):
 
         self.validatePages()
 
-
     # Any code that should be run before checking for accessibility
     def setUp(self):
         super().setUp()
         self.baseline_path = f'{os.path.dirname(os.path.realpath(__file__))}/accessibility_baseline.json'
         self.urls_formatted = [url.format(self.get_current_semester(), 'sample') for url in self.urls]
-
 
     def validatePages(self):
         self.log_out()
@@ -82,13 +80,14 @@ class TestAccessibility(BaseTestCase):
             baseline = json.load(f)
 
         self.maxDiff = None
-        for url_index,url in enumerate(self.urls_formatted):
+        for url_index, url in enumerate(self.urls_formatted):
             with self.subTest(url=url):
                 foundErrors = []
                 foundErrorMessages = []
                 self.get(url=url)
 
                 with tempfile.NamedTemporaryFile(mode='w+', suffix='.html') as tmp:
+                    tmp.write("<!DOCTYPE html>\n")
                     tmp.write(self.driver.page_source)
 
                     error_json = subprocess.check_output(["java", "-jar", "/usr/bin/vnu.jar", "--exit-zero-always", "--format", "json", tmp.name], stderr=subprocess.STDOUT)
@@ -102,10 +101,9 @@ class TestAccessibility(BaseTestCase):
                             continue
 
                         if error['message'] not in baseline[self.urls[url_index]] and error['message'] not in foundErrorMessages:
-                            # print(json.dumps(error, indent=4, sort_keys=True))
                             foundErrorMessages.append(error['message'])
                             clean_error = {
-                                "error": error['message'].replace('\u201c',"'").replace('\u201d',"'").strip(),
+                                "error": error['message'].replace('\u201c', "'").replace('\u201d', "'").strip(),
                                 "html extract": error['extract'].strip(),
                                 "type": error['type'].strip()
                             }
@@ -114,7 +112,6 @@ class TestAccessibility(BaseTestCase):
                     msg = f"\n{json.dumps(foundErrors, indent=4, sort_keys=True)}\nMore info can be found by using the w3 html validator. You can read more about it on submitty.org:\nhttps://validator.w3.org/#validate_by_input\nhttps://submitty.org/developer/interface_design_style_guide/web_accessibility#html-css-and-javascript"
                     self.assertFalse(foundErrors != [], msg=msg)
 
-
     def genBaseline(self):
         self.log_out()
         self.log_in(user_id='instructor')
@@ -122,12 +119,11 @@ class TestAccessibility(BaseTestCase):
 
         baseline = {}
 
-        for url_index,url in enumerate(self.urls_formatted):
+        for url_index, url in enumerate(self.urls_formatted):
             self.get(url=url)
             with tempfile.NamedTemporaryFile(mode='w+', suffix='.html') as tmp:
                 tmp.write("<!DOCTYPE html>\n")
                 tmp.write(self.driver.page_source)
-
 
                 error_json = subprocess.check_output(["java", "-jar", "/usr/bin/vnu.jar", "--exit-zero-always", "--format", "json", tmp.name], stderr=subprocess.STDOUT)
                 baseline[self.urls[url_index]] = []
