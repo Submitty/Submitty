@@ -19,7 +19,7 @@ class MultipleChoiceWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
-        interactive_area.innerHTML = this.getMultipleChoice();
+        interactive_area.appendChild(this.getMultipleChoice());
         interactive_area.appendChild(this.getConfig());
 
         return container;
@@ -58,34 +58,36 @@ class MultipleChoiceWidget extends Widget {
     }
 
     getMultipleChoice() {
-        return this.getMultipleChoiceTemplate();
+        const table = document.createElement('div');
+        table.setAttribute('id', 'mc-table');
+        table.innerHTML = this.getMultipleChoiceTemplate();
+
+        return table;
     }
 
     getMultipleChoiceTemplate() {
         return `
-        <div id="mc-table">
-            <div class="mc-row">
-                <div class="mc-header mc-col">
-                    Value
-                </div>
-                <div class="mc-header mc-col-center">
-                    Description
-                </div>
-                <div class="mc-header mc-col">
-                    Controls
-                </div>
+        <div class="mc-row">
+            <div class="mc-header mc-col">
+                Value
             </div>
-            <div class="mc-body mc-row"></div>
-            <div class="mc-inputs mc-row">
-                <div class="mc-col">
-                    <input type="text" id="value-input">    
-                </div>
-                <div class="mc-col-center">
-                    <textarea id="description-input"></textarea>
-                </div>
-                <div class="mc-col">
-                    <input type="button" id="add_button" value="Add">
-                </div>
+            <div class="mc-header mc-col-center">
+                Description
+            </div>
+            <div class="mc-header mc-col">
+                Controls
+            </div>
+        </div>
+        <div class="mc-body mc-row"></div>
+        <div class="mc-inputs mc-row">
+            <div class="mc-col">
+                <input type="text" id="value-input">    
+            </div>
+            <div class="mc-col-center">
+                <textarea id="description-input"></textarea>
+            </div>
+            <div class="mc-col">
+                <input type="button" id="add_button" value="Add">
             </div>
         </div>`;
     }

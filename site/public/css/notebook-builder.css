@@ -67,7 +67,7 @@
 .markdown-widget textarea {
     width: 100%;
     margin-right: 10px;
-    min-height: 100px;
+    height: 100px;
 }
 
 /**
@@ -113,7 +113,7 @@
 
 #mc-table #description-input {
     width: 90%;
-    min-height: 80px;
+    height: 80px;
 }
 
 .multiple-choice-config {
