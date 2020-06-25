@@ -25,6 +25,10 @@ nlohmann::json printTestCase(TestCase test) {
   j["hidden"] = test.getHidden();
   j["view_testcase_message"] = test.viewTestcaseMessage();
 
+  j["publish_actions"] = test.publishActions();
+  j["dispatcher_actions"] = test.getDispatcherActions();
+  j["actions"] = test.getGraphicsActions();
+
   // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
   j["view_file_results"] = true;
   j["view_test_points"] = true;
@@ -244,7 +248,19 @@ int main(int argc, char *argv[]) {
               out_notebook_cell["width"] = width;
           }
       }
+      // Handle file_submission
+      else if(type == "file_submission"){
+          // required field
+          std::string directory = in_notebook_cell.value("directory","");
+          assert (directory != "");
 
+          // optional field
+          std::string label = in_notebook_cell.value("label","");
+
+          // Pass forward populated items
+          out_notebook_cell["directory"] = directory;
+          out_notebook_cell["label"] = label;
+      }
       // Handle short_answer data
       else if(type == "short_answer"){
           // Get req short_answer items

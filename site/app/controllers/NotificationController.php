@@ -55,7 +55,7 @@ class NotificationController extends AbstractController {
      * @return MultiResponse
      */
     public function showNotifications($show_all = null) {
-        $show_all = isset($show_all) ? true : false;
+        $show_all = isset($show_all);
         $notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), $show_all);
         return MultiResponse::webOnlyResponse(
             new WebResponse(

@@ -497,6 +497,7 @@ CREATE TABLE users (
     instructor_updated boolean NOT NULL DEFAULT false,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
+    time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );
 

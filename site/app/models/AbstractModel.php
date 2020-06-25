@@ -15,7 +15,7 @@ use app\libraries\Utils;
  */
 abstract class AbstractModel {
 
-    protected static $properties = array();
+    protected static $properties = [];
 
     /** @var Core */
     protected $core;
@@ -64,7 +64,7 @@ abstract class AbstractModel {
             }
         }
         elseif (is_array($object)) {
-            $return = array();
+            $return = [];
             foreach ($object as $key => $value) {
                 if (is_numeric($key) || (!$check_property || isset(static::$properties[get_class($this)][$key]))) {
                     $return[$key] = $this->parseObject($value, false);
