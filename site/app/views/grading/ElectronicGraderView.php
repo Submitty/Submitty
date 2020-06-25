@@ -399,7 +399,7 @@ HTML;
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) { 
+            if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "20%", "title" => "Peer Grading",      "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
