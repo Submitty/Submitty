@@ -64,7 +64,7 @@ class PlagiarismView extends AbstractView {
                     $rankings = array_chunk(preg_split('/ +/', $content), 3);
                     $plagiarism_row['ranking_available'] = true;
                     $plagiarism_row['matches_and_topmatch'] = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
-                    $plagiarism_row['gradeable_link'] = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
+                    $plagiarism_row['gradeable_link'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $plagiarism_row['id']]);
                 }
                 $plagiarism_row['rerun_plagiarism_link'] = $this->core->buildCourseUrl(['plagiarism', 'gradeable', "{$plagiarism_row['id']}", 'rerun']);
                 $plagiarism_row['edit_plagiarism_link'] = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . "?gradeable_id={$plagiarism_row['id']}";
@@ -92,6 +92,7 @@ class PlagiarismView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
         $this->core->getOutput()->addInternalJs('plagiarism.js');
+        $this->core->getOutput()->addInternalCss('plagiarism.css');
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate('plagiarism/PlagiarismResult.twig', [
