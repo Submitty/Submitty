@@ -253,6 +253,24 @@ function socketNewPostHandler(post_id, reply_level) {
   });
 }
 
+function socketDeletePostHandler(post_id) {
+  var main_post = $('#' + post_id);
+  var sibling_posts = $('#' + post_id + ' ~ .post_box').map(function() {
+    return $(this).attr('data-reply_level') <= $('#' + post_id).attr('data-reply_level') ? this : null;
+  });
+  if (sibling_posts.length != 0) {
+    var posts_to_delete = main_post.nextUntil(sibling_posts.first());
+  }
+  else {
+    var posts_to_delete = main_post.nextUntil('#post-hr');
+  }
+
+  posts_to_delete.filter('.reply-box').remove();
+  main_post.add(posts_to_delete).fadeOut(400, function () {
+    main_post.add(posts_to_delete).remove();
+  });
+}
+
 function socketNewThreadHandler(thread_id){
   $.ajax({
     type: 'POST',
@@ -551,6 +569,10 @@ function initSocketClient() {
         case "new_post":
           if ($('data#current-thread').val() == msg.thread_id)
             socketNewPostHandler(msg.post_id, msg.reply_level);
+          break;
+        case "delete_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketDeletePostHandler(msg.post_id);
           break;
         default:
           console.log("Undefined message recieved.");
@@ -1386,7 +1408,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     var type = (isDeletion ? '0' : '2');
     var message = (isDeletion?"delete":"undelete");
 
-    var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you are " + message + " the first post in a thread this will " + message + " the entire thread.");
+    var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you " + message + " the first post in a thread this will " + message + " the entire thread.");
     if(confirm){
         var url = buildCourseUrl(['forum', 'posts', 'modify']) + `?modify_type=${type}`;
         $.ajax({
@@ -1411,13 +1433,14 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                     return;
                 }
                 var new_url = "";
+                var course = document.body.dataset.courseUrl.split('/').pop();
                 switch(json['data']['type']){
                     case "thread":
-                      var course = document.body.dataset.courseUrl.split('/').pop();
                       window.socketClient.send({'course': course, 'type': "delete_thread", 'thread_id': thread_id});
                       new_url = buildCourseUrl(['forum', 'threads']);
                       break;
                     case "post":
+                      window.socketClient.send({'course': course, 'type': "delete_post", 'thread_id': thread_id, 'post_id': post_id});
                       new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                       break;
                     default:
