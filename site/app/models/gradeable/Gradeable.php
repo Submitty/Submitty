@@ -455,7 +455,9 @@ class Gradeable extends AbstractModel {
         foreach (self::date_properties as $date) {
             if (isset($dates[$date]) && $dates[$date] !== null) {
                 try {
-                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getUser()->getUsableTimeZone());
+                    $user = $this->core->getUser();
+                    $time_zone = is_null($user) ? $this->core->getConfig()->getTimezone() : $user->getUsableTimeZone();
+                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $time_zone);
                 }
                 catch (\Exception $e) {
                     $parsedDates[$date] = null;

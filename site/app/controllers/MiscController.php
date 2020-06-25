@@ -221,8 +221,8 @@ class MiscController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $is_anon, $version = null, $origin = null) {
-        if ($is_anon) {
+    public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
+        if ($is_anon === "true") {
             $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
         }
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);

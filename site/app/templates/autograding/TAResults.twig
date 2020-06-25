@@ -1,4 +1,5 @@
 {% import 'functions/Badge.twig' as Badge %}
+{% import 'functions/TAResultsFunctions.twig' as TAResultsFunctions %}
 {% import _self as self %}
 
 <script>
@@ -116,17 +117,10 @@ $( document ).ready(function() {
         {% endif %}
         {# /Overview #}
 
-        {% if (ta_score >= ta_max) %}
-            <canvas id="confetti_canvas"></canvas>
-        {% endif %}
-
         {% if ta_components | length > 0 %}
             {# TA/Instructor Manual total #}
             <div class="box submission-page-total-header">
-                <div class="box-title-total key_to_click" tabindex="0"
-                    {% if ta_score >= ta_max %}
-                        onclick="addConfetti();" style="cursor:pointer;"
-                     {% endif %}>
+                <div class="box-title-total key_to_click" tabindex="0">
 
                     {{ Badge.render(ta_score, ta_max, false) }}
                     <h4>TA / Instructor Grading Total</h4>
@@ -136,56 +130,7 @@ $( document ).ready(function() {
 
             {# TA Component boxes #}
             {% for component in ta_components %}
-                <div class="box grade-results">
-                    <div class="box-badge">
-                        {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
-                    </div>
-                    <div class="box-info">
-                        <h4>{{ component.title|escape }}
-                            {% if component.graders|length != 0 %}
-                                <i>(Graded by: {{ component.graders|join(' / ') }})</i>
-                            {% endif %}
-                        </h4>
-                        <div style="float:left;">
-                            <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
-                            <p>
-                            {# This is a layout table #}
-                            <table class="gradeable_comment">
-                                {% for mark in component.marks|filter((mark) => mark.show_mark) %}
-                                    <tr>
-                                        <td>
-                                            {% if mark.earned %}
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            {% else %}
-                                                <i class="far fa-square fa-1g"></i>
-                                            {% endif %}
-                                        </td>
-                                        <td class="mark-score">
-                                            {{ mark.points|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ mark.title|nl2br }}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                {% if component.custom_mark_score != 0 or component.comment != '' %}
-                                    <tr>
-                                        <td>
-                                            <i class="far fa-check-square fa-1g"></i>
-                                        </td>
-                                        <td class="mark-score">
-                                            {{ component.custom_mark_score|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ component.comment|nl2br }}
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </table>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                {{ TAResultsFunctions.renderComponent(component, false) }}
             {% endfor %}
         </div>
         {# /Component boxes #}
