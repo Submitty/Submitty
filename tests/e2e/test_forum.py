@@ -18,7 +18,7 @@ class TestForum(BaseTestCase):
     def setUp(self):
         super().setUp()
         submitty_session_cookie = self.driver.get_cookie('submitty_session')
-        self.ws = create_connection("ws://localhost:1501/ws", cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
+        self.ws = create_connection("ws://localhost", cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
 
     def tearDown(self):
         self.ws.close()
