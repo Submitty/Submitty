@@ -136,6 +136,7 @@ class ElectronicGraderView extends AbstractView {
                 $peer_percentage = 0;
                 $peer_total = 0;
                 $peer_graded = 0;
+               
 
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
                     $peer_total =  floor(($sections['stu_grad']['total_components']));
@@ -143,25 +144,25 @@ class ElectronicGraderView extends AbstractView {
                     $peer_percentage = number_format(($peer_graded / ($peer_total) ) * 100, 1);
                 }
             }
-            else {
-                foreach ($sections as $key => &$section) {
-                    if ($section['total_components'] == 0) {
-                        $section['percentage'] = 0;
-                    }
-                    else {
-                        $section['percentage'] = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
-                    }
-                    $section['graded'] = round($section['graded_components'] / $num_components, 1);
-                    $section['total'] = $section['total_components'] / $num_components;
+            {
+            foreach ($sections as $key => &$section) {
+                if ($section['total_components'] == 0) {
+                    $section['percentage'] = 0;
                 }
+                else {
+                    $section['percentage'] = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
+                }
+                $section['graded'] = round($section['graded_components'] / $num_components, 1);
+                $section['total'] = $section['total_components'] / $num_components;
+            }
                 unset($section); // Clean up reference
 
-                if ($gradeable->isTaGradeReleased()) {
-                    $viewed_total = $total / $num_components;
-                    $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
-                    $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
-                        number_format(($individual_viewed_grade / $total_students_submitted) * 100, 1);
-                }
+            if ($gradeable->isTaGradeReleased()) {
+                $viewed_total = $total / $num_components;
+                $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
+                $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
+                    number_format(($individual_viewed_grade / $total_students_submitted) * 100, 1);
+            }
             }
             if (!$peer) {
                 if ($overall_average !== null) {

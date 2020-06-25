@@ -606,16 +606,17 @@
                                 <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                                 <br/>
                                 <br/>
-                                <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                                <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
                             {% endif %}
                         
                             <br/>
                             <br/>
                         {% endif %}
-                        {% if (peer) %}
-                            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
-                        {% else %}
-                            <b>By Grading Sections:</b>
+                        {# To be used when functionality to view peer data in instructor view is to be added 
+                        {% if peer %}
+                        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
+                        {% endif %} #}
+                            <b>TA Grading By Grading Sections:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
                                     Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
@@ -634,7 +635,7 @@
                                     <br/>
                                 {% endfor %}
                             </div>
-                        {% endif %}
+                        
 
                         {% if ta_grades_released %}
                             {% if team_assignment %}
@@ -662,7 +663,7 @@
                     </div>
                     <div class = "box col-md-6">
                         {# RIGHT CHUNK#}
-                        {% if not peer %}
+                        {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                             <br>
                             <b>Statistics for Completely Graded Assignments: </b>
                             <br/>
@@ -715,7 +716,6 @@
                                     Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
                                 {% endif %}
                             </div>
-                        {% endif %}
                         {# RIGHT CHUNK #}
                     </div>
 
