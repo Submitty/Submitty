@@ -225,16 +225,22 @@ function socketNewPostHandler(post_id, reply_level) {
         }
         else {
           var sibling_posts = $('[parent_id="' + parent_id + '"]');
-          if (sibling_posts.length == 0) {
-            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+          if (sibling_posts.length != 0) {
+            var parent_sibling_posts = $('#' + parent_id + ' ~ .post_box').map(function() {
+              return $(this).attr('data-reply_level') <= $('#' + parent_id).attr('data-reply_level') ? this : null;
+            });
+            if (parent_sibling_posts.length != 0) {
+              $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
+            }
+            else {
+              $(new_post).insertBefore('#post-hr').hide().fadeIn();
+            }
           }
           else {
-            var last_sibling = $('#' + parent_id + ' ~ .post_box').map(function() {
-              return $(this).attr('data-reply_level') > $('#' + parent_id).attr('data-reply_level') ? this : null;
-            }).last();
-            $(new_post).insertAfter(last_sibling.next()).hide().fadeIn();
+            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
           }
         }
+
         $('#'+ post_id + '-reply').css("display","none");
         $(".post_reply_form").submit(publishPost);
 
