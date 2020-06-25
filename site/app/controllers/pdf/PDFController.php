@@ -18,7 +18,7 @@ class PDFController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")
      */
-    public function showStudentPDF(string $gradeable_id, string $filename, string $path): void {
+    public function showStudentPDF(string $gradeable_id, string $filename, string $path, ?string $grader = null): void {
         $filename = html_entity_decode($filename);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -30,6 +30,9 @@ class PDFController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = [];
+        if ($grader != null) {
+            $grader = html_entity_decode($grader);
+        }
         if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
@@ -41,7 +44,7 @@ class PDFController extends AbstractController {
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = implode('_', array_slice($pdf_info, 0, -1));
                         $grader_id = $pdf_info[count($pdf_info) - 1];
-                        if ($pdf_id . '.pdf' === $filename) {
+                        if ($pdf_id . '.pdf' === $filename && $grader_id == $grader) {
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
                     }
