@@ -26,7 +26,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return MultiResponse
      */
     public function encodePDF($gradeable_id) {
@@ -73,7 +73,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/display_file")
+     * @Route("/courses/{_semester}/{_course}/display_file")
      */
     public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
         //Is this per-gradeable?
@@ -113,6 +113,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
+
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
@@ -137,7 +138,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/read_file")
+     * @Route("/courses/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
@@ -173,7 +174,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/download")
+     * @Route("/courses/{_semester}/{_course}/download")
      */
     public function downloadCourseFile($dir, $path) {
         // security check
@@ -218,9 +219,12 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $version = null, $origin = null) {
+    public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
+        if ($is_anon === "true") {
+            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+        }
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
@@ -244,7 +248,7 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $folder_names = array();
+        $folder_names = [];
         //See which directories we are allowed to read.
         if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
             //These two have the same check
@@ -282,36 +286,34 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
 
-        $paths = [];
-        foreach ($folder_names as $folder_name) {
-            $paths[] = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
-        }
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-        for ($x = 0; $x < count($paths); $x++) {
-            if (is_dir($paths[$x])) {
+        foreach ($folder_names as $folder_name) {
+            $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
+            if (is_dir($path)) {
                 $files = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($paths[$x]),
+                    new \RecursiveDirectoryIterator($path),
                     \RecursiveIteratorIterator::LEAVES_ONLY
                 );
-                $zip->addEmptyDir($folder_names[$x]);
+                $zip->addEmptyDir($folder_name);
                 foreach ($files as $name => $file) {
-                    // Skip directories (they would be added automatically)
-                    if (!$file->isDir()) {
-                        $file_path = $file->getRealPath();
-                        $relative_path = substr($file_path, strlen($paths[$x]) + 1);
+                    // Skip directories (they are added automatically)
+                    if ($file->isDir()) {
+                        continue;
+                    }
+                    $file_path = $file->getRealPath();
+                    $relative_path = substr($file_path, strlen($path) + 1);
 
-                        // For scanned exams, the directories get polluted with the images of the split apart
-                        // pages, so we selectively only grab the PDFs there. For all other types,
-                        // we can grab all files regardless of type.
-                        if ($gradeable->isScannedExam()) {
-                            if (mime_content_type($file_path) === 'application/pdf') {
-                                $zip->addFile($file_path, $folder_names[$x] . '/' . $relative_path);
-                            }
+                    // For scanned exams, the directories get polluted with the images of the split apart
+                    // pages, so we selectively only grab the PDFs there. For all other types,
+                    // we can grab all files regardless of type.
+                    if ($gradeable->isScannedExam()) {
+                        if (mime_content_type($file_path) === 'application/pdf') {
+                            $zip->addFile($file_path, $folder_name . '/' . $relative_path);
                         }
-                        else {
-                            $zip->addFile($file_path, $folder_names[$x] . "/" . $relative_path);
-                        }
+                    }
+                    else {
+                        $zip->addFile($file_path, $folder_name . "/" . $relative_path);
                     }
                 }
             }
@@ -328,7 +330,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function downloadAssignedZips($gradeable_id, $type = null) {
@@ -414,7 +416,7 @@ class MiscController extends AbstractController {
                     );
                     $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
                 }
-                $students_array = array();
+                $students_array = [];
                 foreach ($students as $student) {
                     $students_array[] = $student->getId();
                 }
@@ -460,7 +462,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
      */
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";

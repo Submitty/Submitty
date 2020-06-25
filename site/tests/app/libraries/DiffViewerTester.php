@@ -13,11 +13,11 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
      * @return array
      */
     public function diffDir() {
-        $needed_files = array('input_actual.txt', 'input_expected.txt',
-            'input_differences.json', 'output_actual.txt', 'output_expected.txt');
+        $needed_files = ['input_actual.txt', 'input_expected.txt',
+            'input_differences.json', 'output_actual.txt', 'output_expected.txt'];
         $dir = __TEST_DATA__ . '/diffs';
         $files = scandir($dir);
-        $diffs = array();
+        $diffs = [];
         foreach ($files as $file) {
             if (is_dir($dir . "/" . $file) && strpos($file, '.') === false) {
                 foreach ($needed_files as $needed_file) {
@@ -25,7 +25,7 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
                         continue 2;
                     }
                 }
-                $diffs[] = array($dir . "/" . $file);
+                $diffs[] = [$dir . "/" . $file];
             }
         }
         return $diffs;

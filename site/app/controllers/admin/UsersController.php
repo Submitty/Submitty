@@ -24,8 +24,8 @@ use app\exceptions\DatabaseException;
  */
 class UsersController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/users", methods={"GET"})
-     * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/users", methods={"GET"})
      * @return MultiResponse
      */
     public function getStudents() {
@@ -33,9 +33,11 @@ class UsersController extends AbstractController {
         //Assemble students into sections
         $sorted_students = [];
         $download_info = [];
+        $formatted_tzs = [];
         foreach ($students as $student) {
             $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $formatted_tzs[$student->getId()] = $student->getNiceFormatTimeZone() === 'NOT SET' ? 'NOT SET' : $student->getUTCOffset() . ' ' . $student->getTimeZone();
             $sorted_students[$reg_sec][] = $student;
             switch ($student->getGroup()) {
                 case User::GROUP_INSTRUCTOR:
@@ -56,6 +58,8 @@ class UsersController extends AbstractController {
                 'last_name' => $student->getDisplayedLastName(),
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
+                'utc_offset' => $student->getUTCOffset(),
+                'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
@@ -71,14 +75,15 @@ class UsersController extends AbstractController {
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
                 $download_info,
+                $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication
             )
         );
     }
 
     /**
-     * @Route("/{_semester}/{_course}/graders", methods={"GET"})
-     * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/graders", methods={"GET"})
      * @return MultiResponse
      */
     public function getGraders() {
@@ -140,16 +145,16 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
      */
     public function reassignRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['graders']);
-        $new_registration_information = array();
+        $new_registration_information = [];
 
         foreach ($_POST as $key => $value) {
             $key_array = explode("_", $key, 2);
             if (!array_key_exists($key_array[0], $new_registration_information)) {
-                $new_registration_information[$key_array[0]] = array();
+                $new_registration_information[$key_array[0]] = [];
             }
             if ($key_array[1] != 'all') {
                 $new_registration_information[$key_array[0]][] = $key_array[1];
@@ -162,7 +167,7 @@ class UsersController extends AbstractController {
                 $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
             }
             else {
-                $grader->setGradingRegistrationSections(array());
+                $grader->setGradingRegistrationSections([]);
             }
             $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
         }
@@ -171,11 +176,11 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users/details", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/users/details", methods={"GET"})
      */
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
-        $this->core->getOutput()->renderJsonSuccess(array(
+        $this->core->getOutput()->renderJsonSuccess([
             'user_id' => $user->getId(),
             'already_in_course' => true,
             'user_numeric_id' => $user->getNumericId(),
@@ -191,11 +196,11 @@ class UsersController extends AbstractController {
             'instructor_updated' => $user->isInstructorUpdated(),
             'manual_registration' => $user->isManualRegistration(),
             'grading_registration_sections' => $user->getGradingRegistrationSections()
-        ));
+        ]);
     }
 
     /**
-     * @Route("/{_semester}/{_course}/user_information", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/user_information", methods={"GET"})
      */
     public function ajaxGetSubmittyUsers() {
         $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
@@ -203,11 +208,11 @@ class UsersController extends AbstractController {
         $course_users = $this->core->getQueries()->getUsersById($user_ids);
 
         //uses more thorough course information if it exists, if not uses database information
-        $user_information = array();
+        $user_information = [];
         foreach ($user_ids as $user_id) {
             $already_in_course = array_key_exists($user_id, $course_users);
             $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
-            $user_information[$user_id] = array(
+            $user_information[$user_id] = [
                 'already_in_course' => $already_in_course,
                 'user_numeric_id' => $user->getNumericId(),
                 'user_firstname' => $user->getLegalFirstName(),
@@ -222,13 +227,13 @@ class UsersController extends AbstractController {
                 'instructor_updated' => $user->isInstructorUpdated(),
                 'manual_registration' => $user->isManualRegistration(),
                 'grading_registration_sections' => $user->getGradingRegistrationSections()
-            );
+            ];
         }
         $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})
      */
     public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
@@ -320,7 +325,7 @@ class UsersController extends AbstractController {
             $user->setGradingRegistrationSections($_POST['grading_registration_section']);
         }
         else {
-            $user->setGradingRegistrationSections(array());
+            $user->setGradingRegistrationSections([]);
         }
 
         if ($_POST['edit_user'] == "true") {
@@ -356,7 +361,31 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
+     * @param "users"|"graders" $type
+     * @return RedirectResponse
+     */
+    public function deleteUser(string $type = 'users'): RedirectResponse {
+        $user_id = trim($_POST['user_id']);
+        $displayed_fullname = trim($_POST['displayed_fullname']);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
+
+        if ($user_id === $this->core->getUser()->getId()) {
+            $this->core->addErrorMessage('You cannot delete yourself.');
+        }
+        elseif ($this->core->getQueries()->deleteUser($user_id, $semester, $course)) {
+             $this->core->addSuccessMessage("{$displayed_fullname} has been removed from your course.");
+        }
+        else {
+            $this->core->addErrorMessage("Could not remove {$displayed_fullname}.  They may have recorded activity in your course.");
+        }
+
+        return new RedirectResponse($this->core->buildCourseUrl([$type]));
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/sections", methods={"GET"})
      */
     public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
@@ -364,7 +393,7 @@ class UsersController extends AbstractController {
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
 
         //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
-        $sections_with_students = array();
+        $sections_with_students = [];
         foreach ($non_null_counts as $rows) {
             array_push($sections_with_students, $rows['rotating_section']);
         }
@@ -380,7 +409,7 @@ class UsersController extends AbstractController {
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
         $this->core->getOutput()->renderOutput(
-            array('admin', 'Users'),
+            ['admin', 'Users'],
             'sectionsForm',
             $students,
             $reg_sections,
@@ -391,7 +420,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/sections/registration", methods={"POST"})
      */
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
@@ -447,7 +476,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/sections/rotating", methods={"POST"})
      */
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
@@ -468,7 +497,7 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (isset($_POST['rotating_type']) && in_array($_POST['rotating_type'], array('random', 'alphabetically'))) {
+        if (isset($_POST['rotating_type']) && in_array($_POST['rotating_type'], ['random', 'alphabetically'])) {
             $type = $_POST['rotating_type'];
         }
         else {
@@ -481,7 +510,7 @@ class UsersController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if (in_array($_POST['sort_type'], array('redo', 'fewest')) && $type == "random") {
+        if (in_array($_POST['sort_type'], ['redo', 'fewest']) && $type == "random") {
             $sort = $_POST['sort_type'];
         }
         else {
@@ -660,7 +689,7 @@ class UsersController extends AbstractController {
         // this process ends, regardless if process completes successfully or not.
         register_shutdown_function(
             function () use (&$csv_file, &$xlsx_file) {
-                foreach (array($csv_file, $xlsx_file) as $file) {
+                foreach ([$csv_file, $xlsx_file] as $file) {
                     if (isset($file) && file_exists($file)) {
                         unlink($file);
                     }
@@ -773,7 +802,7 @@ class UsersController extends AbstractController {
      * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
-     * @Route("/{_semester}/{_course}/users/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/users/upload", methods={"POST"})
      */
     public function uploadUserList($list_type = "classlist") {
         // A few places have different behaviors depending on $list_type.
@@ -802,7 +831,7 @@ class UsersController extends AbstractController {
                     //grader-level check is a digit between 1 - 4.
                     return User::validateUserData('user_group', $vals[4]);
                 default:
-                    throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
+                    throw new ValidationException("Unknown classlist", [$list_type, '$row4_validation_function']);
             }
         };
 
@@ -818,7 +847,7 @@ class UsersController extends AbstractController {
                 case "graderlist":
                     return (string) $user->getGroup();
                 default:
-                    throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
+                    throw new ValidationException("Unknown classlist", [$list_type, '$get_user_registration_or_group_function']);
             }
         };
 
@@ -838,7 +867,7 @@ class UsersController extends AbstractController {
                     $user->setGroup($row[4]);
                     break;
                 default:
-                    throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
+                    throw new ValidationException("Unknown classlist", [$list_type, '$set_user_registration_or_group_function']);
             }
         };
 
@@ -861,7 +890,7 @@ class UsersController extends AbstractController {
                         $this->core->getQueries()->updateUser($user, $semester, $course);
                         break;
                     default:
-                        throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
+                        throw new ValidationException("Unknown DB operation", [$action, '$insert_or_update_user_function']);
                 }
             }
             catch (DatabaseException $e) {
@@ -882,7 +911,7 @@ class UsersController extends AbstractController {
                 case "graderlist":
                     return "graders";
                 default:
-                    throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
+                    throw new ValidationException("Unknown classlist", [$list_type, '$set_return_url_action_function']);
             }
         };
 
@@ -899,7 +928,7 @@ class UsersController extends AbstractController {
         // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
-        $bad_rows = array();
+        $bad_rows = [];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
             if (count($vals) === 1) {
@@ -949,8 +978,8 @@ class UsersController extends AbstractController {
 
         // Isolate existing users ($users_to_update[]) and new users ($users_to_add[])
         $existing_users = $this->core->getQueries()->getAllUsers();
-        $users_to_add = array();
-        $users_to_update = array();
+        $users_to_add = [];
+        $users_to_update = [];
         foreach ($uploaded_data as $row) {
             $exists = false;
             foreach ($existing_users as $i => $existing_user) {
@@ -1054,7 +1083,7 @@ class UsersController extends AbstractController {
 
     /**
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/{_semester}/{_course}/users/view_grades", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
     public function viewStudentGrades() {
         if (!isset($_POST["student_id"])) {
@@ -1082,7 +1111,7 @@ class UsersController extends AbstractController {
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
-                array('submission', 'RainbowGrades'),
+                ['submission', 'RainbowGrades'],
                 'showStudentToInstructor',
                 $user,
                 $grade_file

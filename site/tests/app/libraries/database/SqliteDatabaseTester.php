@@ -6,12 +6,12 @@ use app\libraries\database\SqliteDatabase;
 
 class SqliteDatabaseTester extends \PHPUnit\Framework\TestCase {
     public function testMemorySqliteDSN() {
-        $database = new SqliteDatabase(array('memory' => true));
+        $database = new SqliteDatabase(['memory' => true]);
         $this->assertEquals("sqlite::memory:", $database->getDSN());
     }
 
     public function testPathSqliteDSN() {
-        $database = new SqliteDatabase(array('path' => '/tmp/test.sq3'));
+        $database = new SqliteDatabase(['path' => '/tmp/test.sq3']);
         $this->assertEquals("sqlite:/tmp/test.sq3", $database->getDSN());
     }
 
@@ -24,6 +24,6 @@ class SqliteDatabaseTester extends \PHPUnit\Framework\TestCase {
     public function testFromPHPToDatabaseArray() {
         $database = new SqliteDatabase();
         $this->expectException(\app\exceptions\NotImplementedException::class);
-        $database->fromPHPToDatabaseArray(array());
+        $database->fromPHPToDatabaseArray([]);
     }
 }

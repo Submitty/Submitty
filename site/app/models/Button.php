@@ -9,6 +9,7 @@ use app\libraries\Core;
  * @package app\models
  * @method string getTitle()
  * @method string|null getSubtitle()
+ * @method \DateTime|null getDate()
  * @method string|null getHref()
  * @method string|null getOnclick()
  * @method string getClass()
@@ -19,9 +20,11 @@ use app\libraries\Core;
  * @method string|null getAriaLabel()
  * @method string|null getBadge()
  * @method string|null getIcon()
+ * @method bool getPrefix()
  *
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
+ * @method void setDate(\DateTime|null $date)
  * @method void setHref(string|null $href)
  * @method void setOnclick(string|null $on_click)
  * @method void setClass(string $class)
@@ -38,6 +41,9 @@ class Button extends AbstractModel {
     protected $title;
     /** @prop @var string|null $subtitle */
     protected $subtitle;
+    /** @prop @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
+     * grade button then $date may represent the date and time grading begins or ends */
+    protected $date;
     /** @prop @var string|null $href */
     protected $href;
     /** @prop @var string|null $onclick */
@@ -58,6 +64,8 @@ class Button extends AbstractModel {
     protected $badge;
     /** @prop @var string|null $icon */
     protected $icon;
+     /** @prop @var string|null $prefix */
+    protected $prefix;
 
     /**
      * @param Core $core
@@ -67,6 +75,7 @@ class Button extends AbstractModel {
         parent::__construct($core);
         $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
+        $this->date     = $details["date"] ?? null;
         $this->href     = $details["href"] ?? null;
         $this->onclick  = $details["onclick"] ?? null;
         $this->class    = $details["class"] ?? "btn";
@@ -80,6 +89,7 @@ class Button extends AbstractModel {
         $this->aria_label = $details["aria_label"] ?? null;
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
+        $this->prefix = $details["prefix"] ?? "fa";
     }
 
     /**

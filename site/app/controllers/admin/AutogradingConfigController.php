@@ -18,18 +18,18 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AutogradingConfigController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config", methods={"GET"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
     public function showConfig($g_id = '') {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
-        $all_paths = array();
+        $all_paths = [];
         foreach ($all_files as $file) {
             $all_paths[] = $file['path'];
         }
-        $inuse_config = array();
+        $inuse_config = [];
         foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
             foreach ($all_paths as $path) {
                 if ($gradeable->getAutogradingConfigPath() === $path) {
@@ -50,7 +50,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -115,7 +115,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -153,7 +153,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -192,14 +192,14 @@ class AutogradingConfigController extends AbstractController {
 
     /**
      * @param $config_path
-     * @Route("/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
      * @return MultiResponse
      */
     public function configUsedBy($config_path = null) {
         $config_path = urldecode($config_path);
         // Returns a list of gradeables that are using this config
         if ($config_path) {
-            $inuse_config = array();
+            $inuse_config = [];
             foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
                 if ($gradeable->getAutogradingConfigPath() === $config_path) {
                     $inuse_config[] = $gradeable->getId();

@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
@@ -33,7 +34,7 @@ class ReportController extends AbstractController {
     private $all_overrides = [];
 
     /**
-     * @Route("/{_semester}/{_course}/reports")
+     * @Route("/courses/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -43,14 +44,14 @@ class ReportController extends AbstractController {
         $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates', $grade_summaries_last_run);
+        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run);
     }
 
     /**
      * Generates grade summary files for every user
      *
-     * @Route("/{_semester}/{_course}/reports/summaries")
-     * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/reports/summaries")
+     * @Route("/api/courses/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -107,17 +108,17 @@ class ReportController extends AbstractController {
             $time_stamp = filemtime($summaries_dir . '/' . $files[2]);
 
             // Format it
-            $time_stamp = date("F d Y - g:i:s A", $time_stamp);
-            $time_stamp = $time_stamp . ' - ' . $this->core->getConfig()->getTimezone()->getName();
+            $time_stamp = new \DateTime("@$time_stamp");
+            $time_stamp->setTimezone($this->core->getConfig()->getTimezone());
 
-            return $time_stamp;
+            return DateUtils::convertTimeStamp($this->core->getUser(), $time_stamp->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'));
         }
     }
 
     /**
      * Generates and offers download of CSV grade report
      *
-     * @Route("/{_semester}/{_course}/reports/csv")
+     * @Route("/courses/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -519,7 +520,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
@@ -572,7 +573,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/reports/rainbow_grades_status")
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")
      */
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
@@ -637,7 +638,7 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/{_semester}/{_course}/gradebook")
+     * @Route("/courses/{_semester}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function displayGradebook() {
@@ -650,7 +651,7 @@ class ReportController extends AbstractController {
 
         return MultiResponse::webOnlyResponse(
             new WebResponse(
-                array('admin', 'Report'),
+                ['admin', 'Report'],
                 'showFullGradebook',
                 $grade_file
             )

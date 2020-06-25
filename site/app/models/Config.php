@@ -33,6 +33,7 @@ use app\libraries\FileUtils;
  * @method string getConfigPath()
  * @method string getAuthentication()
  * @method \DateTimeZone getTimezone()
+ * @method setTimezone(\DateTimeZone $timezone)
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
  * @method string getCourseJsonPath()
@@ -54,6 +55,7 @@ use app\libraries\FileUtils;
  * @method string getVcsType()
  * @method string getPrivateRepository()
  * @method string getRoomSeatingGradeableId()
+ * @method void setRoomSeatingGradeableId(string $gradeable_id)
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
  * @method string getSecretSession()
@@ -94,13 +96,13 @@ class Config extends AbstractModel {
     protected $course_json_path;
 
     /** @prop @var array */
-    protected $course_json = array();
+    protected $course_json = [];
 
     /**
-    * Indicates whether a course config has been successfully loaded.
-    * @var bool
-    * @prop
-    */
+     * Indicates whether a course config has been successfully loaded.
+     * @var bool
+     * @prop
+     */
     protected $course_loaded = false;
 
     /*** MASTER CONFIG ***/
@@ -176,13 +178,13 @@ class Config extends AbstractModel {
     protected $system_message = '';
 
     /** @prop @var array */
-    protected $submitty_database_params = array();
+    protected $submitty_database_params = [];
 
     /** @prop @var array */
-    protected $course_database_params = array();
+    protected $course_database_params = [];
 
     /** @prop @var array */
-    protected $wrapper_files = array();
+    protected $wrapper_files = [];
 
     /** @prop @var bool */
     protected $email_enabled;
@@ -253,6 +255,9 @@ class Config extends AbstractModel {
     /** @prop-read @var array */
     protected $feature_flags = [];
 
+    /** @prop @var DateTimeFormat */
+    protected $date_time_format;
+
     /**
      * Config constructor.
      *
@@ -261,6 +266,10 @@ class Config extends AbstractModel {
     public function __construct(Core $core) {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
+
+        // For now this will be set to 'MDY', and configured as a property of the Config class
+        // Eventually this should be moved to the User class and configured on a per-user basis
+        $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
     }
 
     public function loadMasterConfigs($config_path) {
@@ -352,14 +361,14 @@ class Config extends AbstractModel {
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
-        foreach (array('submitty_path', 'submitty_log_path', 'submitty_install_path') as $path) {
+        foreach (['submitty_path', 'submitty_log_path', 'submitty_install_path'] as $path) {
             if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
 
-        foreach (array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
+        foreach (['autograding', 'access', 'site_errors', 'ta_grading'] as $path) {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
@@ -451,14 +460,21 @@ class Config extends AbstractModel {
             }
         }
 
-        foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
+        foreach (['default_hw_late_days', 'default_student_late_days'] as $key) {
             $this->$key = intval($this->$key);
         }
 
-        $array = array('zero_rubric_grades', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled", 'queue_contact_info');
+        $array = [
+            'zero_rubric_grades',
+            'display_rainbow_grades_summary',
+            'display_custom_message',
+            'forum_enabled', 'regrade_enabled',
+            'seating_only_for_instructor',
+            'queue_enabled',
+            'queue_contact_info'
+        ];
         foreach ($array as $key) {
-            $this->$key = ($this->$key == true) ? true : false;
+            $this->$key = (bool) $this->$key;
         }
 
         if (!empty($this->course_json['feature_flags']) && is_array($this->course_json['feature_flags'])) {

@@ -3,33 +3,52 @@
 namespace app\libraries\plagiarism;
 
 class Submission {
-    private $userId;
-    private $versionId;
-    private $originalStartMatch;
-    private $originalEndMatch;
-    private $matchingPositions;
+    /** @var string */
+    private $user_id;
+    /** @var int */
+    private $version;
+    /** @var array */
+    private $matching_positions;
+    /** @var int */
+    private $original_start_match;
+    /** @var int */
+    private $original_end_match;
 
-    public function __construct($uId, $vId, $pos, $ogS, $ogE) {
-        $this->userId = $uId;
-        $this->versionId = $vId;
-        $this->matchingPositions = $pos;
-        $this->originalStartMatch = $ogS;
-        $this->originalEndMatch = $ogE;
+    public function __construct(
+        string $user_id,
+        int $version,
+        array $positions,
+        int $original_start,
+        int $original_end
+    ) {
+        $this->user_id = $user_id;
+        $this->version = $version;
+        $this->matching_positions = $positions;
+        $this->original_start_match = $original_start;
+        $this->original_end_match = $original_end;
     }
 
-    public function getUid() {
-        return $this->userId;
+    public function getUserId(): string {
+        return $this->user_id;
     }
 
-    public function getVid() {
-        return $this->versionId;
+    public function getVersion(): int {
+        return $this->version;
     }
 
-    public function getMatchingPositions() {
-        return $this->matchingPositions;
+    public function getMatchingPositions(): array {
+        return $this->matching_positions;
     }
 
-    public function mergeMatchingPositions($newPositions) {
-        $this->matchingPositions = array_merge($this->matchingPositions, $newPositions);
+    public function mergeMatchingPositions(array $positions): void {
+        $this->matching_positions = array_merge($this->matching_positions, $positions);
+    }
+
+    public function getOriginalStartMatch(): int {
+        return $this->original_start_match;
+    }
+
+    public function getOriginalEndMatch(): int {
+        return $this->original_end_match;
     }
 }

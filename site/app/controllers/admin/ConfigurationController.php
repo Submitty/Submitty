@@ -27,12 +27,12 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
-     * @Route("/api/{_semester}/{_course}/config", methods={"GET"})
-     * @Route("/{_semester}/{_course}/config", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/config", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/config", methods={"GET"})
      * @return MultiResponse
      */
     public function viewConfiguration(): MultiResponse {
-        $fields = array(
+        $fields = [
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
             'default_hw_late_days'           => $this->core->getConfig()->getDefaultHwLateDays(),
@@ -56,7 +56,7 @@ class ConfigurationController extends AbstractController {
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
             'queue_announcement_message'       => $this->core->getConfig()->getQueueAnnouncementMessage(),
-        );
+        ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
         if ($this->core->getConfig()->isSubmittyAdminUserVerified()) {
@@ -95,8 +95,8 @@ class ConfigurationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/{_semester}/{_course}/config", methods={"POST"})
-     * @Route("/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
      * @return MultiResponse
      */
     public function updateConfiguration(): MultiResponse {
@@ -116,7 +116,7 @@ class ConfigurationController extends AbstractController {
 
         if ($name === "room_seating_gradeable_id") {
             $gradeable_seating_options = $this->getGradeableSeatingOptions();
-            $gradeable_ids = array();
+            $gradeable_ids = [];
             foreach ($gradeable_seating_options as $option) {
                 $gradeable_ids[] = $option['g_id'];
             }
@@ -126,7 +126,7 @@ class ConfigurationController extends AbstractController {
                 );
             }
         }
-        elseif (in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+        elseif (in_array($name, ['default_hw_late_days', 'default_student_late_days'])) {
             if (!ctype_digit($entry)) {
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Must enter a number for this field')
@@ -149,7 +149,7 @@ class ConfigurationController extends AbstractController {
                 ]
             )
         ) {
-            $entry = $entry === "true" ? true : false;
+            $entry = $entry === "true";
         }
         elseif ($name == "course_home_url") {
             if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {
@@ -177,7 +177,7 @@ class ConfigurationController extends AbstractController {
                 }
             }
 
-            $entry = $entry === "true" ? true : false;
+            $entry = $entry === "true";
         }
 
         if ($name === 'forum_enabled' && $entry == 1) {

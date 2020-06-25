@@ -31,7 +31,7 @@
             <button title="Insert italic text" type="button" onclick="addMarkdownCode(3, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default btn_markdown key_to_click"  tabindex="0">Italics <i class="fas fa-italic fa-1x"></i></button>
         </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -83,7 +83,7 @@
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
         <textarea name="thread_post_content" class="fill-available post_content_reply thread_post_content" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" {% if post_content_limit %} maxlength="{{ post_content_limit }}" {% endif %}
-        onkeydown="submitNearestForm(event,$(this))"></textarea>
+        onkeydown="submitNearestForm(event,$(this))" onpaste="pasteImageFromClipboard(event,$(this), {{ post_box_id }})"></textarea>
     </div>
 <br/>
 {% endif %}
@@ -96,13 +96,15 @@
                 No categories exists please create one.
             </span>
         {% endif %}
-        <fieldset id='categories-pick-list'>
-          <legend id="cat_label">Categories</legend>
-          {% for category in categories %}
-              <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                  <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
-              </div>
-          {% endfor %}
+        <fieldset>
+          <legend id="cat_label">Categories:</legend>
+          <div id=id='categories-pick-list'>
+            {% for category in categories %}
+                <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
+                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+                </div>
+            {% endfor %}
+          </div>
         </fieldset>
     <script>
     $(function() {
@@ -177,8 +179,8 @@
             {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
-            <label class="inline-block" for="Announcement">{{ "Pin Thread" }}</label>
-            <input type="checkbox" class="pinThread-checkbox" name="pinThread" value="pinThread" data-ays-ignore="true"/>
+            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
+            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
@@ -233,6 +235,24 @@
                 theForm.trigger('reinitialize.areYouSure');
                 theForm.submit();
             }
+        }
+    }
+
+    function pasteImageFromClipboard(e, textarea, part) {
+        var item = e.clipboardData.items[0];
+        if (item.type.indexOf("image")===0){
+            image = item.getAsFile();
+
+            num_clipboard_files++;
+            old_name = image.name.split('.');
+            new_name = old_name[0] + num_clipboard_files.toString() + '.' + old_name[1];
+
+            Object.defineProperty(image, 'name', {
+                writable: true,
+                value: new_name
+            });
+
+            addFile(image, part);
         }
     }
 </script>

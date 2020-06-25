@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LateController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/late_days")
+     * @Route("/courses/{_semester}/{_course}/late_days")
      * @return MultiResponse
      */
     public function viewLateDays() {
@@ -32,7 +32,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions")
+     * @Route("/courses/{_semester}/{_course}/extensions")
      * @return MultiResponse
      */
     public function viewExtensions() {
@@ -48,12 +48,12 @@ class LateController extends AbstractController {
     /**
      * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
-     * @Route("/{_semester}/{_course}/late_days/update", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return MultiResponse
      */
     public function updateLateDays($csv_option = null) {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            $data = array();
+            $data = [];
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "late"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->addErrorMessage($error);
@@ -79,8 +79,8 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
-                $error = "Datestamp must be Y-m-d";
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d H:i:s', $_POST['datestamp']) === false)) {
+                $error = "Datestamp must be Y-m-d H:i:s";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
@@ -93,14 +93,17 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-            $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+
+            $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
+
+            $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
     }
 
     /**
-     * @Route("/{_semester}/{_course}/late_days/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/late_days/delete", methods={"POST"})
      * @return MultiResponse
      */
     public function deleteLateDays() {
@@ -128,12 +131,12 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions/update", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/extensions/update", methods={"POST"})
      * @return MultiResponse
      */
     public function updateExtension() {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            $data = array();
+            $data = [];
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->addErrorMessage($error);
@@ -219,7 +222,7 @@ class LateController extends AbstractController {
                 }
                 else {
                     $team_member_ids = explode(", ", $team->getMemberList());
-                    $team_members = array();
+                    $team_members = [];
                     for ($i = 0; $i < count($team_member_ids); $i++) {
                         $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
                             $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
@@ -246,9 +249,9 @@ class LateController extends AbstractController {
      */
     private function getLateDays() {
         $users = $this->core->getQueries()->getUsersWithLateDays();
-        $user_table = array();
+        $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
+            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
         }
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])

@@ -5,6 +5,8 @@ namespace app\models;
 use app\libraries\Core;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\RFCValidation;
 
 /**
  * Class User
@@ -124,10 +126,10 @@ class User extends AbstractModel {
     protected $instructor_updated = false;
 
     /** @prop @var array */
-    protected $grading_registration_sections = array();
+    protected $grading_registration_sections = [];
 
     /** @prop @var array */
-    protected $notification_settings = array();
+    protected $notification_settings = [];
 
     /**
      * User constructor.
@@ -135,7 +137,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details = array()) {
+    public function __construct(Core $core, $details = []) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -188,17 +190,15 @@ class User extends AbstractModel {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
 
-        if (isset($details['time_zone'])) {
-            $this->time_zone = $details['time_zone'];
-        }
+        $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
     }
 
     /**
-     * Update $this->time_zone
+     * Set $this->time_zone
      * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
      * @return bool True if time zone was able to be updated, False otherwise
      */
-    public function updateTimeZone(string $time_zone): bool {
+    public function setTimeZone(string $time_zone): bool {
 
         // Validate the $time_zone string
         if (in_array($time_zone, DateUtils::getAvailableTimeZones())) {
@@ -213,6 +213,40 @@ class User extends AbstractModel {
         }
 
         return false;
+    }
+
+    /**
+     * Get the UTC offset for this user's time zone.
+     *
+     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
+    }
+
+    /**
+     * Gets a \DateTimeZone instantiation for the user's time zone if they have one set, or the server time zone
+     * if they don't.
+     *
+     * @return \DateTimeZone
+     */
+    public function getUsableTimeZone(): \DateTimeZone {
+        if ($this->time_zone === 'NOT_SET/NOT_SET') {
+            return $this->core->getConfig()->getTimezone();
+        }
+        else {
+            return new \DateTimeZone($this->time_zone);
+        }
+    }
+
+    /**
+     * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
+     * user has not set their time zone.
+     *
+     * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
+     */
+    public function getNiceFormatTimeZone(): string {
+        return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
     }
 
     /**
@@ -349,7 +383,7 @@ class User extends AbstractModel {
      * @param mixed $data
      * @return bool
      */
-    public static function validateUserData($field, $data) {
+    public static function validateUserData($field, $data): bool {
 
         switch ($field) {
             case 'user_id':
@@ -369,8 +403,9 @@ class User extends AbstractModel {
                     return true;
                 }
                 // -- or ---
-                // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-                return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+                // validate email address against email RFCs
+                $validator = new EmailValidator();
+                return $validator->isValid($data, new RFCValidation());
             case 'user_group':
                 //user_group check is a digit between 1 - 4.
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
@@ -384,8 +419,8 @@ class User extends AbstractModel {
             default:
                 //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
-                $ex_data = '$data:  ' . var_export(htmlentities($data), true);
-                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
+                $ex_data = '$data: ' . var_export(htmlentities($data), true);
+                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', [$ex_field, $ex_data]);
         }
     }
 

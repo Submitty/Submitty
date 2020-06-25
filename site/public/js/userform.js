@@ -66,6 +66,7 @@ function newUserForm() {
         $("#user_lastname")[0].setCustomValidity("user_lastname is required");
     }
     checkValidEntries();
+    captureTabInModal("edit-user-form");
 }
 
 //opens modal with initial settings for edit user
@@ -101,6 +102,7 @@ function editUserForm(user_id) {
             }
             completeUserFormInformation(json);
             clearValidityWarnings();
+            captureTabInModal("edit-user-form");
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
@@ -108,6 +110,14 @@ function editUserForm(user_id) {
     })
 }
 
+function deleteUserForm(user_id, firstname, lastname) {
+    $('.popup-form').css('display', 'none');
+    const form = $("#delete-user-form");
+    $('[name="user_id"]', form).val(user_id);
+    $('[name="displayed_fullname"]', form).val(firstname + " " + lastname);
+    $('#user-fullname', form).html(firstname + " " + lastname);
+    form.css("display", "block");
+}
 
 function userFormChange() {
     var user_elem = $("select[name='user_group']")[0];
@@ -167,12 +177,12 @@ function checkValidEntries() {
                 input.css("background-color", "transparent");
                 break;
             }
-            var valid_expression = /^[^(),:;\<\>@\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?!\-)(\.[a-zA-Z0-9]+)+$/;
+            var valid_expression = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$/;
             setRedOrTransparent(input,valid_expression);
             break;
         }
 
-    //disable submit button if anythiing is invalid
+    //disable submit button if anything is invalid
     var has_invalid_entry = false;
     $(":text",$("#edit-user-form")).each( function() {
         if (!this.checkValidity()) {
@@ -185,6 +195,7 @@ function checkValidEntries() {
     else {
         $("#user-form-submit").prop('disabled',false);
     }
+    captureTabInModal("edit-user-form", false);
 }
 
 function setRedOrTransparent(input,reg_expression) {
@@ -334,6 +345,7 @@ function clearValidityWarnings() {
         $(this)[0].setCustomValidity("");
     });
     $("#user-form-submit").prop('disabled',false);
+    captureTabInModal("edit-user-form", false);
 }
 
 function closeButton() {
