@@ -145,7 +145,7 @@ class PDFController extends AbstractController {
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->isPeerGrading()) {
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
-                if(!$gradeable->isTeamAssignment()){
+                if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($user_id, $user_ids)) {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
@@ -153,16 +153,16 @@ class PDFController extends AbstractController {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
                 }
-                else{
+                else {
                     $permission_to_grade = false;
                     $id_array[] = $user_id;
                     $team_ids = $this->core->getQueries()->getTeamsById($id_array)[$user_id]->getMemberUserIds();
-                    foreach ($team_ids as $team_id){
-                        if(in_array($team_id, $user_ids)){
+                    foreach ($team_ids as $team_id) {
+                        if (in_array($team_id, $user_ids)) {
                             $permission_to_grade = true;
                         }
                     }
-                    if(!$permission_to_grade){
+                    if (!$permission_to_grade) {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
                 }
@@ -243,7 +243,7 @@ class PDFController extends AbstractController {
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->isPeerGrading()) {
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
-                if(!$gradeable->isTeamAssignment()){
+                if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($id, $user_ids)) {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
@@ -251,16 +251,16 @@ class PDFController extends AbstractController {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
                 }
-                else{
+                else {
                     $permission_to_grade = false;
                     $id_array[] = $id;
                     $team_ids = $this->core->getQueries()->getTeamsById($id_array)[$id]->getMemberUserIds();
-                    foreach ($team_ids as $team_id){
-                        if(in_array($team_id, $user_ids)){
+                    foreach ($team_ids as $team_id) {
+                        if (in_array($team_id, $user_ids)) {
                             $permission_to_grade = true;
                         }
                     }
-                    if(!$permission_to_grade){
+                    if (!$permission_to_grade) {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
                 }
