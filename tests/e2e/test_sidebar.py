@@ -12,7 +12,7 @@ class TestSidebar(BaseTestCase):
     def sidebar_test_helper(self, expected, user_id, user_name):
         self.log_in(user_id=user_id, user_name=user_name)
         self.click_class('sample')
-        base_url = self.test_url + '/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
 
         title_map = {
             'Manage Sections': 'Manage Registration Sections',
@@ -66,7 +66,7 @@ class TestSidebar(BaseTestCase):
             current_idx += 1
 
     def test_click_sidebar_links_instructor(self):
-        base_url = self.test_url + '/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -92,7 +92,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper(expected, 'instructor', 'Quinn')
 
     def test_click_sidebar_links_ta(self):
-        base_url = self.test_url + '/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -109,7 +109,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper(expected, 'ta', 'Jill')
 
     def test_click_sidebar_links_student(self):
-        base_url = self.test_url + '/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],

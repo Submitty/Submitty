@@ -14,7 +14,7 @@ class AccessControlTester extends BaseUnitTest {
     private $course = 'test_course';
 
     public function data() {
-        $course_prefix = '/' . $this->semester . '/' . $this->course;
+        $course_prefix = "/courses/{$this->semester}/{$this->course}";
         return [
             [$course_prefix . '/gradeable/open_homework/update', "GET", [], User::GROUP_INSTRUCTOR],
         ];
