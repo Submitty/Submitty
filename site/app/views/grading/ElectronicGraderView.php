@@ -56,6 +56,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $graded = 0;
         $total = 0;
+        $late_total = 0;
         $no_team_total = 0;
         $team_total = 0;
         $team_percentage = 0;
@@ -81,6 +82,8 @@ class ElectronicGraderView extends AbstractView {
             if ($key === "NULL") {
                 continue;
             }
+            // var_dump($section);
+            $late_total += $gradeable->getAllLateComponentsFromSection($key);
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {

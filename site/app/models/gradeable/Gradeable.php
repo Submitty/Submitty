@@ -1382,6 +1382,31 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets the number of students in a section with a bad or late status for this gradeable
+     * @param int $section
+     * @return int The number of students who submitted with a non-good status
+     */
+    public function getAllLateComponentsFromSection($section){
+        $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
+        $return = 0;
+
+        foreach ($ggs as $key => $gg) {
+            //$graded = count($gg->ta_graded_gradeable->getGradedComponentContainers());
+            //var_dump($graded);
+            $user = $gg->getSubmitter()->getUser();
+            if ($user->getRotatingSection() == $section) {
+                // var_dump($gg);
+                $late_days = LateDays::fromUser($this->core, $user);
+                $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
+                if ($late_status === LateDayInfo::STATUS_BAD || $late_status === LateDayInfo::STATUS_LATE) {
+                    $return += 1;
+                }
+            }
+        }
+        return $return;
+    }
+
+    /**
      * Gets the percent of grading complete for the provided user for this gradeable
      * @param User $grader
      * @return float The percentage (0 to 1) of grading completed or NAN if none required

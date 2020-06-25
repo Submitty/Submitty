@@ -78,6 +78,20 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets if the submitter submitted on time
+     * @return bool
+     */
+    public function isOnTimeSubmission(User $user) {
+        // var_dump($this->late_day_exceptions);
+        // var_dump($user);
+        $user = $this->getSubmitter()->getUser();
+        var_dump($user);
+        $late_days = LateDays::fromUser($this->gradeable->core, $user);
+        $late_status = $late_days->getLateDayInfoByGradeable($this->gradeable)->getStatus();
+        return $late_status === LateDayInfo::STATUS_GOOD;
+    }
+
+    /**
      * Sets the TA grading data for this graded gradeable
      * @param TaGradedGradeable $ta_graded_gradeable
      */

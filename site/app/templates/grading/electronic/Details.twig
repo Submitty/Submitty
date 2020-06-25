@@ -359,8 +359,13 @@
             {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
         {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
-        {% set contents = "Grade" %}
-        {% set btn_class = "btn-primary" %}
+        {% if graded_gradeable.isOnTimeSubmission(core.getUser()) %}
+            {% set contents = "Grade" %}
+            {% set btn_class = "btn-primary" %}
+        {% else %}
+            {% set contents = "Too Many Days Late" %}
+            {% set btn_class = "btn-danger" %}
+        {% endif %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
