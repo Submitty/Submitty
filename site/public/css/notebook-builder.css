@@ -86,31 +86,34 @@
 /**
  * Multiple choice widget styles
  */
-.multiple-choice-widget td ,
-.multiple-choice-widget th {
-    text-align: left;
-    white-space: pre-wrap;
+
+#mc-table {
+    width: 100%;
 }
 
-.multiple-choice-options td {
-}
-
-.multiple-choice-options {
+#mc-table .mc-row {
     display: flex;
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
 }
 
-.multiple-choice-options table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 10px;
+#mc-table .mc-col {
+    flex: 1;
 }
 
-.multiple-choice-options textarea {
-    width: 100%;
-    min-height: 50px;
+#mc-table .mc-col-center {
+    flex: 3;
+}
+
+#mc-table .mc-header {
+    font-weight: bold;
+}
+
+#mc-table #value-input {
+    width: 90%;
+}
+
+#mc-table #description-input {
+    width: 90%;
+    min-height: 80px;
 }
 
 .multiple-choice-config {
