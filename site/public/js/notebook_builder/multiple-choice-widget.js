@@ -62,6 +62,18 @@ class MultipleChoiceWidget extends Widget {
         table.setAttribute('id', 'mc-table');
         table.innerHTML = this.getMultipleChoiceTemplate();
 
+        // Add newly entered data to form when add button is clicked
+        const add_button = table.querySelector('#add_button');
+        add_button.addEventListener('click', () => {
+            const value = table.querySelector('#value-input');
+            const description = table.querySelector('#description-input');
+
+            table.insertBefore(this.getMultipleChoiceOption(value.value, description.value), table.querySelector('.mc-inputs'));
+
+            value.value = '';
+            description.value = '';
+        });
+
         return table;
     }
 
@@ -78,17 +90,64 @@ class MultipleChoiceWidget extends Widget {
                 Controls
             </div>
         </div>
-        <div class="mc-body mc-row"></div>
         <div class="mc-inputs mc-row">
             <div class="mc-col">
-                <input type="text" id="value-input">    
+                <input type="text" id="value-input" placeholder="Add new value">    
             </div>
             <div class="mc-col-center">
-                <textarea id="description-input"></textarea>
+                <textarea id="description-input" placeholder="Add new description"></textarea>
             </div>
-            <div class="mc-col">
+            <div class="mc-col mc-buttons">
                 <input type="button" id="add_button" value="Add">
             </div>
+        </div>`;
+    }
+
+    getMultipleChoiceOption(value, description) {
+        const mc_option = document.createElement('div');
+        mc_option.classList.add('mc-entered-option');
+        mc_option.classList.add('mc-row');
+        mc_option.innerHTML = this.getMultipleChoiceOptionTemplate(value, description);
+
+        mc_option.addEventListener('click', (event) => {
+
+            const trigger = event.target;
+            const current = event.currentTarget;
+
+            if (trigger.classList.contains('up-button')) {
+                const arr = Array.from(current.parentNode.children);
+                const index = arr.indexOf(current);
+                if (index > 1) {
+                    current.parentNode.insertBefore(current, current.previousSibling);
+                }
+            }
+            else if (trigger.classList.contains('down-button')) {
+                const arr = Array.from(current.parentNode.children);
+                const index = arr.indexOf(current);
+                if (index < arr.length - 2) {
+                    current.parentNode.insertBefore(current, current.nextSibling.nextSibling);
+                }
+            }
+            else if (trigger.classList.contains('remove-button')) {
+                current.remove();
+            }
+        });
+
+        return mc_option;
+    }
+
+    getMultipleChoiceOptionTemplate(value, description) {
+        return `
+        <div class="mc-col">
+            <input type="text" class="entered-value-input" value="${value}">    
+        </div>
+        <div class="mc-col-center">
+            <textarea class="entered-description-input">${description}</textarea>
+        </div>
+        <div class="mc-col mc-buttons">
+            <input type="button" class="up-button" value="Up">
+            <input type="button" class="down-button" value="Down">
+            <input type="button" class="remove-button" value="Remove">
         </div>`;
     }
 

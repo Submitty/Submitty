@@ -89,10 +89,12 @@
 
 #mc-table {
     width: 100%;
+    margin-right: 10px;
 }
 
 #mc-table .mc-row {
     display: flex;
+    margin-top: 15px;
 }
 
 #mc-table .mc-col {
@@ -100,20 +102,27 @@
 }
 
 #mc-table .mc-col-center {
-    flex: 3;
+    flex: 4;
 }
 
 #mc-table .mc-header {
     font-weight: bold;
 }
 
-#mc-table #value-input {
-    width: 90%;
+#mc-table #value-input,
+#mc-table .entered-value-input {
+    width: 95%;
 }
 
-#mc-table #description-input {
-    width: 90%;
+#mc-table #description-input,
+#mc-table .entered-description-input {
+    width: 95%;
     height: 80px;
+}
+
+#mc-table .mc-buttons {
+    display: flex;
+    flex-direction: column;
 }
 
 .multiple-choice-config {
