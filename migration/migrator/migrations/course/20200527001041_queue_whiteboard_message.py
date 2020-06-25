@@ -29,6 +29,9 @@ def up(config, database, semester, course):
             json.dump(j, out_file, indent=4)
 
 
+    database.execute("ALTER TABLE queue ADD COLUMN IF NOT EXISTS paused BOOLEAN NOT NULL DEFAULT false;");
+
+
 def down(config, database, semester, course):
     """
     Run down migration (rollback).
@@ -55,3 +58,6 @@ def down(config, database, semester, course):
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
+
+
+    database.execute("ALTER TABLE queue DROP COLUMN IF EXISTS paused;");
