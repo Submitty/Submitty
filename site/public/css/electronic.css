@@ -42,11 +42,11 @@ aside {
 }
 
 #bar_wrapper {
-    padding-top: 10px;
     padding-bottom: 5px;
     /*border: solid 6px var(--important-post);*/
     box-sizing: content-box;
     overflow-x: auto;
+    margin: 6px;
 }
 
 .navigation-box {
@@ -225,11 +225,11 @@ progress::-webkit-progress-value {
 
 /* Grading Panel Header (Buttons) CSS */
 #grading-panel-header {
-    margin-top: 6px;
+    margin: 6px;
     width: 100%;
     flex: 1;
     display: flex;
-    overflow: auto;
+    overflow: visible;
 }
 
 .panel-header-box {
@@ -237,27 +237,26 @@ progress::-webkit-progress-value {
 }
 
 .grade-panel {
+    position: relative;
     border: 2px solid;
-    padding: 2px 10px 5px;
-    border-radius: 59px;
-    cursor: pointer;
-    margin-left: 12px;
+    margin-right: 12px;
+    border-radius: 5px;
 }
 
 .grade-panel button {
     color: var(--text-black);
     position: relative;
     cursor: pointer;
-    padding-left: 22px;
+    padding: 2px 6px 5px 24px;
     white-space: nowrap;
     outline: none;
 }
 
 .grade-panel button i {
     position: absolute;
-    top: -2px;
-    left: 0;
-    font-size: 17px;
+    top: 1px;
+    left: 4px;
+    font-size: 14px;
 }
 
 .grade-panel.active button, .grade-panel:hover button {
@@ -268,21 +267,30 @@ progress::-webkit-progress-value {
     border: 2px solid #bc0a33;
 }
 
-#autograding_results_btn:hover, #autograding_results_btn.active {
+#autograding_results_btn:hover,
+#autograding_results_btn.active,
+#autograding_results_select option:hover,
+#autograding_results_select option:focus {
     background: #962e2e;
 }
 
 #grading_rubric_btn {
     border: 2px solid #249c63;
 }
-#grading_rubric_btn:hover, #grading_rubric_btn.active {
+#grading_rubric_btn:hover,
+#grading_rubric_btn.active,
+#grading_rubric_select option:hover,
+#grading_rubric_select option:focus {
     background: #1c794d;
 }
 
 #submission_browser_btn {
     border: 2px solid #1c83b7;
 }
-#submission_browser_btn:hover, #submission_browser_btn.active {
+#submission_browser_btn:hover,
+#submission_browser_btn.active,
+#submission_browser_select option:hover,
+#submission_browser_select option:focus {
     background: #286888;
 }
 
@@ -290,7 +298,10 @@ progress::-webkit-progress-value {
     border: 2px solid #316895;
 }
 
-#student_info_btn:hover, #student_info_btn.active {
+#student_info_btn:hover,
+#student_info_btn.active,
+#student_info_select option:hover,
+#student_info_select option:focus {
     background: #316895;
 }
 
@@ -298,7 +309,10 @@ progress::-webkit-progress-value {
     border: 2px solid #316895;
 }
 
-#peer_info_btn:hover, #peer_info_btn.active {
+#peer_info_btn:hover,
+#peer_info_btn.active,
+#peer_info_select option:hover,
+#peer_info_select option:focus {
     background: #316895;
 }
 
@@ -306,7 +320,10 @@ progress::-webkit-progress-value {
     border: 2px solid #316895;
 }
 
-#discussion_browser_btn:hover, #discussion_browser_btn.active {
+#discussion_browser_btn:hover,
+#discussion_browser_btn.active,
+#discussion_browser_select option:hover,
+#discussion_browser_select option:focus {
     background: #316895;
 }
 
@@ -314,8 +331,44 @@ progress::-webkit-progress-value {
     border: 2px solid #f29f0d;
 }
 
-#regrade_info_btn:hover, #regrade_info_btn.active {
+#regrade_info_btn:hover,
+#regrade_info_btn.active,
+#regrade_info_select option:hover,
+#regrade_info_select option:focus {
     background: #9e7835;
+}
+
+/* Grading Panel Position selector */
+.panel-position-cont {
+    display: none;
+    position: absolute;
+    border: 2px solid;
+    font-size: 12px;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    z-index: 1;
+    left: -1px;
+    top: 21px;
+    padding: 0;
+    overflow: visible;
+    height: max-content;
+    min-width: max-content;
+}
+
+.panel-position-cont option {
+    padding: 10px;
+    color: var(--text-black);
+    width: 100%;
+    cursor: pointer;
+}
+
+.panel-position-cont option:hover, .panel-position-cont option:focus {}
+
+.panel-position-left {
+    border-bottom: 1px solid;
+}
+
+.panel-position-right {
 }
 
 /* Grading Panels CSS */

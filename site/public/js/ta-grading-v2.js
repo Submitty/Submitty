@@ -31,10 +31,54 @@ const taLayoutDet = {
 
 $(function () {
   Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+
+  // initialize the layout
   initializeTwoPanelDrag();
   initializeTaLayout();
+
+  // Progress bar value
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
+
+  // panel position selector change event
+  $(".grade-panel .panel-position-cont").change(function() {
+    console.log("inside the change");
+    let panelSpanId = $(this).parent().attr('id');
+    let position = $(this).val();
+    if (panelSpanId) {
+      const panelId = panelSpanId.split('_btn')[0];
+      setPanelsVisibilities(panelId, null, position);
+      $(this).parent().find('select.panel-position-cont').hide();
+    }
+  });
+
+  // Grading panel toggle buttons
+  $(".grade-panel button").click(function () {
+    const btnCont = $(this).parent();
+    const selectEle =  btnCont.find('select.panel-position-cont');
+    let panelSpanId = btnCont.attr('id');
+    const panelId = panelSpanId.split('_btn')[0];
+
+    if (!panelSpanId) {
+      return;
+    }
+    const isPanelOpen = btnCont.hasClass('active') && $('#' + panelId).is(':visible');
+    if (isPanelOpen || !taLayoutDet.isTwoPanelsEnabled) {
+      setPanelsVisibilities(panelId);
+    } else {
+      // Hide all select dropdown except the current one
+      $('select.panel-position-cont').not(selectEle).hide();
+      // removing previously selected option
+      selectEle.val(0);
+      selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
+
+    }
+  });
+  // Remove the select options which are open
+  function hidePanelPositionSelect() {
+    $('select.panel-position-cont').hide();
+    document.removeEventListener('click', hidePanelPositionSelect);
+  }
 });
 
 function getSavedTaLayoutDetails() {
@@ -283,24 +327,26 @@ function resetTwoPanelLayout() {
   initializeTwoPanelDrag();
 }
 
-function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null) {
+function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPosition = null) {
   // update the global variable
   if (isPanelAdded) {
+    taLayoutDet.currentTwoPanels[panelPosition] = panelId;
     // panel is going to be added on the screen, so rotate the panels
-    if ((taLayoutDet.currentTwoPanels.left && taLayoutDet.currentTwoPanels.right) || !taLayoutDet.currentTwoPanels.left && taLayoutDet.currentTwoPanels.right) {
-      taLayoutDet.currentTwoPanels.left = taLayoutDet.currentTwoPanels.right;
-      taLayoutDet.currentTwoPanels.right = panelId;
-    } else if (taLayoutDet.currentTwoPanels.left) {
-      taLayoutDet.currentTwoPanels.right = panelId;
-    } else { // there is no panels
-      taLayoutDet.currentTwoPanels.left = panelId;
-    }
+    // if ((taLayoutDet.currentTwoPanels.left && taLayoutDet.currentTwoPanels.right) || !taLayoutDet.currentTwoPanels.left && taLayoutDet.currentTwoPanels.right) {
+    //   taLayoutDet.currentTwoPanels.left = taLayoutDet.currentTwoPanels.right;
+    //   taLayoutDet.currentTwoPanels.right = panelId;
+    // } else if (taLayoutDet.currentTwoPanels.left) {
+    //   taLayoutDet.currentTwoPanels.right = panelId;
+    // } else { // there is no panels
+    //   taLayoutDet.currentTwoPanels.left = panelId;
+    // }
   } else {
     // panel is going to be removed from screen
     // check which one out of the left or right is going to be hidden
     if (taLayoutDet.currentTwoPanels.left === panelId ) {
-      taLayoutDet.currentTwoPanels.left = taLayoutDet.currentTwoPanels.right;
-      taLayoutDet.currentTwoPanels.right = null;
+      taLayoutDet.currentTwoPanels.left = null;
+      // taLayoutDet.currentTwoPanels.left = taLayoutDet.currentTwoPanels.right;
+      // taLayoutDet.currentTwoPanels.right = null;
     }
     if (taLayoutDet.currentTwoPanels.right === panelId ) {
       taLayoutDet.currentTwoPanels.right = null;
@@ -324,7 +370,7 @@ function setTwoPanelModeVisibilities () {
     });
 }
 
-function setPanelsVisibilities (ele, forceVisible) {
+function setPanelsVisibilities (ele, forceVisible, position=null) {
   ele = ele ? ele : taLayoutDet.currentOpenPanel;
   panelElements.forEach((panel) => {
     //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels
@@ -340,7 +386,7 @@ function setPanelsVisibilities (ele, forceVisible) {
       // update the global variable
       taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
       if (taLayoutDet.isTwoPanelsEnabled) {
-        checkForTwoPanelLayoutChange(eleVisibility, panel.str);
+        checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
       }
     }
   });
@@ -350,33 +396,6 @@ function setPanelsVisibilities (ele, forceVisible) {
   } else {
     saveTaLayoutDetails();
   }
-}
-
-function toggleAutograding() {
-  setPanelsVisibilities("autograding_results");
-}
-
-function toggleRubric() {
-  setPanelsVisibilities("grading_rubric");
-}
-
-function toggleSubmissions() {
-  setPanelsVisibilities("submission_browser");
-}
-
-function toggleInfo() {
-  setPanelsVisibilities("student_info");
-}
-function toggleRegrade() {
-  setPanelsVisibilities("regrade_info");
-}
-
-function toggleDiscussion() {
-  setPanelsVisibilities("discussion_browser");
-}
-
-function togglePeer() {
-  setPanelsVisibilities("peer_info");
 }
 
 function toggleFullScreenMode () {
@@ -461,6 +480,7 @@ function toggleTwoPanelMode() {
     }
     if (leftPanelId) {
       document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
+      // passing forceVisible true as normal toggle will hide it single panel mode
       setPanelsVisibilities(leftPanelId, true);
     }
     resetTwoPanelLayout();

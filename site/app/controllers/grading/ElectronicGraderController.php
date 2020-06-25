@@ -971,6 +971,7 @@ class ElectronicGraderController extends AbstractController {
         $showNewInterface = isset($version);
 
         /** @var Gradeable $gradeable */
+
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');

@@ -1,41 +1,43 @@
+{% import _self as self %}
+
 <div id="grading-panel-header">
     <div class="panel-header-box">
         <span class="grade-panel" id="autograding_results_btn">
             <button title="Show/Hide Autograding Testcases (Press A)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
-                    onclick="toggleAutograding(); updateCookies()";
             >
                 <i class="fas fa-list"></i>Autograding Testcases
             </button>
+            {{ self.renderPanelPositionSelector('autograding_results') }}
         </span>
         <span class="grade-panel" id="grading_rubric_btn">
             <button title="Show/Hide Grading Rubric (Press G)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
-                    onclick="toggleRubric(); updateCookies();"
             >
                 <i class="fas fa-edit"></i>Grading Rubric
             </button>
+            {{ self.renderPanelPositionSelector('grading_rubric') }}
         </span>
         <span class="grade-panel" id="submission_browser_btn">
             <button title="Show/Hide Submission and Results Browser (Press O)"
                     class="invisible-btn key_to_click"
                     tabindex="0"
-                    onclick="toggleSubmissions(); updateCookies();"
             >
                 <i class="fas fa-folder-open"></i>Submission and Results Browser
             </button>
+            {{ self.renderPanelPositionSelector('submission_browser') }}
         </span>
         {% if ((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) %}
             <span class="grade-panel" id="student_info_btn">
                 <button title="Show/Hide Student Information (Press S)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
-                        onclick="toggleInfo(); updateCookies();"
                 >
                     <i class="fas fa-user"></i>Student Information
                 </button>
+            {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
         {% if peer_gradeable and not i_am_a_peer %}
@@ -43,10 +45,10 @@
                 <button title="Show/Hide Peer Information (Press P)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
-                        onclick="togglePeer(); updateCookies();"
                 >
                     <i class="fas fa-users"></i>Peer Information
                 </button>
+            {{ self.renderPanelPositionSelector('peer_info') }}
             </span>
         {% endif %}
         {% if discussion_based %}
@@ -54,10 +56,10 @@
                 <button title="Show/Hide Discussion Posts"
                         class="invisible-btn key_to_click"
                         tabindex="0"
-                        onclick="toggleDiscussion(); updateCookies();"
                 >
                     <i class="fas fa-comment-alt"></i>Discussion Posts
                 </button>
+            {{ self.renderPanelPositionSelector('discussion_browser') }}
             </span>
         {% endif %}
         {% if regrade_panel_available %}
@@ -65,12 +67,23 @@
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn key_to_click"
                         tabindex="0"
-                        onclick="toggleRegrade(); updateCookies();"
                 >
                    <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
                    Grade Inquiry Information
                 </button>
+            {{ self.renderPanelPositionSelector('regrade_info') }}
             </span>
         {% endif %}
     </div>
 </div>
+
+{% macro renderPanelPositionSelector(panelId) %}
+    <select class="panel-position-cont" id="{{ panelId }}_select" size="2">
+        <option class="panel-position-left" tabindex="0" value="left">
+            Open as left panel
+        </option>
+        <option class="panel-position-right" tabindex="0" value="right">
+            Open as right panel
+        </option>
+    </select>
+{% endmacro %}
