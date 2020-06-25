@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AutogradingConfigController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config", methods={"GET"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -50,7 +50,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -115,7 +115,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -153,7 +153,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */
@@ -192,7 +192,7 @@ class AutogradingConfigController extends AbstractController {
 
     /**
      * @param $config_path
-     * @Route("/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
      * @return MultiResponse
      */
     public function configUsedBy($config_path = null) {
