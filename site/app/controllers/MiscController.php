@@ -39,7 +39,7 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = ($_POST['file_path']);
         $anon_id = explode("/",$file_path)[9];
-        $correct_user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
+        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         if($correct_user_id !== null){
             $file_path = str_replace($anon_id, $correct_user_id, $file_path);
         }

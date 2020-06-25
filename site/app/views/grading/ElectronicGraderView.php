@@ -391,7 +391,7 @@ HTML;
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
             if ($gradeable->isTeamAssignment()) {
-                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
+                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
             }
             else {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
@@ -938,7 +938,7 @@ HTML;
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id[0]]->getAnonId();
+                $anon_id = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]]->getAnonId();
                 $anon_path = $anon_path . "/" . $anon_id;
             }
             else {
