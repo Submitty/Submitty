@@ -768,18 +768,20 @@ chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.p
 chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 
 # Backup and adjust/overwrite Postgresql's configuration
-cp -a /etc/postgresql/${PG_VERSION}/main/postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf.backup
-sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'csvlog'~;
-        s~^#*[ tab]*logging_collector[ tab]*=[ tab]*[a-z01]\+~logging_collector = on~;
-        s~^#*[ tab]*log_directory[ tab]*=[ tab]*'[^][(){}<>|:;&#=!'?\*\~\$\"\` tab]\+'~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
-        s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[-a-zA-Z0-9_%\.]\+'~log_filename = 'postgresql_%Y-%m-%dT%H%M%S.log'~;
-        s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*[0-9]\+~log_file_mode = 0640~;
-        s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*[a-z0-9]\+~log_rotation_age = 1d~;
-        s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-zA-Z0-9]\+~log_rotation_size = 0~;
-        s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = warning~;
-        s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = -1~;
-        s~^#*[ tab]*log_statement[ tab]*=[ tab]*'[a-z]\+'~log_statement = 'ddl'~;
-        s~^#*[ tab]*log_error_verbosity[ tab]*=[ tab]*[a-z]\+~log_error_verbosity = default~" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+if [ ${WORKER} == 0 ]; then
+    cp -a /etc/postgresql/${PG_VERSION}/main/postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf.backup
+    sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'csvlog'~;
+            s~^#*[ tab]*logging_collector[ tab]*=[ tab]*[a-z01]\+~logging_collector = on~;
+	    s~^#*[ tab]*log_directory[ tab]*=[ tab]*'[^][(){}<>|:;&#=!'?\*\~\$\"\` tab]\+'~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
+	    s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[-a-zA-Z0-9_%\.]\+'~log_filename = 'postgresql_%Y-%m-%dT%H%M%S.log'~;
+            s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*[0-9]\+~log_file_mode = 0640~;
+            s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*[a-z0-9]\+~log_rotation_age = 1d~;
+            s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-zA-Z0-9]\+~log_rotation_size = 0~;
+            s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = warning~;
+            s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = -1~;
+            s~^#*[ tab]*log_statement[ tab]*=[ tab]*'[a-z]\+'~log_statement = 'ddl'~;
+            s~^#*[ tab]*log_error_verbosity[ tab]*=[ tab]*[a-z]\+~log_error_verbosity = default~" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+fi
 
 echo -e "Finished preferred_name_logging setup."
 
