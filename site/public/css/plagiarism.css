@@ -85,7 +85,32 @@ input[type="text"], select {
     margin-right: 10px;
 }
 
-@media (max-width: 768px) {
+/* Results Page */
+.plagiarism-result-cont {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 5px 0 5px;
+}
+
+.plag-flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.plag-flex-item {
+    margin-top: 5px;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.plagiarism-result-cont.content hr {
+    margin: 1px 0;
+}
+
+@media (max-width: 660px) {
     .nav-buttons a {
         width: 100%;
     }
@@ -109,11 +134,17 @@ input[type="text"], select {
         padding: 2px 8px;
         margin: 2px 0;
     }
+    .plag-flex a, .plag-flex span {
+        flex-grow: 1;
+    }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 660px) {
     #save-configuration-form {
         width: 80%;
+    }
+    .plag-flex {
+        flex-direction: row;
     }
 
     td .plag-action-btn-cont a:not(:last-child) {
