@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60cfc55bd7648af65b4be4ae44b58f51",
+    "content-hash": "b99a9e8901c5236603f3a947948aed99",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2122,22 +2122,22 @@
     "packages-dev": [
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
-            "version": "v0.6.2",
+            "version": "v0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Dealerdirect/phpcodesniffer-composer-installer.git",
-                "reference": "8001af8eb107fbfcedc31a8b51e20b07d85b457a"
+                "reference": "e8d808670b8f882188368faaf1144448c169c0b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/8001af8eb107fbfcedc31a8b51e20b07d85b457a",
-                "reference": "8001af8eb107fbfcedc31a8b51e20b07d85b457a",
+                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/e8d808670b8f882188368faaf1144448c169c0b7",
+                "reference": "e8d808670b8f882188368faaf1144448c169c0b7",
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.0",
-                "php": "^5.3|^7",
-                "squizlabs/php_codesniffer": "^2|^3"
+                "composer-plugin-api": "^1.0 || ^2.0",
+                "php": ">=5.3",
+                "squizlabs/php_codesniffer": "^2 || ^3 || 4.0.x-dev"
             },
             "require-dev": {
                 "composer/composer": "*",
@@ -2184,7 +2184,7 @@
                 "stylecheck",
                 "tests"
             ],
-            "time": "2020-01-29T20:22:20+00:00"
+            "time": "2020-06-25T14:57:39+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -3896,16 +3896,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.5.4",
+            "version": "3.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "dceec07328401de6211037abbb18bda423677e26"
+                "reference": "73e2e7f57d958e7228fce50dc0c61f58f017f9f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/dceec07328401de6211037abbb18bda423677e26",
-                "reference": "dceec07328401de6211037abbb18bda423677e26",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/73e2e7f57d958e7228fce50dc0c61f58f017f9f6",
+                "reference": "73e2e7f57d958e7228fce50dc0c61f58f017f9f6",
                 "shasum": ""
             },
             "require": {
@@ -3943,7 +3943,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2020-01-30T22:20:29+00:00"
+            "time": "2020-04-17T01:09:41+00:00"
         },
         {
             "name": "submitty/php-codesniffer",
