@@ -280,7 +280,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback)
     var gradeable_id=$('#g_id').val();
     $.ajax({
         type: "POST", 
-        url: buildCourseUrl(['gradeable', gradeable_id, 'ajaxRandomizePeers']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'RandomizePeers']),
         data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade},
         success: function(response){
             let res=JSON.parse(response);
