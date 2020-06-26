@@ -4,11 +4,13 @@ import tempfile
 import shutil
 import time
 import dateutil
+import dateutil.parser
 import string
 import random
 import zipfile
 
 from submitty_utils import dateutils
+
 
 from . import insert_database_version_data, autograding_utils, CONFIG_PATH
 
@@ -164,7 +166,6 @@ def prepare_autograding_and_submission_zip(
     is_batch_job = "regrade" in obj and obj["regrade"]
 
     queue_time = get_queue_time(next_directory, next_to_grade)
-    queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
     autograding_utils.log_message(
@@ -265,15 +266,6 @@ def prepare_autograding_and_submission_zip(
     history_file = os.path.join(results_path, "history.json")
     if os.path.isfile(history_file):
         shutil.copy(history_file, os.path.join(tmp_submission, "history.json"))
-    # get info from the gradeable config file
-    with open(complete_config, 'r') as infile:
-        complete_config_obj = json.load(infile)
-    if 'generate_output' not in obj:
-        checkout_subdirectory = complete_config_obj["autograding"].get(
-            "use_checkout_subdirectory",
-            ""
-        )
-        checkout_subdir_path = os.path.join(checkout_path, checkout_subdirectory)
 
     # switch to tmp directory
     os.chdir(tmp)
@@ -289,7 +281,7 @@ def prepare_autograding_and_submission_zip(
     if "generate_output" not in obj:
         if is_vcs:
             # there should be a checkout log file in the results directory
-            # move that file to the tmp logs directory..
+            # move that file to the tmp logs directory.
             vcs_checkout_logfile = os.path.join(results_path, "logs", "vcs_checkout.txt")
             if os.path.isfile(vcs_checkout_logfile):
                 shutil.move(vcs_checkout_logfile, tmp_logs)
@@ -303,7 +295,7 @@ def prepare_autograding_and_submission_zip(
     if "generate_output" not in obj:
         copytree_if_exists(submission_path, os.path.join(tmp_submission, "submission"))
         copytree_if_exists(checkout_path, os.path.join(tmp_submission, "checkout"))
-    obj["queue_time"] = queue_time_longstring
+    obj["queue_time"] = dateutils.write_submitty_date(queue_time)
     obj["regrade"] = is_batch_job
     obj["waittime"] = waittime
     obj["job_id"] = job_id
