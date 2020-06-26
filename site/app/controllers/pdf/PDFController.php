@@ -43,7 +43,7 @@ class PDFController extends AbstractController {
                     $annotation_decoded = json_decode($file_contents, true);
                     if ($annotation_decoded !== null) {
                         $grader_id = $annotation_decoded["grader_id"];
-                        if($grader_id === $grader){
+                        if ($grader_id === $grader) {
                             $annotation_jsons[$grader_id] = $file_contents;
                         }
                     }
