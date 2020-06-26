@@ -13,7 +13,7 @@ use app\models\CourseMaterial;
 
 class CourseMaterialsController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/course_materials")
+     * @Route("/courses/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage() {
         $this->core->getOutput()->renderOutput(
@@ -42,7 +42,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/delete")
+     * @Route("/courses/{_semester}/{_course}/course_materials/delete")
      */
     public function deleteCourseMaterial($path) {
         // security check
@@ -91,7 +91,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/download_zip")
+     * @Route("/courses/{_semester}/{_course}/course_materials/download_zip")
      */
     public function downloadCourseMaterialZip($dir_name, $path) {
         $root_path = realpath(htmlspecialchars_decode(urldecode($path)));
@@ -156,7 +156,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/modify_timestamp")
+     * @Route("/courses/{_semester}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
@@ -215,9 +215,9 @@ class CourseMaterialsController extends AbstractController {
 
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
-    
+
     /**
-     * @Route("/{_semester}/{_course}/course_materials/edit", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxEditCourseMaterialsFiles() {
@@ -225,24 +225,24 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['sections'])) {
             $sections = $_POST['sections'] ?? null;
         }
-        
+
         if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
-        
+
         $sections_exploded = $sections;
-        
+
         if (!(is_null($sections)) && !empty($sections)) {
             $sections_exploded = explode(",", $sections);
         }
-        
+
         $hide_from_students = $_POST['hide_from_students'];
-        
+
         $requested_path = "";
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'] ?? '';
         }
-        
+
         $release_time = "";
         if (isset($_POST['release_time'])) {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getUser()->getUsableTimeZone());
@@ -266,7 +266,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/course_materials/upload", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/course_materials/upload", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxUploadCourseMaterialsFiles() {

@@ -22,7 +22,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue", methods={"GET"})
      * @return MultiResponse
      */
     public function showQueue($full_history = false) {
@@ -42,7 +42,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -89,7 +89,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/add", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/add", methods={"POST"})
      * @return MultiResponse
      */
     public function addPerson($queue_code) {
@@ -154,7 +154,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/remove", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/remove", methods={"POST"})
      * @return MultiResponse
      */
     public function removePerson($queue_code) {
@@ -193,7 +193,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -219,7 +219,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/startHelp", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/startHelp", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -246,7 +246,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/finishHelp", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/finishHelp", methods={"POST"})
      * @return MultiResponse
      */
     public function finishHelpPerson($queue_code) {
@@ -285,7 +285,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/empty", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/empty", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -305,7 +305,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/toggle", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/toggle", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -332,7 +332,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/deleteQueue", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/deleteQueue", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -352,7 +352,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/check_updates", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/check_updates", methods={"GET"})
      * @return MultiResponse
      */
     public function checkUpdates() {
@@ -362,7 +362,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
@@ -395,7 +395,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse
      */
     public function showCurrentQueue() {
@@ -417,7 +417,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
      * @return MultiResponse
      */
     public function showQueueHistory($full_history = false) {
@@ -439,7 +439,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
      * @return MultiResponse
      */
     public function showNewStatus() {

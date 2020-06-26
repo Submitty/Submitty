@@ -4263,9 +4263,9 @@ AND gc_id IN (
         return $users;
     }
     
-    public function getUsersOrTeamsById(array $ids){
+    public function getUsersOrTeamsById(array $ids) {
         $users = $this->getUsersById($ids);
-        if(empty($users)){
+        if (empty($users)) {
             return $this->getTeamsById($ids);
         }
         return $users;
