@@ -887,7 +887,7 @@ HTML;
         $templateFile = "grading/electronic/NavigationBar.twig";
         if ($showNewInterface) {
             $studentBaseUrl = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade', 'beta']);
-            $templateFile = "grading/electronicV2/NavigationBar.twig";
+            $templateFile = "grading/electronic/NavigationBarV2.twig";
         }
         // Setup urls for prev and next students
         $prev_student_url = $studentBaseUrl . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'false' ]);
@@ -920,7 +920,7 @@ HTML;
     }
 
     public function renderGradingPanelHeader(GradedGradeable $graded_gradeable) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronicV2/GradingPanelHeader.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
@@ -936,7 +936,8 @@ HTML;
      */
     public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $showNewInterface) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
-        return $this->core->getOutput()->renderTwigTemplate("grading/". ($showNewInterface ? "electronicV2" : "electronic") ."/AutogradingPanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
+            "showNewInterface" => $showNewInterface,
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
         ]);
@@ -989,7 +990,8 @@ HTML;
 HTML;
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("grading/". ($showNewInterface ? "electronicV2" : "electronic") ."/DiscussionForumPanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/DiscussionForumPanel.twig", [
+            "showNewInterface" => $showNewInterface,
             "discussion_forum_content" => $posts_view
         ]);
     }
@@ -1045,7 +1047,8 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
-        return $this->core->getOutput()->renderTwigTemplate("grading/". ($showNewInterface ? "electronicV2" : "electronic") ."/SubmissionPanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
+            "showNewInterface" => $showNewInterface,
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
             "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
@@ -1111,7 +1114,8 @@ HTML;
 
         $this->core->getOutput()->addInternalCss('table.css');
 
-        return $this->core->getOutput()->renderTwigTemplate("grading/". ($showNewInterface ? "electronicV2" : "electronic") ."/StudentInformationPanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
+            "showNewInterface" => $showNewInterface,
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,
             "submitter_id" => $submitter_id,
@@ -1161,15 +1165,14 @@ HTML;
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
 
-        $templateFile = "grading/electronic/RubricPanel.twig";
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
-            $templateFile = "grading/electronicV2/RubricPanel.twig";
         } else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
         }
 
-        return $return . $this->core->getOutput()->renderTwigTemplate($templateFile, [
+        return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
+                "showNewInterface" => $showNewInterface,
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
                 "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
@@ -1211,15 +1214,14 @@ HTML;
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalCss('table.css');
 
-        $templateFile = "grading/electronic/PeerPanel.twig";
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
-            $templateFile = "grading/electronicV2/PeerPanel.twig";
         } else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
         }
 
-        return $return . $this->core->getOutput()->renderTwigTemplate($templateFile, [
+        return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
+                "showNewInterface" => $showNewInterface,
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
                 "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
@@ -1241,7 +1243,8 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry, bool $showNewInterface) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/". ($showNewInterface ? "electronicV2" : "electronic") . "/RegradePanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+            "showNewInterface" => $showNewInterface,
             "graded_gradeable" => $graded_gradeable,
             "can_inquiry" => $can_inquiry
         ]);
