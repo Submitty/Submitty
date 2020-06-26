@@ -177,7 +177,7 @@ function checkValidEntries() {
                 input.css("background-color", "transparent");
                 break;
             }
-            var valid_expression = /^[^(),:;\<\>@\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?!\-)(\.[a-zA-Z0-9]+)+$/;
+            var valid_expression = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$/;
             setRedOrTransparent(input,valid_expression);
             break;
         }

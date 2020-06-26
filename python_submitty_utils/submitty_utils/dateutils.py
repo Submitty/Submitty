@@ -184,3 +184,17 @@ def parse_datetime(date_string):
         ) + timedelta(days=days)
 
     raise ValueError("Invalid string for date parsing: " + str(date_string))
+
+
+def get_current_semester() -> str:
+    """
+    Given today's date, generates a three character code that represents the semester to use for
+    courses such that the first half of the year is considered "Spring" and the last half is
+    considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
+    F. The next two characters are the last two digits in the current year.
+    """
+    today = datetime.today()
+    semester = "f" + str(today.year)[-2:]
+    if today.month < 7:
+        semester = "s" + str(today.year)[-2:]
+    return semester

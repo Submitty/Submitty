@@ -115,3 +115,16 @@ class TestDateUtils(TestCase):
             'Invalid string for date parsing: invalid datetime',
             str(cm.exception)
         )
+
+    @patch('submitty_utils.dateutils.datetime')
+    def test_get_semester(self, mock):
+        testcases = (
+            (datetime(year=2021, month=1, day=1), 's21'),
+            (datetime(year=2020, month=6, day=22), 's20'),
+            (datetime(year=2019, month=7, day=1), 'f19'),
+            (datetime(year=2020, month=12, day=22), 'f20'),
+        )
+        for testcase in testcases:
+            with self.subTest(testcase[1]):
+                mock.today.return_value = testcase[0]
+                self.assertEqual(testcase[1], dateutils.get_current_semester())
