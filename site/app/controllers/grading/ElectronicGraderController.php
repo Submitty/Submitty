@@ -1195,13 +1195,13 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
+        $this->core->getOutput()->addInternalCss('forum.css');
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalCss('electronic.css');
         }
         else {
             $this->core->getOutput()->addInternalCss('ta-grading.css');
         }
-        $this->core->getOutput()->addInternalCss('forum.css');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
