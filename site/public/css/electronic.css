@@ -42,11 +42,9 @@ aside {
 }
 
 #bar_wrapper {
-    padding-bottom: 5px;
-    /*border: solid 6px var(--important-post);*/
     box-sizing: content-box;
     overflow-x: auto;
-    margin: 6px 0;
+    padding: 6px 0;
 }
 
 .navigation-box {
@@ -398,7 +396,7 @@ progress::-webkit-progress-value {
 
 .panels-container {
     height: calc(100% - 140px);
-    margin: 6px;
+    margin: 0 6px;
     background: var(--standard-medium-gray);
 }
 

@@ -170,16 +170,20 @@ function initializeTaLayout() {
   Adjust buttons inside Grading panel header and shows only icons on smaller screens
  */
 function adjustGradingPanelHeader () {
-  const header = $('.panel-header-box');
-  const headerWidth = header.width();
-  if (maxHeaderWidth < headerWidth) {
-    maxHeaderWidth = headerWidth;
+  const header = $('#grading-panel-header');
+  const headerBox = $('.panel-header-box');
+  const barHeight = $('#bar_wrapper').outerHeight();
+  if (maxHeaderWidth < headerBox.width()) {
+    maxHeaderWidth = headerBox.width();
   }
-  if (maxHeaderWidth > $('#grading-panel-header').width()) {
-    header.addClass('smaller-header');
+  if (maxHeaderWidth > header.width()) {
+    headerBox.addClass('smaller-header');
   } else {
-    header.removeClass('smaller-header');
+    headerBox.removeClass('smaller-header');
   }
+  // From the complete content remove the height occupied by navigation-bar and panel-header element
+  // 6 is used for adding some space in the bottom
+  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + barHeight +6) + "px)";
 }
 
 function onAjaxInit() {}
