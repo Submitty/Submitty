@@ -56,10 +56,10 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
      *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/ajaxRandomizePeers", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function ajaxRandomizePeers($gradeable_id) {
+    public function RandomizePeers($gradeable_id) {
         /* How does this function work?
         1 - Number of students to grade (Y) is taken from the client using POST
             1.1 - If the number is > number of students, then ALL grade ALL.
