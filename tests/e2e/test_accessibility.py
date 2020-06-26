@@ -68,7 +68,7 @@ class TestAccessibility(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.baseline_path = f'{os.path.dirname(os.path.realpath(__file__))}/accessibility_baseline.json'
-        self.urls = [url.format(self.get_current_semester(), 'sample') for url in self.urls]
+        self.urls = [url.format(self.semester, 'sample') for url in self.urls]
 
 
     def validatePages(self):
