@@ -1161,6 +1161,7 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
 
         $templateFile = "grading/electronic/RubricPanel.twig";
         if ($showNewInterface) {
@@ -1168,7 +1169,6 @@ HTML;
             $templateFile = "grading/electronicV2/RubricPanel.twig";
         } else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
-            $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         }
 
         return $return . $this->core->getOutput()->renderTwigTemplate($templateFile, [

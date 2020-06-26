@@ -29,6 +29,9 @@ const taLayoutDet = {
   },
 };
 
+// Grading Panel header width
+let maxHeaderWidth = 0;
+
 $(function () {
   Object.assign(taLayoutDet, getSavedTaLayoutDetails());
 
@@ -48,16 +51,19 @@ $(function () {
     if (panelSpanId) {
       const panelId = panelSpanId.split('_btn')[0];
       setPanelsVisibilities(panelId, null, position);
-      $(this).parent().find('select.panel-position-cont').hide();
+      $('select#' + panelId + '_select').hide();
     }
   });
 
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
-    const selectEle =  btnCont.find('select.panel-position-cont');
     let panelSpanId = btnCont.attr('id');
     const panelId = panelSpanId.split('_btn')[0];
+    const selectEle =  $('select#' + panelId + '_select');
+
+    // Hide all select dropdown except the current one
+    $('select.panel-position-cont').not(selectEle).hide();
 
     if (!panelSpanId) {
       return;
@@ -66,12 +72,9 @@ $(function () {
     if (isPanelOpen || !taLayoutDet.isTwoPanelsEnabled) {
       setPanelsVisibilities(panelId);
     } else {
-      // Hide all select dropdown except the current one
-      $('select.panel-position-cont').not(selectEle).hide();
       // removing previously selected option
       selectEle.val(0);
       selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
-
     }
   });
   // Remove the select options which are open
@@ -79,6 +82,14 @@ $(function () {
     $('select.panel-position-cont').hide();
     document.removeEventListener('click', hidePanelPositionSelect);
   }
+  // Check for the panels status initially
+  adjustGradingPanelHeader();
+  const resizeObserver = new ResizeObserver(() => {
+      adjustGradingPanelHeader();
+  });
+  // calling it for the first time i.e initializing
+  adjustGradingPanelHeader();
+  resizeObserver.observe(document.getElementById('grading-panel-header'));
 });
 
 function getSavedTaLayoutDetails() {
@@ -153,6 +164,22 @@ function initializeTaLayout() {
   }
   if (taLayoutDet.isFullLeftColumnMode) {
     toggleFullLeftColumnMode();
+  }
+}
+
+/*
+  Adjust buttons inside Grading panel header and shows only icons on smaller screens
+ */
+function adjustGradingPanelHeader () {
+  const header = $('.panel-header-box');
+  const headerWidth = header.width();
+  if (maxHeaderWidth < headerWidth) {
+    maxHeaderWidth = headerWidth;
+  }
+  if (maxHeaderWidth > $('#grading-panel-header').width()) {
+    header.addClass('smaller-header');
+  } else {
+    header.removeClass('smaller-header');
   }
 }
 

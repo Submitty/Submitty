@@ -258,6 +258,30 @@ progress::-webkit-progress-value {
     left: 4px;
     font-size: 14px;
 }
+.grade-panel button i:hover {
+    color: unset;
+}
+
+.smaller-header {
+    flex-wrap: wrap;
+}
+
+.smaller-header .grade-panel {
+    margin-top: 4px;
+}
+
+.smaller-header .grade-panel button {
+    padding: 10px 20px;
+}
+
+.smaller-header .grade-panel button i {
+    left: 12px;
+    top: 0;
+}
+
+.smaller-header .grade-panel button span {
+    display: none;
+}
 
 .grade-panel.active button, .grade-panel:hover button {
     color: white;
@@ -358,18 +382,17 @@ progress::-webkit-progress-value {
 .panel-position-cont option {
     padding: 10px;
     color: var(--text-black);
-    width: 100%;
     cursor: pointer;
+    border-bottom: 1px solid var(--text-black);
 }
 
-.panel-position-cont option:hover, .panel-position-cont option:focus {}
-
-.panel-position-left {
-    border-bottom: 1px solid;
+.panel-position-cont option:hover, .panel-position-cont option:focus {
+    color: white;
 }
 
-.panel-position-right {
-}
+.panel-position-left {}
+
+.panel-position-right {}
 
 /* Grading Panels CSS */
 
