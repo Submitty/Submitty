@@ -45,7 +45,6 @@ $(function () {
 
   // panel position selector change event
   $(".grade-panel .panel-position-cont").change(function() {
-    console.log("inside the change");
     let panelSpanId = $(this).parent().attr('id');
     let position = $(this).val();
     if (panelSpanId) {
@@ -499,17 +498,20 @@ function toggleTwoPanelMode() {
 
     const leftPanelId = taLayoutDet.currentTwoPanels.left;
     const rightPanelId = taLayoutDet.currentTwoPanels.right;
+    //Now Fetch the panels from DOM
+    const leftPanel = document.getElementById(leftPanelId);
+    const rightPanel = document.getElementById(rightPanelId);
 
     taLayoutDet.currentTwoPanels = {
       left: null,
       right: null
     };
 
-    if (rightPanelId) {
-      document.querySelector('.panels-container').append(document.getElementById(rightPanelId));
+    if (rightPanel) {
+      document.querySelector('.panels-container').append(rightPanel);
     }
-    if (leftPanelId) {
-      document.querySelector('.panels-container').append(document.getElementById(leftPanelId));
+    if (leftPanel) {
+      document.querySelector('.panels-container').append();
       // passing forceVisible true as normal toggle will hide it single panel mode
       setPanelsVisibilities(leftPanelId, true);
     }
