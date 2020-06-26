@@ -439,7 +439,8 @@ progress::-webkit-progress-value {
     background: transparent;
 }
 
-.two-panel-drag-bar span, .content-drag-bar span {
+.two-panel-drag-bar:after, .content-drag-bar:after {
+    content: "";
     position: absolute;
     width: 10px;
     height: 30%;
@@ -452,7 +453,11 @@ progress::-webkit-progress-value {
     transition: all 0.5s;
 }
 
-.two-panel-drag-bar:hover span {
+.content-drag-bar:after {
+    left: 60%;
+}
+
+.two-panel-drag-bar:hover:after, .content-drag-bar:hover:after {
     filter: blur(3px);
 }
 

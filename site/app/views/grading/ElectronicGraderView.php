@@ -762,7 +762,6 @@ HTML;
         		    <div class="content-items-container">
                     <div class="content-items content-item-left"></div>
                     <div class="content-drag-bar">
-                        <span></span>
                     </div>
                     <div class="content-items content-item-right">
 HTML;
@@ -774,7 +773,6 @@ HTML;
                     <div class="two-panel-cont">
                          <div class="two-panel-item two-panel-left active"></div>
                          <div class="two-panel-drag-bar active">
-                            <span></span>
                          </div>
                          <div class="two-panel-item two-panel-right">
                          </div>   

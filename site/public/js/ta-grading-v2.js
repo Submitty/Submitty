@@ -126,10 +126,9 @@ function initializeTwoPanelDrag () {
     // remove the dragging CSS props to go back to initial styling
     dragbar.style.removeProperty("cursor");
     document.body.style.removeProperty("cursor");
-    leftPanel.style.removeProperty("user-select");
-    leftPanel.style.removeProperty("pointer-events");
-    rightPanel.style.removeProperty("user-select");
-    rightPanel.style.removeProperty("pointer-events");
+    document.body.style.removeProperty("user-select");
+    document.body.style.removeProperty("pointer-events");
+    dragbar.style.removeProperty("filter");
 
     // Remove the handlers of `mousemove` and `mouseup`
     document.removeEventListener("mousemove", mouseMoveHandler);
@@ -143,11 +142,11 @@ function initializeTwoPanelDrag () {
 
     // consistent mouse pointer during dragging
     document.body.style.cursor = "col-resize";
-    leftPanel.style.userSelect = "none";
-    leftPanel.style.pointerEvents = "none";
     // Disable text selection when dragging
-    rightPanel.style.userSelect = "none";
-    rightPanel.style.pointerEvents = "none";
+    document.body.style.userSelect = "none";
+    document.body.style.pointerEvents = "none";
+    // Add blurry effect on drag-bar
+    dragbar.style.filter = "blur(5px)";
   };
   dragbar.addEventListener("mousedown", mouseDownHandler);
   saveTaLayoutDetails();
