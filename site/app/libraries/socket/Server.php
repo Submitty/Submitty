@@ -40,36 +40,30 @@ class Server implements MessageComponentInterface {
         $client_id = $conn->resourceId;
         $origin = $request->getHeader('origin')[0];
 
-        if (strpos($origin, "localhost")) {
-            $cookieString = $request->getHeader("cookie")[0];
-            parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
-            $sessid = $cookies['submitty_session'];
+        $cookieString = $request->getHeader("cookie")[0];
+        parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
+        $sessid = $cookies['submitty_session'];
 
-            try {
-                $token = TokenManager::parseSessionToken(
-                    $sessid,
-                    $this->core->getConfig()->getBaseUrl(),
-                    $this->core->getConfig()->getSecretSession()
-                );
-                $session_id = $token->getClaim('session_id');
-                $user_id = $token->getClaim('sub');
-                $logged_in = $this->core->getSession($session_id, $user_id);
-                if (!$logged_in) {
-                    $conn->close();
-                    return false;
-                }
-                else {
-                    $this->setSocketClient($user_id, $conn);
-                    return true;
-                }
+        try {
+            $token = TokenManager::parseSessionToken(
+                $sessid,
+                $this->core->getConfig()->getBaseUrl(),
+                $this->core->getConfig()->getSecretSession()
+            );
+            $session_id = $token->getClaim('session_id');
+            $user_id = $token->getClaim('sub');
+            $logged_in = $this->core->getSession($session_id, $user_id);
+            if (!$logged_in) {
+                $conn->close();
+                return false;
             }
-            catch (\InvalidArgumentException $exc) {
-                die($exc);
+            else {
+                $this->setSocketClient($user_id, $conn);
+                return true;
             }
         }
-        else {
-            $conn->close();
-            return false;
+        catch (\InvalidArgumentException $exc) {
+            die($exc);
         }
     }
 
