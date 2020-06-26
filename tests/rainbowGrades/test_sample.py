@@ -14,6 +14,8 @@ import shutil
 import subprocess
 from datetime import datetime
 
+from submitty_utils import dateutils
+
 # Get paths required for testing
 # this file is at SUBMITTY_INSTALL_DIR/test_suite/rainbowGrades
 SUBMITTY_INSTALL_DIR = os.path.realpath(
@@ -32,22 +34,6 @@ repository_path = SUBMITTY_JSON['submitty_repository']
 script_path = os.path.join(SUBMITTY_JSON['submitty_data_dir'], "test_suite", "rainbowGrades")
 runner_dir = os.path.join(SUBMITTY_JSON['submitty_data_dir'], "to_be_graded_queue")
 rainbow_path = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "RainbowGrades")
-
-
-def get_current_semester():
-    """
-    Given today's date, generates a three character code that represents the semester to use for
-    courses such that the first half of the year is considered "Spring" and the last half is
-    considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
-    F. The next two characters are the last two digits in the current year.
-    :return:
-    """
-    today = datetime.today()
-    semester = "f" + str(today.year)[-2:]
-    if today.month < 7:
-        semester = "s" + str(today.year)[-2:]
-    return semester
-
 
 
 def error_and_cleanup(tmp_path, message, error=-1):
@@ -153,8 +139,13 @@ def sample_rainbow_grades_test():
                 if len(line) >= 25 and line[:25] == "RAINBOW_GRADES_DIRECTORY=":
                     make_file.write("RAINBOW_GRADES_DIRECTORY=" + rainbow_tmp + "\n")
                 elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
-                    make_file.write(os.path.join("REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
-                                                 get_current_semester(), "sample", "reports") + "\n")
+                    make_file.write(os.path.join(
+                        "REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__",
+                        "courses",
+                        dateutils.get_current_semester(),
+                        "sample",
+                        "reports"
+                    ) + "\n")
                 else:
                     make_file.write(line)
     except Exception as e:
