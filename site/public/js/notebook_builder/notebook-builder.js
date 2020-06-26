@@ -6,9 +6,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 class NotebookBuilder {
     constructor() {
-        this.widgets = [new MultipleChoiceWidget(), new SelectorWidget()];
+        this.widgets = [new SelectorWidget()];
     }
 
+    /**
+     * Display all widgets the notebook builder is keeping track of
+     */
     render() {
         // Get a handle on the main div
         const main_div = document.getElementById('notebook-builder');
@@ -17,11 +20,14 @@ class NotebookBuilder {
         main_div.innerHTML = '';
 
         // Draw widgets
-        this.widgets.forEach((widget) => {
+        this.widgets.forEach(widget => {
             main_div.appendChild(widget.render());
         });
     }
 
+    /**
+     * From the list of widgets compile and return a 'notebook' json
+     */
     getJSON() {
         const notebook_array = [];
 

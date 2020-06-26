@@ -1,13 +1,20 @@
 class MarkdownWidget extends Widget {
     constructor() {
         super();
-        this.text_area = document.createElement('textarea');
 
-        // Setup text area
-        this.text_area.setAttribute('placeholder', 'Enter text or markdown');
+        this.dom_pointer;
+
+        this.state = {
+            type: 'markdown',
+            value: ''
+        };
     }
 
     render() {
+        if (this.dom_pointer) {
+            this.commitState();
+        }
+
         // Setup container
         const container = this.getContainer('Markdown');
         container.classList.add('markdown-widget');
@@ -20,23 +27,31 @@ class MarkdownWidget extends Widget {
         info_link.innerHTML = '<i class="far fa-question-circle"></i>';
         container.querySelector('.heading-container').appendChild(info_link);
 
+        // Setup text area
+        const text_area = document.createElement('textarea');
+        text_area.classList.add('markdown-input');
+        text_area.setAttribute('placeholder', 'Enter text or markdown');
+        text_area.value = this.state.value;
+
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
-        interactive_area.appendChild(this.text_area);
+        interactive_area.appendChild(text_area);
 
+        this.dom_pointer = container;
         return container;
     }
 
-    getJSON() {
-        // If there was no value entered then return nothing
-        if (this.text_area.value === '') {
-            return;
-        }
+    commitState() {
+        const text_area = this.dom_pointer.querySelector('.markdown-input');
+        this.state.value = text_area.value;
+    }
 
-        return {
-            type: 'markdown',
-            markdown_string: this.text_area.value
-        };
+    getJSON() {
+        this.commitState();
+
+        if (this.state.value !== '') {
+            return this.state;
+        }
     }
 }
 

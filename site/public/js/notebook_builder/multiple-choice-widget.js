@@ -2,17 +2,20 @@ class MultipleChoiceWidget extends Widget {
     constructor() {
         super();
 
-        this.allow_multiple_toggle = document.createElement('input');
-        this.allow_multiple_toggle.setAttribute('type', 'checkbox');
+        this.dom_pointer;
 
-        this.randomize_order_toggle = document.createElement('input');
-        this.randomize_order_toggle.setAttribute('type', 'checkbox');
-
-        this.filename = document.createElement('input');
-        this.filename.setAttribute('type', 'text');
+        this.state = {
+            type: 'multiple_choice',
+            choices: [],
+            filename: 'default.txt'
+        };
     }
 
     render() {
+        if (this.dom_pointer) {
+            this.commitState();
+        }
+
         // Setup container
         const container = this.getContainer('Multiple Choice');
         container.classList.add('multiple-choice-widget');
@@ -22,51 +25,60 @@ class MultipleChoiceWidget extends Widget {
         interactive_area.appendChild(this.getMultipleChoice());
         interactive_area.appendChild(this.getConfig());
 
+        this.dom_pointer = container;
         return container;
     }
 
+    commitState() {
+        // MC Options
+        const values = this.dom_pointer.querySelectorAll('.entered-value-input');
+        const descriptions = this.dom_pointer.querySelectorAll('.entered-description-input');
+
+        this.state.choices = [];
+        for (let i = 0; i < values.length; i++) {
+            this.state.choices.push({value: values[i].value, description: descriptions[i].value});
+        }
+
+        // Others
+        const allow_multiple_toggle = this.dom_pointer.querySelector('.allow-multiple-toggle');
+        allow_multiple_toggle.checked ? this.state.allow_multiple = true : delete this.state.allow_multiple;
+
+        const randomize_order_toggle = this.dom_pointer.querySelector('.randomize-order-toggle');
+        randomize_order_toggle.checked ? this.state.randomize_order = true : delete this.state.randomize_order;
+
+        const filename = this.dom_pointer.querySelector('.filename-input');
+        this.state.filename = filename.value;
+    }
+
     getJSON() {
-        const choices = this.getChoicesArrayJSON();
+        this.commitState();
 
-        // If there were no choices created then return nothing
-        if (choices.length === 0) {
-            return;
+        if (this.state.choices.length) {
+            return this.state;
         }
-
-        const result = {};
-
-        result.type = 'multiple_choice';
-        result.choices = choices;
-
-        if (this.randomize_order_toggle.checked) {
-            result.randomize_order = true;
-        }
-
-        if (this.allow_multiple_toggle.checked) {
-            result.allow_multiple = true;
-        }
-
-        if (this.filename.value) {
-            result.filename = this.filename.value;
-        }
-
-        return result;
     }
 
-    getChoicesArrayJSON() {
-
-    }
-
+    /**
+     * Get and setup the area of the multiple choice widget which allows the user to add a new multiple choice
+     * option
+     *
+     * @returns {HTMLDivElement}
+     */
     getMultipleChoice() {
         const table = document.createElement('div');
-        table.setAttribute('id', 'mc-table');
+        table.classList.add('mc-table');
         table.innerHTML = this.getMultipleChoiceTemplate();
 
+        // Add options we already had in state to begin with
+        this.state.choices.forEach(option_json => {
+            table.insertBefore(this.getMultipleChoiceOption(option_json.value, option_json.description), table.querySelector('.mc-inputs'));
+        });
+
         // Add newly entered data to form when add button is clicked
-        const add_button = table.querySelector('#add_button');
+        const add_button = table.querySelector('.add-button');
         add_button.addEventListener('click', () => {
-            const value = table.querySelector('#value-input');
-            const description = table.querySelector('#description-input');
+            const value = table.querySelector('.value-input');
+            const description = table.querySelector('.description-input');
 
             table.insertBefore(this.getMultipleChoiceOption(value.value, description.value), table.querySelector('.mc-inputs'));
 
@@ -77,6 +89,11 @@ class MultipleChoiceWidget extends Widget {
         return table;
     }
 
+    /**
+     * Get the html template used with this.getMultipleChoice()
+     *
+     * @returns {string}
+     */
     getMultipleChoiceTemplate() {
         return `
         <div class="mc-row">
@@ -92,25 +109,33 @@ class MultipleChoiceWidget extends Widget {
         </div>
         <div class="mc-inputs mc-row">
             <div class="mc-col">
-                <input type="text" id="value-input" placeholder="Add new value">    
+                <input type="text" class="value-input" placeholder="Add new value">    
             </div>
             <div class="mc-col-center">
-                <textarea id="description-input" placeholder="Add new description"></textarea>
+                <textarea class="description-input" placeholder="Add new description"></textarea>
             </div>
             <div class="mc-col mc-buttons">
-                <input type="button" id="add_button" value="Add">
+                <input type="button" class="add-button" value="Add">
             </div>
         </div>`;
     }
 
+    /**
+     * Get a div which contains populated inputs for a single multiple choice option, along with their up/down/remove
+     * controls.
+     *
+     * @param value The value which should be populated in the value box
+     * @param description The description which should be populated in the description box
+     * @returns {HTMLDivElement}
+     */
     getMultipleChoiceOption(value, description) {
         const mc_option = document.createElement('div');
         mc_option.classList.add('mc-entered-option');
         mc_option.classList.add('mc-row');
         mc_option.innerHTML = this.getMultipleChoiceOptionTemplate(value, description);
 
+        // Handle when an up, down, or remove mc option button is clicked
         mc_option.addEventListener('click', (event) => {
-
             const trigger = event.target;
             const current = event.currentTarget;
 
@@ -136,6 +161,13 @@ class MultipleChoiceWidget extends Widget {
         return mc_option;
     }
 
+    /**
+     * Get the html template used with this.getMultipleChoiceOption()
+     *
+     * @param value The value which should be populated in the value box
+     * @param description The description which should be populated in the description box
+     * @returns {string}
+     */
     getMultipleChoiceOptionTemplate(value, description) {
         return `
         <div class="mc-col">
@@ -151,18 +183,39 @@ class MultipleChoiceWidget extends Widget {
         </div>`;
     }
 
+    /**
+     * Get the configuration area of the multiple choice widget.  These are the inputs related to
+     * allow_multiple, randomize_order, and filename.
+     *
+     * @returns {HTMLDivElement}
+     */
     getConfig() {
+        const allow_multiple_toggle = document.createElement('input');
+        allow_multiple_toggle.classList.add('allow-multiple-toggle');
+        allow_multiple_toggle.setAttribute('type', 'checkbox');
+        allow_multiple_toggle.checked = this.state.allow_multiple;
+
+        const randomize_order_toggle = document.createElement('input');
+        randomize_order_toggle.classList.add('randomize-order-toggle');
+        randomize_order_toggle.setAttribute('type', 'checkbox');
+        randomize_order_toggle.checked = this.state.randomize_order;
+
+        const filename = document.createElement('input');
+        filename.classList.add('filename-input');
+        filename.setAttribute('type', 'text');
+        filename.value = this.state.filename;
+
         const allow_multiple_label = document.createElement('label');
         allow_multiple_label.innerText = 'Select multiple: ';
-        allow_multiple_label.appendChild(this.allow_multiple_toggle);
+        allow_multiple_label.appendChild(allow_multiple_toggle);
 
         const randomize_order_label = document.createElement('label');
         randomize_order_label.innerText = 'Randomize order: ';
-        randomize_order_label.appendChild(this.randomize_order_toggle);
+        randomize_order_label.appendChild(randomize_order_toggle);
 
         const filename_label = document.createElement('label');
         filename_label.innerText = 'Filename: ';
-        filename_label.appendChild(this.filename);
+        filename_label.appendChild(filename);
 
         const fieldset = document.createElement('fieldset');
         fieldset.appendChild(allow_multiple_label);

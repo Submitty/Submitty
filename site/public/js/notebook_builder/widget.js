@@ -1,5 +1,20 @@
 class Widget {
     /**
+     * Get the html representation of the widget
+     */
+    render() { throw 'Implement this method in the child class.'; }
+
+    /**
+     * Parse through any interactive elements inside the widget and save them into the widget's state object
+     */
+    commitState() { throw 'Implement this method in the child class.'; }
+
+    /**
+     * Get the JSON representation of the widget.  This is usually just the state object
+     */
+    getJSON() { throw 'Implement this method in the child class.'; }
+
+    /**
      * Gets a widget container div
      *
      * @returns {HTMLDivElement}

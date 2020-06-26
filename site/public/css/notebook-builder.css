@@ -1,5 +1,5 @@
 /**
- * Styles common to all notebook builder widgets
+ * Styles common to multiple notebook builder widgets
  */
 .notebook-builder-widget {
     border: 3px solid var(--viewed_content);
@@ -48,6 +48,10 @@
     margin-top: 10px;
 }
 
+.filename-input {
+    text-align: right;
+}
+
 /**
  * Selector widget styles
  */
@@ -77,50 +81,48 @@
     align-items: center;
 }
 
-.short-answer-widget .interactive-container form div {
-    margin: 10px;
-    display: flex;
-    align-items: center;
+.short-answer-widget .rows-input {
+    width: 60px;
+    text-align: right;
 }
 
 /**
  * Multiple choice widget styles
  */
-
-#mc-table {
+.mc-table {
     width: 100%;
     margin-right: 10px;
 }
 
-#mc-table .mc-row {
+.mc-table .mc-row {
     display: flex;
     margin-top: 15px;
 }
 
-#mc-table .mc-col {
+.mc-table .mc-col {
     flex: 1;
 }
 
-#mc-table .mc-col-center {
+.mc-table .mc-col-center {
     flex: 4;
 }
 
-#mc-table .mc-header {
+.mc-table .mc-header {
     font-weight: bold;
 }
 
-#mc-table #value-input,
-#mc-table .entered-value-input {
+.mc-table .value-input,
+.mc-table .entered-value-input {
     width: 95%;
 }
 
-#mc-table #description-input,
-#mc-table .entered-description-input {
+.mc-table .description-input,
+.mc-table .entered-description-input {
     width: 95%;
     height: 80px;
 }
 
-#mc-table .mc-buttons {
+.mc-table .mc-buttons {
     display: flex;
     flex-direction: column;
 }
