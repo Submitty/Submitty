@@ -10,6 +10,7 @@
         });
 
         $(".post_reply_form").submit(publishPost);
+        $("#thread_form").submit(modifyPost)
         $("form").areYouSure();
         loadThreadHandler();
         initSocketClient();

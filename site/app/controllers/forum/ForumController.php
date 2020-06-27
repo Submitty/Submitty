@@ -442,6 +442,9 @@ class ForumController extends AbstractController {
         $post_id = $_POST['post_id'];
         $reply_level = $_POST['reply_level'];
         $post = $this->core->getQueries()->getPost($post_id);
+        if (($_POST['edit']) && !empty($this->core->getQueries()->getPostHistory($post_id))) {
+            $post['edit_timestamp'] = $this->core->getQueries()->getPostHistory($post_id)[0]['edit_timestamp'];
+        }
         $thread_id = $post['thread_id'];
         $GLOBALS['totalAttachments'] = 0;
         $unviewed_posts = [$post_id];
@@ -492,10 +495,9 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
         if (!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage("Thread is locked.");
-            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
+            return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
-        elseif ($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin()) {
+        elseif (!empty($_POST['thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         elseif ($modify_type == 0) { //delete post or thread
@@ -604,7 +606,7 @@ class ForumController extends AbstractController {
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
             }
-            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
+            return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
     }
 

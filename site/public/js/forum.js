@@ -44,7 +44,7 @@ function checkForumFileExtensions(post_box_id, files){
             files.splice(i, 1);
             i--;
         }
-    } 
+    }
     return count == files.length;
 }
 
@@ -93,7 +93,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         }
         files.push(file_array[index][j]);
     }
-    
+
     var valid = true;
     if(!checkForumFileExtensions(post_box_id, files)){
         displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
@@ -209,36 +209,44 @@ function publishPost(e) {
     }
 }
 
-function socketNewPostHandler(post_id, reply_level) {
+function socketNewOrEditPostHandler(post_id, reply_level, edit=false) {
   $.ajax({
     type: 'POST',
     url: buildCourseUrl(['forum', 'posts', 'single']),
-    data: {'post_id': post_id, 'reply_level': reply_level, 'csrf_token': window.csrfToken},
+    data: {'post_id': post_id, 'reply_level': reply_level, 'edit': edit, 'csrf_token': window.csrfToken},
     success: function (response) {
       try {
         var new_post = JSON.parse(response).data;
 
-        var parent_id = $($(new_post)[0]).attr('parent_id');
-        var parent_post = $("#" + parent_id);
-        if (parent_post.hasClass('first_post')) {
-          $(new_post).insertBefore('#post-hr').hide().fadeIn();
-        }
-        else {
-          var sibling_posts = $('[parent_id="' + parent_id + '"]');
-          if (sibling_posts.length != 0) {
-            var parent_sibling_posts = $('#' + parent_id + ' ~ .post_box').map(function() {
-              return $(this).attr('data-reply_level') <= $('#' + parent_id).attr('data-reply_level') ? this : null;
-            });
-            if (parent_sibling_posts.length != 0) {
-              $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
-            }
-            else {
-              $(new_post).insertBefore('#post-hr').hide().fadeIn();
-            }
+        if (!edit){
+          var parent_id = $($(new_post)[0]).attr('parent_id');
+          var parent_post = $("#" + parent_id);
+          if (parent_post.hasClass('first_post')) {
+            $(new_post).insertBefore('#post-hr').hide().fadeIn();
           }
           else {
-            $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+            var sibling_posts = $('[parent_id="' + parent_id + '"]');
+            if (sibling_posts.length != 0) {
+              var parent_sibling_posts = $('#' + parent_id + ' ~ .post_box').map(function() {
+                return $(this).attr('data-reply_level') <= $('#' + parent_id).attr('data-reply_level') ? this : null;
+              });
+              if (parent_sibling_posts.length != 0) {
+                $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
+              }
+              else {
+                $(new_post).insertBefore('#post-hr').hide().fadeIn();
+              }
+            }
+            else {
+              $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+            }
           }
+        }
+        else {
+          var original_post = $('#' + post_id);
+          $(new_post).insertBefore(original_post);
+          original_post.next().remove();
+          original_post.remove();
         }
 
         $('#'+ post_id + '-reply').css("display","none");
@@ -560,11 +568,15 @@ function initSocketClient() {
           break;
         case "new_post":
           if ($('data#current-thread').val() == msg.thread_id)
-            socketNewPostHandler(msg.post_id, msg.reply_level);
+            socketNewOrEditPostHandler(msg.post_id, msg.reply_level);
           break;
         case "delete_post":
           if ($('data#current-thread').val() == msg.thread_id)
             socketDeletePostHandler(msg.post_id);
+          break;
+        case "edit_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketNewOrEditPostHandler(msg.post_id, msg.reply_level, true);
           break;
         default:
           console.log("Undefined message recieved.");
@@ -610,7 +622,47 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
+function modifyPost(e) {
+  e.preventDefault();
+  var form = $(this);
+  var formData = new FormData(form[0]);
+  var submit_url = form.attr('action');
+
+  $.ajax({
+    url: submit_url,
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function (response) {
+      try {
+        var json = JSON.parse(response);
+      }
+      catch (e) {
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please refresh the page.</div>';
+        $('#messages').append(message);
+        return;
+      }
+      if(json['status'] === 'fail'){
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+        $('#messages').append(message);
+        return;
+      }
+
+      if (json['data']['type'] === 'Post') {
+        var course = document.body.dataset.courseUrl.split('/').pop();
+        var thread_id = form.find('#edit_thread_id').val()
+        var post_id = form.find('#edit_post_id').val()
+        var reply_level = $('#' + post_id).attr('data-reply_level')
+        window.socketClient.send({'course': course, 'type': "edit_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level});
+      }
+
+      window.location.reload();
+    }
+  });
+}
+
+function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
     if(!checkAreYouSureForm()) {
         return;
     }
@@ -1608,9 +1660,6 @@ function loadThreadHandler(){
 
                 enableTabsInTextArea('.post_content_reply');
                 saveScrollLocationOnRefresh('posts_list');
-
-                $(".post_reply_form").submit(publishPost);
-
             },
             error: function(){
                 window.alert("Something went wrong while trying to display thread details. Please try again.");
