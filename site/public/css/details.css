@@ -2,11 +2,6 @@
     padding: 20px 10px;
 }
 
-.details-header-row h1 {
-    margin-bottom: 18px;
-    font-weight: 500;
-}
-
 #details-table tbody.details-info-header {
     font-size: 15px;
     margin: 15px -10px;
@@ -77,7 +72,6 @@
     border-radius: 0;
     padding: 12px;
     flex: 1;
-    height: unset;
     margin-right: 10px;
     border: 1px solid var(--standard-medium-gray);
 }
@@ -231,11 +225,6 @@
 }
 
 @media (min-width: 660px) {
-    .details-header-row h1 {
-        margin-bottom: auto;
-        font-weight: bold;
-    }
-
     .markers-container {
         width: unset;
     }
@@ -252,6 +241,7 @@
 
     .action-btn-cont a {
         margin-right: 0;
+        flex: unset;
     }
 
     .action-btn-cont a:first-child {
