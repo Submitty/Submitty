@@ -1,4 +1,20 @@
 {% import _self as self %}
+<script>
+    let student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
+    let regrade_info = {% if isRegradePanel %} true {% else %} false {% endif %};
+    let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
+    let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
+
+    updateThePanelsElements({
+        autograding_results: true,
+        grading_rubric: true,
+        submission_browser: true,
+        student_info,
+        regrade_info,
+        discussion_browser,
+        peer_info,
+    });
+</script>
 
 <div id="grading-panel-header">
     <div class="panel-header-box">
@@ -29,7 +45,7 @@
             </button>
             {{ self.renderPanelPositionSelector('submission_browser') }}
         </span>
-        {% if ((not peer_gradeable) or (peer_gradeable and not i_am_a_peer )) %}
+        {% if isStudentInfoPanel %}
             <span class="grade-panel" id="student_info_btn">
                 <button title="Show/Hide Student Information (Press S)"
                         class="invisible-btn key_to_click"
@@ -40,7 +56,7 @@
             {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
-        {% if peer_gradeable and not i_am_a_peer %}
+        {% if isPeerPanel %}
             <span class="grade-panel" id="peer_info_btn">
                 <button title="Show/Hide Peer Information (Press P)"
                         class="invisible-btn key_to_click"
@@ -51,7 +67,7 @@
             {{ self.renderPanelPositionSelector('peer_info') }}
             </span>
         {% endif %}
-        {% if discussion_based %}
+        {% if isDiscussionPanel %}
             <span class="grade-panel" id="discussion_browser_btn">
                 <button title="Show/Hide Discussion Posts"
                         class="invisible-btn key_to_click"
@@ -62,7 +78,7 @@
             {{ self.renderPanelPositionSelector('discussion_browser') }}
             </span>
         {% endif %}
-        {% if regrade_panel_available %}
+        {% if isRegradePanel %}
             <span class="grade-panel" id="regrade_info_btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
                         class="invisible-btn key_to_click"
@@ -79,10 +95,10 @@
 
 {% macro renderPanelPositionSelector(panelId) %}
     <select class="panel-position-cont" id="{{ panelId }}_select" size="2">
-        <option class="panel-position-left" tabindex="0" value="left">
+        <option class="panel-position-left" value="left">
             Open as left panel
         </option>
-        <option class="panel-position-right" tabindex="0" value="right">
+        <option class="panel-position-right" value="right">
             Open as right panel
         </option>
     </select>

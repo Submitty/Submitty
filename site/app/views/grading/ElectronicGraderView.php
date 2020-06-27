@@ -745,11 +745,21 @@ HTML;
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, bool $showNewInterface) {
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $peer = false;
+        $isPeerPanel = false;
+        $isStudentInfoPanel = true;
+        $isDiscussionPanel = false;
+        $isRegradePanel = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() === 4) {
-            $peer = true;
+            $isPeerPanel = true;
+            $isStudentInfoPanel = false;
+        }
+        if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
+            $isDiscussionPanel = true;
+        }
+        if ($this->core->getConfig()->isRegradeEnabled()) {
+            $isRegradePanel = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
@@ -766,7 +776,7 @@ HTML;
                     <div class="content-items content-item-right">
 HTML;
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderGradingPanelHeader', $graded_gradeable);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderGradingPanelHeader', $isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel);
 
             $return .= <<<HTML
                 <div class="panels-container">
@@ -788,10 +798,11 @@ HTML;
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $showNewInterface);
 
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
+        if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version, $showNewInterface);
         }
-        if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
+        if ($isDiscussionPanel) {
+            $isPeerPanel = true;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment(), $showNewInterface);
         }
 
@@ -799,10 +810,10 @@ HTML;
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
-        if (!$peer) {
+        if (!$isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
         }
-        if ($this->core->getConfig()->isRegradeEnabled()) {
+        if ($isRegradePanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry, $showNewInterface);
         }
 
@@ -919,11 +930,12 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(GradedGradeable $graded_gradeable) {
+    public function renderGradingPanelHeader($isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
-            'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
-            'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
-            'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
+            'isPeerPanel' => $isPeerPanel,
+            'isStudentInfoPanel' => $isStudentInfoPanel,
+            'isDiscussionPanel' => $isDiscussionPanel,
+            'isRegradePanel' => $isRegradePanel
         ]);
     }
 

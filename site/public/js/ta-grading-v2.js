@@ -32,6 +32,15 @@ const taLayoutDet = {
 // Grading Panel header width
 let maxHeaderWidth = 0;
 
+// Only keep those panels which are available
+function updateThePanelsElements(panelsAvailabilityObj) {
+  // Attach the isAvailable to the panel elements to manage them
+  panelElements = panelElements.filter((panel) => {
+    return panelsAvailabilityObj[panel.str]
+  });
+  console.log(panelElements);
+}
+
 $(function () {
   Object.assign(taLayoutDet, getSavedTaLayoutDetails());
 
