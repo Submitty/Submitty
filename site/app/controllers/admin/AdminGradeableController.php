@@ -267,11 +267,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
-
-        $peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
-        $grading_assignment_for_grader = $this->core->getQueries()->getPeerGradingAssignmentsForGrader('aphacker');
-        var_dump($peer_grading_assignments);
-        var_dump($grading_assignment_for_grader);
     }
 
     /**
@@ -280,7 +275,6 @@ class AdminGradeableController extends AbstractController {
      */
     public function adminGradeablePeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
-        // $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         //if entire grader row is removed, just remove grader and their students
         if (!empty($_POST['remove_grader'])) {
             $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
@@ -312,7 +306,8 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
-        $this->core->getOutput()->renderJsonSuccess($this->core->getQueries()->getPeerGradingAssignment($gradeable_id));
+        $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+        $this->core->getOutput()->renderJsonSuccess($new_peers);
     }
 
     /* Http request methods (i.e. ajax) */
