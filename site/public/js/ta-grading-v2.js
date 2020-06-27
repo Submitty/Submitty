@@ -36,7 +36,7 @@ let maxHeaderWidth = 0;
 function updateThePanelsElements(panelsAvailabilityObj) {
   // Attach the isAvailable to the panel elements to manage them
   panelElements = panelElements.filter((panel) => {
-    return panelsAvailabilityObj[panel.str]
+    return !!panelsAvailabilityObj[panel.str];
   });
   console.log(panelElements);
 }
@@ -518,10 +518,12 @@ function toggleTwoPanelMode() {
 
     if (rightPanel) {
       document.querySelector('.panels-container').append(rightPanel);
+      taLayoutDet.currentOpenPanel = rightPanelId;
     }
     if (leftPanel) {
-      document.querySelector('.panels-container').append();
+      document.querySelector('.panels-container').append(leftPanel);
       // passing forceVisible true as normal toggle will hide it single panel mode
+      taLayoutDet.currentOpenPanel = leftPanelId;
       setPanelsVisibilities(leftPanelId, true);
     }
     resetTwoPanelLayout();

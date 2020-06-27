@@ -328,14 +328,14 @@ progress::-webkit-progress-value {
 }
 
 #peer_info_btn {
-    border: 2px solid #316895;
+    border: 2px solid var(--standard-plum-purple);
 }
 
 #peer_info_btn:hover,
 #peer_info_btn.active,
 #peer_info_select option:hover,
 #peer_info_select option:focus {
-    background: #316895;
+    background: var(--standard-plum-purple);
 }
 
 #discussion_browser_btn {
