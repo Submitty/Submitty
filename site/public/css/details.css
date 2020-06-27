@@ -4,7 +4,6 @@
 
 #details-table tbody.details-info-header {
     font-size: 15px;
-    margin: 15px -10px;
 }
 
 #details-table tbody.details-info-header .info td {
@@ -52,6 +51,7 @@
     padding: 6px 6px 6px 0;
     justify-self: flex-end;
     border: 1px solid var(--standard-medium-gray);
+    border-radius: 4px;
 }
 
 #details-legend li i {
@@ -69,7 +69,6 @@
 }
 
 .action-btn-cont a {
-    border-radius: 0;
     padding: 12px;
     flex: 1;
     margin-right: 10px;
@@ -170,7 +169,7 @@
     #details-table .empty-info-header {
         padding: 10px 0;
         position: relative;
-        margin: 15px -25px;
+        margin: 15px 0;
         background-color: var(--alert-border-blue);
         transition: 0.2s;
         cursor: pointer;
@@ -185,7 +184,6 @@
         padding: 10px 0;
         border: 1px solid var(--text-black);
         transform: translate(0, -5px);
-        margin-top: 15px;
         color: white;
         background-color: var(--standard-medium-blue);
     }
