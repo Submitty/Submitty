@@ -182,6 +182,9 @@ class TestForum(BaseTestCase):
         hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'new_post')
         # Test existence only
         self.find_posts(newcontent, must_exists=True, check_attachment=attachment_file)
         return attachment_file
