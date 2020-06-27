@@ -323,16 +323,11 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge=false, merge_thread_i
   if ($("#current-thread").val() == thread_id){
     if (merge){
       var new_url = buildCourseUrl(['forum', 'threads', merge_thread_id]);
-      var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Thread was merged.</div>';
     }
     else {
       var new_url = buildCourseUrl(['forum', 'threads']);
-      var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Thread was deleted.</div>';
     }
     window.location.replace(new_url);
-
-    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Thread was deleted.</div>';
-    $('#messages').append(message);
     return;
   }
   else if (merge && $("#current-thread").val() == merge_thread_id)
@@ -350,9 +345,6 @@ function socketResolveThreadHandler(thread_id){
 
   if ($("#current-thread").val() == thread_id){
     $("[title='Mark thread as resolved']").remove();
-
-    var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread was resolved.</div>';
-    $('#messages').append(message);
   }
 }
 
