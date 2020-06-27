@@ -125,7 +125,6 @@
 
     #details-table tbody.panel-head-active {
         background: var(--submitty-logo-blue);
-        border: 1px solid var(--text-black);
         color: white;
     }
 
@@ -170,7 +169,7 @@
         padding: 10px 0;
         position: relative;
         margin: 15px 0;
-        background-color: var(--alert-border-blue);
+        background-color: var(--alert-background-blue);
         transition: 0.2s;
         cursor: pointer;
     }
@@ -181,11 +180,9 @@
     }
 
     #details-table tbody.details-info-header:hover {
-        padding: 10px 0;
-        border: 1px solid var(--text-black);
-        transform: translate(0, -5px);
-        color: white;
         background-color: var(--standard-medium-blue);
+        color: white;
+        transform: translate(0, -5px);
     }
 
     .details-info-header .info,
