@@ -19,7 +19,6 @@ exclude=
     more_autograding_examples,
     ParseLogFiles,
     sample_files,
-    autograder/autograder/grade_item.py,
     autograder/autograder/insert_database_version_data.py,
     autograder/autograder/packer_unpacker.py,
     autograder/autograder/autograding_utils.py,
