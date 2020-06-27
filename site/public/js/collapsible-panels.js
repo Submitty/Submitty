@@ -25,7 +25,7 @@ function attachCollapsiblePanel (panelHeadSel, breakPoint, headActiveClass, anim
       $(panelHeadSel).each(function() {
         if ($(this).next().is( ":hidden" )) {
           $(this).next().slideDown("slow");
-          $(this).toggleClass(headActiveClass);
+          $(this).addClass(headActiveClass);
         }
       });
       isCollapsibleDisabled = true;

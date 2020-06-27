@@ -119,10 +119,6 @@
     .panel-active {
         display: block;
     }
-
-    #gradeables-content h1 {
-        font-weight: 400;
-    }
 }
 
 @media (min-width: 950px) {
@@ -139,7 +135,7 @@
     }
 
     .course-section {
-        display: table-row-group;
+        display: table-row-group!important;
     }
 
     .gradeable-row {
