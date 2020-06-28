@@ -673,7 +673,8 @@ class ForumController extends AbstractController {
             }
         }
         if (empty($title) || empty($categories_ids) || !$this->isValidCategories($categories_ids)) {
-            $this->core->addErrorMessage("Failed to split thread; make sure that you have a title and that you have at least one category selected.");
+            $msg = "Failed to split thread; make sure that you have a title and that you have at least one category selected.";
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         elseif (is_numeric($post_id) && $post_id > 0) {
             $thread_ids = $this->core->getQueries()->splitPost($post_id, $title, $categories_ids);
@@ -705,16 +706,16 @@ class ForumController extends AbstractController {
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $this->core->addSuccessMessage("Post split!");
+
+                $result = [];
+                $result['next'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+                $result['new_thread_id'] = $thread_id;
+                $result['old_thread_id'] = $thread_ids[0];
+                return $this->core->getOutput()->renderJsonSuccess($result);
             }
             else {
-                $this->core->addErrorMessage("Splitting Failed! ");
+                return $this->core->getOutput()->renderJsonFail("Splitting Failed!");
             }
-        }
-        if ($thread_id == -1) {
-            $this->core->redirect($this->core->buildCourseUrl(['forum']));
-        }
-        else {
-            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
         }
     }
 

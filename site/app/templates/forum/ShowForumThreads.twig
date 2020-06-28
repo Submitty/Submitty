@@ -10,7 +10,8 @@
         });
 
         $(".post_reply_form").submit(publishPost);
-        $("#thread_form").submit(modifyPost)
+        $("#thread_form").submit(modifyOrSplitPost);
+        $("#split_form").submit(modifyOrSplitPost);
         $("form").areYouSure();
         loadThreadHandler();
         initSocketClient();

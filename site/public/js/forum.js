@@ -589,6 +589,12 @@ function initSocketClient() {
           if ($('data#current-thread').val() == msg.thread_id)
             socketNewOrEditPostHandler(msg.post_id, msg.reply_level, true);
           socketNewOrEditThreadHandler(msg.thread_id, true);
+          break;
+        case "split_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketDeletePostHandler(msg.post_id);
+          socketNewOrEditThreadHandler(msg.new_thread_id, false);
+          break;
         default:
           console.log("Undefined message recieved.");
       }
@@ -633,7 +639,7 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-function modifyPost(e) {
+function modifyOrSplitPost(e) {
   e.preventDefault();
   var form = $(this);
   var formData = new FormData(form[0]);
@@ -661,13 +667,24 @@ function modifyPost(e) {
       }
 
       var course = document.body.dataset.courseUrl.split('/').pop();
-      var thread_id = form.find('#edit_thread_id').val();
-      var post_id = form.find('#edit_post_id').val();
-      var reply_level = $('#' + post_id).attr('data-reply_level');
-      var msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
-      window.socketClient.send({'course': course, 'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level});
 
-      window.location.reload();
+      // modify
+      if (form.attr('id') == 'thread_form'){
+        var thread_id = form.find('#edit_thread_id').val();
+        var post_id = form.find('#edit_post_id').val();
+        var reply_level = $('#' + post_id).attr('data-reply_level');
+        var msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
+        window.socketClient.send({'course': course, 'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level});
+        window.location.reload();
+      }
+      // split
+      else {
+        var post_id = form.find('#split_post_id').val();
+        var new_thread_id = json['data']['new_thread_id'];
+        var old_thread_id = json['data']['old_thread_id'];
+        window.socketClient.send({'course': course, 'type': 'split_post', 'new_thread_id': new_thread_id, 'thread_id': old_thread_id, 'post_id': post_id});
+        window.location.replace(json['data']['next']);
+      }
     }
   });
 }
@@ -1670,6 +1687,8 @@ function loadThreadHandler(){
 
                 enableTabsInTextArea('.post_content_reply');
                 saveScrollLocationOnRefresh('posts_list');
+
+                $(".post_reply_form").submit(publishPost);
             },
             error: function(){
                 window.alert("Something went wrong while trying to display thread details. Please try again.");
