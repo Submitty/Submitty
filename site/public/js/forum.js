@@ -279,7 +279,7 @@ function socketDeletePostHandler(post_id) {
   });
 }
 
-function socketNewThreadHandler(thread_id){
+function socketNewOrEditThreadHandler(thread_id, edit=false){
   $.ajax({
     type: 'POST',
     url: buildCourseUrl(['forum', 'threads', 'single']),
@@ -288,26 +288,33 @@ function socketNewThreadHandler(thread_id){
       try {
         var new_thread = JSON.parse(response).data;
 
-        if ($(new_thread).find(".thread-announcement").length != 0) {
-          var last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
-          if (last_bookmarked_announcement.length != 0) {
-            $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn("slow");
-          } else {
-            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+        if (!edit){
+          if ($(new_thread).find(".thread-announcement").length != 0) {
+            var last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
+            if (last_bookmarked_announcement.length != 0) {
+              $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn("slow");
+            } else {
+              $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+            }
+          }
+          else {
+            var last_announcement = $('.thread-announcement').last().parent().parent();
+            var last_bookmarked = $('.thread-favorite').last().parent().parent();
+            var last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
+
+            if (last.length == 0) {
+              $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+            } else {
+              $(new_thread).insertAfter(last.next()).hide().fadeIn("slow");
+            }
           }
         }
         else {
-          var last_announcement = $('.thread-announcement').last().parent().parent();
-          var last_bookmarked = $('.thread-favorite').last().parent().parent();
-          var last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
-
-          if (last.length == 0) {
-            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
-          } else {
-            $(new_thread).insertAfter(last.next()).hide().fadeIn("slow");
-          }
+          var original_thread = $('[data-thread_id="' + thread_id + '"]');
+          $(new_thread).insertBefore(original_thread);
+          original_thread.next().remove();
+          original_thread.remove();
         }
-
         $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
       } catch(err) {
         var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new thread. Please refresh the page.</div>';
@@ -549,7 +556,7 @@ function initSocketClient() {
     if (msg.course === document.body.dataset.courseUrl.split('/').pop()) {
       switch (msg.type) {
         case "new_thread":
-          socketNewThreadHandler(msg.thread_id);
+          socketNewOrEditThreadHandler(msg.thread_id);
           break;
         case "delete_thread":
           socketDeleteOrMergeThreadHandler(msg.thread_id);
@@ -578,6 +585,10 @@ function initSocketClient() {
           if ($('data#current-thread').val() == msg.thread_id)
             socketNewOrEditPostHandler(msg.post_id, msg.reply_level, true);
           break;
+        case "edit_thread":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketNewOrEditPostHandler(msg.post_id, msg.reply_level, true);
+          socketNewOrEditThreadHandler(msg.thread_id, true);
         default:
           console.log("Undefined message recieved.");
       }
@@ -649,13 +660,12 @@ function modifyPost(e) {
         return;
       }
 
-      if (json['data']['type'] === 'Post') {
-        var course = document.body.dataset.courseUrl.split('/').pop();
-        var thread_id = form.find('#edit_thread_id').val()
-        var post_id = form.find('#edit_post_id').val()
-        var reply_level = $('#' + post_id).attr('data-reply_level')
-        window.socketClient.send({'course': course, 'type': "edit_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level});
-      }
+      var course = document.body.dataset.courseUrl.split('/').pop();
+      var thread_id = form.find('#edit_thread_id').val();
+      var post_id = form.find('#edit_post_id').val();
+      var reply_level = $('#' + post_id).attr('data-reply_level');
+      var msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
+      window.socketClient.send({'course': course, 'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level});
 
       window.location.reload();
     }

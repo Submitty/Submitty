@@ -448,7 +448,8 @@ class ForumController extends AbstractController {
         $thread_id = $post['thread_id'];
         $GLOBALS['totalAttachments'] = 0;
         $unviewed_posts = [$post_id];
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, false, $reply_level, 'tree', true, true);
+        $first = $post['parent_id'] == -1;
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
