@@ -8,7 +8,7 @@ import os
 import shutil
 import json
 from zipfile import ZipFile
-
+from datetime import datetime
 
 def main():
 
@@ -16,8 +16,8 @@ def main():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     # Collect other path information from configuration file
-    config_file = os.path.join(current_dir, '..', '..', 'config', 'submitty.json')
-    submitty_users_file = os.path.join(current_dir, '..', '..', 'config',
+    config_file = os.path.join(current_dir, '..', '..', '..', '..', 'config', 'submitty.json')
+    submitty_users_file = os.path.join(current_dir, '..', '..', '..', '..', 'config',
                                        'submitty_users.json')
 
     with open(config_file) as f:
@@ -56,8 +56,10 @@ def main():
             if extension == 'png':
                 user_folder_path = os.path.join(user_data_dir, user_name)
                 user_images_path = os.path.join(user_data_dir, user_name, 'system_images')
-                new_file_name = user_name + '.png'
                 access = 0o770
+
+                time = datetime.now()
+                new_file_name = time.strftime('%Y%m%d%H%M%S') + '.png'
 
                 if not os.path.isdir(user_folder_path):
                     os.makedirs(user_folder_path)

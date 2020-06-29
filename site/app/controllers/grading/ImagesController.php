@@ -4,6 +4,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
 use app\models\DisplayImage;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,14 +15,10 @@ class ImagesController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/student_photos")
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
-        if ($user_group === User::GROUP_STUDENT) { // student has no permissions to view image page
-            $this->core->addErrorMessage("You have no permissions to see images.");
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
-        }
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
 
         $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
@@ -122,7 +119,7 @@ class ImagesController extends AbstractController {
 
                             // If user is a member of this course then go ahead and save
                             if (in_array($user_id, $users)) {
-                                DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $file, 'system_images');
+                                DisplayImage::saveUserImage($this->core, $user_id, $extension, $file, 'system_images');
                             }
                         }
 
@@ -150,7 +147,7 @@ class ImagesController extends AbstractController {
 
                         // If user is a member of this course then go ahead and save
                         if (in_array($user_id, $users)) {
-                            DisplayImage::saveUserImage($this->core, $user_id, $user_id, $extension, $tmp_path, 'system_images');
+                            DisplayImage::saveUserImage($this->core, $user_id, $extension, $tmp_path, 'system_images');
                         }
                     }
                     else {
@@ -183,15 +180,19 @@ class ImagesController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function flagUserImage() {
-        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], 'flagged');
-
-        if ($result) {
-            $this->core->addSuccessMessage($_POST['user_id'] . '\'s image was successfully flagged.');
-            $this->core->redirect($this->core->buildCourseUrl(['student_photos']));
+        if ($_POST['flag'] === 'true') {
+            $new_state = 'flagged';
+            $success_msg = $_POST['user_id'] . '\'s image was successfully flagged.';
+            $fail_msg = 'Some error occurred flagging ' . $_POST['user_id'] . '\'s image.';
         }
         else {
-            $this->core->addErrorMessage('Some error occurred flagging ' . $_POST['user_id'] . '\'s image.');
-            $this->core->redirect($this->core->buildCourseUrl(['student_photos']));
+            $new_state = 'preferred';
+            $success_msg = $_POST['user_id'] . '\'s image was successfully unflagged.';
+            $fail_msg = 'Some error occurred unflagging ' . $_POST['user_id'] . '\'s image.';
         }
+
+        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], $new_state);
+        $result ? $this->core->addSuccessMessage($success_msg) : $this->core->addErrorMessage($fail_msg);
+        return new RedirectResponse($this->core->buildCourseUrl(['student_photos']));
     }
 }

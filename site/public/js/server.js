@@ -1616,23 +1616,45 @@ function enableKeyToClick(){
   }
 }
 
-function flagUserImage(user_id) {
-    const confirmed = confirm(`You are flagging ${user_id}'s image as inappropriate.  Are you sure you wish to proceed?`);
+/**
+ * Function for instructor to flag/unflag a user's preferred photo as inappropriate.
+ *
+ * @param user_id The user_id of the user who's preferred photo should be flagged
+ * @param flag A boolean indicating whether to flag or unflag the image.
+ *             True to flag
+ *             False to unflag
+ */
+function flagUserImage(user_id, flag) {
+    let message;
+
+    if (flag) {
+        message = `You are flagging ${user_id}'s image as inappropriate.  Are you sure you wish to proceed?`;
+    }
+    else {
+        message = `You are unflagging ${user_id}'s image.  Are you sure you wish to proceed?`;
+    }
+
+    const confirmed = confirm(message);
 
     if (confirmed) {
-        const input = document.createElement('input');
-        input.setAttribute('name', 'user_id');
-        input.setAttribute('value', user_id);
+        const input_elem = document.createElement('input');
+        input_elem.setAttribute('name', 'user_id');
+        input_elem.setAttribute('value', user_id);
 
-        const token = document.createElement('input');
-        token.setAttribute('name', 'csrf_token');
-        token.setAttribute('value', csrfToken);
+        const token_elem = document.createElement('input');
+        token_elem.setAttribute('name', 'csrf_token');
+        token_elem.setAttribute('value', csrfToken);
+
+        const flag_elem = document.createElement('input');
+        flag_elem.setAttribute('name', 'flag');
+        flag_elem.setAttribute('value', flag);
 
         const form = document.createElement('form');
         form.setAttribute('method', 'post');
         form.setAttribute('action', buildCourseUrl(['flag_user_image']));
-        form.appendChild(input);
-        form.appendChild(token);
+        form.appendChild(input_elem);
+        form.appendChild(token_elem);
+        form.appendChild(flag_elem);
 
         document.body.appendChild(form);
         form.submit();

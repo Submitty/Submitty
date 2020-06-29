@@ -183,10 +183,7 @@ class GlobalController extends AbstractController {
                 }
             }
 
-            $at_least_one_grader_link = false;
-
             if ($this->core->getUser()->accessAdmin()) {
-                $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['users']),
                     "title" => "Manage Students",
@@ -211,7 +208,6 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getUser()->accessGrading()) {
-                $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['student_photos']),
                     "title" => "Student Photos",
@@ -231,7 +227,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
+            if ($this->core->getUser()->accessGrading()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);

@@ -104,7 +104,7 @@ class HomePageController extends AbstractController {
                 $extension = $meta[1];
 
                 // Save image for user
-                $result = $user->setDisplayImage($file_name, $extension, $_FILES['user_image']['tmp_name']);
+                $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
 
                 if (!$result) {
                     $this->core->addErrorMessage('Some error occurred saving your new user image.');

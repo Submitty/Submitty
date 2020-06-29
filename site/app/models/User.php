@@ -265,24 +265,18 @@ class User extends AbstractModel {
     /**
      * Update the user's display image if they have uploaded a new one
      *
-     * @param string $new_image_name File name of the image without the extension, for example 'my_image'
      * @param string $image_extension The extension, for example 'jpeg' or 'gif'
      * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
      *                              elsewhere.
      * @return bool true if the update was successful, false otherwise
      * @throws \ImagickException
      */
-    public function setDisplayImage(string $new_image_name, string $image_extension, string $tmp_file_path): bool {
-        // Check if user's current display image state is set to flagged, if so they may not continue
-        if (!is_null($this->display_image) && $this->display_image->getDisplayImageState() === 'flagged') {
-            return false;
-        }
-
+    public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
         $image_saved = true;
 
         // Try saving image to its new spot in the file directory
         try {
-            DisplayImage::saveUserImage($this->core, $this->id, $new_image_name, $image_extension, $tmp_file_path, 'user_images');
+            DisplayImage::saveUserImage($this->core, $this->id, $image_extension, $tmp_file_path, 'user_images');
         }
         catch (\Exception $exception) {
             $image_saved = false;

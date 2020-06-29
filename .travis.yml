@@ -97,14 +97,6 @@ jobs:
     - &02-php-unit
       stage: 02 unit test
       php: 7.2
-      addons:
-        apt:
-          sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse"
-          packages:
-            - imagemagick
-            - php-imagick
       before_install:
         - phpenv config-rm xdebug.ini
       install:
@@ -200,8 +192,6 @@ jobs:
             - libpam-passwdqc
             - libboost-all-dev
             - jq
-            - imagemagick
-            - php-imagick
       before_install:
         - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
         - phpenv config-rm xdebug.ini
