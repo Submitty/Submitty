@@ -59,7 +59,7 @@ function switch_feedback_modes() {
                     {% if peer_score >= peer_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
                     {% endif %}>
-
+                    {{ Badge.render(peer_score, peer_max, false) }}
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
