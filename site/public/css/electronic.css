@@ -317,14 +317,14 @@ progress::-webkit-progress-value {
 }
 
 #student_info_btn {
-    border: 2px solid #316895;
+    border: 2px solid var(--text-black);
 }
 
 #student_info_btn:hover,
 #student_info_btn.active,
 #student_info_select option:hover,
 #student_info_select option:focus {
-    background: #316895;
+    background: var(--subheading-underscore-grey);
 }
 
 #peer_info_btn {

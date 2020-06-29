@@ -751,9 +751,14 @@ HTML;
         $isRegradePanel = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
-        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() === 4) {
-            $isPeerPanel = true;
-            $isStudentInfoPanel = false;
+        if ($gradeable->isPeerGrading()) {
+            if ($this->core->getUser()->getGroup() !== 4) {
+                $isPeerPanel = true;
+                $isStudentInfoPanel = true;
+            } else {
+               $isPeerPanel = false;
+               $isStudentInfoPanel = false;
+            }
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
@@ -810,7 +815,7 @@ HTML;
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
-        if (!$isPeerPanel) {
+        if ($isStudentInfoPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
         }
         if ($isRegradePanel) {
