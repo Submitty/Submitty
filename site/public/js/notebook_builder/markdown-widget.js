@@ -6,7 +6,7 @@ class MarkdownWidget extends Widget {
 
         this.state = {
             type: 'markdown',
-            value: ''
+            markdown_string: ''
         };
     }
 
@@ -31,7 +31,7 @@ class MarkdownWidget extends Widget {
         const text_area = document.createElement('textarea');
         text_area.classList.add('markdown-input');
         text_area.setAttribute('placeholder', 'Enter text or markdown');
-        text_area.value = this.state.value;
+        text_area.value = this.state.markdown_string;
 
         // Setup interactive area
         const interactive_area = container.getElementsByClassName('interactive-container')[0];
@@ -43,13 +43,13 @@ class MarkdownWidget extends Widget {
 
     commitState() {
         const text_area = this.dom_pointer.querySelector('.markdown-input');
-        this.state.value = text_area.value;
+        this.state.markdown_string = text_area.value;
     }
 
     getJSON() {
         this.commitState();
 
-        if (this.state.value !== '') {
+        if (this.state.markdown_string !== '') {
             return this.state;
         }
     }
