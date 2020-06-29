@@ -94,7 +94,7 @@ class ElectronicGraderController extends AbstractController {
             for ($grader = 0; $grader < count($student_array); ++$grader) {
                 $peer_array = $student_array;
                 unset($peer_array[$grader]);
-                $peer_array=array_values($peer_array);
+                $peer_array = array_values($peer_array);
                 array_push($final_grading_info, [$student_array[$grader],$peer_array]);
             }
             $gradeable->setRandomPeerGradersList($final_grading_info);
@@ -115,17 +115,17 @@ class ElectronicGraderController extends AbstractController {
         $final_grading_info = [];
         $max_offset = count($student_array);
         $offset_array = [];
-        $temp_offset=[];
+        $temp_offset = [];
         for ($i = 1; $i < $max_offset; ++$i) {
-            array_push($temp_offset,$i);
+            array_push($temp_offset, $i);
         }
         /* $offset_array contains randomly chosen offsets.
             $temp_offset ensures no duplicate offsets exist.
             Upon every random choice of an offset from $temp_offset, the value is removed from it.
         */
         for ($i = 0; $i < $number_to_grade; ++$i) {
-            $random_offset = array_rand($temp_offset,1);
-            array_push($offset_array, $temp_offset[$random_offset]); 
+            $random_offset = array_rand($temp_offset, 1);
+            array_push($offset_array, $temp_offset[$random_offset]);
             unset($temp_offset[$random_offset]);
         }
         foreach ($offset_array as $element) {
