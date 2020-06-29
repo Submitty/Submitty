@@ -112,7 +112,6 @@ class ElectronicGraderView extends AbstractView {
                 $num_components = count($gradeable->getPeerComponents());
                 $graded_total = $num_components > 0 ? $graded / $num_components : 0;
                 $submitted_total = $num_components > 0 ? $total / $num_components : 0;
-                $peer = false;
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
