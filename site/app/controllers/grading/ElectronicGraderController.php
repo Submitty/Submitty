@@ -90,18 +90,11 @@ class ElectronicGraderController extends AbstractController {
             $all_grade_all = true;
         }
         if ($all_grade_all) {
-            $this->core->getOutput()->renderJSONSuccess("Invalid Number of Students Entered");
             $final_grading_info = [];
             for ($grader = 0; $grader < count($student_array); ++$grader) {
-                $peer_array = [];
-                for ($peer = 0; $peer < count($student_array); ++$peer) {
-                    if ($grader === $peer) {
-                        continue;
-                    }
-                    else {
-                        array_push($peer_array, $student_array[$peer]);
-                    }
-                }
+                $peer_array = $student_array;
+                unset($peer_array[$grader]);
+                $peer_array=array_values($peer_array);
                 array_push($final_grading_info, [$student_array[$grader],$peer_array]);
             }
             $gradeable->setRandomPeerGradersList($final_grading_info);
@@ -122,12 +115,18 @@ class ElectronicGraderController extends AbstractController {
         $final_grading_info = [];
         $max_offset = count($student_array);
         $offset_array = [];
+        $temp_offset=[];
+        for ($i = 1; $i < $max_offset; ++$i) {
+            array_push($temp_offset,$i);
+        }
+        /* $offset_array contains randomly chosen offsets.
+            $temp_offset ensures no duplicate offsets exist.
+            Upon every random choice of an offset from $temp_offset, the value is removed from it.
+        */
         for ($i = 0; $i < $number_to_grade; ++$i) {
-            $random_offset = rand(1, $max_offset);
-            if (in_array($random_offset, $offset_array)) {
-                $random_offset = rand($random_offset + 1, $max_offset);
-            }
-            array_push($offset_array, $random_offset);
+            $random_offset = array_rand($temp_offset,1);
+            array_push($offset_array, $temp_offset[$random_offset]); 
+            unset($temp_offset[$random_offset]);
         }
         foreach ($offset_array as $element) {
             $temp_array = $student_array;
@@ -148,7 +147,7 @@ class ElectronicGraderController extends AbstractController {
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
         }
         $gradeable->setRandomPeerGradersList($final_grading_info);
-        return JsonResponse::getSuccessResponse($final_grading_info);
+        return JsonResponse::getSuccessResponse($offset_array);
     }
     /**
      * Route for getting whitespace information for the diff viewer
