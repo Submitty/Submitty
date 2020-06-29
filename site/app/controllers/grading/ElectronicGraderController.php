@@ -120,7 +120,7 @@ class ElectronicGraderController extends AbstractController {
             array_push($temp_offset, $i);
         }
         /* $offset_array contains randomly chosen offsets.
-            $temp_offset ensures no duplicate offsets exist.
+            $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
             Upon every random choice of an offset from $temp_offset, the value is removed from it.
         */
         for ($i = 0; $i < $number_to_grade; ++$i) {
