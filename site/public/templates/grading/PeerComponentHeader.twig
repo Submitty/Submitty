@@ -1,5 +1,4 @@
 {% import "Functions.twig" as functions %}
-
 <span class="col-no-gutters badge-container">
     <strong id="grading_total"
             class="badge {{ functions.getBadgeStyle(peer_score, component.max_value) }}">
@@ -9,5 +8,6 @@
 
 <span class="component-title col-no-gutters">
     <b>{{ component.title|escape }}</b>
+        <a class="key_to_click" tabindex="0" title="Edit Peer Marks" aria-label="edit peer marks" onclick = "newEditPeerMarksForm()"><i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 </span>
 

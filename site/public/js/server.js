@@ -1615,3 +1615,10 @@ function enableKeyToClick(){
     });
   }
 }
+
+function newEditPeerMarksForm(gradeable_id, component_id) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-peer-components-form");
+    form.css("display", "block");
+    captureTabInModal("edit-peer-components-form");
+}
