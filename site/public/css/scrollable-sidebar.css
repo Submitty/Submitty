@@ -1,0 +1,23 @@
+body {
+    min-width: auto;
+}
+
+#submitty-body {
+    height: 100vh;
+}
+
+main#main {
+    min-width: 0;
+}
+
+#wrapper {
+    padding-top: 30px;
+    min-height: 0;
+}
+
+aside {
+    margin: 0;
+    padding-top: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

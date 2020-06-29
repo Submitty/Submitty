@@ -89,7 +89,9 @@ input[type="text"], select {
 .plagiarism-result-cont {
     display: flex;
     flex-direction: column;
-    padding: 30px 15px;
+    height: 100%;
+    padding: 20px;
+    margin: 0 20px 0 0;
 }
 
 .plag-flex {
@@ -113,7 +115,7 @@ input[type="text"], select {
 
 .code-cont {
     position:relative;
-    height:70vh;
+    height: inherit;
     overflow-y:hidden;
 }
 
