@@ -461,10 +461,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @Route("/courses/{_semester}/{_course}/office_hours_queue/update_announcement", methods={"POST"})
-    * @AccessControl(role="LIMITED_ACCESS_GRADER")
-    * @return MultiResponse
-    */
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/update_announcement", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     * @return MultiResponse
+     */
     public function updateAnnouncement() {
         if (!isset($_POST['queue_announcement_message'])) {
             $this->core->addErrorMessage("Missing announcement content");
