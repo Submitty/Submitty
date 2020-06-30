@@ -1,7 +1,8 @@
 from .base_testcase import BaseTestCase
-import requests
 import json
 import os
+import tempfile
+import subprocess
 
 
 class TestAccessibility(BaseTestCase):
@@ -54,6 +55,8 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/grades',
     ]
 
+    urls_formatted = []
+
     baseline_path = ''
 
     def test_w3_validator(self):
@@ -63,13 +66,11 @@ class TestAccessibility(BaseTestCase):
 
         self.validatePages()
 
-
     # Any code that should be run before checking for accessibility
     def setUp(self):
         super().setUp()
         self.baseline_path = f'{os.path.dirname(os.path.realpath(__file__))}/accessibility_baseline.json'
-        self.urls = [url.format(self.semester, 'sample') for url in self.urls]
-
+        self.urls_formatted = [url.format(self.semester, 'sample') for url in self.urls]
 
     def validatePages(self):
         self.log_out()
@@ -79,40 +80,37 @@ class TestAccessibility(BaseTestCase):
             baseline = json.load(f)
 
         self.maxDiff = None
-        for url in self.urls:
+        for url_index, url in enumerate(self.urls_formatted):
             with self.subTest(url=url):
                 foundErrors = []
                 foundErrorMessages = []
                 self.get(url=url)
 
-                payload = self.driver.page_source
-                headers = {
-                    'Content-Type': 'text/html; charset=utf-8'
-                }
-                response = requests.request(
-                    "POST", "https://validator.w3.org/nu/?out=json", headers=headers, data=payload.encode('utf-8'))
+                with tempfile.NamedTemporaryFile(mode='w+', suffix='.html') as tmp:
+                    tmp.write("<!DOCTYPE html>\n")
+                    tmp.write(self.driver.page_source)
 
-                for error in response.json()['messages']:
-                    # For some reason the test fails to detect this even though when you actually look at the rendered
-                    # pages this error is not there. So therefore the test is set to just ignore this error.
-                    if error['message'].startswith("Start tag seen without seeing a doctype first"):
-                        continue
-                    if error['message'].startswith("Possible misuse of “aria-label”"):
-                        continue
+                    error_json = subprocess.check_output(["java", "-jar", "/usr/bin/vnu.jar", "--exit-zero-always", "--format", "json", tmp.name], stderr=subprocess.STDOUT)
 
-                    if error['message'] not in baseline[url] and error['message'] not in foundErrorMessages:
-                        # print(json.dumps(error, indent=4, sort_keys=True))
-                        foundErrorMessages.append(error['message'])
-                        clean_error = {
-                            "error": error['message'].replace('\u201c',"'").replace('\u201d',"'").strip(),
-                            "html extract": error['extract'].strip(),
-                            "type": error['type'].strip()
-                        }
-                        foundErrors.append(clean_error)
+                    for error in json.loads(error_json)['messages']:
+                        # For some reason the test fails to detect this even though when you actually look at the rendered
+                        # pages this error is not there. So therefore the test is set to just ignore this error.
+                        if error['message'].startswith("Start tag seen without seeing a doctype first"):
+                            continue
+                        if error['message'].startswith("Possible misuse of “aria-label”"):
+                            continue
 
-                msg = f"\n{json.dumps(foundErrors, indent=4, sort_keys=True)}\nMore info can be found by using the w3 html validator. You can read more about it on submitty.org:\nhttps://validator.w3.org/#validate_by_input\nhttps://submitty.org/developer/interface_design_style_guide/web_accessibility#html-css-and-javascript"
-                self.assertFalse(foundErrors != [], msg=msg)
+                        if error['message'] not in baseline[self.urls[url_index]] and error['message'] not in foundErrorMessages:
+                            foundErrorMessages.append(error['message'])
+                            clean_error = {
+                                "error": error['message'].replace('\u201c', "'").replace('\u201d', "'").strip(),
+                                "html extract": error['extract'].strip(),
+                                "type": error['type'].strip()
+                            }
+                            foundErrors.append(clean_error)
 
+                    msg = f"\n{json.dumps(foundErrors, indent=4, sort_keys=True)}\nMore info can be found by using the w3 html validator. You can read more about it on submitty.org:\nhttps://validator.w3.org/#validate_by_input\nhttps://submitty.org/developer/interface_design_style_guide/web_accessibility#html-css-and-javascript"
+                    self.assertFalse(foundErrors != [], msg=msg)
 
     def genBaseline(self):
         self.log_out()
@@ -120,27 +118,24 @@ class TestAccessibility(BaseTestCase):
         self.click_class('sample')
 
         baseline = {}
-        urls = self.urls
 
-        for url in urls:
+        for url_index, url in enumerate(self.urls_formatted):
             self.get(url=url)
-            payload = self.driver.page_source
-            headers = {
-                'Content-Type': 'text/html; charset=utf-8'
-            }
-            response = requests.request(
-                "POST", "https://validator.w3.org/nu/?out=json", headers=headers, data=payload.encode('utf-8'))
+            with tempfile.NamedTemporaryFile(mode='w+', suffix='.html') as tmp:
+                tmp.write("<!DOCTYPE html>\n")
+                tmp.write(self.driver.page_source)
 
-            baseline[url] = []
-            for error in response.json()['messages']:
-                # For some reason the test fails to detect this even though when you actually look at the rendered
-                # pages this error is not there. So therefore the test is set to just ignore this error.
-                if error['message'].startswith("Start tag seen without seeing a doctype first"):
-                    continue
-                if error['message'].startswith("Possible misuse of “aria-label”"):
-                    continue
+                error_json = subprocess.check_output(["java", "-jar", "/usr/bin/vnu.jar", "--exit-zero-always", "--format", "json", tmp.name], stderr=subprocess.STDOUT)
+                baseline[self.urls[url_index]] = []
+                for error in json.loads(error_json)['messages']:
+                    # For some reason the test fails to detect this even though when you actually look at the rendered
+                    # pages this error is not there. So therefore the test is set to just ignore this error.
+                    if error['message'].startswith("Start tag seen without seeing a doctype first"):
+                        continue
+                    if error['message'].startswith("Possible misuse of “aria-label”"):
+                        continue
 
-                if error['message'] not in baseline[url]:
-                    baseline[url].append(error['message'])
+                    if error['message'] not in baseline[self.urls[url_index]]:
+                        baseline[self.urls[url_index]].append(error['message'])
         with open(self.baseline_path, 'w') as file:
             json.dump(baseline, file, ensure_ascii=False, indent=4)
