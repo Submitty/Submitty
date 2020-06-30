@@ -60,7 +60,7 @@ class MultipleChoiceWidget extends Widget {
 
     /**
      * Get and setup the area of the multiple choice widget which allows the user to add a new multiple choice
-     * option
+     * option.
      *
      * @returns {HTMLDivElement}
      */
@@ -90,7 +90,7 @@ class MultipleChoiceWidget extends Widget {
     }
 
     /**
-     * Get the html template used with this.getMultipleChoice()
+     * Get the html template used with this.getMultipleChoice().
      *
      * @returns {string}
      */
@@ -124,8 +124,8 @@ class MultipleChoiceWidget extends Widget {
      * Get a div which contains populated inputs for a single multiple choice option, along with their up/down/remove
      * controls.
      *
-     * @param value The value which should be populated in the value box
-     * @param description The description which should be populated in the description box
+     * @param {string} value The value which should be populated in the value box.
+     * @param {string} description The description which should be populated in the description box.
      * @returns {HTMLDivElement}
      */
     getMultipleChoiceOption(value, description) {
@@ -162,10 +162,10 @@ class MultipleChoiceWidget extends Widget {
     }
 
     /**
-     * Get the html template used with this.getMultipleChoiceOption()
+     * Get the html template used with this.getMultipleChoiceOption().
      *
-     * @param value The value which should be populated in the value box
-     * @param description The description which should be populated in the description box
+     * @param {string} value The value which should be populated in the value box.
+     * @param {string} description The description which should be populated in the description box.
      * @returns {string}
      */
     getMultipleChoiceOptionTemplate(value, description) {

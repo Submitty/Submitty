@@ -56,9 +56,9 @@ class ShortAnswerWidget extends Widget {
     }
 
     /**
-     * Get the html template for the size selector part of the short answer widget
+     * Get the html template for the size selector part of the short answer widget.
      *
-     * @param rows The value which should be display in the input box
+     * @param {int} rows The value which should be display in the input box.
      * @returns {string}
      */
     getSizeSelectorTemplate(rows) {

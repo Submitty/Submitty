@@ -1,22 +1,23 @@
 class Widget {
     /**
-     * Get the html representation of the widget
+     * Get the html representation of the widget.
      */
     render() { throw 'Implement this method in the child class.'; }
 
     /**
-     * Parse through any interactive elements inside the widget and save them into the widget's state object
+     * Parse through any interactive elements inside the widget and save them into the widget's state object.
      */
     commitState() { throw 'Implement this method in the child class.'; }
 
     /**
-     * Get the JSON representation of the widget.  This is usually just the state object
+     * Get the JSON representation of the widget.  This is usually just the state object.
      */
     getJSON() { throw 'Implement this method in the child class.'; }
 
     /**
-     * Gets a widget container div
+     * Gets a widget container div.
      *
+     * @param {string} heading_text Text that will be used as a heading for the div.
      * @returns {HTMLDivElement}
      */
     getContainer(heading_text) {
@@ -36,9 +37,9 @@ class Widget {
     }
 
     /**
-     * Gets a div which contains a heading text
+     * Gets a div which contains a heading text.
      *
-     * @param heading_text The heading
+     * @param {string} heading_text The heading
      * @returns {HTMLDivElement}
      */
     getHeadingContainer(heading_text) {
@@ -53,7 +54,7 @@ class Widget {
     }
 
     /**
-     * Gets a div which will contain the interactive elements of the widget
+     * Gets a div which will contain the interactive elements of the widget.
      *
      * @returns {HTMLDivElement}
      */
@@ -65,9 +66,9 @@ class Widget {
     }
 
     /**
-     * Get a button node
+     * Get a button element.
      *
-     * @param value The text shown inside the button
+     * @param {string} value The text shown inside the button
      * @returns {HTMLInputElement}
      */
     getButton(value) {
@@ -79,7 +80,7 @@ class Widget {
     }
 
     /**
-     * Gets a div which contains all the buttons needed to handle the reorder or removal of a widget
+     * Gets a div which contains all the buttons needed to handle the reorder or removal of a widget.
      *
      * @returns {HTMLDivElement}
      */

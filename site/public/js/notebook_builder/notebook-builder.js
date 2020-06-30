@@ -10,7 +10,7 @@ class NotebookBuilder {
     }
 
     /**
-     * Display all widgets the notebook builder is keeping track of
+     * Display all widgets the notebook builder is keeping track of.
      */
     render() {
         // Get a handle on the main div
@@ -26,7 +26,7 @@ class NotebookBuilder {
     }
 
     /**
-     * From the list of widgets compile and return a 'notebook' json
+     * From the list of widgets compile and return a 'notebook' json.
      */
     getJSON() {
         const notebook_array = [];
@@ -48,9 +48,9 @@ class NotebookBuilder {
     }
 
     /**
-     * Add a widget to the notebook builder form
+     * Add a widget to the notebook builder form.
      *
-     * @param widget
+     * @param {Widget} widget
      */
     widgetAdd(widget) {
         this.widgets.splice(this.widgets.length - 1, 0, widget);
@@ -58,9 +58,9 @@ class NotebookBuilder {
     }
 
     /**
-     * Remove a widget from the notebook builder form
+     * Remove a widget from the notebook builder form.
      *
-     * @param widget
+     * @param {Widget} widget
      */
     widgetRemove(widget) {
         const index = this.widgets.indexOf(widget);
@@ -69,9 +69,9 @@ class NotebookBuilder {
     }
 
     /**
-     * Move a widget up one position in the notebook builder form
+     * Move a widget up one position in the notebook builder form.
      *
-     * @param widget
+     * @param {Widget} widget
      */
     widgetUp(widget) {
         const index = this.widgets.indexOf(widget);
@@ -87,9 +87,9 @@ class NotebookBuilder {
     }
 
     /**
-     * Move a widget down one position in the notebook builder form
+     * Move a widget down one position in the notebook builder form.
      *
-     * @param widget
+     * @param {Widget} widget
      */
     widgetDown(widget) {
         const index = this.widgets.indexOf(widget);
