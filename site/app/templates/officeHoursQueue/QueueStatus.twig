@@ -11,7 +11,7 @@
       <select id="queue_code" class="form-control" name="code" required="required">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllQueues() if queue['open'] == 'true' %}
-          <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
+          <option value="{{queue['code']}}">{{queue['code']}}</option>
         {% endfor %}
       </select>
     </div>
@@ -37,7 +37,7 @@
     </p>
 
     <p>You are currently in:
-      <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
+      <b>{{viewer.getCurrentQueueCode()}}</b>
     </p>
 
     <p>

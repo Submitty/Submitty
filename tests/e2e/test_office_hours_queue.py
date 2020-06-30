@@ -3,6 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from random import choice
 from string import ascii_lowercase
+import urllib.parse
+
 
 class TestOfficeHoursQueue(BaseTestCase):
     """
@@ -82,12 +84,12 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(base_queue_history_count+2, self.queueHistoryCount(False))
         self.assertEqual(2, self.currentQueueCount())
         self.openFilterSettings()
-        self.toggleQueueFilter('custom code')#turn it off
+        self.toggleFirstQueueFilter()#turn 'custom code' off
         self.assertEqual(0, self.currentQueueCount())
-        self.toggleQueueFilter('custom code')#turn it back on
+        self.toggleFirstQueueFilter()#turn 'custom code' back on
         self.assertEqual(2, self.currentQueueCount())
         self.closeFirstQueue()
-        self.expectedAlerts(1, 0, success_text=['Closed queue: "custom_code"'], error_text=[])
+        self.expectedAlerts(1, 0, success_text=['Closed queue: "custom code"'], error_text=[])
         self.openFilterSettings()
         self.emptyFirstQueue()
         self.expectedAlerts(1, 0, success_text=['Queue emptied'], error_text=[])
@@ -182,7 +184,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         select = Select(self.driver.find_element(By.ID, 'queue_code'))
         select.select_by_visible_text(queueName)
         self.driver.find_element(By.ID, 'token_box').send_keys(queueCode)
-        self.assertIn("_".join(queueName.split()), self.driver.find_element(By.ID, 'add_to_queue').get_attribute('action'))
+        self.assertIn(urllib.parse.quote(queueName), self.driver.find_element(By.ID, 'add_to_queue').get_attribute('action'))
         self.assertEqual(queueCode, self.driver.find_element(By.ID, 'token_box').get_attribute('value'))
         self.driver.find_element(By.ID, 'join_queue_btn').click()
 
@@ -214,9 +216,9 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.driver.switch_to.alert.accept()
 
     #this checks how many visible students are in the queue
-    def toggleQueueFilter(self, code):
-        self.wait_for_element((By.ID, f'queue_filter_{code.replace(" ", "_").upper()}'))
-        self.driver.find_element(By.ID, f'queue_filter_{code.replace(" ", "_").upper()}').click()
+    def toggleFirstQueueFilter(self):
+        self.wait_for_element((By.CLASS_NAME, f'queue_filter'))
+        self.driver.find_element(By.CLASS_NAME, f'queue_filter').click()
 
     def closeFirstQueue(self):
         self.wait_for_element((By.CLASS_NAME, 'close_queue_btn'))

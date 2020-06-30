@@ -5,12 +5,9 @@
 
   //Get the list of queue_codes
   var current_queues = [{% for queue in viewer.getAllQueues() %}
-      "{{queue['code']}}",
+      "{{queue['id']}}",
     {% endfor %}]
   current_queues = Array.from(new Set(current_queues));
-  current_queues = current_queues.map(function(x) {
-    return x.toUpperCase()
-  })
 
   //checks if the filter settings are in local storage
   if (!localStorage.getItem('office_hour_queue_filters')) {
