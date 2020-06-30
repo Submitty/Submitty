@@ -1616,9 +1616,10 @@ function enableKeyToClick(){
   }
 }
 
-function newEditPeerMarksForm(gradeable_id, component_id) {
+function newEditPeerComponentsForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#edit-peer-components-form");
     form.css("display", "block");
+    console.log(form.attr('id'));
     captureTabInModal("edit-peer-components-form");
 }
