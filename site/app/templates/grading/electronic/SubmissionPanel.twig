@@ -29,7 +29,7 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, true)">Download Zip File</button>
+                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
             {% endif %}
 
             <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>

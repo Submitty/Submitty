@@ -976,8 +976,8 @@ function downloadStudentAnnotations(url, path, dir) {
     //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
-    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
+function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
+    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`;
     return false;
 }
 
@@ -1616,6 +1616,7 @@ function enableKeyToClick(){
   }
 }
 function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
+    $('#save_status').html('Saving Feedback...');
     var url = buildCourseUrl(['gradeable', g_id, 'feedback' , 'set']);
     let formData = new FormData();
     formData.append('csrf_token', csrfToken);
@@ -1632,12 +1633,14 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         success: function(data) {
             try {
                 console.log(data);
+                $('#save_status').html('All Changes Saved');
             } catch(err){
                 return;
             }
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
+            $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
         }
     })
 }

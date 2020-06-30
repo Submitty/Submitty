@@ -455,7 +455,9 @@ class Gradeable extends AbstractModel {
         foreach (self::date_properties as $date) {
             if (isset($dates[$date]) && $dates[$date] !== null) {
                 try {
-                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getUser()->getUsableTimeZone());
+                    $user = $this->core->getUser();
+                    $time_zone = is_null($user) ? $this->core->getConfig()->getTimezone() : $user->getUsableTimeZone();
+                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $time_zone);
                 }
                 catch (\Exception $e) {
                     $parsedDates[$date] = null;
@@ -520,7 +522,20 @@ class Gradeable extends AbstractModel {
     
     public function getPeerFeedback($grader_id, $anon_id) {
         $user_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
-        return $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        if ($feedback == 'thanks') {
+            return 'Thank you!';
+        }
+        elseif ($feedback == 'helpful') {
+            return 'This feedback was helpful to me!';
+        }
+        elseif ($feedback == 'detailed') {
+            return 'This feedback was detailed, specific, and/or technical';
+        }
+        elseif ($feedback == 'inappropriate') {
+            return 'This feedback was inaccurate and/or inappropriate';
+        }
+        return 'No response';
     }
 
     /**
