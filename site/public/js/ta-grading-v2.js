@@ -38,6 +38,8 @@ const taLayoutDet = {
 
 // Grading Panel header width
 let maxHeaderWidth = 0;
+// Navigation Toolbar Panel header width
+let maxNavbarWidth = 0;
 
 // Only keep those panels which are available
 function updateThePanelsElements(panelsAvailabilityObj) {
@@ -81,6 +83,7 @@ $(function () {
 
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
+    console.log("clicked!");
     const btnCont = $(this).parent();
     let panelSpanId = btnCont.attr('id');
     const panelId = panelSpanId.split('_btn')[0];
@@ -200,9 +203,12 @@ function initializeTaLayout() {
   Adjust buttons inside Grading panel header and shows only icons on smaller screens
  */
 function adjustGradingPanelHeader () {
+  debugger;
   const header = $('#grading-panel-header');
   const headerBox = $('.panel-header-box');
-  const barHeight = $('#bar_wrapper').outerHeight();
+  const navBar = $('#bar_wrapper');
+  const navBarBox = $('.navigation-box');
+
   if (maxHeaderWidth < headerBox.width()) {
     maxHeaderWidth = headerBox.width();
   }
@@ -211,9 +217,27 @@ function adjustGradingPanelHeader () {
   } else {
     headerBox.removeClass('smaller-header');
   }
+  // changes for the navigation toolbar buttons
+  if (maxNavbarWidth < $('.grading_toolbar').width()) {
+    maxNavbarWidth = $('.grading_toolbar').width();
+    console.log(maxNavbarWidth);
+  }
+  if (maxNavbarWidth > navBar.width()) {
+    navBarBox.addClass('smaller-navbar');
+  } else {
+    navBarBox.removeClass('smaller-navbar');
+  }
+  // On mobile display screen hide the two-panel-mode
+  if (isMobileView) {
+    // TODO first check if the class is there or not
+    // hide the buttons
+    navBarBox.addClass('mobile-view');
+  } else {
+    navBarBox.removeClass('mobile-view');
+  }
   // From the complete content remove the height occupied by navigation-bar and panel-header element
   // 6 is used for adding some space in the bottom
-  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + barHeight +6) + "px)";
+  document.querySelector('.panels-container').style.height = "calc(100% - " + (header.outerHeight() + navBar.outerHeight() +6) + "px)";
 }
 
 function onAjaxInit() {}

@@ -37,6 +37,7 @@ aside {
 #electronic-gradeable-container {
     height: 100%;
     padding: 0;
+    /*overflow: hidden;*/
     margin: 0 20px 0 0;
     position: relative;
 }
@@ -47,11 +48,44 @@ aside {
 }
 
 .navigation-box {
-    margin: 4px auto;
+    margin: 0 auto;
     display: flex;
     width: max-content;
+    max-width: 100%;
 }
 
+.navigation-box.smaller-navbar {
+}
+
+.navigation-box.smaller-navbar .progress_bar {
+    position: relative;
+    width: unset;
+    padding: 0;
+}
+
+.navigation-box.smaller-navbar .progressbar {
+    display: none;
+}
+
+.navigation-box.smaller-navbar .progress-value {
+    position: unset;
+    display: block;
+    line-height: 33px;
+    padding: 0 5px;
+    transform: unset;
+}
+
+.navigation-box.smaller-navbar #grading-setting-btn,
+.navigation-box.smaller-navbar #grading-setting-btn,
+.navigation-box.smaller-navbar #two-panel-exchange-btn,
+.navigation-box.mobile-view #full-left-column-btn,
+.navigation-box.mobile-view #two-panel-mode-btn{
+    display: none;
+}
+
+.navigation-box.smaller-navbar .grading_toolbar {
+    flex-wrap: wrap;
+}
 /* Content Panels CSS */
 
 .content-items-container {
@@ -87,7 +121,7 @@ aside {
 }
 /* Toolbar CSS*/
 .grading_toolbar {
-    display: block;
+    display: flex;
     padding-top:3px;
     padding-bottom:3px;
 }
@@ -98,6 +132,10 @@ aside {
     transition: transform 0.2s;
     box-shadow: 0px 0px 5px 5px var(--subheading-underscore-grey);
     background-color: var(--subheading-underscore-grey);
+}
+
+.ta-navlink-cont button {
+    cursor: pointer;
 }
 
 #fullscreen-btn-cont.active {
@@ -142,11 +180,17 @@ button > i.fas:hover {
 }
 
 .ta-navlink-cont {
-    display: inline-block;
     position: relative;
+    margin-right: 4px;
+    margin-top: 4px;
     border: 2px solid black;
     border-radius: 5px;
     box-shadow: 2px 2px 4px;
+    box-sizing: border-box;
+}
+
+.nav-btn-cont {
+    display: flex;
 }
 
 .nav-btn-cont:before {
@@ -192,8 +236,6 @@ button > i.fas:hover {
 .progressbar {
     width: 100%;
     height: 100%;
-    border: 2px solid black;
-    box-shadow: 2px 2px 4px var(--text-black);
 }
 
 .progress-value {
@@ -207,9 +249,6 @@ button > i.fas:hover {
     position: relative;
     width: 190px;
     display: block;
-    margin-left: 4px;
-    padding-top: 4px;
-    padding-bottom: 8px;
 }
 
 progress {
@@ -1220,10 +1259,6 @@ tr.is_publish {
 @media (max-width: 540px) {
     #electronic-gradeable-container {
         margin: 0;
-    }
-    .navigation-box {
-        margin: 4px 6px;
-        width: max-content;
     }
 }
 

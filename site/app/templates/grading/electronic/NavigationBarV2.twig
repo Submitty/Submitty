@@ -75,7 +75,7 @@
                     </button>
             </span>
 
-            <span class="ta-navlink-cont">
+            <span class="ta-navlink-cont" id="grading-setting-btn">
                 <button title="Show Grading Settings"
                         class="invisible-btn key_to_click"
                         tabindex="0"
@@ -84,11 +84,10 @@
                     <i class="fas fa-wrench icon-header icon-streched"></i>
                 </button>
             </span>
-        </div>
-
-        <div class="progress_bar">
-            <progress class="progressbar" max="100" value="{{ progress }}"></progress>
-            <span class="progress-value"></span>
+            <span class="ta-navlink-cont progress_bar" id="progress-bar-cont">
+                <progress class="progressbar" max="100" value="{{ progress }}"></progress>
+                <span class="progress-value"></span>
+            </span>
         </div>
     </div>
 </div>
