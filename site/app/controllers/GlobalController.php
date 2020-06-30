@@ -183,10 +183,7 @@ class GlobalController extends AbstractController {
                 }
             }
 
-            $at_least_one_grader_link = false;
-
             if ($this->core->getUser()->accessAdmin()) {
-                $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['users']),
                     "title" => "Manage Students",
@@ -211,43 +208,13 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getUser()->accessGrading()) {
-                $images_course_path = $this->core->getConfig()->getCoursePath();
-                // FIXME: this code is duplicated in ImagesController.php
-                $images_path = FileUtils::joinPaths($images_course_path, "uploads/student_images");
-                $common_images_path_1 = FileUtils::joinPaths("/var/local/submitty/student_images");
-                $term = explode('/', $this->core->getConfig()->getCoursePath());
-                $term = $term[count($term) - 2];
-                $common_images_path_2 = FileUtils::joinPaths("/var/local/submitty/student_images", $term);
-                // FIXME: consider searching through the common location for matches to my students
-                // (but this would be expensive)
-                $any_images_files = array_merge(
-                    FileUtils::getAllFiles($images_path, [], true),
-                    FileUtils::getAllFiles($common_images_path_1, [], true),
-                    FileUtils::getAllFiles($common_images_path_2, [], true)
-                );
-                if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
-                    $at_least_one_grader_link = true;
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildCourseUrl(['student_photos']),
-                        "title" => "Student Photos",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-photos",
-                        "icon" => "fa-id-card"
-                    ]);
-                }
-                elseif (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
-                    $sections = $this->core->getUser()->getGradingRegistrationSections();
-                    if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
-                        $at_least_one_grader_link = true;
-                        $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $this->core->buildCourseUrl(['student_photos']),
-                            "title" => "Student Photos",
-                            "class" => "nav-row",
-                            "id" => "nav-sidebar-photos",
-                            "icon" => "fa-id-card"
-                        ]);
-                    }
-                }
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(['student_photos']),
+                    "title" => "Student Photos",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-photos",
+                    "icon" => "fa-id-card"
+                ]);
             }
 
             if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {
@@ -260,7 +227,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
+            if ($this->core->getUser()->accessGrading()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);
