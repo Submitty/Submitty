@@ -131,8 +131,8 @@ class User extends AbstractModel {
     /** @prop @var array */
     protected $notification_settings = [];
 
-    /** @prop @var DisplayImage The user's DisplayImage model */
-    protected $display_image;
+    /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
+    protected $display_image_state;
 
     /**
      * User constructor.
@@ -194,12 +194,7 @@ class User extends AbstractModel {
         }
 
         if (isset($details['display_image_state'])) {
-            try {
-                $this->display_image = new DisplayImage($core, $details['user_id'], $details['display_image_state']);
-            }
-            catch (\Exception $exception) {
-                $this->display_image = null;
-            }
+            $this->display_image_state = $details['display_image_state'];
         }
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
@@ -282,13 +277,29 @@ class User extends AbstractModel {
             $image_saved = false;
         }
 
-        // Update the DB to 'preferred' and reset $this->display_image
+        // Update the DB to 'preferred'
         if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
-            $this->display_image = new DisplayImage($this->core, $this->id, 'preferred');
+            $this->display_image_state = 'preferred';
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Gets the user's DisplayImage object.
+     *
+     * @return DisplayImage|null The user's DisplayImage object, or null if an error occurred
+     */
+    public function getDisplayImage(): ?DisplayImage {
+        try {
+            $result = new DisplayImage($this->core, $this->id, $this->display_image_state);
+        }
+        catch (\Exception $exception) {
+            $result = null;
+        }
+
+        return $result;
     }
 
     /**
@@ -491,11 +502,8 @@ class User extends AbstractModel {
 
     /**
      * Checks if the user is on ANY team for the given assignment
-     *
-     * @param string gradable_id
-     * @return bool
      */
-    public function onTeam($gradeable_id) {
+    public function onTeam(string $gradeable_id): bool {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
         return $team !== null;
     }
