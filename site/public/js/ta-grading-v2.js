@@ -3,7 +3,6 @@ let cookie_version = 1;
 
 // Width of mobile and Tablet screens width
 const MOBILE_WIDTH = 540;
-// const TAB_WIDTH = 940?;
 
 // tracks if the current display screen is mobile
 let isMobileView = false;
@@ -51,20 +50,18 @@ function updateThePanelsElements(panelsAvailabilityObj) {
 
 $(function () {
   Object.assign(taLayoutDet, getSavedTaLayoutDetails());
-  console.log(taLayoutDet);
   // Check initially if its the mobile screen view or not
   isMobileView = window.innerWidth <= MOBILE_WIDTH;
+  initializeTaLayout();
+
   window.addEventListener('resize', () => {
-    console.log("Window Resized!");
     let wasMobileView = isMobileView;
     isMobileView = window.innerWidth <= MOBILE_WIDTH;
-    // if the screen width is switched between smaller and bigger one initialize the layout
+    // if the width is switched between smaller and bigger screens, re-initialize the layout
     if (wasMobileView !== isMobileView) {
       initializeTaLayout();
     }
   });
-
-  initializeTaLayout();
 
   // Progress bar value
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
@@ -83,7 +80,6 @@ $(function () {
 
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
-    console.log("clicked!");
     const btnCont = $(this).parent();
     let panelSpanId = btnCont.attr('id');
     const panelId = panelSpanId.split('_btn')[0];
@@ -95,8 +91,10 @@ $(function () {
     if (!panelSpanId) {
       return;
     }
-    const isPanelOpen = btnCont.hasClass('active') && $('#' + panelId).is(':visible');
-    if (isPanelOpen || !taLayoutDet.isTwoPanelsEnabled) {
+    const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
+    // If panel is not in-view and two-panel-mode is enabled show the drop-down to select position,
+    // otherwise just toggle it
+    if (isPanelOpen || !(taLayoutDet.isTwoPanelsEnabled && !isMobileView)) {
       setPanelsVisibilities(panelId);
     } else {
       // removing previously selected option
@@ -119,6 +117,7 @@ $(function () {
   resizeObserver.observe(document.getElementById('grading-panel-header'));
 });
 
+// returns taLayoutDet object from LS, and if its not present returns empty object
 function getSavedTaLayoutDetails() {
   const savedData = localStorage.getItem('taLayoutDetails');
   return savedData ? JSON.parse(savedData) : {};
@@ -181,7 +180,6 @@ function initializeTwoPanelDrag () {
 function initializeTaLayout() {
   if (isMobileView) {
     resetTwoPanelLayout();
-    // updateNavToolbar();
   }
   else if (taLayoutDet.isTwoPanelsEnabled) {
     toggleTwoPanelMode();
@@ -203,7 +201,6 @@ function initializeTaLayout() {
   Adjust buttons inside Grading panel header and shows only icons on smaller screens
  */
 function adjustGradingPanelHeader () {
-  debugger;
   const header = $('#grading-panel-header');
   const headerBox = $('.panel-header-box');
   const navBar = $('#bar_wrapper');
@@ -220,7 +217,6 @@ function adjustGradingPanelHeader () {
   // changes for the navigation toolbar buttons
   if (maxNavbarWidth < $('.grading_toolbar').width()) {
     maxNavbarWidth = $('.grading_toolbar').width();
-    console.log(maxNavbarWidth);
   }
   if (maxNavbarWidth > navBar.width()) {
     navBarBox.addClass('smaller-navbar');
@@ -229,7 +225,6 @@ function adjustGradingPanelHeader () {
   }
   // On mobile display screen hide the two-panel-mode
   if (isMobileView) {
-    // TODO first check if the class is there or not
     // hide the buttons
     navBarBox.addClass('mobile-view');
   } else {
@@ -402,6 +397,7 @@ registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, fu
 //
 
 function resetTwoPanelLayout() {
+  // hide all the two-panel-mode related nodes
   $('.two-panel-cont').removeClass("active");
   $("#two-panel-mode-btn").removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
@@ -421,17 +417,15 @@ function resetTwoPanelLayout() {
   const rightPanel = document.getElementById(rightPanelId);
 
   if (rightPanel) {
-    console.log("Right APpended");
     document.querySelector('.panels-container').append(rightPanel);
     taLayoutDet.currentOpenPanel = rightPanelId;
   }
   if (leftPanel) {
-    console.log("Left APpended");
     document.querySelector('.panels-container').append(leftPanel);
-    // passing forceVisible true as normal toggle will hide it single panel mode
     taLayoutDet.currentOpenPanel = leftPanelId;
   }
   // current open panel will be either left or right panel from two-panel-mode
+  // passing forceVisible = true, otherwise this method will just toggle it and it will get hidden
   setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
   initializeTwoPanelDrag();
 }
@@ -449,7 +443,6 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
     if (taLayoutDet.currentTwoPanels.right === panelId ) {
       taLayoutDet.currentTwoPanels.right = null;
     }
-    // update the currentopenpanel variable here it self
   }
   saveTaLayoutDetails();
 }
@@ -472,7 +465,6 @@ function setTwoPanelModeVisibilities () {
 function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
     if (panel.str === ele) {
-      console.log("mil gya", panel.str);
       const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
@@ -488,7 +480,6 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       && taLayoutDet.currentTwoPanels.right !== panel.str
       && taLayoutDet.currentTwoPanels.left !== panel.str) || panel.str !== ele ) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
-      console.log('NHi mila', panel.str);
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
       $("#" + panel.str + "_btn").removeClass('active');
@@ -496,7 +487,6 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   });
   // update the two-panels-layout if it's enabled
   if (taLayoutDet.isTwoPanelsEnabled && !isMobileView) {
-    console.log("updating two panel layout");
     updateTwoPanelLayout();
   } else {
     saveTaLayoutDetails();

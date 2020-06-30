@@ -37,7 +37,6 @@ aside {
 #electronic-gradeable-container {
     height: 100%;
     padding: 0;
-    /*overflow: hidden;*/
     margin: 0 20px 0 0;
     position: relative;
 }
@@ -52,9 +51,6 @@ aside {
     display: flex;
     width: max-content;
     max-width: 100%;
-}
-
-.navigation-box.smaller-navbar {
 }
 
 .navigation-box.smaller-navbar .progress_bar {
@@ -234,7 +230,7 @@ button > i.fas:hover {
 }
 
 .progressbar {
-    width: 100%;
+    width: 190px;
     height: 100%;
 }
 
@@ -243,12 +239,6 @@ button > i.fas:hover {
     top: 49%;
     left: 50%;
     transform: translate(-50%,-50%);
-}
-
-.progress_bar {
-    position: relative;
-    width: 190px;
-    display: block;
 }
 
 progress {
