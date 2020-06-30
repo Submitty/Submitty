@@ -1320,7 +1320,8 @@ CREATE TABLE IF NOT EXISTS queue(
   help_started_by TEXT REFERENCES users(user_id),
   removed_by TEXT REFERENCES users(user_id),
   contact_info TEXT,
-  last_time_in_queue TIMESTAMP WITH TIME ZONE
+  last_time_in_queue TIMESTAMP WITH TIME ZONE,
+  paused BOOLEAN NOT NULL DEFAULT false
 );
 CREATE TABLE IF NOT EXISTS queue_settings(
   id serial PRIMARY KEY,

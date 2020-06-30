@@ -106,7 +106,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled'                  => false,
             'queue_contact_info'             => false,
             'queue_message'                  => 'Welcome to the OH/Lab queue',
-            'queue_announcement_message'       => 'announcement message'
+            'queue_announcement_message'     => 'announcement message'
         ];
 
         $gradeable_seating_options = [
@@ -187,7 +187,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled'                  => false,
             'queue_contact_info'             => false,
             'queue_message'                  => 'Welcome to the OH/Lab queue',
-            'queue_announcement_message'       => 'announcement message'
+            'queue_announcement_message'     => 'announcement message'
         ];
 
         $gradeable_seating_options = [
@@ -275,7 +275,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled'                  => false,
             'queue_contact_info'             => false,
             'queue_message'                  => 'Welcome to the OH/Lab queue',
-            'queue_announcement_message'       => 'announcement message'
+            'queue_announcement_message'     => 'announcement message'
         ];
 
         $gradeable_seating_options = [
