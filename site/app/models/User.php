@@ -449,11 +449,8 @@ class User extends AbstractModel {
 
     /**
      * Checks if the user is on ANY team for the given assignment
-     *
-     * @param string gradable_id
-     * @return bool
      */
-    public function onTeam($gradeable_id) {
+    public function onTeam(string $gradeable_id): bool {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
         return $team !== null;
     }
