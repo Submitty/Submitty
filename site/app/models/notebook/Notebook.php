@@ -22,7 +22,7 @@ class Notebook extends AbstractModel {
     /** @prop @var array parsed notebook from the config */
     protected $notebook;
     /** @prop @var array notebook elements that can hold user input */
-    protected $inputs;
+    protected $inputs = [];
     /** @prop @var string parsed notebook from the config */
     protected $gradeable_id;
     /** @prop @var array of image names and their locations */
