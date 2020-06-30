@@ -33,7 +33,7 @@ def cleanup(test):
     if os.path.isdir(data_path):
         shutil.rmtree(data_path)
     os.mkdir(data_path)
-    
+
     subprocess.call(["cp", "-r",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input"),
         os.path.join(data_path)])
@@ -42,10 +42,16 @@ def cleanup(test):
                      [os.path.join(test.testcase_path, "data")])
 
 
-#This test is not possible until lib.py starts using grade_item_main_runner.
 @testcase
-def correct(test):
-  pass
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
+
+# #This test is not possible until lib.py starts using grade_item_main_runner.
+# @testcase
+# def correct(test):
+#   pass
     # cleanup(test)
     # subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "correct","server.py"),
     #                  os.path.join(test.testcase_path, "data")])
