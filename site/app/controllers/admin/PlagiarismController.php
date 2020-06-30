@@ -66,7 +66,7 @@ class PlagiarismController extends AbstractController {
         return $return;
     }
     /**
-     * @Route("/{_semester}/{_course}/plagiarism")
+     * @Route("/courses/{_semester}/{_course}/plagiarism")
      */
     public function plagiarismMainPage($refresh_page = "NO_REFRESH") {
         $semester = $this->core->getConfig()->getSemester();
@@ -123,7 +123,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}")
      */
     public function showPlagiarismResult($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
@@ -154,7 +154,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"GET"})
      */
     public function configureNewGradeableForPlagiarismForm() {
         $semester = $this->core->getConfig()->getSemester();
@@ -172,7 +172,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
     public function saveNewPlagiarismConfiguration($new_or_edit, $gradeable_id = null) {
 
@@ -399,7 +399,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/rerun")
      */
     public function reRunPlagiarism($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
@@ -436,7 +436,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/configuration/edit")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/configuration/edit")
      */
     public function editPlagiarismSavedConfig($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
@@ -460,7 +460,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/delete", methods={"POST"})
      */
     public function deletePlagiarismResultAndConfig($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
@@ -488,7 +488,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/nightly_rerun")
      */
     public function toggleNightlyRerun($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
@@ -508,7 +508,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/concat")
      */
     public function ajaxGetSubmissionConcatenated($gradeable_id, $user_id_1, $version_user_1, $user_id_2 = null, $version_user_2 = null) {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -673,7 +673,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
      */
     public function ajaxGetMatchingUsers($gradeable_id, $user_id_1, $version_user_1) {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -727,7 +727,7 @@ class PlagiarismController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/clicked_match")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/clicked_match")
      */
     public function ajaxGetMatchesForClickedMatch($gradeable_id, $user_id_1, $version_user_1, $start, $end) {
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -772,7 +772,7 @@ class PlagiarismController extends AbstractController {
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      *
-     * @Route("/{_semester}/{_course}/plagiarism/check_refresh")
+     * @Route("/courses/{_semester}/{_course}/plagiarism/check_refresh")
      */
     public function checkRefreshLichenMainPage() {
         $this->core->getOutput()->useHeader(false);

@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
      */
     public function createNewTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -74,7 +74,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/leave")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/leave")
      */
     public function leaveTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -124,7 +124,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/new", methods={"POST"})
      */
     public function sendInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -220,7 +220,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/accept", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/accept", methods={"POST"})
      */
     public function acceptInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -294,7 +294,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/cancel", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/cancel", methods={"POST"})
      */
     public function cancelInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -350,7 +350,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/new")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/new")
      */
     public function seekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -374,7 +374,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")
      */
     public function stopSeekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -398,7 +398,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team")
      */
     public function showPage($gradeable_id) {
         $user_id = $this->core->getUser()->getId();

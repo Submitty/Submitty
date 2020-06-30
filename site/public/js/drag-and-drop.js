@@ -231,8 +231,7 @@ function addFile(file, part, check_duplicate_zip=true){
         }
     }
 
-    setButtonStatus()
-
+    setButtonStatus();
 }
 
 // REMOVE FILES
@@ -1016,8 +1015,7 @@ function handleDownloadImages(csrf_token) {
     var return_url = buildCourseUrl(['student_photos']);
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
-    formData.append('file_count', file_array.length);
-
+    formData.append('file_count', file_array[0].length);
 
     // Files selected
     for (var i = 0; i < file_array.length; i++) {

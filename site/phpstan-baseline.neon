@@ -36,11 +36,6 @@ parameters:
 			path: app/controllers/admin/AutogradingConfigController.php
 
 		-
-			message: "#^Variable \\$seating_assignment_emails might not be defined\\.$#"
-			count: 1
-			path: app/controllers/admin/EmailRoomSeatingController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$csv_option string csv_option_overwrite_all or csv_option_preserve_higher\\)\\: Unexpected token \"\\$csv_option\", expected type at offset 18$#"
 			count: 1
 			path: app/controllers/admin/LateController.php
@@ -559,11 +554,6 @@ parameters:
 			message: "#^Argument of an invalid type app\\\\models\\\\RainbowCustomizationJSON supplied for foreach, only iterables are supported\\.$#"
 			count: 1
 			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(string gradable_id\\)\\: Unexpected token \"gradable_id\", expected variable at offset 98$#"
-			count: 1
-			path: app/models/User.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:threadExists\\(\\) invoked with 1 parameter, 0 required\\.$#"
