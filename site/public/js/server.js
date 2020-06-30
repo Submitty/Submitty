@@ -1628,10 +1628,10 @@ function flagUserImage(user_id, flag) {
     let message;
 
     if (flag) {
-        message = `You are flagging ${user_id}'s image as inappropriate.  Are you sure you wish to proceed?`;
+        message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
     }
     else {
-        message = `You are unflagging ${user_id}'s image.  Are you sure you wish to proceed?`;
+        message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
     }
 
     const confirmed = confirm(message);
