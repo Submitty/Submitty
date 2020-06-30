@@ -14,7 +14,6 @@
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
 
-        <exclude name="Generic.Arrays.DisallowLongArraySyntax.Found" />
         <exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed" />
         <exclude name="Generic.Files.LineLength.TooLong" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
@@ -25,14 +24,8 @@
 
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
-        <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
-        <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceBeforeBracket" />
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
-        <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
-        <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
-        <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
-        <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
 
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />
@@ -40,18 +33,14 @@
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedMethod" />
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.WriteOnlyProperty" />
         <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedProperty" />
-        <exclude name="SlevomatCodingStandard.ControlStructures.UselessTernaryOperator.UselessTernaryOperator" />
         <exclude name="SlevomatCodingStandard.ControlStructures.UselessIfConditionWithReturn" />
         <exclude name="SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly.ReferencedGeneralException" />
         <exclude name="SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter" />
         <exclude name="SlevomatCodingStandard.Functions.UselessParameterDefaultValue.UselessParameterDefaultValue" />
         <exclude name="SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse" />
-        <exclude name="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash.UseStartsWithBackslash" />
         <exclude name="SlevomatCodingStandard.Namespaces.UseFromSameNamespace.UseFromSameNamespace" />
-        <exclude name="SlevomatCodingStandard.Namespaces.UnusedUses.MismatchingCaseSensitivity" />
         <exclude name="SlevomatCodingStandard.Operators.DisallowEqualOperators.DisallowedEqualOperator" />
         <exclude name="SlevomatCodingStandard.Operators.DisallowEqualOperators.DisallowedNotEqualOperator" />
-        <exclude name="SlevomatCodingStandard.PHP.UselessSemicolon.UselessSemicolon" />
         <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing.WhitespaceBeforeColon" />
         <exclude name="SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable" />
     </rule>

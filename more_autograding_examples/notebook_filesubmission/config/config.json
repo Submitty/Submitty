@@ -1,0 +1,90 @@
+{
+    "assignment_message" : "#A Notebook with File Submission",
+    "autograding" : {
+        "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
+        "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
+        "submission_to_validation" : [ "*.txt", "*.png" ],
+        "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
+    },
+    // ======================================================================================================
+    "notebook" : [
+        {
+            "type": "markdown",
+            "markdown_string": "#Let's do Math!"
+        },
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###Problem 1: What is `2 + 2`?"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "problem_1_math.txt",
+            "testcase_ref" : "problem_1_math",
+            "choices":[
+                {"value": "a", "description": "`2`"},
+                {"value": "b", "description": "`3`"},
+                {"value": "c", "description": "`4`"},
+                {"value": "d", "description": "`5`"},
+                {"value": "e", "description" : "*none of the above*"}
+            ]
+        },
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###Problem 2: Draw a House\n  \
+Upload an image file (.png or .jpg or .pdf).\n  \n\
+*Note: this section will not be auto-graded*"
+        },
+        {
+            "type": "file_submission",
+            "label": "Problem 2",
+            "directory" : "problem_2_house"
+        },
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###Problem 3: Animal Identification"
+        },
+        {
+            "type": "image",
+            "image" : "zebra.png",
+            "alt_text" : "An Animal",
+            "height": 240,
+            "width": 286
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "What is the type of the above animal?"
+        },
+        {
+            "type": "short_answer",
+            "filename": "problem_3_animal.txt",
+            "testcase_ref": "problem_3_animal"
+        },
+        // ===================================================
+        {
+            "type": "markdown",
+            "markdown_string": "###Problem 4: Poetry\n  \
+Upload at least 2 samples of your writing in separate files (.txt or .pdf or .docx).\n  \n\
+*Note: this section will not be auto-graded*"
+        },
+        {
+            "type": "file_submission",
+            "label": "Problem 4",
+            "directory" : "problem_4_poetry"
+        }
+    ],
+    // ======================================================================================================
+    "testcases" : [ 
+        { "title":"Problem 1 Math", "points":3, "testcase_label":"problem_1_math",
+          "validation":[ { "method":"diff", "actual_file":"problem_1_math.txt", "expected_file":"math_answer.txt",
+                           "show_expected":"never","show_actual":"never",
+                           "failure_message":"Incorrect Answer" } ] },
+
+        { "title":"Problem 3 Animal Identification", "points":2, "testcase_label":"problem_3_animal",
+          "validation":[ { "method":"diff", "actual_file":"problem_3_animal.txt", "expected_file":"animal_answer.txt",
+                           "show_expected":"never","show_actual":"never",
+                           "failure_message":"Incorrect Answer (note: make sure your answer is lowercase)" } ] }
+    ]
+}

@@ -17,7 +17,12 @@ var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
+let total_files_added = 0;
+let MAX_NUM_OF_FILES;
+
 var empty_inputs = true;
+
+let num_clipboard_files = 0;
 
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
@@ -31,6 +36,7 @@ function initializeDragAndDrop() {
     empty_inputs = true;
     student_ids = [];
     student_without_ids = [];
+    num_clipboard_files=0;
 }
 
 // initializing file_array and previous_files
@@ -71,13 +77,30 @@ function draghandle(e){
 
 // ADD FILES FOR NEW SUBMISSION
 //========================================================================================
+// check if adding a file is valid (not exceeding the limit)
+function addIsValid(files_to_add, total_added_files) {
+  if (files_to_add+total_added_files > MAX_NUM_OF_FILES){
+    alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
+    return false;
+  }
+  return true;
+}
+
+//initialize maximum no of files with that of the php_ini value
+function initMaxNoFiles(max_no_of_files) {
+  MAX_NUM_OF_FILES = max_no_of_files;
+}
+
 // add files dragged
 function drop(e){
     draghandle(e);
     var filestream= e.dataTransfer.files;
-    var part = get_part_number(e);
-    for(var i=0; i<filestream.length; i++){
-        addFileWithCheck(filestream[i], part); // check for folders
+    if (addIsValid(filestream.length, total_files_added)){
+        var part = get_part_number(e);
+        for(var i=0; i<filestream.length; i++){
+            addFileWithCheck(filestream[i], part); // check for folders
+            total_files_added++;
+        }
     }
 }
 
@@ -85,9 +108,12 @@ function drop(e){
 function dropWithMultipleZips(e){
     draghandle(e);
     var filestream= e.dataTransfer.files;
-    var part = get_part_number(e);
-    for(var i=0; i<filestream.length; i++){
-        addFileWithCheck(filestream[i], part, false); // check for folders
+    if (addIsValid(filestream.length, total_files_added)){
+        var part = get_part_number(e);
+        for(var i=0; i<filestream.length; i++){
+            addFileWithCheck(filestream[i], part, false); // check for folders
+            total_files_added++;
+        }
     }
 }
 
@@ -118,8 +144,11 @@ function get_part_number(e) {
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip=true){
     var filestream = document.getElementById("input-file" + part).files;
-    for(var i=0; i<filestream.length; i++){
-        addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+    if (addIsValid(filestream.length, total_files_added)){
+        for(var i=0; i<filestream.length; i++){
+          addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
+          total_files_added++;
+        }
     }
     $('#input-file' + part).val("");
 }
@@ -202,7 +231,7 @@ function addFile(file, part, check_duplicate_zip=true){
         }
     }
 
-    setButtonStatus()
+    setButtonStatus();
 }
 
 // REMOVE FILES
@@ -219,6 +248,7 @@ function deleteFiles(part) {
     var labels = dropzone.getElementsByClassName("file-label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
+        total_files_added--;
     }
     label_array[part-1] = [];
     changed = true;
@@ -243,6 +273,7 @@ function deleteSingleFile(filename, part, previous) {
             if (file_array[part-1][j].name == filename) {
                 file_array[part-1].splice(j, 1);
                 label_array[part-1].splice(j, 1);
+                total_files_added--;
                 break;
             }
         }
@@ -314,7 +345,7 @@ function addLabel(filename, filesize, part, previous){
     fileTrashElement.setAttribute('class', 'file-trash');
 
     fileDataElement.innerHTML= filename;
-    fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
+    fileTrashElement.innerHTML= filesize + "KB  <i aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -365,16 +396,15 @@ function openFile(url_full) {
 // moving to next input for split item submissions
 // referenced https://stackoverflow.com/questions/18150090/jquery-scroll-element-to-the-middle-of-the-screen-instead-of-to-the-top-with-a
 function moveNextInput(count) {
-    var next_count = count+1;
-    var next_input = "#users_" + next_count + " :first";
-    if ($(next_input).length) {
-        $(next_input).focus();
-        $(next_input).select();
+    const next_input = $("#users_" + (count + 1)).first();
+    if (next_input) {
+        next_input.focus();
+        next_input.select();
 
-        var inputOffset = $(next_input).offset().top;
-        var inputHeight = $(next_input).height();
-        var windowHeight = $(window).height();
-        var offset;
+        const inputOffset = next_input.offset().top;
+        const inputHeight = next_input.height();
+        const windowHeight = $(window).height();
+        let offset;
 
         if (inputHeight < windowHeight) {
             offset = inputOffset - ((windowHeight / 2) - (inputHeight / 2));
@@ -382,12 +412,9 @@ function moveNextInput(count) {
         else {
             offset = inputOffset;
         }
-        var speed = 500;
-        $('html, body').animate({scrollTop:offset}, speed);
+        $('html, body').animate({scrollTop: offset}, 500);
     }
 }
-
-
 
 // HANDLE SUBMISSION
 //========================================================================================
@@ -849,13 +876,13 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         }
     }
     // check due date
-    if (days_late > 0 && days_late <= late_days_allowed) {
+    if (days_late > 0 && days_late <= late_days_allowed && days_to_be_charged > 0) {
         message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
     }
-    else if (days_late > 0) {
+    else if (days_late > 0 && days_late > late_days_allowed) {
         message = "Your submission will be " + days_late + " days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?";
         if (!confirm(message)) {
             return;
@@ -920,7 +947,6 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
-
 
     if (student_page) {
         var pages = [];
@@ -990,8 +1016,7 @@ function handleDownloadImages(csrf_token) {
     var return_url = buildCourseUrl(['student_photos']);
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
-    formData.append('file_count', file_array.length);
-
+    formData.append('file_count', file_array[0].length);
 
     // Files selected
     for (var i = 0; i < file_array.length; i++) {
@@ -1153,11 +1178,11 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
-    
+
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
     }
-    
+
     $.ajax({
         url: edit_url,
         data: formData,

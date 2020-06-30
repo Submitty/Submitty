@@ -13,48 +13,51 @@
                     <th style="width:33%">Std. Deviation</th>
                 </tr>
             </thead>
-            {% for section, info in sections |filter((section,info) => section != null) %}
-                <tbody>
+            <tbody>
+            {% for section, info in sections|filter((info, section) => section != '') %}
                 <tr>
                     <td>{{ section }}</td>
                     <td id="avg-section-{{ section }}"></td>
                     <td id="stddev-section-{{ section }}"></td>
                 </tr>
-                </tbody>
             {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <table class="table table-striped table-bordered persist-area">
             <thead>
             <tr>
-                <td><b>By Component</b></td>
-                <td colspan="2"></td>
+                <th style="width:33%">By Component</th>
+                <th style="width:33%">Average</th>
+                <th style="width:33%">Std. Deviation</th>
             </tr>
             </thead>
+            <tbody>
             {% for component in components_numeric %}
-                <tbody>
                 <tr>
                     <td>{{ component.getTitle() }}</td>
                     <td id="avg-component-{{ loop.index0 }}"></td>
                     <td id="stddev-component-{{ loop.index0 }}"></td>
                 </tr>
-                </tbody>
             {% endfor %}
-            <thead>
-            <tr>
-                <td style="width:33%"><b>Total</b></td>
-                <td style="width:33%" id="avg-total"></td>
-                <td style="width:33%" id="stddev-total"></td>
-            </tr>
-            </thead>
-        </table>
-        <br>
-        {# This is a layout table #}
-        <table class="table table-striped table-bordered persist-area">
-            <tbody>
-            <tr>
-                <td style="width:50%">Students with a nonzero grade</td>
-                <td style="width:50%" id="num-graded"></td>
-            </tr>
             </tbody>
         </table>
+        <br>
+        <div class="layout-table-div">
+            <div class="layout-table-div-row layout-table-div-header">
+                <div style="width: 33%" class="layout-table-div-cell"><b>Total</b></div>
+                <div style="width: 33%" class="layout-table-div-cell" id="avg-total">0</div>
+                <div style="width: 33%" class="layout-table-div-cell" id="stddev-total">0</div>
+            </div>
+        </div>
+        <br>
+        {# This is a layout table #}
+        <div class="layout-table-div">
+            <div class="layout-table-div-row">
+                <div style="width: 50%" class="layout-table-div-cell">Students with a nonzero grade</div>
+                <div style="width: 50%" class="layout-table-div-cell" id="num-graded">0</div>
+            </div>
+        </div>
     {% else %}
         <p style="text-align: center">No Statistics To View.</p>
     {% endif %}

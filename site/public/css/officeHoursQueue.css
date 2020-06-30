@@ -47,3 +47,7 @@ th{
         display: none !important;
     }
 }
+
+.current_queue_row, a > i.fas{
+  color: var(--btn-text-black);
+}

@@ -8,23 +8,23 @@ use app\libraries\Core;
  * Class RedirectResponse
  * @package app\libraries\response
  */
-class RedirectResponse extends AbstractResponse {
+class RedirectResponse implements ResponseInterface {
     /** @var string */
     public $url;
 
     /**
      * RedirectResponse constructor.
-     * @param $url
+     * @param string|null $url
      */
-    public function __construct($url) {
-        $this->url = $url;
+    public function __construct(?string $url) {
+        $this->url = $url ?? "";
     }
 
     /**
      * Redirect to $this->url.
      * @param Core $core
      */
-    public function render(Core $core) {
+    public function render(Core $core): void {
         $core->redirect($this->url);
     }
 }

@@ -21,7 +21,7 @@
                         openAll( 'openable-element-', $(this).data('linked-type'))
                     })
 
-                    var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
+                    var currentCodeStyle = localStorage.getItem('theme');
                     var currentCodeStyleRadio = (currentCodeStyle == null || currentCodeStyle == "light") ? "style_light" : "style_dark";
                     $('#' + currentCodeStyleRadio).parent().addClass('active');
                     $('#' + currentCodeStyleRadio).prop('checked', true);
@@ -29,17 +29,9 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
+                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
             {% endif %}
 
-            <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
-                <label class="btn btn-secondary">
-                    <input type="radio" name="codeStyle" id="style_light" autocomplete="off" checked> Light
-                </label>
-                <label class="btn btn-secondary">
-                    <input type="radio" name="codeStyle" id="style_dark" autocomplete="off"> Dark
-                </label>
-            </div>
             <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             <br />
             {# Files #}
@@ -97,7 +89,9 @@
             }
             // handle pdf
             if (url_file.substring(url_file.length - 3) === "pdf") {
-                expandFile(html_file, url_file);
+                expandFile(html_file, url_file).then(function(){
+                    loadPDFToolbar();
+                });
             }
             else {
                 iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
@@ -169,7 +163,7 @@
                 type: 'POST',
                 url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
                 data: {
-                    'user_id': '{{ submitter_id }}',
+                    'user_id': '{{ submitter_id  }}',
                     'filename': name,
                     'file_path': path,
                     'page_num': page_num,

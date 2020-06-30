@@ -13,7 +13,10 @@
     else {
         editor{{ number }}.setSize("100%", "auto");
     }
-    var theme = localStorage.getItem("codeDisplayStyle");
+    var theme = localStorage.getItem("theme");
+    if(theme == null && window.matchMedia("(prefers-color-scheme: dark)").matches){
+      theme = "dark";
+    }
     editor{{ number }}.setOption("theme", (theme == null || theme === "light") ? "eclipse" : "monokai");
     editor{{ number }}.setOption("mode", "{{ type }}");
     $("#myTab").find("a").click(function (e) {

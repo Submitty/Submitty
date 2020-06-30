@@ -2,11 +2,21 @@
 {% block popup_id %}grader-list-form{% endblock %}
 {% block title %}Upload Grader List{% endblock %}
 {% block body %}
-    <p>
-        Format your grader data as an .xlsx or .csv file with {{ use_database ? 8 : 7 }} columns:<br>
-        &emsp;username, first name, last name, email, grader group, {{ use_database ? "password, " : "" }}preferred first name, preferred last name<br>
-    </p>
-    <p>&emsp;</p>
+    <p>Format your grader data as an .xlsx or .csv file with {{ use_database ? 8 : 7 }} columns :</p>
+        <ol class="full-list">
+            <li>username</li>
+            <li>first name</li>
+            <li>last name</li>
+            <li>email</li>
+            <li>registration section</li>
+            {% if use_database %}
+                <li>password</li>
+            {% endif %}
+            <li>preferred first name</li>
+            <li>preferred last name</li>
+        </ol>
+        <span style="color: #006398">&#9734; : You can also supply just the user_id and rest of the fields will be auto-fill with the existing user data and a default value for grader-group as 'Limited Access Grader' (4) will be used</span>
+    <br/>
     <p>
         Where GraderGroup is:<br>
         &emsp;1=Instructor<br>
@@ -16,8 +26,8 @@
     </p>
     <p>&emsp;</p>
     <p>
-        Preferred first and last names are optional.<br>
-        Do not use a header row.<br>
+        <b>Preferred first and last names are optional.<br>
+        Do not use a header row.</b><br>
     </p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div>

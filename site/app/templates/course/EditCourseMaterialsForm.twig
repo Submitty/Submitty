@@ -33,7 +33,7 @@
                 </tr>
             {% endfor %}
             </span>
-            <script type="text/javascript">
+            <script>
                 function toggleRegistrationSectionsEdit(){
                     $("#show-some-section-selection-edit").toggle();
                 }
@@ -47,11 +47,11 @@
         </label>
         <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
-            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
+            Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
-    <script type="text/javascript">
+    <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
                 let cmTime = document.getElementById("edit-picker").value;
@@ -90,18 +90,20 @@
 
                     ],
                     onClick: (index, fp) => {
+                        let date;
                         switch (index) {
                             case 0:
-                                updateToServerTime(fp);
+                                date = new Date();
                                 break;
                             case 1:
-                                updateToTomorrowServerTime(fp);
+                                date = new Date();
+                                date.setDate(date.getDate() + 1);
                                 break;
                             case 2:
                                 date = new Date("9998-01-01 00:00:00");
-                                fp.setDate(date,true);
                                 break;
                         }
+                        fp.setDate(date);
                     }
                 }
             )],

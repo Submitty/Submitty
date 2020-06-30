@@ -81,6 +81,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
+ * @method object[] getPeerGradingPairs()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -133,6 +134,9 @@ class Gradeable extends AbstractModel {
      * that contains filename, file path, and the file size.
      */
     private $split_pdf_files = null;
+    
+    /** @prop @var array */
+    protected $peer_grading_pairs = [];
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -229,6 +233,9 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
+        if (array_key_exists('peer_graders_list', $details)) {
+            $this->setPeerGradersList($details['peer_graders_list']);
+        }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
@@ -448,7 +455,9 @@ class Gradeable extends AbstractModel {
         foreach (self::date_properties as $date) {
             if (isset($dates[$date]) && $dates[$date] !== null) {
                 try {
-                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getConfig()->getTimezone());
+                    $user = $this->core->getUser();
+                    $time_zone = is_null($user) ? $this->core->getConfig()->getTimezone() : $user->getUsableTimeZone();
+                    $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $time_zone);
                 }
                 catch (\Exception $e) {
                     $parsedDates[$date] = null;
@@ -462,6 +471,33 @@ class Gradeable extends AbstractModel {
         // Assume that if no late days provided that there should be zero of them;
         $parsedDates['late_days'] = intval($dates['late_days'] ?? 0);
         return $parsedDates;
+    }
+
+    public function setPeerGradersList($input) {
+        $bad_rows = [];
+        foreach ($input as $row_num => $vals) {
+            if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
+                array_push($bad_rows, ($vals["student"]));
+            }
+            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
+                array_push($bad_rows, ($vals["grader"]));
+            }
+        }
+        if (!empty($bad_rows)) {
+            $msg = "The given user id is not valid: ";
+            array_walk($bad_rows, function ($val) use (&$msg) {
+                $msg .= " {$val}";
+            });
+            $this->core->addErrorMessage($msg);
+        }
+        else {
+            $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
+            foreach ($input as $row_num => $vals) {
+                $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
+                $this->modified = true;
+                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+            }
+        }
     }
 
     /**
@@ -1354,8 +1390,8 @@ class Gradeable extends AbstractModel {
      */
     public function getGradingProgress(User $grader) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
-        $total_users = array();
-        $graded_components = array();
+        $total_users = [];
+        $graded_components = [];
         if ($this->isGradeByRegistration()) {
             if (!$grader->accessFullGrading()) {
                 $sections = $grader->getGradingRegistrationSections();
@@ -1395,13 +1431,13 @@ class Gradeable extends AbstractModel {
         }
 
         $num_components = $this->core->getQueries()->getTotalComponentCount($this->getId());
-        $sections = array();
+        $sections = [];
         if (count($total_users) > 0) {
             foreach ($num_submitted as $key => $value) {
-                $sections[$key] = array(
+                $sections[$key] = [
                     'total_components' => $value * $num_components,
                     'graded_components' => 0,
-                );
+                ];
                 if (isset($graded_components[$key])) {
                     // Clamp to total components if unsubmitted assigment is graded for whatever reason
                     $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
@@ -1526,9 +1562,21 @@ class Gradeable extends AbstractModel {
      */
     public function getGradingSectionsForUser(User $user) {
         if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
-            $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
-            //TODO: Peer grading team assignments
-            return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
+            if ($this->isTeamAssignment()) {
+                $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
+                $teams = [];
+                foreach ($users as $u) {
+                    $teamToAdd = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                    if ($this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId()) !== null) {
+                        $teams[$teamToAdd->getId()] = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $u->getId());
+                    }
+                }
+                $g_section = new GradingSection($this->core, false, -1, [$user], null, $teams);
+                return [$g_section];
+            }
+            $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
+            $g_section = new GradingSection($this->core, false, -1, [$user], $users, null);
+            return [$g_section];
         }
         else {
             $users = [];
@@ -1729,11 +1777,11 @@ class Gradeable extends AbstractModel {
             . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
 
-        $json = array("team_history" => array(array("action" => "admin_create", "time" => $current_time,
-            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId())));
+        $json = ["team_history" => [["action" => "admin_create", "time" => $current_time,
+            "admin_user" => $this->core->getUser()->getId(), "first_user" => $leader->getId()]]];
         foreach ($members as $member) {
-            $json["team_history"][] = array("action" => "admin_add_user", "time" => $current_time,
-                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId());
+            $json["team_history"][] = ["action" => "admin_add_user", "time" => $current_time,
+                "admin_user" => $this->core->getUser()->getId(), "added_user" => $member->getId()];
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");

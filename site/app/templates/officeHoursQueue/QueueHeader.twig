@@ -1,66 +1,20 @@
+{% if viewer.getQueueMessage() | length > 0 %}
+  <div class="content gradeable_message">
+    <p>{{viewer.getQueueMessage() | markdown}}</p>
+  </div>
+{% endif %}
 <div class="content">
   <h1>
-    Office Hours/Lab Queue
+    Office Hours Queue
   </h1>
   {% if not viewer.isGrader() %}
-    {% if viewer.inQueue() == 0 %}
-      <br>
-      <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <label for="name_box">Your Name:</label>
-        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Queue Name" value="{{viewer.getName()}}" style="margin:.5rem" required="required">
-        <br>
-        <div class="form-group">
-          <label for="queue_code">Queue Name:
-          </label>
-          <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
-            <option value="">Queue Name</option>
-            {% for queue in viewer.getAllQueues() %}
-              <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <label for="token_box">Queue Code:</label>
-        <input type="text" name="token" id="token_box" placeholder="Queue Code" style="margin:.5rem" autocomplete="on" required="required">
-        <br>
-        {% if viewer.isContactInfoEnabled() %}
-          <label for="contact_info">My Contact Information (follow instructor directions):</label>
-          <input type="text" name="contact_info" id="contact_info" style="width: 500px" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" style="margin:.5rem" autocomplete="on" required="required">
-          <br>
-        {% endif %}
-        <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
-      </form>
-    {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
-      {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
-        <p>There is currently
-          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
-          person ahead of you in the queue</p>
-      {% else %}
-        <p>There are currently
-          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
-          people ahead of you in the queue</p>
-      {% endif %}
-      <p>You are currently in:
-        <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
-      </p>
-      <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
-        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
-      </form>
-    {% else %}
-      <p>You are currently being helped</p>
-      <form
-        method="post"
-        id="finish_help"
-        action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/finishHelp"
-        onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
-        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-        <button id="self_finish_help" type="submit" class="btn btn-danger">Finish Being Helped</button>
-      </form>
-    {% endif %}
+    <p>
+      For more information:
+      <a target="_blank" href="https://submitty.org/student/queue">
+        Getting Help through the Office Hours Queue
+        <i style="font-style:normal;" class="fa-question-circle"></i>
+      </a>
+    </p>
+    {% include 'officeHoursQueue/QueueStatus.twig' %}
     <br>
   {% endif %}

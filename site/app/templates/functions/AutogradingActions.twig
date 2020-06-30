@@ -1,0 +1,209 @@
+{# Render a Dispatcher Action #}
+{# @var object action #}
+{% macro renderDispatcherAction(action) %}
+    {% import _self as self %}
+
+    {% if action.action == "delay" %}
+        {{ self.renderDelay(action) }}
+    {% elseif action.action == "stdin" %}
+        {{ self.renderStdin(action) }}
+    {% elseif (action.action == "stop") or  (action.action == "start") or (action.action == "kill") %}
+        {{ self.renderSignal(action) }}
+    {% else %}
+        An undocumented action was taken
+    {% endif %}
+{% endmacro %}
+
+{# Render a Graphics Action #}
+{# @var object action #}
+{% macro renderGraphicsAction(action) %}
+    {% import _self as self %}
+    {% if action.action == "delay" %}
+        {{ self.renderGraphicsDelay(action) }}
+    {% elseif action.action == "screenshot" %}
+        {{ self.renderScreenshot(action) }}
+    {% elseif action.action == "gif" %}
+        {{ self.renderGIF(action) }}
+    {% elseif action.action == "type" %}
+        {{ self.renderType(action) }}
+    {% elseif action.action == "key" %}
+        {{ self.renderKey(action) }}
+    {% elseif action.action == "click and drag" %}
+        {{ self.renderClickAndDrag(action) }}
+    {% elseif action.action == "click and drag delta" %}
+        {{ self.renderClickAndDragDelta(action) }}
+    {% elseif action.action == "click" %}
+        {{ self.renderClick(action) }}
+    {% elseif action.action == "move mouse" %}
+        {{ self.renderMoveMouse(action) }}
+    {% elseif action.action == "center" %}
+        {{ self.renderCenterMouse(action) }}
+    {% elseif action.action == "origin" %}
+        {{ self.renderOrigin(action) }}
+    {% else %}
+        An undocumented action was taken
+    {% endif %}
+{% endmacro %}
+
+
+{# Render a list of containers #}
+{# @var object  action #}
+{%- macro renderContainerList(action) -%}
+    {% for container in action.containers %}
+        {% if loop.first %}
+            {{container}}
+        {% elseif loop.last %}
+            , and {{container}}
+        {% else %}
+            , {{container}}
+        {% endif %}
+    {% endfor %}
+{%- endmacro -%}
+
+
+{# Render the stop, start, or kill command #}
+{# @var object  action #}
+{%- macro renderSignal(action) -%}
+    Send the {{ action.action }} command to {{ _self.renderContainerList(action) }}
+{%- endmacro -%}
+
+
+{# Render the delay command #}
+{# @var object  action #}
+{%- macro renderDelay(action) -%}
+    Delay for {{ action.seconds }} second(s)
+{%- endmacro -%}
+
+
+{# Render a stdin command sent to a container #}
+{# @var object  action #}
+{%- macro renderStdin(action) -%}
+    Send the message "{{ action.string }}" via standard input to {{ _self.renderContainerList(action) }}
+{%- endmacro -%}
+
+
+{# Render a graphics delay command #}
+{# @var object action #}
+{%- macro renderGraphicsDelay(action) -%}
+    Delay for {{ action.seconds }} second(s)
+{%- endmacro -%}
+
+
+{# Render the screenshot command #}
+{# @var object action #}
+{%- macro renderScreenshot(action) -%}
+    Take a screenshot with the name {{ action.name }}
+{%- endmacro -%}
+
+
+{# Render the GIF command #}
+{# @var object action #}
+{%- macro renderGIF(action) -%}
+    Begin a {{ action.seconds }} second GIF with the name {{ action.name }}
+{%- endmacro -%}
+
+
+{# Render the type action #}
+{# @var object action #}
+{%- macro renderType(action) -%}
+    Press the key sequence {{ action.string }} 
+    {% if action.presses > 1 %}
+        {{action.presses}} times
+        {% if action.delay_in_seconds > 0 %}
+            with a {{ action.delay_in_seconds }} delay
+        {% endif %}
+    {% endif %}
+{%- endmacro -%}
+
+
+{# Render the key action #}
+{# @var object action #}
+{%- macro renderKey(action) -%}
+    Press {{ action.key_combination }} 
+    {% if action.presses > 1 %}
+        {{action.presses}} times
+        {% if action.delay_in_seconds > 0 %}
+            with a {{ action.delay_in_seconds }} delay
+        {% endif %}
+    {% endif %}
+{%- endmacro -%}
+
+
+{# Render the click action #}
+{# @var object action #}
+{%- macro renderClick(action) -%}
+    Click the {{ action.mouse_button }} mouse button 
+{%- endmacro -%}
+
+
+{# Render the move mouse action #}
+{# @var object action #}
+{%- macro renderMoveMouse(action) -%}
+    Move the mouse 
+    {% if action.end_x != 0 %}
+        {{action.end_x | abs}} pixels {{_self.convertXMovement(action.end_x)}}
+        {% if action.end_y != 0 %}
+            and 
+        {% endif %}
+    {% endif %}
+    {% if action.end_y != 0 %}
+        {{action.end_y | abs }} pixels {{_self.convertYMovement(action.end_y)}}
+    {% endif %}
+{%- endmacro -%}
+
+{# Render the center mouse action #}
+{# @var object action #}
+{%- macro renderCenterMouse(action) -%}
+    Center the mouse on the window
+{%- endmacro -%}
+
+{# Render the move mouse to origin action #}
+{# @var object action #}
+{%- macro renderOrigin(action) -%}
+    Move the mouse to (0,0)
+{%- endmacro -%}
+
+{# Render the click and drag (standard) action #}
+{# @var object action #}
+{%- macro renderClickAndDrag(action) -%}
+    Click the {{action.mouse_button}} mouse button and move 
+    {% if action.start_x and action.start_y %}
+        from ({{action.start_x}}, {{action.start_y}}) 
+    {% endif %}
+    to ({{action.end_x}}, {{action.end_y}})
+{%- endmacro -%}
+
+{# Output "left" or "right" based on an amount of x movement. Nothing on 0. #}
+{# @var int amount #}
+{%- macro convertXMovement(movement) -%}
+    {% if movement < 0 %}
+        left
+    {% elseif movement > 0 %}
+        right
+    {% endif %}
+{%- endmacro -%}
+
+{# Output "up" or "down" based on an amount of y movement. Nothing on 0. #}
+{# @var int amount #}
+{%- macro convertYMovement(movement) -%}
+    {% if movement < 0 %}
+        up
+    {% elseif movement > 0 %}
+        down
+    {% endif %}
+{%- endmacro -%}
+
+{# Render the Click and Drag Delta action #}
+{# @var object action #}
+{%- macro renderClickAndDragDelta(action) -%}
+    Click the {{action.mouse_button}} mouse button and move 
+    {% if action.end_x != 0 %}
+        {{action.end_x | abs}} pixels {{_self.convertXMovement(action.end_x)}}
+        {% if action.end_y != 0 %}
+            and 
+        {% endif %}
+    {% endif %}
+    {% if action.end_y != 0 %}
+        {{action.end_y | abs}} pixels {{_self.convertYMovement(action.end_y)}}
+    {% endif %}
+{%- endmacro -%}

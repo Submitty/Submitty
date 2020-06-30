@@ -38,7 +38,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return Core
      */
-    protected function createMockCore($config_values = array(), $user_config = array(), $queries = array(), $access = array()) {
+    protected function createMockCore($config_values = [], $user_config = [], $queries = [], $access = []) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -157,7 +157,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * Utilty function that helps us mock Models from our system. Because they rely on the magic __call() function,
+     * Utility function that helps us mock Models from our system. Because they rely on the magic __call() function,
      * we cannot directly mock these as we would any other object as then we won't have access to any methods that
      * require the __call() magic function. However, PHPUnit allows us to specify functions that are mockable (even
      * if they are not directly defined) via setMethods(), so we use reflection on our given class to get all methods
@@ -181,8 +181,8 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $reflection = new \ReflectionClass($class);
-            $methods = array();
-            $matches = array();
+            $methods = [];
+            $matches = [];
             preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
             foreach ($matches[1] as $match) {
                 if (strlen($match) > 0) {
@@ -220,12 +220,9 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * Checks whether a mocked method was called or not
-     *
-     * @param string $method
-     * @return bool
+     * Asserts whether a mocked method was called or not
      */
-    public function assertMethodCalled(string $method): bool {
-        return array_key_exists($method, $this->mocked_methods) && $this->mocked_methods[$method];
+    public function assertMethodCalled(string $method): void {
+        $this->assertTrue(array_key_exists($method, $this->mocked_methods) && $this->mocked_methods[$method]);
     }
 }

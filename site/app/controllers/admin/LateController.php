@@ -5,7 +5,7 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,11 +17,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LateController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/late_days")
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/late_days")
+     * @return MultiResponse
      */
     public function viewLateDays() {
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'LateDay'],
                 'displayLateDays',
@@ -32,11 +32,11 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions")
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/extensions")
+     * @return MultiResponse
      */
     public function viewExtensions() {
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['admin', 'Extensions'],
                 'displayExtensions',
@@ -48,16 +48,16 @@ class LateController extends AbstractController {
     /**
      * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
-     * @Route("/{_semester}/{_course}/late_days/update", methods={"POST"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/late_days/update", methods={"POST"})
+     * @return MultiResponse
      */
     public function updateLateDays($csv_option = null) {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            $data = array();
+            $data = [];
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "late"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
@@ -74,34 +74,37 @@ class LateController extends AbstractController {
             if (!$user) {
                 $error = "Invalid Student ID";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
 
-            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
-                $error = "Datestamp must be Y-m-d";
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d H:i:s', $_POST['datestamp']) === false)) {
+                $error = "Datestamp must be Y-m-d H:i:s";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
             if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])))) {
                 $error = "Late Days must be a nonnegative integer";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
-            $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+
+            $date_time = DateUtils::parseDateTime($_POST['datestamp'], $this->core->getUser()->getUsableTimeZone());
+
+            $this->core->getQueries()->updateLateDays($_POST['user_id'], $date_time, $_POST['late_days']);
             $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
     }
 
     /**
-     * @Route("/{_semester}/{_course}/late_days/delete", methods={"POST"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/late_days/delete", methods={"POST"})
+     * @return MultiResponse
      */
     public function deleteLateDays() {
         $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
@@ -109,7 +112,7 @@ class LateController extends AbstractController {
             $error = "Invalid Student ID";
             $this->core->addErrorMessage($error);
 
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse($error)
             );
         }
@@ -117,7 +120,7 @@ class LateController extends AbstractController {
             $error = "Datestamp must be mm/dd/yy";
             $this->core->addErrorMessage($error);
 
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse($error)
             );
         }
@@ -128,16 +131,16 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions/update", methods={"POST"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/extensions/update", methods={"POST"})
+     * @return MultiResponse
      */
     public function updateExtension() {
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            $data = array();
+            $data = [];
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
@@ -145,14 +148,14 @@ class LateController extends AbstractController {
                 for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
-                return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
         else {
             if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" )) {
                 $error = "Please choose a gradeable_id";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
@@ -160,7 +163,7 @@ class LateController extends AbstractController {
             if (!$user) {
                 $error = "Invalid Student ID";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
@@ -170,7 +173,7 @@ class LateController extends AbstractController {
                 if (intval($late_days) < 0 || !ctype_digit($late_days)) {
                     $error = "Extensions must be a nonnegative integer";
                     $this->core->addErrorMessage($error);
-                    return Response::JsonOnlyResponse(
+                    return MultiResponse::JsonOnlyResponse(
                         JsonResponse::getFailResponse($error)
                     );
                 }
@@ -178,7 +181,7 @@ class LateController extends AbstractController {
             else {
                 $error = "You must specify a number of late days or a new due date for the student";
                 $this->core->addErrorMessage($error);
-                return Response::JsonOnlyResponse(
+                return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
@@ -197,7 +200,7 @@ class LateController extends AbstractController {
             }
             if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
                 $this->core->addNoticeMessage("User already has " . $late_days . " extensions; no changes made");
-                return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
@@ -207,7 +210,7 @@ class LateController extends AbstractController {
                 if ($option == 0) {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
-                    return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                    return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 elseif ($option == 1) {
                     $team_member_ids = explode(", ", $team->getMemberList());
@@ -215,11 +218,11 @@ class LateController extends AbstractController {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
-                    return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                    return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 }
                 else {
                     $team_member_ids = explode(", ", $team->getMemberList());
-                    $team_members = array();
+                    $team_members = [];
                     for ($i = 0; $i < count($team_member_ids); $i++) {
                         $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
                             $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
@@ -228,7 +231,7 @@ class LateController extends AbstractController {
                         "admin/users/MoreExtensions.twig",
                         ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
                     );
-                    return Response::JsonOnlyResponse(
+                    return MultiResponse::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );
                 }
@@ -236,21 +239,21 @@ class LateController extends AbstractController {
             else {
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                 $this->core->addSuccessMessage("Extensions have been updated");
-                return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+                return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
     }
 
     /**
-     * @return Response
+     * @return MultiResponse
      */
     private function getLateDays() {
         $users = $this->core->getQueries()->getUsersWithLateDays();
-        $user_table = array();
+        $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
+            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions()];
         }
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
         );
     }

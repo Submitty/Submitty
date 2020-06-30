@@ -31,6 +31,7 @@ class ElectronicGraderView extends AbstractView {
      * @param bool $show_warnings
      * @return string
      */
+    
     public function statusPage(
         Gradeable $gradeable,
         array $sections,
@@ -116,7 +117,7 @@ class ElectronicGraderView extends AbstractView {
                 $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
-            $warnings = array();
+            $warnings = [];
             if ($section_type === "rotating_section" && $show_warnings) {
                 if ($registered_but_not_rotating > 0) {
                     array_push($warnings, "There are " . $registered_but_not_rotating . " registered students without a rotating section.");
@@ -136,8 +137,8 @@ class ElectronicGraderView extends AbstractView {
                 $peer_graded = 0;
 
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
-                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
-                    $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
+                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / ($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables'])) * 100, 1);
+                    $peer_total =  floor(($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables']) / $peer_count);
                     $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
                 }
             }
@@ -273,10 +274,10 @@ HTML;
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
 					<tr>
-				        <td style = "cursor:pointer;width:25%" id="user_down">User &darr;</td>
-				        <td style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</td>
-				        <td style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</td>
-				        <td style = "cursor:pointer;width:25%" id="filepath_down">Filepath</td>
+				        <th style = "cursor:pointer;width:25%" id="user_down">User &darr;</th>
+				        <th style = "cursor:pointer;width:25%" id="upload_down">Upload Timestamp</th>
+				        <th style = "cursor:pointer;width:25%" id="submission_down">Submission Timestamp</th>
+				        <th style = "cursor:pointer;width:25%" id="filepath_down">Filepath</th>
 					</tr>
 HTML;
 
@@ -381,7 +382,7 @@ HTML;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
-
+        
         //Each table column is represented as an array with the following entries:
         // width => how wide the column should be on the page, <td width=X>
         // title => displayed title in the table header
@@ -389,16 +390,23 @@ HTML;
         $columns = [];
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
-            $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
-
+            if ($gradeable->isTeamAssignment()) {
+                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
+            }
+            else {
+                $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
+            }
+            if ($gradeable->isTaGrading()) {
+                $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
+            }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
+                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
-                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading"];
+                $columns[]     = ["width" => "30%", "title" => "Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
@@ -430,7 +438,7 @@ HTML;
                 if ($gradeable->isTaGrading()) {
                     $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
                 }
-                $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
+                $columns[]     = ["width" => "8%",  "title" => "Manual Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "7%",  "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
                 if ($gradeable->isTaGradeReleased()) {
@@ -441,7 +449,7 @@ HTML;
                 if ($gradeable->isTaGrading()) {
                     $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
                 }
-                $columns[]     = ["width" => "12%", "title" => "TA Grading",       "function" => "grading"];
+                $columns[]     = ["width" => "12%", "title" => "Manual Grading",       "function" => "grading"];
                 $columns[]     = ["width" => "12%", "title" => "Total",            "function" => "total"];
                 $columns[]     = ["width" => "10%", "title" => "Active Version",   "function" => "active_version"];
                 if ($gradeable->isTaGradeReleased()) {
@@ -510,7 +518,11 @@ HTML;
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
-                if ($graded_component === null) {
+
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                    $info["graded_groups"][] = 4;
+                }
+                elseif ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
                 }
@@ -623,7 +635,7 @@ HTML;
             ];
         }
 
-        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : array();
+        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : [];
         foreach ($team_gradeable_view_history as $team_id => $team) {
             $not_viewed_yet = true;
             $hover_over_string = "";
@@ -647,8 +659,12 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $this->core->getOutput()->addInternalCss('details.css');
+        $this->core->getOutput()->addInternalJs('details.js');
+
+        $this->core->getOutput()->enableMobileViewport();
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -706,14 +722,15 @@ HTML;
         ]);
     }
 
-
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from) {
+
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $peer = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
-        if ($gradeable->isPeerGrading() && !$this->core->getAccess()->canI("grading.electronic.peer_panel")) {
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == 4) {
             $peer = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
@@ -721,17 +738,17 @@ HTML;
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
-        if ($gradeable->isPeerGrading() && $this->core->getAccess()->canI("grading.electronic.peer_panel")) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderPeerPanel', $graded_gradeable, $display_version);
+        if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
         }
 
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
@@ -739,10 +756,10 @@ HTML;
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
         if (!$peer) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable, $can_inquiry);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
 
         if ($graded_gradeable->hasOverriddenGrades()) {
@@ -777,7 +794,27 @@ HTML;
                 "message" => "Late Submission (No on time submission available)"
             ]);
         }
+        elseif ($graded_gradeable->getAutoGradedGradeable()->hasSubmission() && count($display_version_instance->getFiles()["submissions"]) > 1 && $graded_gradeable->getGradeable()->isScannedExam()) {
+            $pattern1 = "upload.pdf";
+            $pattern2 = "/upload_page_\d+/";
+            $pattern3 = "/upload_version_\d+_page\d+/";
+            $pattern4 = ".submit.timestamp";
+            $pattern5 = "bulk_upload_data.json";
 
+            $pattern_match_flag = false;
+            foreach ($display_version_instance->getFiles()["submissions"] as $key => $value) {
+                if ($pattern1 != $key && !preg_match($pattern2, $key) && !preg_match($pattern3, $key) && $pattern4 != $key && $pattern5 != $key) {
+                    $pattern_match_flag = true;
+                }
+            }
+
+            // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
+            if ($pattern_match_flag == true) {
+                $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/InformationMessage.twig", [
+                "message" => "Multiple files within submissions"
+                ]);
+            }
+        }
         return $return;
     }
 
@@ -802,12 +839,17 @@ HTML;
         $prev_ungraded_student_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'prev', 'to_ungraded' => 'true']);
         $next_ungraded_student_url =  $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'from' => $from, 'to' => 'next', 'to_ungraded' => 'true']);
 
+        $i_am_a_peer = false;
+        if ($peer && $this->core->getUser()->getGroup() == 4) {
+            $i_am_a_peer = true;
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "progress" => $progress,
             "peer_gradeable" => $peer,
             // WIP. Replace this with a better function call once there is a definitive way to determine my peer-ness.
             // For now, I am a peer if I cannot access the peer panel.
-            "i_am_a_peer" => !$this->core->getAccess()->canI("grading.electronic.peer_panel"),
+            "i_am_a_peer" => $i_am_a_peer,
             "prev_student_url" => $prev_student_url,
             "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
@@ -826,6 +868,7 @@ HTML;
      * @return string
      */
     public function renderAutogradingPanel($version_instance, bool $show_hidden_cases) {
+        $this->core->getOutput()->addInternalJs('submission-page.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
@@ -841,7 +884,7 @@ HTML;
 
         //Empty thread input
         if ($threadIds === "{}") {
-            $threadIds = array();
+            $threadIds = [];
         }
         $id = '';
         $submitters = [];
@@ -854,7 +897,7 @@ HTML;
             $submitters = [$id];
         }
         foreach ($threadIds as $threadId) {
-            $posts = array();
+            $posts = [];
             foreach ($submitters as $s_id) {
                 $posts = array_merge($posts, $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $s_id));
             }
@@ -888,11 +931,12 @@ HTML;
      * Render the Submissions and Results Browser panel
      * @param GradedGradeable $graded_gradeable
      * @param int $display_version
-     * @return string
+     * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
+        $user_ids = [];
         $add_files = function (&$files, $new_files, $start_dir_name) {
-            $files[$start_dir_name] = array();
+            $files[$start_dir_name] = [];
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $path = explode('/', $file['relative_name']);
@@ -900,7 +944,7 @@ HTML;
                     $working_dir = &$files[$start_dir_name];
                     foreach ($path as $dir) {
                         if (!isset($working_dir[$dir])) {
-                            $working_dir[$dir] = array();
+                            $working_dir[$dir] = [];
                         }
                         $working_dir = &$working_dir[$dir];
                     }
@@ -908,15 +952,14 @@ HTML;
                 }
             }
         };
-        $submissions = array();
-        $results = array();
-        $results_public = array();
-        $checkout = array();
+        $submissions = [];
+        $results = [];
+        $results_public = [];
+        $checkout = [];
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
         // order of these statements matter I believe
-
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
         $isVcs = $graded_gradeable->getGradeable()->isVcs();
         if ($display_version_instance !==  null) {
@@ -928,14 +971,18 @@ HTML;
             $add_files($results, $display_version_instance->getResultsFiles(), 'results');
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
-
-        // For PDFAnnotationBar.twig
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
             "has_vcs_files" => $isVcs,
+            "user_ids" => $user_ids,
             "submissions" => $submissions,
             "checkout" => $checkout,
             "results" => $results,
@@ -1035,6 +1082,8 @@ HTML;
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');

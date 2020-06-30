@@ -8,7 +8,7 @@ use app\models\User;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
-use app\libraries\response\Response;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,8 +24,8 @@ class SimpleGraderController extends AbstractController {
      * @param $section
      * @param $section_type
      * @param $sort
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
+     * @return MultiResponse
      */
     public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
         //convert from id --> u.user_id etc for use by the database.
@@ -42,7 +42,7 @@ class SimpleGraderController extends AbstractController {
         //Figure out what section we are supposed to print
         if (is_null($section)) {
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl())
             );
         }
@@ -51,28 +51,28 @@ class SimpleGraderController extends AbstractController {
 
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl())
             );
         }
 
         //Figure out if we are getting users by rotating or registration section.
         if (is_null($section_type)) {
-            return Response::WebOnlyResponse(
+            return MultiResponse::webOnlyResponse(
                 new WebResponse('Error', 'noGradeable')
             );
         }
 
         //Grab the students in section, sectiontype.
         if ($section_type === "rotating_section") {
-            $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRotatingSections([$section], $sort_by);
         }
         elseif ($section_type === "registration_section") {
-            $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRegistrationSections([$section], $sort_by);
         }
         else {
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl())
             );
         }
@@ -81,7 +81,7 @@ class SimpleGraderController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         //display the lab to be printed (in SimpleGraderView's displayPrintLab function)
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['grading', 'SimpleGrader'],
                 'displayPrintLab',
@@ -96,15 +96,15 @@ class SimpleGraderController extends AbstractController {
      * @param $gradeable_id
      * @param $view
      * @param $sort
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
+     * @return MultiResponse
      */
     public function gradePage($gradeable_id, $view = null, $sort = null) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         }
         catch (\InvalidArgumentException $e) {
-            return Response::WebOnlyResponse(
+            return MultiResponse::webOnlyResponse(
                 new WebResponse('Error', 'noGradeable')
             );
         }
@@ -112,7 +112,7 @@ class SimpleGraderController extends AbstractController {
         //If you can see the page, you can grade the page
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
-            return Response::RedirectOnlyResponse(
+            return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl())
             );
         }
@@ -173,7 +173,7 @@ class SimpleGraderController extends AbstractController {
         }
 
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
-        return Response::WebOnlyResponse(
+        return MultiResponse::webOnlyResponse(
             new WebResponse(
                 ['grading', 'SimpleGrader'],
                 'simpleDisplay',
@@ -190,12 +190,12 @@ class SimpleGraderController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"POST"})
+     * @return MultiResponse
      */
     public function save($gradeable_id) {
         if (!isset($_POST['user_id'])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Did not pass in user_id')
             );
         }
@@ -206,17 +206,17 @@ class SimpleGraderController extends AbstractController {
 
         $user = $this->core->getQueries()->getUserById($user_id);
         if ($gradeable === null) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid gradeable ID")
             );
         }
         elseif ($user === null) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid user ID")
             );
         }
         elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Didn't submit any scores")
             );
         }
@@ -225,7 +225,7 @@ class SimpleGraderController extends AbstractController {
 
         //Make sure they're allowed to do this
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["graded_gradeable" => $graded_gradeable])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You do not have permission to do this.")
             );
         }
@@ -233,7 +233,7 @@ class SimpleGraderController extends AbstractController {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
         // Return ids and scores of updated components in success response so frontend can validate
-        $return_data = array();
+        $return_data = [];
 
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
@@ -251,13 +251,13 @@ class SimpleGraderController extends AbstractController {
                         $component->getUpperClamp() < $data
                         || !is_numeric($data)
                     ) {
-                        return Response::JsonOnlyResponse(
+                        return MultiResponse::JsonOnlyResponse(
                             JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
                         );
                     }
                     $db_data = $component_grade->getTotalScore();
                     if ($original_data != $db_data) {
-                        return Response::JsonOnlyResponse(
+                        return MultiResponse::JsonOnlyResponse(
                             JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")")
                         );
                     }
@@ -268,18 +268,17 @@ class SimpleGraderController extends AbstractController {
             }
         }
 
-        $ta_graded_gradeable->setOverallComment('');
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($return_data)
         );
     }
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
-     * @return Response
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/csv", methods={"POST"})
+     * @return MultiResponse
      */
     public function UploadCSV($gradeable_id) {
         $users = $_POST['users'];
@@ -288,7 +287,7 @@ class SimpleGraderController extends AbstractController {
         $grader = $this->core->getUser();
 
         if (!$this->core->getAccess()->canI("grading.simple.upload_csv", ["gradeable" => $gradeable])) {
-            return Response::JsonOnlyResponse(
+            return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("You do not have permission to grade {$gradeable->getTitle()}")
             );
         }
@@ -297,9 +296,9 @@ class SimpleGraderController extends AbstractController {
 
         $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
         $arr_length = count($csv_array);
-        $return_data = array();
+        $return_data = [];
 
-        $data_array = array();
+        $data_array = [];
         for ($i = 0; $i < $arr_length; $i++) {
             $temp_array = explode(',', $csv_array[$i]);
             $data_array[] = $temp_array;
@@ -313,7 +312,7 @@ class SimpleGraderController extends AbstractController {
                     continue;
                 }
 
-                $temp_array = array();
+                $temp_array = [];
                 $temp_array['username'] = $username;
                 $index1 = 0;
                 $index2 = 3; //3 is the starting index of the grades in the csv
@@ -360,7 +359,6 @@ class SimpleGraderController extends AbstractController {
                 }
 
                 // Reset the overall comment because we're overwriting the grade anyway
-                $ta_graded_gradeable->setOverallComment('');
                 $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
                 $return_data[] = $temp_array;
@@ -368,7 +366,7 @@ class SimpleGraderController extends AbstractController {
             }
         }
 
-        return Response::JsonOnlyResponse(
+        return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($return_data)
         );
     }

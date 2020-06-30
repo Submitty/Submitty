@@ -1,5 +1,7 @@
 {% import _self as self %}
 
+{% from 'notebook/Notebook.twig' import renderNotebook as renderNotebook %}
+
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
@@ -20,10 +22,10 @@
             {% endif %}
         </h1>
         {% if has_due_date %}
-            <h2>Due: {{ formatted_due_date }}</h2>
+            <h2>Due: {{ due_date|date(date_time_format) }}</h2>
         {% endif %}
         <div class="loading-bar-wrapper">
-            <label for="loading-bar">Upload progress: <span id="loading-bar-percentage"></span></label>
+            <span>Upload progress: <span id="loading-bar-percentage"></span></span>
             <progress id="loading-bar" value="0" ></progress>
         </div>
     </header>
@@ -44,7 +46,7 @@
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission_type" checked="true">
+                    <input type='radio' id="radio-normal" name="submission_type" checked="checked">
                     Normal Submission
                 </label>
                 <label for="radio-student">
@@ -55,7 +57,7 @@
                     <label for="radio-bulk">
                         <input type='radio' id="radio-bulk" name="submission_type">
                         Bulk PDF Upload
-                        <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
+                        <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
@@ -81,7 +83,7 @@
 
                     <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
                     <span id="prefix-prompt">QR code prefix/suffix:
-                    <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
+                    <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
 	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i>
                     </a>
                     </span>
@@ -241,187 +243,7 @@
         {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-
-        {# Notebook #}
-        <div class="notebook">
-
-            {# Render content #}
-            {% set num_short_answer = 0 %}
-            {% set num_codeboxes = 0 %}
-            {% set num_multiple_choice = 0%}
-            {% for cell in notebook %}
-                <div id="content_{{ loop.index0 }}">
-
-                    {# Handle if cell is markdown #}
-                    {% if cell.type == "markdown" %}
-
-                        {# Render markdown #}
-                        {{ cell.markdown_data | markdown }}
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
-
-                    {# Handle if cell is image #}
-                    {% elseif cell.type == "image" %}
-
-                        <img src="{{ attribute(image_data, cell.image) }}"
-
-                        {% if cell.width > 0 %}
-                            width="{{ cell.width }}"
-                        {% endif %}
-
-                        {% if cell.height > 0 %}
-                            height="{{ cell.height }}"
-                        {% endif %}
-
-                        {% if cell.alt_text is defined %}
-                            alt="{{ cell.alt_text }}"
-                        {% endif %}
-
-                        >
-
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
-
-                    {# Handle if cell is short_answer #}
-                    {% elseif cell.type == "short_answer" %}
-
-                        {# If programming language not defined render regular text boxes #}
-                        {% if cell.programming_language is not defined %}
-
-                            {{ self.render_short_answer(cell, num_short_answer, highest_version, testcase_messages) }}
-                            {% set num_short_answer = num_short_answer + 1 %}
-
-                        {# Else render a codebox #}
-                        {% else %}
-                                <div>
-                                    {% if cell.label %}
-                                        {{ cell.label | markdown }}
-                                    {% else %}
-                                        Write your {{ cell.programming_language | title }} below:
-                                    {% endif %}
-                                </div>
-
-                                <div id="codebox_{{ num_codeboxes }}"
-                                     name="codebox_{{ num_codeboxes }}"
-                                     autocapitalization="off"
-                                     spellcheck="false"
-                                     class="codebox"
-                                     data-initial_value="{{ cell.initial_value }}"
-                                     data-recent_submission="{{ cell.recent_submission }}"
-                                     onkeyup="handle_input_keypress();">
-                                </div>
-
-                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
-                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
-
-                                <script>
-
-                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
-                                        {
-                                            "mode": "{{ cell.programming_language }}",
-                                            lineNumbers: true,
-                                            "theme": "eclipse"
-                                        }
-                                    );
-
-                                    {# Populate codebox and set state of buttons initially #}
-                                    {% if highest_version == 0 %}
-                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
-                                    {% else %}
-                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                                    {% endif %}
-                                </script>
-                            {% set num_codeboxes = num_codeboxes + 1 %}
-                        {% endif %}
-
-                    {# Handle if cell is multiple choice #}
-                    {% elseif cell.type == "multiple_choice" %}
-                        {% if cell.randomize_order == true %}
-                            {% set choices_indices = numberUtils.getRandomIndices(cell.choices|length, student_id, gradeable_id ) %}
-                        {% else %}
-                            {% set choices_indices = numberUtils.getIndices(cell.choices) %}
-                        {% endif %}
-                        <fieldset id="mc_field_{{ num_multiple_choice }}"
-                                  class="mc"
-                                  {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
-                            {% if cell.allow_multiple == true %}
-                                <legend>
-                                    {% if cell.label %}
-                                        {{ cell.label | markdown }}
-                                    {% else %}
-                                        You may select many:
-                                    {% endif %}
-                                </legend>
-
-                                {{ self.render_testcase_messages(cell, testcase_messages) }}
-
-                                {% for idx in choices_indices %}
-                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-                                        <input type="checkbox" class="key_to_click" tabindex="0"
-                                               name="multiple_choice_{{ num_multiple_choice }}"
-                                               id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                               value="{{ cell.choices[idx].value }}"
-                                               onclick="handle_input_keypress();"
-                                        />
-                                        {{ cell.choices[idx].description | markdown }}
-                                    </label>
-                                {% endfor %}
-                            {% else %}
-                                <legend>
-                                    {% if cell.label %}
-                                        {{ cell.label | markdown }}
-                                    {% else %}
-                                        Select one:
-                                    {% endif %}
-                                </legend>
-
-                                {{ self.render_testcase_messages(cell, testcase_messages) }}
-
-                                {% for idx in choices_indices %}
-                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
-                                        <input type="radio" class="key_to_click" tabindex="0"
-                                               name="multiple_choice_{{ num_multiple_choice }}"
-                                               id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                               value="{{ cell.choices[idx].value }}"
-                                               onclick="handle_input_keypress();"
-                                        />
-                                        {{ cell.choices[idx].description | markdown }}
-                                    </label>
-                                {% endfor %}
-                            {% endif %}
-                        </fieldset>
-
-                        {# Create reset to recent submission button #}
-                        <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
-                        <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
-
-                        <script>
-                            {# Populate checkboxes initially #}
-                            {% if cell.recent_submission is defined %}
-                                setMultipleChoices("mc_field_{{ num_multiple_choice }}");
-                            {% endif %}
-
-                            {# Configure initial state for the button #}
-                            {% if highest_version == 0 %}
-                                $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
-                            {% else %}
-                                $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
-                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
-                            {% endif %}
-                        </script>
-
-                        {% set num_multiple_choice = num_multiple_choice + 1 %}
-
-                    {% endif %}
-
-                </div>
-
-            {% endfor %}
-
-        </div>
+        {{ renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version,max_file_uploads, old_files) }}
 
         {# File upload boxes #}
         <div id="upload-boxes">
@@ -444,7 +266,12 @@
                     </h2>
                     <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                     <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
+                      <tr style="background:transparent; display:none;">
+                        <th>File Name:</th>
+                        <th>Size:</th>
+                      </tr>
                     </table>
+                    <p>Maximum allowed number of files to be uploaded is {{ max_file_uploads }}.</p>
                 </div>
             {% endfor %}
         </div>
@@ -463,7 +290,7 @@
         {# /Page selector #}
 
         <p>
-            {{ upload_message }}
+            {{ upload_message | markdown}}
         </p>
 
         <button type="button" id="submit" class="btn btn-success">Submit</button>
@@ -488,21 +315,30 @@
         <script>
             $(function() {
                 setButtonStatus();
+                initMaxNoFiles({{ max_file_uploads }});
             });
 
             // CLICK ON THE DRAG-AND-DROP ZONE TO OPEN A FILE BROWSER OR DRAG AND DROP FILES TO UPLOAD
-            var num_parts = {{ part_names|length }};
+            if (typeof num_parts === "undefined"){
+                var num_parts = {{ part_names|length }};
+            }
             createArray(num_parts);
             var assignment_version = {{ display_version }};
             var highest_version = {{ highest_version }};
             for (var i = 1; i <= num_parts; i++ ){
-                var dropzone = document.getElementById("upload" + i);
+                initializeDropZone("upload" + String(i));
+            }
+
+
+            function initializeDropZone(id){
+                var dropzone = document.getElementById(id);
                 dropzone.addEventListener("click", clicked_on_box, false);
                 dropzone.addEventListener("dragenter", draghandle, false);
                 dropzone.addEventListener("dragover", draghandle, false);
                 dropzone.addEventListener("dragleave", draghandle, false);
                 dropzone.addEventListener("drop", drop, false);
             }
+
 
             $("#startnew").click(function(e){ // Clear all the selected files in the buckets
                 for (var i = 1; i <= num_parts; i++){
@@ -658,102 +494,4 @@
     });
 </script>
 
-{% macro render_testcase_messages(cell, testcase_messages) %}
 
-    {# If testcase_ref is set then attempt to display associated messages #}
-    {% if cell.testcase_ref is defined %}
-
-        {% if testcase_messages[cell.testcase_ref] is defined %}
-
-            {% for msg in testcase_messages[cell.testcase_ref] %}
-                <p class="feedback-msg-{{ msg.type }}">{{ msg.message }}</p>
-            {% endfor %}
-
-        {% endif %}
-
-    {% endif %}
-
-{% endmacro %}
-
-{% macro render_short_answer(short_answer, index, version, testcase_messages) %}
-    <p class="short-answer">
-        {% if short_answer.rows == 0 %}
-            <label>
-                <div>
-                    {% if short_answer.label %}
-                        {{ short_answer.label | markdown }}
-                    {% else %}
-                        Write your answer below:
-                    {% endif %}
-                </div>
-
-                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
-
-                <input
-                    type="text"
-                    name="short_answer_{{ index }}"
-                    autocapitalization="off"
-                    spellcheck="false"
-                    id="short_answer_{{ index }}"
-                    class="sa-box"
-                    data-initial_value="{{ short_answer.initial_value }}"
-                    data-recent_submission="{{ short_answer.recent_submission }}"
-                    {% if short_answer.recent_submission|length  %}
-                        value="{{ short_answer.recent_submission }}"
-                    {% else %}
-                        value="{{ short_answer.initial_value }}"
-                    {% endif %}
-                    onkeyup="handle_input_keypress();"
-                />
-            </label>
-        {% else %}
-            <label>
-                <div>
-                    {% if short_answer.label %}
-                        {{ short_answer.label | markdown }}
-                    {% else %}
-                        Write your answer below:
-                    {% endif %}
-                    Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
-                </div>
-
-                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
-
-                {# Single line to prevent whitespace from being captured #}
-                <textarea
-                    rows="{{ short_answer.rows }}"
-                    cols="50"
-                    name="short_answer_{{ index }}"
-                    id="short_answer_{{ index }}"
-                    class="sa-box"
-                    data-initial_value="{{ short_answer.initial_value }}"
-                    data-recent_submission="{{ short_answer.recent_submission }}"
-                    onkeyup="handle_input_keypress()"
-                >{% if short_answer.recent_submission|length  %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
-            </label>
-            {#
-                Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-
-                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
-            #}
-            <script>
-                enableTabsInTextArea('#short_answer_{{ index }}');
-            </script>
-        {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa-clear-reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
-        <script>
-
-            // Setup init state of buttons
-            {% if version == 0 %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
-            {% else %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-            {% endif %}
-
-        </script>
-    </p>
-{% endmacro %}

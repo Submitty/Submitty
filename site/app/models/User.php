@@ -4,6 +4,9 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\exceptions\ValidationException;
+use app\libraries\DateUtils;
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\RFCValidation;
 
 /**
  * Class User
@@ -95,6 +98,8 @@ class User extends AbstractModel {
     protected $registration_section = null;
     /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
+    /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
+    protected $time_zone;
 
     /**
      * @prop
@@ -121,10 +126,13 @@ class User extends AbstractModel {
     protected $instructor_updated = false;
 
     /** @prop @var array */
-    protected $grading_registration_sections = array();
+    protected $grading_registration_sections = [];
 
     /** @prop @var array */
-    protected $notification_settings = array();
+    protected $notification_settings = [];
+
+    /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
+    protected $display_image_state;
 
     /**
      * User constructor.
@@ -132,7 +140,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details = array()) {
+    public function __construct(Core $core, $details = []) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -184,6 +192,114 @@ class User extends AbstractModel {
         if (isset($details['grading_registration_sections'])) {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
+
+        if (isset($details['display_image_state'])) {
+            $this->display_image_state = $details['display_image_state'];
+        }
+
+        $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
+    }
+
+    /**
+     * Set $this->time_zone
+     * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
+     * @return bool True if time zone was able to be updated, False otherwise
+     */
+    public function setTimeZone(string $time_zone): bool {
+
+        // Validate the $time_zone string
+        if (in_array($time_zone, DateUtils::getAvailableTimeZones())) {
+            // Attempt to update database
+            $result = $this->core->getQueries()->updateSubmittyUserTimeZone($this, $time_zone);
+
+            // Return true if we were able to update the database
+            if ($result === 1) {
+                $this->time_zone = $time_zone;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the UTC offset for this user's time zone.
+     *
+     * @return string The offset in hours and minutes, for example '+9:30' or '-4:00'
+     */
+    public function getUTCOffset(): string {
+        return DateUtils::getUTCOffset($this->time_zone);
+    }
+
+    /**
+     * Gets a \DateTimeZone instantiation for the user's time zone if they have one set, or the server time zone
+     * if they don't.
+     *
+     * @return \DateTimeZone
+     */
+    public function getUsableTimeZone(): \DateTimeZone {
+        if ($this->time_zone === 'NOT_SET/NOT_SET') {
+            return $this->core->getConfig()->getTimezone();
+        }
+        else {
+            return new \DateTimeZone($this->time_zone);
+        }
+    }
+
+    /**
+     * Get the user's time zone, in 'nice' format.  This simply returns a cleaner 'NOT SET' string when the
+     * user has not set their time zone.
+     *
+     * @return string The user's PHP DateTimeZone identifier string or 'NOT SET'
+     */
+    public function getNiceFormatTimeZone(): string {
+        return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+
+    /**
+     * Update the user's display image if they have uploaded a new one
+     *
+     * @param string $image_extension The extension, for example 'jpeg' or 'gif'
+     * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
+     *                              elsewhere.
+     * @return bool true if the update was successful, false otherwise
+     * @throws \ImagickException
+     */
+    public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
+        $image_saved = true;
+
+        // Try saving image to its new spot in the file directory
+        try {
+            DisplayImage::saveUserImage($this->core, $this->id, $image_extension, $tmp_file_path, 'user_images');
+        }
+        catch (\Exception $exception) {
+            $image_saved = false;
+        }
+
+        // Update the DB to 'preferred'
+        if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
+            $this->display_image_state = 'preferred';
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the user's DisplayImage object.
+     *
+     * @return DisplayImage|null The user's DisplayImage object, or null if an error occurred
+     */
+    public function getDisplayImage(): ?DisplayImage {
+        try {
+            $result = new DisplayImage($this->core, $this->id, $this->display_image_state);
+        }
+        catch (\Exception $exception) {
+            $result = null;
+        }
+
+        return $result;
     }
 
     /**
@@ -221,7 +337,7 @@ class User extends AbstractModel {
     public function setPassword($password) {
         if (!empty($password)) {
             $info = password_get_info($password);
-            if ($info['algo'] === 0) {
+            if (empty($info['algo'])) {
                 $this->password = password_hash($password, PASSWORD_DEFAULT);
             }
             else {
@@ -320,7 +436,7 @@ class User extends AbstractModel {
      * @param mixed $data
      * @return bool
      */
-    public static function validateUserData($field, $data) {
+    public static function validateUserData($field, $data): bool {
 
         switch ($field) {
             case 'user_id':
@@ -340,8 +456,9 @@ class User extends AbstractModel {
                     return true;
                 }
                 // -- or ---
-                // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-                return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+                // validate email address against email RFCs
+                $validator = new EmailValidator();
+                return $validator->isValid($data, new RFCValidation());
             case 'user_group':
                 //user_group check is a digit between 1 - 4.
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
@@ -353,10 +470,10 @@ class User extends AbstractModel {
                 //Database password cannot be blank, no check on format
                 return $data !== "";
             default:
-                //$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
+                //$data can't be validated since $field is unknown. Notify developer with an exception (also protects data record integrity).
                 $ex_field = '$field: ' . var_export(htmlentities($field), true);
-                $ex_data = '$data:  ' . var_export(htmlentities($data), true);
-                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
+                $ex_data = '$data: ' . var_export(htmlentities($data), true);
+                throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', [$ex_field, $ex_data]);
         }
     }
 
@@ -385,11 +502,8 @@ class User extends AbstractModel {
 
     /**
      * Checks if the user is on ANY team for the given assignment
-     *
-     * @param string gradable_id
-     * @return bool
      */
-    public function onTeam($gradeable_id) {
+    public function onTeam(string $gradeable_id): bool {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
         return $team !== null;
     }
