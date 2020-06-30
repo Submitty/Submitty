@@ -43,7 +43,6 @@ aside {
 
 #bar_wrapper {
     box-sizing: content-box;
-    overflow-x: auto;
     padding: 6px 0;
 }
 
@@ -1215,6 +1214,17 @@ tr.is_publish {
 
 #changeCodeStyle {
     display:inline-block;
+}
+
+/* Media queries */
+@media (max-width: 540px) {
+    #electronic-gradeable-container {
+        margin: 0;
+    }
+    .navigation-box {
+        margin: 4px 6px;
+        width: max-content;
+    }
 }
 
 /* Animations */
