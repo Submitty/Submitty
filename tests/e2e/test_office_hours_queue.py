@@ -109,7 +109,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new_queue_token', 'new_queue_rand_token', 'open_new_queue_btn']))
 
     def goToQueuePage(self):
-        queue_url = f"courses/{self.get_current_semester()}/sample/office_hours_queue"
+        queue_url = f"courses/{self.semester}/sample/office_hours_queue"
         self.get(queue_url)
         self.assertEqual(self.driver.current_url, self.test_url+"/"+queue_url)
 
