@@ -5,30 +5,16 @@ import sys
 import json
 from datetime import datetime
 
-def get_current_semester():
-	"""
-	Given today's date, generates a three character code that represents the semester to use for
-	courses such that the first half of the year is considered "Spring" and the last half is
-	considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
-	F. The next two characters are the last two digits in the current year.
-	:return:
-	"""
-	today = datetime.today()
-	semester = "f" + str(today.year)[-2:]
-	if today.month < 7:
-		semester = "s" + str(today.year)[-2:]
-	return semester
+from submitty_utils import dateutils
+
 
 def generatePossibleDatabases():
-	current = get_current_semester()
+	current = dateutils.get_current_semester()
 	pre = 'submitty_' + current + '_'
 	path = "/var/local/submitty/courses/" + current
 	return [pre + name for name in sorted(os.listdir(path)) if os.path.isdir(path + "/" + name)]
 
 if(__name__ == "__main__"):
-
-
-	
 	num_args = len(sys.argv)
 	possible_databases = generatePossibleDatabases()
 
@@ -50,7 +36,7 @@ if(__name__ == "__main__"):
 
 	threads = abs(int(input("Enter number of threads (i.e. 1000): ").strip()))
 	posts = abs(int(input("Enter number of posts per thread (i.e. 20): ").strip()))
-	
+
 	usr_path = "/usr/local/submitty"
 
 	settings = json.load(open(os.path.join(usr_path, ".setup", "submitty_conf.json")))
