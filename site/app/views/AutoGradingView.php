@@ -623,7 +623,10 @@ class AutoGradingView extends AbstractView {
         }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
+        $annotated_pdf_paths = [];
         $annotated_file_names = [];
+        $annotation_paths = [];
         if (is_dir($annotation_path)) {
             $dir_iter = new \DirectoryIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
