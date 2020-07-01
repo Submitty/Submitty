@@ -219,8 +219,9 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             queue_obj = json.load(infile)
             queue_obj["which_untrusted"] = which_untrusted
             queue_obj["which_machine"] = which_machine
-            queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
+            queue_obj["ship_time"] = dateutils.write_submitty_date(milliseconds=True)
             queue_obj['identifier'] = random_identifier
+
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))
@@ -420,7 +421,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         return
 
     #TODO: break which_machine into id, address, and passphrase.
-    
+
     try:
         # prepare the job
         shipper_counter=0
@@ -430,7 +431,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
             time.sleep(5)
 
         prep_job_success = True
-        
+
         if not prep_job_success:
             print (my_name, " ERROR unable to prepare job: ", queue_file)
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR unable to prepare job: " + queue_file)
@@ -662,7 +663,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted):
     Our first priority is to perform any awaiting VCS checkouts
 
     Note: This design is imperfect:
-    
+
         * If all shippers are busy working on long-running autograding
         tasks there will be a delay of seconds or minutes between
         a student pressing the submission button and clone happening.
@@ -670,7 +671,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted):
         continue working on their submission past the deadline for
         the time period of the delay.
         -- This is not a significant, practical problem.
-    
+
         * If multiple and/or large git submissions arrive close
         together, this shipper job will be tied up performing these
         clone operations.  Because we don't release the lock, any
@@ -680,11 +681,11 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted):
         -- Based on experience with actual submission patterns, we
             do not anticipate that this will be a significant
             bottleneck at this time.
-    
+
         * If a git clone takes a very long time and/or hangs because of
         network problems, this could halt all work on the server.
         -- We'll need to monitor the production server.
-    
+
     We plan to do a complete overhaul of the
     scheduler/shipper/worker and refactoring this design should be
     part of the project.
@@ -848,7 +849,7 @@ def can_short_circuit(config_obj: str) -> bool:
 def check_submission_limit_penalty_inline(config_obj: dict,
                                           queue_obj: dict) -> dict:
     """Check if a submission violates the submission limit.
-    
+
     Note that this function makes the assumption that the file being graded is
     short-circuitable (i.e. only has one test case; the sentinel "submission
     limit" test case).
@@ -873,7 +874,7 @@ def check_submission_limit_penalty_inline(config_obj: dict,
     points = floor(excessive * penalty)
     points = max(points, possible_points)
     view_testcase = points != 0
-    
+
     return {
         'test_name': f"Test 1 {testcase['title']}",
         'view_testcase': view_testcase,
@@ -987,7 +988,7 @@ def try_short_circuit(queue_file: str) -> bool:
 
     base_dir = tempfile.mkdtemp()
 
-    results_dir = os.path.join(base_dir, 'TMP_RESULTS')    
+    results_dir = os.path.join(base_dir, 'TMP_RESULTS')
     results_json_path = os.path.join(results_dir, 'results.json')
     grade_txt_path = os.path.join(results_dir, 'grade.txt')
     queue_file_json_path = os.path.join(results_dir, 'queue_file.json')
@@ -1094,7 +1095,7 @@ def write_grading_outputs(testcases: list,
         for r, tc in zip(testcase_outputs, testcases)
         if not tc.get('hidden', False)
     )
-    
+
     with open(grade_txt, 'w') as fd:
         # Write each test case's individual output
         for i, tc in enumerate(testcases):
@@ -1116,11 +1117,11 @@ def write_grading_outputs(testcases: list,
                     fd.write(' ' * 10)
             else:
                 fd.write(f"{points:3} / {max_points:3}  ")
-            
+
             if tc.get('hidden', False):
                 fd.write("  [ HIDDEN ]")
             fd.write('\n')
-        
+
         # Write the final lines
         autograde_total_msg = f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n"
         fd.write(autograde_total_msg)
@@ -1175,7 +1176,7 @@ def launch_shippers(worker_status_map):
     processes = list()
     for name, machine in autograding_workers.items():
         thread_count = machine["num_autograding_workers"]
-        
+
         # Cleanup previous in-progress submissions
         worker_folders = [worker_folder(f'{name}_{i}') for i in range(thread_count)]
         for folder in worker_folders:
@@ -1241,16 +1242,16 @@ def launch_shippers(worker_status_map):
             idle_workers = list(filter(
                 lambda n: len(os.listdir(worker_folder(n))) == 0,
                 workers))
-            jobs = filter(os.path.isfile, 
-                map(lambda f: os.path.join(INTERACTIVE_QUEUE, f), 
+            jobs = filter(os.path.isfile,
+                map(lambda f: os.path.join(INTERACTIVE_QUEUE, f),
                     os.listdir(INTERACTIVE_QUEUE)))
-            
+
             # Distribute available jobs randomly among workers currently idle.
             for job in jobs:
                 if len(idle_workers) == 0:
                     break
                 dest = random.choice(idle_workers)
-                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, 
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
                     message=f"Pushing job {os.path.basename(job)} to {dest}.")
                 shutil.move(job, worker_folder(dest))
                 idle_workers.remove(dest)

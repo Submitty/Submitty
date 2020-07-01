@@ -573,10 +573,30 @@ class AutoGradingView extends AbstractView {
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $grader_id);
         }
+        
+        $id = $this->core->getUser()->getId();
 
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $graders = [];
+                $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+                if (is_dir($annotation_path)) {
+                    $first_file = scandir($annotation_path)[2];
+                    $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
+                    if (is_file($annotation_path)) {
+                        $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+                        foreach ($dir_iter as $fileinfo) {
+                            if (!$fileinfo->isDot()) {
+                                $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                                $pdf_info = explode('_', $no_extension);
+                                $grader_id = $pdf_info[count($pdf_info) - 1];
+                                $graders[] = $grader_id;
+                            }
+                        }
+                    }
+                }
+                $file['graders'] = $graders;
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -600,8 +620,6 @@ class AutoGradingView extends AbstractView {
                 $files = array_merge($files['submissions'], $files['checkout']);
             }
         }
-
-        $id = $this->core->getUser()->getId();
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
         }
@@ -640,7 +658,10 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$user_id] = $comment;
             }
         }
-
+        
+        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalCss('ta-grading.css');
+        
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),

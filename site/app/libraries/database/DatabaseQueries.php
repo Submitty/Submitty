@@ -207,6 +207,32 @@ ORDER BY {$orderBy}"
     }
 
     /**
+     * Gets an indexed array of all the user_ids for all users who are members of the current course.
+     *
+     * @return array An array of all the users
+     */
+    public function getListOfCourseUsers(): array {
+        $sql = 'SELECT user_id FROM users';
+        $this->course_db->query($sql);
+        return array_map(function ($row) {
+            return $row['user_id'];
+        }, $this->course_db->rows());
+    }
+
+    /**
+     * Update master and course database user's display_image_state to a new state
+     *
+     * @param string $user_id
+     * @param string $state
+     * @return bool
+     */
+    public function updateUserDisplayImageState(string $user_id, string $state): bool {
+        $sql = 'UPDATE users SET display_image_state = ? WHERE user_id = ?';
+        $this->submitty_db->query($sql, [$state, $user_id]);
+        return $this->submitty_db->getRowCount() === 1;
+    }
+
+    /**
      * @return User[]
      */
     public function getAllGraders() {

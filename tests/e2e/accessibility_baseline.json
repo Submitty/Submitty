@@ -1,69 +1,70 @@
 {
     "/home": [],
     "/home/courses/new": [],
-    "/courses/s20/sample": [],
-    "/courses/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": [
+    "/courses/{}/{}": [],
+    "/courses/{}/{}/gradeable/future_no_tas_homework/update?nav_tab=0": [
         "Attribute “placeholder” not allowed on element “input” at this point.",
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”."
     ],
-    "/courses/s20/sample/autograding_config?g_id=future_no_tas_homework": [],
-    "/courses/s20/sample/gradeable/future_no_tas_lab/grading?view=all": [],
-    "/courses/s20/sample/gradeable/future_no_tas_test/grading?view=all": [],
-    "/courses/s20/sample/gradeable/open_homework/grading/status": [],
-    "/courses/s20/sample/gradeable/open_homework/bulk_stats": [],
-    "/courses/s20/sample/gradeable/open_homework/grading/details?view=all": [],
-    "/courses/s20/sample/gradeable/open_homework": [
+    "/courses/{}/{}/autograding_config?g_id=future_no_tas_homework": [],
+    "/courses/{}/{}/gradeable/future_no_tas_lab/grading?view=all": [],
+    "/courses/{}/{}/gradeable/future_no_tas_test/grading?view=all": [],
+    "/courses/{}/{}/gradeable/open_homework/grading/status": [],
+    "/courses/{}/{}/gradeable/open_homework/bulk_stats": [],
+    "/courses/{}/{}/gradeable/open_homework/grading/details?view=all": [],
+    "/courses/{}/{}/gradeable/open_homework": [
         "Bad value “text” for attribute “role” on element “div”.",
         "Attribute “fname” not allowed on element “tr” at this point."
     ],
-    "/courses/s20/sample/gradeable/open_team_homework/team": [],
-    "/courses/s20/sample/gradeable/grades_released_homework_autota": [
+    "/courses/{}/{}/gradeable/open_team_homework/team": [],
+    "/courses/{}/{}/gradeable/grades_released_homework_autota": [
         "Bad value “text” for attribute “role” on element “div”.",
         "Attribute “fname” not allowed on element “tr” at this point.",
         "Duplicate ID “confetti_canvas”.",
         "The first occurrence of ID “confetti_canvas” was here.",
         "CSS: The value “break-word” is deprecated"
     ],
-    "/courses/s20/sample/notifications": [],
-    "/courses/s20/sample/notifications/settings": [
+    "/courses/{}/{}/notifications": [],
+    "/courses/{}/{}/notifications/settings": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/courses/s20/sample/gradeable": [],
-    "/courses/s20/sample/config": [],
-    "/courses/s20/sample/theme": [],
-    "/courses/s20/sample/office_hours_queue": [
+    "/courses/{}/{}/gradeable": [],
+    "/courses/{}/{}/config": [],
+    "/courses/{}/{}/theme": [],
+    "/courses/{}/{}/office_hours_queue": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/courses/s20/sample/course_materials": [],
-    "/courses/s20/sample/forum": [
+    "/courses/{}/{}/course_materials": [],
+    "/courses/{}/{}/forum": [
         "The element “input” must not appear as a descendant of the “a” element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+        "Element “pre” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools)."
     ],
-    "/courses/s20/sample/forum/threads/new": [
+    "/courses/{}/{}/forum/threads/new": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/courses/s20/sample/forum/categories": [],
-    "/courses/s20/sample/forum/stats": [
+    "/courses/{}/{}/forum/categories": [],
+    "/courses/{}/{}/forum/stats": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/courses/s20/sample/users": [],
-    "/courses/s20/sample/graders": [
+    "/courses/{}/{}/users": [],
+    "/courses/{}/{}/graders": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/courses/s20/sample/sections": [],
-    "/courses/s20/sample/student_photos": [],
-    "/courses/s20/sample/late_days": [],
-    "/courses/s20/sample/extensions": [],
-    "/courses/s20/sample/grade_override": [],
-    "/courses/s20/sample/plagiarism": [
+    "/courses/{}/{}/sections": [],
+    "/courses/{}/{}/student_photos": [],
+    "/courses/{}/{}/late_days": [],
+    "/courses/{}/{}/extensions": [],
+    "/courses/{}/{}/grade_override": [],
+    "/courses/{}/{}/plagiarism": [
         "Attribute “name” not allowed on element “div” at this point."
     ],
-    "/courses/s20/sample/plagiarism/configuration/new": [
+    "/courses/{}/{}/plagiarism/configuration/new": [
         "Attribute “name” not allowed on element “div” at this point.",
         "Attribute “name” not allowed on element “span” at this point."
     ],
-    "/courses/s20/sample/reports": [],
-    "/courses/s20/sample/late_table": [],
-    "/courses/s20/sample/grades": []
+    "/courses/{}/{}/reports": [],
+    "/courses/{}/{}/late_table": [],
+    "/courses/{}/{}/grades": []
 }
