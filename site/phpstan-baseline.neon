@@ -556,11 +556,6 @@ parameters:
 			path: app/models/RainbowCustomizationJSON.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(string gradable_id\\)\\: Unexpected token \"gradable_id\", expected variable at offset 98$#"
-			count: 1
-			path: app/models/User.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:threadExists\\(\\) invoked with 1 parameter, 0 required\\.$#"
 			count: 1
 			path: app/models/forum/Forum.php
