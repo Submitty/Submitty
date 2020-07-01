@@ -54,7 +54,7 @@ class PDFController extends AbstractController {
             "gradeable_id" => $gradeable_id,
             "id" => $id,
             "file_name" => $filename,
-            "file_path" => urldecode($decoded_path),
+            "file_path" => $decoded_path,
             "annotation_jsons" => $annotation_jsons,
             "is_student" => true,
             "page_num" => 1,
@@ -85,20 +85,17 @@ class PDFController extends AbstractController {
         $rerender_annotated_pdf = true;
         $latest_timestamp = filemtime(urldecode($path));
         if (is_dir($annotation_path)) {
-            $dir_iter = new \DirectoryIterator($annotation_path);
+            $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
-                if ($file_info->isFile() && !$file_info->isDot()) {
-                    $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file_info->getFilename());
-                    $file_contents = file_get_contents($file_info->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded != null) {
-                        $pdf_id = $annotation_decoded["file_name"];
-                        $grader_id = $annotation_decoded["grader_id"];
-                        if ($pdf_id . '.pdf' === $filename) {
-                            $annotation_jsons[$grader_id] = $file_contents;
-                            if ($latest_timestamp < $file_info->getMTime()) {
-                                $latest_timestamp = $file_info->getMTime();
-                            }
+                $file_contents = file_get_contents($file_info->getPathname());
+                $annotation_decoded = json_decode($file_contents, true);
+                if ($annotation_decoded != null) {
+                    $pdf_id = $annotation_decoded["file_name"];
+                    $grader_id = $annotation_decoded["grader_id"];
+                    if ($pdf_id . '.pdf' === $filename) {
+                        $annotation_jsons[$grader_id] = $file_contents;
+                        if ($latest_timestamp < $file_info->getMTime()) {
+                            $latest_timestamp = $file_info->getMTime();
                         }
                     }
                 }
@@ -235,7 +232,7 @@ class PDFController extends AbstractController {
                 if (explode('_', $annotation_file)[0] === md5($file_path)) {
                     $file_contents = file_get_contents(FileUtils::joinPaths($annotation_dir, $annotation_file));
                     $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded != null) {
+                    if ($annotation_decoded !== null) {
                         $grader_id = $annotation_decoded["grader_id"];
                         $annotation_jsons[$grader_id] = $file_contents;
                     }

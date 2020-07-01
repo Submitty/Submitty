@@ -32,7 +32,7 @@ def up(config, database, semester, course):
                                 for submission_file in submission_files:
                                     if(submission_file[:-4] == file_name):
                                         md5_file_name = hashlib.md5((os.path.abspath(os.path.join(submission_root, submission_file))).encode())
-                            with open(Path(annotation_full_path,name)) as initial_file:
+                            with Path(annotation_full_path, name).open() as initial_file:
                                 json_data['annotations'] = json.dumps(json.load(initial_file))
                             json_data['grader_id'] = grader_id[:-5]
                             json_data['file_name'] = file_name
