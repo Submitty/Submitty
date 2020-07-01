@@ -226,21 +226,6 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 46$#"
-			count: 2
-			path: app/controllers/pdf/PDFController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$target_dir\\)\\: Unexpected token \"\\$target_dir\", expected type at offset 46$#"
-			count: 1
-			path: app/controllers/pdf/PDFController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 4
-			path: app/controllers/pdf/PDFController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
 			count: 3
 			path: app/controllers/student/GradeInquiryController.php
@@ -634,76 +619,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns true\\.$#"
 			count: 1
 			path: app/views/AutoGradingView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 179$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected type at offset 205$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$file_name\\)\\: Unexpected token \"\\$file_name\", expected type at offset 155$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected type at offset 155$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$file_path\\)\\: Unexpected token \"\\$file_path\", expected type at offset 180$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$page_num\\)\\: Unexpected token \"\\$page_num\", expected type at offset 301$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 104$#"
-			count: 2
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 211$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected type at offset 237$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$rerender_annotated_pdf\\)\\: Unexpected token \"\\$rerender_annotated_pdf\", expected type at offset 263$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected type at offset 132$#"
-			count: 2
-			path: app/views/PDFView.php
-
-		-
-			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^Method app\\\\views\\\\PDFView\\:\\:downloadPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
-			count: 1
-			path: app/views/PDFView.php
-
-		-
-			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
-			count: 2
-			path: app/views/PDFView.php
 
 		-
 			message: "#^Variable \\$row might not be defined\\.$#"
