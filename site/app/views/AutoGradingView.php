@@ -628,24 +628,21 @@ class AutoGradingView extends AbstractView {
         $annotated_file_names = [];
         $annotation_paths = [];
         if (is_dir($annotation_path)) {
-            $dir_iter = new \DirectoryIterator($annotation_path);
+            $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
-                if ($file_info->isFile() && !$file_info->isDot()) {
-                    $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $file_info->getFilename());
-                    $pdf_info = explode('_', $no_extension);
-                    $pdf_id = explode("_", $file_info)[0];
-                    if (file_get_contents($file_info->getPathname()) != "") {
-                        $annotated_file_names[] = $pdf_id;
-                        $pdf_id = $pdf_id . '.pdf';
-                        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-                            $target_file = scandir($annotation_path)[2];
-                            $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
-                        }
-                        if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
-                            $target_file = scandir($pdfs_path)[2];
-                            $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
-                            $annotated_pdf_paths[$pdf_id] = $pdf_path;
-                        }
+                $file_contents = file_get_contents($file_info->getPathname());
+                $annotation_decoded = json_decode($file_contents, true);
+                if ($annotation_decoded != null) {
+                    $pdf_id = $annotation_decoded["file_path"];
+                    $annotated_file_names[] = $pdf_id;
+                    if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                        $target_file = scandir($annotation_path)[2];
+                        $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                    }
+                    if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                        $target_file = scandir($pdfs_path)[2];
+                        $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                        $annotated_pdf_paths[$pdf_id] = $pdf_path;
                     }
                 }
             }
