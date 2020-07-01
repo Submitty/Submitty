@@ -6,7 +6,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 class NotebookBuilder {
     constructor() {
-        this.widgets = [new SelectorWidget()];
+        this.widgets = [];
+        this.selector = new SelectorWidget();
     }
 
     /**
@@ -23,6 +24,9 @@ class NotebookBuilder {
         this.widgets.forEach(widget => {
             main_div.appendChild(widget.render());
         });
+
+        // Draw selector
+        main_div.appendChild(this.selector.render());
     }
 
     /**
@@ -31,16 +35,13 @@ class NotebookBuilder {
     getJSON() {
         const notebook_array = [];
 
-        // Iterate but dont include the final widget which is the selector widget
-        let i;
-        for (i = 0; i < this.widgets.length - 1; i++) {
-
+        this.widgets.forEach((widget) => {
             // Ensure we got something back before adding to the notebook_array
-            const widget_json = this.widgets[i].getJSON();
+            const widget_json = widget.getJSON();
             if (widget_json) {
                 notebook_array.push(widget_json);
             }
-        }
+        });
 
         return {
             notebook: notebook_array
@@ -53,7 +54,7 @@ class NotebookBuilder {
      * @param {Widget} widget
      */
     widgetAdd(widget) {
-        this.widgets.splice(this.widgets.length - 1, 0, widget);
+        this.widgets.push(widget);
         this.render();
     }
 
@@ -95,7 +96,7 @@ class NotebookBuilder {
         const index = this.widgets.indexOf(widget);
 
         // If widget is already at the end of the form then do nothing
-        if (index === this.widgets.length - 2) {
+        if (index === this.widgets.length - 1) {
             return;
         }
 
