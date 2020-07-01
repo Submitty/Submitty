@@ -219,13 +219,13 @@ function socketNewOrEditPostHandler(post_id, reply_level, edit=false) {
         var new_post = JSON.parse(response).data;
 
         if (!edit){
-          var parent_id = $($(new_post)[0]).attr('parent_id');
+          var parent_id = $($(new_post)[0]).attr('data-parent_id');
           var parent_post = $("#" + parent_id);
           if (parent_post.hasClass('first_post')) {
             $(new_post).insertBefore('#post-hr').hide().fadeIn();
           }
           else {
-            var sibling_posts = $('[parent_id="' + parent_id + '"]');
+            var sibling_posts = $('[data-parent_id="' + parent_id + '"]');
             if (sibling_posts.length != 0) {
               var parent_sibling_posts = $('#' + parent_id + ' ~ .post_box').map(function() {
                 return $(this).attr('data-reply_level') <= $('#' + parent_id).attr('data-reply_level') ? this : null;
