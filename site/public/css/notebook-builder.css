@@ -60,9 +60,8 @@
     flex-direction: column;
 }
 
-.selector-widget select {
-    margin-top: 0;
-    width: 90%;
+.selector-widget .interactive-container {
+    justify-content: space-evenly;
 }
 
 /**
