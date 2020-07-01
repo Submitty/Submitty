@@ -1384,23 +1384,50 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets the number of students in a section with a bad or late status for this gradeable
+     * Gets the number of components in this section that were graded and have a bad status
      * @param int $section
      * @return int The number of students who submitted with a non-good status
      */
-    public function getAllLateComponentsFromSection($section){
+    public function getBadGradedComponents($section, $section_key){
         $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
         $return = 0;
 
+        $is_rotate = $section_key == 'rotating_section';
+        $is_regist = !$is_rotate;
         foreach ($ggs as $key => $gg) {
-            //$graded = count($gg->ta_graded_gradeable->getGradedComponentContainers());
-            //var_dump($graded);
             $user = $gg->getSubmitter()->getUser();
-            if ($user->getRotatingSection() == $section) {
-                // var_dump($gg);
+            if ($is_rotate && $user->getRotatingSection() == $section
+                || $is_regist && $user->getRegistrationSection() == $section) {
                 $late_days = LateDays::fromUser($this->core, $user);
                 $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
-                if ($late_status === LateDayInfo::STATUS_BAD || $late_status === LateDayInfo::STATUS_LATE) {
+                if ($late_status === LateDayInfo::STATUS_BAD) {
+                    $ta_graded = $gg->getOrCreateTaGradedGradeable();
+                    $return += $ta_graded->getComponentsGraded();
+                }  
+            }
+        }
+        return $return;
+    }
+
+    /**
+     * Gets the number of students in a section with a bad status for this gradeable
+     * @param int $section
+     * @return int The number of students who submitted with a non-good status
+     */
+    public function getBadSubmissions($section, $section_key){
+        $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
+        $return = 0;
+
+        //var_dump($section_key);
+        $is_rotate = $section_key == 'rotating_section';
+        $is_regist = !$is_rotate;
+        foreach ($ggs as $key => $gg) {
+            $user = $gg->getSubmitter()->getUser();
+            if ($is_rotate && $user->getRotatingSection() == $section
+                || $is_regist && $user->getRegistrationSection() == $section) {
+                $late_days = LateDays::fromUser($this->core, $user);
+                $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
+                if ($late_status === LateDayInfo::STATUS_BAD) {
                     $return += 1;
                 }
             }

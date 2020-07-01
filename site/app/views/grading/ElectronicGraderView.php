@@ -55,15 +55,19 @@ class ElectronicGraderView extends AbstractView {
             $peer = true;
         }
         $graded = 0;
+        $non_late_graded = 0;
         $total = 0;
-        $late_total = 0;
+        $non_late_total = 0;
         $no_team_total = 0;
         $team_total = 0;
         $team_percentage = 0;
         $total_students = 0;
         $graded_total = 0;
+        $non_late_graded_total = 0;
         $submitted_total = 0;
+        $non_late_submitted_total = 0;
         $submitted_percentage = 0;
+        $non_late_submitted_percentage = 0;
         $peer_total = 0;
         $peer_graded = 0;
         $peer_percentage = 0;
@@ -83,9 +87,10 @@ class ElectronicGraderView extends AbstractView {
                 continue;
             }
             // var_dump($section);
-            $late_total += $gradeable->getAllLateComponentsFromSection($key);
             $graded += $section['graded_components'];
             $total += $section['total_components'];
+            $non_late_total += $section['non_late_components'];
+            $non_late_graded += $section['non_late_graded_components'];
             if ($gradeable->isTeamAssignment()) {
                 $no_team_total += $section['no_team'];
                 $team_total += $section['team'];
@@ -93,12 +98,15 @@ class ElectronicGraderView extends AbstractView {
         }
         if ($total === 0 && $no_team_total === 0) {
             $graded_percentage = -1;
+            $non_late_graded_percentage = -1;
         }
         elseif ($total === 0 && $no_team_total > 0) {
             $graded_percentage = 0;
+            $non_late_graded_percentage = 0;
         }
         else {
             $graded_percentage = number_format(($graded / $total) * 100, 1);
+            $non_late_graded_percentage = number_format(($non_late_graded / $non_late_total) * 100, 1);
         }
 
         if ($graded_percentage !== -1) {
@@ -111,13 +119,18 @@ class ElectronicGraderView extends AbstractView {
             $num_components = count($gradeable->getNonPeerComponents());
             $submitted_total = $num_components > 0 ? $total / $num_components : 0;
             $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
+            $non_late_submitted_total = $num_components > 0 ? $non_late_total / $num_components : 0;
+            $non_late_graded_total = $num_components > 0 ? round($non_late_graded / $num_components, 2) : 0;
             if ($peer) {
                 $num_components = count($gradeable->getPeerComponents()) * $gradeable->getPeerGradeSet();
                 $graded_total = $num_components > 0 ? $graded / $num_components : 0;
                 $submitted_total = $num_components > 0 ? $total / $num_components : 0;
+                $non_late_graded_total = $num_components > 0 ? $non_late_graded / $num_components : 0;
+                $non_late_submitted_total = $num_components > 0 ? $non_late_total / $num_components : 0;
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
+                $non_late_submitted_percentage = round(($non_late_submitted_total / $submitted_total) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = [];
@@ -149,12 +162,16 @@ class ElectronicGraderView extends AbstractView {
                 foreach ($sections as $key => &$section) {
                     if ($section['total_components'] == 0) {
                         $section['percentage'] = 0;
+                        $section['non_late_percentage'] = 0;
                     }
                     else {
                         $section['percentage'] = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
+                        $section['non_late_percentage'] = number_format(($section['non_late_graded_components'] / $section['non_late_components']) * 100, 1);
                     }
                     $section['graded'] = round($section['graded_components'] / $num_components, 1);
+                    $section['non_late_graded'] = round($section['non_late_graded_components'] / $num_components, 1);
                     $section['total'] = $section['total_components'] / $num_components;
+                    $section['non_late_total'] = $section['non_late_components'] / $num_components;
                 }
                 unset($section); // Clean up reference
 
@@ -227,9 +244,13 @@ class ElectronicGraderView extends AbstractView {
             "total_students" => $total_students,
             "total_submissions" => $total_submissions,
             "submitted_total" => $submitted_total,
+            "non_late_submitted_total" => $non_late_submitted_total,
             "submitted_percentage" => $submitted_percentage,
+            "non_late_submitted_percentage" => $non_late_submitted_percentage,
             "graded_total" => $graded_total,
+            "non_late_graded_total" => $non_late_graded_total,
             "graded_percentage" => $graded_percentage,
+            "non_late_graded_percentage" => $non_late_graded_percentage,
             "peer_total" => $peer_total,
             "peer_graded" => $peer_graded,
             "peer_percentage" => $peer_percentage,

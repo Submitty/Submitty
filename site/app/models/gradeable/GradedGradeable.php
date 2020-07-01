@@ -85,10 +85,10 @@ class GradedGradeable extends AbstractModel {
         // var_dump($this->late_day_exceptions);
         // var_dump($user);
         $user = $this->getSubmitter()->getUser();
-        var_dump($user);
+        //var_dump($user);
         $late_days = LateDays::fromUser($this->gradeable->core, $user);
         $late_status = $late_days->getLateDayInfoByGradeable($this->gradeable)->getStatus();
-        return $late_status === LateDayInfo::STATUS_GOOD;
+        return $late_status === LateDayInfo::STATUS_GOOD || $late_status === LateDayInfo::STATUS_LATE;
     }
 
     /**
