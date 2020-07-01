@@ -583,6 +583,16 @@
             <div id="numerical-data" class="page-content">
                 <div class = "row">
                     <div class = "box col-md-6">
+
+                        <a class="btn btn-default" style="float: right"
+                            {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
+                                href="{{ details_view_all_url }}">
+                            {% else %}
+                                href="{{ details_url }}">
+                            {% endif %}
+                            Exclude Late Submissions
+                        </a>
+
                         {# LEFT CHUNK#}
                         {% if warnings|length > 0 %}
                             <ul>
