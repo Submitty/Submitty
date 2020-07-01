@@ -498,6 +498,7 @@ CREATE TABLE users (
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
+    display_image_state VARCHAR NOT NULL DEFAULT 'system',
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );
 
