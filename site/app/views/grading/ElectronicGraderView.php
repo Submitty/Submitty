@@ -746,6 +746,7 @@ HTML;
 
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
+            //$return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
@@ -1139,6 +1140,10 @@ HTML;
             "grader_id" => $this->core->getUser()->getId(),
             "display_version" => $display_version
         ]);
+    }
+    
+    public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable, int $display_version) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig");
     }
 
     /**

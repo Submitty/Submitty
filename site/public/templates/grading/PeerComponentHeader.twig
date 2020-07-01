@@ -1,8 +1,6 @@
 {% import _self as self %}
 {% import "Functions.twig" as functions %}
 
-{% include "EditPeerComponentsForm.twig" %}
-
 <span class="col-no-gutters badge-container">
     <strong id="grading_total"
             class="badge {{ functions.getBadgeStyle(peer_score, component.max_value) }}">
