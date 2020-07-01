@@ -430,8 +430,6 @@ def dump(args):
     data_dir = Path(args.path) if 'path' in args else Path(__file__).resolve().parent
     data_dir /= 'data'
 
-    print('test')
-
     if 'master' in args.environments:
         out_file = data_dir / 'submitty_db.sql'
         print(f'Dumping master environment to {str(out_file)}... ', end='')
