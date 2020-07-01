@@ -216,6 +216,7 @@ class AutogradingConfigController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/notebook_builder", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function showNotebookBuilder() {
         // Load JS and CSS dependencies
