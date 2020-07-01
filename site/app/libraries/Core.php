@@ -509,17 +509,39 @@ class Core {
 
     /**
      * Given some URL parameters (parts), build a URL for the site using those parts.
-     * This function will add the semester and course to the beginning of the new URL by default,
-     * if you do not prepend this part (e.g. for authentication-related URLs), please set
-     * $prepend_course_info to false.
+     * This function will add the semester and course to the beginning of the new URL.
      *
      * @param array  $parts
-     *
      * @return string
      */
     public function buildCourseUrl($parts = []) {
         array_unshift($parts, "courses", $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
+    }
+
+    /**
+     * Build a course URL that includes GET parameters.
+     *
+     * Example:
+     * $parts = ['gradeable', 'update']
+     * $get_params = ['hello' => 'world', 'foo' => 'bar']
+     *
+     * Would return:
+     * http://<hostname>/courses/<semester>/<course>/gradeable/update?hello=world&foo=bar
+     *
+     * @param array $parts
+     * @param array $get_params
+     * @return string
+     */
+    public function buildCourseGetUrl(array $parts, array $get_params): string {
+        $base_part = $this->buildCourseUrl($parts);
+
+        $get_parts = [];
+        foreach ($get_params as $key => $value) {
+            $get_parts[] = implode('=', [$key, $value]);
+        }
+
+        return $base_part . '?' . implode('&', $get_parts);
     }
 
     /**

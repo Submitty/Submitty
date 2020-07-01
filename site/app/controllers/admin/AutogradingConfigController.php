@@ -216,9 +216,10 @@ class AutogradingConfigController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/notebook_builder", methods={"GET"})
+     * @param string $g_id Gradeable Id
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function showNotebookBuilder() {
+    public function showNotebookBuilder(string $g_id) {
         // Load JS and CSS dependencies
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
