@@ -1,0 +1,139 @@
+/**
+ * Styles common to multiple notebook builder widgets
+ */
+.notebook-builder-widget {
+    border: 3px solid var(--viewed_content);
+    background-color: var(--viewed_content);
+    border-radius: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px;
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.heading-container {
+    display: flex;
+    align-items: center;
+}
+
+.heading-container h3 {
+    margin-right: 5px;
+}
+
+.widget-main {
+    padding: 10px;
+    margin-right: 10px;
+    width: 100%;
+}
+
+.widget-controls {
+    display: flex;
+    flex-direction: column;
+    border: 3px solid white;
+    border-radius: 25px;
+    background-color: white;
+    justify-content: space-around;
+}
+
+.widget-controls input[type='button'] {
+    margin: 10px;
+}
+
+.interactive-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.filename-input {
+    text-align: right;
+}
+
+/**
+ * Selector widget styles
+ */
+.selector-widget {
+    display: flex;
+    flex-direction: column;
+}
+
+.selector-widget select {
+    margin-top: 0;
+    width: 90%;
+}
+
+/**
+ * Markdown widget styles
+ */
+.markdown-widget textarea {
+    width: 100%;
+    margin-right: 10px;
+    height: 100px;
+}
+
+/**
+ * Short answer widget styles
+ */
+.short-answer-widget .interactive-container {
+    align-items: center;
+}
+
+.short-answer-widget .rows-input {
+    width: 60px;
+    text-align: right;
+}
+
+/**
+ * Multiple choice widget styles
+ */
+.mc-table {
+    width: 100%;
+    margin-right: 10px;
+}
+
+.mc-table .mc-row {
+    display: flex;
+    margin-top: 15px;
+}
+
+.mc-table .mc-col {
+    flex: 1;
+}
+
+.mc-table .mc-col-center {
+    flex: 4;
+}
+
+.mc-table .mc-header {
+    font-weight: bold;
+}
+
+.mc-table .value-input,
+.mc-table .entered-value-input {
+    width: 95%;
+}
+
+.mc-table .description-input,
+.mc-table .entered-description-input {
+    width: 95%;
+    height: 80px;
+}
+
+.mc-table .mc-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.multiple-choice-config {
+    display: flex;
+    align-items: center;
+}
+
+.multiple-choice-config fieldset {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
