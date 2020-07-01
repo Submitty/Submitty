@@ -75,7 +75,9 @@ aside {
 .navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #two-panel-exchange-btn,
 .navigation-box.mobile-view #full-left-column-btn,
-.navigation-box.mobile-view #two-panel-mode-btn{
+.navigation-box.mobile-view #two-panel-mode-btn,
+.navigation-box.smaller-navbar #prev-ungraded-student-navlink,
+.navigation-box.smaller-navbar #next-ungraded-student-navlink {
     display: none;
 }
 
@@ -185,28 +187,9 @@ button > i.fas:hover {
     box-sizing: border-box;
 }
 
-.nav-btn-cont {
-    display: flex;
-}
-
-.nav-btn-cont:before {
-    content: "";
-    width: 2px;
-    position: absolute;
-    height: 100%;
-    background: black;
-    left: 50%;
-    display: inline-block;
-    top: 50%;
-    transform: translate(-50%,-50%);
-}
-
-#ungraded-student-navlink {
-    background: #36e08e;
-}
-
-#student-navlink {
-    background: #fa4472;
+#prev-student-navlink i,
+#next-student-navlink i {
+    padding: 3px 14px;
 }
 
 #grade-inquiry-navlink {
