@@ -935,6 +935,7 @@ CREATE TABLE public.users (
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
+    display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
 
