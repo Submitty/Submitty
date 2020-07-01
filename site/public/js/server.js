@@ -1209,8 +1209,6 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-let messages = 0;
-
 function displayErrorMessage(message){
     displayMessage(message, 'error');
 }
@@ -1228,6 +1226,7 @@ function displaySuccessMessage(message) {
  * @param {string} type
  */
 function displayMessage(message, type) {
+    let messages = 0;
     const id = `${type}-js-${messages}`;
     message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
@@ -1618,7 +1617,7 @@ function enableKeyToClick(){
 
 function newEditPeerComponentsForm() {
     $('.popup-form').css('display', 'none');
-    var form = $("#edit-peer-components-form");
+    let form = $("#edit-peer-components-form");
     form.css("display", "block");
     console.log(form.attr('id'));
     captureTabInModal("edit-peer-components-form");

@@ -171,6 +171,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
     // TODO: i don't think this is async
     return Twig.twig({ref: "PeerGradeable"}).render({
         'gradeable': gradeable,
+        'popup_css': "diff-viewer.css",
         'graded_gradeable': graded_gradeable,
         'edit_marks_enabled': false,
         'grading_disabled': grading_disabled,

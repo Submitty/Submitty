@@ -11,10 +11,6 @@ Required inputs:
 
 {% set show_verify_grader = false %}
 
-{% block modal_block %}
-{% include "EditPeerComponentsForm.twig" %}
-{% endblock %}
-
 {% block header_block %}
     {% include 'PeerComponentHeader.twig' with {
         'peer_score': graded_gradeable.peer_scores[component.id],
