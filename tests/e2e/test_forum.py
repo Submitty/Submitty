@@ -7,11 +7,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
+from websocket import create_connection
+import json
 
 
 class TestForum(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn")
+
+    def setUp(self):
+        super().setUp()
+        submitty_session_cookie = self.driver.get_cookie('submitty_session')
+        self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
+
+    def tearDown(self):
+        self.ws.close()
+        super().tearDown()
 
     def init_and_enable_discussion(self):
         self.click_class('sample')
@@ -66,7 +77,7 @@ class TestForum(BaseTestCase):
         self.select_categories(categories_list)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
-        self.driver.find_element(By.XPATH, "//input[@value='Submit Post']").click()
+        self.driver.find_element(By.XPATH, "//input[@value='Publish thread']").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
             self.driver.switch_to.alert.accept()
@@ -74,6 +85,11 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
             return None
         self.wait_after_ajax()
+
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'new_thread')
+
         assert '/threads' in self.driver.current_url
         return attachment_file
 
@@ -176,12 +192,21 @@ class TestForum(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
 
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'delete_thread')
+
+
     def resolve_thread(self, title):
         assert self.icon_exists(title, "fa-question")
         self.view_thread(title)
         self.driver.find_element(By.XPATH, "//a[@title='Mark thread as resolved']").click()
         self.wait_after_ajax()
         assert self.icon_exists(title, "fa-check")
+
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'resolve_thread')
 
     def announce_thread(self, title):
         assert not self.icon_exists(title, "thread-announcement")
@@ -190,6 +215,10 @@ class TestForum(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.wait_after_ajax()
         assert self.icon_exists(title, "thread-announcement")
+
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'announce_thread')
 
     def create_dummy_file(self):
         # Download image to create dummy image file
@@ -216,6 +245,9 @@ class TestForum(BaseTestCase):
                 cancel_button.click()
             else:
                 submit_button.click()
+                ws_msg = json.loads(self.ws.recv())
+                self.assertIn('type', ws_msg.keys())
+                self.assertEqual(ws_msg['type'], 'merge_thread')
             assert self.driver.find_element(By.ID, "merge-threads").value_of_css_property("display") == "none"
 
     def test_basic_operations_thread(self):
@@ -274,11 +306,11 @@ class TestForum(BaseTestCase):
 
         # Merging success
         self.merge_threads(title2, title1, press_cancel=False)
-        content2 = f"Merged Thread Title: {title2}\n\n{content2}"
 
+        content2 = "Merged Thread Title: {}\n\n{}".format(title2, content2)
         self.find_posts(content1, must_exists=True, move_to_thread=title1, check_attachment=content1_attachment)
         self.find_posts(reply1, must_exists=True)
-        self.find_posts(content2, must_exists=True)
+        self.find_posts(content2, must_exists=True, move_to_thread=title1)
         self.find_posts(reply2, must_exists=True, check_attachment=reply2_attachment)
         self.find_posts(content3, must_exists=True, move_to_thread=title3)
         self.find_posts(reply3, must_exists=True)

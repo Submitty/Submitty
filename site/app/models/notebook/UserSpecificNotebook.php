@@ -74,7 +74,8 @@ class UserSpecificNotebook extends Notebook {
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {
                     $new_notebook = array_merge($new_notebook, $item_data['notebook']);
-                    $tests = array_merge($tests, $item_data['testcases']);
+                    $test_cases = $item_data['testcases'] ?? [];
+                    $tests = array_merge($tests, $test_cases);
                 }
 
                 //record if we potentially grabbed the same question
@@ -147,7 +148,8 @@ class UserSpecificNotebook extends Notebook {
         foreach ($this->item_pool as $item) {
             if ($item['item_name'] === $tgt_name) {
                 $ret["notebook"] = array_merge($ret["notebook"], $item["notebook"]);
-                $ret["testcases"] = array_merge($ret["testcases"], $item["testcases"]);
+                $test_cases = $item["testcases"] ?? [];
+                $ret["testcases"] = array_merge($ret["testcases"], $test_cases);
             }
         }
 

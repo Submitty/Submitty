@@ -213,4 +213,20 @@ class AutogradingConfigController extends AbstractController {
             JsonResponse::getFailResponse("Config path can't be empty.")
         );
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/notebook_builder", methods={"GET"})
+     */
+    public function showNotebookBuilder() {
+        // Load JS and CSS dependencies
+        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
+        $this->core->getOutput()->addInternalCss('notebook-builder.css');
+
+        $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig');
+    }
 }
