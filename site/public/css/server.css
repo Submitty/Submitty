@@ -1726,18 +1726,17 @@ end of styles used in the admin gradeable page
     padding: 0px;
 }
 
-#skip-nav:not(:focus) {
+.skip-btn:not(:focus) {
     clip: rect(1px,1px,1px,1px);
     overflow: hidden;
     position: absolute;
     padding: 0;
 }
 
-#skip-nav {
+.skip-btn {
     box-shadow: 0 2px 15px -5px #888888;
     border-radius: 3px;
     /* TODO on mobile, different header height */
-    margin: 90px 10px 10px; /* 80px for header */
     padding: 10px;
     background-color: var(--default-white);
     text-align: center;
@@ -1747,6 +1746,12 @@ end of styles used in the admin gradeable page
     height: -moz-min-content;
     position: absolute;
     z-index: 999;
+}
+
+#skip-nav {
+    /* 90px is the heigth of the navbar and this makes sure the
+    skip-nav shows up below the navbar instead of on top of it */
+    margin: 90px 10px 10px;
 }
 
 .float-right {
