@@ -91,7 +91,7 @@ is_team = False
 course_conn_string = db_utils.generate_connect_string(
     DATABASE_HOST,
     DATABASE_PORT,
-    f"submitty_{args.semester}_{args.port}",
+    f"submitty_{args.semester}_{args.course}",
     DATABASE_USER,
     DATABASE_PASS,
 )
