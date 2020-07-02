@@ -27,7 +27,7 @@ def initialize(test):
 
 
 def cleanup(test):
-    subprocess.call(["cp", "-r", test.testcase_path])
+    pass
 
 
 

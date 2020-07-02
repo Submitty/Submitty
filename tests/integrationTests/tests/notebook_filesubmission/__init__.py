@@ -5,7 +5,7 @@ import subprocess
 import os
 import glob
 import shutil
-
+import traceback
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
@@ -27,12 +27,16 @@ def initialize(test):
 
 
 def cleanup(test):
-    subprocess.call(["cp", "-r", test.testcase_path])
+    pass
 
 
 
 @testcase
-def notebook_basic_config_(test):
+def test_schema(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    test.validate_complete_config(config_path)
+    try:
+        test.validate_complete_config(config_path)
+    except Exception:
+        traceback.print_exc()
+        raise

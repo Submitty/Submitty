@@ -5,7 +5,7 @@ import subprocess
 import os
 import glob
 import shutil
-
+import traceback
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
@@ -30,7 +30,7 @@ def initialize(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
         os.path.join(test.testcase_path, "assignment_config")])
-    
+
 
 ############################################################################
 
@@ -40,7 +40,7 @@ def cleanup(test):
         os.path.join(test.testcase_path, "data/", "test01/execute_logfile.txt")])
     subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-    
+
     os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "hw01part1_sol.txt"),
@@ -50,7 +50,11 @@ def cleanup(test):
 def schema_validation(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    test.validate_complete_config(config_path)
+    try:
+        test.validate_complete_config(config_path)
+    except Exception:
+        traceback.print_exc()
+        raise
 
 @testcase
 def correct(test):

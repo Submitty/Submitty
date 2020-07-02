@@ -6,19 +6,21 @@ import json
 import jsonschema
 from jsonschema import validate
 import jsonref
-
+import traceback
 
 class SubmittySchemaException(Exception):
     """An exception capable of printing helpful information about schema errors."""
 
     def __init__(self, config_json, schema, message, title, schema_error):
         """Use to aid in printing helpful information about schema errors."""
-        super(SubmittySchemaException, self).__init__(schema_error.message)
+        error_message = schema_error.message if schema_error is not None else ''
+
+        super(SubmittySchemaException, self).__init__(error_message)
         self.config_json = config_json
         self.schema = schema
         self.my_message = message
         self.title = title
-        self.schema_message = schema_error.message
+        self.schema_message = error_message
 
     def print_human_readable_error(self):
         """Use to print a human readable version of this exception."""
@@ -68,14 +70,26 @@ def validate_testcases(testcases, s_, name='', warn=None):
                     'testcase_label']:
             validate_schema(t, p_s, key, t_name, warn=warn)
 
-        containers = t['containers']
         # validate each container in the testcase
-        for c in containers:
-            validate_schema(c, c_schema, prefix=t_name, warn=warn)
+        if 'containers' in t:
+            for c in t['containers']:
+                validate_schema(c, c_schema, prefix=t_name, warn=warn)
+        else:
+            raise SubmittySchemaException(t,
+                                      None,
+                                      'Testcase is missing "containers" field',
+                                      'Testcase is missing "containers" field',
+                                      None)
 
-        solution_containers = t['solution_containers']
-        for c in solution_containers:
-            validate_schema(c, c_schema, prefix=t_name, warn=warn)
+        if 'solution_containers' in t:
+            for c in t['solution_containers']:
+                validate_schema(c, c_schema, prefix=t_name, warn=warn)
+        else:
+            raise SubmittySchemaException(t,
+                                      None,
+                                      'Testcase is missing "solution_containers" field',
+                                      'Testcase is missing "solution_containers" field',
+                                      None)
 
         validators = t.get('validation', [])
         validator_num = 0

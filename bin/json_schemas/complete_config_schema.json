@@ -375,8 +375,7 @@
               "$ref" : "#/definitions/filecheck"
             }
           ]
-        },
-        "minItems" : 1
+        }
       },
       "notebook" : {
         "description" : "The definition of a notebook consisting of messages and inputs.",
@@ -418,8 +417,7 @@
                     "$ref" : "#/definitions/filecheck"
                   }
                 ]
-              },
-              "minItems" : 1
+              }
             }
           }
         }
@@ -428,7 +426,7 @@
   "definitions" : {
     "submission_limit" : {
       "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
-      "required" : ["max_submissions", "penalty", "points", "title", "type", "timestamped_stdout"],
+      "required" : ["max_submissions", "penalty", "points", "title", "type"],
       "properties" : {
         "timestamped_stdout" : {
           "description" : "Add timestamps to student standard output files",
@@ -462,7 +460,7 @@
     "filecheck": {
       "description" : "A file existence check",
       "additionalProperties" : false,
-      "required" : ["type", "title", "actual_file", "points", "timestamped_stdout"],
+      "required" : ["type", "title", "actual_file"],
       "properties" : {
         "timestamped_stdout" : {
           "type" : "boolean"
@@ -493,7 +491,7 @@
       "description" : "A testcase represents a single test run against student code.",
       "type": "object",
       "additionalProperties" : false,
-      "required" : ["containers", "solution_containers", "dispatcher_actions", "points",
+      "required" : ["containers", "solution_containers", "dispatcher_actions",
                     "pre_commands", "single_port_per_container",
                     "use_router", "title", "validation", "timestamped_stdout", "publish_actions"],
       "properties" : {
