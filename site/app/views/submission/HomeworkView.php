@@ -487,7 +487,8 @@ class HomeworkView extends AbstractView {
             if ($confidence_val <= .50) {
                 $ret .= "_";
                 $low_conf++;
-            }else {
+            }
+            else {
                 $ret .= $str_id[$i];
             }
 
