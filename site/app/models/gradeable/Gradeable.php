@@ -492,10 +492,10 @@ class Gradeable extends AbstractModel {
         else {
             $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
             $g_id = $this->getId();
-            if (count($grading_list[1]) < 1) {
+            $query_string = "";
+            if (count($input[0][1]) < 1) {
                 return;
             }
-            $query_string = "";
             foreach ($input as $grading_list) {
                 $grader = $grading_list[0];
                 for ($j = 0; $j < count($grading_list[1]); $j++) {
