@@ -5,12 +5,12 @@ import subprocess
 import os
 import glob
 import shutil
-
+import traceback
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/notebook_basic/config"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/notebook_itempool/config"
 
 @prebuild
 def initialize(test):
@@ -32,7 +32,11 @@ def cleanup(test):
 
 
 @testcase
-def notebook_basic_config_(test):
+def schema_test(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    test.validate_complete_config(config_path)
+    try:
+        test.validate_complete_config(config_path)
+    except:
+        traceback.print_exc()
+        raise
