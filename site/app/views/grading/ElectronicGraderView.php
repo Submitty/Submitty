@@ -746,7 +746,7 @@ HTML;
 
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
-            //$return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable, $display_version);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable, $display_version);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
@@ -1143,7 +1143,38 @@ HTML;
     }
     
     public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig");
+        $gradeable = $graded_gradeable->getGradeable();
+        $submitter = $graded_gradeable->getSubmitter()->getId();
+        $peer_pairs = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+        $peers_to_list = $peer_pairs[$submitter];
+        $components = $gradeable->getComponents();
+        $marks_array = [];
+        $peer_details = [];
+        foreach ($components as $component) {
+            foreach($peers_to_list as $peer){
+                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
+                    if($graded_component !== null){
+                        $peer_details["graders"][] = $peer;
+                        $peer_details["marks_assigned"][$peer] = $graded_component->getMarkIds();
+                    }
+                }
+            if($component->isPeer()){
+                $component_obj["title"] = $component->getTitle();
+                $component_obj["marks"] = [];
+                foreach ($component->getMarks() as $mark) {
+                    $component_obj["marks"][$mark->getId()]["id"] = $mark->getId();
+                    $component_obj["marks"][$mark->getId()]["title"] = $mark->getTitle();
+                }
+                $marks_array[] = $component_obj;
+            }
+            
+        }
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
+            "graded_gradeable" => $graded_gradeable,
+            "peers" => $peers_to_list,
+            "peer_details"=>$peer_details,
+            "components" => $marks_array
+        ]);
     }
 
     /**
@@ -1153,10 +1184,37 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+       /* $gradeable = $graded_gradeable->getGradeable();
+        $submitter = $graded_gradeable->getSubmitter()->getId();
+        $peer_pairs = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+        $peers_to_list = $peer_pairs[$submitter];
+        $components = $gradeable->getComponents();
+        $marks_array = [];
+        $peer_details = [];
+        foreach ($components as $component) {
+            foreach($peers_to_list as $peer){
+                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
+                    if($graded_component !== null){
+                        $peer_details["graders"][] = $peer;
+                        $peer_details["marks_assigned"][$peer] = $graded_component->getMarkIds();
+                    }
+                }
+            if($component->isPeer()){
+                $component_obj["title"] = $component->getTitle();
+                $component_obj["marks"] = [];
+                foreach ($component->getMarks() as $mark) {
+                    $component_obj["marks"][$mark->getId()]["id"] = $mark->getId();
+                    $component_obj["marks"][$mark->getId()]["title"] = $mark->getTitle();
+                }
+                $marks_array[] = $component_obj;
+            }
+        }
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
             "graded_gradeable" => $graded_gradeable,
-            "can_inquiry" => $can_inquiry
-        ]);
+            "peers" => $peers_to_list,
+            "peer_details"=>$peer_details,
+            "components" => $marks_array
+        ]);*/
     }
 
     public function popupStudents() {
