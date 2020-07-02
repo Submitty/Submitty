@@ -42,8 +42,10 @@ def worker_process(which_machine, address, which_untrusted, my_server):
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                      message="ERROR: must be run by DAEMON_USER")
+        autograding_utils.log_message(
+            AUTOGRADING_LOG_PATH, JOB_ID,
+            message="ERROR: must be run by DAEMON_USER"
+        )
         raise SystemExit("ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER")  # noqa: E501
 
     # ignore keyboard interrupts in the worker processes
@@ -51,30 +53,44 @@ def worker_process(which_machine, address, which_untrusted, my_server):
     counter = 0
 
     servername_workername = "{0}_{1}".format(my_server, address)
-    autograding_zip = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO",
-                                   servername_workername+"_"+which_untrusted+"_autograding.zip")
-    submission_zip = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO",
-                                  servername_workername+"_"+which_untrusted+"_submission.zip")
-    todo_queue_file = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO",
-                                   servername_workername+"_"+which_untrusted+"_queue.json")
+    autograding_zip = os.path.join(
+        SUBMITTY_DATA_DIR, "autograding_TODO",
+        f"{servername_workername}_{which_untrusted}_autograding.zip"
+    )
+    submission_zip = os.path.join(
+        SUBMITTY_DATA_DIR, "autograding_TODO",
+        f"{servername_workername}_{which_untrusted}_submission.zip"
+    )
+    todo_queue_file = os.path.join(
+        SUBMITTY_DATA_DIR, "autograding_TODO",
+        f"{servername_workername}_{which_untrusted}_queue.json"
+    )
 
     while True:
         if os.path.exists(todo_queue_file):
             try:
-                working_directory = os.path.join("/var/local/submitty/autograding_tmp/",
-                                                 which_untrusted, "tmp")
-                results_zip_tmp = grade_item.grade_from_zip(working_directory, which_untrusted,
-                                                            autograding_zip, submission_zip)
-                results_zip = os.path.join(SUBMITTY_DATA_DIR, "autograding_DONE",
-                                           servername_workername+"_"+which_untrusted+"_results.zip")
-                done_queue_file = os.path.join(SUBMITTY_DATA_DIR, "autograding_DONE",
-                                               servername_workername+"_"+which_untrusted+"_queue.json")  # noqa: E501
+                working_directory = os.path.join(
+                    "/var/local/submitty/autograding_tmp/", which_untrusted, "tmp"
+                )
+                results_zip_tmp = grade_item.grade_from_zip(
+                    working_directory, which_untrusted, autograding_zip, submission_zip
+                )
+                results_zip = os.path.join(
+                    SUBMITTY_DATA_DIR, "autograding_DONE",
+                    f"{servername_workername}_{which_untrusted}_results.zip"
+                )
+                done_queue_file = os.path.join(
+                    SUBMITTY_DATA_DIR, "autograding_DONE",
+                    f"{servername_workername}_{which_untrusted}_queue.json"
+                )
                 # move doesn't inherit the permissions of the destination directory. Copyfile does.
                 try:
                     shutil.copyfile(results_zip_tmp, results_zip)
                 except Exception as e:
-                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                                  message=f"{e} {results_zip}")
+                    autograding_utils.log_message(
+                        AUTOGRADING_LOG_PATH, JOB_ID,
+                        message=f"{e} {results_zip}"
+                    )
 
                 os.remove(results_zip_tmp)
                 with open(todo_queue_file, 'r') as infile:
@@ -83,18 +99,24 @@ def worker_process(which_machine, address, which_untrusted, my_server):
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
             except Exception:
-                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                              message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + ". for more details, see traces entry.")  # noqa: E501
-                autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, JOB_ID,
-                                                  trace=traceback.format_exc())
+                autograding_utils.log_message(
+                    AUTOGRADING_LOG_PATH, JOB_ID,
+                    message=f"ERROR attempting to unzip graded item: {which_machine} {which_untrusted}. for more details, see traces entry."  # noqa: E501
+                )
+                autograding_utils.log_stack_trace(
+                    AUTOGRADING_STACKTRACE_PATH, JOB_ID,
+                    trace=traceback.format_exc()
+                )
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(submission_zip)
 
                 # Respond with a failure zip file.
-                results_zip = os.path.join(SUBMITTY_DATA_DIR, "autograding_DONE",
-                                           servername_workername+"_"+which_untrusted+"_results.zip")
+                results_zip = os.path.join(
+                    SUBMITTY_DATA_DIR, "autograding_DONE",
+                    f"{servername_workername}_{which_untrusted}_results.zip"
+                )
                 tmp_dir = tempfile.mkdtemp()
                 with open(os.path.join(tmp_dir, 'failure.txt'), 'w') as outfile:
                     outfile.write("grading failed.\n")
@@ -104,8 +126,10 @@ def worker_process(which_machine, address, which_untrusted, my_server):
                 results_zip_tmp.close()
 
                 shutil.rmtree(tmp_dir)
-                done_queue_file = os.path.join(SUBMITTY_DATA_DIR, "autograding_DONE",
-                                               servername_workername+"_"+which_untrusted+"_queue.json")  # noqa: E501
+                done_queue_file = os.path.join(
+                    SUBMITTY_DATA_DIR, "autograding_DONE",
+                    f"{servername_workername}_{which_untrusted}_queue.json"
+                )
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
                     queue_obj["done_time"] = dateutils.write_submitty_date(microseconds=True)
@@ -137,8 +161,10 @@ def launch_workers(my_name, my_stats):
     if not int(os.getuid()) == int(DAEMON_UID):
         raise SystemExit("ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER")  # noqa: E501
 
-    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                  message="grade_scheduler.py launched")
+    autograding_utils.log_message(
+        AUTOGRADING_LOG_PATH, JOB_ID,
+        message="grade_scheduler.py launched"
+    )
 
     # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
@@ -155,8 +181,9 @@ def launch_workers(my_name, my_stats):
     processes = list()
     for i in range(0, num_workers):
         u = "untrusted" + str(i).zfill(2)
-        p = multiprocessing.Process(target=worker_process,
-                                    args=(which_machine, address, u, my_server))
+        p = multiprocessing.Process(
+            target=worker_process, args=(which_machine, address, u, my_server)
+        )
         p.start()
         processes.append(p)
 
@@ -168,16 +195,22 @@ def launch_workers(my_name, my_stats):
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
-                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                                  message="ERROR: process "+str(i)+" is not alive")
+                    autograding_utils.log_message(
+                        AUTOGRADING_LOG_PATH, JOB_ID,
+                        message=f"ERROR: process {i} is not alive"
+                    )
             if alive != num_workers:
-                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                              message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))  # noqa: E501
+                autograding_utils.log_message(
+                    AUTOGRADING_LOG_PATH, JOB_ID,
+                    message=f"ERROR: #workers={num_workers} != #alive={alive}"
+                )
             time.sleep(1)
 
     except KeyboardInterrupt:
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                      message="grade_scheduler.py keyboard interrupt")  # noqa: E501
+        autograding_utils.log_message(
+            AUTOGRADING_LOG_PATH, JOB_ID,
+            message="grade_scheduler.py keyboard interrupt"
+        )
 
         # just kill everything in this group id right now
         # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
@@ -197,8 +230,10 @@ def launch_workers(my_name, my_stats):
         for i in range(0, num_workers):
             processes[i].join()
 
-    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                  message="grade_scheduler.py terminated")
+    autograding_utils.log_message(
+        AUTOGRADING_LOG_PATH, JOB_ID,
+        message="grade_scheduler.py terminated"
+    )
 
 
 # ==================================================================================
@@ -220,13 +255,17 @@ def read_autograding_worker_json():
 def cleanup_old_jobs():
     for file_path in Path(SUBMITTY_DATA_DIR, "autograding_DONE").glob("*"):
         file_path = str(file_path)
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                                      message="Remove autograding DONE file: " + file_path)
+        autograding_utils.log_message(
+            AUTOGRADING_LOG_PATH, JOB_ID,
+            message=f"Remove autograding DONE file: {file_path}"
+        )
         try:
             os.remove(file_path)
         except Exception:
-            autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, JOB_ID,
-                                              trace=traceback.format_exc())
+            autograding_utils.log_stack_trace(
+                AUTOGRADING_STACKTRACE_PATH, JOB_ID,
+                trace=traceback.format_exc()
+            )
 
 # ==================================================================================
 
