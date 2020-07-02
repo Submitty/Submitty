@@ -157,7 +157,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     }
 
     /**
-     * Utilty function that helps us mock Models from our system. Because they rely on the magic __call() function,
+     * Utility function that helps us mock Models from our system. Because they rely on the magic __call() function,
      * we cannot directly mock these as we would any other object as then we won't have access to any methods that
      * require the __call() magic function. However, PHPUnit allows us to specify functions that are mockable (even
      * if they are not directly defined) via setMethods(), so we use reflection on our given class to get all methods

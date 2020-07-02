@@ -28,14 +28,15 @@
     "doctrine/cache": "1.10.1",
     "php-ds/php-ds": "1.2.0",
     "cboden/ratchet": "0.4.2",
-    "textalk/websocket": "1.3.1"
+    "textalk/websocket": "1.3.1",
+    "egulias/email-validator": "2.1.18"
   },
   "require-dev": {
-    "phpunit/phpunit": "8.5.6",
+    "phpunit/phpunit": "8.5.8",
     "submitty/php-codesniffer": "2.3.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.7.0",
     "php-mock/php-mock-phpunit": "2.6.0",
-    "phpstan/phpstan": "0.12.29"
+    "phpstan/phpstan": "0.12.31"
   },
   "scripts": {
     "test": "phpunit -c tests/phpunit.xml",
