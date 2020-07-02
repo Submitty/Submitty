@@ -186,8 +186,7 @@
     {% elseif core.getUser().getGroup() < 4 %}
         <div class = "tab">
             <div class =tab-bar-wrapper">
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">All Data</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'non-late-numerical-data'), this.blur()" id="defaultOpen">Non-Late Data</a>
+                <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-auto" onclick="openStat(this, 'autograding-score-histogram'), this.blur()">Autograding Histogram</a>
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-comp" onclick="openStat(this, 'component-averages'), this.blur()">Manual Grading Component Averages</a>
                 <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-tot" onclick="openStat(this, 'total-score-histogram'), this.blur()">Overall Histogram</a>
@@ -585,11 +584,7 @@
                     <div class = "box col-md-6">
 
                         <a class="btn btn-default" style="float: right"
-                            {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
-                                href="{{ details_view_all_url }}">
-                            {% else %}
-                                href="{{ details_url }}">
-                            {% endif %}
+                            onclick="openStat(this, 'non-late-numerical-data'), this.blur()">
                             Exclude Late Submissions
                         </a>
 
@@ -738,6 +733,12 @@
             <div id="non-late-numerical-data" class="page-content">
                 <div class = "row">
                     <div class = "box col-md-6">
+
+                        <a class="btn btn-default" style="float: right"
+                            onclick="openStat(this, 'numerical-data'), this.blur()">
+                            Include Late Submissions
+                        </a>
+
                         {# LEFT CHUNK#}
                         {% if warnings|length > 0 %}
                             <ul>
@@ -759,7 +760,7 @@
                                 <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             {% else %}
                                 <br/>
-                                <b>Students who have submitted on time:</b>  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                <b>Students who have submitted on time:</b>  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
                                 <br/>
                                 <br/>
                                 <b>Current percentage of grading done:</b> {{ non_late_graded_total }} / {{ non_late_submitted_total }} ({{ non_late_graded_percentage }}%)
