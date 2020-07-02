@@ -23,10 +23,8 @@ use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ElectronicGraderController extends AbstractController {
-
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
-     *
      * @param  string $option
      * @return bool
      */
@@ -37,10 +35,8 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-
     /**
      * Checks that a given diff viewer type is valid using DiffViewer::isValidType
-     *
      * @param  string $type
      * @return bool
      */
@@ -51,11 +47,8 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-
-    
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
-     *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
@@ -583,15 +576,9 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = [];
         foreach ($section_submitters as $section) {
-            $student_ids = array_merge(
-                $student_ids,
-                array_map(
-                    function (Submitter $submitter) {
-                        return $submitter->getId();
-                    },
-                    $section
-                )
-            );
+            $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
+                return $submitter->getId();
+            }, $section));
         }
 
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");
@@ -613,9 +600,7 @@ class ElectronicGraderController extends AbstractController {
 
         $graded_gradeables = [];
         $user_ids = $this->core->getQueries()->getUsersOnTeamsForGradeable($gradeable); // Collect user ids so we know who isn't on a team
-        /**
- * @var GradedGradeable $g
-*/
+        /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
             if ($gradeable->isTeamAssignment()) {
@@ -792,17 +777,14 @@ class ElectronicGraderController extends AbstractController {
         foreach ($all_teams as $team) {
             if ($team->getSize() != 0) {
                 foreach ($team->getMemberUsers() as $user) {
-                    $csvdata .= implode(
-                        ',',
-                        [
+                    $csvdata .= implode(',', [
                         $user->getDisplayedFirstName(),
                         $user->getDisplayedLastName(),
                         $user->getId(),
                         $team->getId(),
                         $team->getRegistrationSection(),
                         $team->getRotatingSection()
-                        ]
-                    );
+                        ]);
                     $csvdata .= $nl;
                 }
             }
@@ -814,8 +796,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Randomly redistributes teams with members into Rotating Grading Sections
      * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
-     *      Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
-     *
+     * Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")
      */
     public function randomizeTeamRotatingSections($gradeable_id) {
@@ -845,7 +826,6 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Handle requests to create individual teams via the AdminTeamForm
-     *
      * @AccessControl(permission="grading.electronic.submit_team_form")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/new", methods={"POST"})
      */
@@ -985,9 +965,7 @@ class ElectronicGraderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1") {
-        /**
- * @var Gradeable $gradeable
-*/
+        /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
@@ -1261,17 +1239,11 @@ class ElectronicGraderController extends AbstractController {
         ];
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
-        $return['components'] = array_map(
-            function (Component $component) {
+        $return['components'] = array_map(function (Component $component) {
                 return $component->toArray();
-            },
-            array_filter(
-                $gradeable->getComponents(),
-                function (Component $component) use ($gradeable) {
-                    return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
-                }
-            )
-        );
+        }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
+                return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+        }));
         //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         $return['components'] = array_values($return['components']);
         return $return;
@@ -1671,14 +1643,12 @@ class ElectronicGraderController extends AbstractController {
             $component->setTitle($title);
             $component->setTaComment($ta_comment);
             $component->setStudentComment($student_comment);
-            $component->setPoints(
-                [
+            $component->setPoints([
                 'lower_clamp' => $lower_clamp,
                 'default' => $default,
                 'max_value' => $max_value,
                 'upper_clamp' => $upper_clamp
-                ]
-            );
+                ]);
             $component->setPage($page);
 
             $this->core->getQueries()->saveComponent($component);
@@ -1813,7 +1783,6 @@ class ElectronicGraderController extends AbstractController {
             $component->setPage(max($page, -1));
         }
     }
-
 
  /**
   * Route for adding a new component to a gradeable
@@ -1981,7 +1950,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * Route for saving a the order of marks in a component=
+     * Route for saving a the order of marks in a component
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/save_order", methods={"POST"})
      */
     public function ajaxSaveMarkOrder($gradeable_id) {
@@ -2462,7 +2431,6 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Gets... stats
-     *
      * @param Gradeable $gradeable
      * @param User      $grader
      * @param bool      $full_sets
