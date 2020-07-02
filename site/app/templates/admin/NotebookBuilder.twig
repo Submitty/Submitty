@@ -1,4 +1,8 @@
 <div class="content">
+    <script>
+        window.csrf_token = '{{ core.getCsrfToken() }}';
+    </script>
+
     <h2>Notebook Builder</h2>
     <div id="notebook-builder"></div>
     <button onclick="javascript:document.getElementById('holder').innerHTML=JSON.stringify(notebook_builder.getJSON(), null, 2)">Show JSON</button>

@@ -59,16 +59,22 @@ class AutogradingConfigController extends AbstractController {
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
 
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
-            $this->core->addErrorMessage("Upload failed: No file to upload");
-            return MultiResponse::RedirectOnlyResponse(
+            $msg = 'Upload failed: No file to upload';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
                 new RedirectResponse($redirect_url)
             );
         }
 
         $upload = $_FILES['config_upload'];
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
-            $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
-            return MultiResponse::RedirectOnlyResponse(
+            $msg = 'Upload failed: Empty tmp name for file';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
                 new RedirectResponse($redirect_url)
             );
         }
@@ -93,8 +99,11 @@ class AutogradingConfigController extends AbstractController {
             else {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                $this->core->addErrorMessage("Upload failed: {$error_message}");
-                return MultiResponse::RedirectOnlyResponse(
+                $msg = "Upload failed: {$error_message}";
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getErrorResponse($msg),
+                    null,
                     new RedirectResponse($redirect_url)
                 );
             }
@@ -102,14 +111,20 @@ class AutogradingConfigController extends AbstractController {
         else {
             if (!@copy($upload['tmp_name'], FileUtils::joinPaths($target_dir, $upload['name']))) {
                 FileUtils::recursiveRmdir($target_dir);
-                $this->core->addErrorMessage("Upload failed: Could not copy file");
-                return MultiResponse::RedirectOnlyResponse(
+                $msg = 'Upload failed: Could not copy file';
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getErrorResponse($msg),
+                    null,
                     new RedirectResponse($redirect_url)
                 );
             }
         }
-        $this->core->addSuccessMessage("Gradeable config uploaded");
-        return MultiResponse::RedirectOnlyResponse(
+        $msg = 'Gradeable config uploaded';
+        $this->core->addSuccessMessage($msg);
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse(['config_name' => $counter]),
+            null,
             new RedirectResponse($redirect_url)
         );
     }
@@ -230,6 +245,17 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
-        $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig');
+        $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
+            'core' => $this->core
+        ]);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/notebook_builder/save_new", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function uploadNewNotebookBuilderConfig(): JsonResponse {
+        $result = $this->uploadConfig();
+        return $result->json_response;
     }
 }

@@ -45,7 +45,8 @@ class NotebookBuilder {
         });
 
         return {
-            notebook: notebook_array
+            notebook: notebook_array,
+            testcases: []
         };
     }
 
