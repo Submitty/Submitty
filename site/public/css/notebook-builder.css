@@ -136,3 +136,15 @@
     flex-direction: column;
     text-align: right;
 }
+
+/**
+ * Form options widget styles
+ */
+.form-options-widget,
+.form-options-widget .interactive-container {
+    flex-direction: column;
+}
+
+.form-options-widget input {
+    width: 30%;
+}

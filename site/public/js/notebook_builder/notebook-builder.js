@@ -8,6 +8,7 @@ class NotebookBuilder {
     constructor() {
         this.widgets = [];
         this.selector = new SelectorWidget();
+        this.form_options = new FormOptionsWidget();
     }
 
     /**
@@ -25,8 +26,8 @@ class NotebookBuilder {
             main_div.appendChild(widget.render());
         });
 
-        // Draw selector
         main_div.appendChild(this.selector.render());
+        main_div.appendChild(this.form_options.render());
     }
 
     /**
@@ -35,7 +36,7 @@ class NotebookBuilder {
     getJSON() {
         const notebook_array = [];
 
-        this.widgets.forEach((widget) => {
+        this.widgets.forEach(widget => {
             // Ensure we got something back before adding to the notebook_array
             const widget_json = widget.getJSON();
             if (widget_json) {
