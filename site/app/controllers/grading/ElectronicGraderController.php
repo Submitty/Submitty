@@ -140,7 +140,7 @@ class ElectronicGraderController extends AbstractController {
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
         }
         $gradeable->setRandomPeerGradersList($final_grading_info);
-        return JsonResponse::getSuccessResponse($offset_array);
+        return JsonResponse::getSuccessResponse($final_grading_info);
     }
     /**
      * Route for getting whitespace information for the diff viewer
