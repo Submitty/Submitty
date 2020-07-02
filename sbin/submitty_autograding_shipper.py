@@ -286,8 +286,9 @@ def prepare_job(
             queue_obj = json.load(infile)
             queue_obj["which_untrusted"] = which_untrusted
             queue_obj["which_machine"] = which_machine
-            queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
+            queue_obj["ship_time"] = dateutils.write_submitty_date(milliseconds=True)
             queue_obj['identifier'] = random_identifier
+
     except Exception as e:
         autograding_utils.log_stack_trace(
             AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,

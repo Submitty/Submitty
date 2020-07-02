@@ -38,46 +38,39 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         $request = $conn->httpRequest;
         $client_id = $conn->resourceId;
-        $userAgent = $request->getHeader('user-agent');
+        $origin = $request->getHeader('origin')[0];
 
-        if ($userAgent[0] === "websocket-client-php") {
-            return true;
+        $cookieString = $request->getHeader("cookie")[0];
+        parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
+        $sessid = $cookies['submitty_session'];
+
+        try {
+            $token = TokenManager::parseSessionToken(
+                $sessid,
+                $this->core->getConfig()->getBaseUrl(),
+                $this->core->getConfig()->getSecretSession()
+            );
+            $session_id = $token->getClaim('session_id');
+            $user_id = $token->getClaim('sub');
+            $logged_in = $this->core->getSession($session_id, $user_id);
+            if (!$logged_in) {
+                $conn->close();
+                return false;
+            }
+            else {
+                $this->setSocketClient($user_id, $conn);
+                return true;
+            }
         }
-        else {
-            $cookieString = $request->getHeader("cookie");
-            parse_str(strtr($cookieString[0], ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
-
-            $sessid = $cookies['submitty_session'];
-
-            try {
-                $token = TokenManager::parseSessionToken(
-                    $sessid,
-                    $this->core->getConfig()->getBaseUrl(),
-                    $this->core->getConfig()->getSecretSession()
-                );
-                $session_id = $token->getClaim('session_id');
-                $user_id = $token->getClaim('sub');
-                $logged_in = $this->core->getSession($session_id, $user_id);
-                if (!$logged_in) {
-                    $conn->send('{"sys": "Unauthenticated User"}');
-                    $conn->close();
-                    return false;
-                }
-                else {
-                    $this->setSocketClient($user_id, $conn);
-                    return true;
-                }
-            }
-            catch (\InvalidArgumentException $exc) {
-                die($exc);
-            }
+        catch (\InvalidArgumentException $exc) {
+            die($exc);
         }
     }
 
     /**
      * Push a given message to all or all-but-sender connections
      */
-    private function broadcast(ConnectionInterface $from, string $content, bool $all = true): void {
+    private function broadcast(ConnectionInterface $from, string $content, $all = true): void {
         if ($all) {
             foreach ($this->clients as $client) {
                 $client->send($content);
@@ -156,7 +149,9 @@ class Server implements MessageComponentInterface {
      * to check auth here as that is done on every message.
      */
     public function onOpen(ConnectionInterface $conn) {
-        $this->clients->attach($conn);
+        if ($this->checkAuth($conn)) {
+            $this->clients->attach($conn);
+        }
     }
 
     /**
@@ -170,24 +165,22 @@ class Server implements MessageComponentInterface {
             return;
         }
 
-        if ($this->checkAuth($from)) {
-            $msg = json_decode($msgString, true);
+        $msg = json_decode($msgString, true);
 
-            switch ($msg["type"]) {
-                case "new_thread":
-                case "new_post":
-                    $user_id = $msg["data"]["user_id"];
-                    if ($fromConn = $this->getSocketClient($user_id)) {
-                        $this->broadcast($fromConn, $msgString, true);
-                    }
-                    else {
-                        $this->broadcast($from, $msgString, true);
-                    }
-                    break;
-                default:
-                    $this->broadcast($from, $msgString, true);
-                    break;
-            }
+        switch ($msg["type"]) {
+//                case "new_thread":
+//                case "new_post":
+//                    $user_id = $msg["data"]["user_id"];
+//                    if ($fromConn = $this->getSocketClient($user_id)) {
+//                        $this->broadcast($fromConn, $msgString, true);
+//                    }
+//                    else {
+//                        $this->broadcast($from, $msgString, true);
+//                    }
+//                    break;
+            default:
+                $this->broadcast($from, $msgString, false);
+                break;
         }
     }
 

@@ -7,6 +7,7 @@ function userNameChange() {
     $("#user-firstname-change").focus();
 }
 
+
 function passwordChange() {
     $('.popup-form').css('display', 'none');
     var form = $("#change-password-form");
