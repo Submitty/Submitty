@@ -204,6 +204,7 @@ fi
 #Make a courses and checkouts directory if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/courses
+    mkdir -p ${SUBMITTY_DATA_DIR}/user_data
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
 fi
@@ -237,6 +238,8 @@ chmod  751                                        ${SUBMITTY_DATA_DIR}
 if [ "${WORKER}" == 0 ]; then
     chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
+    chown  ${PHP_USER}:${PHP_USER}                    ${SUBMITTY_DATA_DIR}/user_data
+    chmod  770                                        ${SUBMITTY_DATA_DIR}/user_data
     chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs
     chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs/git
