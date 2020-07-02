@@ -78,15 +78,20 @@
                     <label for="use-qr">Split by QR code?</label>
                     <input type="checkbox" id="use-qr">
 
+                    {% if feature_flag_enabled('submitty_ocr') %}
                     <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
                     <input type="checkbox" id="use-ocr">
+                    {% endif %}
 
-                    <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
+
+                    <br>
+
                     <span id="prefix-prompt">QR code prefix/suffix:
-                    <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
-	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i>
-                    </a>
+                        <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
+	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
                     </span>
+
+                    <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
@@ -106,8 +111,6 @@
                 $('#prefix-prompt').prop('hidden', true);
                 $('#bulk_progress_box').prop('hidden', true);
                 $('#expected-num-box').prop('hidden', true);
-                $('#use-ocr-id').prop('hidden', true);
-                $('#use-ocr').prop('hidden', true);
 
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio-bulk')){
@@ -204,12 +207,19 @@
                     $('#prefix-prompt').prop('hidden', !$('#prefix-prompt').is(':hidden'));
                     $('#pages-prompt').prop('hidden', !$('#pages-prompt').is(':hidden'));
                     $('#expected-num-box').prop('hidden',!$('#expected-num-box').is(':hidden'));
-                    $('#use-ocr').prop('hidden', !$('#use-ocr').is(':hidden'));
-                    $('#use-ocr-id').prop('hidden', !$('#use-ocr-id').is(':hidden'))
+
+                    if(!$('#use-qr').is(":checked")){
+                        $('#use-ocr').prop('checked', false);
+                    }
                 });
                 $('#use-ocr').click(function(){
                     sessionStorage.getItem('use-ocr') ? sessionStorage.removeItem('use-ocr') :
                         sessionStorage.setItem('use-ocr', true);
+
+                    if( $('#use-qr').is(":checked") !== $('#use-ocr').is(":checked") ){
+                        $('#use-qr').click();
+                    }
+
                 });
                 $("#user_id").autocomplete({
                     source: students_full

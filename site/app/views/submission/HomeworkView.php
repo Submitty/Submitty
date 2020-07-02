@@ -482,12 +482,20 @@ class HomeworkView extends AbstractView {
         $ret = "";
         $str_id = strval($id);
         $i = 0;
+        $low_conf = 0;
         foreach ($confidences as $confidence_val) {
-            $ret .= ($confidence_val <= .50) ? "_" : $str_id[$i];
+            if ($confidence_val <= .50) {
+                $ret .= "_";
+                $low_conf++;
+            }else {
+                $ret .= $str_id[$i];
+            }
+
             $i++;
         }
 
-        return $ret;
+        //if we didn't find any digits can't suggest similar ids
+        return $low_conf === strlen($str_id) ? $str_id : $ret;
     }
 
     /**
@@ -588,11 +596,15 @@ class HomeworkView extends AbstractView {
             //decoded.json may be read before the assoicated data is written, check if key exists first
             if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
                 $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
-                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
 
                 if ($use_ocr) {
                     $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
-                    $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+
+                    $matches = [];
+                    if (strpos($tgt_string, '_') !== false) {
+                        $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+                    }
                 }
 
                 if (array_key_exists('id', $data)) {
