@@ -190,6 +190,8 @@ def read_autograding_worker_json():
             #grab the key and the value. NOTE: For now there should only ever be one pair.
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
+    except FileNotFoundError as e:
+        raise SystemExit("autograding_worker.json not found. Have you registered this worker with a Submitty host yet?") from e
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, trace=traceback.format_exc())
         raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))
