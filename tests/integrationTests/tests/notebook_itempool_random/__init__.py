@@ -10,7 +10,7 @@ import traceback
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/notebook_itempool/config"
+SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/notebook_itempool_random/config"
 
 @prebuild
 def initialize(test):

@@ -6,7 +6,7 @@ import json
 import jsonschema
 from jsonschema import validate
 import jsonref
-import traceback
+
 
 class SubmittySchemaException(Exception):
     """An exception capable of printing helpful information about schema errors."""
@@ -75,21 +75,25 @@ def validate_testcases(testcases, s_, name='', warn=None):
             for c in t['containers']:
                 validate_schema(c, c_schema, prefix=t_name, warn=warn)
         else:
-            raise SubmittySchemaException(t,
-                                      None,
-                                      'Testcase is missing "containers" field',
-                                      'Testcase is missing "containers" field',
-                                      None)
+            raise SubmittySchemaException(
+                t,
+                None,
+                'Testcase is missing "containers" field',
+                'Testcase is missing "containers" field',
+                None
+            )
 
         if 'solution_containers' in t:
             for c in t['solution_containers']:
                 validate_schema(c, c_schema, prefix=t_name, warn=warn)
         else:
-            raise SubmittySchemaException(t,
-                                      None,
-                                      'Testcase is missing "solution_containers" field',
-                                      'Testcase is missing "solution_containers" field',
-                                      None)
+            raise SubmittySchemaException(
+                t,
+                None,
+                'Testcase is missing "solution_containers" field',
+                'Testcase is missing "solution_containers" field',
+                None
+            )
 
         validators = t.get('validation', [])
         validator_num = 0
@@ -127,7 +131,7 @@ def complete_config_validator(j_, s_, warn=True):
         item_num = 0
         for item in j_['item_pool']:
             item_num += 1
-            prefix=f"item {item_num}"
+            prefix = f"item {item_num}"
             # First, validate the notebook section of the item
             notebook_section = 0
             for notebook_obj in item['notebook']:
@@ -138,8 +142,6 @@ def complete_config_validator(j_, s_, warn=True):
             # Next, validate the testcases in the schema
             if 'testcases' in item:
                 validate_testcases(item['testcases'], s_, name=f'{prefix} ', warn=warn)
-
-
             validate_schema(item, item_schema, prefix=prefix, warn=warn)
         validate_schema(j_['item_pool'], item_pool_schema, warn=warn)
 
@@ -150,8 +152,6 @@ def complete_config_validator(j_, s_, warn=True):
 
     # validate the testcases defined in the json
     validate_testcases(j_["testcases"], s_, warn=warn)
-
-
     # Finally, validate the config as a whole.
     validate_schema(j_, s_, prefix='Your config json', warn=warn)
 
