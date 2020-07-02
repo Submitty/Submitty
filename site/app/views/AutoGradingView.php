@@ -660,7 +660,7 @@ class AutoGradingView extends AbstractView {
         }
         
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->addInternalCss('ta-grading.css');                        
+        $this->core->getOutput()->addInternalCss('ta-grading.css');
         $gradeable_id = $gradeable->getId();
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
