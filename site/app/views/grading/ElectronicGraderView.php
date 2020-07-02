@@ -722,27 +722,9 @@ HTML;
         ]);
     }
 
-    /**
-     * The student not in section variable indicates that an full access grader is viewing a student that is not in their
-     * assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-     * @param Gradeable $gradeable
-     * @param GradedGradeable $graded_gradeable
-     * @param int $display_version
-     * @param float $progress
-     * @param bool $show_hidden_cases
-     * @param bool $can_inquiry
-     * @param bool $can_verify
-     * @param bool $show_verify_all
-     * @param bool $show_silent_edit
-     * @param string $late_status
-     * @param $rollbackSubmission
-     * @param $sort
-     * @param $direction
-     * @param $from
-     * @param bool $showNewInterface
-     * @return string
-     */
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, bool $showNewInterface) {
+    //The student not in section variable indicates that an full access grader is viewing a student that is not in their
+    //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, $showNewInterface) {
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
@@ -755,9 +737,10 @@ HTML;
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
                 $isStudentInfoPanel = true;
-            } else {
-               $isPeerPanel = false;
-               $isStudentInfoPanel = false;
+            }
+            else {
+                $isPeerPanel = false;
+                $isStudentInfoPanel = false;
             }
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
@@ -780,8 +763,8 @@ HTML;
                     </div>
                     <div class="content-items content-item-right">
 HTML;
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderGradingPanelHeader', $isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradingPanelHeader', $isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel);
 
             $return .= <<<HTML
                 <div class="panels-container">
@@ -948,7 +931,7 @@ HTML;
      * Render the Autograding Testcases panel
      * @param AutoGradedVersion $version_instance
      * @param bool $show_hidden_cases
-     * @param bool $showInterface
+     * @param bool $showNewInterface
      * @return string
      */
     public function renderAutogradingPanel($version_instance, bool $show_hidden_cases, bool $showNewInterface) {
@@ -1184,7 +1167,8 @@ HTML;
 
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
-        } else {
+        }
+        else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
         }
 
@@ -1233,7 +1217,8 @@ HTML;
 
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
-        } else {
+        }
+        else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
         }
 
