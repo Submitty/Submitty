@@ -704,15 +704,19 @@ bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
 
 # (re)start the submitty grading scheduler daemon
-systemctl restart submitty_autograding_shipper
 systemctl restart submitty_autograding_worker
-systemctl restart submitty_daemon_jobs_handler
-systemctl restart submitty_websocket_server
+if [ ${WORKER} == 0 ]; then
+    systemctl restart submitty_autograding_shipper
+    systemctl restart submitty_daemon_jobs_handler
+    systemctl restart submitty_websocket_server
+fi
 # also, set it to automatically start on boot
-systemctl enable submitty_autograding_shipper
 systemctl enable submitty_autograding_worker
-systemctl enable submitty_daemon_jobs_handler
-systemctl enable submitty_websocket_server
+if [ ${WORKER} == 0 ]; then
+    systemctl enable submitty_autograding_shipper
+    systemctl enable submitty_daemon_jobs_handler
+    systemctl enable submitty_websocket_server
+fi
 
 #Setup website authentication if not in worker mode.
 if [ ${WORKER} == 0 ]; then
