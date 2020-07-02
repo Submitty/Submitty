@@ -363,7 +363,6 @@ class ElectronicGraderController extends AbstractController {
             else {
                 foreach ($total_users as $key => $value) {
                     if (array_key_exists($key, $num_submitted)) {
-
                         $sections[$key] = [
                             'total_components' => $num_submitted[$key] * $num_components,
                             'non_late_components' => ($num_submitted[$key] - $gradeable->getBadSubmissions($key, $section_key)) * $num_components,
