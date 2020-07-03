@@ -153,7 +153,7 @@ $(document).ready(function () {
 
     $('#random_peer_graders_list').click(
         function () {
-            if (confirm("This will update peer matrix. Are you sure?")){
+            if ( confirm("This will update peer matrix. Are you sure?")) {
                 let data = {'csrf_token': csrfToken};
                 data[this.name] = $(this).val();
                 let addDataToRequest = function (i, val) {
@@ -164,29 +164,28 @@ $(document).ready(function () {
                         $(val).val('0');
                     }
                     data[val.name] = $(val).val();
-                };
-                setRandomGraders($('#g_id').val(), data,
-                    function (response_data) {
-                        // Clear errors by setting new values
-                        for (let key in response_data) {
-                            if (response_data.hasOwnProperty(key)) {
-                                clearError(key, response_data[key]);
-                            }
-                        }
-                        // Clear errors by just removing red background
-                        for (let key in data) {
-                            if (data.hasOwnProperty(key)) {
-                                clearError(key);
-                            }
-                        }
-                        updateErrorMessage();
-                    }, updateGradeableErrorCallback);
-            }
-            else {
-                return false;
-            }
+            };
+            setRandomGraders($('#g_id').val(), data, function (response_data) {
+                // Clear errors by setting new values
+                for (let key in response_data) {
+                    if (response_data.hasOwnProperty(key)) {
+                        learError(key, response_data[key]);
+                    }
+                }
+                // Clear errors by just removing red background
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        clearError(key);
+                    }
+                }
+                updateErrorMessage();
+            }, updateGradeableErrorCallback );
+        }
+        else {
+            return false;
+        }
             
-            });
+        });
     });
     
 function ajaxRebuildGradeableButton() {
@@ -278,17 +277,15 @@ function ajaxCheckBuildStatus() {
         }
     });
 }
-function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback)
-    {
+function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback) {
     var number_to_grade=$('#number_to_peer_grade').val();
-    if(number_to_grade<=0){
-    if (confirm("This will clear Peer Matrix. Continue?")) {
-    }
-    else 
-    {
+    if(number_to_grade<=0) {
+        if (confirm("This will clear Peer Matrix. Continue?")) {
+        }
+    else {
       $('#peer_loader').addClass("hide");
-      return false;
-    } }
+      return false;} 
+    }
     var gradeable_id=$('#g_id').val();
     $('#peer_loader').removeClass("hide");
     $.ajax({
@@ -309,7 +306,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback)
             },
         
       /* To check for Server Error Messages */
-         error: function (jqXHR, exception) {
+        error: function (jqXHR, exception) {
             var msg = '';
             if (jqXHR.status === 0) {
                 msg = 'Not connect.\n Verify Network.';
