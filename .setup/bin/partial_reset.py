@@ -93,6 +93,21 @@ def main():
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
+    services = subprocess.check_output(
+        ["systemctl", "list-units", "--type=service"],
+        universal_newlines=True
+    ).strip().split("\n")
+    running_services = []
+    for service in services:
+        service = service[2:].strip()
+        if "submitty_" not in service:
+            continue
+        if "running" not in service:
+            continue
+        service = service.split()[0]
+        running_services.append(service)
+        subprocess.check_call(["systemctl", "stop", service])
+
     shutil.rmtree('/var/local/submitty', True)
     Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
 
