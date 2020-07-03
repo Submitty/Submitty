@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 This does a more partial reset of the system compared to reset_system.py, primarily not wiping
-various changes like removing DB users, all created users (including system ones like PHP_USER, 
+various changes like removing DB users, all created users (including system ones like PHP_USER,
 CGI_USER, etc.), removing networking stuff, etc.
 
 This script acts more like the inverse of "setup_sample_courses.py" so that we could only run
@@ -93,6 +93,21 @@ def main():
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
+    services = subprocess.check_output(
+        ["systemctl", "list-units", "--type=service"],
+        universal_newlines=True
+    ).strip().split("\n")
+    running_services = []
+    for service in services:
+        service = service[2:].strip()
+        if "submitty_" not in service:
+            continue
+        if "running" not in service:
+            continue
+        service = service.split()[0]
+        running_services.append(service)
+        subprocess.check_call(["systemctl", "stop", service])
+
     shutil.rmtree('/var/local/submitty', True)
     Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
 
@@ -101,30 +116,46 @@ def main():
 
     # Clean out the log files, but leave the folders intact
     if Path(CURRENT_PATH, "..", "..", ".vagrant").is_dir():
-        repo_path = SUBMITTY_REPOSITORY / '.vagrant' / distro_name / distro_version / 'logs' / 'submitty'
+        repo_path = Path(
+            SUBMITTY_REPOSITORY,
+            '.vagrant',
+            distro_name,
+            distro_version,
+            'logs',
+            'submitty'
+        )
         data_path = SUBMITTY_DATA_DIR / 'logs'
-        data_path.mkdir()
         if repo_path.exists():
             shutil.rmtree(str(repo_path))
         repo_path.mkdir()
-        for folder in ['autograding', 'access', 'site_errors', 'ta_grading']:
-            repo_log_path = repo_path / folder
-            data_log_path = data_path / folder
-            repo_log_path.mkdir()
-            data_log_path.symlink_to(repo_log_path)
+        data_path.symlink_to(repo_path)
 
     with Path(SUBMITTY_INSTALL_DIR, 'config', 'database.json').open() as submitty_config:
         submitty_config_json = json.load(submitty_config)
         os.environ['PGPASSWORD'] = submitty_config_json["database_password"]
         db_user = submitty_config_json["database_user"]
-    os.system('psql -d postgres -U '+db_user+' -c "SELECT pg_terminate_backend(pg_stat_activity.pid) '
-              'FROM pg_stat_activity WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND '
-              'pid <> pg_backend_pid();"')
-    os.system("psql -U "+db_user+" --list | grep submitty* | awk '{print $1}' | "
-              "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
-    os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
+    query = """
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname LIKE \'Submitty%\' AND pid <> pg_backend_pid();
+"""
+    subprocess.check_call(['psql', '-d', 'postgres', '-U', db_user, '-c', query])
+    db_list = subprocess.check_output(
+        ['psql', '-U', db_user, '--list'],
+        universal_newlines=True
+    ).split("\n")[3:]
+    for db_row in db_list:
+        db_name = db_row.strip().split('|')[0].strip()
+        if not db_name.startswith('submitty'):
+            continue
+        subprocess.check_call(['dropdb', '-h', 'localhost', '-U', db_user, db_name])
+    subprocess.check_call(
+        ['psql', '-d', 'postgres', '-U', db_user, '-c', 'CREATE DATABASE submitty']
+    )
     migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'run_migrator.py')
-    subprocess.check_call(['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial'])
+    subprocess.check_call(
+        ['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial']
+    )
     del os.environ['PGPASSWORD']
 
     subprocess.check_call(['bash', str(SUBMITTY_INSTALL_DIR / '.setup' / 'INSTALL_SUBMITTY.sh')])
@@ -146,7 +177,8 @@ def main():
         groups.append(course['code'] + "_archive")
         groups.append(course['code'] + "_tas_www")
         for queue in ['to_be_graded_queue']:
-            for queue_file in Path(SUBMITTY_DATA_DIR, queue).glob("*__{}__*".format(course['code'])):
+            queue_path = Path(SUBMITTY_DATA_DIR, queue)
+            for queue_file in queue_path.glob("*__{}__*".format(course['code'])):
                 queue_file.unlink()
 
     for group in groups:
