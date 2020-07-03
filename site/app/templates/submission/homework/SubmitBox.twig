@@ -218,7 +218,10 @@
         {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
+
+    {% if is_notebook %}
         {{ renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version,max_file_uploads, old_files) }}
+    {% endif %}
 
         {# File upload boxes #}
         <div id="upload-boxes">
