@@ -384,9 +384,9 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
-    var form = $("#save-configuration-form");
-    var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
-    var to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
+    const form = $("#save-configuration-form");
+    const prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
+    let to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
         to_append += '<option value="'+ sem +'">'+ sem +'</option>';
     });
@@ -394,7 +394,7 @@ function addMorePriorTermGradeable(prior_term_gradeables) {
     $('#prev_gradeable_div', form).append(to_append);
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
-        var select_element_name = $(this).attr("name");
+        const select_element_name = $(this).attr("name");
         PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }

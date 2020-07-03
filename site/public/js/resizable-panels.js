@@ -1,8 +1,8 @@
 /**
  * Initializes Resizables two panels mode
  * where width from one panel can be given out to another one i.e resizable widths
- * @param leftPanelSel DOM selector for left panel
- * @param dragBarSel DOM selector for drag-bar on which this resizing event will be attached
+ * @param {string} leftPanelSel DOM selector for left panel
+ * @param {string} dragBarSel DOM selector for drag-bar on which this resizing event will be attached
  */
 function initializeResizablePanels (leftPanelSel, dragBarSel) {
   // Select all the DOM elements for dragging in two-panel-mode
@@ -13,7 +13,7 @@ function initializeResizablePanels (leftPanelSel, dragBarSel) {
   let xPos = 0, yPos = 0, leftPanelWidth = 0;
 
   // Width of left side
-  const mouseDownHandler = function(e) {
+  const mouseDownHandler = (e) => {
     // Get the current mouse position
     xPos = e.clientX;
     yPos = e.clientY;
