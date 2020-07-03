@@ -236,7 +236,7 @@ class AutogradingConfigController extends AbstractController {
      * @param string $g_id Gradeable ID
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function showNotebookBuilder(string $g_id) {
+    public function notebookBuilder(string $g_id) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
 
         // Load JS and CSS dependencies
