@@ -27,3 +27,8 @@ python3 ./.setup/bin/setup_sample_courses.py
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 service php${PHP_VERSION}-fpm restart
+
+DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+for i in "${DAEMONS[@]}"; do
+    systemctl start ${i}
+done
