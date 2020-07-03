@@ -911,10 +911,10 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   FormatDispatcherActions(*testcases, answer);
   formatPreActions(*testcases, answer);
   FormatGraphicsActions(*testcases, answer);
-  ArchiveValidatedFiles(*testcases, answer);
-  PreserveCompiledFiles(*testcases, answer);
   RewriteDeprecatedMyersDiff(*testcases, answer);
   InflateTestcases(*testcases, answer);
+  ArchiveValidatedFiles(*testcases, answer);
+  PreserveCompiledFiles(*testcases, answer);
 
   /**
   * Validate/complete-ify the testcases in each item in the item_pool.
@@ -931,10 +931,10 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
       FormatDispatcherActions(*item_testcases, answer);
       formatPreActions(*item_testcases, answer);
       FormatGraphicsActions(*item_testcases, answer);
-      ArchiveValidatedFiles(*item_testcases, answer);
-      PreserveCompiledFiles(*item_testcases, answer);
       RewriteDeprecatedMyersDiff(*item_testcases, answer);
       InflateTestcases(*item_testcases, answer);
+      ArchiveValidatedFiles(*item_testcases, answer);
+      PreserveCompiledFiles(*item_testcases, answer);
     }
   }
 
