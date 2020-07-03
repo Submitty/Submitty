@@ -211,6 +211,7 @@ jobs:
         - pip3 install jsonschema
         - pip3 install jsonref
         - pip3 install --pre selenium
+        - pip3 install websocket_client
         - pip3 install pause
         - pip3 install paramiko
         - pip3 install psutil
@@ -241,7 +242,7 @@ jobs:
         - sudo bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
         - sudo bash .setup/travis/setup_test_suite.sh
-        - sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi
+        - sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
         - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
         - sudo mkdir -p /run/php
