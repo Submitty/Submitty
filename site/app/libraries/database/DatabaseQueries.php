@@ -741,7 +741,7 @@ WHERE status = 1"
 
     public function getThreadTitle($thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row()['title'];
     }
 
     public function setAnnouncement($thread_id, $onOff) {

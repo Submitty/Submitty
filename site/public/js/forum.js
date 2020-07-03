@@ -315,8 +315,8 @@ function socketNewOrEditThreadHandler(thread_id, edit=false){
           original_thread.next().remove();
           original_thread.remove();
         }
-
-        $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
+        if ($('data#current-thread').val() != thread_id)
+          $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
       } catch(err) {
         var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new thread. Please refresh the page.</div>';
         $('#messages').append(message);
