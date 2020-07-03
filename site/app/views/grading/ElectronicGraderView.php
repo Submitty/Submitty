@@ -1150,30 +1150,40 @@ HTML;
         $components = $gradeable->getComponents();
         $marks_array = [];
         $peer_details = [];
+        $component_scores = [];
         foreach ($components as $component) {
             foreach($peers_to_list as $peer){
                     $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
                     if($graded_component !== null){
                         $peer_details["graders"][] = $peer;
                         $peer_details["marks_assigned"][$peer] = $graded_component->getMarkIds();
+                        $component_scores[$component->getId()][$peer] = $graded_component->getScore();
                     }
                 }
             if($component->isPeer()){
                 $component_obj["title"] = $component->getTitle();
                 $component_obj["marks"] = [];
+                $component_obj["max"] = $component->getMaxValue();
                 foreach ($component->getMarks() as $mark) {
                     $component_obj["marks"][$mark->getId()]["id"] = $mark->getId();
                     $component_obj["marks"][$mark->getId()]["title"] = $mark->getTitle();
+                    $component_obj["marks"][$mark->getId()]["points"] = $mark->getPoints();
                 }
                 $marks_array[] = $component_obj;
             }
             
         }
+        var_dump($peer_details);
+        var_dump($component_scores);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
             "graded_gradeable" => $graded_gradeable,
+            "gradeable_id" => $gradeable->getId(),
             "peers" => $peers_to_list,
+            "submitter_id" => $submitter,
             "peer_details"=>$peer_details,
-            "components" => $marks_array
+            "components" => $marks_array,
+            "csrf_token" => $this->core->getCsrfToken(),
+            "component_scores" => $component_scores
         ]);
     }
 

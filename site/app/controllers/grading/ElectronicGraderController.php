@@ -2373,10 +2373,9 @@ class ElectronicGraderController extends AbstractController {
             $total_total += $value * $num_components;
         }
     }
-}
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
      */
     public function ajaxClearPeerMarks($gradeable_id) {
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -2390,9 +2389,12 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return null;
         }
-        
-        $graded_gradeable->setPeerFeedback($grader_id, $user_id, $feedback);
-        
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($component as $component){
+            $graded_component = $ta_graded_gradeable->getOrCreateGradedComponent($component, $peer_id, true);
+            $graded_component->setMarkIds([]);
+        }
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
         $this->core->getOutput()->renderJsonSuccess('Feeback saved successfully!');
         return true;
     }
