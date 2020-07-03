@@ -520,31 +520,6 @@ class Core {
     }
 
     /**
-     * Build a course URL that includes GET parameters.
-     *
-     * Example:
-     * $parts = ['gradeable', 'update']
-     * $get_params = ['hello' => 'world', 'foo' => 'bar']
-     *
-     * Would return:
-     * http://<hostname>/courses/<semester>/<course>/gradeable/update?hello=world&foo=bar
-     *
-     * @param array $parts
-     * @param array $get_params
-     * @return string
-     */
-    public function buildCourseGetUrl(array $parts, array $get_params): string {
-        $base_part = $this->buildCourseUrl($parts);
-
-        $get_parts = [];
-        foreach ($get_params as $key => $value) {
-            $get_parts[] = implode('=', [$key, $value]);
-        }
-
-        return $base_part . '?' . implode('&', $get_parts);
-    }
-
-    /**
      * @param     $url
      * @param int $status_code
      */

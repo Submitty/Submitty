@@ -1135,7 +1135,7 @@ class AdminGradeableController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
-        // FIXME:  should use a variable intead of hardcoded top level path
+        // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
@@ -1174,7 +1174,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    private function enqueueBuild(Gradeable $gradeable) {
+    public function enqueueBuild(Gradeable $gradeable) {
         // If write form config fails, it will return non-null and end execution, but
         //  if it does return null, we want to run 'enqueueBuildFile'.  This coalescing can
         //  be chained so long as 'null' is the success condition.

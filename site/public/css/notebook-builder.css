@@ -145,6 +145,7 @@
     flex-direction: column;
 }
 
-.form-options-widget input {
-    width: 30%;
+.form-options-widget .buttons {
+    display: flex;
+    margin-bottom: 15px;
 }
