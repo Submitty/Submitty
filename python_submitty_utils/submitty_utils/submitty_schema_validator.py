@@ -29,6 +29,7 @@ class SubmittySchemaException(Exception):
             print(("The portion of your configuration that caused "
                    "the error is:"), file=sys.stderr)
             print(json.dumps(self.config_json, indent=4), file=sys.stderr)
+            print(self.schema_message, file=sys.stderr)
 
 
 def complete_config_validator(j_, s_, warn=True):
