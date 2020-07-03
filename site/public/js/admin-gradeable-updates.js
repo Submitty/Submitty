@@ -169,7 +169,7 @@ $(document).ready(function () {
                 // Clear errors by setting new values
                 for (let key in response_data) {
                     if (response_data.hasOwnProperty(key)) {
-                        learError(key, response_data[key]);
+                        clearError(key, response_data[key]);
                     }
                 }
                 // Clear errors by just removing red background
