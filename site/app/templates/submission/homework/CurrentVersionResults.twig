@@ -7,24 +7,35 @@
     <h4>Submitted Files</h4>
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
-            {% for file in files %}
-                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+            <table class="mobile-table" style="border-color:white;">
+                {% for file in files %}
+                    <tr>
+                        <td>
+                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                        </td>
+                        {# download icon if student can download files #}
+                        {% if can_download %}
+                            <td>
+                                <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                    <i class="fas fa-download" title="Download the file"></i></button>
+                            </td>
+                        {% endif %}
 
-                {# download icon if student can download files #}
-                {% if can_download %}
-                    <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
-                        <i class="fas fa-download" title="Download the file"></i></button>
-                {% endif %}
-
-                {% if loop.index != files|length %}
-                    <br />
-                {% endif %}
-            {% endfor %}
-            {% if can_download and files|length > 1 %}
-                <br />
-                <br />
-                Download all files: <a onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download zip of all files" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download zip of all files"></i></a>
-            {% endif %}
+                        {% if loop.index != files|length %}
+                            <br />
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>
+                        {% if can_download and files|length > 1 %}
+                            <br />
+                            <br />
+                            Download all files: <a onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' aria-label="Download zip of all files" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download zip of all files"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
         </div>
         <div class="box col-md-6">
             {% if first_access_time is not null and first_access_time is not empty %}
