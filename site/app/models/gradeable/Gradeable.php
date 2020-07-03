@@ -1732,6 +1732,17 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Checks if the grade-inquiry has ended or not
+     * @return bool
+     */
+    public function isGradeInquiryEnded() {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && $this->grade_inquiry_due_date < $this->core->getDateTimeNow()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Creates a new team with the provided members
      * @param User $leader The team leader (first user)
      * @param User[] $members The team members (not including leader).
