@@ -58,8 +58,8 @@ class FormOptionsWidget extends Widget {
 
             let msg;
             if (result.status === 'success') {
-                const gradable_submission_url = buildCourseUrl(['gradeable', g_id]);
-                msg = `Your gradeable is being installed.  To view it visit the <a href="${gradable_submission_url}">submission page</a>.`;
+                const gradeable_submission_url = buildCourseUrl(['gradeable', g_id]);
+                msg = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
             }
             else {
                 msg = result.message;
