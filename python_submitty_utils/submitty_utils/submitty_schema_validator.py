@@ -15,7 +15,7 @@ class SubmittySchemaException(Exception):
         """Use to aid in printing helpful information about schema errors."""
         error_message = schema_error.message if schema_error is not None else ''
 
-        super(SubmittySchemaException, self).__init__(error_message)
+        super().__init__(error_message)
         self.config_json = config_json
         self.schema = schema
         self.my_message = message
@@ -71,29 +71,18 @@ def validate_testcases(testcases, s_, name='', warn=None):
             validate_schema(t, p_s, key, t_name, warn=warn)
 
         # validate each container in the testcase
-        if 'containers' in t:
-            for c in t['containers']:
-                validate_schema(c, c_schema, prefix=t_name, warn=warn)
-        else:
-            raise SubmittySchemaException(
-                t,
-                None,
-                'Testcase is missing "containers" field',
-                'Testcase is missing "containers" field',
-                None
-            )
-
-        if 'solution_containers' in t:
-            for c in t['solution_containers']:
-                validate_schema(c, c_schema, prefix=t_name, warn=warn)
-        else:
-            raise SubmittySchemaException(
-                t,
-                None,
-                'Testcase is missing "solution_containers" field',
-                'Testcase is missing "solution_containers" field',
-                None
-            )
+        for key in ['containers', 'solution_containers']:
+            if key in t:
+                for c in t[key]:
+                    validate_schema(c, c_schema, prefix=t_name, warn=warn)
+            else:
+                raise SubmittySchemaException(
+                    t,
+                    None,
+                    f'Testcase is missing "{key}" field',
+                    f'Testcase is missing "{key}" field',
+                    None
+                )
 
         validators = t.get('validation', [])
         validator_num = 0
