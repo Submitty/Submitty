@@ -98,7 +98,7 @@
             "containers": [
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "alpha",
@@ -111,7 +111,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "beta",
@@ -124,7 +124,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "charlie",
@@ -137,7 +137,7 @@
                 },
                 {
                     "commands": [
-                        "python3 client.py"
+                        "python3 -u client.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "client",
@@ -276,7 +276,7 @@
             "containers": [
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "alpha",
@@ -289,7 +289,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "beta",
@@ -302,7 +302,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "charlie",
@@ -315,7 +315,7 @@
                 },
                 {
                     "commands": [
-                        "python3 client.py"
+                        "python3 -u client.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "client",
@@ -411,12 +411,11 @@
                 {
                     "actual_file": "router/sequence_diagram.txt",
                     "deduction": 0,
-                    "points": 0,
+                    "method": "errorIfEmpty",
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "title": "Sequence Diagram Text File",
-                    "type": "FileCheck"
+                    "title": "Sequence Diagram Text File"
                 },
                 {
                     "actual_file": "alpha/STDERR.txt",
@@ -480,7 +479,7 @@
             "containers": [
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "alpha",
@@ -493,7 +492,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "beta",
@@ -506,7 +505,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "charlie",
@@ -519,7 +518,7 @@
                 },
                 {
                     "commands": [
-                        "python3 client.py"
+                        "python3 -u client.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "client",
@@ -529,11 +528,12 @@
                 },
                 {
                     "commands": [
-                        "python3 -u submitty_router.py"
+                        "python3 -u custom_router.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "router",
                     "import_default_router": true,
+                    "number_of_ports": 1,
                     "outgoing_connections": [],
                     "server": false
                 }
@@ -615,12 +615,11 @@
                 {
                     "actual_file": "router/sequence_diagram.txt",
                     "deduction": 0,
-                    "points": 0,
+                    "method": "errorIfEmpty",
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "title": "Sequence Diagram Text File",
-                    "type": "FileCheck"
+                    "title": "Sequence Diagram Text File"
                 },
                 {
                     "actual_file": "alpha/STDERR.txt",
@@ -684,7 +683,7 @@
             "containers": [
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "alpha",
@@ -698,7 +697,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "beta",
@@ -712,7 +711,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "charlie",
@@ -726,7 +725,7 @@
                 },
                 {
                     "commands": [
-                        "python3 server.py"
+                        "python3 -u server.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "delta",
@@ -740,26 +739,13 @@
                 },
                 {
                     "commands": [
-                        "python3 client.py"
+                        "python3 -u client.py"
                     ],
                     "container_image": "submitty/autograding-default:latest",
                     "container_name": "client",
                     "number_of_ports": 1,
                     "outgoing_connections": [],
                     "server": false
-                },
-                {
-                    "actual_file": "router/sequence_diagram.txt",
-                    "commands": [],
-                    "container_image": "submitty/autograding-default:latest",
-                    "container_name": "container5",
-                    "number_of_ports": 1,
-                    "outgoing_connections": [],
-                    "points": 0,
-                    "sequence_diagram": true,
-                    "server": false,
-                    "title": "Sequence Diagram Text File",
-                    "type": "FileCheck"
                 },
                 {
                     "commands": [
@@ -860,12 +846,11 @@
                 {
                     "actual_file": "router/sequence_diagram.txt",
                     "deduction": 0,
-                    "points": 0,
+                    "method": "errorIfEmpty",
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "title": "Sequence Diagram Text File",
-                    "type": "FileCheck"
+                    "title": "Sequence Diagram Text File"
                 },
                 {
                     "actual_file": "alpha/STDERR.txt",

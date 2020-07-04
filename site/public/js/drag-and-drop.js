@@ -719,6 +719,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     }
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
+    formData.append('use_ocr', use_ocr && use_qr_codes);
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
