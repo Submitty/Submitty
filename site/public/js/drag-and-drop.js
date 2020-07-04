@@ -1094,47 +1094,59 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (target_path[target_path.length-1] == '/')
         target_path = target_path.slice(0, -1); // remove slash
 
-	var filesToBeAdded = false;
-    // Files selected
-    for (var i = 0; i < file_array.length; i++) {
-        for (var j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") != -1 ||
-                file_array[i][j].name.indexOf("\"") != -1) {
-                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
-                return;
-            }
-            else if (file_array[i][j].name.indexOf("\\") != -1 ||
-                file_array[i][j].name.indexOf("/") != -1) {
-                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
-                return;
-            }
-            else if (file_array[i][j].name.indexOf("<") != -1 ||
-                file_array[i][j].name.indexOf(">") != -1) {
-                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
-                return;
-            }
+	  var filesToBeAdded = false;
+    
+    if($('#file_selection').is(":visible")){
+      // Files selected
+      for (var i = 0; i < file_array.length; i++) {
+          for (var j = 0; j < file_array[i].length; j++) {
+              if (file_array[i][j].name.indexOf("'") != -1 ||
+                  file_array[i][j].name.indexOf("\"") != -1) {
+                  alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                  return;
+              }
+              else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                  file_array[i][j].name.indexOf("/") != -1) {
+                  alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                  return;
+              }
+              else if (file_array[i][j].name.indexOf("<") != -1 ||
+                  file_array[i][j].name.indexOf(">") != -1) {
+                  alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                  return;
+              }
 
-            var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
-            // Check conflict here
-            if ( k[0] == 1 )
-            {
-                var skip_confirmation = false;
-                if (expand_zip == 'on') {
-                    var extension = getFileExtension(file_array[i][j].name);
-                    if (extension.toLowerCase() == "zip") {
-                        skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
-                    }
-                }
-                if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
-                    continue;
-                }
-            }
+              var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
+              // Check conflict here
+              if ( k[0] == 1 )
+              {
+                  var skip_confirmation = false;
+                  if (expand_zip == 'on') {
+                      var extension = getFileExtension(file_array[i][j].name);
+                      if (extension.toLowerCase() == "zip") {
+                          skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
+                      }
+                  }
+                  if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
+                      continue;
+                  }
+              }
 
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
-            filesToBeAdded = true;
-        }
+              formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+              filesToBeAdded = true;
+          }
+      }
     }
-    if (filesToBeAdded == false){
+    
+    if($('#url_selection').is(":visible")){
+      if($("#url_title").val() !== "" && $("#url_url").val() !== "" ){
+        linkToBeAdded = true;
+        formData.append('url_title', $("#url_title").val());
+        formData.append('url_url', $("#url_url").val());
+      }
+    }
+
+    if (filesToBeAdded == false && linkToBeAdded == false){
         return;
     }
     $.ajax({
