@@ -719,6 +719,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     }
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
+    formData.append('use_ocr', use_ocr && use_qr_codes);
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
@@ -1015,8 +1016,7 @@ function handleDownloadImages(csrf_token) {
     var return_url = buildCourseUrl(['student_photos']);
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
-    formData.append('file_count', file_array.length);
-
+    formData.append('file_count', file_array[0].length);
 
     // Files selected
     for (var i = 0; i < file_array.length; i++) {

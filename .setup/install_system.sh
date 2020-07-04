@@ -213,6 +213,9 @@ pip3 install pdf2image
 pip3 install opencv-python
 pip3 install numpy
 
+#python libraries for OCR for digit recognition
+pip3 install onnxruntime
+
 # Install an email catcher
 if [ ${VAGRANT} == 1 ]; then
     pip3 install nullsmtpd
@@ -745,6 +748,8 @@ if [ ${WORKER} == 0 ]; then
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
+
+        python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_user_data.py
     fi
 fi
 
