@@ -162,10 +162,17 @@
                         style="padding-right:15px;"
                         >
                     {% endif %}
+
                     <img id="moorthy-duck"
                          src="{{ base_url }}/img/{{ duck_img }}"
                          alt="Duck Moorthy!"
-                         height = "50"
+                         {% if 'svg' in duck_img %}
+                            {# Scale up SVGs to match normal logo #}
+                            height="70"
+                         {% else %}
+                            height="50" 
+                         {% endif %}
+    
                          {% if enable_banner %}
                             style="position:absolute; right: 10px;"
                             class="key_to_click"
