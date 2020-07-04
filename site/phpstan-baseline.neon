@@ -121,11 +121,6 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(bool verify all components or not\\)\\: Unexpected token \"verify\", expected variable at offset 83$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Variable \\$graded_component might not be defined\\.$#"
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -182,11 +177,6 @@ parameters:
 
 		-
 			message: "#^Variable \\$goToStudent might not be defined\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$sections\\)\\: Unexpected token \"\\$sections\", expected type at offset 131$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
