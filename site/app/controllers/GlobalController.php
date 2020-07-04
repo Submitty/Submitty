@@ -349,7 +349,7 @@ class GlobalController extends AbstractController {
     }
 
 
-    private function getDuckImage(array $date) : string{
+    private function getDuckImage(array $date): string {
         $duck_img = 'moorthy_duck.png';
         $month = $date['mon'];
         $day = $date['mday'];
@@ -362,7 +362,7 @@ class GlobalController extends AbstractController {
                 break;
             case 10:
                 //halloween
-                if($day >= 27 && $day <= 31){
+                if ($day >= 27 && $day <= 31) {
                     $duck_img = 'moorthy_halloween';
                 }
                 break;
@@ -372,7 +372,7 @@ class GlobalController extends AbstractController {
                 break;
             case 7:
                 //July 4th
-                if($day >= 3 && $day <= 7){
+                if ($day >= 3 && $day <= 7) {
                     $duck_img = '07-july.svg';
                 }
                 break;
@@ -390,13 +390,13 @@ class GlobalController extends AbstractController {
                 break;
             case 3:
                 //Saint Patrick's Day
-                if($day >= 16 && $day <= 20){
+                if ($day >= 16 && $day <= 20) {
                     $duck_img = '03-march.svg';
                 }
                 break;
             case 2:
-                //Valentines 
-                if($day >= 13 && $day <= 17){
+                //Valentines
+                if ($day >= 13 && $day <= 17) {
                     $duck_img = '02-febuary.svg';
                 }
                 break;
