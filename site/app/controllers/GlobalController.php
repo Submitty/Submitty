@@ -350,7 +350,7 @@ class GlobalController extends AbstractController {
 
 
     private function getDuckImage(array $date): string {
-        $duck_img = '00-original.svg';
+        $duck_img = 'moorthy_duck/00-original.svg';
         $month = $date['mon'];
         $day = $date['mday'];
 
@@ -363,7 +363,7 @@ class GlobalController extends AbstractController {
             case 10:
                 //halloween
                 if ($day >= 27 && $day <= 31) {
-                    $duck_img = 'moorthy_halloween';
+                    $duck_img = 'moorthy_duck/moorthy_halloween.png';
                 }
                 break;
             case 9:
@@ -373,36 +373,36 @@ class GlobalController extends AbstractController {
             case 7:
                 //July 4th
                 if ($day >= 3 && $day <= 7) {
-                    $duck_img = '07-july.svg';
+                    $duck_img = 'moorthy_duck/07-july.svg';
                 }
                 break;
             case 6:
                 //June (Pride)
-                $duck_img = '06-june.svg';
+                $duck_img = 'moorthy_duck/06-june.svg';
                 break;
             case 5:
                 //May (Graduation)
-                $duck_img = '05-may.svg';
+                $duck_img = 'moorthy_duck/05-may.svg';
                 break;
             case 4:
                 //April
-                $duck_img = '04-april.svg';
+                $duck_img = 'moorthy_duck/04-april.svg';
                 break;
             case 3:
                 //Saint Patrick's Day
                 if ($day >= 16 && $day <= 20) {
-                    $duck_img = '03-march.svg';
+                    $duck_img = 'moorthy_duck/03-march.svg';
                 }
                 break;
             case 2:
                 //Valentines
                 if ($day >= 13 && $day <= 17) {
-                    $duck_img = '02-febuary.svg';
+                    $duck_img = 'moorthy_duck/02-febuary.svg';
                 }
                 break;
             case 1:
                 //January
-                $duck_img = '01-january.svg';
+                $duck_img = 'moorthy_duck/01-january.svg';
                 break;
             default:
                 break;

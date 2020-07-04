@@ -166,13 +166,7 @@
                     <img id="moorthy-duck"
                          src="{{ base_url }}/img/{{ duck_img }}"
                          alt="Duck Moorthy!"
-                         {% if 'svg' in duck_img %}
-                            {# Scale up SVGs to match normal logo #}
-                            height="75"
-                         {% else %}
-                            height="50" 
-                         {% endif %}
-    
+                         height="75"
                          {% if enable_banner %}
                             style="position:absolute; right: 10px;"
                             class="key_to_click"
