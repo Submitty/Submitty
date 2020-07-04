@@ -1145,8 +1145,8 @@ HTML;
     public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable, int $display_version) {
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
-        $peer_pairs = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
-        $peers_to_list = $peer_pairs[$submitter];
+        $peers_to_list = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $submitter);
+        var_dump($peers_to_list);
         $components = $gradeable->getComponents();
         $marks_array = [];
         $peer_details = [];
@@ -1173,8 +1173,6 @@ HTML;
             }
             
         }
-        var_dump($peer_details);
-        var_dump($component_scores);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
             "graded_gradeable" => $graded_gradeable,
             "gradeable_id" => $gradeable->getId(),
