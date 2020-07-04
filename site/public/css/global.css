@@ -55,10 +55,12 @@ nav a > i.f {
     flex: 1 1 auto;
     flex-wrap: wrap;
     padding-left: 20px;
+    padding-right: 70px;
 }
 @media (max-width: 541px) {
     #breadcrumbs {
         padding-left: 80px;
+        padding-right: 0px;
     }
 }
 
