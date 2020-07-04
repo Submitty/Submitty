@@ -159,6 +159,27 @@ class DatabaseQueries {
         return $ret;
     }
 
+    /**
+     * given a string with missing digits, get all similar numeric ids
+     * should be given as '1_234_567' where '_' are positions to fill in
+     *
+     * @param string $id_string
+     */
+    public function getSimilarNumericIdMatches(string $id_string): array {
+        $this->course_db->query("
+            SELECT user_numeric_id from users where 
+            cast(user_numeric_id as text)
+            like ?
+        ", [$id_string]);
+
+        $ret = [];
+        foreach ($this->course_db->rows() as $result) {
+            $ret[] = $result['user_numeric_id'];
+        }
+
+        return $ret;
+    }
+
     public function getGradingSectionsByUserId($user_id) {
         $this->course_db->query("
 SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
