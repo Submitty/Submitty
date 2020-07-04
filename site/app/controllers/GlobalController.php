@@ -360,9 +360,9 @@ class GlobalController extends AbstractController {
             case 11:
                 break;
             case 10:
-                //halloween
-                if ($day >= 27 && $day <= 31) {
-                    $duck_img = 'moorthy_duck/moorthy_halloween.png';
+                //October (Halloween)
+                if ($day >= 25 && $day <= 31) {
+                    $duck_img = 'moorthy_duck/halloween.png';
                 }
                 break;
             case 9:
@@ -370,8 +370,8 @@ class GlobalController extends AbstractController {
             case 8:
                 break;
             case 7:
-                //July 4th
-                if ($day >= 3 && $day <= 7) {
+                //July (Independence)
+                if ($day >= 1 && $day <= 7) {
                     $duck_img = 'moorthy_duck/07-july.svg';
                 }
                 break;
@@ -384,23 +384,23 @@ class GlobalController extends AbstractController {
                 $duck_img = 'moorthy_duck/05-may.svg';
                 break;
             case 4:
-                //April
+                //April (Flowers)
                 $duck_img = 'moorthy_duck/04-april.svg';
                 break;
             case 3:
-                //Saint Patrick's Day
-                if ($day >= 16 && $day <= 20) {
+                //Saint Patrick's Day (Shamrock)
+                if ($day >= 14 && $day <= 20) {
                     $duck_img = 'moorthy_duck/03-march.svg';
                 }
                 break;
             case 2:
-                //Valentines
-                if ($day >= 13 && $day <= 17) {
-                    $duck_img = 'moorthy_duck/02-febuary.svg';
+                //Valentines (Hearts)
+                if ($day >= 11 && $day <= 17) {
+                    $duck_img = 'moorthy_duck/02-february.svg';
                 }
                 break;
             case 1:
-                //January
+                //January (Snowflakes)
                 $duck_img = 'moorthy_duck/01-january.svg';
                 break;
             default:
