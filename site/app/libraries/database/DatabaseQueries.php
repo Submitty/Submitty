@@ -23,6 +23,7 @@ use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
+use app\models\PollModel;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\CascadingIterator;
@@ -6388,6 +6389,178 @@ AND gc_id IN (
         }
         return '';
     }
+    //// BEGIN ONLINE POLLING QUERIES ////
+
+    public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+        $this->course_db->query("INSERT INTO polls(name, question, status, release_date) VALUES (?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date]);
+        $this->course_db->query("SELECT max(poll_id) from polls");
+        $poll_id = $this->course_db->rows()[0]['max'];
+        foreach ($responses as $option_id => $response) {
+            $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$option_id, $orders[$option_id], $poll_id, $response]);
+        }
+        foreach ($answers as $answer) {
+            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
+        }
+    }
+
+    public function endPoll($poll_id) {
+        $this->course_db->query("UPDATE polls SET status = 'ended' where poll_id = ?", [$poll_id]);
+    }
+
+    public function closePoll($poll_id) {
+        $this->course_db->query("UPDATE polls SET status = 'closed' where poll_id = ?", [$poll_id]);
+    }
+
+    public function openPoll($poll_id) {
+        $this->course_db->query("UPDATE polls SET status = 'open' where poll_id = ?", [$poll_id]);
+    }
+
+    public function getPolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls order by poll_id DESC");
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getTodaysPolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls where release_date = ? or status='open' order by poll_id DESC", [date("Y-m-d")]);
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getOlderPolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls where release_date < ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getFuturePolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls where release_date > ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getPoll($poll_id) {
+        $this->course_db->query("SELECT * from polls where poll_id = ?", [$poll_id]);
+        $row = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+        if (count($row) <= 0) {
+            return null;
+        }
+        $row = $row[0];
+        $responses = $this->getResponses($row["poll_id"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"]);
+    }
+
+    public function getResponses($poll_id) {
+        $this->course_db->query("SELECT * from poll_options where poll_id = ? order by order_id ASC", [$poll_id]);
+        $responses = [];
+        $responses_rows = $this->course_db->rows();
+        foreach ($responses_rows as $rep_row) {
+            $responses[$rep_row["option_id"]] = $rep_row["response"];
+        }
+
+        return $responses;
+    }
+
+    public function getUserResponses($poll_id) {
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ?", [$poll_id]);
+        $rows = $this->course_db->rows();
+        $responses = [];
+        foreach ($rows as $row) {
+            $responses[$row["student_id"]] = $row["option_id"];
+        }
+        return $responses;
+    }
+
+    public function submitResponse($poll_id, $response) {
+        $user = $this->core->getUser()->getId();
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+        if (count($this->course_db->rows()) <= 0) {
+            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response]);
+        }
+        else {
+            $this->course_db->query("UPDATE poll_responses SET option_id=? where poll_id = ? and student_id = ?", [$response, $poll_id, $user]);
+        }
+    }
+
+    public function getAnswers($poll_id) {
+        $this->course_db->query("SELECT option_id from poll_options where poll_id = ? and correct = TRUE order by order_id ASC", [$poll_id]);
+        $answers = [];
+        foreach ($this->course_db->rows() as $row) {
+            $answers[] = $row["option_id"];
+        }
+        return $answers;
+    }
+
+    public function getTotalPollsScore($user_id) {
+        $polls = $this->getPolls();
+        $total = 0.0;
+        foreach ($polls as $poll) {
+            $total = $total + $poll->getScore($user_id);
+        }
+        return $total;
+    }
+
+    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ? where poll_id = ?", [$poll_name, $question, $release_date, $poll_id]);
+        foreach ($responses as $order_id => $response) {
+            $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
+        }
+        foreach ($answers as $answer) {
+            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
+        }
+    }
+
+    public function deletePoll($poll_id) {
+        $this->course_db->query("DELETE FROM poll_responses where poll_id = ?", [$poll_id]);
+        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
+        $this->course_db->query("DELETE FROM polls where poll_id = ?", [$poll_id]);
+    }
+
+    public function getResults($poll_id) {
+        $results = [];
+        foreach ($this->getResponses($poll_id) as $option_id => $answer) {
+            $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);
+            $results[$option_id] = count($this->course_db->rows());
+        }
+        return $results;
+    }
+
+    public function deleteUserResponseIfExists($poll_id) {
+        $user = $this->core->getUser()->getId();
+        $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+    }
+
+    //// END ONLINE POLLING QUERIES ////
 
     /**
      * Delete user from DBs identified by user_id, semester, and course.

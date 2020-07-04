@@ -1,0 +1,222 @@
+<div class="content">
+    <h1> Polls </h1>
+    <a href="{{base_url}}/newPoll" class="btn btn-primary">New Poll</a>
+    <hr>
+
+    <div class="dropdown_wrapper">
+        <div class="dropdown_bar">
+            <h2> Today's Polls </h2>
+            <div class="dropdown-btn">
+                <i class="dropdown_arrow down"></i>
+            </div>
+        </div>
+        <table id="today-table" class="table table-striped" style="width:100%;">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Toggle</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">View Results</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poll in todays_polls %}
+                    <tr>
+                        <td> {{ poll.getName() }} </td>
+                        {% if poll.isOpen() %}
+                            <td>
+                                <form method="post" action="{{ base_url }}/setEnded">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                    <button type="submit" class="btn btn-primary">End Poll</button>
+                                </form>
+                            </td>
+                        {% elseif poll.isClosed() %}
+                            <td>
+                                <form method="post" action="{{ base_url }}/setOpen">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                    <button type="submit" class="btn btn-primary">Open Poll</button>
+                                </form>
+                            </td>
+                        {% elseif poll.isEnded() %}
+                            <td>
+                                <form method="post" action="{{ base_url }}/setOpen">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                    <button type="submit" class="btn btn-primary">Reopen Poll</button>
+                                </form>
+                            </td>
+                        {% endif %}
+                        <td>
+                            <form method="post" action="{{base_url}}/editPoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">Edit Poll</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/viewResults">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">View Results</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/deletePoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <br/>
+    <hr>
+
+    <div class="dropdown_wrapper">
+        <div class="dropdown_bar">
+            <h2> Old Polls </h2>
+            <div class="dropdown-btn">
+                <i class="dropdown_arrow right"></i>
+            </div>
+        </div>
+        <table id="older-table" class="table table-striped" style="width:100%; display: none;">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Toggle</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">View Results</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poll in older_polls %}
+                    <tr>
+                        <td> {{ poll.getName() }} </td>
+                        {% if poll.isOpen() %}
+                            <td>
+                                <form method="post" action="{{ base_url }}/setOpen">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                    <input type="hidden" name="open" value="FALSE"/>
+                                    <button type="submit" class="btn btn-primary">Close Poll</button>
+                                </form>
+                            </td>
+                        {% else %}
+                            <td>
+                                <form method="post" action="{{ base_url }}/setOpen">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                    <input type="hidden" name="open" value="TRUE"/>
+                                    <button type="submit" class="btn btn-primary">Open Poll</button>
+                                </form>
+                            </td>
+                        {% endif %}
+                        <td>
+                            <form method="post" action="{{base_url}}/editPoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">Edit Poll</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/viewResults">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">View Results</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/deletePoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br/>
+    <hr>
+
+    <div class="dropdown_wrapper">
+        <div class="dropdown_bar">
+            <h2> Future Polls </h2>
+            <div class="dropdown-btn">
+                <i class="dropdown_arrow right"></i>
+            </div>
+        </div>
+        <table id="future-table" class="table table-striped" style="width:100%; display: none;">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Toggle</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">View Results</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poll in future_polls %}
+                    <tr>
+                        <td> {{ poll.getName() }} </td>
+                        <td>
+                            <form method="post" action="{{ base_url }}/setOpen">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">Open Poll</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/editPoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">Edit Poll</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/viewResults">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary">View Results</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{{base_url}}/deletePoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
