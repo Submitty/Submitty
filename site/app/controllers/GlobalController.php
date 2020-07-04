@@ -342,18 +342,17 @@ class GlobalController extends AbstractController {
             }
         }
 
-        $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
+        $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
 
         return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
     }
 
 
-    private function getDuckImage(array $date): string {
+    private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
-        $month = $date['mon'];
-        $day = $date['mday'];
-
+        $day = (int) $now->format('j');
+        $month = (int) $now->format('n');
 
         switch ($month) {
             case 12:
