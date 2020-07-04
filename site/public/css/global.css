@@ -54,7 +54,12 @@ nav a > i.f {
     width: 1px;
     flex: 1 1 auto;
     flex-wrap: wrap;
-    padding-left: 10px;
+    padding-left: 20px;
+}
+@media (max-width: 541px) {
+    #breadcrumbs {
+        padding-left: 80px;
+    }
 }
 
 #breadcrumbs > *:not(:last-child) {
