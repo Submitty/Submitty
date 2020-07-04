@@ -41,12 +41,12 @@ nav a > i.f {
 #nav-links {
     display: flex;
     align-items: center;
-    padding: 15px;
+    padding: 5px;
     flex-grow: 1;
 }
 
 #home-button {
-    margin-right: 15px;
+    margin-right: 0px;
 }
 
 #breadcrumbs {
@@ -54,6 +54,7 @@ nav a > i.f {
     width: 1px;
     flex: 1 1 auto;
     flex-wrap: wrap;
+    padding-left: 10px;
 }
 
 #breadcrumbs > *:not(:last-child) {

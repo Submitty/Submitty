@@ -350,7 +350,7 @@ class GlobalController extends AbstractController {
 
 
     private function getDuckImage(array $date): string {
-        $duck_img = 'moorthy_duck.png';
+        $duck_img = '00-original.svg';
         $month = $date['mon'];
         $day = $date['mday'];
 
