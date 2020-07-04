@@ -4029,7 +4029,7 @@ AND gc_id IN (
      */
     public function getUserCourseMaterialInfo(string $user_id, bool $seen) {
         $seen_status_query = $seen === null ? "true" : 'seen = ?';
-        $parameters = $seen === null ? array($user_id) : array($user_id, $seen);
+        $parameters = $seen === null ? [$user_id] : [$user_id, $seen];
         $this->course_db->query(
             "SELECT * FROM course_material_info WHERE user_id = ? and {$seen_status_query}",
             $parameters
@@ -4045,7 +4045,7 @@ AND gc_id IN (
     public function getAllUsersForACourseMaterial(string $course_file_path) {
         $this->course_db->query(
             "SELECT user_id FROM course_material_info WHERE course_file_path = ?",
-            array($course_file_path)
+            [$course_file_path]
         );
         return $this->rowsToArray($this->course_db->rows());
     }
@@ -4058,7 +4058,7 @@ AND gc_id IN (
     public function getNewCourseMaterialReleasedCount(string $user_id) {
         $this->course_db->query(
             "SELECT COUNT(*) FROM course_material_info WHERE user_id = ? and seen = ? and release_date <= current_timestamp",
-            array($user_id, false)
+            [$user_id, false]
         );
         return $this->course_db->rows()[0]['count'];
     }
@@ -4070,7 +4070,7 @@ AND gc_id IN (
     public function markUserCourseMaterialAsSeen(string $user_id) {
         $this->course_db->query(
             "UPDATE course_material_info SET seen = ? WHERE user_id = ? and release_date <= current_timestamp",
-            array(true, $user_id)
+            [true, $user_id]
         );
     }
 
@@ -4083,7 +4083,7 @@ AND gc_id IN (
     public function updateCourseMaterialReleaseTimeInfo(string $file_path, string $new_release_date) {
         $this->course_db->query(
             "UPDATE course_material_info SET release_date = ? WHERE course_file_path = ?",
-            array($new_release_date, $file_path)
+            [$new_release_date, $file_path]
         );
     }
 
@@ -4093,7 +4093,7 @@ AND gc_id IN (
     public function deleteCourseMaterialInfo(string $file_deleted) {
         $this->course_db->query(
             "DELETE FROM course_material_info WHERE course_file_path=?",
-            array($file_deleted)
+            [$file_deleted]
         );
     }
 
@@ -4104,7 +4104,7 @@ AND gc_id IN (
     public function deleteUsersForACourseMaterial(array $users_ids, string $course_file_path) {
         return $this->course_db->query(
             "DELETE FROM course_material_info WHERE user_id IN ('" . implode("', '", $users_ids) . "') AND course_file_path=?",
-            array($course_file_path)
+            [$course_file_path]
         );
     }
 
