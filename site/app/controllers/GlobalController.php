@@ -343,19 +343,74 @@ class GlobalController extends AbstractController {
         }
 
         $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
-        $month = $now['mon'];
-        $day = $now['mday'];
-
-        $duck_img = 'moorthy_duck.png';
-        if ($month === 10 && ($day >= 27 && $day <= 31)) {
-            //halloween
-            $duck_img = 'moorthy_halloween.png';
-        }
-        //else if(...){}
-        //more Holidays go here!
+        $duck_img = $this->getDuckImage($now);
 
         return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
     }
+
+
+    private function getDuckImage(array $date): string {
+        $duck_img = 'moorthy_duck.png';
+        $month = $date['mon'];
+        $day = $date['mday'];
+
+
+        switch ($month) {
+            case 12:
+                break;
+            case 11:
+                break;
+            case 10:
+                //halloween
+                if ($day >= 27 && $day <= 31) {
+                    $duck_img = 'moorthy_halloween';
+                }
+                break;
+            case 9:
+                break;
+            case 8:
+                break;
+            case 7:
+                //July 4th
+                if ($day >= 3 && $day <= 7) {
+                    $duck_img = '07-july.svg';
+                }
+                break;
+            case 6:
+                //June (Pride)
+                $duck_img = '06-june.svg';
+                break;
+            case 5:
+                //May (Graduation)
+                $duck_img = '05-may.svg';
+                break;
+            case 4:
+                //April
+                $duck_img = '04-april.svg';
+                break;
+            case 3:
+                //Saint Patrick's Day
+                if ($day >= 16 && $day <= 20) {
+                    $duck_img = '03-march.svg';
+                }
+                break;
+            case 2:
+                //Valentines
+                if ($day >= 13 && $day <= 17) {
+                    $duck_img = '02-febuary.svg';
+                }
+                break;
+            case 1:
+                //January
+                $duck_img = '01-january.svg';
+                break;
+            default:
+                break;
+        }
+
+        return $duck_img;
+    }
+
 
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
