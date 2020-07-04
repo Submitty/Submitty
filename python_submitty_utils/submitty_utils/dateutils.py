@@ -3,24 +3,6 @@ import tzlocal
 from datetime import datetime, timedelta
 
 
-def normalize_submitty_date(d: str) -> str:
-    """Normalize a date.
-
-    If the date is in the format YYYY-MM-DD, then this function returns the
-    provided string. However, if the date is in the format MM-DD-YYYY, then
-    this function will swap the fields around to match the expected format
-    YYYY-MM-DD.
-
-    TODO: Delete this once we fix the access date strings.
-    """
-    words = d.split(' ')
-    date_parts = words[0].split('-')
-    if len(date_parts[0]) == 2:
-        words[0] = date_parts[2]+'-'+date_parts[0]+'-'+date_parts[1]
-        d = ' '.join(words)
-    return d
-
-
 def get_timezone():
     """
     Grab the system timezone, should generally only be used when we don't have any
