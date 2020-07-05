@@ -574,6 +574,19 @@ td>a.active-sort {
     padding: 5px 5px 10px;
 }
 
+.no-border-box {
+    border-radius: 3px;
+    border: 1px solid var(--default-white);
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    position: relative;
+    float: left;
+    background: var(--default-white);
+    box-shadow: 2px 2px 4px -3px var(--default-white);
+    padding: 5px 5px 10px;
+}
+
 .overall-comment-box {
   margin-top:10px;
 }
@@ -1726,18 +1739,17 @@ end of styles used in the admin gradeable page
     padding: 0px;
 }
 
-#skip-nav:not(:focus) {
+.skip-btn:not(:focus) {
     clip: rect(1px,1px,1px,1px);
     overflow: hidden;
     position: absolute;
     padding: 0;
 }
 
-#skip-nav {
+.skip-btn {
     box-shadow: 0 2px 15px -5px #888888;
     border-radius: 3px;
     /* TODO on mobile, different header height */
-    margin: 90px 10px 10px; /* 80px for header */
     padding: 10px;
     background-color: var(--default-white);
     text-align: center;
@@ -1747,6 +1759,12 @@ end of styles used in the admin gradeable page
     height: -moz-min-content;
     position: absolute;
     z-index: 999;
+}
+
+#skip-nav {
+    /* 90px is the heigth of the navbar and this makes sure the
+    skip-nav shows up below the navbar instead of on top of it */
+    margin: 90px 10px 10px;
 }
 
 .float-right {
@@ -1960,3 +1978,26 @@ header > * {
 .block {
   display: block;
 }
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    align-content: center;
+    animation: spin 2s linear infinite;
+    position: fixed; /* Sit on top of the page content */
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

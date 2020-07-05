@@ -426,7 +426,7 @@
           "type" : "string"
         },
         "points" : {
-          "type" : "number", 
+          "type" : "number",
           "description" : "The number of points the student receives if actual_file exists"
         },
         "title" : {
@@ -444,7 +444,7 @@
       "type": "object",
       "additionalProperties" : false,
       "required" : ["containers", "solution_containers", "dispatcher_actions", "points",
-                    "pre_commands", "single_port_per_container", 
+                    "pre_commands", "single_port_per_container",
                     "use_router", "title", "validation", "timestamped_stdout", "publish_actions"],
       "properties" : {
         "timestamped_stdout" : {
@@ -523,7 +523,65 @@
                     "description" : "The list of named containers to which this message should be delivered.",
                     "items" : {
                       "type" : "string"
-                    }
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Gracefully stop a container (ctrl-c).",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["stop"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Start a container which has been stopped or killed.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["start"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Kill a container (SIGKILL).",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["kill"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
                   }
                 }
               }
@@ -818,7 +876,7 @@
               }
             ]
           }
-        }, 
+        },
         "points" : {
           "description" : "The point value of this testcase",
           "type": "number"
@@ -844,7 +902,7 @@
                   },
                   "destination" : {
                     "type" : "string"
-                  }, 
+                  },
                   "option" : {
                     "type" : "string"
                   },
@@ -889,7 +947,7 @@
                 "$ref" : "#/definitions/abstract_validation_object"
               }
             ]
-          } 
+          }
         }
       }
     },
@@ -1013,7 +1071,7 @@
               "type" : "string",
               "enum" : ["MultipleJUnitTestGrader"]
             }
-          }  
+          }
         },
         {
           "type" : "object",
@@ -1107,7 +1165,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["PacmanGrader"]
-            }, 
+            },
             "num_tests" : {
               "type" : "integer",
               "minimum" : 1
@@ -1121,7 +1179,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["searchToken"]
-            }, 
+            },
             "data" : {
               "type" : "array",
               "items" : {
@@ -1137,10 +1195,10 @@
             "method" : {
               "type" : "string",
               "enum" : ["intComparison"]
-            }, 
+            },
             "term" : {
               "type" : "number"
-            }, 
+            },
             "comparison" : {
               "type" : "string"
             },
@@ -1159,7 +1217,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["diff"]
-            }, 
+            },
             "comparison" : {
               "type" : "string"
             },
@@ -1181,7 +1239,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["fileExists"]
-            }, 
+            },
             "one_of" : {
               "type" : "boolean"
             },
@@ -1198,7 +1256,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["warnIfNotEmpty"]
-            }, 
+            },
             "jvm_memory" : {
               "type" : "boolean"
             }
@@ -1282,7 +1340,7 @@
             }
           }
         }
-      ]       
+      ]
     },
     "notebook_object" : {
       "type": "object",

@@ -24,6 +24,9 @@
         "auto_rainbow_grades": false,
         "queue_enabled": false,
         "queue_contact_info": false,
-        "queue_message": ""
+        "queue_message": "",
+        "polls_enabled": false,
+        "polls_pts_for_correct": 1.0,
+        "polls_pts_for_incorrect": 0.0
     }
 }

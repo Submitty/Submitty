@@ -12,7 +12,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
             <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" aria-label="Select thread to merge into" data-ays-ignore="true">
                 {% for threads in possibleMerges %}
-                    <option value=({{ threads['id'] }}) data-first-post-id={{ threads['first_post_id'] }}>({{ threads['id'] }}) {{ threads['title'] }}</option>
+                    <option value="{{ threads['id'] }}" data-first-post-id={{ threads['first_post_id'] }}>({{ threads['id'] }}) {{ threads['title'] }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -33,6 +33,14 @@
                     $("#merge-threads .form-body").css("min-height", "inherit");
                     $("#merge-threads .form-body").css('overflow-y', 'initial');
                     document.getElementsByClassName('chosen-search-input')[0].setAttribute('aria-label', 'Chosen thread');
+
+                    $("#merge-threads").children("form").submit(function () {
+                        var child_thread_id = $('#merge_thread_child').val();
+                        var parent_thread_id = $('#merge_thread_parent').val();
+                        var course = document.body.dataset.courseUrl.split('/').pop();
+                        window.socketClient.send({'course': course, 'type': "merge_thread", 'thread_id': child_thread_id, 'merge_thread_id': parent_thread_id});
+                        return;
+                    });
                 });
             </script>
         </div>
