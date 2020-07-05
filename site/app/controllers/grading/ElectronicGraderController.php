@@ -434,7 +434,9 @@ class ElectronicGraderController extends AbstractController {
                 ];
                 $sections['all'] = [
                     'total_components' => 0,
+                    'non_late_components' => 0,
                     'graded_components' => 0,
+                    'non_late_graded_components' => 0,
                     'graders' => []
                 ];
                 foreach ($total_users as $key => $value) {

@@ -733,11 +733,12 @@
             <div id="non-late-numerical-data" class="page-content">
                 <div class = "row">
                     <div class = "box col-md-6">
-
-                        <a class="btn btn-default" style="float: right"
-                            onclick="openStat(this, 'numerical-data'), this.blur()">
-                            Include Late Submissions
-                        </a>
+                        {% if not peer %}
+                            <a class="btn btn-default" style="float: right"
+                                onclick="openStat(this, 'numerical-data'), this.blur()">
+                                Include Late Submissions
+                            </a>
+                        {% endif %}
 
                         {# LEFT CHUNK#}
                         {% if warnings|length > 0 %}
