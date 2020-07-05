@@ -1682,6 +1682,8 @@ class Component(object):
 
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
+        if 'gc_is_peer' in component:
+            self.is_peer = component['gc_is_peer']
         if 'gc_student_comment' in component:
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
