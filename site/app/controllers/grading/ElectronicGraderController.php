@@ -243,6 +243,8 @@ class ElectronicGraderController extends AbstractController {
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
+            $peer_array = $this->core->getQueries()->getPeerAssignment($gradeable_id,$this->core->getUser()->getId());
+            $peers_to_grade = count($peer_array);
             $num_components = count($gradeable->getPeerComponents());
             $graded_components = $this->core->getQueries()->getGradedPeerComponentsByRegistrationSection($gradeable_id, $sections);
             $num_gradeables = count($this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId()));
@@ -330,7 +332,7 @@ class ElectronicGraderController extends AbstractController {
             }
             if ($peer) {
                 $sections['stu_grad'] = [
-                    'total_components' => $num_components,
+                    'total_components' => $num_components * $peers_to_grade,
                     'graded_components' => $my_grading,
                     'num_gradeables' => $num_gradeables,
                     'graders' => []
