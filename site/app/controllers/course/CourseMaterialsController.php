@@ -166,7 +166,7 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
-        $files = json_decode($filenames); // course material files to be modified
+        $data = $_POST['fn'];
         $hide_from_students = null;
 
         if (!isset($newdatatime)) {
@@ -185,12 +185,12 @@ class CourseMaterialsController extends AbstractController {
         $new_data_time = DateUtils::parseDateTime($new_data_time, $this->core->getUser()->getUsableTimeZone());
         $new_data_time = DateUtils::dateTimeToString($new_data_time);
 
-        // Check if the $files data is correct
-        if (is_null($files) || !count($files)) {
-            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted filename data", false);
+        //only one will not iterate correctly
+        if (is_string($data)) {
+            $data = [$data];
         }
 
-        foreach ($files as $filename) {
+        foreach ($data as $filename) {
             if (!isset($filename)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
@@ -218,7 +218,7 @@ class CourseMaterialsController extends AbstractController {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
             }
         }
-        $this->notifyCourseMaterialEvent('RELEASE_TIME_MODIFIED', $files, null, $new_data_time);
+        $this->notifyCourseMaterialEvent('RELEASE_TIME_MODIFIED', $data, null, $new_data_time);
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
 
@@ -488,7 +488,7 @@ class CourseMaterialsController extends AbstractController {
         }
         $this->notifyCourseMaterialEvent('FILES_UPLOAD', $files_uploaded, $sections_exploded, $release_time);
 
-        $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
+        return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }
     /**
      * Helper function to create notification/email content and aggregate recipients

@@ -1435,14 +1435,18 @@ function setChildNewDateTime(path, changeDate,handleData) {
     });
 }
 
-function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+function changeFolderNewDateTime(filenames, newdatatime, handleData) {
     // send to server to handle folder date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + JSON.stringify(filenames) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']);
     var tbr = false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'fn':filenames,csrf_token: csrfToken},
+        data: {
+          fn:filenames,
+          newdatatime,
+          csrf_token: csrfToken
+        },
         success: function(data) {
             var jsondata = JSON.parse(data);
             if (jsondata.status === 'fail') {
