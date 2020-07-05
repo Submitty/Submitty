@@ -13,10 +13,10 @@ def up(config, database, semester, course):
     daemoncgi_group = config.submitty_users['daemoncgi_group']
 
     # set the owner/group/permissions
-    os.system("chown -R "+php_user+":"+daemoncgi_group+" "+str(tmp_cgi_dir))
-    os.system("chmod -R u+rwx  "+str(tmp_cgi_dir))
-    os.system("chmod -R g+rwxs "+str(tmp_cgi_dir))
-    os.system("chmod -R o-rwx  "+str(tmp_cgi_dir))
+    chown_res = subprocess.check_output(["chown", "-R", php_user + ":" + daemoncgi_group + " ", str(tmp_cgi_dir)])
+    chmod_user_res = subprocess.check_output(["chmod", "-R", "u+rwx", str(tmp_cgi_dir)])
+    chmod_group_res = subprocess.check_output(["chmod", "-R", "g+rwxs", str(tmp_cgi_dir)])
+    chmod_other_res = subprocess.check_output(["chmod", "-R", "o-rwx", str(tmp_cgi_dir)])
 
 def down(config, database, semester, course):
     pass

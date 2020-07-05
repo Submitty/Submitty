@@ -942,7 +942,7 @@ class UsersController extends AbstractController {
             'user_password' => 'user_password cannot be blank',
             'user_preferred_firstname' => 'Preferred first name must be alpha characters, white-space, or certain punctuation.',
             'user_preferred_lastname' => 'Preferred last name must be alpha characters, white-space, or certain punctuation.'
-            ];
+        ];
         foreach ($uploaded_data as $row_num => $vals) {
             // When record contain just one field, only check for valid user_id
             if (count($vals) === 1) {
