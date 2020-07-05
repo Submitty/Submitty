@@ -976,8 +976,8 @@ function downloadStudentAnnotations(url, path, dir) {
     //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
-    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
+function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
+    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`;
     return false;
 }
 
@@ -1614,4 +1614,49 @@ function enableKeyToClick(){
       }
     });
   }
+}
+
+/**
+ * Function for instructor to flag/unflag a user's preferred photo as inappropriate.
+ *
+ * @param user_id The user_id of the user who's preferred photo should be flagged
+ * @param flag A boolean indicating whether to flag or unflag the image.
+ *             True to flag
+ *             False to unflag
+ */
+function flagUserImage(user_id, flag) {
+    let message;
+
+    if (flag) {
+        message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
+    }
+    else {
+        message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
+    }
+
+    const confirmed = confirm(message);
+
+    if (confirmed) {
+        const input_elem = document.createElement('input');
+        input_elem.setAttribute('name', 'user_id');
+        input_elem.setAttribute('value', user_id);
+
+        const token_elem = document.createElement('input');
+        token_elem.setAttribute('name', 'csrf_token');
+        token_elem.setAttribute('value', csrfToken);
+
+        const flag_elem = document.createElement('input');
+        flag_elem.setAttribute('name', 'flag');
+        flag_elem.setAttribute('value', flag);
+
+        const form = document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', buildCourseUrl(['flag_user_image']));
+        form.appendChild(input_elem);
+        form.appendChild(token_elem);
+        form.appendChild(flag_elem);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
