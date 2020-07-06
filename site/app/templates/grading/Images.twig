@@ -1,5 +1,5 @@
 <div class="content">
-    {% if hasInstructorPermission %}
+    {% if has_full_access %}
         <div style="float: right; margin-bottom: 20px;">
             <a onclick="newUploadImagesForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Student Photos</a>
         </div>
@@ -28,7 +28,7 @@
                             <div class="name">
                                 <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                                 <br />{{student.getId()}}
-                                {% if hasInstructorPermission %}
+                                {% if has_full_access %}
                                     {% if student.getDisplayImageState() == 'preferred' %}
                                         <a href="javascript:flagUserImage('{{ student.getId() }}', true)"><i class="fas fa-flag"></i></a>
                                     {% elseif student.getDisplayImageState() == 'flagged' %}

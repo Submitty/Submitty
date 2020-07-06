@@ -12,7 +12,7 @@ class ImagesView extends AbstractView {
      * @param User[] $students
      * @return string
      */
-    public function listStudentImages($students, $grader_sections, $instructor_permission) {
+    public function listStudentImages($students, $grader_sections, $has_full_access) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
@@ -22,7 +22,7 @@ class ImagesView extends AbstractView {
         $sections = [];
         foreach ($students as $student) {
             $student_section = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-            if ($instructor_permission || in_array($student_section, $grader_sections)) {
+            if ($has_full_access || in_array($student_section, $grader_sections)) {
                 $sections[$student_section][] = $student;
             }
         }
@@ -33,7 +33,7 @@ class ImagesView extends AbstractView {
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
-            "hasInstructorPermission" => $instructor_permission,
+            "has_full_access" => $has_full_access,
             "csrf_token" => $this->core->getCsrfToken(),
             "max_size_string" => $max_size_string
         ]);

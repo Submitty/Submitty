@@ -18,12 +18,10 @@ class ImagesController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
-        $user_group = $this->core->getUser()->getGroup();
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
-
-        $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
+        $has_full_access = $this->core->getUser()->accessFullGrading();
         $students = $this->core->getQueries()->getAllUsers();
-        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $instructor_permission);
+        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $has_full_access);
     }
 
     /**
@@ -177,7 +175,7 @@ class ImagesController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function flagUserImage() {
         if ($_POST['flag'] === 'true') {
