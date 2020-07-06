@@ -63,13 +63,14 @@ def main():
             complete_config_schema_path,
             warn=False
         )
-    except Exception:
-        traceback.print_exc()
-        print()
+    except submitty_schema_validator.SubmittySchemaException as s:
+        s.print_human_readable_error()
         print("The submitty configuration validator detected the above error in your config.")
         print("This is a new feature. If you feel that an error was incorrectly identified,")
         print("please submit an error report at https://github.com/Submitty/Submitty")
         print()
+    except Exception:
+        traceback.print_exc()
 
 
 if __name__ == '__main__':
