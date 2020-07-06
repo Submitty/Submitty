@@ -384,9 +384,11 @@ class ElectronicGraderController extends AbstractController {
         //Check if this is a team project or a single-user project
         if ($gradeable->isTeamAssignment()) {
             $num_submitted = $this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
+            $late_submitted = $gradeable->getBadSubmissions($sections, 'registration_section');
         }
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
+            $late_submitted = $gradeable->getBadSubmissions($sections, $section_key);
         }
 
         if (count($sections) > 0) {
@@ -403,6 +405,7 @@ class ElectronicGraderController extends AbstractController {
                 $individual_viewed_grade = 0;
             }
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
+            $late_components = $gradeable->getBadGradedComponents($sections, $section_key);
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
@@ -462,7 +465,7 @@ class ElectronicGraderController extends AbstractController {
                     if (array_key_exists($key, $num_submitted)) {
                         $sections[$key] = [
                             'total_components' => $num_submitted[$key] * $num_components,
-                            'non_late_components' => ($num_submitted[$key] - $gradeable->getBadSubmissions($key, $section_key)) * $num_components,
+                            'non_late_components' => ($num_submitted[$key] - $late_submitted[$key]) * $num_components,
                             'graded_components' => 0,
                             'non_late_graded_components' => 0,
                             'graders' => []
@@ -484,9 +487,8 @@ class ElectronicGraderController extends AbstractController {
                     if (isset($graded_components[$key])) {
                         // Clamp to total components if unsubmitted assigment is graded for whatever reason
                         $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                        $sections[$key]['non_late_graded_components'] = $sections[$key]['graded_components'];
+                        $sections[$key]['non_late_graded_components'] = $sections[$key]['graded_components'] - $late_components[$key];
                     }
-                    $sections[$key]['non_late_graded_components'] -= $gradeable->getBadGradedComponents($key, $section_key);
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];
 

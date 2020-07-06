@@ -1422,25 +1422,31 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the number of components in this section that were graded and have a bad status
-     * @param int $section
-     * @return int The number of students who submitted with a non-good status
+     * @param array $sections
+     * @param String $section_key
+     * @return array Where each key is section key and each value the number of students with graded bad submissions in that section
      */
     public function getBadGradedComponents($section, $section_key){
         $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
-        $return = 0;
+        $return = [];
 
         $is_rotate = $section_key == 'rotating_section';
-        $is_regist = !$is_rotate;
-        foreach ($ggs as $key => $gg) {
+        foreach ($ggs as $gg) {
             $user = $gg->getSubmitter()->getUser();
-            if ($is_rotate && $user->getRotatingSection() == $section
-                || $is_regist && $user->getRegistrationSection() == $section) {
-                $late_days = LateDays::fromUser($this->core, $user);
-                $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
-                if ($late_status === LateDayInfo::STATUS_BAD) {
-                    $ta_graded = $gg->getOrCreateTaGradedGradeable();
-                    $return += $ta_graded->getComponentsGraded();
-                }  
+            $late_days = LateDays::fromUser($this->core, $user);
+            $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
+            if ($is_rotate) {
+                $key = $user->getRotatingSection();
+            }
+            else {
+                $key = $user->getRegistrationSection();
+            }
+            if (!array_key_exists($key, $return)){
+                $return[$key] = 0;
+            }
+            if ($late_status === LateDayInfo::STATUS_BAD) {
+                $ta_graded = $gg->getOrCreateTaGradedGradeable();
+                $return[$key] += $ta_graded->getComponentsGraded();
             }
         }
         return $return;
@@ -1448,25 +1454,30 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the number of students in a section with a bad status for this gradeable
-     * @param int $section
-     * @return int The number of students who submitted with a non-good status
+     * @param array $sections
+     * @param String $section_key
+     * @return array Where each key is section key and each value the number of students with bad submissions in that section
      */
-    public function getBadSubmissions($section, $section_key){
+    public function getBadSubmissions($sections, $section_key){
         $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
-        $return = 0;
+        $return = [];
 
-        //var_dump($section_key);
         $is_rotate = $section_key == 'rotating_section';
-        $is_regist = !$is_rotate;
-        foreach ($ggs as $key => $gg) {
+        foreach ($ggs as $gg) {
             $user = $gg->getSubmitter()->getUser();
-            if ($is_rotate && $user->getRotatingSection() == $section
-                || $is_regist && $user->getRegistrationSection() == $section) {
-                $late_days = LateDays::fromUser($this->core, $user);
-                $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
-                if ($late_status === LateDayInfo::STATUS_BAD) {
-                    $return += 1;
-                }
+            $late_days = LateDays::fromUser($this->core, $user);
+            $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
+            if ($is_rotate) {
+                $key = $user->getRotatingSection();
+            }
+            else {
+                $key = $user->getRegistrationSection();
+            }
+            if (!array_key_exists($key, $return)){
+                $return[$key] = 0;
+            }
+            if ($late_status === LateDayInfo::STATUS_BAD) {
+                $return[$key] += 1;
             }
         }
         return $return;

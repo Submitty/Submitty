@@ -578,16 +578,15 @@
                 </div>
                 {% endif %}
 
-
             <div id="numerical-data" class="page-content">
                 <div class = "row">
                     <div class = "box col-md-6">
-
-                        <a class="btn btn-default" style="float: right"
-                            onclick="openStat(this, 'non-late-numerical-data'), this.blur()">
-                            Exclude Late Submissions
-                        </a>
-
+                        {% if not peer %}
+                            <a class="btn btn-default" style="float: right"
+                                onclick="changeLate()">
+                                Exclude Late Submissions
+                            </a>
+                        {% endif %}
                         {# LEFT CHUNK#}
                         {% if warnings|length > 0 %}
                             <ul>
@@ -735,7 +734,7 @@
                     <div class = "box col-md-6">
                         {% if not peer %}
                             <a class="btn btn-default" style="float: right"
-                                onclick="openStat(this, 'numerical-data'), this.blur()">
+                                onclick="changeLate()">
                                 Include Late Submissions
                             </a>
                         {% endif %}
@@ -920,6 +919,20 @@
 </body>
 {# Tab Buttons #}
 <script>
+
+    function changeLate() {
+        var include = document.getElementById("numerical-data");
+        var exclude = document.getElementById("non-late-numerical-data");
+
+        if (include.style.display === "none") {
+            exclude.style.display = "none"
+            include.style.display = "block"
+        }
+        else {
+            exclude.style.display = "block"
+            include.style.display = "none"
+        }
+    }
 
     function openStat(evt, statName) {
         // Declare all variables
