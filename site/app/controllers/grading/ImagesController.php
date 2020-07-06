@@ -18,10 +18,15 @@ class ImagesController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
+        $view = 'sections';
+        if (isset($_GET['view']) && $_GET['view'] === 'all') {
+            $view = 'all';
+        }
+
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
         $has_full_access = $this->core->getUser()->accessFullGrading();
         $students = $this->core->getQueries()->getAllUsers();
-        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $has_full_access);
+        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $has_full_access, $view);
     }
 
     /**

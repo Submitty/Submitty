@@ -12,7 +12,7 @@ class ImagesView extends AbstractView {
      * @param User[] $students
      * @return string
      */
-    public function listStudentImages($students, $grader_sections, $has_full_access) {
+    public function listStudentImages($students, $grader_sections, $has_full_access, $view) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
@@ -22,7 +22,18 @@ class ImagesView extends AbstractView {
         $sections = [];
         foreach ($students as $student) {
             $student_section = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-            if ($has_full_access || in_array($student_section, $grader_sections)) {
+            $student_belongs_to_grader = in_array($student_section, $grader_sections);
+
+            // Full access no sections or view all
+            if ($has_full_access && (empty($grader_sections) || $view === 'all')) {
+                $sections[$student_section][] = $student;
+            }
+            // Full access view sections
+            elseif ($has_full_access && $view === 'sections' && $student_belongs_to_grader) {
+                $sections[$student_section][] = $student;
+            }
+            // Limited access only show their sections
+            elseif ($student_belongs_to_grader) {
                 $sections[$student_section][] = $student;
             }
         }
@@ -35,7 +46,10 @@ class ImagesView extends AbstractView {
             "sections" => $sections,
             "has_full_access" => $has_full_access,
             "csrf_token" => $this->core->getCsrfToken(),
-            "max_size_string" => $max_size_string
+            "max_size_string" => $max_size_string,
+            "view" => $view,
+            "core" => $this->core,
+            "has_sections" => !empty($grader_sections)
         ]);
     }
 }
