@@ -1978,3 +1978,26 @@ header > * {
 .block {
   display: block;
 }
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    align-content: center;
+    animation: spin 2s linear infinite;
+    position: fixed; /* Sit on top of the page content */
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

@@ -472,7 +472,44 @@ class Gradeable extends AbstractModel {
         $parsedDates['late_days'] = intval($dates['late_days'] ?? 0);
         return $parsedDates;
     }
-
+    public function setRandomPeerGradersList(&$input) {
+        $bad_rows = [];
+        foreach ($input as $grader => $grading_list) {
+            if ($this->core->getQueries()->getUserById($grading_list[0]) == null) {
+                array_push($bad_rows, ($grading_list[0]));
+            }
+        }
+        if (!empty($bad_rows)) {
+            $msg = "The given user id is not valid: ";
+            array_walk(
+                $bad_rows,
+                function ($val) use (&$msg) {
+                    $msg .= " {$val}";
+                }
+            );
+            $this->core->addErrorMessage($msg);
+        }
+        else {
+            $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
+            $g_id = $this->getId();
+            $query_string = "";
+            if (count($input[0][1]) < 1) {
+                return;
+            }
+            foreach ($input as $grading_list) {
+                $grader = $grading_list[0];
+                for ($j = 0; $j < count($grading_list[1]); $j++) {
+                    $peer = $grading_list[1][$j];
+                    $query_string .= " ('$grader', '$peer','$g_id'),";
+                }
+            }
+            $query_string = chop($query_string, ',');
+            $query_string .= ";";
+                $this->core->getQueries()->insertBulkPeerGradingAssignment($query_string);
+                $this->modified = true;
+                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+        }
+    }
     public function setPeerGradersList($input) {
         $bad_rows = [];
         foreach ($input as $row_num => $vals) {
