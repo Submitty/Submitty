@@ -347,7 +347,7 @@ td>a.active-sort {
     color: var(--always-default-white);
 }
 
-.content.gradeable_message a{
+.content.gradeable_message a {
     color: var(--always-default-white);
 }
 
@@ -685,10 +685,10 @@ td>a.active-sort {
     margin-right: 10px;
 }
 
-.diff-element {
-    float: left;
-    margin-right: 20px;
-}
+/*.diff-element {*/
+/*    float: left;*/
+/*    margin-right: 20px;*/
+/*}*/
 
 .badge {
     float: left;
@@ -1948,9 +1948,23 @@ header > * {
     color: unset;
 }
 
+@media (max-width: 541px) {
+    .content {
+        padding: 30px 15px;
+    }
+
+    .box-block {
+        margin-left: 0;
+    }
+
+    .file-upload-table {
+        font-weight: 200;
+    }
+}
+
 @media (min-width: 541px) {
     .content {
-    margin: 30px;
+        margin: 30px;
         max-height: none;
     }
 
