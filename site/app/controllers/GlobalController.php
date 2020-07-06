@@ -317,6 +317,14 @@ class GlobalController extends AbstractController {
             }
 
             $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['user-profile-setting']),
+                "title" => "My Profile",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-collapse",
+                "icon" => "fa-user"
+            ]);
+
+            $sidebar_buttons[] = new Button($this->core, [
                 "href" => "javascript: toggleSidebar();",
                 "title" => "Collapse Sidebar",
                 "class" => "nav-row",
