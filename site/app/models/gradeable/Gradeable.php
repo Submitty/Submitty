@@ -1422,11 +1422,10 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the number of components in this section that were graded and have a bad status
-     * @param array $sections
      * @param String $section_key
      * @return array Where each key is section key and each value the number of students with graded bad submissions in that section
      */
-    public function getBadGradedComponents($section, $section_key){
+    public function getBadGradedComponents($section_key) {
         $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
         $return = [];
 
@@ -1446,7 +1445,7 @@ class Gradeable extends AbstractModel {
             else {
                 $key = $user->getRegistrationSection();
             }
-            if (!array_key_exists($key, $return)){
+            if (!array_key_exists($key, $return)) {
                 $return[$key] = 0;
             }
             if ($late_status === LateDayInfo::STATUS_BAD) {
@@ -1459,11 +1458,10 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the number of students or teams in a section with a bad status for this gradeable
-     * @param array $sections
      * @param String $section_key
      * @return array Where each key is section key and each value the number of students or teams with bad submissions in that section
      */
-    public function getBadSubmissionsByGradingSection($sections, $section_key){
+    public function getBadSubmissionsByGradingSection($section_key) {
         $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
         $return = [];
 
@@ -1483,7 +1481,7 @@ class Gradeable extends AbstractModel {
             else {
                 $key = $user->getRegistrationSection();
             }
-            if (!array_key_exists($key, $return)){
+            if (!array_key_exists($key, $return)) {
                 $return[$key] = 0;
             }
             if ($late_status === LateDayInfo::STATUS_BAD) {

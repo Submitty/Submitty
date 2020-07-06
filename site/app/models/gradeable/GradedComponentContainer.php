@@ -265,8 +265,7 @@ class GradedComponentContainer extends AbstractModel {
      * @return int
      */
     public function getComponentsGraded() {
-        $graders = count($this->graded_components);
-        return $graders;
+        return count($this->graded_components);
     }
 
     /**
