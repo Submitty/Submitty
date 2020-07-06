@@ -519,11 +519,23 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
                     $info["graded_groups"][] = 4;
                 }
+                elseif (($component->isPeer() && $graded_component != null)) {
+                    //peer submitted and graded
+                    $info["graded_groups"][] = 4;
+                }
+                elseif (($component->isPeer() && $graded_component === null)) {
+                    //peer submitted but not graded
+                    $info["graded_groups"][] = "peer-null";
+                }
+                elseif ($component->isPeer() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
+                    //peer not submitted
+                    $info["graded_groups"][] = "peer-no-submission";
+                }
                 elseif ($graded_component === null) {
-                    //not graded
+                    //non-peer not graded
                     $info["graded_groups"][] = "NULL";
                 }
                 elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {

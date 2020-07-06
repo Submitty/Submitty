@@ -1478,6 +1478,17 @@ end of styles used in the admin gradeable page
     1px 1px 0 var(--text-black);
 }
 
+/* styles for the colors for the electronic grader details page */
+/* color for no grader (PEER) */
+.grader-peer-null {
+    color: var(--default-white);
+    text-shadow:
+    -1px -1px 0 var(--text-black),
+    1px -1px 0 var(--text-black),
+    -1px 1px 0 var(--text-black),
+    1px 1px 0 var(--text-black);
+}
+
 /* color for limited access graders who were verifed */
 .grader-verified{
                                         /* yellow       green   */
@@ -1505,6 +1516,9 @@ end of styles used in the admin gradeable page
     color: var(--standard-vibrant-green) /* green */
 }
 
+.hideHighlights{
+    display:none;
+}
 /* color for double graded */
 .grader-double {
     color: var(--standard-vibrant-dark-blue)  /* dark blue */
