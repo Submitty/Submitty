@@ -106,7 +106,7 @@ class ElectronicGraderView extends AbstractView {
         }
         else {
             $graded_percentage = number_format(($graded / $total) * 100, 1);
-            $non_late_graded_percentage = number_format(($non_late_graded / $non_late_total) * 100, 1);
+            $non_late_graded_percentage = $non_late_total > 0 ? number_format(($non_late_graded / $non_late_total) * 100, 1) : 0;
         }
 
         if ($graded_percentage !== -1) {
@@ -166,7 +166,7 @@ class ElectronicGraderView extends AbstractView {
                     }
                     else {
                         $section['percentage'] = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
-                        $section['non_late_percentage'] = number_format(($section['non_late_graded_components'] / $section['non_late_components']) * 100, 1);
+                        $section['non_late_percentage'] = $section['non_late_components'] > 0 ? number_format(($section['non_late_graded_components'] / $section['non_late_components']) * 100, 1) : 0;
                     }
                     $section['graded'] = round($section['graded_components'] / $num_components, 1);
                     $section['non_late_graded'] = round($section['non_late_graded_components'] / $num_components, 1);

@@ -82,10 +82,12 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function isOnTimeSubmission(User $user) {
-        // var_dump($this->late_day_exceptions);
-        // var_dump($user);
-        $user = $this->getSubmitter()->getUser();
-        //var_dump($user);
+        if ($this->gradeable->isTeamAssignment()) {
+            $user = $this->getSubmitter()->getTeam()->getMemberUsersSorted()[0];
+        }
+        else {
+            $user = $this->getSubmitter()->getUser();
+        }
         $late_days = LateDays::fromUser($this->gradeable->core, $user);
         $late_status = $late_days->getLateDayInfoByGradeable($this->gradeable)->getStatus();
         return $late_status === LateDayInfo::STATUS_GOOD || $late_status === LateDayInfo::STATUS_LATE;

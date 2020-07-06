@@ -384,11 +384,11 @@ class ElectronicGraderController extends AbstractController {
         //Check if this is a team project or a single-user project
         if ($gradeable->isTeamAssignment()) {
             $num_submitted = $this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
-            $late_submitted = $gradeable->getBadSubmissions($sections, 'registration_section');
+            $late_submitted = $gradeable->getBadSubmissionsByGradingSection($sections, 'registration_section');
         }
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
-            $late_submitted = $gradeable->getBadSubmissions($sections, $section_key);
+            $late_submitted = $gradeable->getBadSubmissionsByGradingSection($sections, $section_key);
         }
 
         if (count($sections) > 0) {

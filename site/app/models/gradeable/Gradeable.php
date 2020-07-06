@@ -1432,7 +1432,12 @@ class Gradeable extends AbstractModel {
 
         $is_rotate = $section_key == 'rotating_section';
         foreach ($ggs as $gg) {
-            $user = $gg->getSubmitter()->getUser();
+            if ($this->isTeamAssignment()) {
+                $user = $gg->getSubmitter()->getTeam()->getMemberUsersSorted()[0];
+            }
+            else {
+                $user = $gg->getSubmitter()->getUser();
+            }
             $late_days = LateDays::fromUser($this->core, $user);
             $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
             if ($is_rotate) {
@@ -1453,18 +1458,23 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets the number of students in a section with a bad status for this gradeable
+     * Gets the number of students or teams in a section with a bad status for this gradeable
      * @param array $sections
      * @param String $section_key
-     * @return array Where each key is section key and each value the number of students with bad submissions in that section
+     * @return array Where each key is section key and each value the number of students or teams with bad submissions in that section
      */
-    public function getBadSubmissions($sections, $section_key){
+    public function getBadSubmissionsByGradingSection($sections, $section_key){
         $ggs = $this->core->getQueries()->getGradedGradeables([$this]);
         $return = [];
 
         $is_rotate = $section_key == 'rotating_section';
         foreach ($ggs as $gg) {
-            $user = $gg->getSubmitter()->getUser();
+            if ($this->isTeamAssignment()) {
+                $user = $gg->getSubmitter()->getTeam()->getMemberUsersSorted()[0];
+            }
+            else {
+                $user = $gg->getSubmitter()->getUser();
+            }
             $late_days = LateDays::fromUser($this->core, $user);
             $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
             if ($is_rotate) {
