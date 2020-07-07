@@ -746,7 +746,7 @@ HTML;
 
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() < 4) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable, $display_version);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
@@ -1154,7 +1154,7 @@ HTML;
         $components = $gradeable->getComponents();
         $components_details_array = [];
         $peer_details = [];
-        $graded_component_details = [];
+        $component_scores = [];
         $peer_details["graders"] = [];
         foreach ($components as $component) {
             if($component->isPeer()){
@@ -1163,11 +1163,7 @@ HTML;
                         if($graded_component !== null){
                             $peer_details["graders"][$component->getId()][] = $peer;
                             $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
-                            $graded_component_details[$component->getId()][$peer]["score"] = $graded_component->getTotalScore($peer);
-                            $graded_component_details[$component->getId()][$peer]["comment"] = "";
-                            if($graded_component->hasCustomMark()){
-                                $graded_component_details[$component->getId()][$peer]["comment"] = $graded_component->getComment();
-                            }
+                            $component_scores[$component->getId()][$peer] = $graded_component->getTotalScore($peer);
                         }
                     }
                 $component_details["title"] = $component->getTitle();
@@ -1190,7 +1186,7 @@ HTML;
             "peer_details"=>$peer_details,
             "components" => $components_details_array,
             "csrf_token" => $this->core->getCsrfToken(),
-            "graded_component_details" => $graded_component_details
+            "component_scores" => $component_scores
         ]);
     }
 
