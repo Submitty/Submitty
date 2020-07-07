@@ -92,7 +92,7 @@ $(document).ready(function () {
 
     ajaxCheckBuildStatus();
 
-    $('#peer_graders_list').change(function () {
+    $('input,select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
