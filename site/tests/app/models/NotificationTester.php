@@ -43,7 +43,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
                 'id' => 'test_notification_id',
                 'seen' => false,
                 'component' => 'test_component_view_only',
-                'created_at' => date('n/d g:i A'),
+                'created_at' => date('n/j g:i A'),
                 'elapsed_time' => 59,
                 'metadata' => json_encode([]),
                 'content' => 'test_content_view_only',
@@ -64,7 +64,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($normalNotifyDetails['to_user_id'], $normalNotification->getNotifyTarget());
 
         // Update the values using various setters
-        $created_at = date('n/d g:i A');
+        $created_at = date('n/j g:i A');
         $normalNotification->setComponent('updated_component');
         $normalNotification->setSeen(true);
         $normalNotification->setCreatedAt($created_at);
@@ -87,7 +87,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         // testing with empty notification details
         $emptyViewOnlyNotification =  Notification::createViewOnlyNotification($this->core, $this->notify_details['empty_view_only']);
         // notification should be null
-        $this->assertEquals(null, $emptyViewOnlyNotification);
+        $this->assertNull($emptyViewOnlyNotification);
 
         // Creating a simple view-only notification object
         $viewOnlyNotificationDetails = $this->notify_details['view_only'];
@@ -101,7 +101,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($viewOnlyNotificationDetails['metadata'], $viewOnlyNotification->getNotifyMetadata());
 
         // Update the values using various setters
-        $created_at = date('n/d g:i A');
+        $created_at = date('n/j g:i A');
         $viewOnlyNotification->setComponent('updated_component_view_only');
         $viewOnlyNotification->setSeen(true);
         $viewOnlyNotification->setElapsedTime(130);
@@ -128,8 +128,8 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $viewOnlyNotification = Notification::createViewOnlyNotification($this->core, $this->notify_details['view_only']);
 
         // Initially the metadata is empty array so the getUrl should return null
-        $this->assertEquals(null, Notification::getUrl($this->core, $simpleNotification->getNotifyMetadata()));
-        $this->assertEquals(null, Notification::getUrl($this->core, $viewOnlyNotification->getNotifyMetadata()));
+        $this->assertNull(Notification::getUrl($this->core, $simpleNotification->getNotifyMetadata()));
+        $this->assertNull(Notification::getUrl($this->core, $viewOnlyNotification->getNotifyMetadata()));
 
         // set the metadata with some data other than url
         $simpleNotification->setNotifyMetadata(json_encode(["extra" => "some_extra_metadata"]));
@@ -197,7 +197,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("5 hours ago", $notification->getNotifyTime());
 
         $notification->setElapsedTime(90000); // 24 hrs 43 mins 20 secs
-        $created_at = date('n/d g:i A');
+        $created_at = date('n/j g:i A');
         $notification->setCreatedAt($created_at);
 
         $this->assertEquals($created_at, $notification->getNotifyTime());

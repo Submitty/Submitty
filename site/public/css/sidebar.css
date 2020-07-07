@@ -21,7 +21,7 @@ aside {
     }
 
     aside i  {
-        color: var(--text-black);
+        color: var(--text-black) !important;
         width: 30px;
         min-width: 30px;
         text-align: center;

@@ -37,7 +37,13 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = realpath($_POST['file_path']);
+        $file_path = ($_POST['file_path']);
+        $anon_id = explode("/", $file_path)[9];
+        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        if ($correct_user_id !== null) {
+            $file_path = str_replace($anon_id, $correct_user_id, $file_path);
+        }
+        $file_path = realpath($file_path);
         $directory = 'invalid';
         if (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
@@ -54,7 +60,7 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-        if ($file_path !== $_POST['file_path'] || !Utils::startsWith($file_path, $check_path)) {
+        if (!Utils::startsWith($file_path, $check_path)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
