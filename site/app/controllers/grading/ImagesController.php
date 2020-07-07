@@ -4,9 +4,11 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\models\DisplayImage;
 use app\models\User;
+use app\views\grading\ImagesView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
@@ -182,20 +184,35 @@ class ImagesController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
-    public function flagUserImage() {
+    public function flagUserImage(): JsonResponse {
+        $user_id = $_POST['user_id'];
+
         if ($_POST['flag'] === 'true') {
             $new_state = 'flagged';
-            $success_msg = $_POST['user_id'] . '\'s image was successfully flagged.';
-            $fail_msg = 'Some error occurred flagging ' . $_POST['user_id'] . '\'s image.';
+            $icon_html = ImagesView::UNDO_ICON_HTML;
+            $href = "javascript:flagUserImage('$user_id', false)";
         }
         else {
             $new_state = 'preferred';
-            $success_msg = $_POST['user_id'] . '\'s image was successfully unflagged.';
-            $fail_msg = 'Some error occurred unflagging ' . $_POST['user_id'] . '\'s image.';
+            $icon_html = ImagesView::FLAG_ICON_HTML;
+            $href = "javascript:flagUserImage('$user_id', true)";
         }
 
-        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], $new_state);
-        $result ? $this->core->addSuccessMessage($success_msg) : $this->core->addErrorMessage($fail_msg);
-        return new RedirectResponse($this->core->buildCourseUrl(['student_photos']));
+        $result = $this->core->getQueries()->updateUserDisplayImageState($user_id, $new_state);
+        $user = $this->core->getQueries()->getSubmittyUser($user_id);
+
+        if ($result) {
+            $display_image = $user->getDisplayImage();
+
+            return JsonResponse::getSuccessResponse([
+                'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                'image_data' => $display_image->getImageBase64MaxDimension(ImagesView::IMG_MAX_DIMENSION),
+                'image_mime_type' => $display_image->getMimeType(),
+                'icon_html' => $icon_html,
+                'href' => $href
+            ]);
+        }
+
+        return JsonResponse::getErrorResponse('There was an error flagging or unflagging the user\'s image');
     }
 }
