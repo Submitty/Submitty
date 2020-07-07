@@ -146,6 +146,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnonymous",
             'user_updated' => false,
             'instructor_updated' => false,
+            'display_image_state' => null,
             'notification_settings' => [
                 'reply_in_post_thread' => false,
                 'merge_threads' => false,

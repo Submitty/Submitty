@@ -342,10 +342,50 @@
     <td class="td-graded-questions">
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
-                {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
-                    <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                {% else %}
-                    <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+            {# Non-Peer View for Stoplights #}
+            {% if core.getUser().getGroup() < 4 %}
+                    {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
+                        <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                    {% else %}
+                        {% if info.graded_groups[index] =="peer-null"   %}
+                            {# Indicates Peer Component #}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                        {% elseif info.graded_groups[index] == 4   %}
+                            {# Indicates Graded Peer Component #}   
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                        {% else %}
+                            {# Indicates Non-Peer Component (Visible)#}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                        {% endif %}
+                    {% endif %}
+            {% endif %}
+            {# Peer View for Stoplights #} 
+            {% if core.getUser().getGroup() == 4 %}
+                    {# If no submission has been made, non peer should not be visible to peer grader #}
+                    {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
+                        {% if info.graded_groups[index] =="peer-null"   %}
+                            {# Indicates Ungraded Peer Component #}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL }}"></i>
+                        {% else %}
+                            {# Indicates Non-Peer Component (Hidden)#}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                        {% endif %}
+                    {% else %}
+                        {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
+                        {%  if info.graded_groups[index] == "peer-no-submission" %}
+                            {# Indicates Submitted but Ungraded Peer Component #}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                        {% elseif info.graded_groups[index] =="peer-null"   %}
+                            {# Indicates Non-Peer Component (Hidden) #}   
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+                        {% elseif info.graded_groups[index] < 4   %}
+                            {# Indicates Non-Peer Component (Hidden) #} 
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
+                        {% else %}
+                            {# Indicates Submitted and Graded Peer Component #} 
+                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                        {% endif %}
+                    {% endif %}
                 {% endif %}
             {%- endfor -%}
         </span>
@@ -434,9 +474,12 @@
                 {% set btn_class = "btn-primary" %}
             {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() or core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
-                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getTaPoints() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+                {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
+            {% set btn_class = "btn-default" %}
             {% endif %}
         {% endif %}
         {% if graded_gradeable.hasActiveRegradeRequest() %}

@@ -1,6 +1,7 @@
 {% set show_unresolve = false %}
 <data id="current-thread" value="{{ post_data[0].thread_id }}"></data>
-
+<a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
+<a class="skip-btn key_to_click" href="#reply_box_{{post_box_id}}" onclick="$('#reply_box_{{post_box_id}}').focus(); return false;">Skip to reply</a>
 {% for post_d in  post_data %}
 
     {% if (post_d.userGroup <= 3 or post_d.post.author_user_id == post_d.current_user) and post_d.first %}
@@ -57,7 +58,7 @@
         <input type="hidden" name="display_option" value="{{ display_option }}" />
         {% include "forum/ThreadPostForm.twig" with {
             "show_post" : true,
-            "post_content_placeholder" : "Enter your reply to all here...\nPress enter for newline or ctrl+enter to post",
+            "post_content_placeholder" : "Enter your reply to all here...\nPress enter for newline or ctrl+enter to post\nPress escape to exit textbox",
             "show_merge_thread_button" : true,
             "post_box_id" : post_box_id,
             "attachment_script" : true,
@@ -65,6 +66,7 @@
             "show_unresolve": show_unresolve,
             "show_anon" : true,
             "submit_label" : "Submit Reply to All",
+            "thread_id": thread_id,
         } %}
 
     </form>
@@ -81,3 +83,9 @@
         "possibleMerges" : merge_thread_content.possibleMerges
     } %}
 {% endif %}
+
+<script>
+  // This must be rerun for when this post loaded in on a page that already exists
+  // Otherwise the enter/spacebar keys wont work on buttons on this post
+  enableKeyToClick();
+</script>
