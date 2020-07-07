@@ -57,3 +57,8 @@ th{
     margin: 0 0 1em;
     width: 100%;
 }
+
+#announcement {
+  background: var(--standard-light-gray);
+  padding: .75rem;
+}
