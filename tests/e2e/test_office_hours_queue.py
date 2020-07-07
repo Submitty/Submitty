@@ -289,7 +289,7 @@ class TestOfficeHoursQueue(BaseTestCase):
 
 def enableQueue(self):
     self.log_in(user_id='instructor')
-    self.get(f"/courses/{self.get_current_semester()}/sample/config")
+    self.get(f"/courses/{self.semester}/sample/config")
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
         self.driver.find_element(By.ID, 'queue-enabled').click()
