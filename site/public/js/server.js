@@ -1596,23 +1596,31 @@ $(document).ready(function() {
   enableKeyToClick();
 });
 
+function keyToClickKeydown(event){
+  if (event.keyCode === 13) {//ENTER key
+    event.preventDefault();
+    event.stopPropagation();
+    $(event.target).click();
+  }
+}
+
+function keyToClickKeyup(event){
+  if (event.keyCode === 32) { //SPACE key
+    event.preventDefault();
+    event.stopPropagation();
+    $(event.target).click();
+  }
+}
+
 function enableKeyToClick(){
-  var key_to_click = document.getElementsByClassName("key_to_click");
+  const key_to_click = document.getElementsByClassName("key_to_click");
   for (var i = 0; i < key_to_click.length; i++) {
-    key_to_click[i].addEventListener('keydown', function(event) {
-      if (event.keyCode === 13) {//ENTER key
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).click();
-      }
-    });
-    key_to_click[i].addEventListener('keyup', function(event) {
-      if (event.keyCode === 32) { //SPACE key
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).click();
-      }
-    });
+    //In case this function is run multiple times, we need to remove the old event listeners
+    key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
+    key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
+
+    key_to_click[i].addEventListener('keyup', keyToClickKeyup);
+    key_to_click[i].addEventListener('keydown', keyToClickKeydown);
   }
 }
 

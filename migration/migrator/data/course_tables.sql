@@ -1332,6 +1332,30 @@ CREATE TABLE IF NOT EXISTS queue_settings(
 
 -- end office hours queue
 
+-- begin online polling
+CREATE TABLE IF NOT EXISTS polls(
+    poll_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    question TEXT NOT NULL,
+    status TEXT NOT NULL,
+    release_date DATE NOT NULL
+);
+CREATE TABLE IF NOT EXISTS poll_options(
+    option_id integer NOT NULL,
+    order_id integer NOT NULL,
+    poll_id integer REFERENCES polls(poll_id),
+    response TEXT NOT NULL,
+    correct bool NOT NULL
+);
+CREATE TABLE IF NOT EXISTS poll_responses(
+    poll_id integer NOT NULL REFERENCES polls(poll_id),
+    student_id TEXT NOT NULL REFERENCES users(user_id),
+    option_id integer NOT NULL
+);
+
+-- end online polling
+
+
 --
 -- PostgreSQL database dump complete
 --
