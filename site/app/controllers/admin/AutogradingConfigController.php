@@ -249,8 +249,12 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
+        $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
+        $json_contents = file_get_contents($json_path);
+
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
-            'gradeable' => $gradeable
+            'gradeable' => $gradeable,
+            'gradeable_config_string' => $json_contents
         ]);
     }
 

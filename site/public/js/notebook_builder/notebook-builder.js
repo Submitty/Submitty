@@ -6,13 +6,18 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 class NotebookBuilder {
     constructor() {
+        // Setup object properties
         this.reorderable_widgets = [];
         this.selector = new SelectorWidget();
         this.form_options = new FormOptionsWidget();
 
+        // Setup fixed position widgets
         const main_div = document.getElementById('notebook-builder');
         main_div.appendChild(this.selector.render());
         main_div.appendChild(this.form_options.render());
+
+        // Load reorderable notebook widgets
+        this.load();
     }
 
     /**
@@ -49,6 +54,38 @@ class NotebookBuilder {
             notebook: notebook_array,
             testcases: []
         };
+    }
+
+    load() {
+        const json = this.cleanAndParseConfig();
+
+        json.notebook.forEach(cell => {
+            let widget;
+
+            switch (cell.type) {
+                case 'multiple_choice':
+                    widget = new MultipleChoiceWidget();
+                    break;
+                case 'markdown':
+                    widget = new MarkdownWidget();
+                    break;
+                case 'short_answer':
+                    widget = new ShortAnswerWidget();
+                    break;
+                default:
+                    break;
+            }
+
+            if (widget) {
+                widget.load(cell);
+                this.widgetAdd(widget);
+            }
+        });
+    }
+
+    cleanAndParseConfig() {
+        gradeable_config_string.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+        return JSON.parse(gradeable_config_string);
     }
 
     /**
