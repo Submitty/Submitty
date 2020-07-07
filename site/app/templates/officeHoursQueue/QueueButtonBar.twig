@@ -1,32 +1,25 @@
-{% if viewer.isGrader()%}
-  {% include('officeHoursQueue/QueueFilter.twig') %}
-  {% include('officeHoursQueue/QueueAnnouncement.twig') %}
+{% include('officeHoursQueue/QueueFilter.twig') %}
+{% include('officeHoursQueue/QueueAnnouncement.twig') %}
+<br>
+<div>
+  <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()">
+    Filter Settings
+  </button>
+  <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
+    Edit Announcement
+  </button>
+  <button id="auto_refresh_btn" class="btn btn-default filter_btn" type="button" onclick="toggleAutoRefresh()">
+    Turn On Auto Refresh
+  </button>
+  <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
+    Enable Notifications
+  </button>
+</div>
 
-  <p>
-    For more information: <a target=_blank href="https://submitty.org/grader/queue">
-    Managing the Office Hours Queue <i style="font-style:normal;" class="fa-question-circle"></i></a>
-    <br><br>
-  </p>
-  <div>
-    <button id="toggle_filter_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#filter-settings').show()">
-      Filter Settings
-    </button>
-    <button id="toggle_announcement_settings" class="btn btn-primary filter_btn" type="button" onclick="$('#announcement-settings').show()">
-      Edit Announcement
-    </button>
-    <button id="auto_refresh_btn" class="btn btn-default filter_btn" type="button" onclick="toggleAutoRefresh()">
-      Turn On Auto Refresh
-    </button>
-    <button id="notification_btn" class="btn btn-default filter_btn" type="button" onclick="enableNotifications()">
-      Enable Notifications
-    </button>
-  </div>
-
-  <style>
-    {% for color in viewer.getColors() %}
-      .row_color_{{loop.index0}}{
-        background: {{color}}!important;
-      }
-    {% endfor %}
-  </style>
-{% endif %}
+<style>
+  {% for color in viewer.getColors() %}
+    .row_color_{{loop.index0}}{
+      background: {{color}}!important;
+    }
+  {% endfor %}
+</style>

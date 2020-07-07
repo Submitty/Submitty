@@ -178,6 +178,9 @@
           $.get("{{base_url}}/new_status", function(newStatus) {
             $("#queue_status").replaceWith(newStatus);
           });
+          $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {
+            $("#queue_history").replaceWith(newStatus);
+          });
         }
       });
     }
