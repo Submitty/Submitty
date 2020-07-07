@@ -1154,13 +1154,12 @@ HTML;
         foreach ($components as $component) {
             if($component->isPeer()){
                 foreach($peers_to_list as $peer){
-                        getGradedComponentContainer
                         $graded_component_container = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
                         $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
                         if($graded_component !== null){
                             $peer_details["graders"][$component->getId()][] = $peer;
                             $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
-                            $component_scores[$component->getId()][$peer] = $graded_component->getScore();
+                            $component_scores[$component->getId()][$peer] = $graded_component_container->getTotalScore($peer);
                         }
                     }
                 $component_obj["title"] = $component->getTitle();
