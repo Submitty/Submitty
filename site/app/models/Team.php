@@ -37,8 +37,6 @@ class Team extends AbstractModel {
     protected $anon_id;
     /** @var array $assignment_settings */
     protected $assignment_settings;
-    /** @var string $anon_id */
-    protected $anon_id;
 
     /**
      * Team constructor.
