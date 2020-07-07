@@ -189,8 +189,8 @@ class PDFController extends AbstractController {
     }
 
    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
-     */
+    * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
+    */
     public function showGraderPDFEmbedded(string $gradeable_id) {
         // This is the embedded pdf annotator that we built.
         // User can be a team

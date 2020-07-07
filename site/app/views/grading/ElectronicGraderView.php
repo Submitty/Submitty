@@ -950,11 +950,11 @@ HTML;
         for ($index = 1; $index < count($file_path_parts); $index++) {
             if ($index == 9) {
                 $user_id[] = $file_path_parts[$index];
-                if($is_team){
+                if ($is_team) {
                     $anon_id = $this->core->getQueries()->getTeamsById($user_id)[$user_id[0]]->getAnonId();
                     $anon_path = $anon_path . "/" . $anon_id;
                 }
-                else{
+                else {
                     $anon_id = $this->core->getQueries()->getUsersById($user_id)[$user_id[0]]->getAnonId();
                     $anon_path = $anon_path . "/" . $anon_id;
                 }
