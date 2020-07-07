@@ -1308,7 +1308,6 @@ class ElectronicGraderController extends AbstractController {
         if ($this->tryGetGradeable($gradeable_id)->isTeamAssignment()) {
             $submitter_id = $this->core->getQueries()->getTeamFromAnon($anon_id)[$anon_id];
         }
-        
         else {
             $submitter_id = $this->core->getQueries()->getUserFromAnon($anon_id)[$anon_id];
         }
