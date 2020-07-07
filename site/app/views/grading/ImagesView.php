@@ -34,16 +34,16 @@ class ImagesView extends AbstractView {
             $student_section = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
             $student_belongs_to_grader = in_array($student_section, $grader_sections);
 
-            // Full access no sections or view all
             if ($has_full_access && (empty($grader_sections) || $view === 'all')) {
+                // Full access no sections or view all
                 $sections[$student_section][] = $student;
             }
-            // Full access view sections
             elseif ($has_full_access && $view === 'sections' && $student_belongs_to_grader) {
+                // Full access view sections
                 $sections[$student_section][] = $student;
             }
-            // Limited access only show their sections
             elseif ($student_belongs_to_grader) {
+                // Limited access only show their sections
                 $sections[$student_section][] = $student;
             }
         }
