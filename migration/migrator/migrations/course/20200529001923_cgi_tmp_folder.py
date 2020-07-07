@@ -1,6 +1,7 @@
 import os
 import grp
 from pathlib import Path
+import subprocess
 
 
 def up(config, database, semester, course):
@@ -13,7 +14,7 @@ def up(config, database, semester, course):
     daemoncgi_group = config.submitty_users['daemoncgi_group']
 
     # set the owner/group/permissions
-    subprocess.check_output(["chown", "-R", php_user + ":" + daemoncgi_group + " ", str(tmp_cgi_dir)])
+    subprocess.check_output(["chown", "-R", php_user + ":" + daemoncgi_group, str(tmp_cgi_dir)])
     subprocess.check_output(["chmod", "-R", "u+rwx", str(tmp_cgi_dir)])
     subprocess.check_output(["chmod", "-R", "g+rwxs", str(tmp_cgi_dir)])
     subprocess.check_output(["chmod", "-R", "o-rwx", str(tmp_cgi_dir)])
