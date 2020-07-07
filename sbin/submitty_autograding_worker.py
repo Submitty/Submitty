@@ -70,9 +70,9 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 os.remove(results_zip_tmp)
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
-                    queue_obj["done_time"]=dateutils.write_submitty_date(microseconds=True)
+                    queue_obj["done_time"]=dateutils.write_submitty_date(milliseconds=True)
                 with open(done_queue_file, 'w') as outfile:
-                    json.dump(queue_obj, outfile, sort_keys=True, indent=4)        
+                    json.dump(queue_obj, outfile, sort_keys=True, indent=4)
             except Exception as e:
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + ". for more details, see traces entry.")
                 autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, JOB_ID,trace=traceback.format_exc())
@@ -95,7 +95,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
-                    queue_obj["done_time"]=dateutils.write_submitty_date(microseconds=True)
+                    queue_obj["done_time"]=dateutils.write_submitty_date(milliseconds=True)
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
             finally:
@@ -114,7 +114,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
             counter += 1
             time.sleep(1)
 
-                
+
 # ==================================================================================
 # ==================================================================================
 def launch_workers(my_name, my_stats):
@@ -190,6 +190,8 @@ def read_autograding_worker_json():
             #grab the key and the value. NOTE: For now there should only ever be one pair.
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
+    except FileNotFoundError as e:
+        raise SystemExit("autograding_worker.json not found. Have you registered this worker with a Submitty host yet?") from e
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, trace=traceback.format_exc())
         raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))

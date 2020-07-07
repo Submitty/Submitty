@@ -14,6 +14,90 @@ class TestDateUtils(TestCase):
             2016, 10, 14, 22, 11, 32, 0
         ))
     )
+    def test_write_submitty_date_default(self, current_time):
+        date = dateutils.write_submitty_date()
+        self.assertTrue(current_time.called)
+        self.assertEqual('2016-10-14 22:11:32-0400', date)
+
+    @patch(
+        "submitty_utils.dateutils.get_timezone",
+        return_value=pytz_timezone('America/New_York')
+    )
+    def test_write_submitty_date(self, get_timezone):
+        testcases = (
+            (
+                datetime(2020, 6, 12, 3, 21, 30, tzinfo=pytz_timezone('UTC')),
+                '2020-06-12 03:21:30+0000'
+            ),
+            (
+                datetime(2020, 12, 25, 3, 21, 30, tzinfo=pytz_timezone('UTC')),
+                '2020-12-25 03:21:30+0000'
+            ),
+            (
+                datetime(2020, 6, 12, 3, 21, 30, 123, tzinfo=pytz_timezone('UTC')),
+                '2020-06-12 03:21:30+0000'
+            ),
+            (
+                datetime(2020, 6, 12, 3, 21, 30),
+                '2020-06-12 03:21:30-0400'
+            ),
+            (
+                datetime(2020, 12, 12, 3, 21, 30),
+                '2020-12-12 03:21:30-0500'
+            )
+        )
+        for testcase in testcases:
+            with self.subTest(i=testcase[0]):
+                self.assertEqual(
+                    testcase[1],
+                    dateutils.write_submitty_date(testcase[0])
+                )
+
+
+    @patch(
+        "submitty_utils.dateutils.get_timezone",
+        return_value=pytz_timezone('America/New_York')
+    )
+    def test_write_submitty_date_microseconds(self, get_timezone):
+        testcases = (
+            (
+                datetime(2020, 6, 12, 3, 21, 30, tzinfo=pytz_timezone('UTC')),
+                '2020-06-12 03:21:30.000+0000'
+            ),
+            (
+                datetime(2020, 6, 12, 3, 21, 30, 123500, tzinfo=pytz_timezone('UTC')),
+                '2020-06-12 03:21:30.123+0000'
+            ),
+            (
+                datetime(2020, 6, 12, 3, 21, 30, 211500),
+                '2020-06-12 03:21:30.211-0400'
+            ),
+        )
+        for testcase in testcases:
+            with self.subTest(i=testcase[0]):
+                self.assertEqual(
+                    testcase[1],
+                    dateutils.write_submitty_date(testcase[0], True)
+                )
+
+    def test_invalid_type_write_submitty_date(self):
+        testcases = ('2020-06-12 03:21:30.123+0000', 10)
+        for testcase in testcases:
+            with self.subTest(testcase):
+                with self.assertRaises(TypeError) as cm:
+                    dateutils.write_submitty_date(10)
+                self.assertEqual(
+                    "Invalid type. Expected datetime or datetime string,"
+                    " got <class 'int'>.",
+                    str(cm.exception)
+                )
+
+    @patch(
+        "submitty_utils.dateutils.get_current_time",
+        return_value=pytz_timezone('America/New_York').localize(datetime(
+            2016, 10, 14, 22, 11, 32, 0
+        ))
+    )
     @patch(
         "submitty_utils.dateutils.get_timezone",
         return_value=pytz_timezone('America/New_York')

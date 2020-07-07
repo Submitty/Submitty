@@ -391,7 +391,7 @@ HTML;
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
             if ($gradeable->isTeamAssignment()) {
-                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
+                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
             }
             else {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
@@ -401,7 +401,7 @@ HTML;
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_peer"];
+                $columns[]     = ["width" => "20%", "title" => "Manual Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
@@ -519,11 +519,23 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
                     $info["graded_groups"][] = 4;
                 }
+                elseif (($component->isPeer() && $graded_component != null)) {
+                    //peer submitted and graded
+                    $info["graded_groups"][] = 4;
+                }
+                elseif (($component->isPeer() && $graded_component === null)) {
+                    //peer submitted but not graded
+                    $info["graded_groups"][] = "peer-null";
+                }
+                elseif ($component->isPeer() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
+                    //peer not submitted
+                    $info["graded_groups"][] = "peer-no-submission";
+                }
                 elseif ($graded_component === null) {
-                    //not graded
+                    //non-peer not graded
                     $info["graded_groups"][] = "NULL";
                 }
                 elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
@@ -927,6 +939,27 @@ HTML;
             "discussion_forum_content" => $posts_view
         ]);
     }
+    
+    /**
+     * Replace the userId with the corresponding anon_id in the given file_path
+     * @param string $file_path
+     * @return string $anon_path
+     */
+    public function setAnonPath($file_path) {
+        $file_path_parts = explode("/", $file_path);
+        $anon_path = "";
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index == 9) {
+                $user_id[] = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]]->getAnonId();
+                $anon_path = $anon_path . "/" . $anon_id;
+            }
+            else {
+                $anon_path = $anon_path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $anon_path;
+    }
 
     /**
      * Render the Submissions and Results Browser panel
@@ -935,11 +968,13 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        $user_ids = [];
         $add_files = function (&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = [];
             if ($new_files) {
                 foreach ($new_files as $file) {
+                    if ($start_dir_name == "submissions") {
+                        $file["path"] = $this->setAnonPath($file["path"]);
+                    }
                     $path = explode('/', $file['relative_name']);
                     array_pop($path);
                     $working_dir = &$files[$start_dir_name];
@@ -972,6 +1007,13 @@ HTML;
             $add_files($results, $display_version_instance->getResultsFiles(), 'results');
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
+        $student_grader = false;
+        if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            $student_grader = true;
+        }
+        $submitter_id = $graded_gradeable->getSubmitter()->getId();
+        $anon_submitter_id = $graded_gradeable->getSubmitter()->getAnonId();
+        $user_ids[$anon_submitter_id] = $submitter_id;
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
@@ -980,8 +1022,9 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
-            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
-            "anon_submitter_id" => $graded_gradeable->getSubmitter()->getAnonId(),
+            "submitter_id" => $submitter_id,
+            "student_grader" => $student_grader,
+            "anon_submitter_id" => $anon_submitter_id,
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
             "submissions" => $submissions,
