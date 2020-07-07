@@ -158,8 +158,8 @@ class TestDump(TestCase):
             self.assertEqual(COURSE_DB_EXPECTED, course_db.read_text())
             self.assertRegex(
                 sys.stdout.getvalue(),
-                r"Dumping master environment to .*/data/submitty_db.sql... DONE\\n" +
-                r"Dumping course environment to .*/data/course_tables.sql... DONE\\n"
+                r"Dumping master environment to .*/data/submitty_db.sql... DONE\n" +
+                r"Dumping course environment to .*/data/course_tables.sql... DONE\n"
             )
 
     @patch('migrator.main.subprocess.check_output', side_effect=[
