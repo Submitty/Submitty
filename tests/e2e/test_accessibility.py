@@ -53,6 +53,8 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/reports',
         '/courses/{}/{}/late_table',
         '/courses/{}/{}/grades',
+        '/courses/{}/{}/polls',
+        '/courses/{}/{}/polls/newPoll',
     ]
 
     urls_formatted = []

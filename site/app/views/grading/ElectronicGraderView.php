@@ -391,7 +391,7 @@ HTML;
         if ($peer) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
             if ($gradeable->isTeamAssignment()) {
-                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members"];
+                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
             }
             else {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id_anon"];
@@ -401,7 +401,7 @@ HTML;
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading_peer"];
+                $columns[]     = ["width" => "20%", "title" => "Manual Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
@@ -519,11 +519,23 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete() && $graded_component === null) {
+                if ($component->isPeer() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
                     $info["graded_groups"][] = 4;
                 }
+                elseif (($component->isPeer() && $graded_component != null)) {
+                    //peer submitted and graded
+                    $info["graded_groups"][] = 4;
+                }
+                elseif (($component->isPeer() && $graded_component === null)) {
+                    //peer submitted but not graded
+                    $info["graded_groups"][] = "peer-null";
+                }
+                elseif ($component->isPeer() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
+                    //peer not submitted
+                    $info["graded_groups"][] = "peer-no-submission";
+                }
                 elseif ($graded_component === null) {
-                    //not graded
+                    //non-peer not graded
                     $info["graded_groups"][] = "NULL";
                 }
                 elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {

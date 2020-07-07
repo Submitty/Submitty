@@ -37,6 +37,8 @@ class Team extends AbstractModel {
     protected $anon_id;
     /** @var array $assignment_settings */
     protected $assignment_settings;
+    /** @var string $anon_id */
+    protected $anon_id;
 
     /**
      * Team constructor.
@@ -96,13 +98,13 @@ class Team extends AbstractModel {
                     // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
                     // so just ignore this fact
                     /** @noinspection PhpUnhandledExceptionInspection */
-                    $random = "check";
+                    $random .= $alpha[random_int(0, $alpha_length)];
                 }
             } while (in_array($random, $anon_ids));
             $this->anon_id = $random;
-            $this->core->getQueries()->setTeamAnonId($this->getId(), $random);
+            $this->core->getQueries()->updateTeamAnonId($this->getId(), $random);
         }
-        return $this->anon_id;
+        return $this->core->getQueries()->getTeamAnonId($this->getId())[$this->getId()];
     }
 
     /**
