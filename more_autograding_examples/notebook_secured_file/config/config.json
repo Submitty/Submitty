@@ -108,7 +108,7 @@
         },
         {
             "type": "secure_file",
-            "markdown_string": "finalexam_<USERID>.pdf"
+            "filename": "finalexam_<USERID>.pdf"
         },
         {
             "type": "markdown",
@@ -116,7 +116,7 @@
         },
         {
             "type": "secure_file",
-            "markdown_string": [ "dataset_123.zip", "dataset_456.zip", "dataset_789.zip" ]
+            "filename_pool": [ "dataset_123.zip", "dataset_456.zip", "dataset_789.zip" ]
         },
 
         // ======================================================================================================
