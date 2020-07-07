@@ -131,6 +131,9 @@ class User extends AbstractModel {
     /** @prop @var array */
     protected $notification_settings = [];
 
+    /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
+    protected $display_image_state;
+
     /**
      * User constructor.
      *
@@ -190,6 +193,10 @@ class User extends AbstractModel {
             $this->setGradingRegistrationSections($details['grading_registration_sections']);
         }
 
+        if (isset($details['display_image_state'])) {
+            $this->display_image_state = $details['display_image_state'];
+        }
+
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
     }
 
@@ -247,6 +254,52 @@ class User extends AbstractModel {
      */
     public function getNiceFormatTimeZone(): string {
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+
+    /**
+     * Update the user's display image if they have uploaded a new one
+     *
+     * @param string $image_extension The extension, for example 'jpeg' or 'gif'
+     * @param string $tmp_file_path The temporary path to the file, where it can be collected from, processed, and saved
+     *                              elsewhere.
+     * @return bool true if the update was successful, false otherwise
+     * @throws \ImagickException
+     */
+    public function setDisplayImage(string $image_extension, string $tmp_file_path): bool {
+        $image_saved = true;
+
+        // Try saving image to its new spot in the file directory
+        try {
+            DisplayImage::saveUserImage($this->core, $this->id, $image_extension, $tmp_file_path, 'user_images');
+        }
+        catch (\Exception $exception) {
+            $image_saved = false;
+        }
+
+        // Update the DB to 'preferred'
+        if ($image_saved && $this->core->getQueries()->updateUserDisplayImageState($this->id, 'preferred')) {
+            $this->display_image_state = 'preferred';
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the user's DisplayImage object.
+     *
+     * @return DisplayImage|null The user's DisplayImage object, or null if an error occurred
+     */
+    public function getDisplayImage(): ?DisplayImage {
+        try {
+            $result = new DisplayImage($this->core, $this->id, $this->display_image_state);
+        }
+        catch (\Exception $exception) {
+            $result = null;
+        }
+
+        return $result;
     }
 
     /**

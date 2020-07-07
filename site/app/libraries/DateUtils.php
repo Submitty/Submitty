@@ -189,4 +189,15 @@ class DateUtils {
         $time = self::parseDateTime($time_stamp, $user->getUsableTimeZone());
         return $time->format($format);
     }
+
+    /**
+     * Get the current time formatted so that it can be used as a filename.  Naming files in this way makes files
+     * easily sorted by their creation time.
+     *
+     * @return string
+     */
+    public static function getFileNameTimeStamp(): string {
+        $time = new \DateTime();
+        return $time->format('YmdHis');
+    }
 }
