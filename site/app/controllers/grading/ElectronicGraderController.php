@@ -2482,7 +2482,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonFail('Could not fetch graded gradeable');
         }
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container){
+        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
             $component = $container->getComponent();
             $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
         }

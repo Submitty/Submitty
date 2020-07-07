@@ -1200,15 +1200,15 @@ HTML;
         $component_scores = [];
         $peer_details["graders"] = [];
         foreach ($components as $component) {
-            if($component->isPeer()){
-                foreach($peers_to_list as $peer){
-                        $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
-                        if($graded_component !== null){
-                            $peer_details["graders"][$component->getId()][] = $peer;
-                            $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
-                            $component_scores[$component->getId()][$peer] = $graded_component->getTotalScore($peer);
-                        }
+            if ($component->isPeer()) {
+                foreach ($peers_to_list as $peer) {
+                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById([$peer])[$peer]);
+                    if ($graded_component !== null) {
+                        $peer_details["graders"][$component->getId()][] = $peer;
+                        $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
+                        $component_scores[$component->getId()][$peer] = $graded_component->getTotalScore();
                     }
+                }
                 $component_details["title"] = $component->getTitle();
                 $component_details["marks"] = [];
                 $component_details["max"] = $component->getMaxValue();
@@ -1226,7 +1226,7 @@ HTML;
             "gradeable_id" => $gradeable->getId(),
             "peers" => $peers_to_list,
             "submitter_id" => $submitter,
-            "peer_details"=>$peer_details,
+            "peer_details" => $peer_details,
             "components" => $components_details_array,
             "csrf_token" => $this->core->getCsrfToken(),
             "component_scores" => $component_scores
