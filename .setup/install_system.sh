@@ -213,6 +213,9 @@ pip3 install pdf2image
 pip3 install opencv-python
 pip3 install numpy
 
+#python libraries for OCR for digit recognition
+pip3 install onnxruntime
+
 # Install an email catcher
 if [ ${VAGRANT} == 1 ]; then
     pip3 install nullsmtpd

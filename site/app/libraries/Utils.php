@@ -253,7 +253,7 @@ class Utils {
      * students_version is an array of user and their highest submitted version
      */
 
-    public static function getAutoFillData($students, $students_version = null): string {
+    public static function getAutoFillData($students, $students_version = null, $append_numeric_id = false): string {
         $students_full = new Set();
         $null_students = new Set();
         foreach ($students as $student) {
@@ -261,6 +261,10 @@ class Utils {
                 'value' => $student->getId(),
                 'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
             ];
+
+            if ($append_numeric_id) {
+                $student_entry['label'] .= ' <' . $student->getNumericId() . '>';
+            }
 
             if ($students_version !== null) {
                 if ($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
