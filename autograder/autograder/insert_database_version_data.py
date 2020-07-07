@@ -28,7 +28,7 @@ def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
 
-def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_team,version):
+def insert_to_database(semester, course, gradeable_id, user_id, team_id, who_id, is_team, version):
 
     non_hidden_non_ec = 0
     non_hidden_ec = 0
@@ -38,7 +38,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
     testcases = get_testcases(semester, course, gradeable_id)
     results = get_result_details(semester, course, gradeable_id, who_id, version)
     if len(testcases) != len(results['testcases']):
-      print("ERROR!  mismatched # of testcases {} != {}".format(len(testcases), len(results['testcases'])))
+        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
     for i in range(len(testcases)):
         if testcases[i]['hidden'] and testcases[i]['extra_credit']:
             hidden_ec += results['testcases'][i]['points']
@@ -50,13 +50,13 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
             non_hidden_non_ec += results['testcases'][i]['points']
     submission_time = results['submission_time']
 
-    db_name = "submitty_{}_{}".format(semester, course)
+    db_name = f"submitty_{semester}_{course}"
 
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
+        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}?host={DB_HOST}"
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{db_name}"
 
     engine = create_engine(conn_string)
     db = engine.connect()
@@ -81,8 +81,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
         if row[0] > 0:
             query_type = data_table\
                 .update(
-                    values=
-                    {
+                    values={
                         data_table.c.autograding_non_hidden_non_extra_credit:
                             bindparam("autograding_non_hidden_non_extra_credit"),
                         data_table.c.autograding_non_hidden_extra_credit:
@@ -123,8 +122,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
         if row[0] > 0:
             query_type = data_table\
                 .update(
-                    values=
-                    {
+                    values={
                         data_table.c.autograding_non_hidden_non_extra_credit:
                             bindparam("autograding_non_hidden_non_extra_credit"),
                         data_table.c.autograding_non_hidden_extra_credit:
@@ -182,10 +180,10 @@ def get_testcases(semester, course, g_id):
 
 def get_result_details(semester, course, g_id, who_id, version):
     """
-    Gets the result details for a particular version of a gradeable for the who (user or team). It returns a
-    dictionary that contains a list of the testcases (that should have a 1-to-1 correspondance
-    with the testcases gotten through get_testcases() method) and the submission time for the
-    particular version.
+    Gets the result details for a particular version of a gradeable for the who (user or team).
+    It returns a dictionary that contains a list of the testcases (that should have a 1-to-1
+    correspondence with the testcases gotten through get_testcases() method) and the submission
+    time for the particular version.
 
     :param semester:
     :param course:
@@ -207,7 +205,7 @@ def get_result_details(semester, course, g_id, who_id, version):
     if os.path.isfile(os.path.join(result_dir, "history.json")):
         with open(os.path.join(result_dir, "history.json")) as result_file:
             result_json = json.load(result_file)
-            #a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
+            # a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
             a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
             result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
                 .format(a.year, a.month, a.day, a.hour, a.minute, a.second)

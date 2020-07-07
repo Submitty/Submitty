@@ -27,9 +27,9 @@ class Output {
     private $buffer_output = true;
 
     private $output_buffer = "";
-    private $breadcrumbs = array();
+    private $breadcrumbs = [];
     private $page_name = "";
-    private $loaded_views = array();
+    private $loaded_views = [];
 
     /** @var Set */
     private $css;
@@ -100,17 +100,10 @@ class Output {
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
-            $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
-            [$mime_type, $mime_subtype] = explode('/', mime_content_type($path), 2);
-            if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
-                // Read image path, convert to base64 encoding
-                $image_data = base64_encode(file_get_contents($path));
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
-<img alt="${title}" src="data:image/${mime_subtype};base64,${image_data}" width="150" height="200" />
+<img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
 HTML;
-            }
-            throw new OutputException('Invalid path to image file');
         }, ['is_safe' => ['html']]));
 
         $this->twig->addFunction(new \Twig\TwigFunction("plurality_picker", function ($num, $single, $plural) {
@@ -121,8 +114,6 @@ HTML;
         }, ["is_safe" => ["html"]]));
 
         if ($full_load) {
-            $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
-                ->setTimezone($this->core->getConfig()->getTimezone());
             if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
@@ -207,7 +198,7 @@ HTML;
         if (is_array($view)) {
             $view = implode("\\", $view);
         }
-        $func = call_user_func_array(array($this->getView($view), $function), $args);
+        $func = call_user_func_array([$this->getView($view), $function], $args);
         if ($func === false) {
             throw new OutputException("Cannot find function '{$function}' in requested view '{$view}'");
         }
@@ -344,7 +335,7 @@ HTML;
         try {
             return $this->twig->render($filename, $context);
         }
-        catch (\Twig_Error $e) {
+        catch (\Twig\Error\Error $e) {
             throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
         }
     }
@@ -599,5 +590,16 @@ HTML;
      */
     public function buildCourseUrl(array $parts): string {
         return $this->core->buildCourseUrl($parts);
+    }
+
+    /**
+     * Set the time zone that the twig date filter should display times in.  This will typically be set to the
+     * logged in user's time zone.  If a user's time zone has not been set then the server time zone will be used.
+     *
+     * @param string $time_zone A time zone available in DateUtils::getAvailableTimeZones()
+     */
+    public function setTwigTimeZone(string $time_zone): void {
+        $tz = $time_zone === 'NOT_SET/NOT_SET' ? $this->core->getConfig()->getTimezone() : $time_zone;
+        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)->setTimezone($tz);
     }
 }

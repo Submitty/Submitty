@@ -6,41 +6,41 @@ use app\libraries\database\PostgresqlDatabase;
 
 class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
     public function testPostgresqlHost() {
-        $database = new PostgresqlDatabase(array('host' => 'localhost'));
+        $database = new PostgresqlDatabase(['host' => 'localhost']);
         $this->assertEquals("pgsql:host=localhost", $database->getDSN());
     }
 
     public function testPostgresqlPort() {
-        $database = new PostgresqlDatabase(array('port' => '15432'));
+        $database = new PostgresqlDatabase(['port' => '15432']);
         $this->assertEquals('pgsql:port=15432', $database->getDSN());
     }
 
     public function testPostgresqlDbname() {
-        $database = new PostgresqlDatabase(array('dbname' => 'submitty'));
+        $database = new PostgresqlDatabase(['dbname' => 'submitty']);
         $this->assertEquals('pgsql:dbname=submitty', $database->getDSN());
     }
 
     public function arrayData() {
-        return array(
-            array('{}', array()),
-            array('{{}, {}}', array(array(),array())),
-            array('{1, 2, 3, 4}', array(1,2,3,4)),
-            array('{1.5, 2, 4, 5.5}', array(1.5,2,4,5.5)),
-            array('{{"breakfast", "consulting"}, {"meeting", "lunch"}}',
-                  array(array('breakfast','consulting'), array('meeting', 'lunch'))),
-            array('{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}',
-                  array(array('breakfast','test'),array(array('another','array'),array('test','me')))),
-            array('{"true", "false"}', array("true", "false")),
-            array('{"M5"}', array('M5')),
-            array('{"aa", null, "null", null}', array('aa', null, "null", null)),
-            array('{"aaa\"bbb\nccc"}', array('aaa"bbb\nccc')),
-            array('{"yes?{}", "", "blah/yes(more).' . "\n" . '", "\"aaaa. \""}', array("yes?{}", "", "blah/yes(more).\n", '"aaaa. "')),
-            array('{"\\\\"}', array("\\")),
-            array('{"a,b,c\\\\"}', array("a,b,c\\")),
-            array('{"a,b,c\'"}', array("a,b,c'")),
-            array('{"a,b,c\\""}', array("a,b,c\"")),
-            array('{{"a"}, {"b"}, {"c\\""}}', array(array("a"),array("b"),array("c\"")))
-        );
+        return [
+            ['{}', []],
+            ['{{}, {}}', [[],[]]],
+            ['{1, 2, 3, 4}', [1,2,3,4]],
+            ['{1.5, 2, 4, 5.5}', [1.5,2,4,5.5]],
+            ['{{"breakfast", "consulting"}, {"meeting", "lunch"}}',
+                  [['breakfast','consulting'], ['meeting', 'lunch']]],
+            ['{{"breakfast", "test"}, {{"another", "array"}, {"test", "me"}}}',
+                  [['breakfast','test'],[['another','array'],['test','me']]]],
+            ['{"true", "false"}', ["true", "false"]],
+            ['{"M5"}', ['M5']],
+            ['{"aa", null, "null", null}', ['aa', null, "null", null]],
+            ['{"aaa\"bbb\nccc"}', ['aaa"bbb\nccc']],
+            ['{"yes?{}", "", "blah/yes(more).' . "\n" . '", "\"aaaa. \""}', ["yes?{}", "", "blah/yes(more).\n", '"aaaa. "']],
+            ['{"\\\\"}', ["\\"]],
+            ['{"a,b,c\\\\"}', ["a,b,c\\"]],
+            ['{"a,b,c\'"}', ["a,b,c'"]],
+            ['{"a,b,c\\""}', ["a,b,c\""]],
+            ['{{"a"}, {"b"}, {"c\\""}}', [["a"],["b"],["c\""]]]
+        ];
     }
 
     /**
@@ -70,19 +70,19 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
      */
     public function testBadPostgrestoPHP() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array(), $database->fromDatabaseToPHPArray('{,}'));
-        $this->assertEquals(array(array(),array()), $database->fromDatabaseToPHPArray('{{,},{,}}'));
+        $this->assertEquals([], $database->fromDatabaseToPHPArray('{,}'));
+        $this->assertEquals([[],[]], $database->fromDatabaseToPHPArray('{{,},{,}}'));
     }
     /**
      * Test that invalid input for PG returns null
      */
     public function testInvalidInputPostgres() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array(), $database->fromDatabaseToPHPArray(''));
-        $this->assertEquals(array(), $database->fromDatabaseToPHPArray(null));
-        $this->assertEquals(array(), $database->fromDatabaseToPHPArray('abcd'));
-        $this->assertEquals(array(), $database->fromDatabaseToPHPArray(1));
-        $this->assertEquals(array(), $database->fromDatabaseToPHPArray('{1,2'));
+        $this->assertEquals([], $database->fromDatabaseToPHPArray(''));
+        $this->assertEquals([], $database->fromDatabaseToPHPArray(null));
+        $this->assertEquals([], $database->fromDatabaseToPHPArray('abcd'));
+        $this->assertEquals([], $database->fromDatabaseToPHPArray(1));
+        $this->assertEquals([], $database->fromDatabaseToPHPArray('{1,2'));
     }
 
     /**
@@ -101,42 +101,42 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
 
     public function testNullPGArray() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array(null), $database->fromDatabaseToPHPArray('{NULL}'));
+        $this->assertEquals([null], $database->fromDatabaseToPHPArray('{NULL}'));
     }
 
     public function testSeatNumberPGToPHP() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array('M5'), $database->fromDatabaseToPHPArray('{M5}'));
+        $this->assertEquals(['M5'], $database->fromDatabaseToPHPArray('{M5}'));
     }
 
     public function testBooleanPGToPHP() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array(true, false, 'test'), $database->fromDatabaseToPHPArray("{true, false, 'test'}", true));
+        $this->assertEquals([true, false, 'test'], $database->fromDatabaseToPHPArray("{true, false, 'test'}", true));
     }
 
     public function testBooleanPHPToPG() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals('{true, false}', $database->fromPHPToDatabaseArray(array(true, false)));
+        $this->assertEquals('{true, false}', $database->fromPHPToDatabaseArray([true, false]));
     }
 
     public function testShortBooleanPGToPHP() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array(true, false, false, true), $database->fromDatabaseToPHPArray('{t, f, f, t}', true));
+        $this->assertEquals([true, false, false, true], $database->fromDatabaseToPHPArray('{t, f, f, t}', true));
     }
 
     public function testNullCasingPGToPHP() {
         $database = new PostgresqlDatabase();
-        $this->assertEquals(array(null, null, null), $database->fromDatabaseToPHPArray('{null, NULL, NuLl}'));
+        $this->assertEquals([null, null, null], $database->fromDatabaseToPHPArray('{null, NULL, NuLl}'));
     }
 
     public function booleanConverts() {
-        return array(
-            array(true, 'true'),
-            array(1, 'false'),
-            array(false, 'false'),
-            array(null, 'false'),
-            array("a", 'false')
-        );
+        return [
+            [true, 'true'],
+            [1, 'false'],
+            [false, 'false'],
+            [null, 'false'],
+            ["a", 'false']
+        ];
     }
 
     /**

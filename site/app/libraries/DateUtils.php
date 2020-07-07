@@ -2,6 +2,8 @@
 
 namespace app\libraries;
 
+use app\models\User;
+
 /**
  * Class DateUtils
  *
@@ -159,22 +161,43 @@ class DateUtils {
     }
 
     /**
-     * Compute the offset in hours and minutes between the given time zone identifier string, and the UTC timezone.
+     * Compute the offset in hours:minutes between the given time zone identifier string, and the UTC timezone.
      *
      * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()
-     * @return string The UTC offset, for example '+9.5 Hours' or '-5 Hours'
+     * @return string The UTC offset, for example '+9:30' or '-4:00'
      */
     public static function getUTCOffset(string $time_zone): string {
         if ($time_zone === 'NOT_SET/NOT_SET') {
-            return 'NOT_SET';
+            return 'NOT SET';
         }
 
-        // Convert offset to hours and then to string
-        $time_zone_obj = new \DateTimeZone($time_zone);
-        $offset = $time_zone_obj->getOffset(new \DateTime());
-        $offset_as_string = strval($offset / 3600) . ' Hours';
+        $time_stamp = new \DateTime('now', new \DateTimeZone($time_zone));
 
-        // Prepend a plus for non-negative offsets, minus is already included for negative offsets
-        return $offset >= 0 ? '+' . $offset_as_string : $offset_as_string;
+        return $time_stamp->format('P');
+    }
+
+    /**
+     * Converts the given time stamp string into the given user's time zone and then returns it according
+     * to the given format.
+     *
+     * @param User $user
+     * @param string $time_stamp
+     * @param string $format
+     * @return string
+     */
+    public static function convertTimeStamp(User $user, string $time_stamp, string $format): string {
+        $time = self::parseDateTime($time_stamp, $user->getUsableTimeZone());
+        return $time->format($format);
+    }
+
+    /**
+     * Get the current time formatted so that it can be used as a filename.  Naming files in this way makes files
+     * easily sorted by their creation time.
+     *
+     * @return string
+     */
+    public static function getFileNameTimeStamp(): string {
+        $time = new \DateTime();
+        return $time->format('YmdHis');
     }
 }

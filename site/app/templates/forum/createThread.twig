@@ -33,7 +33,7 @@
             "show_thread_status" : true,
             "show_announcement" : true,
             "show_editcat" : true,
-            "submit_label" : "Submit Post",
+            "submit_label" : "Publish thread",
             "manage_categories_url" : manage_categories_url,
             "email_enabled": email_enabled
         } %}
@@ -46,5 +46,6 @@
         enableTabsInTextArea("[name=thread_post_content]");
         $("#thread_form").submit(createThread);
         $("form").areYouSure();
+        initSocketClient();
     });
 </script>
