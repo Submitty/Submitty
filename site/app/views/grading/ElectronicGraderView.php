@@ -1142,48 +1142,55 @@ HTML;
         ]);
     }
     
-    public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable, int $display_version) {
+    /**
+     * Render the Grade Inquiry panel
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable) {
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
         $peers_to_list = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $submitter);
         $components = $gradeable->getComponents();
-        $marks_array = [];
+        $components_details_array = [];
         $peer_details = [];
-        $component_scores = [];
+        $graded_component_details = [];
         $peer_details["graders"] = [];
         foreach ($components as $component) {
             if($component->isPeer()){
                 foreach($peers_to_list as $peer){
-                        $graded_component_container = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
                         $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
                         if($graded_component !== null){
                             $peer_details["graders"][$component->getId()][] = $peer;
                             $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
-                            $component_scores[$component->getId()][$peer] = $graded_component_container->getTotalScore($peer);
+                            $graded_component_details[$component->getId()][$peer]["score"] = $graded_component->getTotalScore($peer);
+                            $graded_component_details[$component->getId()][$peer]["comment"] = "";
+                            if($graded_component->hasCustomMark()){
+                                $graded_component_details[$component->getId()][$peer]["comment"] = $graded_component->getComment();
+                            }
                         }
                     }
-                $component_obj["title"] = $component->getTitle();
-                $component_obj["marks"] = [];
-                $component_obj["max"] = $component->getMaxValue();
-                $component_obj["id"] = strval($component->getId());
+                $component_details["title"] = $component->getTitle();
+                $component_details["marks"] = [];
+                $component_details["max"] = $component->getMaxValue();
+                $component_details["id"] = strval($component->getId());
                 foreach ($component->getMarks() as $mark) {
-                    $component_obj["marks"][$mark->getId()]["id"] = $mark->getId();
-                    $component_obj["marks"][$mark->getId()]["title"] = $mark->getTitle();
-                    $component_obj["marks"][$mark->getId()]["points"] = $mark->getPoints();
+                    $component_details["marks"][$mark->getId()]["id"] = $mark->getId();
+                    $component_details["marks"][$mark->getId()]["title"] = $mark->getTitle();
+                    $component_details["marks"][$mark->getId()]["points"] = $mark->getPoints();
                 }
-                $marks_array[] = $component_obj;
+                $components_details_array[] = $component_details;
             }
         }
-        var_dump($component_scores);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
             "graded_gradeable" => $graded_gradeable,
             "gradeable_id" => $gradeable->getId(),
             "peers" => $peers_to_list,
             "submitter_id" => $submitter,
             "peer_details"=>$peer_details,
-            "components" => $marks_array,
+            "components" => $components_details_array,
             "csrf_token" => $this->core->getCsrfToken(),
-            "component_scores" => $component_scores
+            "graded_component_details" => $graded_component_details
         ]);
     }
 
@@ -1194,37 +1201,10 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
-       /* $gradeable = $graded_gradeable->getGradeable();
-        $submitter = $graded_gradeable->getSubmitter()->getId();
-        $peer_pairs = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
-        $peers_to_list = $peer_pairs[$submitter];
-        $components = $gradeable->getComponents();
-        $marks_array = [];
-        $peer_details = [];
-        foreach ($components as $component) {
-            foreach($peers_to_list as $peer){
-                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
-                    if($graded_component !== null){
-                        $peer_details["graders"][] = $peer;
-                        $peer_details["marks_assigned"][$peer] = $graded_component->getMarkIds();
-                    }
-                }
-            if($component->isPeer()){
-                $component_obj["title"] = $component->getTitle();
-                $component_obj["marks"] = [];
-                foreach ($component->getMarks() as $mark) {
-                    $component_obj["marks"][$mark->getId()]["id"] = $mark->getId();
-                    $component_obj["marks"][$mark->getId()]["title"] = $mark->getTitle();
-                }
-                $marks_array[] = $component_obj;
-            }
-        }
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
             "graded_gradeable" => $graded_gradeable,
-            "peers" => $peers_to_list,
-            "peer_details"=>$peer_details,
-            "components" => $marks_array
-        ]);*/
+            "can_inquiry" => $can_inquiry
+        ]);
     }
 
     public function popupStudents() {

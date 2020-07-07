@@ -5063,7 +5063,7 @@ AND gc_id IN (
      *
      * @param GradedComponent $graded_component
      */
-    public function deleteGradedComponent(GradedComponent $graded_component) {
+    private function deleteGradedComponent(GradedComponent $graded_component) {
         // Only the db marks need to be deleted since the others haven't been applied to the database
         $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
 
@@ -5116,7 +5116,7 @@ AND gc_id IN (
      *
      * @param TaGradedGradeable $ta_graded_gradeable
      */
-    public function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
+    private function updateGradedComponents(TaGradedGradeable $ta_graded_gradeable) {
         // iterate through graded components and see if any need updating/creating
         foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
             foreach ($container->getGradedComponents() as $component_grade) {

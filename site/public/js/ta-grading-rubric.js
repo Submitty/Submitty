@@ -2358,11 +2358,6 @@ function toggleComponent(component_id, saveChanges) {
 }
 
 function open_overall_comment_tab(user) {
-    $('#peer-grader-tabs').children().removeClass('active-btn');
-    $('#peer-grader-tab-' + user ).addClass('active-btn');
-}
-
-function open_peer_user_tab(user) {
     $('#overall-comments').children().hide();
     $('#overall-comment-tabs').children().removeClass('active-btn');
     $('#overall-comment-' + user ).show();

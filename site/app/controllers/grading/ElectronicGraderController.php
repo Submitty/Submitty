@@ -2382,11 +2382,11 @@ class ElectronicGraderController extends AbstractController {
         $peer_id = $_POST['peer_id'] ?? '';
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
-            return null;
+            $this->core->getOutput()->renderJsonFail('Could not fetch gradeable');
         }
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
-            return null;
+            $this->core->getOutput()->renderJsonFail('Could not fetch graded gradeable');
         }
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container){
