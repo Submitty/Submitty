@@ -1146,24 +1146,27 @@ HTML;
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
         $peers_to_list = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $submitter);
-        var_dump($peers_to_list);
         $components = $gradeable->getComponents();
         $marks_array = [];
         $peer_details = [];
         $component_scores = [];
+        $peer_details["graders"] = [];
         foreach ($components as $component) {
-            foreach($peers_to_list as $peer){
-                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
-                    if($graded_component !== null){
-                        $peer_details["graders"][] = $peer;
-                        $peer_details["marks_assigned"][$peer] = $graded_component->getMarkIds();
-                        $component_scores[$component->getId()][$peer] = $graded_component->getScore();
-                    }
-                }
             if($component->isPeer()){
+                foreach($peers_to_list as $peer){
+                        getGradedComponentContainer
+                        $graded_component_container = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
+                        $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById(array($peer))[$peer]);
+                        if($graded_component !== null){
+                            $peer_details["graders"][$component->getId()][] = $peer;
+                            $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
+                            $component_scores[$component->getId()][$peer] = $graded_component->getScore();
+                        }
+                    }
                 $component_obj["title"] = $component->getTitle();
                 $component_obj["marks"] = [];
                 $component_obj["max"] = $component->getMaxValue();
+                $component_obj["id"] = strval($component->getId());
                 foreach ($component->getMarks() as $mark) {
                     $component_obj["marks"][$mark->getId()]["id"] = $mark->getId();
                     $component_obj["marks"][$mark->getId()]["title"] = $mark->getTitle();
@@ -1171,8 +1174,8 @@ HTML;
                 }
                 $marks_array[] = $component_obj;
             }
-            
         }
+        var_dump($component_scores);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
             "graded_gradeable" => $graded_gradeable,
             "gradeable_id" => $gradeable->getId(),
