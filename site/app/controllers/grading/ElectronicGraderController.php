@@ -966,7 +966,7 @@ class ElectronicGraderController extends AbstractController {
      */
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
         $anon_mode = false;
-        if(empty($this->core->getQueries()->getTeamsById(array($who_id))) && $this->core->getQueries()->getUserById($who_id) == null){
+        if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
         /** @var Gradeable $gradeable */
@@ -982,13 +982,13 @@ class ElectronicGraderController extends AbstractController {
         }
         
         $peer_double_blind = false;
-        if($peer && $gradeable->getPeerBlind() == 3){
+        if ($peer && $gradeable->getPeerBlind() == 3) {
             $peer_double_blind = true;
         }
         
         $limited_access_blind = false;
         
-        if($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER){
+        if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
             $limited_access_blind = true;
         }
         

@@ -569,11 +569,11 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
-            if($gradeable->getPeerBlind() == 1){
+            if ($gradeable->getPeerBlind() == 1) {
                 $peer_aliases[$grader_id] = $grader_id;
             }
-            else{
-                $peer_aliases[$grader_id] = $alias;    
+            else {
+                $peer_aliases[$grader_id] = $alias;
             }
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $grader_id);
