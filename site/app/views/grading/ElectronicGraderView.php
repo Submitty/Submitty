@@ -474,7 +474,7 @@ HTML;
                 if ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2) {
                     $columns[]     = ["width" => "12%", "title" => "TA Grading",       "function" => "grading_blind"];
                 }
-                else{
+                else {
                     $columns[]     = ["width" => "8%",  "title" => "TA Grading",       "function" => "grading"];
                 }
                 $columns[]     = ["width" => "12%", "title" => "Total",            "function" => "total"];
