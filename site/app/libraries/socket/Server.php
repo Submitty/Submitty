@@ -39,6 +39,11 @@ class Server implements MessageComponentInterface {
         $request = $conn->httpRequest;
         $client_id = $conn->resourceId;
         $origin = $request->getHeader('origin')[0];
+        $user_agent = $request->getHeader('User-Agent')[0];
+
+        if ($user_agent === 'websocket-client-php') {
+            return true;
+        }
 
         $cookieString = $request->getHeader("cookie")[0];
         parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
@@ -167,20 +172,14 @@ class Server implements MessageComponentInterface {
 
         $msg = json_decode($msgString, true);
 
-        switch ($msg["type"]) {
-//                case "new_thread":
-//                case "new_post":
-//                    $user_id = $msg["data"]["user_id"];
-//                    if ($fromConn = $this->getSocketClient($user_id)) {
-//                        $this->broadcast($fromConn, $msgString, true);
-//                    }
-//                    else {
-//                        $this->broadcast($from, $msgString, true);
-//                    }
-//                    break;
-            default:
-                $this->broadcast($from, $msgString, false);
-                break;
+        if (isset($msg['user_id'])) {
+            $original_from = $this->getSocketClient($msg['user_id']);
+            unset($msg['user_id']);
+            $new_msg_string = json_encode($msg);
+            $this->broadcast($original_from, $new_msg_string, false);
+        }
+        else {
+            $this->broadcast($from, $msgString, false);
         }
     }
 

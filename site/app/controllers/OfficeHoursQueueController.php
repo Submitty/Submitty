@@ -10,6 +10,7 @@ use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
+use WebSocket;
 
 /**
  * Class OfficeHoursQueueController
@@ -146,6 +147,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name'], $contact_info);
+        $this->sendSocketMessage(['type' => 'queue_update']);
         $this->core->addSuccessMessage("Added to queue");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -186,6 +188,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $remove_type, $queue_code);
+        $this->sendSocketMessage(['type' => 'full_update']);
         $this->core->addSuccessMessage("Removed from queue");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -213,6 +216,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->restoreUserToQueue($_POST['entry_id']);
+        $this->sendSocketMessage(['type' => 'queue_status_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -239,6 +243,7 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->startHelpUser($_POST['user_id'], $queue_code);
+        $this->sendSocketMessage(['type' => 'queue_status_update']);
         $this->core->addSuccessMessage("Started helping student");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -278,6 +283,7 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->finishHelpUser($_POST['user_id'], $queue_code, $remove_type);
+        $this->sendSocketMessage(['type' => 'full_update']);
         $this->core->addSuccessMessage("Finished helping student");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -458,5 +464,12 @@ class OfficeHoursQueueController extends AbstractController {
                 new OfficeHoursQueueModel($this->core)
             )
         );
+    }
+
+    private function sendSocketMessage($msg_array) {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $client = new Websocket\Client("ws://" . $_SERVER['HTTP_HOST'] . "/ws/");
+        $client->send(json_encode($msg_array));
+        $client->close();
     }
 }
