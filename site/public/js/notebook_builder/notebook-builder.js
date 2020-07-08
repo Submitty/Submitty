@@ -57,7 +57,7 @@ class NotebookBuilder {
     }
 
     load() {
-        const json = this.cleanAndParseConfig();
+        const json = JSON.parse(window.gradeable_config_string);
 
         json.notebook.forEach(cell => {
             let widget;
@@ -81,11 +81,6 @@ class NotebookBuilder {
                 this.widgetAdd(widget);
             }
         });
-    }
-
-    cleanAndParseConfig() {
-        gradeable_config_string.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-        return JSON.parse(gradeable_config_string);
     }
 
     /**

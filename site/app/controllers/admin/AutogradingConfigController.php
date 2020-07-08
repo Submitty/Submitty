@@ -237,9 +237,6 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilder(string $g_id) {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
-
-        // Load JS and CSS dependencies
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
@@ -249,6 +246,7 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
         $json_contents = file_get_contents($json_path);
 

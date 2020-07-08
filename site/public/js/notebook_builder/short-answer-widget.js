@@ -55,6 +55,10 @@ class ShortAnswerWidget extends Widget {
         return this.state;
     }
 
+    load(data) {
+        this.state = data;
+    }
+
     /**
      * Get the html template for the size selector part of the short answer widget.
      *
