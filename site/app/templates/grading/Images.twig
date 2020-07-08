@@ -1,11 +1,10 @@
 <div class="content">
     {% if has_full_access %}
         <div style="float: right; margin-bottom: 20px;">
-            {% set url = core.buildCourseUrl(['student_photos']) %}
             {% if view == 'all' and has_sections %}
-                <a class="btn btn-primary" tabindex="0" href="{{ url ~ '?view=sections' }}">View Your Sections</a>
+                <a class="btn btn-primary" tabindex="0" href="{{ student_photos_url ~ '?view=sections' }}">View Your Sections</a>
             {% elseif has_sections %}
-                <a class="btn btn-primary" tabindex="0" href="{{ url ~ '?view=all' }}">View All Sections</a>
+                <a class="btn btn-primary" tabindex="0" href="{{ student_photos_url ~ '?view=all' }}">View All Sections</a>
             {% endif %}
             <a onclick="newUploadImagesForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Student Photos</a>
         </div>

@@ -1681,7 +1681,7 @@ function flagUserImage(user_id, flag) {
                 displaySuccessMessage(result_message);
             }
             else {
-                console.error(result);
+                displayErrorMessage(result.message);
             }
         };
 

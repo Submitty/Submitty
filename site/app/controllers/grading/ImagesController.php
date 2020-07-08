@@ -200,10 +200,9 @@ class ImagesController extends AbstractController {
 
         $result = $this->core->getQueries()->updateUserDisplayImageState($user_id, $new_state);
         $user = $this->core->getQueries()->getSubmittyUser($user_id);
+        $display_image = $user->getDisplayImage();
 
-        if ($result) {
-            $display_image = $user->getDisplayImage();
-
+        if ($result && $display_image) {
             return JsonResponse::getSuccessResponse([
                 'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
                 'image_data' => $display_image->getImageBase64MaxDimension(ImagesView::IMG_MAX_DIMENSION),
@@ -213,6 +212,6 @@ class ImagesController extends AbstractController {
             ]);
         }
 
-        return JsonResponse::getErrorResponse('There was an error flagging or unflagging the user\'s image');
+        return JsonResponse::getErrorResponse("An error occurred attempting to set $user_id's preferred photo to $new_state.");
     }
 }

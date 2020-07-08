@@ -58,7 +58,7 @@ class ImagesView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "max_size_string" => $max_size_string,
             "view" => $view,
-            "core" => $this->core,
+            "student_photos_url" => $this->core->buildCourseUrl(['student_photos']),
             "has_sections" => !empty($grader_sections)
         ]);
     }
