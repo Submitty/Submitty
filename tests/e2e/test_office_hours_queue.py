@@ -98,7 +98,7 @@ class TestOfficeHoursQueue(BaseTestCase):
 
         announcement_string = ''.join(choice(ascii_lowercase) for i in range(10))
         self.editAnnouncement(announcement_string)
-        self.assertEqual(' '.join(self.driver.find_element(By.ID, 'announcement').text.split()), f'Todays Announcements: {announcement_string}')
+        self.assertEqual(' '.join(self.driver.find_element(By.ID, 'announcement').text.split()), f"Today's Announcements: {announcement_string}")
         self.editAnnouncement("")
         self.assertEqual(True, self.verifyElementMissing('id', ['announcement']))
 
