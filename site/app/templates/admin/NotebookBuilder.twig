@@ -1,8 +1,9 @@
 <div class="content">
     <script>
-        window.notebook_params = {
+        window.builder_params = {
+            g_id: '{{ gradeable.getId() }}',
             mode: '{{ mode }}',
-            config_string: `{{ config_string|raw }}`
+            config: JSON.parse(`{{ config_string|raw }}`),
         };
     </script>
 

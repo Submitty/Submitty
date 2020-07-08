@@ -64,11 +64,11 @@
     <div class="notebook-builder-info">
         <div class="option-title">Notebook Builder:</div>
         <div>
-            <a class="btn btn-primary" href="{{ core.buildCourseUrl(['notebook_builder', gradeable.getId(), 'edit']) }}">Edit Existing</a>
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}">Edit Existing</a>
             <span>Edit the currently selected configuration with notebook builder.</span>
         </div>
         <div>
-            <a class="btn btn-primary" href="{{ core.buildCourseUrl(['notebook_builder', gradeable.getId(), 'new']) }}">Start New</a>
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}">Start New</a>
             <span>Start a new configuration with notebook builder.</span>
         </div>
     </div>

@@ -50,16 +50,12 @@ class NotebookBuilder {
             }
         });
 
-        return {
-            notebook: notebook_array,
-            testcases: []
-        };
+        builder_params.config.notebook = notebook_array;
+        return builder_params.config;
     }
 
     load() {
-        const json = JSON.parse(notebook_params.config_string);
-
-        json.notebook.forEach(cell => {
+        builder_params.config.notebook.forEach(cell => {
             let widget;
 
             switch (cell.type) {

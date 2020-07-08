@@ -41,14 +41,13 @@ class FormOptionsWidget extends Widget {
      */
     saveButtonAction() {
         const file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
-        const g_id = window.location.pathname.split('/').pop();
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
         const form_data = new FormData();
         form_data.append('config_upload', file, 'config.json');
         form_data.append('csrf_token', csrfToken);
-        form_data.append('g_id', g_id);
-        form_data.append('mode', notebook_params.mode);
+        form_data.append('g_id', builder_params.g_id);
+        form_data.append('mode', builder_params.mode);
 
         const makeRequest = async () => {
             const status_div = document.querySelector('.form-options-widget .status');
@@ -59,8 +58,11 @@ class FormOptionsWidget extends Widget {
 
             let msg;
             if (result.status === 'success') {
-                const gradeable_submission_url = buildCourseUrl(['gradeable', g_id]);
+                const gradeable_submission_url = buildCourseUrl(['gradeable', builder_params.g_id]);
                 msg = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
+
+                // Set mode to 'edit' so any additional edits on a 'new' config will be handled correctly
+                builder_params.mode = 'edit';
             }
             else {
                 msg = result.message;

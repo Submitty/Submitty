@@ -9,6 +9,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -123,7 +124,6 @@ class AutogradingConfigController extends AbstractController {
         $this->core->addSuccessMessage($msg);
         return new MultiResponse(
             JsonResponse::getSuccessResponse([
-                'config_name' => $counter,
                 'config_path' => $target_dir
             ]),
             null,
@@ -256,9 +256,11 @@ class AutogradingConfigController extends AbstractController {
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
         $json_contents = file_get_contents($json_path);
 
+        $config_string = $mode === 'edit' ? $json_contents : '{"notebook": [], "testcases": []}';
+
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
-            'config_string' => $json_contents,
+            'config_string' => $config_string,
             'mode' => $mode
         ]);
     }
@@ -268,6 +270,17 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilderSave(): JsonResponse {
+        if ($_POST['mode'] === 'new') {
+            return $this->notebookSaveNew();
+        }
+        elseif ($_POST['mode'] === 'edit') {
+            return $this->notebookSaveExisting();
+        }
+
+        return JsonResponse::getErrorResponse('Illegal "mode" was passed.');
+    }
+
+    private function notebookSaveNew(): JsonResponse {
         $result = $this->uploadConfig();
 
         if ($result->json_response->json['status'] === 'success') {
@@ -278,11 +291,29 @@ class AutogradingConfigController extends AbstractController {
             $gradeable->setAutogradingConfigPath($config_path);
             $this->core->getQueries()->updateGradeable($gradeable);
 
-            // Rebuild
-            $admin_gradeable_controller = new AdminGradeableController($this->core);
-            $admin_gradeable_controller->enqueueBuild($gradeable);
+            $this->notebookRebuildGradeable($gradeable);
         }
 
         return $result->json_response;
+    }
+
+    private function notebookSaveExisting(): JsonResponse {
+        // Overwrite existing configuration with newly uploaded on
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
+        $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
+        $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
+
+        // Update group permission
+        $group = $this->core->getConfig()->getCourse() . '_tas_www';
+        $permission_res = chgrp($json_path, $group);
+
+        $this->notebookRebuildGradeable($gradeable);
+
+        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('An error occurred saving the modified config.json.');
+    }
+
+    private function notebookRebuildGradeable(Gradeable $gradeable): void {
+        $admin_gradeable_controller = new AdminGradeableController($this->core);
+        $admin_gradeable_controller->enqueueBuild($gradeable);
     }
 }
