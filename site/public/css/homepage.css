@@ -62,3 +62,10 @@ select {
 #user_settings_modal input[type='file'] {
     margin-top: 10px;
 }
+
+/*.flex-wrapper .content {*/
+/*    flex: 1;*/
+/*}*/
+/*.flex-wrapper .content:nth-child(2) {*/
+/*    margin-left: 0;*/
+/*}*/

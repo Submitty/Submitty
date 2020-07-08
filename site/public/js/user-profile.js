@@ -94,7 +94,7 @@ $(document).ready(function() {
 
     // Populate specific area time zone selector box when the general one has detected a change
     $('#time_zone_general_drop_down').change(function() {
-        let selected_elem = $(this).children(':selected')[0].innerHTML
+        let selected_elem = $(this).children(':selected')[0].innerHTML;
         populateSpecificTimeZoneDropDown(selected_elem);
     });
 
@@ -107,10 +107,10 @@ $(document).ready(function() {
 
         $.getJSON({
             type: "POST",
-            url: buildUrl(['current_user', 'change_time_zone']),
+            url: buildCourseUrl(['current-user', 'change-time-zone']),
             data: {
                 csrf_token: csrfToken,
-                time_zone: time_zone
+                time_zone
             },
             success: function (response) {
                 // Update page elements if the data was successfully saved server-side

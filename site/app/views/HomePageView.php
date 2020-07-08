@@ -10,15 +10,13 @@ class HomePageView extends AbstractView {
      * @param User $user
      * @param array $unarchived_courses
      * @param array $archived_courses
-     * @param string $change_name_text
+     * @param bool $database_authentication
      */
     public function showHomePage(
         User $user,
         array $unarchived_courses,
         array $archived_courses,
-        string $change_name_text,
-        bool $database_authentication,
-        string $csrf_token
+        bool $database_authentication
     ) {
         $statuses = [];
         $course_types = [$unarchived_courses, $archived_courses];
@@ -65,8 +63,9 @@ class HomePageView extends AbstractView {
             User::LEVEL_FACULTY     => "faculty",
             User::LEVEL_SUPERUSER   => "superuser"
         ];
-        $this->output->addInternalJs('homepage.js');
+
         $this->output->addInternalCss('homepage.css');
+        $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('HomePage.twig', [
@@ -74,13 +73,11 @@ class HomePageView extends AbstractView {
             "user_first" => $autofill_preferred_name[0],
             "user_last" => $autofill_preferred_name[1],
             "statuses" => $statuses,
-            "change_name_text" => $change_name_text,
             "show_change_password" => $database_authentication,
-            "csrf_token" => $csrf_token,
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
-            "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
-            "change_username_url" => $this->output->buildUrl(['current_user', 'change_username']),
+            "change_password_url" => $this->output->buildCourseUrl(['current-user', 'change-password']),
+            "change_username_url" => $this->output->buildCourseUrl(['current-user', 'change-username']),
             'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
             'user_time_zone' => $user->getTimeZone(),
             'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())

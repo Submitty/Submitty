@@ -5,6 +5,11 @@
     width: 80%;
 }
 
+.user-wrap-view-only {
+    width: 100%;
+}
+
+
 #user-card, #user-card-img {
     flex: 1
 }
@@ -20,6 +25,7 @@
 
 #user-card-img {
     text-align: center;
+    padding-left: 25px;
 }
 
 .user-img-cont {
@@ -30,7 +36,21 @@
     position: relative;
     border: 2px solid;
     border-radius: 15px;
+    padding: 12px;
 }
+
+.user-img-cont span {}
+
+.user-img-cont span img {
+    width: 100%;
+    height: auto;
+}
+
+.user-img-view-only .user-img-cont {
+    width: 160px;
+    height: 160px;
+}
+
 
 .center-img-tag {
     position: absolute;
@@ -55,7 +75,19 @@
     margin: 10px 0;
 }
 
+.flex-row-col span:first-child, .flex-row-col label {
+    font-weight: 500;
+}
+
 .flex-row-col label, .flex-row-col select {
     flex: 1;
     min-width: 0;
+}
+
+#time_zone_selector_label a {
+    margin-left: 15px;
+}
+
+#theme_value {
+    text-transform: capitalize;
 }

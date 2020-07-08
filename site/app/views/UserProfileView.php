@@ -38,6 +38,7 @@ class UserProfileView extends AbstractView {
             User::LEVEL_SUPERUSER   => "superuser"
         ];
 
+        $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('My Account');
@@ -50,8 +51,8 @@ class UserProfileView extends AbstractView {
             "csrf_token" => $csrf_token,
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
-            "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
-            "change_username_url" => $this->output->buildUrl(['current_user', 'change_username']),
+            "change_password_url" => $this->output->buildCourseUrl(['current-user', 'change-password']),
+            "change_username_url" => $this->output->buildCourseUrl(['current-user', 'change-username']),
             'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
             'user_time_zone' => $user->getTimeZone(),
             'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())

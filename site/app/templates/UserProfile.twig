@@ -1,16 +1,23 @@
 <div class="content">
-    <h1>My Profile</h1>
-    {% set image = user.getDisplayImage() or "" %}
-    <div class="user-info-wrapper">
+    <h1>
+        {% if not isViewOnly %}
+            My Profile
+        {% else %}
+            About You
+        {% endif %}
+    </h1>
+    <div class="user-info-wrapper {% if isViewOnly %} user-wrap-view-only {% endif %}">
         <div id="user-card">
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
                     <span>Basic Information</span>
+                    {% if not isViewOnly %}
                     <span>
                         <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user information" title="Edit user information">
                             <i class="fas fa-pencil-alt"></i> Edit Preferred Names
                         </a>
                     </span>
+                    {% endif %}
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
@@ -84,11 +91,19 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="time_zone_general_drop_down">General Area:</label>
-                        <select id="time_zone_general_drop_down"></select>
+                        {% if isViewOnly %}
+                            {{ user_time_zone|split('/')[0] }}
+                        {% else %}
+                            <select id="time_zone_general_drop_down"></select>
+                        {% endif %}
                     </div>
                     <div class="flex-row-col">
                         <label for="time_zone_specific_drop_down">Specific Area:</label>
-                        <select id="time_zone_specific_drop_down"></select>
+                        {% if isViewOnly %}
+                            {{ user_time_zone|split('/')[1] }}
+                        {% else %}
+                            <select id="time_zone_specific_drop_down"></select>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -99,20 +114,24 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
-                            <option value="system">Follow Device Theme</option>
-                            <option value="system_black">Follow Device Theme (Black)</option>
-                            <option value="light">Light Mode</option>
-                            <option value="dark">Dark Mode</option>
-                            <option value="dark_black">Dark Mode (Black)</option>
-                        </select>
+                        {% if isViewOnly %}
+                            <span id="theme_value"></span>
+                        {% else %}
+                            <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
+                                <option value="system">Follow Device Theme</option>
+                                <option value="system_black">Follow Device Theme (Black)</option>
+                                <option value="light">Light Mode</option>
+                                <option value="dark">Dark Mode</option>
+                                <option value="dark_black">Dark Mode (Black)</option>
+                            </select>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
-        <div id="user-card-img">
+        <div id="user-card-img" class="{% if isViewOnly %} user-img-view-only {% endif %}">
             <div class="user-img-cont">
-                {% set image = student.getDisplayImage() %}
+                {% set image = user.getDisplayImage() %}
                 {% if image is not null %}
                     <span>
                         {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
@@ -123,11 +142,13 @@
                     </span>
                 {% endif %}
             </div>
+            {% if not isViewOnly %}
             <span class="edit-user-img">
                 <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user information" title="Edit user information">
                     <i class="fas fa-pencil-alt"></i> Upload your profile photo
                 </a>
             </span>
+            {% endif %}
             {% if user.getDisplayImageState() == 'flagged' or true%}
                 <span class="red-message">Your preferred image was flagged as inappropriate.</span>
             {% endif %}
