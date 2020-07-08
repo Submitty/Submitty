@@ -253,6 +253,10 @@ class Gradeable extends AbstractModel {
             $this->setPeerBlind($details['peer_blind']);
         }
         
+        if (array_key_exists('limited_access_blind', $details)) {
+            $this->setLimitedAccessBlind($details['limited_access_blind']);
+        }
+        
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
@@ -274,7 +278,6 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
-            $this->setLimitedAccessBlind($details['limited_access_blind']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
