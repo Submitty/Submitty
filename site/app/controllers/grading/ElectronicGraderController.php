@@ -334,6 +334,10 @@ class ElectronicGraderController extends AbstractController {
         $total_indvidual_students = 0;
         $viewed_grade = 0;
         $num_gradeables = 1;
+        $num_components = 0;
+        $my_grading = 0;
+        $late_components = 0;
+
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
@@ -384,11 +388,11 @@ class ElectronicGraderController extends AbstractController {
         //Check if this is a team project or a single-user project
         if ($gradeable->isTeamAssignment()) {
             $num_submitted = $this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
-            $late_submitted = $gradeable->getBadSubmissionsByGradingSection($sections, 'registration_section');
+            $late_submitted = $gradeable->getBadSubmissionsByGradingSection('registration_section');
         }
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
-            $late_submitted = $gradeable->getBadSubmissionsByGradingSection($sections, $section_key);
+            $late_submitted = $gradeable->getBadSubmissionsByGradingSection($section_key);
         }
 
         if (count($sections) > 0) {
@@ -405,7 +409,7 @@ class ElectronicGraderController extends AbstractController {
                 $individual_viewed_grade = 0;
             }
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $late_components = $gradeable->getBadGradedComponents($sections, $section_key);
+            $late_components = $gradeable->getBadGradedComponents($section_key);
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment());
