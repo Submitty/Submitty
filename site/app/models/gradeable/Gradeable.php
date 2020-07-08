@@ -248,7 +248,11 @@ class Gradeable extends AbstractModel {
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
-
+        
+        if (array_key_exists('peer_blind', $details)) {
+            $this->setPeerGradersList($details['peer_blind']);
+        }
+        
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
@@ -264,7 +268,6 @@ class Gradeable extends AbstractModel {
             $this->setHasDueDate($details['has_due_date']);
             $this->setPeerGrading($details['peer_grading']);
             $this->setPeerGradeSet($details['peer_grade_set']);
-            $this->setPeerBlind($details['peer_blind']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
