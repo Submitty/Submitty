@@ -27,9 +27,8 @@
                     $('#' + currentCodeStyleRadio).prop('checked', true);
                 });
             </script>
-
-            {% if not peer %}
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
+            {% if not student_grader %}
+                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, true)">Download Zip File</button>
             {% endif %}
 
             <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
@@ -40,8 +39,10 @@
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ self.display_files(self, checkout, "c", 0, "checkout") }}
                 {% endif %}
-                {{ self.display_files(self, results, "r", 0, "results") }}
-                {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
+                {% if not student_grader %}
+                    {{ self.display_files(self, results, "r", 0, "results") }}
+                    {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
+                {% endif %}
             </div>
             {# /Files #}
             <script>
@@ -77,6 +78,7 @@
             var directory = "";
             if (url_file.includes("submissions")) {
                 directory = "submissions";
+                url_file = getNonAnonPath(url_file, "{{anon_submitter_id}}");
             }
             else if (url_file.includes("results_public")) {
                 directory = "results_public";
@@ -120,6 +122,7 @@
         var directory = "";
         if (url_file.includes("submissions")) {
             directory = "submissions";
+            url_file = getNonAnonPath(url_file, "{{anon_submitter_id}}");
         }
         else if (url_file.includes("results_public")) {
             directory = "results_public";
@@ -163,10 +166,11 @@
                 type: 'POST',
                 url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
                 data: {
-                    'user_id': '{{ submitter_id  }}',
+                    'user_id': '{{ anon_submitter_id }}',
                     'filename': name,
                     'file_path': path,
                     'page_num': page_num,
+                    'is_anon': true,
                     'csrf_token': csrfToken
                 },
                 success: function(data){
@@ -221,7 +225,7 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}", true); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>

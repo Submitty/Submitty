@@ -13,7 +13,6 @@ $(document).ready(function() {
         }
         formData.append("name", elem.name);
         formData.append("entry", entry);
-
         $.ajax({
             url: buildCourseUrl(['config']),
             data: formData,
