@@ -232,11 +232,17 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode}", methods={"GET"})
      * @param string $g_id Gradeable ID
+     * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
+     * notebook builder know to save a new configuration or edit the existing one
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function notebookBuilder(string $g_id) {
+    public function notebookBuilder(string $g_id, string $mode) {
+        if (!in_array($mode, ['new', 'edit'])) {
+            return new RedirectResponse($this->core->buildUrl());
+        }
+
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
@@ -252,7 +258,8 @@ class AutogradingConfigController extends AbstractController {
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
-            'gradeable_config_string' => $json_contents
+            'config_string' => $json_contents,
+            'mode' => $mode
         ]);
     }
 

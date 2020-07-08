@@ -57,7 +57,7 @@ class NotebookBuilder {
     }
 
     load() {
-        const json = JSON.parse(window.gradeable_config_string);
+        const json = JSON.parse(notebook_params.config_string);
 
         json.notebook.forEach(cell => {
             let widget;

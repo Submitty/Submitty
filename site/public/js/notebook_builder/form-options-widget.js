@@ -48,6 +48,7 @@ class FormOptionsWidget extends Widget {
         form_data.append('config_upload', file, 'config.json');
         form_data.append('csrf_token', csrfToken);
         form_data.append('g_id', g_id);
+        form_data.append('mode', notebook_params.mode);
 
         const makeRequest = async () => {
             const status_div = document.querySelector('.form-options-widget .status');
@@ -67,6 +68,6 @@ class FormOptionsWidget extends Widget {
             status_div.innerHTML = msg;
         };
 
-        makeRequest();
+        makeRequest().catch(err => console.error(err));
     }
 }

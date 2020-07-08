@@ -1,6 +1,9 @@
 <div class="content">
     <script>
-        window.gradeable_config_string = `{{ gradeable_config_string|raw }}`;
+        window.notebook_params = {
+            mode: '{{ mode }}',
+            config_string: `{{ config_string|raw }}`
+        };
     </script>
 
     <h2>{{ gradeable.getTitle() }} Notebook Builder</h2>
