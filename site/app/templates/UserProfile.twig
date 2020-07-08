@@ -149,7 +149,7 @@
                 </a>
             </span>
             {% endif %}
-            {% if user.getDisplayImageState() == 'flagged' or true%}
+            {% if user.getDisplayImageState() == 'flagged' %}
                 <span class="red-message">Your preferred image was flagged as inappropriate.</span>
             {% endif %}
         </div>
