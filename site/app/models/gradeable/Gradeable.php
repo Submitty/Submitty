@@ -250,7 +250,7 @@ class Gradeable extends AbstractModel {
         }
         
         if (array_key_exists('peer_blind', $details)) {
-            $this->setPeerGradersList($details['peer_blind']);
+            $this->setPeerBlind($details['peer_blind']);
         }
         
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
