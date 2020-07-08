@@ -292,8 +292,16 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
 
-        $zip = new \ZipArchive();
-        $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        //$zip = new \ZipArchive();
+        //$zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        $options = new \ZipStream\Option\Archive();
+        $options->setSendHttpHeaders(true);
+        $options->setEnableZip64(false);
+
+        // create a new zipstream object
+        $zip_stream = new \ZipStream\ZipStream($zip_name, $options);
+
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
             if (is_dir($path)) {
@@ -301,7 +309,7 @@ class MiscController extends AbstractController {
                     new \RecursiveDirectoryIterator($path),
                     \RecursiveIteratorIterator::LEAVES_ONLY
                 );
-                $zip->addEmptyDir($folder_name);
+                //$zip->addEmptyDir($folder_name);
                 foreach ($files as $name => $file) {
                     // Skip directories (they are added automatically)
                     if ($file->isDir()) {
@@ -315,17 +323,16 @@ class MiscController extends AbstractController {
                     // we can grab all files regardless of type.
                     if ($gradeable->isScannedExam()) {
                         if (mime_content_type($file_path) === 'application/pdf') {
-                            $zip->addFile($file_path, $folder_name . '/' . $relative_path);
+                            $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
                         }
                     }
                     else {
-                        $zip->addFile($file_path, $folder_name . "/" . $relative_path);
+                        $zip_stream->addFileFromPath($folder_name . "/" . $relative_path, $file_path);
                     }
                 }
             }
         }
-
-        $zip->close();
+        $zip_stream->finish();
         header("Content-type: application/zip");
         header("Content-Disposition: attachment; filename=$zip_file_name");
         header("Content-length: " . filesize($zip_name));
@@ -368,8 +375,16 @@ class MiscController extends AbstractController {
             //VCS submissions are stored in the checkout directory
             $paths[] = 'checkout';
         }
-        $zip = new \ZipArchive();
-        $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        $options = new \ZipStream\Option\Archive();
+        $options->setSendHttpHeaders(true);
+        $options->setEnableZip64(false);
+
+        // create a new zipstream object
+        $zip_stream = new \ZipStream\ZipStream($zip_name, $options);
+
+        // $zip = new \ZipArchive();
+        // $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         foreach ($paths as $path) {
             $gradeable_path = FileUtils::joinPaths(
                 $this->core->getConfig()->getCoursePath(),
@@ -377,7 +392,8 @@ class MiscController extends AbstractController {
                 $gradeable->getId()
             );
             if ($type === "all") {
-                $zip->addEmptyDir($path);
+                //$zip->addEmptyDir($path);
+                //$zip_stream->addFile($path)
                 if (file_exists($gradeable_path)) {
                     if (!is_dir($gradeable_path)) { //if dir is already present, but it's a file
                         $message = "Oops! That page is not available.";
@@ -396,7 +412,8 @@ class MiscController extends AbstractController {
                                 $filePath = $file->getRealPath();
                                 $relativePath = substr($filePath, strlen($gradeable_path) + 1);
                                 // Add current file to archive
-                                $zip->addFile($filePath, $path . "/" . $relativePath);
+                                //$zip->addFile($filePath, $path . "/" . $relativePath);
+                                $zip_stream->addFileFromPath($path . "/" . $relativePath, $filePath);
                             }
                         }
                     }
@@ -447,7 +464,8 @@ class MiscController extends AbstractController {
                                     $filePath = $file_in_folder->getRealPath();
                                     $relativePath = substr($filePath, strlen($temp_path) + 1);
                                     // Add current file to archive
-                                    $zip->addFile($filePath, $file . "/" . $relativePath);
+                                    //$zip->addFile($filePath, $file . "/" . $relativePath);
+                                    $zip_stream->addFileFromPath($file . "/" . $relativePath, $filePath);
                                 }
                             }
                             $x = $arr_length; //cuts the for loop early when found
@@ -457,7 +475,8 @@ class MiscController extends AbstractController {
             }
         }
         // Zip archive will be created only after closing object
-        $zip->close();
+        //$zip->close();
+        $zip_stream->finish();
         header("Content-type: application/zip");
         header("Content-Disposition: attachment; filename=$zip_file_name");
         header("Content-length: " . filesize($zip_name));
