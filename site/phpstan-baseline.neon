@@ -126,11 +126,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$num_components might not be defined\\.$#"
-			count: 4
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Variable \\$my_grading might not be defined\\.$#"
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
