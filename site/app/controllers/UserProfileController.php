@@ -28,7 +28,7 @@ class UserProfileController extends AbstractController {
     /**
      * Show User's profile data
      *
-     * @Route("/courses/{_semester}/{_course}/user-profile", methods={"GET"})
+     * @Route("/current-user", methods={"GET"})
      * @return MultiResponse
      */
     public function showUserProfile() {
@@ -47,7 +47,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/current-user/change-time-zone", methods={"POST"})
+     * @Route("/current-user/change-time-zone", methods={"POST"})
      * @return JsonResponse
      *
      * Handle ajax request to update the currently logged in user's time zone data.
@@ -70,7 +70,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/current-user/change-password", methods={"POST"})
+     * @Route("/current-user/change-password", methods={"POST"})
      * @return MultiResponse
      */
     public function changePassword() {
@@ -94,7 +94,7 @@ class UserProfileController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/current-user/change-username", methods={"POST"})
+     * @Route("/current-user/change-username", methods={"POST"})
      * @return MultiResponse
      * @throws \ImagickException
      */
@@ -131,7 +131,7 @@ class UserProfileController extends AbstractController {
             }
         }
         return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['user-profile']))
+            new RedirectResponse($this->core->buildUrl(['user-profile']))
         );
     }
 }
