@@ -22,6 +22,7 @@ const taLayoutDet = {
     left: null,
     right: null,
   },
+  leftPanelWidth: "50%",
   panelsBucket: {
     leftSelector : ".two-panel-item.two-panel-left",
       rightSelector : ".two-panel-item.two-panel-right",
@@ -147,6 +148,9 @@ function initializeTwoPanelDrag () {
     const dx = e.clientX - xPos;
     const updateLeftPanelWidth = (leftPanelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
     leftPanel.style.width = `${updateLeftPanelWidth}%`;
+    // save the updated width of left column
+    taLayoutDet.leftPanelWidth = `${updateLeftPanelWidth}%`;
+    saveTaLayoutDetails();
 
     // consistent mouse pointer during dragging
     document.body.style.cursor = "col-resize";
@@ -157,6 +161,8 @@ function initializeTwoPanelDrag () {
     dragbar.style.filter = "blur(5px)";
   };
   dragbar.addEventListener("mousedown", mouseDownHandler);
+  // update the width whenever left-cols are switched between normal and full-left-col
+  updateLeftColsWidth();
   saveTaLayoutDetails();
 }
 
@@ -172,6 +178,15 @@ function initializeTaLayout() {
   if (taLayoutDet.isFullLeftColumnMode) {
     toggleFullLeftColumnMode();
   }
+  updateLeftColsWidth();
+}
+
+// updates width of left columns (normal + full-left-col) with the last saved layout width
+function updateLeftColsWidth() {
+  const leftColumns = $(".two-panel-item.two-panel-left, .content-item.content-item-left");
+  leftColumns.css({
+    width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : "50%"
+  });
 }
 
 /*
