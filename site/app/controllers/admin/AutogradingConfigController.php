@@ -261,10 +261,11 @@ class AutogradingConfigController extends AbstractController {
         $config_string = Utils::stripComments($config_string);
 
         // Let PHP json functions handle removing the pretty print
-        $decoded = json_decode($config_string);
+        $decoded = json_decode($config_string, JSON_UNESCAPED_LINE_TERMINATORS);
         $encoded = json_encode($decoded);
 
         $encoded = Utils::escapeDoubleQuotes($encoded);
+        $encoded = Utils::escapeNewLines($encoded);
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,

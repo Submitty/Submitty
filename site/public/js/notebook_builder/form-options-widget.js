@@ -59,8 +59,8 @@ class FormOptionsWidget extends Widget {
             status_div.innerHTML = '';
 
             if (result.status === 'success') {
-                const gradeable_submission_url = buildCourseUrl(['gradeable', g_id]);
-                const edit_gradeable_url = buildCourseUrl(['gradeable', g_id, 'update']);
+                const gradeable_submission_url = buildCourseUrl(['gradeable', builder_params.g_id]);
+                const edit_gradeable_url = buildCourseUrl(['gradeable', builder_params.g_id, 'update']);
 
                 const submission_msg = document.createElement('p');
                 submission_msg.innerHTML = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
@@ -70,8 +70,6 @@ class FormOptionsWidget extends Widget {
 
                 status_div.appendChild(submission_msg);
                 status_div.appendChild(edit_msg);
-                const gradeable_submission_url = buildCourseUrl(['gradeable', builder_params.g_id]);
-                msg = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
 
                 // Set mode to 'edit' so any additional edits on a 'new' config will be handled correctly
                 builder_params.mode = 'edit';

@@ -399,4 +399,8 @@ class Utils {
     public static function escapeDoubleQuotes(string $str) {
         return preg_replace('["]', '\"', $str);
     }
+
+    public static function escapeNewLines(string $str) {
+        return preg_replace("/\n/", '\\\n', $str);
+    }
 }
