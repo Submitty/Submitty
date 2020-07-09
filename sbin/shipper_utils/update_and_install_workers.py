@@ -132,8 +132,6 @@ def parse_arguments():
 
 if __name__ == "__main__":
 
-    print ("just got here")
-    
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
         raise SystemExit("ERROR: the update_and_install_workers.py script must be run by the DAEMON_USER")
@@ -160,8 +158,6 @@ if __name__ == "__main__":
         enabled = stats['enabled']
         primary = worker == 'primary' or host == 'localhost'
 
-        print ("UPDATE WORKER ENTRY "+worker)
-        
         if not enabled:
             print(f"Skipping update of {worker} because it is disabled.")
             continue
