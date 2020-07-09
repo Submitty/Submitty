@@ -58,6 +58,3 @@ def down(config, database, semester, course):
 
         with open(config_file, 'w') as out_file:
             json.dump(j, out_file, indent=4)
-
-
-    database.execute("ALTER TABLE queue DROP COLUMN IF EXISTS paused;");
