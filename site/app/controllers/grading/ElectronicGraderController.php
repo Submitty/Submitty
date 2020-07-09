@@ -391,7 +391,6 @@ class ElectronicGraderController extends AbstractController {
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
             $late_submitted = $gradeable->getBadSubmissionsByGradingSection($section_key);
-
         }
 
         if (count($sections) > 0) {
