@@ -113,7 +113,7 @@ class Access {
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
         
-        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
+        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.status.warnings"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.peer_panel"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
@@ -643,6 +643,13 @@ class Access {
         if (!$gradeable->isPeerGrading()) {
             return false;
         }
+        
+        $now = $this->core->getDateTimeNow();
+        
+        if($gradeable->getGradeStartDate() > $now){
+            return false;
+        }
+        
         else {
             /*
             * When this check is run, the submitter of a gradeable is set to the grader, even on master.
