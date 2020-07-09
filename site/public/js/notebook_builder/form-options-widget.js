@@ -56,17 +56,28 @@ class FormOptionsWidget extends Widget {
             const response = await fetch(url, {method: 'POST', body: form_data});
             const result = await response.json();
 
-            let msg;
+            status_div.innerHTML = '';
+
             if (result.status === 'success') {
                 const gradeable_submission_url = buildCourseUrl(['gradeable', g_id]);
-                msg = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
+                const edit_gradeable_url = buildCourseUrl(['gradeable', g_id, 'update']);
+
+                const submission_msg = document.createElement('p');
+                submission_msg.innerHTML = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
+
+                const edit_msg = document.createElement('p');
+                edit_msg.innerHTML = `To make other changes to the gradeable configuration visit the <a href="${edit_gradeable_url}">edit gradeable page</a>.`;
+
+                status_div.appendChild(submission_msg);
+                status_div.appendChild(edit_msg);
             }
             else {
-                msg = result.message;
+                const msg = document.createElement('p');
+                msg.innerHTML = result.message;
+                status_div.appendChild(msg);
             }
-            status_div.innerHTML = msg;
         };
 
-        makeRequest();
+        makeRequest().catch(err => console.error(err));
     }
 }
