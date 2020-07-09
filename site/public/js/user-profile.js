@@ -75,7 +75,7 @@ function populateSpecificTimeZoneDropDown(general_selection, selected_option = n
 
     let specific_area_set = getSpecificTimeZoneOptions(general_selection);
 
-    $('#time_zone_specific_drop_down').append('<option>Please select a specific area</option>');
+    $('#time_zone_specific_drop_down').append('<option value="null">Please select a specific area</option>');
 
     specific_area_set.forEach(function(elem) {
         $('#time_zone_specific_drop_down').append('<option value="'+elem+'">'+elem+'</option>');
@@ -107,13 +107,20 @@ $(document).ready(function() {
     // Any user made changes to the specific time zone dropdown should be saved server-side
     $('#time_zone_specific_drop_down').change(function() {
 
-        let general_area = $('#time_zone_general_drop_down').children(':selected')[0].innerHTML;
-        let specific_area = $(this).children(':selected')[0].innerHTML;
-        let time_zone = general_area + '/' + specific_area
+        let general_area = $('#time_zone_general_drop_down').children('option:selected').val();
+        let specific_area = $(this).children('option:selected').val();
+        let time_zone = general_area + '/' + specific_area;
+
+        // If user didnt select any specific area its value will be null and in this case we will not make API call
+        if (specific_area === "null") {
+          // display error message or just return without informing the user?
+          displayErrorMessage("Please select a specific area.");
+          return;
+        }
 
         $.getJSON({
             type: "POST",
-            url: buildCourseUrl(['current-user', 'change-time-zone']),
+            url: buildUrl(['current-user', 'change-time-zone']),
             data: {
                 csrf_token: csrfToken,
                 time_zone
@@ -122,13 +129,17 @@ $(document).ready(function() {
                 // Update page elements if the data was successfully saved server-side
                 if (response.status === 'success') {
                     $('#user_utc_offset').text(response.data.utc_offset);
+                    displaySuccessMessage("Time-zone updated succesfully!");
                 }
                 else {
                     console.log(response);
+                    displayErrorMessage("Time-zone is not updated!");
+
                 }
             },
             error: function (response) {
                 console.error('Failed to parse response from server!');
+                displayErrorMessage('Failed to parse response from server!');
                 console.log(response);
             }
         });
