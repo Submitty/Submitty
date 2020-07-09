@@ -1030,6 +1030,13 @@ class ElectronicGraderController extends AbstractController {
             if (!is_null($goToStudent)) {
                 $who_id = $peer && !$team ? $goToStudent->getAnonId() :   $goToStudent->getId();
             }
+            else {
+                // There is no next/prev student found
+                // Either the grading is completed or current user has no ungraded assigned student left to grade
+                $error_msg = "No ". $to . ($to_ungraded ? " assigned ungraded " : " ") . "student found!";
+                $this->core->addErrorMessage($error_msg);
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
+            }
         }
 
         // Get the graded gradeable for the submitter we are requesting
