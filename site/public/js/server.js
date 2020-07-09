@@ -1634,15 +1634,15 @@ function enableKeyToClick(){
  */
 function flagUserImage(user_id, flag) {
     let confirm_message;
-    let result_message;
+    let success_message;
 
     if (flag) {
         confirm_message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
-        result_message = `${user_id}'s preferred image was successfully flagged.`;
+        success_message = `${user_id}'s preferred image was successfully flagged.`;
     }
     else {
         confirm_message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
-        result_message = `${user_id}'s preferred image was successfully restored.`;
+        success_message = `${user_id}'s preferred image was successfully restored.`;
     }
 
     const confirmed = confirm(confirm_message);
@@ -1656,35 +1656,53 @@ function flagUserImage(user_id, flag) {
         form_data.append('flag', flag);
 
         const makeRequest = async () => {
+            const image_container = document.querySelector(`.${user_id}-image-container`);
+
+            // Show working message
+            const working_message = document.createElement('i');
+            working_message.innerHTML = '<span style="color:var(--no-image-available)">Working...</span>';
+            image_container.removeChild(image_container.firstElementChild);
+            image_container.prepend(working_message);
+
             const response = await fetch(url, {method: 'POST', body: form_data});
             const result = await response.json();
 
             if (result.status === 'success') {
                 const data = result.data;
-                const image_container = document.querySelector(`.${user_id}-image-container`);
 
                 // Change image
-                const old_image = image_container.querySelector('img');
+                let new_content;
+                if (data.image_data && data.image_mime_type) {
+                    new_content = document.createElement('img');
+                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
+                }
+                else {
+                    new_content = document.createElement('i');
+                    new_content.innerHTML = '<span style="color:var(--no-image-available)">No Image Available</span>';
+                }
 
-                const new_image = document.createElement('img');
-                new_image.setAttribute('alt', data.first_last_username);
-                new_image.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
-
-                image_container.removeChild(old_image);
-                image_container.prepend(new_image);
+                image_container.removeChild(image_container.firstElementChild);
+                image_container.prepend(new_content);
 
                 // Change icon
                 const a = image_container.querySelector('a');
                 a.href = data.href;
                 a.innerHTML = data.icon_html;
 
-                displaySuccessMessage(result_message);
+                displaySuccessMessage(success_message);
             }
             else {
                 displayErrorMessage(result.message);
             }
         };
 
-        makeRequest().catch(err => console.error(err));
+        try {
+            makeRequest();
+        }
+        catch (err) {
+            console.error(err);
+            displayErrorMessage('Something went wrong!');
+        }
     }
 }

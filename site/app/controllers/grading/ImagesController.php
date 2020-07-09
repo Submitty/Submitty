@@ -200,13 +200,21 @@ class ImagesController extends AbstractController {
 
         $result = $this->core->getQueries()->updateUserDisplayImageState($user_id, $new_state);
         $user = $this->core->getQueries()->getSubmittyUser($user_id);
-        $display_image = $user->getDisplayImage();
 
-        if ($result && $display_image) {
+        $image_data = '';
+        $image_mime_type = '';
+
+        $display_image = $user->getDisplayImage();
+        if ($display_image) {
+            $image_data = $display_image->getImageBase64MaxDimension(ImagesView::IMG_MAX_DIMENSION);
+            $image_mime_type = $display_image->getMimeType();
+        }
+
+        if ($result) {
             return JsonResponse::getSuccessResponse([
                 'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
-                'image_data' => $display_image->getImageBase64MaxDimension(ImagesView::IMG_MAX_DIMENSION),
-                'image_mime_type' => $display_image->getMimeType(),
+                'image_data' => $image_data,
+                'image_mime_type' => $image_mime_type,
                 'icon_html' => $icon_html,
                 'href' => $href
             ]);
