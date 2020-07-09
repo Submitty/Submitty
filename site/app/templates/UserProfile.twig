@@ -13,7 +13,7 @@
                     <span>Basic Information</span>
                     {% if not isViewOnly %}
                     <span>
-                        <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user information" title="Edit user information">
+                        <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user preferred names" title="Edit user preferred names">
                             <i class="fas fa-pencil-alt"></i> Edit Preferred Names
                         </a>
                     </span>
@@ -83,9 +83,11 @@
                          data-user_time_zone="{{ user_time_zone }}"
                          data-available_time_zones="{{ available_time_zones }}"
                    >Time Zone (<span id="utc_offset_stub">UTC Offset <span id="user_utc_offset">{{ user_utc_offset }}</span></span>):
-                       <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
+                    {% if not viewOnly %}
+                        <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
                            <i style="font-style:normal;" class="fa-question-circle"></i>
                        </a>
+                    {% endif %}
                    </span>
                 </div>
                 <div class="user-info">
@@ -144,7 +146,7 @@
             </div>
             {% if not isViewOnly %}
             <span class="edit-user-img">
-                <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user information" title="Edit user information">
+                <a class="icon" tabindex="0" href="javascript:updateProfilePhoto()" aria-label="Edit user profile photo" title="Edit user profile photo">
                     <i class="fas fa-pencil-alt"></i> Upload your profile photo
                 </a>
             </span>
@@ -156,6 +158,7 @@
     </div>
 </div>
 {% include 'EditNameForm.twig' %}
+{% include 'EditProfilePhotoForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}

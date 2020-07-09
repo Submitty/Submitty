@@ -7,7 +7,6 @@ function userNameChange() {
     $("#user-firstname-change").focus();
 }
 
-
 function passwordChange() {
     $('.popup-form').css('display', 'none');
     var form = $("#change-password-form");
@@ -16,6 +15,13 @@ function passwordChange() {
     $('[name="new_password"]', form).val("");
     $('[name="confirm_new_password"]', form).val("");
     $("#new_password").focus();
+}
+
+function updateProfilePhoto() {
+  $('.popup-form').css('display', 'none');
+  var form = $("#edit-profile-photo-form");
+  form.css("display", "block");
+  form.find('.form-body').scrollTop(0);
 }
 
 /**

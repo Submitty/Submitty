@@ -115,19 +115,30 @@ class UserProfileController extends AbstractController {
             else {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
+        }
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildUrl(['user-profile']))
+        );
+    }
 
-            // If we received an image file attempt to save it
-            if ($_FILES['user_image']['tmp_name'] !== '') {
-                $meta = explode('.', $_FILES['user_image']['name']);
-                $file_name = $meta[0];
-                $extension = $meta[1];
+    /**
+     * @Route("/current-user/change-profile-photo", methods={"POST"})
+     * @return MultiResponse
+     * @throws \ImagickException
+     */
+    public function changeProfilePhoto () {
+        $user = $this->core->getUser();
+        // If we received an image file attempt to save it
+        if ($_FILES['user_image']['tmp_name'] !== '') {
+            $meta = explode('.', $_FILES['user_image']['name']);
+            $file_name = $meta[0];
+            $extension = $meta[1];
 
-                // Save image for user
-                $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
+            // Save image for user
+            $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
 
-                if (!$result) {
-                    $this->core->addErrorMessage('Some error occurred saving your new user image.');
-                }
+            if (!$result) {
+                $this->core->addErrorMessage('Some error occurred saving your new profile photo.');
             }
         }
         return MultiResponse::RedirectOnlyResponse(

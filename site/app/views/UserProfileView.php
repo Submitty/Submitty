@@ -41,7 +41,7 @@ class UserProfileView extends AbstractView {
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
-        $this->output->setPageName('My Account');
+        $this->output->setPageName('My Profile');
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
@@ -53,6 +53,7 @@ class UserProfileView extends AbstractView {
             "display_access_level" => $user->accessFaculty(),
             "change_password_url" => $this->output->buildUrl(['current-user', 'change-password']),
             "change_username_url" => $this->output->buildUrl(['current-user', 'change-username']),
+            "change_profile_photo_url" => $this->output->buildUrl(['current-user', 'change-profile-photo']),
             'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
             'user_time_zone' => $user->getTimeZone(),
             'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
