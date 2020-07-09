@@ -643,7 +643,7 @@ class ForumController extends AbstractController {
                 $child_thread = $this->core->getQueries()->getThread($child_thread_id);
                 $child_thread_author = $child_thread['created_by'];
                 $child_thread_title = $child_thread['title'];
-                $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id);
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string) $child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post]);
                 $subject = "Thread Merge: " . Notification::textShortner($child_thread_title);
                 $content = "Two threads were merged in:\n" . $full_course_name . "\n\nAll messages posted in Merged Thread:\n" . $child_thread_title . "\n\nAre now contained within Parent Thread:\n" . $parent_thread_title;
@@ -998,7 +998,7 @@ class ForumController extends AbstractController {
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
-            $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"])["title"];
+            $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
         }
         else {
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);
