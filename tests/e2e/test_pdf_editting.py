@@ -2,45 +2,22 @@ from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 
 
-class TestNavigationPageNonStudent(BaseTestCase):
+class TestPDFs(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def test_instructor(self):
+    def test_pdf_instructor(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
         self.click_nav_grade_button("items_being_graded", "grading_homework", "grade", (By.XPATH, "//div[@class='content']/h1[1][normalize-space(text())='{}']".format("Grading Homework")))
-        self.driver.find_element(By.ID, dateutils.get_current_semester() + '_' + course).click()
-
-    def test_ta(self):
-        self.log_in(user_id="ta", user_name="Jill")
-        self.click_class('sample')
-        elements = self.driver.find_elements(By.CLASS_NAME, 'course-section-heading')
-        self.assertEqual(5, len(elements))
-        self.assertEqual("beta", elements[0].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
-                                .find_element(By.ID, 'beta-section')
-                                .find_elements(By.CLASS_NAME, "gradeable-row")))
-        self.assertEqual("open", elements[1].get_attribute('id'))
-        self.assertEqual(2, len(self.driver
-                                .find_element(By.ID, 'open-section')
-                                .find_elements(By.CLASS_NAME, "gradeable-row")))
-        self.assertEqual("closed", elements[2].get_attribute('id'))
-        self.assertEqual(2, len(self.driver
-                                .find_element(By.ID, 'closed-section')
-                                .find_elements(By.CLASS_NAME, "gradeable-row")))
-        self.assertEqual("items_being_graded", elements[3].get_attribute('id'))
-        self.assertEqual(6, len(self.driver
-                                .find_element(By.ID, 'items_being_graded-section')
-                                .find_elements(By.CLASS_NAME, "gradeable-row")))
-        self.assertEqual("graded", elements[4].get_attribute('id'))
-        self.assertEqual(9, len(self.driver
-                                .find_element(By.ID, 'graded-section')
-                                .find_elements(By.CLASS_NAME, "gradeable-row")))
-
-        self.assertEqual(3, len(self.driver.find_element(By.CLASS_NAME,
-            'gradeable-row').find_elements(By.CLASS_NAME, 'course-button')))
-
+        self.driver.find_element_by_link_text("Grading Index").click()
+        student_url = "http://localhost:1501/courses/s20/sample/gradeable/grading_homework/grading/grade?who_id=aufded&sort=id&direction=ASC"
+        self.driver.find_element_by_xpath('//a[@href="'+student_url+'"]').click()
+        self.driver.find_element_by_id('submissions').click()
+        file_url = "/var/local/submitty/courses/s20/sample/submissions/grading_homework/dbFCC0LPYC3bAjc/1/part1_buggy2.py"
+        self.driver.find_element_by_xpath('//a[@file-url="'+file_url+'"]').click()
+        self.driver.find_element_by_xpath('//a[@file-url="'+file_url+'"]').click()
+        self.driver.find_element_by_id('pageContainer1')
 
 if __name__ == "__main__":
     import unittest
