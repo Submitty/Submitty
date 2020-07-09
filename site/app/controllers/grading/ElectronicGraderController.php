@@ -334,10 +334,6 @@ class ElectronicGraderController extends AbstractController {
         $total_indvidual_students = 0;
         $viewed_grade = 0;
         $num_gradeables = 1;
-        $num_components = 0;
-        $my_grading = 0;
-        $late_components = 0;
-
 
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
@@ -393,6 +389,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
             $late_submitted = $gradeable->getBadSubmissionsByGradingSection($section_key);
+
         }
 
         if (count($sections) > 0) {
@@ -433,9 +430,7 @@ class ElectronicGraderController extends AbstractController {
             if ($peer) {
                 $sections['stu_grad'] = [
                     'total_components' => $num_components,
-                    'non_late_components' => $num_components,
                     'graded_components' => $my_grading,
-                    'non_late_graded_components' => $my_grading,
                     'num_gradeables' => $num_gradeables,
                     'graders' => []
                 ];
@@ -491,7 +486,7 @@ class ElectronicGraderController extends AbstractController {
                     if (isset($graded_components[$key])) {
                         // Clamp to total components if unsubmitted assigment is graded for whatever reason
                         $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                        $sections[$key]['non_late_graded_components'] = $sections[$key]['graded_components'] - $late_components[$key];
+                         $sections[$key]['non_late_graded_components'] = $sections[$key]['graded_components'] - $late_components[$key];
                     }
                     if (isset($graders[$key])) {
                         $sections[$key]['graders'] = $graders[$key];
