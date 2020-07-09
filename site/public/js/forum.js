@@ -1495,7 +1495,7 @@ function restoreCreateThreadFromLocal() {
 
         const { title, isAnonymous, categories, status } = JSON.parse(json);
         $("#title").val(title);
-        $("#input.thread-anon-checkbox").prop("checked", isAnonymous);
+        $("input.thread-anon-checkbox").prop("checked", isAnonymous);
         $("#thread_status").val(status);
         $("div.cat-buttons").each((_i, e) => {
             if (categories.includes(e.innerText)) {

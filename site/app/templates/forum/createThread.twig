@@ -54,7 +54,7 @@
         cleanupAutosaveHistory('-create-autosave');
         restoreCreateThreadFromLocal();
         $("#title").on("input", () => deferredSave(CREATE_THREAD_DEFER_KEY, saveCreateThreadToLocal, 1));
-        $("#input.thread-anon-checkbox").change(saveCreateThreadToLocal);
+        $("input.thread-anon-checkbox").change(saveCreateThreadToLocal);
         $("div.cat-buttons").click(saveCreateThreadToLocal);
         $("#thread_status").change(saveCreateThreadToLocal);
     });
