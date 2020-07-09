@@ -332,6 +332,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
+
         $zip_stream->finish();
         header("Content-type: application/zip");
         header("Content-Disposition: attachment; filename=$zip_file_name");
@@ -382,6 +383,7 @@ class MiscController extends AbstractController {
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream($zip_name, $options);
+
 
         // $zip = new \ZipArchive();
         // $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
@@ -455,7 +457,7 @@ class MiscController extends AbstractController {
                             );
 
                             //makes a new directory in the zip to add the files in
-                            $zip -> addEmptyDir($file);
+                            //$zip -> addEmptyDir($file);
 
                             foreach ($files_in_folder as $name => $file_in_folder) {
                                 // Skip directories (they would be added automatically)
