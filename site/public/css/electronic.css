@@ -13,7 +13,7 @@ main#main {
 
 main#main.full-screen-mode {
     z-index: 10;
-    animation-duration: 0.5s;
+    animation-duration: 0.8s;
     animation-name: scaleUp;
     animation-fill-mode: forwards;
 }
@@ -1222,12 +1222,14 @@ tr.is_publish {
 }
 
 /* Animations */
+/* to persist the changes, some properties are duplicated in 'from' and 'to' block */
 @keyframes scaleUp {
     from {
         position: fixed;
-        height: 40vh;
-        top: 30%;
-        left: 20%;
+        height: 30vh;
+        width: 10vh;
+        top: 0;
+        left: 0;
     }
     to {
         transform: scale(1, 1);
