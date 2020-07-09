@@ -391,4 +391,12 @@ class Utils {
                 return 'text/plain';
         }
     }
+
+    public static function stripComments(string $str): ?string {
+        return preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*/', '', $str);
+    }
+
+    public static function escapeDoubleQuotes(string $str) {
+        return preg_replace('["]', '\"', $str);
+    }
 }

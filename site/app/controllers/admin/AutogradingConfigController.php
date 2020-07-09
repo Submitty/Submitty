@@ -9,6 +9,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -257,10 +258,17 @@ class AutogradingConfigController extends AbstractController {
         $json_contents = file_get_contents($json_path);
 
         $config_string = $mode === 'edit' ? $json_contents : '{"notebook": [], "testcases": []}';
+        $config_string = Utils::stripComments($config_string);
+
+        // Let PHP json functions handle removing the pretty print
+        $decoded = json_decode($config_string);
+        $encoded = json_encode($decoded);
+
+        $encoded = Utils::escapeDoubleQuotes($encoded);
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
-            'config_string' => $config_string,
+            'config_string' => $encoded,
             'mode' => $mode
         ]);
     }
@@ -298,7 +306,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     private function notebookSaveExisting(): JsonResponse {
-        // Overwrite existing configuration with newly uploaded on
+        // Overwrite existing configuration with newly uploaded one
         $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
         $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
         $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);

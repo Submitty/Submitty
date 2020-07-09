@@ -1,9 +1,19 @@
 <div class="content">
     <script>
+        let config = "{{ config_string|raw }}";
+
+        try {
+            config = JSON.parse(config);
+        }
+        catch (err) {
+            console.error(err);
+            displayErrorMessage('JSON parse failure!');
+        }
+
         window.builder_params = {
             g_id: '{{ gradeable.getId() }}',
             mode: '{{ mode }}',
-            config: JSON.parse(`{{ config_string|raw }}`),
+            config: config
         };
     </script>
 
