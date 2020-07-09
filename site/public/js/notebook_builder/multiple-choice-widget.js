@@ -69,21 +69,23 @@ class MultipleChoiceWidget extends Widget {
         table.classList.add('mc-table');
         table.innerHTML = this.getMultipleChoiceTemplate();
 
-        // Add options we already had in state to begin with
-        this.state.choices.forEach(option_json => {
-            table.insertBefore(this.getMultipleChoiceOption(option_json.value, option_json.description), table.querySelector('.mc-inputs'));
-        });
+        const insertOption = (value, description) => {
+            table.insertBefore(this.getMultipleChoiceOption(value, description), table.querySelector('.mc-inputs'));
+        };
+
+        if (this.state.choices.length === 0) {
+            insertOption('', '');
+        }
+        else {
+            this.state.choices.forEach(option_json => {
+                insertOption(option_json.value, option_json.description);
+            });
+        }
 
         // Add newly entered data to form when add button is clicked
         const add_button = table.querySelector('.add-button');
         add_button.addEventListener('click', () => {
-            const value = table.querySelector('.value-input');
-            const description = table.querySelector('.description-input');
-
-            table.insertBefore(this.getMultipleChoiceOption(value.value, description.value), table.querySelector('.mc-inputs'));
-
-            value.value = '';
-            description.value = '';
+            insertOption('', '');
         });
 
         return table;
@@ -108,14 +110,10 @@ class MultipleChoiceWidget extends Widget {
             </div>
         </div>
         <div class="mc-inputs mc-row">
-            <div class="mc-col">
-                <input type="text" class="value-input" placeholder="Add new value">    
-            </div>
-            <div class="mc-col-center">
-                <textarea class="description-input" placeholder="Add new description"></textarea>
-            </div>
+            <div class="mc-col"></div>
+            <div class="mc-col-center"></div>
             <div class="mc-col mc-buttons">
-                <input type="button" class="add-button" value="Add">
+                <input type="button" class="add-button" value="Add Option">
             </div>
         </div>`;
     }
