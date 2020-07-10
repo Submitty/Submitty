@@ -1,23 +1,17 @@
 <div class="content">
     <h1>
-        {% if not isViewOnly %}
-            My Profile
-        {% else %}
-            About You
-        {% endif %}
+        My Profile
     </h1>
     <div class="user-info-wrapper {% if isViewOnly %} user-wrap-view-only {% endif %}">
         <div id="user-card">
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
                     <span>Basic Information</span>
-                    {% if not isViewOnly %}
                     <span>
-                        <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user preferred names" title="Edit user preferred names">
+                        <a class="icon" tabindex="0" href="javascript:showUpdatePrefNameForm()" aria-label="Edit user preferred names" title="Edit user preferred names">
                             <i class="fas fa-pencil-alt"></i> Edit Preferred Names
                         </a>
                     </span>
-                    {% endif %}
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col" id="username-row">
@@ -69,7 +63,7 @@
                             </span>
                             <span>
                                 {# TODO show some kind of asterix #}
-                                <a class="icon" tabindex="0" href="javascript:passwordChange()" aria-label="Change password" title="Change password">
+                                <a class="icon" tabindex="0" href="javascript:showUpdatePasswordForm()" aria-label="Change password" title="Change password">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
                             </span>
@@ -83,29 +77,19 @@
                          data-user_time_zone="{{ user_time_zone }}"
                          data-available_time_zones="{{ available_time_zones }}"
                    >Time Zone (<span id="utc_offset_stub">UTC Offset <span id="user_utc_offset">{{ user_utc_offset }}</span></span>):
-                    {% if not isViewOnly %}
-                        <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
+                       <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
                            <i style="font-style:normal;" class="fa-question-circle"></i>
                        </a>
-                    {% endif %}
                    </span>
                 </div>
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="time_zone_general_drop_down">General Area:</label>
-                        {% if isViewOnly %}
-                            {{ user_time_zone|split('/')[0] }}
-                        {% else %}
-                            <select id="time_zone_general_drop_down"></select>
-                        {% endif %}
+                        <select id="time_zone_general_drop_down"></select>
                     </div>
                     <div class="flex-row-col">
                         <label for="time_zone_specific_drop_down">Specific Area:</label>
-                        {% if isViewOnly %}
-                            {{ user_time_zone|split('/')[1] }}
-                        {% else %}
-                            <select id="time_zone_specific_drop_down"></select>
-                        {% endif %}
+                        <select id="time_zone_specific_drop_down"></select>
                     </div>
                 </div>
             </div>
@@ -116,17 +100,13 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        {% if isViewOnly %}
-                            <span id="theme_value"></span>
-                        {% else %}
-                            <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
-                                <option value="system">Follow Device Theme</option>
-                                <option value="system_black">Follow Device Theme (Black)</option>
-                                <option value="light">Light Mode</option>
-                                <option value="dark">Dark Mode</option>
-                                <option value="dark_black">Dark Mode (Black)</option>
-                            </select>
-                        {% endif %}
+                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
+                            <option value="system">Follow Device Theme</option>
+                            <option value="system_black">Follow Device Theme (Black)</option>
+                            <option value="light">Light Mode</option>
+                            <option value="dark">Dark Mode</option>
+                            <option value="dark_black">Dark Mode (Black)</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -142,13 +122,11 @@
                         {% endif %}
                     </span>
             </div>
-            {% if not isViewOnly %}
             <span class="edit-user-img">
-                <a class="icon" tabindex="0" href="javascript:updateProfilePhoto()" aria-label="Edit user profile photo" title="Edit user profile photo">
+                <a class="icon" tabindex="0" href="javascript:showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
                     <i class="fas fa-upload"></i> Upload your profile photo
                 </a>
             </span>
-            {% endif %}
             {% if user.getDisplayImageState() == 'flagged' %}
                 <span class="red-message">Your preferred image was flagged as inappropriate.</span>
             {% endif %}

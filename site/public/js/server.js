@@ -1508,23 +1508,22 @@ function updateTheme(){
   detectColorScheme();
 }
 $(document).ready(function() {
-  let theme = "system";
-  let savedTheme = localStorage.getItem("theme");
-  let savedBlackMode = localStorage.getItem("black_mode");
-  if (savedTheme) {
-      if (savedTheme === "dark") {
-          theme = savedBlackMode === "black" ? "dark_black" : "dark";
-      } else {
-        theme = "light";
+  if(localStorage.getItem("theme")){
+      if(localStorage.getItem("theme") === "dark"){
+        if(localStorage.getItem("black_mode") === "black"){
+          $("#theme_change_select").val("dark_black");
+        }else{
+          $("#theme_change_select").val("dark");
+        }
+      }else{
+        $("#theme_change_select").val("light");
       }
-  } else {
-      theme = savedBlackMode === "black" ? "system_black" : "system";
-  }
-  // Now update the value of DOM element (if its profile-setting page drop-down value else its just text on home-page)
-  if ($("#theme_change_select").length) {
-    $("#theme_change_select").val(theme);
-  } else {
-    $("#theme_value").text(theme);
+  }else{
+    if(localStorage.getItem("black_mode") === "black"){
+      $("#theme_change_select").val("system_black");
+    }else{
+      $("#theme_change_select").val("system");
+    }
   }
 });
 

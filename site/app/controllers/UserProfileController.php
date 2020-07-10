@@ -29,11 +29,11 @@ class UserProfileController extends AbstractController {
     /**
      * Show User's profile data
      *
-     * @Route("/current-user", methods={"GET"})
+     * @Route("/current_user", methods={"GET"})
      * @return MultiResponse
      */
     public function showUserProfile() {
-
+        $this->core->getOutput()->addBreadcrumb("My Account");
         return new MultiResponse(
             null,
             new WebResponse(
@@ -48,7 +48,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/current-user/change-time-zone", methods={"POST"})
+     * @Route("/current_user/change_time_zone", methods={"POST"})
      * @return JsonResponse
      *
      * Handle ajax request to update the currently logged in user's time zone data.
@@ -71,7 +71,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/current-user/change-password", methods={"POST"})
+     * @Route("/current_user/change_password", methods={"POST"})
      * @return MultiResponse
      */
     public function changePassword() {
@@ -95,7 +95,7 @@ class UserProfileController extends AbstractController {
 
 
     /**
-     * @Route("/current-user/change-preferred-names", methods={"POST"})
+     * @Route("/current_user/change_preferred_names", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
      */
@@ -128,7 +128,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/current-user/change-profile-photo", methods={"POST"})
+     * @Route("/current_user/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
      */

@@ -2,7 +2,7 @@
     <div id="courses" class="content">
         {% for ranks in statuses %}
             {% if loop.index == 1 or ranks|length > 0 %}
-                <h1>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
+                <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
                 {% for rank in ranks %}
                     <h2>As {{ rank.title }}</h2>
                     {% set display_semester = '' %}
@@ -33,9 +33,6 @@
             {% endif %}
         {% endfor %}
     </div>
-    {% include 'UserProfile.twig' with({
-        "isViewOnly": true
-    }) %}
 </div>
 {% include 'EditNameForm.twig' %}
 {% if show_change_password %}

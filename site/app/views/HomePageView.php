@@ -76,8 +76,8 @@ class HomePageView extends AbstractView {
             "show_change_password" => $database_authentication,
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
-            "change_password_url" => $this->output->buildUrl(['current-user', 'change-password']),
-            "change_username_url" => $this->output->buildUrl(['current-user', 'change-preferred-names']),
+            "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
+            "change_username_url" => $this->output->buildUrl(['current_user', 'change_preferred_names']),
             'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
             'user_time_zone' => $user->getTimeZone(),
             'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
