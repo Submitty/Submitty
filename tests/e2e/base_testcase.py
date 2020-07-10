@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from submitty_utils import dateutils
+#from submitty_utils import dateutils
 
 
 # noinspection PyPep8Naming
@@ -42,7 +42,7 @@ class BaseTestCase(unittest.TestCase):
         """ :type driver: webdriver.Chrome """
         self.options = webdriver.ChromeOptions()
         self.options.add_argument('--no-sandbox')
-        #self.options.add_argument('--headless')
+        self.options.add_argument('--headless')
         self.options.add_argument("--disable-extensions")
         self.options.add_argument('--hide-scrollbars')
         self.options.add_argument('--disable-gpu')
@@ -62,7 +62,7 @@ class BaseTestCase(unittest.TestCase):
         if user_password is None and user_id is not None:
             user_password = user_id
         self.user_password = user_password if user_password is not None else BaseTestCase.USER_PASSWORD
-        self.semester = dateutils.get_current_semester()
+        self.semester = "s20"
         self.full_semester = BaseTestCase.get_display_semester(self.semester)
         self.logged_in = False
         self.use_log_in = log_in
@@ -144,7 +144,7 @@ class BaseTestCase(unittest.TestCase):
         if course_name is None:
             course_name = course
         course_name = course_name.title()
-        self.driver.find_element(By.ID, dateutils.get_current_semester() + '_' + course).click()
+        self.driver.find_element(By.ID, "s20" + '_' + course).click()
         # print(self.driver.page_source)
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is('Submitty ' + course_name + ' Gradeables'))
 
