@@ -503,7 +503,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         on the container's network (hostname, port).
         """
 
-        #writing complete knownhost JSON to the container directory
+        # Writing complete knownhost JSON to the container directory
         router = self.get_router(containers)
 
         sorted_networked_containers = sorted(containers, key=lambda x: x.name)
@@ -515,7 +515,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 connections = [x.name for x in containers]
             else:
                 connections = container.outgoing_connections
-            if not container.name in connections:
+
+            if container.name not in connections:
                 connections.append(container.name)
 
             sorted_connections = sorted(connections)
@@ -532,16 +533,16 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                     if container.name == 'router' and connected_container_name == 'router':
                         continue
                     elif container.name == connected_container_name:
-                        network_name =  f"{container.full_name}_network"
+                        network_name = f"{container.full_name}_network"
                         ip_address = container.get_ip_address(network_name)
                     # If this node is not the router, we must inject the router
                     elif container.name != 'router':
                         # Get the router's ip on the container's network
-                        network_name =  f"{container.full_name}_network"
+                        network_name = f"{container.full_name}_network"
                         ip_address = router.get_ip_address(network_name)
                     else:
                         # If we are the router, get the connected container's ip on its own network
-                        network_name =  f"{self.untrusted_user}_{connected_container_name}_network"
+                        network_name = f"{self.untrusted_user}_{connected_container_name}_network"
                         ip_address = connected_container.get_ip_address(network_name)
                 else:
                     ip_address = connected_container.get_ip_address(
@@ -574,8 +575,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             tcp_connection_list.append([container.name, container.tcp_port_range[0]])
             udp_connection_list.append([container.name, container.udp_port_range[0]])
 
-
-        #writing complete knownhosts csvs to input directory'
+        # Writing complete knownhosts csvs to input directory'
         networked_containers = self.get_standard_containers(containers)
         router = self.get_router(containers)
 
@@ -609,7 +609,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         to a set of containers per their testcase specification.
         """
         for action_obj in self.dispatcher_actions:
-            action_type  = action_obj["action"]
+            action_type = action_obj["action"]
 
             if action_type == "delay":
                 time_to_delay = float(action_obj["seconds"])
@@ -653,7 +653,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 return network
         return None
 
-    #targets must hold names/keys for the processes dictionary
+    # Targets must hold names/keys for the processes dictionary
     def send_message_to_processes(self, containers, message, targets):
         """
         Given containers, targets, and a message, deliver the message to the target containers.
@@ -674,7 +674,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             if container.container.status != 'exited':
                 return True
         return False
-
 
     ###########################################################
     #
@@ -724,7 +723,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         """ For every container, set up its directory for archival. """
 
         self.setup_for_testcase_archival(overall_log)
-        test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
 
         for container in self.containers:
             if len(self.containers) > 1:
@@ -796,7 +794,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             return
 
         try:
-            self.create_containers( containers, script, arguments)
+            self.create_containers(containers, script, arguments)
             self.network_containers(containers)
         except Exception:
             self.log_message(
@@ -854,7 +852,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 'ERROR cleaning up docker networks. See stack trace output for more details.'
             )
             self.log_stack_trace(traceback.format_exc())
-
 
         # A zero return code means execution went smoothly
         return_code = 0
