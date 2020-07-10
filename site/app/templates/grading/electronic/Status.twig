@@ -744,10 +744,25 @@
 
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
-                <a class="btn btn-default"
-                   href="{{ download_zip_url }}?type=all">
-                    Download Zip of All Students
-                </a>
+                <details class="btn btn-default" style="padding-right:0px">
+                    <summary float="left">
+                        <a style="text-decoration:none;color:black;padding:10px;padding-left:0px" 
+                            href="{{ download_zip_url }}?type=all">
+                            Download Zip of All Students
+                        </a>
+                    </summary>
+
+                    <details-menu>
+                        <div>
+                            <form style="text-align: left;padding-top:8px;">
+                                <input type="checkbox" id="results_folder">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details-menu>
+                </details>
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-default"
