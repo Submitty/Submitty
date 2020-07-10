@@ -18,7 +18,7 @@ class Server implements MessageComponentInterface {
     private $sessions;
 
     // Holds the mapping between User_ID (key) and Connection object (value)
-    /** @var array<string, \Ratchet\ConnectionInterface> */
+    /** @var array<string, ConnectionInterface> */
     private $users;
 
     /** @var Core */
@@ -27,7 +27,7 @@ class Server implements MessageComponentInterface {
     public function __construct(Core $core) {
         $this->clients = new \SplObjectStorage();
         $this->sessions = [];
-
+        $this->users = [];
         $this->core = $core;
     }
 
@@ -37,8 +37,6 @@ class Server implements MessageComponentInterface {
      */
     private function checkAuth(ConnectionInterface $conn): bool {
         $request = $conn->httpRequest;
-        $client_id = $conn->resourceId;
-        $origin = $request->getHeader('origin')[0];
         $user_agent = $request->getHeader('User-Agent')[0];
 
         if ($user_agent === 'websocket-client-php') {
@@ -106,7 +104,7 @@ class Server implements MessageComponentInterface {
 
     /**
      * Fetches Connection object of a given User_ID
-     * @return bool|\Ratchet\ConnectionInterface
+     * @return bool|ConnectionInterface
      */
     private function getSocketClient(string $user_id) {
         if (isset($this->users[$user_id])) {
@@ -145,8 +143,10 @@ class Server implements MessageComponentInterface {
      */
     private function removeSocketClient(ConnectionInterface $conn): void {
         $user_id = $this->getSocketUserID($conn);
-        unset($this->sessions[$conn->resourceId]);
-        unset($this->users[$user_id]);
+        if ($user_id) {
+            unset($this->sessions[$conn->resourceId]);
+            unset($this->users[$user_id]);
+        }
     }
 
     /**
@@ -174,9 +174,13 @@ class Server implements MessageComponentInterface {
 
         if (isset($msg['user_id'])) {
             $original_from = $this->getSocketClient($msg['user_id']);
+            if ($original_from) {
+                $original_from->close();
+            }
             unset($msg['user_id']);
             $new_msg_string = json_encode($msg);
-            $this->broadcast($original_from, $new_msg_string, false);
+            $this->broadcast($from, $new_msg_string, false);
+            $from->close();
         }
         else {
             $this->broadcast($from, $msgString, false);
