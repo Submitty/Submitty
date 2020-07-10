@@ -120,7 +120,7 @@ def update_worker_json(name, entry):
         print(f"ERROR: autograding_workers.json entry for {e} is malformatted. {name}")
         autograding_utils.log_message(
             AUTOGRADING_LOG_PATH, JOB_ID,
-            message=f"ERROR: autograding_workers.json entry for {e} is malformed. {name}"
+            message=f"ERROR: autograding_workers.json entry for {name} is malformed. {e}"
         )
         autograding_utils.log_stack_trace(
             AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
