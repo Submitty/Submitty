@@ -86,6 +86,71 @@ function populateSpecificTimeZoneDropDown(general_selection, selected_option = n
     }
 }
 
+function updateUserPreferredNames () {
+  const first_name_field = $("#user-firstname-change");
+  const last_name_field = $("#user-lastname-change");
+  // If the names are not updated just display an error message and return without making any API call
+  if (first_name_field.data('current-name') === first_name_field.val() && last_name_field.data('current-name') === last_name_field.val()) {
+    displayErrorMessage('No changes detected to update preferred names!');
+  }
+  else {
+    let data = new FormData();
+    data.append('csrf_token', csrfToken);
+    data.append('first_name', first_name_field.val());
+    data.append('last_name', last_name_field.val());
+    let url = buildUrl(['current-user', 'change-preferred-names']);
+    $.ajax({
+      url,
+      type: "POST",
+      data,
+      processData: false,
+      contentType: false,
+      success: function(res) {
+        const response = JSON.parse(res);
+        response.status === "success"
+          ? displaySuccessMessage(response.data.message)
+          : displayErrorMessage(response.message);
+      },
+      error: function() {
+        // display error message
+        displayErrorMessage("Some went wrong while updating preferred names!");
+      }
+    });
+  }
+  // hide the form form view
+  $('.popup-form').css('display', 'none');
+  return false;
+}
+
+function updateUserProfilePhoto () {
+  let data = new FormData();
+  data.append('csrf_token', $("#user-profile-photo-csrf").val());
+  data.append('user_image', $("#user-image-button").prop('files')[0]);
+  let url = buildUrl(['current-user', 'change-profile-photo']);
+  $.ajax({
+    url,
+    type: "POST",
+    data,
+    processData: false,
+    contentType: false,
+    success: function(res) {
+      //display success message
+      const response = JSON.parse(res);
+
+      response.status === "success"
+        ? displaySuccessMessage(response.data.message)
+        : displayErrorMessage(response.message);
+    },
+    error: function() {
+      // display error message
+      displayErrorMessage("Some went wrong while updating profile photo!");
+    }
+  });
+  // hide the form from view
+  $('.popup-form').css('display', 'none');
+  return false;
+}
+
 $(document).ready(function() {
 
     $('#theme_change_select').change(function() {

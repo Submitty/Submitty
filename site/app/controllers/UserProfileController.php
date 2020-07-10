@@ -94,15 +94,15 @@ class UserProfileController extends AbstractController {
 
 
     /**
-     * @Route("/current-user/change-username", methods={"POST"})
-     * @return MultiResponse
+     * @Route("/current-user/change-preferred-names", methods={"POST"})
+     * @return JsonResponse
      * @throws \ImagickException
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if (isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
-            $newFirstName = trim($_POST['user_firstname_change']);
-            $newLastName = trim($_POST['user_lastname_change']);
+        if (empty($_POST['user_firstname_change']) && empty($_POST['user_lastname_change'])) {
+            $newFirstName = trim($_POST['first_name']);
+            $newLastName = trim($_POST['last_name']);
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
@@ -111,38 +111,45 @@ class UserProfileController extends AbstractController {
                 //User updated flag tells auto feed to not clobber some of the user's data.
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Preferred names updated successfully!"
+                ]);
             }
             else {
-                $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
+                return JsonResponse::getErrorResponse("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['user-profile']))
-        );
+        else {
+            return JsonResponse::getErrorResponse('Preferred names cannot be empty!');
+        }
     }
 
     /**
      * @Route("/current-user/change-profile-photo", methods={"POST"})
-     * @return MultiResponse
+     * @return JsonResponse
      * @throws \ImagickException
      */
     public function changeProfilePhoto () {
         $user = $this->core->getUser();
-        // If we received an image file attempt to save it
-        if ($_FILES['user_image']['tmp_name'] !== '') {
+        // No image uploaded
+        if (empty($_FILES['user_image']) || empty($_FILES['user_image']['tmp_name'])) {
+            return JsonResponse::getErrorResponse('No image uploaded to update the profile photo');
+        }
+        else {
             $meta = explode('.', $_FILES['user_image']['name']);
-            $file_name = $meta[0];
             $extension = $meta[1];
 
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
 
             if (!$result) {
-                $this->core->addErrorMessage('Some error occurred saving your new profile photo.');
+                return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
+            }
+            else {
+                return JsonResponse::getSuccessResponse([
+                    'message' => 'Profile photo updated successfully!',
+                ]);
             }
         }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['user-profile']))
-        );
     }
 }

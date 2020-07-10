@@ -52,7 +52,7 @@ class UserProfileView extends AbstractView {
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
             "change_password_url" => $this->output->buildUrl(['current-user', 'change-password']),
-            "change_username_url" => $this->output->buildUrl(['current-user', 'change-username']),
+            "change_username_url" => $this->output->buildUrl(['current-user', 'change-preferred-names']),
             "change_profile_photo_url" => $this->output->buildUrl(['current-user', 'change-profile-photo']),
             'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
             'user_time_zone' => $user->getTimeZone(),

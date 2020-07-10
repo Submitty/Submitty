@@ -4,17 +4,17 @@
 {% block body %}
     <p class="std-margin">{{ change_name_text }}</p>
     <div class="flex-col" id="user_settings_modal">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="csrf_token" id="user-profile-photo-csrf" value="{{ csrf_token }}" />
         <h2>Preferred User Image</h2>
-        <label for="user_image_button">
+        <label for="user-image-button">
             You may upload a passport-style photograph of yourself for display to course teaching staff.<br>
             NOTE: This feature is NOT for avatars, memes, etc.
         </label>
-        <input type="file" name="user_image" id="user_image_button" accept="image/*">
+        <input type="file" name="user_image" id="user-image-button" accept="image/*">
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" enctype="multipart/form-data" action="{{ change_profile_photo_url }}" >
+    <form method="post" enctype="multipart/form-data" onsubmit="return updateUserProfilePhoto();" >
         {{ parent() }}
     </form>
 {% endblock %}
