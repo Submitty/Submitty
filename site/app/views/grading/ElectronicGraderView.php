@@ -674,6 +674,7 @@ HTML;
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalJs('details.js');
+        $this->core->getOutput()->addInternalJs('collapsible-panels.js');
 
         $this->core->getOutput()->enableMobileViewport();
 
@@ -771,10 +772,10 @@ HTML;
             $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
         		    <div class="content-items-container">
-                    <div class="content-items content-item-left"></div>
+                    <div class="content-item content-item-left"></div>
                     <div class="content-drag-bar">
                     </div>
-                    <div class="content-items content-item-right">
+                    <div class="content-item content-item-right">
 HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradingPanelHeader', $isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel);

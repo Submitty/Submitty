@@ -27,7 +27,7 @@
     "doctrine/annotations": "1.10.3",
     "doctrine/cache": "1.10.1",
     "php-ds/php-ds": "1.2.0",
-    "cboden/ratchet": "0.4.2",
+    "cboden/ratchet": "0.4.3",
     "textalk/websocket": "1.3.1",
     "egulias/email-validator": "2.1.18"
   },
