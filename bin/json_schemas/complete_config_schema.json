@@ -575,7 +575,65 @@
                     "description" : "The list of named containers to which this message should be delivered.",
                     "items" : {
                       "type" : "string"
-                    }
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Gracefully stop a container (ctrl-c).",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["stop"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Start a container which has been stopped or killed.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["start"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Kill a container (SIGKILL).",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["kill"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
                   }
                 }
               }
