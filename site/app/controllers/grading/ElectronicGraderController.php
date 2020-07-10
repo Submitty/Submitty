@@ -299,13 +299,11 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
             $this->core->redirect($this->core->buildCourseUrl());
-            return;
         }
 
         if (!$this->core->getAccess()->canI("grading.electronic.status", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
-            return;
         }
 
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
