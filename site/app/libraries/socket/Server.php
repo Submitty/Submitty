@@ -11,11 +11,14 @@ use app\libraries\TokenManager;
 
 class Server implements MessageComponentInterface {
 
-    // Holds the connections object array, used directly by the class functions
+    // Holds the connection objects array stored per course, used directly by the class functions
     private $clients;
 
     // Holds the mapping between Connection Objects (key) and User_ID (value)
     private $sessions;
+
+    // Holds the mapping between Connection Objects IDs (key) and user current course (value)
+    private $courses;
 
     // Holds the mapping between User_ID (key) and Connection object (value)
     /** @var array<string, ConnectionInterface> */
@@ -25,7 +28,8 @@ class Server implements MessageComponentInterface {
     private $core;
 
     public function __construct(Core $core) {
-        $this->clients = new \SplObjectStorage();
+        $this->clients = [];
+        $this->courses = [];
         $this->sessions = [];
         $this->users = [];
         $this->core = $core;
@@ -57,7 +61,6 @@ class Server implements MessageComponentInterface {
             $user_id = $token->getClaim('sub');
             $logged_in = $this->core->getSession($session_id, $user_id);
             if (!$logged_in) {
-                $conn->close();
                 return false;
             }
             else {
@@ -73,17 +76,10 @@ class Server implements MessageComponentInterface {
     /**
      * Push a given message to all or all-but-sender connections
      */
-    private function broadcast(ConnectionInterface $from, string $content, $all = true): void {
-        if ($all) {
-            foreach ($this->clients as $client) {
+    private function broadcast(ConnectionInterface $from, string $content, string $course_name): void {
+        foreach ($this->clients[$course_name] as $client) {
+            if ($client !== $from) {
                 $client->send($content);
-            }
-        }
-        else {
-            foreach ($this->clients as $client) {
-                if ($client !== $from) {
-                    $client->send($content);
-                }
             }
         }
     }
@@ -154,8 +150,8 @@ class Server implements MessageComponentInterface {
      * to check auth here as that is done on every message.
      */
     public function onOpen(ConnectionInterface $conn) {
-        if ($this->checkAuth($conn)) {
-            $this->clients->attach($conn);
+        if (!$this->checkAuth($conn)) {
+            $conn->close();
         }
     }
 
@@ -166,24 +162,31 @@ class Server implements MessageComponentInterface {
      */
     public function onMessage(ConnectionInterface $from, $msgString) {
         if ($msgString === 'ping') {
-            $this->broadcast($from, 'pong');
+            $from->send('pong');
             return;
         }
 
         $msg = json_decode($msgString, true);
 
-        if (isset($msg['user_id'])) {
+        if ($msg["type"] === "new_connection") {
+            if (!array_key_exists($msg['course'], $this->clients)) {
+                $this->clients[$msg['course']] = new \SplObjectStorage();
+            }
+            $this->clients[$msg['course']]->attach($from);
+            $this->courses[$from->resourceId] = $msg['course'];
+        }
+        elseif (isset($msg['user_id'])) {
             $original_from = $this->getSocketClient($msg['user_id']);
             if ($original_from) {
                 $original_from->close();
             }
             unset($msg['user_id']);
             $new_msg_string = json_encode($msg);
-            $this->broadcast($from, $new_msg_string, false);
+            $this->broadcast($from, $new_msg_string, $msg['course']);
             $from->close();
         }
         else {
-            $this->broadcast($from, $msgString, false);
+            $this->broadcast($from, $msgString, $msg['course']);
         }
     }
 
@@ -193,7 +196,8 @@ class Server implements MessageComponentInterface {
      */
     public function onClose(ConnectionInterface $conn): void {
         $this->removeSocketClient($conn);
-        $this->clients->detach($conn);
+        $user_current_course = $this->courses[$conn->resourceId];
+        $this->clients[$user_current_course]->detach($conn);
     }
 
     /**

@@ -680,7 +680,7 @@ WHERE status = 1"
 
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row();
     }
 
     public function removeNotificationsPost($post_id) {
@@ -763,7 +763,7 @@ WHERE status = 1"
 
     public function getThreadTitle($thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row()['title'];
     }
 
     public function setAnnouncement($thread_id, $onOff) {
@@ -2535,6 +2535,16 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function updateTeamRegistrationSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET registration_section=? WHERE team_id=?", [$section, $team_id]);
     }
+    
+    /**
+     * Set team $team_id's anon_id
+     *
+     * @param string $team_id
+     * @param string $anon_id
+     */
+    public function updateTeamAnonId($team_id, $anon_id) {
+        $this->course_db->query("UPDATE teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
+    }
 
     public function updateTeamRotatingSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
@@ -3208,15 +3218,6 @@ SQL;
     }
 
     /**
-     * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment
-     *
-     * @param string $gradeable_id
-     */
-    public function clearPeerGradingAssignments($gradeable_id) {
-        $this->course_db->query("DELETE FROM peer_assign WHERE g_id=?", [$gradeable_id]);
-    }
-
-    /**
      * Adds an assignment for someone to grade another person for peer grading
      *
      * @param string $student
@@ -3225,6 +3226,26 @@ SQL;
      */
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", [$grader, $student, $gradeable_id]);
+    }
+
+    /**
+     * Removes a specific grader's student from a given assignment
+     *
+     * @param string $gradeable_id
+     * @param string $grader_id
+     */
+    public function removePeerAssignment($gradeable_id, $grader_id, $student_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ? AND user_id = ?", [$gradeable_id, $grader_id, $student_id]);
+    }
+
+    /**
+     * Removes a specific grader and their students from a given assignment
+     *
+     * @param string $gradeable_id
+     * @param string $grader_id
+     */
+    public function removePeerAssignmentsForGrader($gradeable_id, $grader_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ?", [$gradeable_id, $grader_id]);
     }
     
     /**
@@ -3626,6 +3647,18 @@ AND gc_id IN (
         }
         return $return;
     }
+    
+    public function getTeamAnonId($team_id) {
+        $params = (is_array($team_id)) ? $team_id : [$team_id];
+
+        $question_marks = $this->createParamaterList(count($params));
+        $this->course_db->query("SELECT team_id, anon_id FROM teams WHERE team_id IN {$question_marks}", $params);
+        $return = [];
+        foreach ($this->course_db->rows() as $id_map) {
+            $return[$id_map['team_id']] = $id_map['anon_id'];
+        }
+        return $return;
+    }
 
     public function getUserFromAnon($anon_id) {
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
@@ -3638,41 +3671,27 @@ AND gc_id IN (
         }
         return $return;
     }
+    
+    public function getTeamIdFromAnonId($anon_id) {
+        $params = is_array($anon_id) ? $anon_id : [$anon_id];
+
+        $question_marks = $this->createParamaterList(count($params));
+        $this->course_db->query("SELECT anon_id, team_id FROM teams WHERE anon_id IN {$question_marks}", $params);
+        $return = [];
+        foreach ($this->course_db->rows() as $id_map) {
+            $return[$id_map['anon_id']] = $id_map['team_id'];
+        }
+        return $return;
+    }
 
     public function getAllAnonIds() {
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
     }
 
-    /**
-     * Gets the team ids from the provided anonymous ids
-     * TODO: This function is in place for when teams get anonymous ids
-     *
-     * @param  array $anon_ids
-     * @return array
-     */
-    public function getTeamIdsFromAnonIds(array $anon_ids) {
-        /*
-        $placeholders = $this->createParamaterList(count($anon_ids));
-        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$placeholders}", $anon_ids);
-
-        $team_ids = [];
-        foreach ($this->course_db->row() as $row) {
-            $team_ids[$row['anon_id']] = $row['team_id'];
-        }
-        return $team_ids;
-        */
-        // TODO: team ids are the same as their anonymous ids for now
-        return array_combine($anon_ids, $anon_ids);
-    }
-
-    public function getTeamIdFromAnonId(string $anon_id) {
-        return $this->getTeamIdsFromAnonIds([$anon_id])[$anon_id] ?? null;
-    }
-
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id);
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
     }
 
     // NOTIFICATION/EMAIL QUERIES
@@ -4308,6 +4327,14 @@ AND gc_id IN (
             $users[$user->getId()] = $user;
         }
 
+        return $users;
+    }
+    
+    public function getUsersOrTeamsById(array $ids) {
+        $users = $this->getUsersById($ids);
+        if (empty($users)) {
+            return $this->getTeamsById($ids);
+        }
         return $users;
     }
 
