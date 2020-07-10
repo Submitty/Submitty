@@ -599,6 +599,63 @@ CREATE TABLE public.peer_assign (
 
 
 --
+-- Name: poll_options; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.poll_options (
+    option_id integer NOT NULL,
+    order_id integer NOT NULL,
+    poll_id integer,
+    response text NOT NULL,
+    correct boolean NOT NULL
+);
+
+
+--
+-- Name: poll_responses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.poll_responses (
+    poll_id integer NOT NULL,
+    student_id text NOT NULL,
+    option_id integer NOT NULL
+);
+
+
+--
+-- Name: polls; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.polls (
+    poll_id integer NOT NULL,
+    name text NOT NULL,
+    question text NOT NULL,
+    status text NOT NULL,
+    release_date date NOT NULL
+);
+
+
+--
+-- Name: polls_poll_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.polls_poll_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: polls_poll_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.polls_poll_id_seq OWNED BY public.polls.poll_id;
+
+
+--
 -- Name: posts; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -994,6 +1051,13 @@ ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: polls poll_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.polls ALTER COLUMN poll_id SET DEFAULT nextval('public.polls_poll_id_seq'::regclass);
+
+
+--
 -- Name: posts id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1256,6 +1320,14 @@ ALTER TABLE ONLY public.notifications
 
 ALTER TABLE ONLY public.peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: polls polls_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.polls
+    ADD CONSTRAINT polls_pkey PRIMARY KEY (poll_id);
 
 
 --
@@ -1781,6 +1853,30 @@ ALTER TABLE ONLY public.peer_assign
 
 
 --
+-- Name: poll_options poll_options_poll_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_poll_id_fkey FOREIGN KEY (poll_id) REFERENCES public.polls(poll_id);
+
+
+--
+-- Name: poll_responses poll_responses_poll_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses
+    ADD CONSTRAINT poll_responses_poll_id_fkey FOREIGN KEY (poll_id) REFERENCES public.polls(poll_id);
+
+
+--
+-- Name: poll_responses poll_responses_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_responses
+    ADD CONSTRAINT poll_responses_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: posts posts_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1978,30 +2074,6 @@ ALTER TABLE ONLY public.viewed_responses
 
 ALTER TABLE ONLY public.viewed_responses
     ADD CONSTRAINT viewed_responses_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
-
-
--- begin online polling
-CREATE TABLE IF NOT EXISTS polls(
-    poll_id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    question TEXT NOT NULL,
-    status TEXT NOT NULL,
-    release_date DATE NOT NULL
-);
-CREATE TABLE IF NOT EXISTS poll_options(
-    option_id integer NOT NULL,
-    order_id integer NOT NULL,
-    poll_id integer REFERENCES polls(poll_id),
-    response TEXT NOT NULL,
-    correct bool NOT NULL
-);
-CREATE TABLE IF NOT EXISTS poll_responses(
-    poll_id integer NOT NULL REFERENCES polls(poll_id),
-    student_id TEXT NOT NULL REFERENCES users(user_id),
-    option_id integer NOT NULL
-);
-
--- end online polling
 
 
 --
