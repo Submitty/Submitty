@@ -1,14 +1,20 @@
 <div class="content">
-    <h2>System Update</h2>
-    <h4> Current Version Installed {{ latest_tag }} </h4>
+    <h1>System update page</h1>
     <a target="_blank" href="https://submitty.org/sysadmin/update">Need help with updating Submitty? <i style="font-style:normal;" class="fa-question-circle"></i></a>
-    <button class="btn btn-primary" onclick="getReleases('{{latest_tag}}');">Check for Updates</button>
-    <div class="content" id="update_status" hidden>
-        <h2 id="text"></label>
-        <h4 id="tag"></label> 
+
+    <button 
+        class="btn btn-primary float-right" 
+        onclick="getReleases('{{latest_tag}}');">
+        Check for Updates
+    </button>
+
+    <div id="update_status" class="box">
+        <p id="current-version"> Current Version Installed: {{ latest_tag }} </p>
+        <p id="tag"></p>
+        <br> 
+        <p id="text"></p>
     </div>
 
-    <div class="content" id="release_notes_container" hidden>
-        <label id="release_notes"></label>
+    <div class="box" id="release-notes" hidden>
     </div>
 </div>

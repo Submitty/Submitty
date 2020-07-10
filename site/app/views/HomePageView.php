@@ -100,7 +100,7 @@ class HomePageView extends AbstractView {
         ]);
     }
 
-    public function showSystemUpdatePage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token) {
+    public function showSystemUpdatePage(string $csrf_token): string {
         $this->output->addBreadcrumb("System Update");
         return $this->output->renderTwigTemplate('admin/SystemUpdate.twig', [
             "csrf_token" => $csrf_token,
