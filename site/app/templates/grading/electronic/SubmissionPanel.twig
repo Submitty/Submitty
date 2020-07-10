@@ -1,6 +1,12 @@
 {% import _self as self %}
+
+{% if showNewInterface %}
+<div id="submission_browser" class="rubric_panel">
+    <div >
+{% else %}
 <div id="submission_browser" class="draggable rubric_panel">
     <div class="draggable_content">
+{% endif %}
         <div id="directory_view">
             <span class="grading_label">Submissions and Results Browser</span>
             <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>

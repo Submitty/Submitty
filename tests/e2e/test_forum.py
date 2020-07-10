@@ -19,6 +19,8 @@ class TestForum(BaseTestCase):
         super().setUp()
         submitty_session_cookie = self.driver.get_cookie('submitty_session')
         self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
+        new_connection_msg = json.dumps({'type': 'new_connection', 'course': 'sample'})
+        self.ws.send(new_connection_msg)
 
     def tearDown(self):
         self.ws.close()
@@ -182,6 +184,9 @@ class TestForum(BaseTestCase):
         hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'new_post')
         # Test existence only
         self.find_posts(newcontent, must_exists=True, check_attachment=attachment_file)
         return attachment_file
@@ -262,7 +267,6 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
             attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
             assert self.thread_exists(title)
-
             self.find_posts(content, must_exists=True, check_attachment=attachment)
             self.view_thread(title)
             self.find_posts(content, must_exists=True)
