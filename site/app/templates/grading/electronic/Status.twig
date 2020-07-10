@@ -746,7 +746,7 @@
             {% if core.getUser().accessFullGrading() and submitted_total %}
                 <details class="btn btn-default" style="padding-right:0px">
                     <summary float="left">
-                        <a style="text-decoration:none;color:black;padding:10px;padding-left:0px" 
+                        <a id="zip_link" style="text-decoration:none;color:black;padding:10px;padding-left:0px" 
                             href="{{ download_zip_url }}?type=all">
                             Download Zip of All Students
                         </a>
@@ -755,9 +755,9 @@
                     <details-menu>
                         <div>
                             <form style="text-align: left;padding-top:8px;">
-                                <input type="checkbox" id="results_folder">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}' )">
                                 <label for="results_folder"> Include Results Folder</label><br>
-                                <input type="checkbox" id="active_version">
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}' )">
                                 <label for="active_version"> Only Current Active Version</label><br>
                             </form>
                         </div>
@@ -803,5 +803,25 @@
     let defaultOpen = document.getElementById('defaultOpen');
     if (defaultOpen) {
         defaultOpen.click();
+    }
+
+    function editZipDownload(download_zip_url) {
+        var results = document.getElementById("results_folder");
+        var active = document.getElementById("active_version");
+
+        if (results.checked == true && active.checked == true){
+            download_option = "both";
+        }
+        else if (results.checked == true) {
+            download_option = "results";
+        }
+        else if (active.checked == true) {
+            download_option = "active";
+        }
+        else {
+            download_option = "all";
+        }
+
+        $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
     }
 </script>
