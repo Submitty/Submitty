@@ -46,7 +46,9 @@ def worker_process(which_machine, address, which_untrusted, my_server):
             AUTOGRADING_LOG_PATH, JOB_ID,
             message="ERROR: must be run by DAEMON_USER"
         )
-        raise SystemExit("ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER")  # noqa: E501
+        raise SystemExit(
+            "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
+        )
 
     # ignore keyboard interrupts in the worker processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -95,13 +97,14 @@ def worker_process(which_machine, address, which_untrusted, my_server):
                 os.remove(results_zip_tmp)
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
-                    queue_obj["done_time"] = dateutils.write_submitty_date(microseconds=True)
+                    queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
             except Exception:
                 autograding_utils.log_message(
                     AUTOGRADING_LOG_PATH, JOB_ID,
-                    message=f"ERROR attempting to unzip graded item: {which_machine} {which_untrusted}. for more details, see traces entry."  # noqa: E501
+                    message=f"ERROR attempting to unzip graded item: {which_machine} "
+                            f"{which_untrusted}. for more details, see traces entry."
                 )
                 autograding_utils.log_stack_trace(
                     AUTOGRADING_STACKTRACE_PATH, JOB_ID,
@@ -132,7 +135,7 @@ def worker_process(which_machine, address, which_untrusted, my_server):
                 )
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
-                    queue_obj["done_time"] = dateutils.write_submitty_date(microseconds=True)
+                    queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
             finally:
@@ -159,7 +162,9 @@ def launch_workers(my_name, my_stats):
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
-        raise SystemExit("ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER")  # noqa: E501
+        raise SystemExit(
+            "ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER"
+        )
 
     autograding_utils.log_message(
         AUTOGRADING_LOG_PATH, JOB_ID,
@@ -245,7 +250,10 @@ def read_autograding_worker_json():
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
     except FileNotFoundError as e:
-        raise SystemExit("autograding_worker.json not found. Have you registered this worker with a Submitty host yet?") from e
+        raise SystemExit(
+            "autograding_worker.json not found. Have you registered this worker with a "
+            "Submitty host yet?"
+        ) from e
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, trace=traceback.format_exc())
         raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))

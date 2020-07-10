@@ -73,7 +73,10 @@ def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
             installed_commit = submitty_details['installed_commit']
             most_recent_tag = submitty_details['most_recent_git_tag']
     except FileNotFoundError as e:
-        autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, trace=traceback.format_exc())
+        autograding_utils.log_stack_trace(
+            AUTOGRADING_STACKTRACE_PATH,
+            trace=traceback.format_exc()
+        )
         raise SystemExit("ERROR, could not locate the submitty.json:", e)
 
     autograding_worker_json[entry]['server_name'] = socket.getfqdn()
@@ -91,7 +94,10 @@ def update_all_foreign_autograding_workers():
         with open(all_workers_json, 'r') as infile:
             autograding_workers = json.load(infile)
     except FileNotFoundError as e:
-        autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, trace=traceback.format_exc())
+        autograding_utils.log_stack_trace(
+            AUTOGRADING_STACKTRACE_PATH,
+            trace=traceback.format_exc()
+        )
         raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
 
     for key, value in autograding_workers.items():
@@ -149,9 +155,13 @@ def update_worker_json(name, entry):
             )
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: could not mv to local autograding_TODO/autograding_worker.json due to the following error: {e}"  # noqa: E501
+                message="ERROR: could not mv to local autograding_TODO/autograding_worker.json "
+                        f"due to the following error: {e}"
             )
-            print(f"ERROR: could not mv to local autograding_worker.json due to the following error: {e}")  # noqa: E501
+            print(
+                "ERROR: could not mv to local autograding_worker.json due to the following"
+                f" error: {e}"
+            )
             return False
         finally:
             os.close(fd)
@@ -191,9 +201,13 @@ def update_worker_json(name, entry):
             )
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json due to the following error: {e}"  # noqa: E501
+                message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json "
+                        f"due to the following error: {e}"
             )
-            print(f"ERROR: could sftp to foreign autograding_TODO/autograding_worker.json due to the following error: {e}")  # noqa: E501
+            print(
+                "ERROR: could sftp to foreign autograding_TODO/autograding_worker.json due "
+                f"to the following error: {e}"
+            )
             success = False
         finally:
             os.close(fd)
@@ -226,7 +240,8 @@ def establish_ssh_connection(my_name, user, host, only_try_once=False):
             retry_delay = min(10, retry_delay * 2)
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"{my_name} Could not establish connection with {user}@{host} going to re-try."  # noqa: E501
+                message=f"{my_name} Could not establish connection with {user}@{host} going "
+                        "to re-try."
             )
             autograding_utils.log_stack_trace(
                 AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
@@ -250,7 +265,9 @@ def prepare_job(
             AUTOGRADING_LOG_PATH, JOB_ID,
             message="ERROR: must be run by DAEMON_USER"
         )
-        raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")  # noqa: E501
+        raise SystemExit(
+            "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
+        )
 
     if which_machine == 'localhost':
         address = which_machine
@@ -390,7 +407,9 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
             AUTOGRADING_LOG_PATH, JOB_ID,
             message="ERROR: must be run by DAEMON_USER"
         )
-        raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")  # noqa: E501
+        raise SystemExit(
+            "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
+        )
 
     if which_machine == 'localhost':
         address = which_machine
@@ -608,7 +627,8 @@ def grading_cleanup(my_name, queue_file, grading_file):
         print(f"{my_name} ERROR attempting to remove grading file: {grading_file} exception={e}")
         autograding_utils.log_message(
             AUTOGRADING_LOG_PATH, JOB_ID,
-            message=f"{my_name} ERROR attempting to remove grading file: {grading_file} exception={e}"  # noqa: E501
+            message=f"{my_name} ERROR attempting to remove grading file: "
+                    f"{grading_file} exception={e}"
         )
 
 
@@ -676,7 +696,9 @@ def checkout_vcs_repo(my_file):
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
         if vcs_subdirectory == '':
-            with open(os.path.join(submission_path, ".submit.VCS_CHECKOUT")) as submission_vcs_file:
+            with open(
+                os.path.join(submission_path, ".submit.VCS_CHECKOUT")
+            ) as submission_vcs_file:
                 VCS_JSON = json.load(submission_vcs_file)
                 git_user_id = VCS_JSON["git_user_id"]
                 git_repo_id = VCS_JSON["git_repo_id"]
@@ -764,7 +786,10 @@ def checkout_vcs_repo(my_file):
                 #    subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
 
                 subprocess.call(['ls', '-lR', checkout_path], stdout=open(checkout_log_file, 'a'))
-                print("\n====================================\n", file=open(checkout_log_file, 'a'))
+                print(
+                    "\n====================================\n",
+                    file=open(checkout_log_file, 'a')
+                )
                 subprocess.call(['du', '-skh', checkout_path], stdout=open(checkout_log_file, 'a'))
                 obj['revision'] = what_version
 
@@ -783,7 +808,11 @@ def checkout_vcs_repo(my_file):
                     print("\n", file=f)
                     print("Check to be sure the repository is not empty.\n", file=f)
                     print("Check to be sure the repository has a master branch.\n", file=f)
-                    print("And check to be sure the timestamps on the master branch are reasonable.\n", file=f)  # noqa: E501
+                    print(
+                        "And check to be sure the timestamps on the master branch are "
+                        "reasonable.\n",
+                        file=f
+                    )
 
         # exception on git clone
         except subprocess.CalledProcessError as error:
@@ -797,7 +826,11 @@ def checkout_vcs_repo(my_file):
                 print(str(error), file=f)
                 print("\n", file=f)
                 print("Check to be sure the repository exists.\n", file=f)
-                print("And check to be sure the submitty_daemon user has appropriate access credentials.\n", file=f)  # noqa: E501
+                print(
+                    "And check to be sure the submitty_daemon user has appropriate access "
+                    "credentials.\n",
+                    file=f
+                )
 
     # exception in constructing full git repository url/path
     except Exception as error:
@@ -811,7 +844,10 @@ def checkout_vcs_repo(my_file):
             print(str(error), file=f)
             print("\n", file=f)
             print("Check to be sure the repository exists.\n", file=f)
-            print("And check to be sure the submitty_daemon user has appropriate access credentials.\n", file=f)  # noqa: E501
+            print(
+                "And check to be sure the submitty_daemon user has appropriate access "
+                "credentials.\n",
+                file=f)
 
     return obj
 
@@ -989,7 +1025,10 @@ def shipper_process(my_name, my_data, full_address, which_untrusted):
                 AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
-            my_message = f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. For more details, see traces entry"  # noqa: E501
+            my_message = (
+                f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. "
+                "For more details, see traces entry"
+            )
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
 
@@ -1250,7 +1289,8 @@ def try_short_circuit(queue_file: str) -> bool:
     except Exception:
         autograding_utils.log_message(
             AUTOGRADING_LOG_PATH, job_id=job_id,
-            message=f"Short-circuit failed for {gradeable_id} (check stack traces). Falling back to standard grade."  # noqa: E501
+            message=f"Short-circuit failed for {gradeable_id} (check stack traces). "
+                    "Falling back to standard grade."
         )
         autograding_utils.log_stack_trace(
             AUTOGRADING_STACKTRACE_PATH, job_id=job_id,
@@ -1325,9 +1365,13 @@ def write_grading_outputs(
             fd.write('\n')
 
         # Write the final lines
-        autograde_total_msg = f"{'Automatic grading total:':<64}{auto_points:3} /{max_auto_points:3}\n"  # noqa: E501
+        autograde_total_msg = (
+            f"{'Automatic grading total:':<64}{auto_points:3} /"
+            f"{max_auto_points:3}\n"
+        )
         fd.write(autograde_total_msg)
-        fd.write(f"{'Non-hidden automatic grading total:':<64}{nonhidden_auto_points:3} /{max_nonhidden_auto_points:3}\n")  # noqa: E501
+        fd.write(f"{'Non-hidden automatic grading total:':<64}{nonhidden_auto_points:3} /"
+                 f"{max_nonhidden_auto_points:3}\n")
     return autograde_total_msg
 
 
@@ -1336,7 +1380,9 @@ def write_grading_outputs(
 def launch_shippers(worker_status_map):
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
-        raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")  # noqa: E501
+        raise SystemExit(
+            "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
+        )
     autograding_utils.log_message(
         AUTOGRADING_LOG_PATH, JOB_ID,
         message="grade_scheduler.py launched"
@@ -1385,7 +1431,9 @@ def launch_shippers(worker_status_map):
             default_present = True
             break
     if not default_present:
-        raise SystemExit("ERROR: autograding_workers.json contained no machine with default capabilities")  # noqa: E501
+        raise SystemExit(
+            "ERROR: autograding_workers.json contained no machine with default capabilities"
+        )
 
     # Launch a shipper process for every worker on the primary machine and each worker machine
     total_num_workers = 0
@@ -1419,8 +1467,10 @@ def launch_shippers(worker_status_map):
             full_address = ""
             if machine["address"] != "localhost":
                 if machine["username"] == "":
-                    raise SystemExit(f"ERROR: empty username for worker machine {machine['address']}")  # noqa: E501
-                full_address = "{0}@{1}".format(machine["username"], machine["address"])
+                    raise SystemExit(
+                        f"ERROR: empty username for worker machine {machine['address']}"
+                    )
+                full_address = f'{machine["username"]}@{machine["address"]}'
             else:
                 if not machine["username"] == "":
                     raise SystemExit('ERROR: username for primary (localhost) must be ""')
@@ -1428,7 +1478,9 @@ def launch_shippers(worker_status_map):
 
             num_workers_on_machine = machine["num_autograding_workers"]
             if num_workers_on_machine < 0:
-                raise SystemExit(f"ERROR: num_workers_on_machine for '{machine}' must be non-negative.")
+                raise SystemExit(
+                    f"ERROR: num_workers_on_machine for '{machine}' must be non-negative."
+                )
 
             single_machine_data = {name: machine}
             single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
@@ -1437,10 +1489,12 @@ def launch_shippers(worker_status_map):
                 AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
-            print(f"ERROR: autograding_workers.json entry for {name} contains an error: {e}. For more details, see trace entry.")  # noqa: E501
+            print(f"ERROR: autograding_workers.json entry for {name} contains an error: {e}. "
+                  "For more details, see trace entry.")
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: autograding_workers.json entry for {name} contains an error: {e} For more details, see trace entry."  # noqa: E501
+                message=f"ERROR: autograding_workers.json entry for {name} contains an error: {e} "
+                        "For more details, see trace entry."
             )
             continue
         # launch the shipper threads
@@ -1534,7 +1588,9 @@ def launch_shippers(worker_status_map):
 if __name__ == "__main__":
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
-        raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")  # noqa: E501
+        raise SystemExit(
+            "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
+        )
 
     worker_status_map = update_all_foreign_autograding_workers()
     launch_shippers(worker_status_map)
