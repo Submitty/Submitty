@@ -260,16 +260,15 @@ class AutogradingConfigController extends AbstractController {
         $config_string = $mode === 'edit' ? $json_contents : '{"notebook": [], "testcases": []}';
         $config_string = Utils::stripComments($config_string);
 
-        // Let PHP json functions handle removing the pretty print
-        $decoded = json_decode($config_string, JSON_UNESCAPED_LINE_TERMINATORS);
-        $encoded = json_encode($decoded);
+        // Remove pretty print by decoding and re-encoding
+        $config_string = json_decode($config_string);
+        $config_string = json_encode($config_string);
 
-        $encoded = Utils::escapeDoubleQuotes($encoded);
-        $encoded = Utils::escapeNewLines($encoded);
+        $config_string = Utils::escapeDoubleQuotes($config_string);
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
-            'config_string' => $encoded,
+            'config_string' => $config_string,
             'mode' => $mode
         ]);
     }
@@ -280,16 +279,21 @@ class AutogradingConfigController extends AbstractController {
      */
     public function notebookBuilderSave(): JsonResponse {
         if ($_POST['mode'] === 'new') {
-            return $this->notebookSaveNew();
+            return $this->notebookBuilderSaveNew();
         }
         elseif ($_POST['mode'] === 'edit') {
-            return $this->notebookSaveExisting();
+            return $this->notebookBuilderSaveExisting();
         }
 
         return JsonResponse::getErrorResponse('Illegal "mode" was passed.');
     }
 
-    private function notebookSaveNew(): JsonResponse {
+    /**
+     * Helper function for saving a new config.json using notebook builder
+     *
+     * @return JsonResponse
+     */
+    private function notebookBuilderSaveNew(): JsonResponse {
         $result = $this->uploadConfig();
 
         if ($result->json_response->json['status'] === 'success') {
@@ -300,28 +304,43 @@ class AutogradingConfigController extends AbstractController {
             $gradeable->setAutogradingConfigPath($config_path);
             $this->core->getQueries()->updateGradeable($gradeable);
 
-            $this->notebookRebuildGradeable($gradeable);
+            $this->notebookBuilderRebuildGradeable($gradeable);
         }
 
         return $result->json_response;
     }
 
-    private function notebookSaveExisting(): JsonResponse {
+    /**
+     * Helper function used for editing and saving an existing config.json using notebook builder
+     *
+     * @return JsonResponse
+     */
+    private function notebookBuilderSaveExisting(): JsonResponse {
         // Overwrite existing configuration with newly uploaded one
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
-        $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
+        $current_gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
+        $json_path = FileUtils::joinPaths($current_gradeable->getAutogradingConfigPath(), 'config.json');
         $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
 
         // Update group permission
         $group = $this->core->getConfig()->getCourse() . '_tas_www';
         $permission_res = chgrp($json_path, $group);
 
-        $this->notebookRebuildGradeable($gradeable);
+        // Collect all gradeables using this configuration and rebuild
+        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
+            if ($gradeable->getAutogradingConfigPath() === $current_gradeable->getAutogradingConfigPath()) {
+                $this->notebookBuilderRebuildGradeable($gradeable);
+            }
+        }
 
         return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('An error occurred saving the modified config.json.');
     }
 
-    private function notebookRebuildGradeable(Gradeable $gradeable): void {
+    /**
+     * Helper function used to trigger a gradeable rebuild used in the notebook builder save process.
+     *
+     * @return JsonResponse
+     */
+    private function notebookBuilderRebuildGradeable(Gradeable $gradeable): void {
         $admin_gradeable_controller = new AdminGradeableController($this->core);
         $admin_gradeable_controller->enqueueBuild($gradeable);
     }

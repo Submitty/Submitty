@@ -50,12 +50,12 @@ class NotebookBuilder {
             }
         });
 
-        builder_params.config.notebook = notebook_array;
-        return builder_params.config;
+        builder_data.config.notebook = notebook_array;
+        return builder_data.config;
     }
 
     load() {
-        builder_params.config.notebook.forEach(cell => {
+        builder_data.config.notebook.forEach(cell => {
             let widget;
 
             switch (cell.type) {
