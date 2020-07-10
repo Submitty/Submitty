@@ -645,7 +645,6 @@ class Access {
         if (!$gradeable->isPeerGrading()) {
             return false;
         }
-        
         else {
             /*
             * When this check is run, the submitter of a gradeable is set to the grader, even on master.
