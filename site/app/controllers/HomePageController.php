@@ -84,6 +84,7 @@ class HomePageController extends AbstractController {
         if (isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
             $newFirstName = trim($_POST['user_firstname_change']);
             $newLastName = trim($_POST['user_lastname_change']);
+
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
                 $user->setPreferredFirstName($newFirstName);
@@ -94,6 +95,20 @@ class HomePageController extends AbstractController {
             }
             else {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
+            }
+
+            // If we received an image file attempt to save it
+            if ($_FILES['user_image']['tmp_name'] !== '') {
+                $meta = explode('.', $_FILES['user_image']['name']);
+                $file_name = $meta[0];
+                $extension = $meta[1];
+
+                // Save image for user
+                $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
+
+                if (!$result) {
+                    $this->core->addErrorMessage('Some error occurred saving your new user image.');
+                }
             }
         }
         return MultiResponse::RedirectOnlyResponse(

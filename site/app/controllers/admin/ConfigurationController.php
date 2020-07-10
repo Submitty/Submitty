@@ -27,8 +27,8 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
-     * @Route("/api/{_semester}/{_course}/config", methods={"GET"})
-     * @Route("/{_semester}/{_course}/config", methods={"GET"})
+     * @Route("/api/courses/{_semester}/{_course}/config", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/config", methods={"GET"})
      * @return MultiResponse
      */
     public function viewConfiguration(): MultiResponse {
@@ -55,6 +55,9 @@ class ConfigurationController extends AbstractController {
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
+            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
+            'polls_pts_for_correct'          => $this->core->getConfig()->getPollsPtsForCorrect(),
+            'polls_pts_for_incorrect'        => $this->core->getConfig()->getPollsPtsForIncorrect(),
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -94,8 +97,8 @@ class ConfigurationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/{_semester}/{_course}/config", methods={"POST"})
-     * @Route("/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/api/courses/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/config", methods={"POST"})
      * @return MultiResponse
      */
     public function updateConfiguration(): MultiResponse {
@@ -144,7 +147,8 @@ class ConfigurationController extends AbstractController {
                     'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
-                    'queue_contact_info'
+                    'queue_contact_info',
+                    'polls_enabled'
                 ]
             )
         ) {

@@ -18,13 +18,14 @@ use app\libraries\Logger;
 use app\models\GradingOrder;
 use app\models\User;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ElectronicGraderController extends AbstractController {
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
-     * @param string $option
+     * @param  string $option
      * @return bool
      */
     private function validateDiffViewerOption(string $option) {
@@ -34,10 +35,9 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-
     /**
      * Checks that a given diff viewer type is valid using DiffViewer::isValidType
-     * @param string $type
+     * @param  string $type
      * @return bool
      */
     private function validateDiffViewerType(string $type) {
@@ -47,10 +47,104 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-
+    /**
+     * Route for randomizing peer assignments with 'One Grades Many'
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function RandomizePeers($gradeable_id) {
+        /* How does this function work?
+        1 - Number of students to grade (Y) is taken from the client using POST
+            1.1 - If the number is > number of students, then ALL grade ALL.
+        2 - Query DB to get students from registration section(X) (Without taking in students in NULL section)
+        3 - Randomize the order of students
+        4 - Randomly Select Y offsets
+        5 - Shift the random order by the offsets to create the matrix, with no duplicates, and exactly Y assignments and & graders for each student.  no student grades self.
+        */
+        $number_to_grade = $_POST['number_to_grade'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid Gradeable!');
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+        $all_grade_all = false;
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+        $student_array = [];
+        $student_list = [];
+        $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+        foreach ($students as $student) {
+             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+             $sorted_students[$reg_sec][] = $student;
+             array_push($student_list, ['user_id' => $student->getId()]);
+             array_push($student_array, $student->getId());
+        }
+        $number_of_students = count($student_list);
+        if ($number_to_grade > $number_of_students) {
+            $all_grade_all = true;
+        }
+        if ($all_grade_all) {
+            $final_grading_info = [];
+            for ($grader = 0; $grader < count($student_array); ++$grader) {
+                $peer_array = $student_array;
+                unset($peer_array[$grader]);
+                $peer_array = array_values($peer_array);
+                array_push($final_grading_info, [$student_array[$grader],$peer_array]);
+            }
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse($final_grading_info);
+        }
+        $graded_array = $student_array;
+          /*n_array_peers : An Array of arrays that holds information on to be graded peers
+          [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
+          A grades C and E and is graded by C and E.
+          */
+        $n_array_peers = [];
+        shuffle($student_array);
+        array_push($n_array_peers, $student_array);
+          /*final_grading_info : An Array with clear structure of grading rules for peer grading
+          [ [A,[C,E]],[B,[F,D]], ...]
+          A grades C and E, B grades F and D ..and so on!
+          */
+        $final_grading_info = [];
+        $max_offset = count($student_array);
+        $offset_array = [];
+        $temp_offset = [];
+        for ($i = 1; $i < $max_offset; ++$i) {
+            array_push($temp_offset, $i);
+        }
+        /* $offset_array contains randomly chosen offsets.
+            $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
+            Upon every random choice of an offset from $temp_offset, the value is removed from it.
+        */
+        for ($i = 0; $i < $number_to_grade; ++$i) {
+            $random_offset = array_rand($temp_offset, 1);
+            array_push($offset_array, $temp_offset[$random_offset]);
+            unset($temp_offset[$random_offset]);
+        }
+        foreach ($offset_array as $element) {
+            $temp_array = $student_array;
+            for ($i = 0; $i < $element; $i++) {
+                array_push($temp_array, array_shift($temp_array));
+            }
+            array_push($n_array_peers, $temp_array);
+        }
+        for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
+            $temp = [];
+            for ($j = 1; $j < count($n_array_peers); ++$j) {
+                array_push($temp, $n_array_peers[$j][$i]);
+            }
+            array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
+        }
+        if ($number_to_grade < 1) {
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse("Clear Peer Matrix");
+        }
+        $gradeable->setRandomPeerGradersList($final_grading_info);
+        return JsonResponse::getSuccessResponse($final_grading_info);
+    }
     /**
      * Route for getting whitespace information for the diff viewer
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output/remove")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output/remove")
      */
     public function ajaxRemoveEmpty(
         $gradeable_id,
@@ -82,7 +176,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return;
         }
-
+ 
         // get the requested version
         $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
         if ($version_instance === false) {
@@ -126,8 +220,9 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for verifying the grader of a graded component
-     * @param bool verify all components or not
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
+     * @param string $gradeable_id verify all components or not
+     * @param bool $verify_all false be default
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
      * @AccessControl(permission="grading.electronic.verify_grader")
      */
     public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
@@ -197,7 +292,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
      */
     public function showStatus($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -440,7 +535,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Shows the list of submitters
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
     public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
@@ -565,7 +660,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Imports teams from a csv file upload
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/import", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/import", methods={"POST"})
      */
     public function importTeams($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -662,7 +757,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Exports team into a csv file and displays it to the user
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/export")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/export")
      */
     public function exportTeams($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -689,7 +784,7 @@ class ElectronicGraderController extends AbstractController {
                         $team->getId(),
                         $team->getRegistrationSection(),
                         $team->getRotatingSection()
-                    ]);
+                        ]);
                     $csvdata .= $nl;
                 }
             }
@@ -701,9 +796,8 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Randomly redistributes teams with members into Rotating Grading Sections
      * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
-     *      Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
-     *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")
+     * Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")
      */
     public function randomizeTeamRotatingSections($gradeable_id) {
         $section_count = $this->core->getQueries()->getMaxRotatingSection();
@@ -733,7 +827,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Handle requests to create individual teams via the AdminTeamForm
      * @AccessControl(permission="grading.electronic.submit_team_form")
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/new", methods={"POST"})
      */
     public function adminTeamSubmit($gradeable_id) {
         $view = $_POST['view'] ?? '';
@@ -868,7 +962,7 @@ class ElectronicGraderController extends AbstractController {
      * @param $to Used to determine the direction to move in, either 'prev' or 'next'
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1") {
         /** @var Gradeable $gradeable */
@@ -895,8 +989,8 @@ class ElectronicGraderController extends AbstractController {
 
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = false;
-            if ($peer && !$team) {
-                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($from)[$from], false);
+            if ($peer) {
+                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getSubmitterIdFromAnonId($from), false);
             }
             else {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
@@ -940,17 +1034,17 @@ class ElectronicGraderController extends AbstractController {
 
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
-        if ($peer && !$team) {
-            if (array_key_exists($who_id, $this->core->getQueries()->getUserFromAnon($who_id))) {
-                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getUserFromAnon($who_id)[$who_id], false);
+        if ($peer) {
+            if ($this->core->getQueries()->getSubmitterIdFromAnonId($who_id) !== null) {
+                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getSubmitterIdFromAnonId($who_id), false);
             }
         }
         else {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
         if ($graded_gradeable === false) {
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
-                $peer = false;
+            //$this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+            $peer = false;
         }
 
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
@@ -1109,7 +1203,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for fetching a gradeable's rubric information
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"GET"})
      */
     public function ajaxGetGradeableRubric($gradeable_id) {
         $grader = $this->core->getUser();
@@ -1146,9 +1240,9 @@ class ElectronicGraderController extends AbstractController {
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
-            return $component->toArray();
+                return $component->toArray();
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
-            return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+                return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
         //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         $return['components'] = array_values($return['components']);
@@ -1157,7 +1251,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Gets a component and all of its marks
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components")
      */
     public function ajaxGetComponent($gradeable_id, $component_id) {
         // Get the gradeable
@@ -1194,7 +1288,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for getting information about a individual grader
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable")
      */
     public function ajaxGetGradedGradeable($gradeable_id, $anon_id = '', $all_peers = false) {
         // Get the gradeable
@@ -1295,7 +1389,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for saving the marks the submitter received for a component
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/graded_component", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/graded_component", methods={"POST"})
      */
     public function ajaxSaveGradedComponent($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
@@ -1470,7 +1564,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for saving a component's properties (not its marks)
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/save", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/save", methods={"POST"})
      */
     public function ajaxSaveComponent($gradeable_id) {
         // Required parameters
@@ -1554,7 +1648,7 @@ class ElectronicGraderController extends AbstractController {
                 'default' => $default,
                 'max_value' => $max_value,
                 'upper_clamp' => $upper_clamp
-            ]);
+                ]);
             $component->setPage($page);
 
             $this->core->getQueries()->saveComponent($component);
@@ -1570,7 +1664,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for saving the order of components in a gradeable
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/order", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/order", methods={"POST"})
      */
     public function ajaxSaveComponentOrder($gradeable_id) {
         // Required parameters
@@ -1626,7 +1720,7 @@ class ElectronicGraderController extends AbstractController {
      * NOTE: the 'pages' parameter can be an associate array to set the page numbers of each component,
      *  or a single-element array with the key 'page' of the page number to set all components' page to
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/save_pages", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/save_pages", methods={"POST"})
      */
     public function ajaxSaveComponentPages($gradeable_id) {
         // Required parameters
@@ -1690,10 +1784,10 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-/**
- * Route for adding a new component to a gradeable
- * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
- */
+ /**
+  * Route for adding a new component to a gradeable
+  * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
+  */
     public function ajaxAddComponent($gradeable_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1739,7 +1833,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for deleting a component from a gradeable
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/delete", methods={"POST"})
      */
     public function ajaxDeleteComponent($gradeable_id) {
         // Required parameters
@@ -1779,7 +1873,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for saving a mark's title/point value
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/save", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/save", methods={"POST"})
      */
     public function ajaxSaveMark($gradeable_id) {
         // Required parameters
@@ -1857,7 +1951,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for saving a the order of marks in a component
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/save_order", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/save_order", methods={"POST"})
      */
     public function ajaxSaveMarkOrder($gradeable_id) {
         // Required parameters
@@ -1917,7 +2011,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for getting the student's program output for the diff-viewer
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output")
      */
     public function ajaxGetStudentOutput($gradeable_id, $who_id = '', $version = '', $index = '') {
         // Get the gradeable
@@ -1975,7 +2069,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for adding a mark to a component
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/add", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/add", methods={"POST"})
      */
     public function ajaxAddNewMark($gradeable_id) {
         // Required parameters
@@ -2037,7 +2131,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for deleting a mark from a component
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/delete", methods={"POST"})
      */
     public function ajaxDeleteMark($gradeable_id) {
         // Required parameters
@@ -2088,7 +2182,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for saving the general comment for the gradeable
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"POST"})
      */
     public function ajaxSaveOverallComment($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
@@ -2152,7 +2246,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for getting a GradedComponent
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/graded_component", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/graded_component", methods={"GET"})
      */
     public function ajaxGetGradedComponent($gradeable_id, $anon_id = '', $component_id = '') {
         $grader = $this->core->getUser();
@@ -2225,7 +2319,7 @@ class ElectronicGraderController extends AbstractController {
      * Route for getting the overall comment for the currently logged in user.
      * @param string $gradeable_id
      * @param string $anon_id, the anonymous id of the student
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/comments", methods={"GET"})
      */
     public function ajaxGetOverallComment($gradeable_id, $anon_id = '') {
         // Get the gradeable
@@ -2261,7 +2355,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for getting all submitters that received a mark and stats about that mark
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/stats", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/marks/stats", methods={"POST"})
      */
     public function ajaxGetMarkStats($gradeable_id) {
         // Required parameters
@@ -2338,9 +2432,8 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Gets... stats
      * @param Gradeable $gradeable
-     * @param User $grader
-     * @param bool $full_sets
-     * @param $sections
+     * @param User      $grader
+     * @param bool      $full_sets
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());

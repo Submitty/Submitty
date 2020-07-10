@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AdminGradeableController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
      */
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
@@ -53,7 +53,7 @@ class AdminGradeableController extends AbstractController {
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
      * @param Gradeable $gradeable
-     * @Route("/{_semester}/{_course}/gradeable", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable", methods={"GET"})
      */
     public function newPage($template_id = null) {
         $this->core->getOutput()->addBreadcrumb("New Gradeable");
@@ -266,6 +266,48 @@ class AdminGradeableController extends AbstractController {
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function adminGradeablePeerSubmit($gradeable_id) {
+        $grader_id = $_POST['grader_id'];
+        //if entire grader row is removed, just remove grader and their students
+        if (!empty($_POST['remove_grader'])) {
+            $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
+        }
+        else {
+            //otherwise, check if any of the individual current students were removed
+            $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
+            $grading_assignment_for_grader = $tmp[$gradeable_id];
+            foreach ($grading_assignment_for_grader as $i => $student_id) {
+                if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
+                    if ($this->core->getQueries()->getUserById($student_id) == null) {
+                        $this->core->addErrorMessage("{$student_id} is not a valid student");
+                    }
+                    else {
+                        $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
+                    }
+                }
+            }
+            //then, add new students
+            foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+                if (in_array($student_id, $grading_assignment_for_grader)) {
+                    $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
+                }
+                elseif ($this->core->getQueries()->getUserById($student_id) == null) {
+                    $this->core->addErrorMessage("{$student_id} is not a valid student");
+                }
+                else {
+                    $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
+                }
+            }
+        }
+        $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+        $this->core->getOutput()->renderJsonSuccess($new_peers);
     }
 
     /* Http request methods (i.e. ajax) */
@@ -278,7 +320,7 @@ class AdminGradeableController extends AbstractController {
             $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
             $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
             if ($make_peer_assignments) {
-                $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
+                $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
 
                 $users = $this->core->getQueries()->getAllUsers();
                 $user_ids = [];
@@ -366,7 +408,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"POST"})
      */
     public function updateRubricRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -654,7 +696,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods={"POST"})
      */
     public function updateGradersRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -686,7 +728,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable", methods={"POST"})
      */
     public function createGradeableRequest() {
         $gradeable_id = $_POST['id'] ?? '';
@@ -920,7 +962,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"POST"})
      */
     public function updateGradeableRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1076,7 +1118,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
      */
     public function deleteGradeable($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1181,7 +1223,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rebuild")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/rebuild")
      */
     public function rebuildGradeableRequest($gradeable_id) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -1192,7 +1234,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
     public function ajaxGetBuildLogs($gradeable_id) {
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
@@ -1206,7 +1248,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
     public function getBuildStatusOfGradeable($gradeable_id) {
         $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
@@ -1246,7 +1288,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")
      */
     public function openquickLink($gradeable_id, $action) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -1332,7 +1374,7 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Exports components to json and downloads for user
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/export")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/export")
      */
     public function exportComponentsRequest($gradeable_id) {
         $url = $this->core->buildCourseUrl();
@@ -1362,7 +1404,7 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Imports components from uploaded files into gradeable (single-depth array)
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/import", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/import", methods={"POST"})
      */
     public function importComponents($gradeable_id) {
         // Get the gradeable

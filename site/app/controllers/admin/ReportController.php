@@ -17,6 +17,7 @@ use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
+use app\models\PollModel;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\RainbowCustomization;
 use app\exceptions\ValidationException;
@@ -34,7 +35,7 @@ class ReportController extends AbstractController {
     private $all_overrides = [];
 
     /**
-     * @Route("/{_semester}/{_course}/reports")
+     * @Route("/courses/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -50,8 +51,8 @@ class ReportController extends AbstractController {
     /**
      * Generates grade summary files for every user
      *
-     * @Route("/{_semester}/{_course}/reports/summaries")
-     * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/reports/summaries")
+     * @Route("/api/courses/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -76,8 +77,8 @@ class ReportController extends AbstractController {
         ];
 
         // Generate the reports
-        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
-            $this->saveUserToFile($base_path, $a, $b, $c);
+        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c, $d) use ($base_path) {
+            $this->saveUserToFile($base_path, $a, $b, $c, $d);
             return null;
         });
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
@@ -118,7 +119,7 @@ class ReportController extends AbstractController {
     /**
      * Generates and offers download of CSV grade report
      *
-     * @Route("/{_semester}/{_course}/reports/csv")
+     * @Route("/courses/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -255,13 +256,15 @@ class ReportController extends AbstractController {
             $all_late_days[$row['user_id']][] = $row;
         }
 
+        $all_polls = $this->core->getQueries()->getPolls();
+
         $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
 
         // Method to call the callback with the required parameters
-        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days) {
+        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days, $all_polls) {
             $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
             $late_days = new LateDays($this->core, $current_user, $ggs, $all_late_days[$current_user->getId()] ?? []);
-            return $per_user_callback($current_user, $ggs, $late_days);
+            return $per_user_callback($current_user, $ggs, $late_days, $all_polls);
         };
         foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $graded_gradeable_sort_keys) as $gg) {
             /** @var GradedGradeable $gg */
@@ -343,7 +346,7 @@ class ReportController extends AbstractController {
      * @param GradedGradeable[] The list of graded gradeables, indexed by gradeable id
      * @param LateDays $late_days The late day info for these graded gradeables
      */
-    private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days) {
+    private function saveUserToFile(string $base_path, User $user, array $ggs, LateDays $late_days, array $polls) {
 
         $user_data = [];
         $user_data['user_id'] = $user->getId();
@@ -359,6 +362,7 @@ class ReportController extends AbstractController {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
             $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
+        
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
 
@@ -520,7 +524,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
@@ -573,7 +577,7 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/reports/rainbow_grades_status")
+     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")
      */
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
@@ -638,7 +642,7 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/{_semester}/{_course}/gradebook")
+     * @Route("/courses/{_semester}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
     public function displayGradebook() {

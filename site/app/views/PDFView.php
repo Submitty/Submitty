@@ -7,20 +7,20 @@ use app\libraries\FileUtils;
 class PDFView extends AbstractView {
     /**
      * adds to our buffer a twig output of either student view or grader view.
-     *
-     * @param $gradeable_id
-     * @param $user_id
-     * @param $filename
-     * @param $annotation_jsons
-     * @param $is_student
-     *
-     * @return void
      */
-    public function showPDFEmbedded($params) {
+    public function showPDFEmbedded(
+        string $gradeable_id,
+        string $user_id,
+        ?string $file_name,
+        ?string $file_path,
+        array $annotation_jsons,
+        bool $is_student,
+        ?int $page_num,
+        bool $jquery = false
+    ): void {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $pdf_url = $this->core->buildCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
-        $is_student = $params["is_student"];
+        $pdf_url = $this->core->buildCourseUrl(['gradeable',  $gradeable_id, 'encode_pdf']);
 
         $localcss = [];
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdf_embedded.css'), 'css');
@@ -29,7 +29,7 @@ class PDFView extends AbstractView {
         $localjs = [];
 
         //This jquery file should not need to be added here as jquery should already be in the header on any page
-        if (isset($params['jquery']) && $params['jquery'] === true) {
+        if ($jquery) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
@@ -39,45 +39,43 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         // This initializes the toolbar and activates annotation mode
-        if (!isset($is_student) || !$is_student) {
+        if (!$is_student) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
         }
 
-        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
-            'gradeable_id' => $params["gradeable_id"],
-            'user_id' => $params["id"],
+        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
+            'gradeable_id' => $gradeable_id,
+            'user_id' => $user_id,
             'grader_id' => $this->core->getUser()->getId(),
-            'filename' => $params["file_name"],
-            'file_path' => $params['file_path'],
-            'annotation_jsons' => json_encode($params["annotation_jsons"]),
+            'filename' => $file_name,
+            'file_path' => $file_path,
+            'annotation_jsons' => json_encode($annotation_jsons),
             'student_popup' => $is_student,
-            'page_num' => $params["page_num"],
+            'page_num' => $page_num,
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
             'localjs' => $localjs,
             'csrfToken' => $this->core->getCsrfToken()
         ]);
     }
-    
+
     /**
      * adds to our buffer a twig output of either student view or grader view.
-     *
-     * @param $gradeable_id
-     * @param $user_id
-     * @param $file_name
-     * @param $file_path
-     * @param $annotation_jsons
-     * @param $is_student
-     * @param $rerender_annotated_pdf
-     * @param $page_num
-     *
-     * @return void
      */
-    public function downloadPDFEmbedded($params) {
+    public function downloadPDFEmbedded(
+        string $gradeable_id,
+        string $user_id,
+        string $file_name,
+        string $file_path,
+        array $annotation_jsons,
+        bool $rerender_annotated_pdf,
+        bool $is_student,
+        int $page_num,
+        bool $jquery
+    ): void {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $pdf_url = $this->core->buildCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
-        $is_student = $params["is_student"];
+        $pdf_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'encode_pdf']);
 
         $localcss = [];
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdf_embedded.css'), 'css');
@@ -86,7 +84,7 @@ class PDFView extends AbstractView {
         $localjs = [];
 
         //This jquery file should not need to be added here as jquery should already be in the header on any page
-        if (isset($params['jquery']) && $params['jquery'] === true) {
+        if ($jquery) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
@@ -97,20 +95,20 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jspdf', 'jspdf.min.js'), 'vendor');
         // This initializes the toolbar and activates annotation mode
-        if (!isset($is_student) || !$is_student) {
+        if (!$is_student) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'), 'js');
         }
 
-        return $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
-            'gradeable_id' => $params["gradeable_id"],
-            'user_id' => $params["id"],
+        $this->core->getOutput()->renderTwigOutput('grading/electronic/PDFAnnotationEmbedded.twig', [
+            'gradeable_id' => $gradeable_id,
+            'user_id' => $user_id,
             'grader_id' => $this->core->getUser()->getId(),
-            'filename' => $params["file_name"],
-            'file_path' => $params['file_path'],
-            'annotation_jsons' => json_encode($params["annotation_jsons"]),
-            'rerender_annotated_pdf' => $params["rerender_annotated_pdf"],
+            'filename' => $file_name,
+            'file_path' => $file_path,
+            'annotation_jsons' => json_encode($annotation_jsons),
+            'rerender_annotated_pdf' => $rerender_annotated_pdf,
             'student_download' => $is_student,
-            'page_num' => $params["page_num"],
+            'page_num' => $page_num,
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
             'localjs' => $localjs,

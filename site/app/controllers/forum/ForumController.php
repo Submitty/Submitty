@@ -50,7 +50,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads/status", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/status", methods={"POST"})
      */
     public function changeThreadStatus($status, $thread_id = null) {
         if (is_null($thread_id)) {
@@ -134,7 +134,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/categories/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/categories/new", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function addNewCategory($category = []) {
@@ -170,7 +170,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/categories/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/categories/delete", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function deleteCategory() {
@@ -197,7 +197,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/categories/edit", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/categories/edit", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function editCategory() {
@@ -226,7 +226,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/categories/reorder", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
     public function reorderCategories() {
@@ -253,7 +253,7 @@ class ForumController extends AbstractController {
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
     public function publishThread() {
@@ -342,7 +342,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/search", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/search", methods={"POST"})
      */
     public function search() {
         $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
@@ -350,7 +350,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/posts/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/posts/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
     public function publishPost() {
@@ -416,7 +416,7 @@ class ForumController extends AbstractController {
                 }
 
                 $full_course_name = $this->core->getFullCourseName();
-                $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
@@ -434,7 +434,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/announcements", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/announcements", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
     public function alterAnnouncement($type) {
@@ -445,7 +445,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads/pin", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/pin", methods={"POST"})
      */
     public function pinThread($type) {
         $thread_id = $_POST["thread_id"];
@@ -462,7 +462,7 @@ class ForumController extends AbstractController {
      *
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
      *
-     * @Route("/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
      */
     public function alterPost($modify_type) {
         $full_course_name = $this->core->getFullCourseName();
@@ -484,7 +484,7 @@ class ForumController extends AbstractController {
         }
         elseif ($modify_type == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
-            $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+            $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
             if ($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)) {
                 $type = "thread";
             }
@@ -511,7 +511,7 @@ class ForumController extends AbstractController {
             }
             else {
                 // We want to reload same thread again, in both case (thread/post undelete)
-                $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
                 $subject = "Undeleted: " . Notification::textShortner($post["content"]);
@@ -568,7 +568,7 @@ class ForumController extends AbstractController {
                 }
             }
             if ($any_changes) {
-                $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
                 if ($type == "Post") {
@@ -593,15 +593,13 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads/merge", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/merge", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
     public function mergeThread() {
         $current_user_id = $this->core->getUser()->getId();
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
-        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
-        $parent_thread_id = $result[1];
         $thread_id = $child_thread_id;
         if (is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
             $message = "";
@@ -622,7 +620,7 @@ class ForumController extends AbstractController {
                 }
 
                 $full_course_name = $this->core->getFullCourseName();
-                $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
+                $child_thread = $this->core->getQueries()->getThread($child_thread_id);
                 $child_thread_author = $child_thread['created_by'];
                 $child_thread_title = $child_thread['title'];
                 $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
@@ -642,7 +640,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/posts/split", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/posts/split", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
     public function splitThread() {
@@ -679,7 +677,7 @@ class ForumController extends AbstractController {
                 $thread_id = $thread_ids[1];
 
                 $full_course_name = $this->core->getFullCourseName();
-                $thread = $this->core->getQueries()->getThread($thread_id)[0];
+                $thread = $this->core->getQueries()->getThread($thread_id);
                 $thread_author = $thread['created_by'];
                 $thread_title = $thread['title'];
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id, 'post_id' => $post_id]);
@@ -779,7 +777,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"POST"})
      */
     public function getThreads($page_number = null) {
         $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 1;
@@ -816,9 +814,25 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum", methods={"GET"})
-     * @Route("/{_semester}/{_course}/forum/threads", methods={"GET"})
-     * @Route("/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/single", methods={"POST"})
+     */
+    public function getSingleThread() {
+        $thread_id = $_POST['thread_id'];
+        $thread = $this->core->getQueries()->getThread($thread_id);
+        $categories_ids = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $show_deleted = $this->showDeleted();
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
+        $pageNumber = 1;
+        $threads = $this->getSortedThreads($categories_ids, 0, $show_deleted, $show_merged_thread, [$thread['status']], false, $pageNumber, $thread_id);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', $threads, false, $thread_id, $categories_ids, true);
+        return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
     public function showThreads($thread_id = null, $option = 'tree') {
         $user = $this->core->getUser()->getId();
@@ -867,7 +881,6 @@ class ForumController extends AbstractController {
             }
             $thread = $this->core->getQueries()->getThread($thread_id);
             if (!empty($thread)) {
-                $thread = $thread[0];
                 if ($thread['merged_thread_id'] != -1) {
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
@@ -935,7 +948,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/threads/new", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/forum/threads/new", methods={"GET"})
      */
     public function showCreateThread() {
         if (empty($this->core->getQueries()->getCategories())) {
@@ -946,7 +959,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/categories", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/forum/categories", methods={"GET"})
      * @AccessControl(permission="forum.view_modify_category")
      */
     public function showCategories() {
@@ -954,7 +967,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/posts/splitinfo",methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/posts/splitinfo",methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
     public function getSplitPostInfo() {
@@ -973,7 +986,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/posts/history", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/posts/history", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function getHistory() {
@@ -1015,7 +1028,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/posts/get", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/forum/posts/get", methods={"POST"})
      */
     public function getEditPostContent() {
         $post_id = $_POST["post_id"];
@@ -1042,7 +1055,7 @@ class ForumController extends AbstractController {
     }
 
     private function getThreadContent($thread_id, &$output) {
-        $result = $this->core->getQueries()->getThread($thread_id)[0];
+        $result = $this->core->getQueries()->getThread($thread_id);
         $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
@@ -1050,7 +1063,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/forum/stats")
+     * @Route("/courses/{_semester}/{_course}/forum/stats")
      */
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();

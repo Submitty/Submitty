@@ -1,4 +1,5 @@
 {% import 'functions/Badge.twig' as Badge %}
+{% import 'functions/TAResultsFunctions.twig' as TAResultsFunctions %}
 {% import _self as self %}
 
 <script>
@@ -22,12 +23,22 @@ $( document ).ready(function() {
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
-        {# Overview #}
-        <div class="box" style="padding: 10px; word-break: break-word;">
-            <p>Version #{{ ta_graded_version }}</p>
-            {% if regrade_available %}
-                <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
-            {% endif %}
+        {% if ta_components | length > 0 %}
+            {# TA/Instructor Manual total #}
+            <div class="box submission-page-total-header">
+                <div class="box-title-total key_to_click" tabindex="0">
+
+                    {{ Badge.render(ta_score, ta_max, false) }}
+                    <h4>TA / Instructor Grading Total</h4>
+                </div>
+            </div>
+            {# /TA/Instructor Manual total #}
+
+            {# TA Component boxes #}
+            {% for component in ta_components %}
+                {{ TAResultsFunctions.renderComponent(component, false) }}
+            {% endfor %}
+        <div class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in overall_comments | keys | sort %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
@@ -39,20 +50,12 @@ $( document ).ready(function() {
                 </div>
             {% endfor %}
         </div>
-
         {% if uploaded_pdfs|length >= 1 %}
-            <div class = "row" style="float: right">
-                    <div class="col-sm-2" style=" padding: 10px; width: 25%; word-break: break-word; display: inline-block">
-                        <p style="text-align:center">File Name:</p>
-                    </div>
-                    <div class="col-sm-3" style="text-align:center; padding: 10px; width: 25%; word-break: break-word; display: inline-block">
-                        <p style="text-align:center">&nbsp;&nbsp;Original:</p>
-                    </div>
-                    <div class="col-sm-3" style="text-align:center; padding: 10px; width: 25%; word-break: break-word; display: inline-block">
-                        <p style="text-align:center"> &nbsp;&nbsp;&nbsp;&nbsp;Grader Feedback:</p>
-                    </div>
+            <div class = "no-border-box">
                 <div class="row">
-                    <div class="box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
+                        <b>Grader Feedback</b>
+                        </br>
                         {% for file in files %}
                             {% if loop.index != uploaded_pdfs|length %}
                                 <div style="margin-bottom: 2em">
@@ -64,135 +67,62 @@ $( document ).ready(function() {
 
                         {% endfor %}
                     </div>
-                    <div class="box col-sm-6" style="padding: 10px; width: 40%; word-break: break-word; display: inline-block">
+                    <div class="no-border-box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
                         {% for file in files %}
-                            <p style="text-align:center">
+                            <p style="text-align:center; vertical-align: middle;">
                                 {# download icon if student can download files #}
+                                <a class="btn btn-primary key_to_click" tabindex="0" style="margin-right:20px;" onclick="openFile('{{ display_original_pdf }}?dir=submissions&path={{ file.path|url_encode }}')">View Popup<i class="fas fa-window-restore"></i></a>
                                 {% if can_download %}
                                     <button class = 'btn btn-default key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
-                                <a class="btn btn-primary key_to_click" tabindex="0" onclick="openFile('{{ display_original_pdf }}?dir=submissions&path={{ file.path|url_encode }}')">View Popup<i class="fas fa-window-restore"></i></a>
                             </p>
                             {% if loop.index != files|length %}
                                 <br />
                             {% endif %}
                         {% endfor %}
-                        {% if can_download and files|length > 1 %}
-                            <hr>
-                            <p style="text-align:center">
-                                Download all files: <button class = "btn btn-default key_to_click" tabindex="0" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
-                                    <i class="fas fa-download" title="Download zip of all files"></i></button>
-                            </p>
-                        {% endif %}
-                    </div>
-                    <div class="box col-sm-3" style="padding: 10px; width: 30%; word-break: break-word; display: inline-block">
                         {% for file in uploaded_pdfs %}
                             {% if file.name in annotated_file_names %}
-                                {% if can_download %}
-                                    <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
-                                        <i class="fas fa-download" title="Download the file"></i></button>
-                                {% endif %}
                                 {% if loop.index != uploaded_pdfs|length %}
                                     <div style="margin-bottom: 1.28em">
-                                        <p style="text-align:center"> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
+                                        <p> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
                                             <a class="btn btn-success key_to_click" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
                                     </div>
                                 {% else %}
-                                    <p style="text-align:center"> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
+                                    <p> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
                                         <a class="btn btn-success key_to_click" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
                                 {% endif %}
-                            {% else %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 3.4em"></div>
+                                {% if can_download %}
+                                    <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
+                                        <i class="fas fa-download" title="Download the file"></i></button>
                                 {% endif %}
                             {% endif %}
 
                         {% endfor %}
                     </div>
+                        <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
+                        {% if can_download %}
+                            <p style="text-align:center; vertical-align: middle;">
+                                Download all files: <button class = "btn btn-default key_to_click" tabindex="0" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
+                                    <i class="fas fa-download" title="Download zip of all files"></i></button>
+                            </p>
+                        {% endif %}
+                        </div>
                 </div>
 
             </div>
         {% endif %}
         {# /Overview #}
-
-        {% if (ta_score >= ta_max) %}
-            <canvas id="confetti_canvas"></canvas>
-        {% endif %}
-
-        {% if ta_components | length > 0 %}
-            {# TA/Instructor Manual total #}
-            <div class="box submission-page-total-header">
-                <div class="box-title-total key_to_click" tabindex="0"
-                    {% if ta_score >= ta_max %}
-                        onclick="addConfetti();" style="cursor:pointer;"
-                     {% endif %}>
-
-                    {{ Badge.render(ta_score, ta_max, false) }}
-                    <h4>TA / Instructor Grading Total</h4>
-                </div>
-            </div>
-            {# /TA/Instructor Manual total #}
-
-            {# TA Component boxes #}
-            {% for component in ta_components %}
-                <div class="box grade-results">
-                    <div class="box-badge">
-                        {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
-                    </div>
-                    <div class="box-info">
-                        <h4>{{ component.title|escape }}
-                            {% if component.graders|length != 0 %}
-                                <i>(Graded by: {{ component.graders|join(' / ') }})</i>
-                            {% endif %}
-                        </h4>
-                        <div style="float:left;">
-                            <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
-                            <p>
-                            {# This is a layout table #}
-                            <table class="gradeable_comment">
-                                {% for mark in component.marks|filter((mark) => mark.show_mark) %}
-                                    <tr>
-                                        <td>
-                                            {% if mark.earned %}
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            {% else %}
-                                                <i class="far fa-square fa-1g"></i>
-                                            {% endif %}
-                                        </td>
-                                        <td class="mark-score">
-                                            {{ mark.points|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ mark.title|nl2br }}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                {% if component.custom_mark_score != 0 or component.comment != '' %}
-                                    <tr>
-                                        <td>
-                                            <i class="far fa-check-square fa-1g"></i>
-                                        </td>
-                                        <td class="mark-score">
-                                            {{ component.custom_mark_score|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ component.comment|nl2br }}
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </table>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
         </div>
+        {# Overview #}
         {# /Component boxes #}
     {% endif %}
     {% if regrade_available %}
         <div id="ShowRegradeRequestButton">
             <button type="button" title="Open Grade Inquiry" onclick="$('#regradeBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#regradeBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
+            {% if regrade_available %}
+                <i>Grade inquiries are due by {{ regrade_date|date(date_time_format) }}</i>
+            {% endif %}
         </div>
     {% endif %}
 {% endif %}

@@ -290,6 +290,9 @@ class HomeworkView extends AbstractView {
         $config = $gradeable->getAutogradingConfig();
         $notebook = null;
         $notebook_inputs = [];
+        $num_parts = $config->getNumParts();
+        $notebook_file_submissions = [];
+        $notebook_model = null;
         if ($config->isNotebookGradeable()) {
             $notebook_model = $config->getUserSpecificNotebook(
                 $this->core->getUser()->getId(),
@@ -297,6 +300,7 @@ class HomeworkView extends AbstractView {
             );
 
             $notebook = $notebook_model->getNotebook();
+            $num_parts = $notebook_model->getNumParts();
             $warning = $notebook_model->getWarning();
             if (isset($warning) && $this->core->getUser()->accessGrading()) {
                 $output = $this->core->getOutput()->renderTwigTemplate(
@@ -311,6 +315,7 @@ class HomeworkView extends AbstractView {
             $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($h, $notebook);
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
+            $notebook_file_submissions = $notebook_model->getFileSubmissions();
         }
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
         $active_version_instance = null;
@@ -334,7 +339,7 @@ class HomeworkView extends AbstractView {
                 /** @var GradedGradeable $gg */
                 $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
             }
-            $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
+            $students_full = json_decode(Utils::getAutoFillData($students, $students_version, true));
         }
 
         $github_user_id = '';
@@ -344,18 +349,13 @@ class HomeworkView extends AbstractView {
         if (!$gradeable->isVcs()) {
             if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
-                for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
+                for ($i = 1; $i <= $num_parts; $i++) {
                     foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
-                        $size = number_format($file['size'] / 1024, 2);
-                        // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
-                        if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
-                            $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                        }
-                        else {
-                            $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
-                        }
-
-                        $old_files[] = ['name' => $escape_quote_filename, 'size' => $size, 'part' => $i];
+                        $old_files[] = [
+                            'name' => str_replace('\'', '\\\'', $file['name']),
+                            'size' => number_format($file['size'] / 1024, 2),
+                            'part' => $i
+                        ];
                     }
                 }
             }
@@ -382,6 +382,7 @@ class HomeworkView extends AbstractView {
                 }
             }
         }
+
 
         $component_names = array_map(function (Component $component) {
             return $component->getTitle();
@@ -455,7 +456,11 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'team_assignment' => $gradeable->isTeamAssignment(),
             'student_id' => $student_id,
-            'numberUtils' => $numberUtils,
+            'numberUtils' => new class () {
+                public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
+                    return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
+                }
+            },
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
             'inputs' => $input_data,
@@ -469,8 +474,30 @@ class HomeworkView extends AbstractView {
             'days_to_be_charged' => $days_to_be_charged,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
-            'max_file_uploads' => ini_get('max_file_uploads')
+            'max_file_uploads' => ini_get('max_file_uploads'),
+            'is_notebook' => $config->isNotebookGradeable()
         ]);
+    }
+
+    private function removeLowConfidenceDigits($confidences, $id) {
+        $ret = "";
+        $str_id = strval($id);
+        $i = 0;
+        $low_conf = 0;
+        foreach ($confidences as $confidence_val) {
+            if ($confidence_val <= .50) {
+                $ret .= "_";
+                $low_conf++;
+            }
+            else {
+                $ret .= $str_id[$i];
+            }
+
+            $i++;
+        }
+
+        //if we didn't find any digits can't suggest similar ids
+        return $low_conf === strlen($str_id) ? $str_id : $ret;
     }
 
     /**
@@ -485,6 +512,9 @@ class HomeworkView extends AbstractView {
         $count = 1;
         $count_array = [];
         $bulk_upload_data = [];
+        $matches = [];
+        $use_ocr = false;
+
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
@@ -567,6 +597,18 @@ class HomeworkView extends AbstractView {
 
             //decoded.json may be read before the assoicated data is written, check if key exists first
             if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
+                $data = $bulk_upload_data[$files[$i]['filename_full']];
+
+                if ($use_ocr) {
+                    $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
+
+                    $matches = [];
+                    if (strpos($tgt_string, '_') !== false) {
+                        $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+                    }
+                }
+
                 if (array_key_exists('id', $data)) {
                     $id = $data['id'];
                     $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
@@ -590,7 +632,8 @@ class HomeworkView extends AbstractView {
 
             $files[$i] += ['page_count' => $page_count,
                            'id' => $id,
-                           'valid' => $is_valid ];
+                           'valid' => $is_valid,
+                           'matches' => $matches ];
         }
 
         $semester = $this->core->getConfig()->getSemester();
@@ -602,7 +645,8 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'use_ocr' => $use_ocr
         ]);
     }
 

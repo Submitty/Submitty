@@ -26,7 +26,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return MultiResponse
      */
     public function encodePDF($gradeable_id) {
@@ -37,7 +37,13 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = realpath($_POST['file_path']);
+        $file_path = ($_POST['file_path']);
+        $anon_id = explode("/", $file_path)[9];
+        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        if ($correct_user_id !== null) {
+            $file_path = str_replace($anon_id, $correct_user_id, $file_path);
+        }
+        $file_path = realpath($file_path);
         $directory = 'invalid';
         if (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
@@ -54,7 +60,7 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-        if ($file_path !== $_POST['file_path'] || !Utils::startsWith($file_path, $check_path)) {
+        if (!Utils::startsWith($file_path, $check_path)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
@@ -73,7 +79,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/display_file")
+     * @Route("/courses/{_semester}/{_course}/display_file")
      */
     public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
         //Is this per-gradeable?
@@ -113,7 +119,7 @@ class MiscController extends AbstractController {
                 }
             }
         }
-        
+
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
         $mime_type = mime_content_type($corrected_name);
@@ -138,7 +144,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/read_file")
+     * @Route("/courses/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
@@ -174,7 +180,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/download")
+     * @Route("/courses/{_semester}/{_course}/download")
      */
     public function downloadCourseFile($dir, $path) {
         // security check
@@ -219,10 +225,10 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $is_anon, $version = null, $origin = null) {
-        if ($is_anon) {
+    public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
+        if ($is_anon === "true") {
             $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
         }
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
@@ -330,7 +336,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function downloadAssignedZips($gradeable_id, $type = null) {
@@ -462,7 +468,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
      */
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";
