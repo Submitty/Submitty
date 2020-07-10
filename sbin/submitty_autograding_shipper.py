@@ -1428,7 +1428,7 @@ def launch_shippers(worker_status_map):
 
             num_workers_on_machine = machine["num_autograding_workers"]
             if num_workers_on_machine < 0:
-                raise SystemExit("ERROR: num_workers_on_machine for '{0}' must be non-negative.".format(machine))  # noqa: E501
+                raise SystemExit(f"ERROR: num_workers_on_machine for '{machine}' must be non-negative.")
 
             single_machine_data = {name: machine}
             single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
