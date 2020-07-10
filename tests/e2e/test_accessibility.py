@@ -53,6 +53,8 @@ class TestAccessibility(BaseTestCase):
         '/courses/{}/{}/reports',
         '/courses/{}/{}/late_table',
         '/courses/{}/{}/grades',
+        '/courses/{}/{}/polls',
+        '/courses/{}/{}/polls/newPoll',
     ]
 
     urls_formatted = []
@@ -76,7 +78,7 @@ class TestAccessibility(BaseTestCase):
         self.log_out()
         self.log_in(user_id='instructor')
         self.click_class('sample')
-        with open(self.baseline_path) as f:
+        with open(self.baseline_path, encoding="utf8") as f:
             baseline = json.load(f)
 
         self.maxDiff = None

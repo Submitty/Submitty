@@ -23,6 +23,7 @@ use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
+use app\models\PollModel;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\CascadingIterator;
@@ -154,6 +155,27 @@ class DatabaseQueries {
         $ret = $this->getUser($id);
         if ($ret === null) {
             return $this->getUser($id, true);
+        }
+
+        return $ret;
+    }
+
+    /**
+     * given a string with missing digits, get all similar numeric ids
+     * should be given as '1_234_567' where '_' are positions to fill in
+     *
+     * @param string $id_string
+     */
+    public function getSimilarNumericIdMatches(string $id_string): array {
+        $this->course_db->query("
+            SELECT user_numeric_id from users where 
+            cast(user_numeric_id as text)
+            like ?
+        ", [$id_string]);
+
+        $ret = [];
+        foreach ($this->course_db->rows() as $result) {
+            $ret[] = $result['user_numeric_id'];
         }
 
         return $ret;
@@ -658,7 +680,7 @@ WHERE status = 1"
 
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row();
     }
 
     public function removeNotificationsPost($post_id) {
@@ -741,7 +763,7 @@ WHERE status = 1"
 
     public function getThreadTitle($thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
-        return $this->course_db->rows()[0];
+        return $this->course_db->row()['title'];
     }
 
     public function setAnnouncement($thread_id, $onOff) {
@@ -2513,6 +2535,16 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function updateTeamRegistrationSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET registration_section=? WHERE team_id=?", [$section, $team_id]);
     }
+    
+    /**
+     * Set team $team_id's anon_id
+     *
+     * @param string $team_id
+     * @param string $anon_id
+     */
+    public function updateTeamAnonId($team_id, $anon_id) {
+        $this->course_db->query("UPDATE teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
+    }
 
     public function updateTeamRotatingSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET rotating_section=? WHERE team_id=?", [$section, $team_id]);
@@ -3186,15 +3218,6 @@ SQL;
     }
 
     /**
-     * Removes peer grading assignment if instructor decides to change the number of people each person grades for assignment
-     *
-     * @param string $gradeable_id
-     */
-    public function clearPeerGradingAssignments($gradeable_id) {
-        $this->course_db->query("DELETE FROM peer_assign WHERE g_id=?", [$gradeable_id]);
-    }
-
-    /**
      * Adds an assignment for someone to grade another person for peer grading
      *
      * @param string $student
@@ -3204,6 +3227,36 @@ SQL;
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", [$grader, $student, $gradeable_id]);
     }
+
+    /**
+     * Removes a specific grader's student from a given assignment
+     *
+     * @param string $gradeable_id
+     * @param string $grader_id
+     */
+    public function removePeerAssignment($gradeable_id, $grader_id, $student_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ? AND user_id = ?", [$gradeable_id, $grader_id, $student_id]);
+    }
+
+    /**
+     * Removes a specific grader and their students from a given assignment
+     *
+     * @param string $gradeable_id
+     * @param string $grader_id
+     */
+    public function removePeerAssignmentsForGrader($gradeable_id, $grader_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ? AND grader_id = ?", [$gradeable_id, $grader_id]);
+    }
+    
+    /**
+     * Bulk Uploads Peer Grading Assignments
+     *
+     * @param string $values
+     */
+    public function insertBulkPeerGradingAssignment($values) {
+        $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
+    }
+    
 
     /**
      * Removes all peer grading pairs from a given assignment
@@ -3594,6 +3647,18 @@ AND gc_id IN (
         }
         return $return;
     }
+    
+    public function getTeamAnonId($team_id) {
+        $params = (is_array($team_id)) ? $team_id : [$team_id];
+
+        $question_marks = $this->createParamaterList(count($params));
+        $this->course_db->query("SELECT team_id, anon_id FROM teams WHERE team_id IN {$question_marks}", $params);
+        $return = [];
+        foreach ($this->course_db->rows() as $id_map) {
+            $return[$id_map['team_id']] = $id_map['anon_id'];
+        }
+        return $return;
+    }
 
     public function getUserFromAnon($anon_id) {
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
@@ -3606,41 +3671,27 @@ AND gc_id IN (
         }
         return $return;
     }
+    
+    public function getTeamIdFromAnonId($anon_id) {
+        $params = is_array($anon_id) ? $anon_id : [$anon_id];
+
+        $question_marks = $this->createParamaterList(count($params));
+        $this->course_db->query("SELECT anon_id, team_id FROM teams WHERE anon_id IN {$question_marks}", $params);
+        $return = [];
+        foreach ($this->course_db->rows() as $id_map) {
+            $return[$id_map['anon_id']] = $id_map['team_id'];
+        }
+        return $return;
+    }
 
     public function getAllAnonIds() {
         $this->course_db->query("SELECT anon_id FROM users");
         return $this->course_db->rows();
     }
 
-    /**
-     * Gets the team ids from the provided anonymous ids
-     * TODO: This function is in place for when teams get anonymous ids
-     *
-     * @param  array $anon_ids
-     * @return array
-     */
-    public function getTeamIdsFromAnonIds(array $anon_ids) {
-        /*
-        $placeholders = $this->createParamaterList(count($anon_ids));
-        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$placeholders}", $anon_ids);
-
-        $team_ids = [];
-        foreach ($this->course_db->row() as $row) {
-            $team_ids[$row['anon_id']] = $row['team_id'];
-        }
-        return $team_ids;
-        */
-        // TODO: team ids are the same as their anonymous ids for now
-        return array_combine($anon_ids, $anon_ids);
-    }
-
-    public function getTeamIdFromAnonId(string $anon_id) {
-        return $this->getTeamIdsFromAnonIds([$anon_id])[$anon_id] ?? null;
-    }
-
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id);
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
     }
 
     // NOTIFICATION/EMAIL QUERIES
@@ -4276,6 +4327,14 @@ AND gc_id IN (
             $users[$user->getId()] = $user;
         }
 
+        return $users;
+    }
+    
+    public function getUsersOrTeamsById(array $ids) {
+        $users = $this->getUsersById($ids);
+        if (empty($users)) {
+            return $this->getTeamsById($ids);
+        }
         return $users;
     }
 
@@ -6367,6 +6426,178 @@ AND gc_id IN (
         }
         return '';
     }
+    //// BEGIN ONLINE POLLING QUERIES ////
+
+    public function addNewPoll($poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+        $this->course_db->query("INSERT INTO polls(name, question, status, release_date) VALUES (?, ?, ?, ?)", [$poll_name, $question, "closed", $release_date]);
+        $this->course_db->query("SELECT max(poll_id) from polls");
+        $poll_id = $this->course_db->rows()[0]['max'];
+        foreach ($responses as $option_id => $response) {
+            $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$option_id, $orders[$option_id], $poll_id, $response]);
+        }
+        foreach ($answers as $answer) {
+            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
+        }
+    }
+
+    public function endPoll($poll_id) {
+        $this->course_db->query("UPDATE polls SET status = 'ended' where poll_id = ?", [$poll_id]);
+    }
+
+    public function closePoll($poll_id) {
+        $this->course_db->query("UPDATE polls SET status = 'closed' where poll_id = ?", [$poll_id]);
+    }
+
+    public function openPoll($poll_id) {
+        $this->course_db->query("UPDATE polls SET status = 'open' where poll_id = ?", [$poll_id]);
+    }
+
+    public function getPolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls order by poll_id DESC");
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getTodaysPolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls where release_date = ? or status='open' order by poll_id DESC", [date("Y-m-d")]);
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getOlderPolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls where release_date < ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getFuturePolls() {
+        $polls = [];
+        $this->course_db->query("SELECT * from polls where release_date > ? and status!='open' order by poll_id DESC", [date("Y-m-d")]);
+        $polls_rows = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+
+        foreach ($polls_rows as $row) {
+            $polls[] = $this->getPoll($row["poll_id"]);
+        }
+
+        return $polls;
+    }
+
+    public function getPoll($poll_id) {
+        $this->course_db->query("SELECT * from polls where poll_id = ?", [$poll_id]);
+        $row = $this->course_db->rows();
+        $user = $this->core->getUser()->getId();
+        if (count($row) <= 0) {
+            return null;
+        }
+        $row = $row[0];
+        $responses = $this->getResponses($row["poll_id"]);
+        return new PollModel($this->core, $row["poll_id"], $row["name"], $row["question"], $responses, $this->getAnswers($poll_id), $row["status"], $this->getUserResponses($row["poll_id"]), $row["release_date"]);
+    }
+
+    public function getResponses($poll_id) {
+        $this->course_db->query("SELECT * from poll_options where poll_id = ? order by order_id ASC", [$poll_id]);
+        $responses = [];
+        $responses_rows = $this->course_db->rows();
+        foreach ($responses_rows as $rep_row) {
+            $responses[$rep_row["option_id"]] = $rep_row["response"];
+        }
+
+        return $responses;
+    }
+
+    public function getUserResponses($poll_id) {
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ?", [$poll_id]);
+        $rows = $this->course_db->rows();
+        $responses = [];
+        foreach ($rows as $row) {
+            $responses[$row["student_id"]] = $row["option_id"];
+        }
+        return $responses;
+    }
+
+    public function submitResponse($poll_id, $response) {
+        $user = $this->core->getUser()->getId();
+        $this->course_db->query("SELECT * from poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+        if (count($this->course_db->rows()) <= 0) {
+            $this->course_db->query("INSERT INTO poll_responses(poll_id, student_id, option_id) VALUES (?, ?, ?)", [$poll_id, $user, $response]);
+        }
+        else {
+            $this->course_db->query("UPDATE poll_responses SET option_id=? where poll_id = ? and student_id = ?", [$response, $poll_id, $user]);
+        }
+    }
+
+    public function getAnswers($poll_id) {
+        $this->course_db->query("SELECT option_id from poll_options where poll_id = ? and correct = TRUE order by order_id ASC", [$poll_id]);
+        $answers = [];
+        foreach ($this->course_db->rows() as $row) {
+            $answers[] = $row["option_id"];
+        }
+        return $answers;
+    }
+
+    public function getTotalPollsScore($user_id) {
+        $polls = $this->getPolls();
+        $total = 0.0;
+        foreach ($polls as $poll) {
+            $total = $total + $poll->getScore($user_id);
+        }
+        return $total;
+    }
+
+    public function editPoll($poll_id, $poll_name, $question, array $responses, array $answers, $release_date, array $orders) {
+        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
+        $this->course_db->query("UPDATE polls SET name = ?, question = ?, release_date = ? where poll_id = ?", [$poll_name, $question, $release_date, $poll_id]);
+        foreach ($responses as $order_id => $response) {
+            $this->course_db->query("INSERT INTO poll_options(option_id, order_id, poll_id, response, correct) VALUES (?, ?, ?, ?, FALSE)", [$order_id, $orders[$order_id], $poll_id, $response]);
+        }
+        foreach ($answers as $answer) {
+            $this->course_db->query("UPDATE poll_options SET correct = TRUE where poll_id = ? and option_id = ?", [$poll_id, $answer]);
+        }
+    }
+
+    public function deletePoll($poll_id) {
+        $this->course_db->query("DELETE FROM poll_responses where poll_id = ?", [$poll_id]);
+        $this->course_db->query("DELETE FROM poll_options where poll_id = ?", [$poll_id]);
+        $this->course_db->query("DELETE FROM polls where poll_id = ?", [$poll_id]);
+    }
+
+    public function getResults($poll_id) {
+        $results = [];
+        foreach ($this->getResponses($poll_id) as $option_id => $answer) {
+            $this->course_db->query("SELECT * FROM poll_responses where poll_id = ? and option_id = ?", [$poll_id, $option_id]);
+            $results[$option_id] = count($this->course_db->rows());
+        }
+        return $results;
+    }
+
+    public function deleteUserResponseIfExists($poll_id) {
+        $user = $this->core->getUser()->getId();
+        $this->course_db->query("DELETE FROM poll_responses where poll_id = ? and student_id = ?", [$poll_id, $user]);
+    }
+
+    //// END ONLINE POLLING QUERIES ////
 
     /**
      * Delete user from DBs identified by user_id, semester, and course.

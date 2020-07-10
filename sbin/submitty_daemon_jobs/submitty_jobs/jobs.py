@@ -229,9 +229,11 @@ class BulkUpload(CourseJob):
             print(msg)
             return
 
+        use_ocr = False
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
             qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+            use_ocr = self.job_details['use_ocr']
         else:
             if 'num' not in self.job_details:
                 msg = "Did not pass in the number to divide " + filename + " by"
@@ -297,8 +299,8 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
-            else:
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr])
+            else: 
                 bulk_upload_split.main([filename, split_path, num, log_file_path])
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"
