@@ -174,7 +174,7 @@ def launch_workers(my_name, my_stats):
     # launch the worker threads
     address = my_stats['address']
     if address != 'localhost':
-        which_machine = "{0}@{1}".format(my_stats['username'], address)
+        which_machine = f"{my_stats['username']}@{address}"
     else:
         which_machine = address
     my_server = my_stats['server_name']
