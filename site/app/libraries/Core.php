@@ -509,12 +509,9 @@ class Core {
 
     /**
      * Given some URL parameters (parts), build a URL for the site using those parts.
-     * This function will add the semester and course to the beginning of the new URL by default,
-     * if you do not prepend this part (e.g. for authentication-related URLs), please set
-     * $prepend_course_info to false.
+     * This function will add the semester and course to the beginning of the new URL.
      *
      * @param array  $parts
-     *
      * @return string
      */
     public function buildCourseUrl($parts = []) {
