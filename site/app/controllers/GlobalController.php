@@ -316,7 +316,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            if($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(['update']),
                     "title" => "System Update",
