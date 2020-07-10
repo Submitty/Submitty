@@ -262,10 +262,53 @@ class AdminGradeableController extends AbstractController {
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
             'peer' => $gradeable->isPeerGrading(),
-            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
+            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
+            'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()])
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function adminGradeablePeerSubmit($gradeable_id) {
+        $grader_id = $_POST['grader_id'];
+        //if entire grader row is removed, just remove grader and their students
+        if (!empty($_POST['remove_grader'])) {
+            $this->core->getQueries()->removePeerAssignmentsForGrader($gradeable_id, $grader_id);
+        }
+        else {
+            //otherwise, check if any of the individual current students were removed
+            $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
+            $grading_assignment_for_grader = $tmp[$gradeable_id];
+            foreach ($grading_assignment_for_grader as $i => $student_id) {
+                if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
+                    if ($this->core->getQueries()->getUserById($student_id) == null) {
+                        $this->core->addErrorMessage("{$student_id} is not a valid student");
+                    }
+                    else {
+                        $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
+                    }
+                }
+            }
+            //then, add new students
+            foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+                if (in_array($student_id, $grading_assignment_for_grader)) {
+                    $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
+                }
+                elseif ($this->core->getQueries()->getUserById($student_id) == null) {
+                    $this->core->addErrorMessage("{$student_id} is not a valid student");
+                }
+                else {
+                    $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
+                }
+            }
+        }
+        $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+        $this->core->getOutput()->renderJsonSuccess($new_peers);
     }
 
     /* Http request methods (i.e. ajax) */
@@ -278,7 +321,7 @@ class AdminGradeableController extends AbstractController {
             $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
             $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
             if ($make_peer_assignments) {
-                $this->core->getQueries()->clearPeerGradingAssignments($gradeable->getId());
+                $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
 
                 $users = $this->core->getQueries()->getAllUsers();
                 $user_ids = [];
@@ -1135,7 +1178,7 @@ class AdminGradeableController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
-        // FIXME:  should use a variable intead of hardcoded top level path
+        // FIXME:  should use a variable instead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
@@ -1174,7 +1217,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    private function enqueueBuild(Gradeable $gradeable) {
+    public function enqueueBuild(Gradeable $gradeable) {
         // If write form config fails, it will return non-null and end execution, but
         //  if it does return null, we want to run 'enqueueBuildFile'.  This coalescing can
         //  be chained so long as 'null' is the success condition.
