@@ -107,9 +107,18 @@ function updateUserPreferredNames () {
       contentType: false,
       success: function(res) {
         const response = JSON.parse(res);
-        response.status === "success"
-          ? displaySuccessMessage(response.data.message)
-          : displayErrorMessage(response.message);
+        if (response.status === "success") {
+          const {data} = response;
+          displaySuccessMessage(data.message);
+          //update the preferred names
+          $("#firstname-row .value").text(data.first_name);
+          $("#lastname-row .value").text(data.last_name);
+          //update the data attributes
+          first_name_field.data('current-name', data.first_name);
+          last_name_field.data('current-name', data.last_name);
+        } else {
+          displayErrorMessage(response.message);
+        }
       },
       error: function() {
         // display error message
@@ -137,9 +146,19 @@ function updateUserProfilePhoto () {
       //display success message
       const response = JSON.parse(res);
 
-      response.status === "success"
-        ? displaySuccessMessage(response.data.message)
-        : displayErrorMessage(response.message);
+      if (response.status === "success") {
+        const { data } = response;
+        displaySuccessMessage(data.message);
+        let new_image = 'N/A';
+        // create a new image node
+        if (data.image_data && data.image_mime_type) {
+          new_image = document.createElement('img');
+          new_image.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
+        }
+        $(".user-img-cont .center-img-tag").html(new_image);
+      } else {
+        displayErrorMessage(response.message);
+      }
     },
     error: function() {
       // display error message
@@ -199,7 +218,6 @@ $(document).ready(function() {
                 else {
                     console.log(response);
                     displayErrorMessage("Time-zone is not updated!");
-
                 }
             },
             error: function (response) {

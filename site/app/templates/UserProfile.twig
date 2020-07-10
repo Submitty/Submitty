@@ -20,50 +20,50 @@
                     {% endif %}
                 </div>
                 <div class="user-info">
-                    <div class="flex-row-col">
-                        <span>
+                    <div class="flex-row-col" id="username-row">
+                        <span class="label">
                             Username:
                         </span>
-                        <span>
+                        <span class="value">
                             {{ user.getId() }}
                         </span>
                     </div>
-                    <div class="flex-row-col">
-                        <span>
+                    <div class="flex-row-col" id="firstname-row">
+                        <span class="label">
                             First Name:
                         </span>
-                        <span>
+                        <span class="value">
                             {{ user.getDisplayedFirstName() }}
                         </span>
                     </div>
-                    <div class="flex-row-col">
-                        <span>
+                    <div class="flex-row-col" id="lastname-row">
+                        <span class="label">
                             Last Name:
                         </span>
-                        <span>
+                        <span class="value">
                             {{ user.getDisplayedLastName() }}
                         </span>
                     </div>
-                    <div class="flex-row-col">
-                        <span>
+                    <div class="flex-row-col" id="email-row">
+                        <span class="label">
                             Email:
                         </span>
-                        <span>
+                        <span class="value">
                             {{ user.getEmail() }}
                         </span>
                     </div>
                     {% if display_access_level %}
-                        <div class="flex-row-col">
-                            <span>
+                        <div class="flex-row-col" id="access-row">
+                            <span class="label">
                                 Access Level:
                             </span>
-                            <span>
+                            <span class="value">
                                 {{ access_level }}
                             </span>
                         </div>
                     {% endif %}
                     {% if show_change_password %}
-                        <div class="flex-row-col">
+                        <div class="flex-row-col" id="password-row">
                             <span>
                                 Change Password:
                             </span>
@@ -134,15 +134,13 @@
         <div id="user-card-img" class="{% if isViewOnly %} user-img-view-only {% endif %}">
             <div class="user-img-cont">
                 {% set image = user.getDisplayImage() %}
-                {% if image is not null %}
-                    <span>
-                        {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
-                    </span>
-                {% else %}
                     <span class="center-img-tag">
-                        N/A
+                        {% if image is not null %}
+                            {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
                     </span>
-                {% endif %}
             </div>
             {% if not isViewOnly %}
             <span class="edit-user-img">

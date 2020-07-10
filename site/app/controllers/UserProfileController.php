@@ -10,6 +10,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\views\grading\ImagesView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -112,7 +113,9 @@ class UserProfileController extends AbstractController {
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
-                    'message' => "Preferred names updated successfully!"
+                    'message' => "Preferred names updated successfully!",
+                    'first_name' => $newFirstName,
+                    'last_name' => $newLastName
                 ]);
             }
             else {
@@ -141,13 +144,17 @@ class UserProfileController extends AbstractController {
 
             // Save image for user
             $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
+            $display_image = $user->getDisplayImage();
 
             if (!$result) {
                 return JsonResponse::getErrorResponse('Something went wrong while updating your profile photo.');
             }
             else {
+                // image_data and mime_type will be set but be sure that code doesnt break check for null exception
                 return JsonResponse::getSuccessResponse([
                     'message' => 'Profile photo updated successfully!',
+                    'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
+                    'image_mime_type' => !is_null($display_image) ? $display_image->getMimeType() : '',
                 ]);
             }
         }

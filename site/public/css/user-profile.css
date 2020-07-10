@@ -36,7 +36,6 @@
     position: relative;
     border: 2px solid;
     border-radius: 15px;
-    padding: 12px;
 }
 
 .user-img-cont span {}
@@ -58,6 +57,9 @@
     left: 50%;
     font-size: 24px;
     transform: translate(-50%, -50%);
+    width: 100%;
+    height: auto;
+    padding: 12px;
 }
 
 .edit-user-img {
