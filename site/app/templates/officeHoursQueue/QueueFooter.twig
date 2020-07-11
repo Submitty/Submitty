@@ -160,13 +160,11 @@
       window.socketClient.onmessage = (msg)=>{
           switch (msg.type) {
             case "queue_update":
-                console.log("queue_update");
                 {% if viewer.isGrader() %}
                     updateCurrentQueue();
                 {% endif %}
                 break;
             case "queue_status_update":
-                console.log("queue_status_update");
                 {% if viewer.isGrader() %}
                     updateCurrentQueue();
                 {% else %}
@@ -174,7 +172,6 @@
                 {% endif %}
                 break;
             case "full_update":
-                console.log("full_update");
                 {% if viewer.isGrader() %}
                     updateCurrentQueue();
                 {% else %}

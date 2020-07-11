@@ -38,6 +38,8 @@ class Server implements MessageComponentInterface {
     /**
      * This function checks if a given connection object is authenticated
      * It uses the submitty_session cookie in the header data to work
+     * @param ConnectionInterface $conn
+     * @return bool
      */
     private function checkAuth(ConnectionInterface $conn): bool {
         $request = $conn->httpRequest;
@@ -75,20 +77,18 @@ class Server implements MessageComponentInterface {
 
     /**
      * Push a given message to all or all-but-sender connections
+     * @param ConnectionInterface $from
+     * @param string $content
+     * @param string $course_name
+     * @return void
      */
-    private function broadcast(ConnectionInterface $from, string $content, string $course_name): void {
+    private function broadcast(ConnectionInterface $from, $content, $course_name): void {
         foreach ($this->clients[$course_name] as $client) {
             if ($client !== $from) {
                 $client->send($content);
             }
         }
     }
-
-    /** Note: Even if some of the below functions are not currently used,
-     * Do not remove them. Use them in the future for features like -
-     *      1. pushing notifications to a set of users
-     *      2. User to User (s) chat/communication
-     */
 
     /**
      * Connection object is the object stored against $this->clients for a given connection
@@ -100,9 +100,10 @@ class Server implements MessageComponentInterface {
 
     /**
      * Fetches Connection object of a given User_ID
+     * @param string $user_id
      * @return bool|ConnectionInterface
      */
-    private function getSocketClient(string $user_id) {
+    private function getSocketClient($user_id) {
         if (isset($this->users[$user_id])) {
             return $this->users[$user_id];
         }
@@ -113,6 +114,7 @@ class Server implements MessageComponentInterface {
 
     /**
      * Fetches User_ID of a given socket Connection object
+     * @param ConnectionInterface $conn
      * @return string|false
      */
     private function getSocketUserID(ConnectionInterface $conn) {
@@ -126,15 +128,18 @@ class Server implements MessageComponentInterface {
 
     /**
      * Sets Connection object associativity with User_ID
+     * @param string $user_id
+     * @param ConnectionInterface $conn
      * @return void
      */
-    private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
+    private function setSocketClient($user_id, ConnectionInterface $conn): void {
         $this->sessions[$conn->resourceId] = $user_id;
         $this->users[$user_id] = $conn;
     }
 
     /**
      * Deletes Connection object associativity with User_ID
+     * @param ConnectionInterface $conn
      * @return void
      */
     private function removeSocketClient(ConnectionInterface $conn): void {
@@ -142,12 +147,38 @@ class Server implements MessageComponentInterface {
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
             unset($this->users[$user_id]);
+            unset($this->courses[$conn->resourseId]);
+        }
+    }
+
+    /**
+     * Sets Connection object associativity with user course
+     * @param string $course_name
+     * @param ConnectionInterface $conn
+     * @return void
+     */
+    private function setSocketClientCourse($course_name, ConnectionInterface $conn): void {
+        $this->courses[$conn->resourceId] = $course_name;
+    }
+
+    /**
+     * Fetches User_ID of a given socket Connection object
+     * @param ConnectionInterface $conn
+     * @return string|false
+     */
+    private function getSocketClientCourse(ConnectionInterface $conn) {
+        if (isset($this->courses[$conn->resourceId])) {
+            return $this->courses[$conn->resourceId];
+        }
+        else {
+            return false;
         }
     }
 
     /**
      * On connection, add socket to tracked clients, but we do not need
      * to check auth here as that is done on every message.
+     * @param ConnectionInterface $conn
      */
     public function onOpen(ConnectionInterface $conn) {
         if (!$this->checkAuth($conn)) {
@@ -173,7 +204,7 @@ class Server implements MessageComponentInterface {
                 $this->clients[$msg['course']] = new \SplObjectStorage();
             }
             $this->clients[$msg['course']]->attach($from);
-            $this->courses[$from->resourceId] = $msg['course'];
+            $this->setSocketClientCourse($msg['course'], $from);
         }
         elseif (isset($msg['user_id'])) {
             $original_from = $this->getSocketClient($msg['user_id']);
@@ -195,13 +226,16 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $conn
      */
     public function onClose(ConnectionInterface $conn): void {
+        $user_current_course = $this->getSocketClientCourse($conn);
+        if ($user_current_course) {
+            $this->clients[$user_current_course]->detach($conn);
+        }
         $this->removeSocketClient($conn);
-        $user_current_course = $this->courses[$conn->resourceId];
-        $this->clients[$user_current_course]->detach($conn);
     }
 
     /**
      * When any error occurs within the socket server script
+     * @param ConnectionInterface $conn
      */
     public function onError(ConnectionInterface $conn, \Exception $e): void {
         $conn->close();
