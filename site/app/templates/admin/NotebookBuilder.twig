@@ -16,10 +16,6 @@
         };
 
         let config_string = "{{ config_string|raw }}";
-        if (config_string === null) {
-            displayErrorMessage('There was a server side error preparing the config.json string.');
-        }
-
         config_string = escape(config_string);
         try {
             config = JSON.parse(config_string);
