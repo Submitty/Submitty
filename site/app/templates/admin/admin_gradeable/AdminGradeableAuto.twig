@@ -63,10 +63,12 @@
 
     <div class="notebook-builder-info">
         <div class="option-title">Notebook Builder:</div>
+        {% if not gradeable.isUsingDefaultConfig() %}
         <div>
             <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}">Edit Existing</a>
             <span>Edit the currently selected configuration with notebook builder.</span>
         </div>
+        {% endif %}
         <div>
             <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}">Start New</a>
             <span>Start a new configuration with notebook builder.</span>

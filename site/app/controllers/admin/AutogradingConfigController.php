@@ -240,20 +240,23 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilder(string $g_id, string $mode) {
-        if (!in_array($mode, ['new', 'edit'])) {
+        $valid_gradeable_id = true;
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        }
+        catch (\Exception $exception) {
+            $valid_gradeable_id = false;
+        }
+
+        // Redirect home if attempting to start notebook builder with invalid state
+        // Mostly only possible if attempting to access by manually setting invalid url parameters
+        $valid_mode = in_array($mode, ['new', 'edit']);
+        $editing_default_config = $valid_gradeable_id && $mode === 'edit' && $gradeable->isUsingDefaultConfig();
+        if (!$valid_mode || $editing_default_config || !$valid_gradeable_id) {
+            $this->core->addErrorMessage('Invalid settings used when attempting to start Notebook Builder.');
             return new RedirectResponse($this->core->buildUrl());
         }
 
-        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/form-options-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
-        $this->core->getOutput()->addInternalCss('notebook-builder.css');
-
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
         $json_contents = file_get_contents($json_path);
 
@@ -265,6 +268,15 @@ class AutogradingConfigController extends AbstractController {
         $config_string = json_encode($config_string);
 
         $config_string = Utils::escapeDoubleQuotes($config_string);
+
+        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/form-options-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
+        $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
@@ -317,20 +329,15 @@ class AutogradingConfigController extends AbstractController {
      */
     private function notebookBuilderSaveExisting(): JsonResponse {
         // Overwrite existing configuration with newly uploaded one
-        $current_gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
-        $json_path = FileUtils::joinPaths($current_gradeable->getAutogradingConfigPath(), 'config.json');
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
+        $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
         $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
 
         // Update group permission
         $group = $this->core->getConfig()->getCourse() . '_tas_www';
         $permission_res = chgrp($json_path, $group);
 
-        // Collect all gradeables using this configuration and rebuild
-        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
-            if ($gradeable->getAutogradingConfigPath() === $current_gradeable->getAutogradingConfigPath()) {
-                $this->notebookBuilderRebuildGradeable($gradeable);
-            }
-        }
+        $this->notebookBuilderRebuildGradeable($gradeable);
 
         return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('An error occurred saving the modified config.json.');
     }

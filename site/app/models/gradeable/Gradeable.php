@@ -1892,4 +1892,50 @@ class Gradeable extends AbstractModel {
     public function getWouldBeDaysLate() {
         return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
     }
+
+    /**
+     * Gets a multidimensional array containing data for all possible default configuration paths
+     *
+     * @return array
+     */
+    public function getDefaultConfigPaths(): array {
+        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
+        return [
+            ['PROVIDED: upload_only (1 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
+            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
+            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
+            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
+            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
+            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
+            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
+            ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
+            ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload/config')],
+            ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload_3page/config')]
+        ];
+    }
+
+    /**
+     * Determine if $this gradeable is using a default configuration
+     *
+     * @return bool
+     */
+    public function isUsingDefaultConfig(): bool {
+        foreach ($this->getDefaultConfigPaths() as $option) {
+            if ($option[1] === $this->getAutogradingConfigPath()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
