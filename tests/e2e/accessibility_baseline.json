@@ -1,77 +1,72 @@
 {
     "/home": [],
-    "/home/courses/new": [
-        "Element “div” not allowed as child of element “label” in this context. (Suppressing further errors from this subtree.)",
-        "The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control."
-    ],
-    "/s20/sample": [],
-    "/s20/sample/gradeable/future_no_tas_homework/update?nav_tab=0": [
-        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”.",
+    "/home/courses/new": [],
+    "/courses/{}/{}": [],
+    "/courses/{}/{}/gradeable/future_no_tas_homework/update?nav_tab=0": [
         "Attribute “placeholder” not allowed on element “input” at this point.",
         "Attribute “placeholder” is only allowed when the input type is “email”, “number”, “password”, “search”, “tel”, “text”, or “url”."
     ],
-    "/s20/sample/autograding_config?g_id=future_no_tas_homework": [
-        "Attribute “name” not allowed on element “div” at this point."
-    ],
-    "/s20/sample/gradeable/future_no_tas_lab/grading?view=all": [],
-    "/s20/sample/gradeable/future_no_tas_test/grading?view=all": [],
-    "/s20/sample/gradeable/open_homework/grading/status": [],
-    "/s20/sample/gradeable/open_homework/bulk_stats": [],
-    "/s20/sample/gradeable/open_homework/grading/details?view=all": [],
-    "/s20/sample/gradeable/open_homework": [
+    "/courses/{}/{}/autograding_config?g_id=future_no_tas_homework": [],
+    "/courses/{}/{}/gradeable/future_no_tas_lab/grading?view=all": [],
+    "/courses/{}/{}/gradeable/future_no_tas_test/grading?view=all": [],
+    "/courses/{}/{}/gradeable/open_homework/grading/status": [],
+    "/courses/{}/{}/gradeable/open_homework/bulk_stats": [],
+    "/courses/{}/{}/gradeable/open_homework/grading/details?view=all": [],
+    "/courses/{}/{}/gradeable/open_homework": [
         "Bad value “text” for attribute “role” on element “div”.",
         "Attribute “fname” not allowed on element “tr” at this point."
     ],
-    "/s20/sample/gradeable/open_team_homework/team": [],
-    "/s20/sample/gradeable/grades_released_homework_autota": [
+    "/courses/{}/{}/gradeable/open_team_homework/team": [],
+    "/courses/{}/{}/gradeable/grades_released_homework_autota": [
         "Bad value “text” for attribute “role” on element “div”.",
         "Attribute “fname” not allowed on element “tr” at this point.",
         "Duplicate ID “confetti_canvas”.",
         "The first occurrence of ID “confetti_canvas” was here.",
         "CSS: The value “break-word” is deprecated"
     ],
-    "/s20/sample/notifications": [],
-    "/s20/sample/notifications/settings": [
+    "/courses/{}/{}/notifications": [],
+    "/courses/{}/{}/notifications/settings": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/gradeable": [
-        "Attribute “aria-hidden” is unnecessary for elements that have attribute “hidden”."
-    ],
-    "/s20/sample/config": [],
-    "/s20/sample/theme": [],
-    "/s20/sample/office_hours_queue": [
+    "/courses/{}/{}/gradeable": [],
+    "/courses/{}/{}/config": [],
+    "/courses/{}/{}/theme": [],
+    "/courses/{}/{}/office_hours_queue": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/course_materials": [],
-    "/s20/sample/forum": [
+    "/courses/s20/sample/polls": [],
+    "/courses/s20/sample/polls/newPoll": [],
+    "/courses/{}/{}/course_materials": [],
+    "/courses/{}/{}/forum": [
         "The element “input” must not appear as a descendant of the “a” element.",
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)",
+        "Element “pre” not allowed as child of element “span” in this context. (Suppressing further errors from this subtree.)",
         "Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools)."
     ],
-    "/s20/sample/forum/threads/new": [
+    "/courses/{}/{}/forum/threads/new": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/forum/categories": [],
-    "/s20/sample/forum/stats": [
+    "/courses/{}/{}/forum/categories": [],
+    "/courses/{}/{}/forum/stats": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/users": [],
-    "/s20/sample/graders": [
+    "/courses/{}/{}/users": [],
+    "/courses/{}/{}/graders": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
-    "/s20/sample/sections": [],
-    "/s20/sample/student_photos": [],
-    "/s20/sample/late_days": [],
-    "/s20/sample/extensions": [],
-    "/s20/sample/grade_override": [],
-    "/s20/sample/plagiarism": [
+    "/courses/{}/{}/sections": [],
+    "/courses/{}/{}/student_photos": [],
+    "/courses/{}/{}/late_days": [],
+    "/courses/{}/{}/extensions": [],
+    "/courses/{}/{}/grade_override": [],
+    "/courses/{}/{}/plagiarism": [
         "Attribute “name” not allowed on element “div” at this point."
     ],
-    "/s20/sample/plagiarism/configuration/new": [
+    "/courses/{}/{}/plagiarism/configuration/new": [
         "Attribute “name” not allowed on element “div” at this point.",
         "Attribute “name” not allowed on element “span” at this point."
     ],
-    "/s20/sample/reports": [],
-    "/s20/sample/late_table": [],
-    "/s20/sample/grades": []
+    "/courses/{}/{}/reports": [],
+    "/courses/{}/{}/late_table": [],
+    "/courses/{}/{}/grades": []
 }

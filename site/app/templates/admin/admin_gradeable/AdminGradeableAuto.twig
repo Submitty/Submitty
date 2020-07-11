@@ -12,9 +12,9 @@
                         {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
                 <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
                         {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
-                <div aria-hidden="true" hidden>
+                <div hidden>
                     <input type="radio" id="yes_student_view" name="student_view" value="true"
-                        {{ gradeable.isStudentView() ? 'checked' : '' }} />
+                        {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
                 </div>
             </fieldset>
         </div>
@@ -55,6 +55,7 @@
 
         <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
         <br />
+        <a class="btn btn-primary" style="margin-top: 6px" href="{{ notebook_builder_url }}">Notebook Builder</a>
 
         {# text box with the path to the current config file, hidden but still used in js #}
         <input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path'

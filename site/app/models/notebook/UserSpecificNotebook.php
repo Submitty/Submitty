@@ -57,10 +57,10 @@ class UserSpecificNotebook extends Notebook {
 
 
     /**
-    * Collect items from a notebook and replace them with the actual notebook values
-    * @param array $raw_notebook the original user created config with item sections
-    * @return array a new notebook with the item sections replaced with actual notebook questions/markdown/images etc
-    */
+     * Collect items from a notebook and replace them with the actual notebook values
+     * @param array $raw_notebook the original user created config with item sections
+     * @return array a new notebook with the item sections replaced with actual notebook questions/markdown/images etc
+     */
     private function replaceNotebookItemsWithQuestions(array $raw_notebook): array {
         $new_notebook = [];
         $seen_items = [];
@@ -74,7 +74,8 @@ class UserSpecificNotebook extends Notebook {
                 $item_data = $this->searchForItemPool($tgt_item);
                 if (count($item_data['notebook']) > 0) {
                     $new_notebook = array_merge($new_notebook, $item_data['notebook']);
-                    $tests = array_merge($tests, $item_data['testcases']);
+                    $test_cases = $item_data['testcases'] ?? [];
+                    $tests = array_merge($tests, $test_cases);
                 }
 
                 //record if we potentially grabbed the same question
@@ -102,10 +103,10 @@ class UserSpecificNotebook extends Notebook {
 
 
     /**
-    * Given a notebook item return an associated notebook question
-    * @param array $item notebook item from the user created config
-    * @return string the name of the notebook question to select
-    */
+     * Given a notebook item return an associated notebook question
+     * @param array $item notebook item from the user created config
+     * @return string the name of the notebook question to select
+     */
     private function getItemFromPool(array $item): string {
         $item_label = $item['item_label'];
         $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
@@ -117,11 +118,11 @@ class UserSpecificNotebook extends Notebook {
 
 
     /**
-    * Generate a unique hash used to select a question for this student's notebook, the hash is saved under $this->hashes
-    * @param string $item_label the notebook item label in the config used
-    * @param int $from_pool_count the number of questions in the associated item pool
-    * @return int the index of the question to select
-    */
+     * Generate a unique hash used to select a question for this student's notebook, the hash is saved under $this->hashes
+     * @param string $item_label the notebook item label in the config used
+     * @param int $from_pool_count the number of questions in the associated item pool
+     * @return int the index of the question to select
+     */
     private function getNotebookHash(string $item_label, int $from_pool_count): int {
     
         $gid = $this->gradeable_id;
@@ -139,15 +140,16 @@ class UserSpecificNotebook extends Notebook {
     }
 
     /**
-    * Given an item_pool name return all associated notebook values and their testcases
-    * @param string $tgt_name the name of the item_pool to search for
-    */
+     * Given an item_pool name return all associated notebook values and their testcases
+     * @param string $tgt_name the name of the item_pool to search for
+     */
     private function searchForItemPool(string $tgt_name): array {
         $ret = ["notebook" => [], "testcases" => []];
         foreach ($this->item_pool as $item) {
             if ($item['item_name'] === $tgt_name) {
                 $ret["notebook"] = array_merge($ret["notebook"], $item["notebook"]);
-                $ret["testcases"] = array_merge($ret["testcases"], $item["testcases"]);
+                $test_cases = $item["testcases"] ?? [];
+                $ret["testcases"] = array_merge($ret["testcases"], $test_cases);
             }
         }
 

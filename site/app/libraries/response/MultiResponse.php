@@ -35,6 +35,8 @@ class MultiResponse implements ResponseInterface {
     }
 
     /**
+     * @deprecated should not be used, just return WebResponse directly
+     *
      * @param WebResponse $web_response
      * @return MultiResponse
      */
@@ -43,6 +45,8 @@ class MultiResponse implements ResponseInterface {
     }
 
     /**
+     * @deprecated should not be used, just return JsonResponse directly
+     *
      * @param JsonResponse $json_response
      * @return MultiResponse
      */
@@ -51,6 +55,8 @@ class MultiResponse implements ResponseInterface {
     }
 
     /**
+     * @deprecated should not be used, just return RedirectResponse directly
+     *
      * @param RedirectResponse $redirect_response
      * @return MultiResponse
      */

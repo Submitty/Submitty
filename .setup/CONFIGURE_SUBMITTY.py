@@ -472,6 +472,7 @@ if not args.worker:
       shutil.chown(file, 'root',DAEMON_GID)
       os.chmod(file, 0o460)
 
+    shutil.chown(CONTAINERS_JSON, group=DAEMONPHP_GROUP)
 
 ##############################################################################
 # Write database json
@@ -497,8 +498,9 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['sys_admin_email'] = SYS_ADMIN_EMAIL
-config['sys_admin_url'] = SYS_ADMIN_URL
+if not args.worker:
+    config['sys_admin_email'] = SYS_ADMIN_EMAIL
+    config['sys_admin_url'] = SYS_ADMIN_URL
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
 
