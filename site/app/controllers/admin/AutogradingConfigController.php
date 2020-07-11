@@ -267,6 +267,11 @@ class AutogradingConfigController extends AbstractController {
         $config_string = json_decode($config_string);
         $config_string = json_encode($config_string);
 
+        if ($config_string === 'null') {
+            $this->core->addErrorMessage('Notebook Builder failure attempting to load configuration.');
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1');
+        }
+
         $config_string = Utils::escapeDoubleQuotes($config_string);
 
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
