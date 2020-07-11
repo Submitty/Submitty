@@ -428,8 +428,29 @@ class ForumController extends AbstractController {
                 $this->core->getNotificationFactory()->onNewPost($event);
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
+                $result['post_id'] = $post_id;
+                $result['thread_id'] = $thread_id;
             }
         }
+        return $this->core->getOutput()->renderJsonSuccess($result);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/forum/posts/single", methods={"POST"})
+     */
+    public function getSinglePost() {
+        $post_id = $_POST['post_id'];
+        $reply_level = $_POST['reply_level'];
+        $post = $this->core->getQueries()->getPost($post_id);
+        if (($_POST['edit']) && !empty($this->core->getQueries()->getPostHistory($post_id))) {
+            $post['edit_timestamp'] = $this->core->getQueries()->getPostHistory($post_id)[0]['edit_timestamp'];
+        }
+        $thread_id = $post['thread_id'];
+        $GLOBALS['totalAttachments'] = 0;
+        $GLOBALS['post_box_id'] = $_POST['post_box_id'];
+        $unviewed_posts = [$post_id];
+        $first = $post['parent_id'] == -1;
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'createPost', $thread_id, $post, $unviewed_posts, $first, $reply_level, 'tree', true, true);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -476,10 +497,9 @@ class ForumController extends AbstractController {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
         if (!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage("Thread is locked.");
-            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
+            return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
-        elseif ($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin()) {
+        elseif (!empty($_POST['thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         elseif ($modify_type == 0) { //delete post or thread
@@ -588,7 +608,7 @@ class ForumController extends AbstractController {
             if ($isError) {
                 return $this->core->getOutput()->renderJsonFail($messageString);
             }
-            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
+            return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
     }
 
@@ -623,7 +643,7 @@ class ForumController extends AbstractController {
                 $child_thread = $this->core->getQueries()->getThread($child_thread_id);
                 $child_thread_author = $child_thread['created_by'];
                 $child_thread_title = $child_thread['title'];
-                $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id);
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string) $child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post]);
                 $subject = "Thread Merge: " . Notification::textShortner($child_thread_title);
                 $content = "Two threads were merged in:\n" . $full_course_name . "\n\nAll messages posted in Merged Thread:\n" . $child_thread_title . "\n\nAre now contained within Parent Thread:\n" . $parent_thread_title;
@@ -654,7 +674,8 @@ class ForumController extends AbstractController {
             }
         }
         if (empty($title) || empty($categories_ids) || !$this->isValidCategories($categories_ids)) {
-            $this->core->addErrorMessage("Failed to split thread; make sure that you have a title and that you have at least one category selected.");
+            $msg = "Failed to split thread; make sure that you have a title and that you have at least one category selected.";
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         elseif (is_numeric($post_id) && $post_id > 0) {
             $thread_ids = $this->core->getQueries()->splitPost($post_id, $title, $categories_ids);
@@ -686,16 +707,16 @@ class ForumController extends AbstractController {
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $this->core->addSuccessMessage("Post split!");
+
+                $result = [];
+                $result['next'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+                $result['new_thread_id'] = $thread_id;
+                $result['old_thread_id'] = $thread_ids[0];
+                return $this->core->getOutput()->renderJsonSuccess($result);
             }
             else {
-                $this->core->addErrorMessage("Splitting Failed! ");
+                return $this->core->getOutput()->renderJsonFail("Splitting Failed!");
             }
-        }
-        if ($thread_id == -1) {
-            $this->core->redirect($this->core->buildCourseUrl(['forum']));
-        }
-        else {
-            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
         }
     }
 
@@ -977,7 +998,7 @@ class ForumController extends AbstractController {
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
-            $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"])["title"];
+            $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
         }
         else {
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);

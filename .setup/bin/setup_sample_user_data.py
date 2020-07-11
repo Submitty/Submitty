@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-Setup script that scans over the user_photo zips inside the submitty repo sample files and then generates sample data
-in the user_data directory.  We are only grabbing one image from each zip.
+Setup script that scans over the user_photo zips inside the submitty repo sample files
+and then generates sample data in the user_data directory.  We are only grabbing one
+image from each zip.
 """
 
+from datetime import datetime
+import json
 import os
 import shutil
-import json
+from tempfile import TemporaryDirectory
 from zipfile import ZipFile
-from datetime import datetime
+
 
 def main():
 
@@ -36,52 +39,46 @@ def main():
     for item in os.listdir(user_data_dir):
         shutil.rmtree(os.path.join(user_data_dir, item))
 
-    # Unzip the sample_files image archives
-    for zip_file in os.listdir(sample_images_dir):
+    with TemporaryDirectory() as tmp_dir:
+        # Unzip the sample_files image archives
+        for zip_file in os.scandir(sample_images_dir):
+            if zip_file.is_dir() or not zip_file.name.endswith('.zip'):
+                continue
 
-        zip_path = os.path.join(sample_images_dir, zip_file)
+            with ZipFile(zip_file.path, 'r') as zipObj:
+                zipObj.extractall(tmp_dir)
 
-        with ZipFile(zip_path, 'r') as zipObj:
-            zipObj.extractall('temp')
+        # Traverse subdirectories for images
+        for sub_dir in os.scandir(tmp_dir):
+            for img_file in os.scandir(sub_dir.path):
 
-    # Traverse subdirectories for images
-    for sub_dir in os.listdir('temp'):
-        for file in os.listdir(os.path.join('temp', sub_dir)):
-
-            # If file is an image, create a folder for them in the user_data dir
-            # Only need one image per user, so ignore duplicates
-            extension = file[-3:]
-            user_name = file[:-4]
-
-            if extension == 'png':
-                user_folder_path = os.path.join(user_data_dir, user_name)
+                # If file is an image, create a folder for them in the user_data dir
+                # Only need one image per user, so ignore duplicates
+                user_name = img_file.name[:-4]
                 user_images_path = os.path.join(user_data_dir, user_name, 'system_images')
-                access = 0o770
 
-                time = datetime.now()
-                new_file_name = time.strftime('%Y%m%d%H%M%S') + '.png'
+                if img_file.name.endswith('.png') and not os.path.isdir(user_images_path):
+                    user_folder_path = os.path.join(user_data_dir, user_name)
+                    access = 0o770
+                    time = datetime.now()
+                    new_file_name = time.strftime('%Y%m%d%H%M%S') + '.png'
 
-                if not os.path.isdir(user_folder_path):
-                    os.makedirs(user_folder_path)
-                    os.chmod(user_folder_path, access)
-                    shutil.chown(user_folder_path, php_user, php_user)
+                    if not os.path.isdir(user_folder_path):
+                        os.makedirs(user_folder_path)
+                        os.chmod(user_folder_path, access)
+                        shutil.chown(user_folder_path, php_user, php_user)
 
-                if not os.path.isdir(user_images_path):
                     os.makedirs(user_images_path)
                     os.chmod(user_images_path, access)
                     shutil.chown(user_images_path, php_user, php_user)
 
-                    src = os.path.join('.', 'temp', sub_dir, file)
                     dest = os.path.join(user_images_path, new_file_name)
 
-                    shutil.copy(src, dest)
+                    shutil.copy(img_file.path, dest)
                     shutil.chown(dest, php_user, php_user)
 
-            # Only do one image from each zip
-            break
-
-    # Clean up temp
-    shutil.rmtree('temp')
+                # Only do one image from each zip
+                break
 
 
 if __name__ == "__main__":
