@@ -1976,13 +1976,29 @@ function saveCreateThreadToLocal() {
         const isAnonymous = $("input.thread-anon-checkbox").prop("checked");
         const categories = $("div.cat-buttons.btn-selected").get().map(e => e.innerText);
         const status = $("#thread_status").val();
-        localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify({
+        const data = {
             timestamp: Date.now(),
             title,
             isAnonymous,
             categories,
             status
-        }));
+        };
+
+        // These fields don't always show up
+        const lockDate = $("#lock_thread_date").val();
+        if (lockDate !== undefined) {
+            data.lockDate = lockDate;
+        }
+        const isAnnouncement = $("#Announcement").prop("checked");
+        if (isAnnouncement !== undefined) {
+            data.isAnnouncement = isAnnouncement;
+        }
+        const pinThread = $("#pinThread").prop("checked");
+        if (pinThread !== undefined) {
+            data.pinThread = pinThread;
+        }
+
+        localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify(data));
     }
 }
 
@@ -1993,7 +2009,8 @@ function restoreCreateThreadFromLocal() {
             return;
         }
 
-        const { title, isAnonymous, categories, status } = JSON.parse(json);
+        const data = JSON.parse(json);
+        const { title, isAnonymous, categories, status } = data;
         $("#title").val(title);
         $("input.thread-anon-checkbox").prop("checked", isAnonymous);
         $("#thread_status").val(status);
@@ -2007,6 +2024,17 @@ function restoreCreateThreadFromLocal() {
             }
             $(e).trigger("eventChangeCatClass");
         });
+
+        // Optional fields
+        if (data.hasOwnProperty('lockDate')) {
+            $("#lock_thread_date").val(data.lockDate);
+        }
+        if (data.hasOwnProperty('isAnnouncement')) {
+            $("#Announcement").prop("checked", data.isAnnouncement);
+        }
+        if (data.hasOwnProperty('pinThread')) {
+            $("#pinThread").prop("checked", data.pinThread);
+        }
     }
 }
 
