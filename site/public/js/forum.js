@@ -1929,7 +1929,8 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
 const FORUM_AUTOSAVE_KEY = `${window.location.pathname}-forum-autosave`;
 
 function autosaveKeyFor(textarea) {
-    return `${window.location.pathname}-${textarea.id}-forum-autosave`;
+    const parent = $(textarea).parents('form').children('[name=parent_id]').val();
+    return `${window.location.pathname}-reply-to-${parent}-forum-autosave`;
 }
 
 function saveTextAreaToLocal(textarea) {
