@@ -33,7 +33,7 @@
             "show_thread_status" : true,
             "show_announcement" : true,
             "show_editcat" : true,
-            "submit_label" : "Submit Post",
+            "submit_label" : "Publish thread",
             "manage_categories_url" : manage_categories_url,
             "email_enabled": email_enabled
         } %}
@@ -50,12 +50,14 @@
         });
         $("#thread_form").submit(createThread);
         $("form").areYouSure();
-
+        
         cleanupAutosaveHistory('-create-autosave');
         restoreCreateThreadFromLocal();
         $("#title").on("input", () => deferredSave(CREATE_THREAD_DEFER_KEY, saveCreateThreadToLocal, 1));
         $("input.thread-anon-checkbox").change(saveCreateThreadToLocal);
         $("div.cat-buttons").click(saveCreateThreadToLocal);
         $("#thread_status").change(saveCreateThreadToLocal);
+        
+        initSocketClient();
     });
 </script>

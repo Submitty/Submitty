@@ -498,6 +498,7 @@ CREATE TABLE users (
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
+    display_image_state VARCHAR NOT NULL DEFAULT 'system',
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
 );
 
@@ -1330,6 +1331,30 @@ CREATE TABLE IF NOT EXISTS queue_settings(
 );
 
 -- end office hours queue
+
+-- begin online polling
+CREATE TABLE IF NOT EXISTS polls(
+    poll_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    question TEXT NOT NULL,
+    status TEXT NOT NULL,
+    release_date DATE NOT NULL
+);
+CREATE TABLE IF NOT EXISTS poll_options(
+    option_id integer NOT NULL,
+    order_id integer NOT NULL,
+    poll_id integer REFERENCES polls(poll_id),
+    response TEXT NOT NULL,
+    correct bool NOT NULL
+);
+CREATE TABLE IF NOT EXISTS poll_responses(
+    poll_id integer NOT NULL REFERENCES polls(poll_id),
+    student_id TEXT NOT NULL REFERENCES users(user_id),
+    option_id integer NOT NULL
+);
+
+-- end online polling
+
 
 --
 -- PostgreSQL database dump complete

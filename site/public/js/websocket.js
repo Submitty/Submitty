@@ -41,6 +41,7 @@ class WebSocketClient {
       if (this.onopen) {
         this.onopen();
       }
+      this.client.send(JSON.stringify({'type': 'new_connection', 'course': document.body.dataset.courseUrl.split('/').pop()}));
     };
 
     this.client.onmessage = (event) => {
