@@ -147,7 +147,7 @@ class Server implements MessageComponentInterface {
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
             unset($this->users[$user_id]);
-            unset($this->courses[$conn->resourseId]);
+            unset($this->courses[$conn->resourceId]);
         }
     }
 
