@@ -1,17 +1,28 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from websocket import create_connection
+import json
 
 class TestOfficeHoursQueue(BaseTestCase):
     """
     Test cases revolving around the office hours queue
     """
     def __init__(self, testname):
-        super().__init__(testname, log_in=False)
+        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn")
+
+    def setUp(self):
+        super().setUp()
+        submitty_session_cookie = self.driver.get_cookie('submitty_session')
+        self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
+        new_connection_msg = json.dumps({'type': 'new_connection', 'course': 'sample'})
+        self.ws.send(new_connection_msg)
+
+    def tearDown(self):
+        self.ws.close()
+        super().tearDown()
 
     def test_office_hours_queue(self):
-        self.log_in(user_id='instructor', user_password='instructor')
-
         # Turn the queue on
         self.get(f"/courses/{self.semester}/sample/config")
         if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
@@ -34,7 +45,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(1, 0, success_text=['Queue Access Code Changed'], error_text=[])
         self.changeQueueCode("custom code", "new code")
         self.expectedAlerts(1, 0, success_text=['Queue Access Code Changed'], error_text=[])
-        self.switchToStudent('student')
+        self.switchToUser('student')
         base_queue_history_count_student = self.queueHistoryCount(False)
         self.studentJoinQueue('custom code', 'new code')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
@@ -43,23 +54,23 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(base_queue_history_count_student+1, self.queueHistoryCount(False))
         self.studentJoinQueue('custom code', 'new code')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
-        self.switchToInstructor('instructor')
+        self.switchToUser('instructor')
 
         self.assertEqual(1, self.currentQueueCount())
         self.helpFirstStudent()
         self.expectedAlerts(1, 0, success_text=['Started helping student'], error_text=[])
         self.assertEqual(1, self.currentQueueCount())
-        self.switchToStudent('student')
+        self.switchToUser('student')
         self.studentFinishHelpSelf()
         self.expectedAlerts(1, 0, success_text=['Finished helping student'], error_text=[])
         self.assertEqual(base_queue_history_count_student+2, self.queueHistoryCount(False))
         self.studentJoinQueue('custom code', 'new code')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
-        self.switchToStudent('aphacker')
+        self.switchToUser('aphacker')
         base_queue_history_count_aphacker = self.queueHistoryCount(False)
         self.studentJoinQueue('custom code', 'new code', 'nick name hacker')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
-        self.switchToInstructor('instructor')
+        self.switchToUser('instructor')
         self.assertEqual(2, self.currentQueueCount())
         self.helpFirstStudent()
         self.expectedAlerts(1, 0, success_text=['Started helping student'], error_text=[])
@@ -96,7 +107,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(1, 0, success_text=['Queue emptied'], error_text=[])
         self.assertEqual(base_queue_history_count+4, self.queueHistoryCount(False))
         self.assertEqual(0, self.currentQueueCount())
-        self.switchToStudent('student')
+        self.switchToUser('student')
 
         # Students should not be able to see any of theses elements
         self.assertEqual(True, self.verifyElementMissing('class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
@@ -139,12 +150,7 @@ class TestOfficeHoursQueue(BaseTestCase):
             self.driver.find_element(By.ID, 'old_queue_rand_token').click()
         self.driver.find_element(By.ID, 'change_code_btn').click()
 
-    def switchToStudent(self, account):
-        self.log_out()
-        self.log_in(user_id=account, user_password=account)
-        self.goToQueuePage()
-
-    def switchToInstructor(self, account):
+    def switchToUser(self, account):
         self.log_out()
         self.log_in(user_id=account, user_password=account)
         self.goToQueuePage()
@@ -158,33 +164,55 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertIn("_".join(queueName.split()), self.driver.find_element(By.ID, 'add_to_queue').get_attribute('action'))
         self.assertEqual(queueCode, self.driver.find_element(By.ID, 'token_box').get_attribute('value'))
         self.driver.find_element(By.ID, 'join_queue_btn').click()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'queue_update')
 
     def studentRemoveSelfFromQueue(self):
         self.wait_for_element((By.ID, 'leave_queue'))
         self.driver.find_element(By.ID, 'leave_queue').click()
         self.driver.switch_to.alert.accept()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'full_update')
 
     def studentFinishHelpSelf(self):
         self.wait_for_element((By.ID, 'self_finish_help'))
         self.driver.find_element(By.ID, 'self_finish_help').click()
         self.driver.switch_to.alert.accept()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'full_update')
 
     def helpFirstStudent(self):
         self.wait_for_element((By.CLASS_NAME, 'help_btn'))
         self.driver.find_element(By.CLASS_NAME, 'help_btn').click()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'queue_status_update')
 
     def finishHelpFirstStudent(self):
         self.wait_for_element((By.CLASS_NAME, 'finish_helping_btn'))
         self.driver.find_element(By.CLASS_NAME, 'finish_helping_btn').click()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'full_update')
 
     def removeFirstStudent(self):
         self.driver.find_element(By.CLASS_NAME, 'remove_from_queue_btn').click()
         self.driver.switch_to.alert.accept()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'full_update')
 
     def restoreFirstStudent(self):
         self.wait_for_element((By.CLASS_NAME, 'queue_restore_btn'))
         self.driver.find_element(By.CLASS_NAME, 'queue_restore_btn').click()
         self.driver.switch_to.alert.accept()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'queue_status_update')
+
 
     #this checks how many visible students are in the queue
     def toggleQueueFilter(self, code):
