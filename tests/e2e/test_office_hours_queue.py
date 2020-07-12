@@ -1,26 +1,13 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from websocket import create_connection
-import json
 
 class TestOfficeHoursQueue(BaseTestCase):
     """
     Test cases revolving around the office hours queue
     """
     def __init__(self, testname):
-        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn")
-
-    def setUp(self):
-        super().setUp()
-        submitty_session_cookie = self.driver.get_cookie('submitty_session')
-        self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'])
-        new_connection_msg = json.dumps({'type': 'new_connection', 'course': 'sample'})
-        self.ws.send(new_connection_msg)
-
-    def tearDown(self):
-        self.ws.close()
-        super().tearDown()
+        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True)
 
     def test_office_hours_queue(self):
         # Turn the queue on
@@ -130,9 +117,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         while(self.driver.find_elements(By.CLASS_NAME, 'delete_queue_btn')):
             self.driver.find_element(By.CLASS_NAME, 'delete_queue_btn').click()
             self.driver.switch_to.alert.accept()
-            ws_msg = json.loads(self.ws.recv())
-            self.assertIn('type', ws_msg.keys())
-            self.assertEqual(ws_msg['type'], 'full_update')
+            self.check_socket_message('full_update')
             self.openFilterSettings()
 
     def openQueue(self, name, code=None):
@@ -167,54 +152,40 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertIn("_".join(queueName.split()), self.driver.find_element(By.ID, 'add_to_queue').get_attribute('action'))
         self.assertEqual(queueCode, self.driver.find_element(By.ID, 'token_box').get_attribute('value'))
         self.driver.find_element(By.ID, 'join_queue_btn').click()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'queue_update')
+        self.check_socket_message('queue_update')
 
     def studentRemoveSelfFromQueue(self):
         self.wait_for_element((By.ID, 'leave_queue'))
         self.driver.find_element(By.ID, 'leave_queue').click()
         self.driver.switch_to.alert.accept()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'full_update')
+        self.check_socket_message('full_update')
 
     def studentFinishHelpSelf(self):
         self.wait_for_element((By.ID, 'self_finish_help'))
         self.driver.find_element(By.ID, 'self_finish_help').click()
         self.driver.switch_to.alert.accept()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'full_update')
+        self.check_socket_message('full_update')
 
     def helpFirstStudent(self):
         self.wait_for_element((By.CLASS_NAME, 'help_btn'))
         self.driver.find_element(By.CLASS_NAME, 'help_btn').click()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'queue_status_update')
+        self.check_socket_message('queue_status_update')
 
     def finishHelpFirstStudent(self):
         self.wait_for_element((By.CLASS_NAME, 'finish_helping_btn'))
         self.driver.find_element(By.CLASS_NAME, 'finish_helping_btn').click()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'full_update')
+        self.check_socket_message('full_update')
 
     def removeFirstStudent(self):
         self.driver.find_element(By.CLASS_NAME, 'remove_from_queue_btn').click()
         self.driver.switch_to.alert.accept()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'full_update')
+        self.check_socket_message('full_update')
 
     def restoreFirstStudent(self):
         self.wait_for_element((By.CLASS_NAME, 'queue_restore_btn'))
         self.driver.find_element(By.CLASS_NAME, 'queue_restore_btn').click()
         self.driver.switch_to.alert.accept()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'queue_status_update')
+        self.check_socket_message('queue_status_update')
 
 
     #this checks how many visible students are in the queue
@@ -225,17 +196,13 @@ class TestOfficeHoursQueue(BaseTestCase):
     def closeFirstQueue(self):
         self.wait_for_element((By.CLASS_NAME, 'close_queue_btn'))
         self.driver.find_element(By.CLASS_NAME, 'close_queue_btn').click()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'toggle_queue')
+        self.check_socket_message('toggle_queue')
 
     def emptyFirstQueue(self):
         self.wait_for_element((By.CLASS_NAME, 'empty_queue_btn'))
         self.driver.find_element(By.CLASS_NAME, 'empty_queue_btn').click()
         self.driver.switch_to.alert.accept()
-        ws_msg = json.loads(self.ws.recv())
-        self.assertIn('type', ws_msg.keys())
-        self.assertEqual(ws_msg['type'], 'full_update')
+        self.check_socket_message('full_update')
 
 
     def currentQueueCount(self):
