@@ -1,17 +1,16 @@
 .user-info-wrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: row-reverse;
     justify-content: space-between;
-    width: 80%;
+    flex-wrap: wrap;
 }
-
-.user-wrap-view-only {
-    width: 100%;
-}
-
 
 #user-card, #user-card-img {
     flex: 1
+}
+
+#user-card-img {
+    margin-bottom: 20px;
 }
 
 .user-info-title {
@@ -36,13 +35,14 @@
     position: relative;
     border: 2px solid;
     border-radius: 15px;
+    padding: 12px;
 }
 
 .user-img-cont span {}
 
-.user-img-cont span img {
-    width: 100%;
-    height: auto;
+.user-img-cont img {
+    height: 100%;
+    max-width: 100%;
 }
 
 .user-img-view-only .user-img-cont {
@@ -50,16 +50,12 @@
     height: 160px;
 }
 
-
 .center-img-tag {
     position: absolute;
     top: 50%;
     left: 50%;
     font-size: 24px;
     transform: translate(-50%, -50%);
-    width: 100%;
-    height: auto;
-    padding: 12px;
 }
 
 .edit-user-img {
@@ -74,6 +70,10 @@
 .flex-row-col {
     display: flex;
     justify-content: space-between;
+    margin: 10px 0;
+}
+
+.user-info .flex-row {
     margin: 10px 0;
 }
 
@@ -92,4 +92,16 @@
 
 #theme_value {
     text-transform: capitalize;
+}
+
+@media (max-width: 401px) {
+    .content {
+        margin: 10px 0 0 0;
+    }
+}
+
+@media (max-width: 541px) {
+    .flex-row-col {
+        flex-direction: column;
+    }
 }

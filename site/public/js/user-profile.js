@@ -149,13 +149,12 @@ function updateUserProfilePhoto () {
       if (response.status === "success") {
         const { data } = response;
         displaySuccessMessage(data.message);
-        let new_image = 'N/A';
+        let updated_element = '<span class="center-img-tag">N/A</span>';
         // create a new image node
         if (data.image_data && data.image_mime_type) {
-          new_image = document.createElement('img');
-          new_image.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
+          updated_element = `<img src="data:${data.image_data};base64,${data.image_mime_type}" alt="${data.image_alt_tag}"/>`;
         }
-        $(".user-img-cont .center-img-tag").html(new_image);
+        $(".user-img-cont .center-img-tag").html(updated_element);
       } else {
         displayErrorMessage(response.message);
       }
