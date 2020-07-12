@@ -82,7 +82,7 @@ class Server implements MessageComponentInterface {
      * @param string $course_name
      * @return void
      */
-    private function broadcast(ConnectionInterface $from, $content, $course_name): void {
+    private function broadcast(ConnectionInterface $from, string $content, string $course_name): void {
         foreach ($this->clients[$course_name] as $client) {
             if ($client !== $from) {
                 $client->send($content);
@@ -103,7 +103,7 @@ class Server implements MessageComponentInterface {
      * @param string $user_id
      * @return bool|ConnectionInterface
      */
-    private function getSocketClient($user_id) {
+    private function getSocketClient(string $user_id) {
         if (isset($this->users[$user_id])) {
             return $this->users[$user_id];
         }
@@ -132,7 +132,7 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $conn
      * @return void
      */
-    private function setSocketClient($user_id, ConnectionInterface $conn): void {
+    private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
         $this->sessions[$conn->resourceId] = $user_id;
         $this->users[$user_id] = $conn;
     }
@@ -157,7 +157,7 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $conn
      * @return void
      */
-    private function setSocketClientCourse($course_name, ConnectionInterface $conn): void {
+    private function setSocketClientCourse(string $course_name, ConnectionInterface $conn): void {
         $this->courses[$conn->resourceId] = $course_name;
     }
 
