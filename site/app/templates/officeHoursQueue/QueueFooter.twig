@@ -164,6 +164,11 @@
                     updateCurrentQueue();
                 {% endif %}
                 break;
+            case "toggle_queue":
+                {% if not viewer.isGrader() %}
+                    updateQueueStatus();
+                {% endif %}
+                break;
             case "queue_status_update":
                 {% if viewer.isGrader() %}
                     updateCurrentQueue();

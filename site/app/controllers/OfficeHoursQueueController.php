@@ -305,6 +305,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         $this->core->getQueries()->emptyQueue($queue_code);
         $this->core->addSuccessMessage("Queue emptied");
+        $this->sendSocketMessage(['type' => 'full_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -331,6 +332,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         $this->core->getQueries()->toggleQueue($queue_code, $_POST['queue_state']);
         $this->core->addSuccessMessage(($_POST['queue_state'] === "1" ? 'Closed' : 'Opened') . ' queue: "' . $queue_code . '"');
+        $this->sendSocketMessage(['type' => 'toggle_queue']);
 
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -352,6 +354,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         $this->core->getQueries()->deleteQueue($queue_code);
         $this->core->addSuccessMessage("Queue deleted");
+        $this->sendSocketMessage(['type' => 'full_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );

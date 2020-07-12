@@ -130,6 +130,9 @@ class TestOfficeHoursQueue(BaseTestCase):
         while(self.driver.find_elements(By.CLASS_NAME, 'delete_queue_btn')):
             self.driver.find_element(By.CLASS_NAME, 'delete_queue_btn').click()
             self.driver.switch_to.alert.accept()
+            ws_msg = json.loads(self.ws.recv())
+            self.assertIn('type', ws_msg.keys())
+            self.assertEqual(ws_msg['type'], 'full_update')
             self.openFilterSettings()
 
     def openQueue(self, name, code=None):
@@ -222,11 +225,17 @@ class TestOfficeHoursQueue(BaseTestCase):
     def closeFirstQueue(self):
         self.wait_for_element((By.CLASS_NAME, 'close_queue_btn'))
         self.driver.find_element(By.CLASS_NAME, 'close_queue_btn').click()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'toggle_queue')
 
     def emptyFirstQueue(self):
         self.wait_for_element((By.CLASS_NAME, 'empty_queue_btn'))
         self.driver.find_element(By.CLASS_NAME, 'empty_queue_btn').click()
         self.driver.switch_to.alert.accept()
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], 'full_update')
 
 
     def currentQueueCount(self):
