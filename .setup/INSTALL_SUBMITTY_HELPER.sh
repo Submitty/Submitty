@@ -27,6 +27,11 @@ set -e
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 CONF_DIR=${THIS_DIR}/../../../config
 
+VAGRANT=0
+if [ -d ${THIS_DIR}/../.vagrant ]; then
+    VAGRANT=1
+fi
+
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
@@ -826,10 +831,12 @@ if [ "${WORKER}" == 1 ]; then
     chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    # in order to update the submitty source files on the worker machines
-    # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
-    chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
-    chmod -R g+r ${SUBMITTY_REPOSITORY}
+    if [ ${VAGRANT} == 0 ]; then
+        # in order to update the submitty source files on the worker machines
+        # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
+        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
+        chmod -R g+r ${SUBMITTY_REPOSITORY}
+    fi
 
     # Update any foreign worker machines
     echo -e -n "Updating worker machines\n\n"
