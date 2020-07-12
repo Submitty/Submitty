@@ -1,39 +1,510 @@
+/* TODO finally put this code to server and sidebar css*/
+body {
+    min-width: auto;
+}
+
+#submitty-body {
+    height: 100vh;
+}
+
+main#main {
+    min-width: 0;
+}
+
+main#main.full-screen-mode {
+    z-index: 10;
+    animation-duration: 0.8s;
+    animation-name: scaleUp;
+    animation-fill-mode: forwards;
+}
+
+main#main.full-screen-mode .content {
+    margin: 0;
+}
+
+#wrapper {
+    padding-top: 30px;
+    min-height: 0;
+}
+
+aside {
+    margin: 0;
+    padding-top: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#electronic-gradeable-container {
+    height: 100%;
+    padding: 0;
+    margin: 0 20px 0 0;
+    position: relative;
+}
+
 #bar_wrapper {
-    position: absolute;
-    height: 41px;
-    width: max-content;
-    top: -90px;
-    left: 45%;
-    background-color: var(--standard-pale-blue-gray);
-    cursor: move;
-    z-index:40;
-    border: solid 6px var(--important-post);
     box-sizing: content-box;
+    overflow-x: auto;
+    padding: 6px 0;
 }
 
-#footer {
-    z-index: 20;
+.navigation-box {
+    margin: 4px auto;
+    display: flex;
+    width: max-content;
 }
 
-.draggable_content{
-    width: 100%;
-    height:100%;
-    overflow: auto;
+/* Content Panels CSS */
+
+.content-items-container {
+    display: flex;
+    height: 100%;
 }
 
-.grading_toolbar {
-    position:relative;
+.content-item {
+    width: 50%;
+    min-width: 250px;
+}
+
+.content-item-right {
+    flex: 1 1 0%;
+}
+
+.content-item-left {
+    background: var(--standard-medium-gray);
+    display: none;
+    width: 50%;
+}
+
+.content-drag-bar {
+    display: none;
+}
+
+.content-item-left.active, .content-drag-bar.active {
     display: block;
-    float: left;
+}
+
+.active {
+    border: unset;
+}
+/* Toolbar CSS*/
+.grading_toolbar {
+    display: block;
     padding-top:3px;
     padding-bottom:3px;
-    background-color: #var(--standard-pale-blue-gray);
 }
 
-.grading_toolbar i:not(.icon-disabled):hover {
+.grading_toolbar .ta-navlink-cont:hover {
+    transform: translate(0 , -2px);
     cursor: pointer;
-    box-shadow: 0px 0px 5px 5px var(--standard-vibrant-yellow);
-    background-color: yellow;
+    transition: transform 0.2s;
+    box-shadow: 0px 0px 5px 5px var(--subheading-underscore-grey);
+    background-color: var(--subheading-underscore-grey);
+}
+
+#fullscreen-btn-cont.active {
+    background: var(--subheading-underscore-grey);
+}
+
+#fullscreen-btn-cont.active i.fa-compress,
+#fullscreen-btn-cont i.fa-expand {
+    display: inline-block;
+}
+
+#fullscreen-btn-cont.active i.fa-expand,
+#fullscreen-btn-cont i.fa-compress {
+    display: none;
+}
+
+
+#two-panel-mode-btn.active i.fa-square,
+#two-panel-mode-btn i.fa-columns {
+    display: inline-block;
+}
+
+#two-panel-mode-btn.active i.fa-columns,
+#two-panel-mode-btn i.fa-square {
+    display: none;
+}
+
+#two-panel-exchange-btn {
+    display: none;
+}
+
+#two-panel-exchange-btn.active {
+    display: inline-block;
+}
+
+/* Resets server.css pink color */
+a > i.fa:hover,
+a > i.fas:hover,
+button > i.fa:hover,
+button > i.fas:hover {
+    color: initial;
+}
+
+.ta-navlink-cont {
+    display: inline-block;
+    position: relative;
+    border: 2px solid black;
+    border-radius: 5px;
+    box-shadow: 2px 2px 4px;
+}
+
+.ta-navlink-cont button {
+    cursor: pointer;
+}
+
+.nav-btn-cont:before {
+    content: "";
+    width: 2px;
+    position: absolute;
+    height: 100%;
+    background: black;
+    left: 50%;
+    display: inline-block;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+#ungraded-student-navlink {
+    background: #36e08e;
+}
+
+#student-navlink {
+    background: #fa4472;
+}
+
+#grade-inquiry-navlink {
+    background: #36e08e;
+}
+
+#full-left-column-btn {
+    display: none;
+}
+
+#full-left-column-btn.visible {
+    display: inline-block;
+}
+
+#full-left-column-btn.active i {
+    transform: rotate(140deg);
+}
+
+#full-left-column-btn i {
+    transform: rotate(-40deg);
+}
+
+.progressbar {
+    width: 100%;
+    height: 100%;
+    border: 2px solid black;
+    box-shadow: 2px 2px 4px var(--text-black);
+}
+
+.progress-value {
+    position: absolute;
+    top: 49%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.progress_bar {
+    position: relative;
+    width: 190px;
+    display: block;
+    margin-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 8px;
+}
+
+progress {
+    border-radius: 2px;
+}
+
+progress::-webkit-progress-value {
+    background: var(--standard-medium-vibrant-blue);
+}
+
+/* Grading Panel Header (Buttons) CSS */
+#grading-panel-header {
+    padding: 6px 0 6px 6px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    overflow: visible;
+}
+
+.panel-header-box {
+    display: flex;
+}
+
+.grade-panel {
+    position: relative;
+    border: 2px solid;
+    margin-right: 12px;
+    border-radius: 5px;
+}
+
+.grade-panel button {
+    color: var(--text-black);
+    position: relative;
+    cursor: pointer;
+    padding: 2px 6px 5px 24px;
+    white-space: nowrap;
+    outline: none;
+}
+
+.grade-panel button i {
+    position: absolute;
+    top: 1px;
+    left: 4px;
+    font-size: 14px;
+}
+.grade-panel button i:hover {
+    color: unset;
+}
+
+.smaller-header {
+    flex-wrap: wrap;
+}
+
+.smaller-header .grade-panel {
+    margin-top: 4px;
+}
+
+.smaller-header .grade-panel button {
+    padding: 10px 20px;
+}
+
+.smaller-header .grade-panel button i {
+    left: 12px;
+    top: 0;
+}
+
+.smaller-header .grade-panel button span {
+    display: none;
+}
+
+.grade-panel.active button, .grade-panel:hover button {
+    color: white;
+}
+
+#autograding_results_btn {
+    border: 2px solid #bc0a33;
+}
+
+#autograding_results_btn:hover,
+#autograding_results_btn.active,
+#autograding_results_select option:hover,
+#autograding_results_select option:focus {
+    background: #962e2e;
+}
+
+#grading_rubric_btn {
+    border: 2px solid #249c63;
+}
+#grading_rubric_btn:hover,
+#grading_rubric_btn.active,
+#grading_rubric_select option:hover,
+#grading_rubric_select option:focus {
+    background: #1c794d;
+}
+
+#submission_browser_btn {
+    border: 2px solid #1c83b7;
+}
+#submission_browser_btn:hover,
+#submission_browser_btn.active,
+#submission_browser_select option:hover,
+#submission_browser_select option:focus {
+    background: #286888;
+}
+
+#student_info_btn {
+    border: 2px solid var(--text-black);
+}
+
+#student_info_btn:hover,
+#student_info_btn.active,
+#student_info_select option:hover,
+#student_info_select option:focus {
+    background: var(--subheading-underscore-grey);
+}
+
+#peer_info_btn {
+    border: 2px solid var(--standard-plum-purple);
+}
+
+#peer_info_btn:hover,
+#peer_info_btn.active,
+#peer_info_select option:hover,
+#peer_info_select option:focus {
+    background: var(--standard-plum-purple);
+}
+
+#discussion_browser_btn {
+    border: 2px solid #316895;
+}
+
+#discussion_browser_btn:hover,
+#discussion_browser_btn.active,
+#discussion_browser_select option:hover,
+#discussion_browser_select option:focus {
+    background: #316895;
+}
+
+#regrade_info_btn {
+    border: 2px solid #f29f0d;
+}
+
+#regrade_info_btn:hover,
+#regrade_info_btn.active,
+#regrade_info_select option:hover,
+#regrade_info_select option:focus {
+    background: #9e7835;
+}
+
+/* Grading Panel Position selector */
+.panel-position-cont {
+    display: none;
+    position: absolute;
+    border: 2px solid;
+    font-size: 12px;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    z-index: 1;
+    left: -1px;
+    top: 21px;
+    padding: 0;
+    overflow: visible;
+    height: max-content;
+    min-width: max-content;
+}
+
+.panel-position-cont option {
+    padding: 10px;
+    color: var(--text-black);
+    cursor: pointer;
+    border-bottom: 1px solid var(--text-black);
+}
+
+.panel-position-cont option:hover, .panel-position-cont option:focus {
+    color: white;
+}
+
+.panel-position-left {}
+
+.panel-position-right {}
+
+/* Grading Panels CSS */
+
+.panels-container {
+    height: calc(100% - 140px);
+    margin: 0 6px;
+    background: var(--standard-medium-gray);
+}
+
+.two-panel-cont {
+    display: none;
+    height: 100%;
+}
+
+.two-panel-cont.active {
+    display: flex;
+    border: none;
+}
+
+.two-panel-item {
+    /*flex: 1;*/
+    min-width: 200px;
+    width: 50%;
+    background: var(--standard-medium-gray);
+}
+
+.two-panel-left, .two-panel-drag-bar {
+    display: none;
+}
+
+.two-panel-left.active, .two-panel-drag-bar.active {
+    display: block;
+}
+
+.two-panel-right {
+    flex: 1 1 0%;
+}
+
+.two-panel-drag-bar, .content-drag-bar {
+    flex: 0 0 auto;
+    cursor: col-resize;
+    position: relative;
+    width: 20px;
+    background: transparent;
+}
+
+.two-panel-drag-bar:after, .content-drag-bar:after {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 30%;
+    max-height: 160px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50px;
+    background: var(--submitty-logo-blue);
+    transition: all 0.5s;
+}
+
+.content-drag-bar:after {
+    left: 60%;
+}
+
+.two-panel-drag-bar:hover:after, .content-drag-bar:hover:after {
+    filter: blur(3px);
+}
+
+#regrade_inner_info .inner-container {
+    padding: 20px;
+}
+
+#autograding_results.rubric_panel {
+    border:5px solid var(--standard-vibrant-pink-red);
+}
+
+#grading_rubric.rubric_panel {
+    border:5px solid var(--standard-dark-mint-green);
+}
+
+#submission_browser.rubric_panel {
+    border:5px solid var(--standard-gray-blue);
+}
+
+#regrade_info.rubric_panel {
+    border:5px solid var(--standard-vibrant-orange);
+}
+
+#student_info.rubric_panel {
+    border:5px solid var(--text-black);
+}
+
+#peer_info.rubric_panel {
+    border:5px solid var(--standard-plum-purple);
+}
+
+.rubric_panel {
+    font-size: 90%;
+    background-color: var(--standard-pale-blue-gray);
+    display: none;
+    overflow: auto;
+    height: 100%;
+    opacity: 0.95;
+}
+
+.grading_label {
+    display: inline-block;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 16pt;
 }
 
 .banner {
@@ -166,71 +637,8 @@
     margin: 5px;
 }
 
-.icon-home {
-    background: url('../img/glyphicons-21-home.png') no-repeat -2px -1px;
-    display: inline-block;
-    height: 22px;
-    width: 22px;
-    margin: 5px;
-}
-
-.progress_bar {
-    position: relative;
-    height: 31px;
-    width: 190px;
-    float: right;
-    background-color: var(--standard-pale-blue-gray);
-    border: 5px solid var(--standard-pale-blue-gray);
-}
-
-progress {
-    border-radius: 2px;
-}
-
-progress::-webkit-progress-value {
-    background: var(--standard-medium-vibrant-blue);
-}
-
-.draggable {
-}
-
-.rubric_panel {
-    font-size: 90%;
-    cursor: move;
-    position: absolute;
-    background-color: var(--standard-pale-blue-gray);
-    display: none;
-    z-index: 30;
-    overflow:hidden;
-    opacity: 0.95;
-}
-
-#autograding_results.rubric_panel {
-    border:5px solid var(--standard-vibrant-pink-red);
-}
-
-#grading_rubric.rubric_panel {
-    border:5px solid var(--standard-dark-mint-green);
-}
-
-#submission_browser.rubric_panel {
-    border:5px solid var(--standard-gray-blue);
-}
-#regrade_info.rubric_panel {
-    border:5px solid var(--standard-vibrant-orange);
-}
-#student_info.rubric_panel {
-    border:5px solid var(--text-black);
-}
-#peer_info.rubric_panel {
-    border:5px solid var(--standard-plum-purple);
-}
-
-.grading_label {
-    display: inline-block;
-    padding: 10px;
-    font-weight: bold;
-    font-size: 16pt;
+.ta-nav-wrapper {
+    width: 100%;
 }
 
 .file-viewer{
@@ -318,6 +726,11 @@ progress::-webkit-progress-value {
     position: relative;
     top: 2px;
     left: 1%;
+}
+
+.icon-streched {
+    padding: 3px 8px;
+    width: unset;
 }
 
 .rubric-title {
@@ -794,24 +1207,6 @@ tr.is_publish {
     margin-top: 25px;
 }
 
-/*Submission Panel CSS*/
-
-#submission_browser {
-    left:15px;
-    bottom:40px;
-    width:48%;
-    height:30%;
-    overflow: hidden;
-}
-
-#discussion_browser {
-    left:15px;
-    bottom:40px;
-    width:48%;
-    height:30%;
-    overflow: hidden;
-}
-
 #discussion_browser.rubric_panel {
     border:5px solid var(--standard-light-seafoam);
 }
@@ -824,4 +1219,24 @@ tr.is_publish {
 
 #changeCodeStyle {
     display:inline-block;
+}
+
+/* Animations */
+/* to persist the changes, some properties are duplicated in 'from' and 'to' block */
+@keyframes scaleUp {
+    from {
+        position: fixed;
+        height: 30vh;
+        width: 10vh;
+        top: 0;
+        left: 0;
+    }
+    to {
+        transform: scale(1, 1);
+        position: fixed;
+        height: 100vh;
+        width: 100vw;
+        top: 0;
+        left: 0;
+    }
 }
