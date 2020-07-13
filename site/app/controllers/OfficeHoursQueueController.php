@@ -471,7 +471,7 @@ class OfficeHoursQueueController extends AbstractController {
 
     private function sendSocketMessage($msg_array) {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['course'] = $this->core->getConfig()->getCourse();
+        $msg_array['page'] = $this->core->getConfig()->getCourse() . "-office_hours_queue";
         $client = new WebSocket\Client("ws://127.0.0.1:41983/");
         $client->send(json_encode($msg_array));
     }

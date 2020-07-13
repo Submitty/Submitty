@@ -17,8 +17,8 @@ class Server implements MessageComponentInterface {
     // Holds the mapping between Connection Objects (key) and User_ID (value)
     private $sessions;
 
-    // Holds the mapping between Connection Objects IDs (key) and user current course (value)
-    private $courses;
+    // Holds the mapping between Connection Objects IDs (key) and user current course/page (value)
+    private $pages;
 
     // Holds the mapping between User_ID (key) and Connection object (value)
     /** @var array<string, ConnectionInterface> */
@@ -29,7 +29,7 @@ class Server implements MessageComponentInterface {
 
     public function __construct(Core $core) {
         $this->clients = [];
-        $this->courses = [];
+        $this->pages = [];
         $this->sessions = [];
         $this->users = [];
         $this->core = $core;
@@ -79,11 +79,11 @@ class Server implements MessageComponentInterface {
      * Push a given message to all or all-but-sender connections
      * @param ConnectionInterface $from
      * @param string $content
-     * @param string $course_name
+     * @param string $page_name
      * @return void
      */
-    private function broadcast(ConnectionInterface $from, string $content, string $course_name): void {
-        foreach ($this->clients[$course_name] as $client) {
+    private function broadcast(ConnectionInterface $from, string $content, string $page_name): void {
+        foreach ($this->clients[$page_name] as $client) {
             if ($client !== $from) {
                 $client->send($content);
             }
@@ -147,18 +147,18 @@ class Server implements MessageComponentInterface {
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
             unset($this->users[$user_id]);
-            unset($this->courses[$conn->resourceId]);
+            unset($this->pages[$conn->resourceId]);
         }
     }
 
     /**
      * Sets Connection object associativity with user course
-     * @param string $course_name
+     * @param string $page_name
      * @param ConnectionInterface $conn
      * @return void
      */
-    private function setSocketClientCourse(string $course_name, ConnectionInterface $conn): void {
-        $this->courses[$conn->resourceId] = $course_name;
+    private function setSocketClientPage(string $page_name, ConnectionInterface $conn): void {
+        $this->pages[$conn->resourceId] = $page_name;
     }
 
     /**
@@ -166,9 +166,9 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $conn
      * @return string|false
      */
-    private function getSocketClientCourse(ConnectionInterface $conn) {
-        if (isset($this->courses[$conn->resourceId])) {
-            return $this->courses[$conn->resourceId];
+    private function getSocketClientPage(ConnectionInterface $conn) {
+        if (isset($this->pages[$conn->resourceId])) {
+            return $this->pages[$conn->resourceId];
         }
         else {
             return false;
@@ -200,11 +200,13 @@ class Server implements MessageComponentInterface {
         $msg = json_decode($msgString, true);
 
         if ($msg["type"] === "new_connection") {
-            if (!array_key_exists($msg['course'], $this->clients)) {
-                $this->clients[$msg['course']] = new \SplObjectStorage();
+            if (!array_key_exists($msg['page'], $this->clients)) {
+                $this->clients[$msg['page']] = new \SplObjectStorage();
             }
-            $this->clients[$msg['course']]->attach($from);
-            $this->setSocketClientCourse($msg['course'], $from);
+            $this->clients[$msg['page']]->attach($from);
+            $this->setSocketClientPage($msg['page'], $from);
+            var_dump($this->clients);
+            var_dump($this->pages);
         }
         elseif (isset($msg['user_id'])) {
             $original_from = $this->getSocketClient($msg['user_id']);
@@ -213,11 +215,11 @@ class Server implements MessageComponentInterface {
             }
             unset($msg['user_id']);
             $new_msg_string = json_encode($msg);
-            $this->broadcast($from, $new_msg_string, $msg['course']);
+            $this->broadcast($from, $new_msg_string, $msg['page']);
             $from->close();
         }
         else {
-            $this->broadcast($from, $msgString, $msg['course']);
+            $this->broadcast($from, $msgString, $msg['page']);
         }
     }
 
@@ -226,9 +228,9 @@ class Server implements MessageComponentInterface {
      * @param ConnectionInterface $conn
      */
     public function onClose(ConnectionInterface $conn): void {
-        $user_current_course = $this->getSocketClientCourse($conn);
-        if ($user_current_course) {
-            $this->clients[$user_current_course]->detach($conn);
+        $user_current_page = $this->getSocketClientPage($conn);
+        if ($user_current_page) {
+            $this->clients[$user_current_page]->detach($conn);
         }
         $this->removeSocketClient($conn);
     }

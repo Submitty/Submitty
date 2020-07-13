@@ -7,7 +7,7 @@ class TestOfficeHoursQueue(BaseTestCase):
     Test cases revolving around the office hours queue
     """
     def __init__(self, testname):
-        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True)
+        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True, socket_page='office_hours_queue')
 
     def test_office_hours_queue(self):
         # Turn the queue on

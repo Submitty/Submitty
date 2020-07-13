@@ -11,7 +11,7 @@ import time
 
 class TestForum(BaseTestCase):
     def __init__(self, testname):
-        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True)
+        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn", use_websockets=True, socket_page='discussion_forum')
 
 
     def init_and_enable_discussion(self):
