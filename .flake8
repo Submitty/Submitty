@@ -33,7 +33,5 @@ exclude=
     sbin/compare_reuploads.py,
     sbin/count_autograding_logs.py,
     sbin/run_lichen_plagiarism.py,
-    sbin/submitty_autograding_shipper.py,
-    sbin/submitty_autograding_worker.py,
     sbin/untrusted_canary.py,
     tests

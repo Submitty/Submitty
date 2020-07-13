@@ -193,6 +193,9 @@ function build_homework {
         popd > /dev/null
         exit 1
     fi
+    
+    # generate queue file for generated_output
+    $SUBMITTY_INSTALL_DIR/bin/make_generated_output.py $hw_source $assignment $semester $course
 
     fix_permissions $hw_config $hw_bin_path $hw_build_path $course_dir $assignment $course_group
     popd > /dev/null

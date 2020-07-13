@@ -26,10 +26,6 @@ class TestSubmittySchemaValidator(TestCase):
     def test_valid_schemas(self):
         for entry in CONFIGS_DIR.iterdir():
             with self.subTest(f'Validating {entry.name}'):
-                if 'notebook' in entry.name:
-                    # cannot currently pass, see #5531
-                    continue
-
                 validator.validate_complete_config_schema_using_filenames(
                     str(entry),
                     str(SCHEMA_PATH)
