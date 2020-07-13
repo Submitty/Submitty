@@ -713,7 +713,8 @@ CREATE TABLE public.queue (
     help_started_by text,
     removed_by text,
     contact_info text,
-    last_time_in_queue timestamp with time zone
+    last_time_in_queue timestamp with time zone,
+    paused boolean DEFAULT false NOT NULL
 );
 
 
@@ -2060,42 +2061,7 @@ ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_rotating_section_fkey FOREIGN KEY (rotating_section) REFERENCES public.sections_rotating(sections_rotating_id);
 
 
-CREATE UNIQUE INDEX gradeable_user_unique ON regrade_requests(user_id, g_id) WHERE gc_id IS NULL;
-CREATE UNIQUE INDEX gradeable_team_unique ON regrade_requests(team_id, g_id) WHERE gc_id IS NULL;
-
-ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
-ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
-
--- End Forum Key relationships
-
--- office hours queue
-
-CREATE TABLE IF NOT EXISTS queue(
-  entry_id SERIAL PRIMARY KEY,
-  current_state TEXT NOT NULL,
-  removal_type TEXT,
-  queue_code TEXT NOT NULL,
-  user_id TEXT NOT NULL REFERENCES users(user_id),
-  name TEXT NOT NULL,
-  time_in TIMESTAMP NOT NULL,
-  time_help_start TIMESTAMP,
-  time_out TIMESTAMP,
-  added_by TEXT NOT NULL REFERENCES users(user_id),
-  help_started_by TEXT REFERENCES users(user_id),
-  removed_by TEXT REFERENCES users(user_id),
-  contact_info TEXT,
-  last_time_in_queue TIMESTAMP WITH TIME ZONE,
-  paused BOOLEAN NOT NULL DEFAULT false
-);
-CREATE TABLE IF NOT EXISTS queue_settings(
-  id serial PRIMARY KEY,
-  open boolean NOT NULL,
-  code text NOT NULL,
-  token text NOT NULL
-);
-
-                                                                
-                                                                --
+--
 -- Name: viewed_responses viewed_responses_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
