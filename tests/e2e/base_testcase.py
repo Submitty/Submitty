@@ -15,7 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from python_submitty_utils.submitty_utils import dateutils
+from submitty_utils import dateutils
 
 
 # noinspection PyPep8Naming
