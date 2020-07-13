@@ -251,8 +251,8 @@ class AutogradingConfigController extends AbstractController {
         // Redirect home if attempting to start notebook builder with invalid state
         // Mostly only possible if attempting to access by manually setting invalid url parameters
         $valid_mode = in_array($mode, ['new', 'edit']);
-        $editable = $gradeable && !$gradeable->isUsingDefaultConfig();
-        if (!$valid_mode || !$editable) {
+        $invalid_state = $gradeable && $gradeable->isUsingDefaultConfig() && $mode === 'edit';
+        if (!$valid_mode || $invalid_state) {
             $this->core->addErrorMessage('Invalid settings used when attempting to start Notebook Builder.');
             return new RedirectResponse($this->core->buildUrl());
         }
