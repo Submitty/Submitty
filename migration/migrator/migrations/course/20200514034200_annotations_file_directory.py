@@ -35,9 +35,9 @@ def up(config, database, semester, course):
                             with Path(annotation_full_path, name).open() as initial_file:
                                 json_data['annotations'] = json.dumps(json.load(initial_file))
                             json_data['grader_id'] = grader_id[:-5]
-                            json_data['file_name'] = file_name
+                            json_data['file_path'] = file_name
                             file_path = Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)
-                            new_json_file = open(Path(annotation_full_path, md5_file_name.hexdigest() + "_" + grader_id), 'x')
+                            new_json_file = open(Path(annotation_full_path, md5_file_name.hexdigest() + "_" + grader_id), 'w')
                             json.dump(json_data, new_json_file)
                             new_json_file.close()
                             os.remove(Path(annotation_full_path,name))
