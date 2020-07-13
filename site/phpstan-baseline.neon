@@ -421,11 +421,6 @@ parameters:
 			path: app/libraries/socket/Server.php
 
 		-
-			message: "#^Access to an undefined property Ratchet\\\\ConnectionInterface\\:\\:\\$resourceId\\.$#"
-			count: 5
-			path: app/libraries/socket/Server.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected type at offset 350$#"
 			count: 1
 			path: app/models/AbstractModel.php
