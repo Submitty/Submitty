@@ -10,10 +10,13 @@ from os import path
 import subprocess
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
+from submitty_utils import db_utils
+
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'config')
 with open(path.join(CONFIG_PATH, 'database.json')) as open_file:
     DATABASE_DETAILS = json.load(open_file)
 DATABASE_HOST = DATABASE_DETAILS['database_host']
+DATABASE_PORT = DATABASE_DETAILS['database_port']
 DATABASE_USER = DATABASE_DETAILS['database_user']
 DATABASE_PASS = DATABASE_DETAILS['database_password']
 AUTHENTICATION_METHOD = DATABASE_DETAILS['authentication_method']
@@ -61,13 +64,15 @@ def main():
     args = parse_args()
     user_id = args.user_id
 
-    engine_str = f"postgresql://{DATABASE_USER}:{DATABASE_PASS}@"
-    if path.isdir(DATABASE_HOST):
-        engine_str += f"/submitty?host={DATABASE_HOST}"
-    else:
-        engine_str += f"{DATABASE_HOST}/submitty"
+    conn_str = db_utils.generate_connect_string(
+        DATABASE_HOST,
+        DATABASE_PORT,
+        "submitty",
+        DATABASE_USER,
+        DATABASE_PASS,
+    )
 
-    engine = create_engine(engine_str)
+    engine = create_engine(conn_str)
     connection = engine.connect()
     metadata = MetaData(bind=engine)
     users_table = Table('users', metadata, autoload=True)
