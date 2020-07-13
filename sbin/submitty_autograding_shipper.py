@@ -447,7 +447,9 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
     # status will be set to a GradingStatus.
     status = None
 
-    # If the worker we are retrieving from is local
+    # If the worker we are retrieving from is local, then we can just cp files around.
+    # If it is remote, we use the library paramiko to ssh to the submitty user on the
+    # worker and scp the files to the primary machine.
     if which_machine == "localhost":
         # See if it has finished grading yet
         if not os.path.exists(target_done_queue_file):
@@ -531,7 +533,6 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
 
         # Check to make certain that the job we received was the correct job
         if random_identifier != local_done_queue_obj['identifier']:
-            status = GradingStatus.WAITING
             msg = f"{which_machine} returned a stale job (ids don't match). Discarding."
             # Even though this job was not the one we are waiting for, report errors.
             if local_done_queue_obj['autograding_status']['status'] == 'fail':
@@ -554,6 +555,7 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         # If the job we received was a good job, check to see if it was a success.
         if status_str == 'success':
             status = GradingStatus.SUCCESS
+            print(f'{worker_name} returned a successful job.')
         # otherwise, check to see if the returned status was a failure
         elif status_str == 'fail':
             autograding_utils.log_message(
@@ -565,6 +567,7 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
                 trace=f"ERROR: {worker_name} returned the following error:\n"
                       f"{local_done_queue_obj['autograding_status']['message']}"
             )
+            print(f'{worker_name} returned a failed job.')
             status = GradingStatus.FAILURE
         # If we hit this else statement, a bad status was returned.
         else:
@@ -594,6 +597,7 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
                 AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
                 trace=f'ERROR: {worker_name} could not unpack {local_results_zip}'
             )
+            print(f'ERROR: {worker_name} could not unpack {local_results_zip}')
     # If we have thrown an exception, it was very likely either when we tried to load the
     # local_queue_obj or when we called unpack_grading_results_zip. Log the error, set status
     # to failure, and carry on.
@@ -607,6 +611,7 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
             message="ERROR: Exception when unpacking results zip."
                     "For more details, see traces entry."
         )
+        print("ERROR: Exception when unpacking results zip.")
         status = GradingStatus.FAILURE
     finally:
         # Whether we succeeded or failed, make sure that we've cleaned up after ourselves.
