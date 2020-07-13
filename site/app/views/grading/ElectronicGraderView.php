@@ -813,7 +813,7 @@ HTML;
                     </div>
                     <div class="content-item content-item-right">
 HTML;
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $showNewInterface);
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradingPanelHeader', $isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel);
 
             $return .= <<<HTML
@@ -847,7 +847,7 @@ HTML;
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
-        if (!$peer && $gradeable->getLimitedAccessBlind() !== 2) {
+        if ($this->core->getUser()->getGroup() !== User::GROUP_STUDENT && $gradeable->getLimitedAccessBlind() !== 2) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
         }
         if ($isRegradePanel) {
