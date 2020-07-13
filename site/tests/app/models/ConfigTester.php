@@ -56,6 +56,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config = [
             "authentication_method" => "PamAuthentication",
             "database_host" => "/var/run/postgresql",
+            "database_port" => 5432,
             "database_user" => "submitty_dbuser",
             "database_password" => "submitty_dbpass",
             "debugging_enabled" => false,
@@ -188,6 +189,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $db_params = [
             'dbname' => 'submitty',
             'host' => '/var/run/postgresql',
+            'port' => 5432,
             'username' => 'submitty_dbuser',
             'password' => 'submitty_dbpass'
         ];

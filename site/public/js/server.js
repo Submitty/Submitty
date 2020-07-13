@@ -1625,7 +1625,7 @@ function enableKeyToClick(){
 }
 
 /**
- * Function for instructor to flag/unflag a user's preferred photo as inappropriate.
+ * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
  *
  * @param user_id The user_id of the user who's preferred photo should be flagged
  * @param flag A boolean indicating whether to flag or unflag the image.
@@ -1633,38 +1633,76 @@ function enableKeyToClick(){
  *             False to unflag
  */
 function flagUserImage(user_id, flag) {
-    let message;
+    let confirm_message;
+    let success_message;
 
     if (flag) {
-        message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
+        confirm_message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
+        success_message = `${user_id}'s preferred image was successfully flagged.`;
     }
     else {
-        message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
+        confirm_message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
+        success_message = `${user_id}'s preferred image was successfully restored.`;
     }
 
-    const confirmed = confirm(message);
+    const confirmed = confirm(confirm_message);
 
     if (confirmed) {
-        const input_elem = document.createElement('input');
-        input_elem.setAttribute('name', 'user_id');
-        input_elem.setAttribute('value', user_id);
+        const url = buildCourseUrl(['flag_user_image']);
 
-        const token_elem = document.createElement('input');
-        token_elem.setAttribute('name', 'csrf_token');
-        token_elem.setAttribute('value', csrfToken);
+        const form_data = new FormData();
+        form_data.append('user_id', user_id);
+        form_data.append('csrf_token', csrfToken);
+        form_data.append('flag', flag);
 
-        const flag_elem = document.createElement('input');
-        flag_elem.setAttribute('name', 'flag');
-        flag_elem.setAttribute('value', flag);
+        const makeRequest = async () => {
+            const image_container = document.querySelector(`.${user_id}-image-container`);
 
-        const form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', buildCourseUrl(['flag_user_image']));
-        form.appendChild(input_elem);
-        form.appendChild(token_elem);
-        form.appendChild(flag_elem);
+            // Show working message
+            const working_message = document.createElement('i');
+            working_message.innerHTML = '<span style="color:var(--no-image-available)">Working...</span>';
+            image_container.removeChild(image_container.firstElementChild);
+            image_container.prepend(working_message);
 
-        document.body.appendChild(form);
-        form.submit();
+            const response = await fetch(url, {method: 'POST', body: form_data});
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const data = result.data;
+
+                // Change image
+                let new_content;
+                if (data.image_data && data.image_mime_type) {
+                    new_content = document.createElement('img');
+                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
+                }
+                else {
+                    new_content = document.createElement('i');
+                    new_content.innerHTML = '<span style="color:var(--no-image-available)">No Image Available</span>';
+                }
+
+                image_container.removeChild(image_container.firstElementChild);
+                image_container.prepend(new_content);
+
+                // Change icon
+                const a = image_container.querySelector('a');
+                a.href = data.href;
+                a.innerHTML = data.icon_html;
+
+                displaySuccessMessage(success_message);
+            }
+            else {
+                displayErrorMessage(result.message);
+            }
+        };
+
+        try {
+            makeRequest();
+        }
+        catch (err) {
+            console.error(err);
+            displayErrorMessage('Something went wrong!');
+        }
     }
 }
