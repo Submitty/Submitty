@@ -63,15 +63,13 @@
 
     <div class="notebook-builder-info">
         <div class="option-title">Notebook Builder:</div>
-        {% if not gradeable.isUsingDefaultConfig() %}
-        <div>
-            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}">Edit Existing</a>
-            <span>Edit the currently selected configuration with notebook builder.</span>
-        </div>
-        {% endif %}
         <div>
             <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}">Start New</a>
             <span>Start a new configuration with notebook builder.</span>
+        </div>
+        <div class="notebook-builder-edit-button-div">
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}">Edit Existing</a>
+            <span>Edit the currently selected configuration with notebook builder.</span>
         </div>
     </div>
 
@@ -158,6 +156,12 @@
         for (i=0; i<data[1].length; i++) {
             if (full_path_obj.val() == data[1][i]) {
                 $('#config_search').val(data[0][i]);
+
+                // Update visibility of notebook builder edit button
+                const edit_button_div = document.querySelector('.notebook-builder-edit-button-div');
+                const visibility = data[0][i].split(':')[0] === 'PROVIDED' ? 'hidden' : 'visible';
+                edit_button_div.style.visibility = visibility;
+
                 return;
             }
         }
