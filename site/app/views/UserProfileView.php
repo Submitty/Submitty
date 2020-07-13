@@ -2,7 +2,6 @@
 
 namespace app\views;
 
-
 use app\libraries\DateUtils;
 use app\models\User;
 
@@ -18,7 +17,7 @@ class UserProfileView extends AbstractView {
      * @param string $csrf_token
      * @return string
      */
-    public function showUserProfile (
+    public function showUserProfile(
         User $user,
         string $change_name_text,
         bool $database_authentication,

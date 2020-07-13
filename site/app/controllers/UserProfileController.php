@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-
 use app\authentication\DatabaseAuthentication;
 use app\libraries\Core;
 use app\libraries\DateUtils;
@@ -132,7 +131,7 @@ class UserProfileController extends AbstractController {
      * @return JsonResponse
      * @throws \ImagickException
      */
-    public function changeProfilePhoto () {
+    public function changeProfilePhoto() {
         $user = $this->core->getUser();
         // No image uploaded
         if (empty($_FILES['user_image']) || empty($_FILES['user_image']['tmp_name'])) {
