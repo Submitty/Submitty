@@ -128,6 +128,10 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
+#moorthy-duck{
+    display: block;
+}
+
 @media (max-width: 541px) {
     #moorthy-duck{
         display: none;
