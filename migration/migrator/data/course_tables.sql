@@ -706,14 +706,14 @@ CREATE TABLE public.queue (
     queue_code text NOT NULL,
     user_id text NOT NULL,
     name text NOT NULL,
-    time_in timestamp without time zone NOT NULL,
-    time_help_start timestamp without time zone,
-    time_out timestamp without time zone,
+    time_in timestamp with time zone NOT NULL,
+    time_out timestamp with time zone,
     added_by text NOT NULL,
     help_started_by text,
     removed_by text,
     contact_info text,
-    last_time_in_queue timestamp with time zone
+    last_time_in_queue timestamp with time zone,
+    time_help_start timestamp with time zone
 );
 
 
