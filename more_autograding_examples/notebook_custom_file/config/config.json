@@ -107,7 +107,7 @@
             "markdown_string": "Download your custom final exam problem packet:"
         },
         {
-            "type": "secure_file",
+            "type": "file",
             "filename": "finalexam_<USERID>.pdf"
         },
         {
@@ -115,7 +115,7 @@
             "markdown_string": "Here is your assigned dataset file:"
         },
         {
-            "type": "secure_file",
+            "type": "file",
             "filename_pool": [ "dataset_123.zip", "dataset_456.zip", "dataset_789.zip" ]
         },
 
