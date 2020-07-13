@@ -69,7 +69,7 @@ def worker_process(which_machine, address, which_untrusted, my_server):
 
     # Establish the the directory in which we will do our work
     working_directory = os.path.join(
-        "/var/local/submitty/autograding_tmp/",
+        os.path.join(SUBMITTY_DATA_DIR, 'autograding_tmp')
         which_untrusted,
         "tmp"
     )
