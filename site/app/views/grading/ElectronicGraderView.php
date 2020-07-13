@@ -847,7 +847,7 @@ HTML;
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
-        if (!$peer && $gradeable->getLimitedAccessBlind() !== 2l) {
+        if (!$peer && $gradeable->getLimitedAccessBlind() !== 2) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
         }
         if ($isRegradePanel) {
