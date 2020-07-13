@@ -240,19 +240,19 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilder(string $g_id, string $mode) {
-        $valid_gradeable_id = true;
+        $gradeable = null;
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         }
         catch (\Exception $exception) {
-            $valid_gradeable_id = false;
+            // Pass
         }
 
         // Redirect home if attempting to start notebook builder with invalid state
         // Mostly only possible if attempting to access by manually setting invalid url parameters
         $valid_mode = in_array($mode, ['new', 'edit']);
-        $editing_default_config = $valid_gradeable_id && $mode === 'edit' && $gradeable->isUsingDefaultConfig();
-        if (!$valid_mode || $editing_default_config || !$valid_gradeable_id) {
+        $editable = $gradeable && !$gradeable->isUsingDefaultConfig();
+        if (!$valid_mode || !$editable) {
             $this->core->addErrorMessage('Invalid settings used when attempting to start Notebook Builder.');
             return new RedirectResponse($this->core->buildUrl());
         }
@@ -349,8 +349,6 @@ class AutogradingConfigController extends AbstractController {
 
     /**
      * Helper function used to trigger a gradeable rebuild used in the notebook builder save process.
-     *
-     * @return JsonResponse
      */
     private function notebookBuilderRebuildGradeable(Gradeable $gradeable): void {
         $admin_gradeable_controller = new AdminGradeableController($this->core);
