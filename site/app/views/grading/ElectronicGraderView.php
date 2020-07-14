@@ -1295,6 +1295,7 @@ HTML;
         $peer_details = [];
         $component_scores = [];
         $peer_details["graders"] = [];
+        $marks = [];
         foreach ($components as $component) {
             if ($component->isPeer()) {
                 foreach ($peers_to_list as $peer) {
@@ -1310,22 +1311,22 @@ HTML;
                 $component_details["max"] = $component->getMaxValue();
                 $component_details["id"] = strval($component->getId());
                 foreach ($component->getMarks() as $mark) {
-                    $component_details["marks"][$mark->getId()]["id"] = $mark->getId();
-                    $component_details["marks"][$mark->getId()]["title"] = $mark->getTitle();
-                    $component_details["marks"][$mark->getId()]["points"] = $mark->getPoints();
+                    $component_details["marks"][] = $mark->getId();
+                    $marks[$mark->getId()]["title"] = $mark->getTitle();
+                    $marks[$mark->getId()]["points"] = $mark->getPoints();
                 }
                 $components_details_array[] = $component_details;
             }
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
-            "graded_gradeable" => $graded_gradeable,
             "gradeable_id" => $gradeable->getId(),
             "peers" => $peers_to_list,
             "submitter_id" => $submitter,
             "peer_details" => $peer_details,
             "components" => $components_details_array,
             "csrf_token" => $this->core->getCsrfToken(),
-            "component_scores" => $component_scores
+            "component_scores" => $component_scores,
+            "marks" => $marks
         ]);
     }
 
