@@ -77,8 +77,9 @@
     margin: 10px 0;
 }
 
-.flex-row-col span:first-child, .flex-row-col label {
-    font-weight: 500;
+.user-info .label {
+    font-weight: normal;
+    margin: 0;
 }
 
 .flex-row-col label, .flex-row-col select {

@@ -136,6 +136,7 @@ function updateUserProfilePhoto () {
   data.append('csrf_token', $("#user-profile-photo-csrf").val());
   data.append('user_image', $("#user-image-button").prop('files')[0]);
   let url = buildUrl(['current_user', 'change_profile_photo']);
+
   $.ajax({
     url,
     type: "POST",
@@ -152,9 +153,9 @@ function updateUserProfilePhoto () {
         let updated_element = '<span class="center-img-tag">N/A</span>';
         // create a new image node
         if (data.image_data && data.image_mime_type) {
-          updated_element = `<img src="data:${data.image_data};base64,${data.image_mime_type}" alt="${data.image_alt_tag}"/>`;
+          updated_element = `<img src="data:${data.image_mime_type};base64,${data.image_data}" alt="${data.image_alt_data}"/>`;
         }
-        $(".user-img-cont .center-img-tag").html(updated_element);
+        $(".user-img-cont").html(updated_element);
       } else {
         displayErrorMessage(response.message);
       }
