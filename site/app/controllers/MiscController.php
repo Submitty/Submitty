@@ -356,9 +356,6 @@ class MiscController extends AbstractController {
                 $this->core->redirect($this->core->buildCourseUrl());
             }
         }
-        else {
-            $type = "";
-        }
         
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
@@ -373,7 +370,7 @@ class MiscController extends AbstractController {
             //VCS submissions are stored in the checkout directory
             $paths[] = 'checkout';
         }
-        if ( in_array($type, ["results", "both"]) ) {
+        if ( in_array($type, ["results", "both", "limited_results", "limited_both"]) ) {
             $paths[] = 'results';
         }
 
@@ -495,7 +492,17 @@ class MiscController extends AbstractController {
                 foreach ($files as $file) {
                     for ($x = 0; $x < $arr_length; $x++) {
                         if ($students_array[$x] === $file) {
-                            $temp_path = $gradeable_path . "/" . $file;
+                            if ( in_array($type, ["limited_active", "limited_both"]) ) {
+                                $gg = $this->core->getQueries()->getGradedGradeable($gradeable, $students_array[$x], null);
+                                $version = $gg->getAutoGradedGradeable()->getActiveVersion();
+                                if ($version <= 0) { //if no active version exitsts, continue
+                                    continue;
+                                }
+                                $temp_path = $gradeable_path . "/" . $file . "/" . $version;
+                            }
+                            else {
+                                $temp_path = $gradeable_path . "/" . $file;
+                            }
                             $files_in_folder = new \RecursiveIteratorIterator(
                                 new \RecursiveDirectoryIterator($temp_path),
                                 \RecursiveIteratorIterator::LEAVES_ONLY
