@@ -4,6 +4,10 @@
     <input type="file" name="peer_graders_list" id="peer_graders_list">
 
     </br>
+    <div class="btn-container" >
+            <input type="text" id="number_to_peer_grade" placeholder="Enter Number of Students to Grade">
+            <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate random assignments"></input>
+    </div>
      <div id="peer_loader" class="loader hide"></div>
         <div class="table-wrapper">
             <table id="peer-table" class = "table table-striped mobile-table directory-table">
@@ -30,10 +34,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-            <div class="btn-container" >
-            <input type="text" id="number_to_peer_grade" placeholder="Enter Number of Students to Grade">
-            <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate random assignments"></input>
         </div>
 </fieldset>
 
