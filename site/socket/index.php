@@ -18,6 +18,8 @@ $core->loadMasterDatabase();
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadAuthentication();
 $core->loadCourseDatabase();
+$core->getOutput()->loadTwig();
+$core->getOutput()->setInternalResources();
 
 $server = IoServer::factory(
     new HttpServer(
