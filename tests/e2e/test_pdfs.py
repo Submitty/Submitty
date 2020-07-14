@@ -9,9 +9,9 @@ class TestPDFs(BaseTestCase):
     def test_pdf_instructor_basic_access(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_peer/grading/status")]').click()
+        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_pdf/grading/status")]').click()
         self.driver.find_element_by_link_text("Grading Index").click()
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_peer/grading/grade?who_id=bechta&sort=id&direction=ASC")]').click()
+        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_pdf/grading/grade?who_id=bechta&sort=id&direction=ASC")]').click()
         self.driver.find_element_by_id('submissions').click()
         self.driver.find_element_by_xpath('//a[contains(@file-url,"words_249.pdf")]').click()
         self.driver.implicitly_wait(10)
