@@ -123,7 +123,8 @@
     }
 </script>
 <body onload="document.getElementById('defaultOpen').click();">
-{% if core.getUser().getGroup() == 4 %}
+<!-- If grader is limited access grader or student peer, Grading reminder should be displayed -->
+{% if core.getUser().getGroup() == 4 or core.getUser().getGroup() == 3%}
 <div class="content gradeable_message">
     <h1>Your Responsibility as a Peer Grader!</h1>
     <p>
