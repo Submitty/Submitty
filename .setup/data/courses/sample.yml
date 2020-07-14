@@ -998,7 +998,7 @@ gradeables:
   gradeable_config: cpp_hidden_tests
   g_bucket: homework
 
-- g_id: grading_homework_peer
+- g_id: grading_homework_pdf
   components:
   - gc_lower_clamp: 0
     gc_default: 2
@@ -1059,12 +1059,9 @@ gradeables:
   eg_regrade_request_date: 9999-01-06 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Grading Homework Peer
+  g_title: Grading Homework PDF
   gradeable_config: pdf_word_count
   g_bucket: homework
-  peer_graders_list:
-    - grader: aphacker
-    - student: student
 
 - g_id: grades_released_homework_onlytaEC
   components:
