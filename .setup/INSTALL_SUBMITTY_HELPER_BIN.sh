@@ -62,8 +62,6 @@ rsync -rtz  ${SUBMITTY_REPOSITORY}/autograder/* ${SUBMITTY_INSTALL_DIR}/autograd
 # most of the scripts should be root only
 find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chown root:root {} \;
 find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
-find ${SUBMITTY_INSTALL_DIR}/autograder -type f -exec chown root:root {} \;
-find ${SUBMITTY_INSTALL_DIR}/autograder -type f -exec chmod 500 {} \;
 
 # www-data needs to have access to this so that it can authenticate for git
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
