@@ -348,7 +348,7 @@ class MiscController extends AbstractController {
         $zip_file_name = $gradeable_id . "_section_students_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        if ( in_array($type, ["all", "results", "active", "both"]) ) {
+        if (in_array($type, ["all", "results", "active", "both"])) {
             $zip_file_name = $gradeable_id . "_all_students_" . date("m-d-Y") . ".zip";
             if (!($this->core->getUser()->accessFullGrading())) {
                 $message = "You do not have access to that page.";
@@ -370,7 +370,7 @@ class MiscController extends AbstractController {
             //VCS submissions are stored in the checkout directory
             $paths[] = 'checkout';
         }
-        if ( in_array($type, ["results", "both", "limited_results", "limited_both"]) ) {
+        if (in_array($type, ["results", "both", "limited_results", "limited_both"])) {
             $paths[] = 'results';
         }
 
@@ -387,7 +387,7 @@ class MiscController extends AbstractController {
                 $path,
                 $gradeable->getId()
             );
-            if ( in_array($type, ["all", "results"]) ) {
+            if (in_array($type, ["all", "results"])) {
                 $zip_stream->addFile($path . "/", "");
                 if (file_exists($gradeable_path)) {
                     if (!is_dir($gradeable_path)) { //if dir is already present, but it's a file
@@ -418,7 +418,7 @@ class MiscController extends AbstractController {
                     $this->core->redirect($this->core->buildCourseUrl());
                 }
             }
-            else if ( in_array($type, ["active", "both"]) ) {
+            elseif (in_array($type, ["active", "both"])) {
                 $zip_stream->addFile($path . "/", "");
                 if (file_exists($gradeable_path)) {
                     if (!is_dir($gradeable_path)) { //if dir is already present, but it's a file
@@ -439,7 +439,7 @@ class MiscController extends AbstractController {
                                 $this->core->getConfig()->getCoursePath(),
                                 $path,
                                 $gradeable->getId(),
-                                $user, 
+                                $user,
                                 $version
                             );
 
@@ -492,7 +492,7 @@ class MiscController extends AbstractController {
                 foreach ($files as $file) {
                     for ($x = 0; $x < $arr_length; $x++) {
                         if ($students_array[$x] === $file) {
-                            if ( in_array($type, ["limited_active", "limited_both"]) ) {
+                            if (in_array($type, ["limited_active", "limited_both"])) {
                                 $gg = $this->core->getQueries()->getGradedGradeable($gradeable, $students_array[$x], null);
                                 $version = $gg->getAutoGradedGradeable()->getActiveVersion();
                                 if ($version <= 0) { //if no active version exitsts, continue
