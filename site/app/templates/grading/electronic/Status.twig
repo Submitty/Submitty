@@ -123,6 +123,24 @@
     }
 </script>
 <body onload="document.getElementById('defaultOpen').click();">
+<!-- If grader is limited access grader or student peer, Grading reminder should be displayed -->
+{% if core.getUser().getGroup() == 4 or core.getUser().getGroup() == 3%}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Peer Grader!</h1>
+    <p>
+        You will be reviewing materials submitted by your classmates and these materials are considered confidential. Your classmate, the author of this material, is entitled to copyright protection. As such,
+        <ul>
+            <li> You may not use or share any of these materials or ideas without explicit permission from the author. </li>
+            <li>You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete. </li>
+            <li>Your instructor has configured the grading for this assignment to be [ double-blind / single-blind / unblinded ]. </li>
+            <li>You should not attempt to discover the identify of your classmate. However, the identify of the classmate may be unintentionally or unavoidably revealed. Please respect your classmate's privacy. </li>
+            <br>
+        </ul>
+        <u>Please refer to your instructor's course policies if you realize you have a conflict of interest with a peer that you have been assigned to grade.</u>
+        
+    </p>
+</div>
+{% endif %}
 <div class = "content">
     <h1>Status of {{ gradeable_title }}</h1>
 
