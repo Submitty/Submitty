@@ -57,6 +57,10 @@
         $("input.thread-anon-checkbox").change(saveCreateThreadToLocal);
         $("div.cat-buttons").click(saveCreateThreadToLocal);
         $("#thread_status").change(saveCreateThreadToLocal);
+        // Optional fields
+        $("#pinThread").change(saveCreateThreadToLocal);
+        $("#Announcement").change(saveCreateThreadToLocal);
+        $("#lock_thread_date").change(saveCreateThreadToLocal);
         
         initSocketClient();
     });
