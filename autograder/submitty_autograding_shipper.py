@@ -21,12 +21,12 @@ import traceback
 import subprocess
 import random
 import urllib
-import config as submitty_config
 
 from math import floor
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
+from autograder import config as submitty_config
 
 
 INTERACTIVE_QUEUE = ''
@@ -282,6 +282,7 @@ def prepare_job(
     # prepare the zip files
     try:
         zips = packer_unpacker.prepare_autograding_and_submission_zip(
+            config,
             which_machine,
             which_untrusted,
             next_directory,
@@ -376,7 +377,7 @@ def prepare_job(
         return success
 
     # log completion of job preparation
-    obj = packer_unpacker.load_queue_file_obj(JOB_ID, next_directory, next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
         item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
@@ -395,10 +396,17 @@ def prepare_job(
 
 # ==================================================================================
 # ==================================================================================
-def unpack_job(config, which_machine, which_untrusted, next_directory, next_to_grade, random_identifier):
+def unpack_job(
+    config,
+    which_machine,
+    which_untrusted,
+    next_directory,
+    next_to_grade,
+    random_identifier
+):
 
     # variables needed for logging
-    obj = packer_unpacker.load_queue_file_obj(JOB_ID, next_directory, next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
         item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
@@ -511,7 +519,7 @@ def unpack_job(config, which_machine, which_untrusted, next_directory, next_to_g
         else:
             # archive the results of grading
             success = packer_unpacker.unpack_grading_results_zip(
-                which_machine, which_untrusted, local_results_zip
+                config, which_machine, which_untrusted, local_results_zip
             )
             msg = "Unpacked job from " + which_machine
     except Exception:
@@ -541,7 +549,7 @@ def unpack_job(config, which_machine, which_untrusted, next_directory, next_to_g
 
 
 # ==================================================================================
-def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
+def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file):
     """
     Oversees the autograding of single item from the queue
 
@@ -557,8 +565,8 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
 
     # Try to short-circuit this job. If it's possible, then great! Clean
     # everything up and return.
-    if try_short_circuit(queue_file):
-        grading_cleanup(my_name, queue_file, grading_file)
+    if try_short_circuit(config, queue_file):
+        grading_cleanup(config, my_name, queue_file, grading_file)
         return
 
     # TODO: break which_machine into id, address, and passphrase.
@@ -604,10 +612,10 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
             message=f"{my_name} ERROR attempting to grade item: {queue_file} exception={e}"
         )
 
-    grading_cleanup(my_name, queue_file, grading_file)
+    grading_cleanup(config, my_name, queue_file, grading_file)
 
 
-def grading_cleanup(my_name, queue_file, grading_file):
+def grading_cleanup(config, my_name, queue_file, grading_file):
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
     try:
@@ -674,19 +682,25 @@ def valid_github_repo_id(repoid):
     return True
 
 
-def checkout_vcs_repo(my_file):
+def checkout_vcs_repo(config, my_file):
     print("SHIPPER CHECKOUT VCS REPO ", my_file)
 
     with open(my_file, 'r') as infile:
         obj = json.load(infile)
 
     partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-    course_dir = os.path.join(config.submitty['submitty_data_dir'], "courses", obj["semester"], obj["course"])
+    course_dir = os.path.join(
+        config.submitty['submitty_data_dir'],
+        "courses",
+        obj["semester"],
+        obj["course"]
+    )
     submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
 
     vcs_info = packer_unpacker.get_vcs_info(
+        config,
         config.submitty['submitty_data_dir'],
         obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
@@ -858,7 +872,7 @@ def checkout_vcs_repo(my_file):
 
 
 # ==================================================================================
-def get_job(my_name, which_machine, my_capabilities, which_untrusted):
+def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
     """
     Pick a job from the queue.
     """
@@ -907,7 +921,7 @@ def get_job(my_name, which_machine, my_capabilities, which_untrusted):
         vcs_file = f[len(folder)+1:]
         no_vcs_file = f[len(folder)+1+5:]
         # do the checkout
-        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+        updated_obj = checkout_vcs_repo(config, folder+"/"+vcs_file)
         # save the regular grading queue file
         with open(os.path.join(folder, no_vcs_file), "w") as queue_file:
             json.dump(updated_obj, queue_file)
@@ -990,7 +1004,7 @@ def get_job(my_name, which_machine, my_capabilities, which_untrusted):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name, my_data, full_address, which_untrusted):
+def shipper_process(config, my_name, my_data, full_address, which_untrusted):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -1009,11 +1023,11 @@ def shipper_process(my_name, my_data, full_address, which_untrusted):
     counter = 0
     while True:
         try:
-            my_job = get_job(my_name, which_machine, my_capabilities, which_untrusted)
+            my_job = get_job(config, my_name, which_machine, my_capabilities, which_untrusted)
             if not my_job == "":
                 counter = 0
                 grade_queue_file(
-                    my_name, which_machine, which_untrusted, os.path.join(my_folder, my_job)
+                    config, my_name, which_machine, which_untrusted, os.path.join(my_folder, my_job)
                 )
                 continue
             else:
@@ -1150,7 +1164,7 @@ def history_short_circuit_helper(
     }
 
 
-def try_short_circuit(queue_file: str) -> bool:
+def try_short_circuit(config: dict, queue_file: str) -> bool:
     """Attempt to short-circuit the job represented by the given queue file.
 
     Returns True if the job is short-circuitable and was successfully
@@ -1289,7 +1303,7 @@ def try_short_circuit(queue_file: str) -> bool:
         results_zip_path = os.path.join(base_dir, 'results.zip')
         autograding_utils.zip_my_directory(results_dir, results_zip_path)
         packer_unpacker.unpack_grading_results_zip(
-            '(short-circuit)', '(short-circuit)', results_zip_path
+            config, '(short-circuit)', '(short-circuit)', results_zip_path
         )
     except Exception:
         autograding_utils.log_message(
@@ -1393,7 +1407,10 @@ def launch_shippers(config, worker_status_map):
         message="grade_scheduler.py launched"
     )
 
-    for file_path in Path(config.submitty['submitty_data_dir'], "autograding_TODO").glob("untrusted*"):
+    for file_path in Path(
+        config.submitty['submitty_data_dir'],
+        "autograding_TODO"
+    ).glob("untrusted*"):
         file_path = str(file_path)
         autograding_utils.log_message(
             config.log_path, JOB_ID,
@@ -1489,7 +1506,11 @@ def launch_shippers(config, worker_status_map):
                 )
 
             single_machine_data = {name: machine}
-            single_machine_data = add_fields_to_autograding_worker_json(config, single_machine_data, name)
+            single_machine_data = add_fields_to_autograding_worker_json(
+                config,
+                single_machine_data,
+                name
+            )
         except Exception as e:
             autograding_utils.log_stack_trace(
                 config.error_path, job_id=JOB_ID,
@@ -1509,7 +1530,7 @@ def launch_shippers(config, worker_status_map):
             u = "untrusted" + str(i).zfill(2)
             p = multiprocessing.Process(
                 target=shipper_process,
-                args=(thread_name, single_machine_data[name], full_address, u)
+                args=(config, thread_name, single_machine_data[name], full_address, u)
             )
             p.start()
             processes.append((thread_name, p))
@@ -1594,7 +1615,7 @@ def launch_shippers(config, worker_status_map):
 if __name__ == "__main__":
 
     config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-    config = submitty_config.path_constructor(config_dir)
+    config = submitty_config.Config.path_constructor(config_dir)
 
     instantiate_global_variables(config)
 

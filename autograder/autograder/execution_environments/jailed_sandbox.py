@@ -8,16 +8,16 @@ from . import secure_execution_environment
 from .. import autograding_utils
 
 class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
-  """ 
+  """
   A Jailed Sandbox ensures a secure execution environment by carefully permissioning
   files during each phase of execution, and by running all execution steps as a limited-access,
-  untrusted user. 
+  untrusted user.
   """
 
 
-  def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+  def __init__(self, config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj,
                testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment):
-     super().__init__(job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+     super().__init__(config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj,
                       testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
 
   def setup_for_archival(self, overall_log):
@@ -29,7 +29,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
 
   def execute_random_input(self, untrusted_user, script, arguments, logfile, cwd=None):
     """
-    Given the correct script arguments, Jailed Sandbox is able to simple run the standard 
+    Given the correct script arguments, Jailed Sandbox is able to simple run the standard
     execute command from the random input directory to generate random input.
     """
     return self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_input_directory)
@@ -37,7 +37,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
 
   def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
     """
-    Given the correct script arguments, Jailed Sandbox is able to simple run the standard 
+    Given the correct script arguments, Jailed Sandbox is able to simple run the standard
     execute command from the random output directory to generate random output.
     """
     return self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_output_directory)
@@ -72,7 +72,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     success = False
     try:
       success = subprocess.call(full_script
-                                + 
+                                +
                                 arguments,
                                 stdout=logfile,
                                 cwd=cwd)
@@ -85,5 +85,5 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     except Exception as e:
       self.log_message(f"ERROR. Could not remove {script}.")
       self.log_stack_trace(traceback.format_exc())
-    
+
     return success

@@ -132,16 +132,16 @@ class Container():
 
 
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
-  """ 
+  """
   A Container Network ensures a secure execution environment by executing instances of student code
   within a secure Docker Container. To add an extra layer of security, files and directories are carefully
   permissioned, and code is executed as a limited-access, untrusted user. Therefore, code is effectively
   run in a Jailed Sandbox within the container. Containers may be networked together to test networked
-  gradeables. 
+  gradeables.
   """
-  def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+  def __init__(self, config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj,
                testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment):
-    super().__init__(job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+    super().__init__(config, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj,
                      testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
 
     containers = list()
@@ -164,7 +164,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     else:
       container_spec = {
         'container_name'  : f'temporary_container',
-        'container_image' : 'submitty/autograding-default:latest', 
+        'container_image' : 'submitty/autograding-default:latest',
         'server' : False,
         'outgoing_connections' : [],
         'container_rlimits': gradeable_rlimits,
@@ -182,7 +182,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     current_tcp_port = 9000
     current_udp_port = 15000
     for solution_container_spec in solution_container_specs:
-      solution_container_spec['container_rlimits'] = gradeable_rlimits 
+      solution_container_spec['container_rlimits'] = gradeable_rlimits
       solution_container_spec['tcp_port_range'] = (current_tcp_port, current_tcp_port + solution_container_spec.get('number_of_ports', 1) - 1)
       solution_container_spec['udp_port_range'] = (current_udp_port, current_udp_port + solution_container_spec.get('number_of_ports', 1) - 1)
       current_udp_port += solution_container_spec.get('number_of_ports', 1)
@@ -207,7 +207,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     """ Given a set of containers, return the router. """
     for container in containers:
       if container.name == 'router':
-        return container 
+        return container
     return None
 
 
@@ -306,7 +306,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     self.networks.append(network)
 
   def network_containers_with_router(self, containers):
-    """ 
+    """
     If there is a router, all containers are added to their own network, on which the only other
     endpoint is the router, which has been aliased to impersonate all other reachable endpoints.
     """
@@ -397,8 +397,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     self.networks.clear()
 
   def create_knownhosts_json(self, containers):
-    """ 
-    Given a set of containers, add initialization files to each 
+    """
+    Given a set of containers, add initialization files to each
     container's directory which specify how to connect to other endpoints
     on the container's network (hostname, port).
     """
@@ -458,8 +458,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def create_knownhosts_txt(self, containers):
-    """ 
-    Given a set of containers, add initialization files to each 
+    """
+    Given a set of containers, add initialization files to each
     container's directory which specify how to connect to other endpoints
     on the container's network (hostname, port).
     """
@@ -502,7 +502,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   ###########################################################
 
   def process_dispatcher_actions(self, containers):
-    """ 
+    """
     Deliver actions (stdin, delay, stop, start, kill)
     to a set of containers per their testcase specification.
     """
@@ -610,7 +610,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         self.log_message(f"COPYING:\n\t{router_path}\n\t{container.directory}")
         shutil.copy(router_path, container.directory)
         autograding_utils.add_all_permissions(container.directory)
-    
+
 
 
   def setup_for_archival(self, overall_log):
@@ -618,7 +618,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     self.setup_for_testcase_archival(overall_log)
     test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
-    
+
     for container in self.containers:
       if len(self.containers) > 1:
         public_dir = os.path.join(self.tmp_results,"results_public", self.name, container.name)
@@ -631,7 +631,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     container_spec = {
         'container_name'  : f'{untrusted_user}_temporary_container',
-        'container_image' : 'submitty/autograding-default:latest', 
+        'container_image' : 'submitty/autograding-default:latest',
         'server' : False,
         'outgoing_connections' : []
     }
@@ -651,9 +651,9 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     return container.return_code
 
   def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
-    """ 
+    """
     Random output execution is analogous to execution, but with slightly different arguments
-    and a different network of containers. 
+    and a different network of containers.
     """
     return self.execute_helper(self.solution_containers, script, arguments, logfile)
 
@@ -715,14 +715,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     except Exception as e:
       self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
-    
+
     # Cleanup the all networks.
     try:
       self.cleanup_networks()
     except Exception as e:
       self.log_message('ERROR cleaning up docker networks. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
-    
+
 
     # A zero return code means execution went smoothly
     return_code = 0
