@@ -297,7 +297,7 @@ class MiscController extends AbstractController {
         $options->setEnableZip64(false);
 
         // create a new zipstream object
-        $zip_stream = new \ZipStream\ZipStream($zip_name, $options);
+        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
 
         foreach ($folder_names as $folder_name) {
             $path = FileUtils::joinPaths($gradeable_path, $folder_name, $gradeable->getId(), $graded_gradeable->getSubmitter()->getId(), $version);
@@ -379,7 +379,7 @@ class MiscController extends AbstractController {
         $options->setEnableZip64(false);
 
         // create a new zipstream object
-        $zip_stream = new \ZipStream\ZipStream($zip_name, $options);
+        $zip_stream = new \ZipStream\ZipStream($zip_file_name, $options);
 
         foreach ($paths as $path) {
             $gradeable_path = FileUtils::joinPaths(
