@@ -100,9 +100,14 @@ class TestAccessibility(BaseTestCase):
                         skip_messages = [
                         "Start tag seen without seeding a doctype first",
                         "Possible misuse of “aria-label”",
-                        "The 'date' input type is not supported in all browsers. Please be sure to test, and consider using a polyfill.",
+                        "The “date” input type is not supported in all browsers."
                         ]
-                        if error['message'] in skip_messages:
+                        skip_error = False
+                        for skip_msg in skip_messages:
+                            if error['message'].startswith(skip_msg):
+                                skip_error = True
+                                break
+                        if skip_error:
                             continue
 
                         if error['message'] not in baseline[self.urls[url_index]] and error['message'] not in foundErrorMessages:
