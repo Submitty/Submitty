@@ -32,9 +32,9 @@ class UserProfileView extends AbstractView {
         }
 
         $access_levels = [
-            User::LEVEL_USER        => "user",
-            User::LEVEL_FACULTY     => "faculty",
-            User::LEVEL_SUPERUSER   => "superuser"
+            User::LEVEL_USER        => "User",
+            User::LEVEL_FACULTY     => "Faculty",
+            User::LEVEL_SUPERUSER   => "Superuser"
         ];
 
         $this->output->addInternalJs('user-profile.js');

@@ -10,13 +10,11 @@ class HomePageView extends AbstractView {
      * @param User $user
      * @param array $unarchived_courses
      * @param array $archived_courses
-     * @param bool $database_authentication
      */
     public function showHomePage(
         User $user,
         array $unarchived_courses,
-        array $archived_courses,
-        bool $database_authentication
+        array $archived_courses
     ) {
         $statuses = [];
         $course_types = [$unarchived_courses, $archived_courses];
@@ -49,38 +47,12 @@ class HomePageView extends AbstractView {
             $statuses[] = $ranks;
         }
 
-
-        $autofill_preferred_name = [$user->getLegalFirstName(), $user->getLegalLastName()];
-        if ($user->getPreferredFirstName() != "") {
-            $autofill_preferred_name[0] = $user->getPreferredFirstName();
-        }
-        if ($user->getPreferredLastName() != "") {
-            $autofill_preferred_name[1] = $user->getPreferredLastName();
-        }
-
-        $access_levels = [
-            User::LEVEL_USER        => "user",
-            User::LEVEL_FACULTY     => "faculty",
-            User::LEVEL_SUPERUSER   => "superuser"
-        ];
-
         $this->output->addInternalCss('homepage.css');
-        $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
-            "user_first" => $autofill_preferred_name[0],
-            "user_last" => $autofill_preferred_name[1],
             "statuses" => $statuses,
-            "show_change_password" => $database_authentication,
-            "access_level" => $access_levels[$user->getAccessLevel()],
-            "display_access_level" => $user->accessFaculty(),
-            "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
-            "change_username_url" => $this->output->buildUrl(['current_user', 'change_preferred_names']),
-            'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
-            'user_time_zone' => $user->getTimeZone(),
-            'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
         ]);
     }
 

@@ -87,8 +87,7 @@ class HomePageController extends AbstractController {
                 'showHomePage',
                 $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
-                $courses["data"]["archived_courses"],
-                $this->core->getAuthentication() instanceof DatabaseAuthentication
+                $courses["data"]["archived_courses"]
             )
         );
     }
