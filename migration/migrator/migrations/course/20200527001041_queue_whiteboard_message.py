@@ -45,16 +45,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-
-    course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    # add boolean to course config
-    config_file = Path(course_dir, 'config', 'config.json')
-    if config_file.is_file():
-        with open(config_file, 'r') as in_file:
-            j = json.load(in_file)
-
-        if 'queue_announcement_message' in j['course_details']:
-            del j['course_details']['queue_announcement_message']
-
-        with open(config_file, 'w') as out_file:
-            json.dump(j, out_file, indent=4)
+    pass
