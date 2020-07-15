@@ -5,11 +5,13 @@
     flex-wrap: wrap;
 }
 
-#user-card, #user-card-img {
-    flex: 1
+#user-card {
+    flex: 1;
+    max-width: 100%;
 }
 
 #user-card-img {
+    flex: 1;
     margin-bottom: 20px;
 }
 
@@ -63,7 +65,7 @@
     margin-bottom: 20px;
 }
 
-#basic_info span:first-of-type {
+#basic_info span:first-of-type, #time_zone_selector_label a {
     margin-right: 15px;
 }
 
@@ -87,10 +89,6 @@
     min-width: 0;
 }
 
-#time_zone_selector_label a {
-    margin-left: 15px;
-}
-
 #theme_value {
     text-transform: capitalize;
 }
@@ -98,6 +96,9 @@
 @media (max-width: 401px) {
     .content {
         margin: 10px 0 0 0;
+    }
+    #basic_info span:first-of-type, #time_zone_selector_label a {
+        margin-right: 4px;
     }
 }
 

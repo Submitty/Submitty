@@ -33,37 +33,6 @@ function getAvailableTimeZones() {
 }
 
 /**
- * Gets the set of general time zone options
- * @returns {Set<*>}
- */
-function getGeneralTimeZoneOptions() {
-    let available_time_zones = getAvailableTimeZones();
-
-    // Only interested in the 'general' area (the part before the first /)
-    available_time_zones = available_time_zones.map(x => x.split('/', 1)[0]);
-
-    return new Set(available_time_zones);
-}
-
-/**
- * Gets the set of specific time zone options based on the passed in general option
- * @param general_option
- * @returns {Set<*>}
- */
-function getSpecificTimeZoneOptions(general_option) {
-    let available_time_zones = getAvailableTimeZones();
-
-    available_time_zones = available_time_zones.filter(
-        x => x.split('/', 1)[0] === general_option
-    )
-
-    let str_to_strip = general_option + '/';
-    available_time_zones = available_time_zones.map(x => x.replace(str_to_strip, ''));
-
-    return new Set(available_time_zones);
-}
-
-/**
  * Populate the specific area drop down based on which general option was selected in the general option drop down.
  *
  * @param general_selection
@@ -74,7 +43,7 @@ function populateSpecificTimeZoneDropDown(general_selection, selected_option = n
     $('#time_zone_specific_drop_down').empty();
 
     let specific_area_set = getSpecificTimeZoneOptions(general_selection);
-
+    console.log(specific_area_set);
     $('#time_zone_specific_drop_down').append('<option value="null">Please select a specific area</option>');
 
     specific_area_set.forEach(function(elem) {
@@ -177,31 +146,22 @@ $(document).ready(function() {
         updateTheme();
     });
 
-    // Populate the general area time zone selector box with options
-    let general_area_set = getGeneralTimeZoneOptions();
-    general_area_set.forEach(function(elem) {
-        $('#time_zone_general_drop_down').append('<option value="'+elem+'">'+elem+'</option>');
+    // Populate the time zone selector box with options
+    let availableTimeZones = getAvailableTimeZones();
+    availableTimeZones.forEach(function(elem) {
+        $('#time_zone_drop_down').append(`<option value="${elem}">${elem}</option>`);
     });
 
-    // Populate specific area time zone selector box when the general one has detected a change
-    $('#time_zone_general_drop_down').change(function() {
-        let selected_elem = $(this).children(':selected')[0].innerHTML;
-        populateSpecificTimeZoneDropDown(selected_elem);
-    });
-
-    // Any user made changes to the specific time zone dropdown should be saved server-side
-    $('#time_zone_specific_drop_down').change(function() {
-
-        let general_area = $('#time_zone_general_drop_down').children('option:selected').val();
-        let specific_area = $(this).children('option:selected').val();
-        let time_zone = general_area + '/' + specific_area;
-
+    $('#time_zone_drop_down').change(function() {
+        let timeZoneWithOffset = $(this).children('option:selected').val();
+        // extract out the time_zone from the timezone with utc offset
+        let time_zone = timeZoneWithOffset === "NOT_SET/NOT_SET" ? timeZoneWithOffset : timeZoneWithOffset.split(') ')[1];
         // If user didnt select any specific area its value will be null and in this case we will not make API call
-        if (specific_area === "null") {
-          // display error message or just return without informing the user?
-          displayErrorMessage("Please select a specific area.");
-          return;
-        }
+        // if (specific_area === "null") {
+        //   // display error message or just return without informing the user?
+        //   displayErrorMessage("Please select a specific area.");
+        //   return;
+        // }
 
         $.getJSON({
             type: "POST",
@@ -230,12 +190,7 @@ $(document).ready(function() {
     });
 
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
-    $(document).ready(function() {
-        let user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
-        let general_area = user_time_zone.split('/', 1)[0];
-        let specific_area = user_time_zone.replace(general_area + '/', '');
+    let user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
 
-        $('[value="' + general_area + '"]').prop('selected', true);
-        populateSpecificTimeZoneDropDown(general_area, specific_area);
-    });
+    $('[value="' + user_time_zone + '"]').prop('selected', true);
 });

@@ -53,8 +53,8 @@ class UserProfileView extends AbstractView {
             "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
             "change_username_url" => $this->output->buildUrl(['current_user', 'change_preferred_names']),
             "change_profile_photo_url" => $this->output->buildUrl(['current_user', 'change_profile_photo']),
-            'available_time_zones' => implode(',', DateUtils::getAvailableTimeZones()),
-            'user_time_zone' => $user->getTimeZone(),
+            'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),
+            'user_time_zone_with_offset' => "(UTC" . DateUtils::getUTCOffset($user->getTimeZone()) . ") " . $user->getTimeZone(),
             'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
         ]);
     }
