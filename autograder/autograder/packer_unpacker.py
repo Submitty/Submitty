@@ -93,18 +93,19 @@ def unzip_queue_file(zipfilename):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist", zipfilename)
     zip_ref = zipfile.ZipFile(zipfilename, 'r')
+    queue_file_name = "queue_file.json"
     names = zip_ref.namelist()
-    if 'failure.txt' in names:
-        return None
-    if 'queue_file.json' not in names:
+
+    # Verify that the queue file is in the zip file
+    if queue_file_name not in names:
         raise RuntimeError("ERROR: zip file does not contain queue file", zipfilename)
+
     # remember the current directory
     cur_dir = os.getcwd()
     # create a temporary directory and go to it
     tmp_dir = tempfile.mkdtemp()
     os.chdir(tmp_dir)
     # extract the queue file
-    queue_file_name = "queue_file.json"
     zip_ref.extract(queue_file_name)
     # read it into a json object
     with open(queue_file_name) as f:
