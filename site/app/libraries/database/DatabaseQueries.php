@@ -5482,7 +5482,7 @@ AND gc_id IN (
     }
 
     public function getPastQueue() {
-        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d')]);
+        $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_out DESC, time_in DESC),* FROM queue where time_in > ? AND current_state IN ('done') order by ROW_NUMBER", [$this->core->getDateTimeNow()->format('Y-m-d 00:00:00O')]);
         return $this->course_db->rows();
     }
 
@@ -5702,14 +5702,14 @@ AND gc_id IN (
     }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
-        $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d');
+        $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$day_threshold, $queue_code, $time_in]);
         return $this->course_db->rows()[0]['count'];
     }
 
     public function getNumberAheadInQueueToday($queue_code, $time_in) {
-        $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
-        $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d');
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
         $this->course_db->query("SELECT count(*) from queue where last_time_in_queue < ? AND last_time_in_queue > ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('waiting') and time_in < ?", [$current_date, $day_threshold, $queue_code, $time_in]);
         return $this->course_db->rows()[0]['count'];
     }
