@@ -16,6 +16,7 @@ let panelElements = [
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
   { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "notebook-view", icon: ".grading_toolbar .fas fa-book-open"}
 ];
 
 // Tracks the layout of TA grading page
@@ -47,6 +48,7 @@ function updateThePanelsElements(panelsAvailabilityObj) {
   panelElements = panelElements.filter((panel) => {
     return !!panelsAvailabilityObj[panel.str];
   });
+
 }
 
 $(function () {
@@ -83,15 +85,17 @@ $(function () {
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
     let panelSpanId = btnCont.attr('id');
-    const panelId = panelSpanId.split('_btn')[0];
+
+    if (!panelSpanId) {
+      return;
+    }
+
+    const panelId = panelSpanId.split(/(_|-)btn/)[0];
     const selectEle =  $('select#' + panelId + '_select');
 
     // Hide all select dropdown except the current one
     $('select.panel-position-cont').not(selectEle).hide();
 
-    if (!panelSpanId) {
-      return;
-    }
     const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
     // If panel is not in-view and two-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it

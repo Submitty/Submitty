@@ -1,6 +1,3 @@
-
-
-{% macro renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version, max_file_uploads, old_files) %}
 <div class="notebook">
 
     {# Render content #}
@@ -235,8 +232,6 @@
         {% endif %}
     });
 </script>
-
-{% endmacro %}
 
 
 {% macro render_testcase_messages(cell, testcase_messages) %}
