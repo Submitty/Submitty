@@ -179,7 +179,7 @@ class DateUtils {
         });
         // Attach the UTC offset value
         $timezone_with_offset = array_map(function ($tz) {
-            return "(UTC" .DateUtils::getUTCOffset($tz) . ") " . $tz;
+            return "(UTC" . DateUtils::getUTCOffset($tz) . ") " . $tz;
         }, $available_time_zones);
         // Add 'NOT_SET/NOT_SET' on top of the ordered list
         return array_merge(['NOT_SET/NOT_SET'], $timezone_with_offset);
