@@ -836,10 +836,11 @@ HTML;
             $image_data = $notebook_model->getImagePaths();
             $testcase_messages = $display_version_instance !== null ? $display_version_instance->getTestcaseMessages() : [];
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($highest_version, $notebook);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderNotebookPanel',
-                $notebook,
+                $notebook_data,
                 $testcase_messages,
                 $image_data,
                 $gradeable->getId(),
