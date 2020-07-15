@@ -185,9 +185,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 return;
             }
             // Now that we've successfully submitted the form, clear autosave data
-            const textarea = form.find("textarea")[0];
-            cancelDeferredSave(autosaveKeyFor(textarea));
-            clearTextAreaAutosave(textarea);
+            cancelDeferredSave(autosaveKeyFor(form));
+            clearReplyBoxAutosave(form);
 
             var course = document.body.dataset.courseUrl.split('/').pop();
             var thread_id = json['data']['thread_id'];
@@ -1926,44 +1925,57 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
     });
 }
 
-const FORUM_AUTOSAVE_KEY = `${window.location.pathname}-forum-autosave`;
-
-function autosaveKeyFor(textarea) {
-    const parent = $(textarea).parents('form').children('[name=parent_id]').val();
-    return `${window.location.pathname}-reply-to-${parent}-forum-autosave`;
+function autosaveKeyFor(replyBox) {
+    const parent = $(replyBox).children('[name=parent_id]').val();
+    // Having `reply-to-undefined` in the key is sorta gross and might cause
+    // false positive bug reports. Let's avoid that.
+    if (parent !== undefined) {
+        return `${window.location.pathname}-reply-to-${parent}-forum-autosave`;
+    } else {
+        return `${window.location.pathname}-create-thread-forum-autosave`;
+    }
 }
 
-function saveTextAreaToLocal(textarea) {
-    if (autosaveEnabled && textarea.value) {
-        localStorage.setItem(autosaveKeyFor(textarea), JSON.stringify({
+function saveReplyBoxToLocal(replyBox) {
+    const inputBox = $(replyBox).find("textarea.thread_post_content");
+    if (autosaveEnabled && inputBox.val()) {
+        const anonCheckbox = $(replyBox).find("input.thread-anon-checkbox");
+        const post = inputBox.val();
+        const isAnonymous = anonCheckbox.prop("checked");
+        localStorage.setItem(autosaveKeyFor(replyBox), JSON.stringify({
             timestamp: Date.now(),
-            text_value: textarea.value
+            post,
+            isAnonymous
         }));
     }
 }
 
-function restoreTextAreaFromLocal(textarea) {
+function restoreReplyBoxFromLocal(replyBox) {
     if (autosaveEnabled) {
-        const json = localStorage.getItem(autosaveKeyFor(textarea));
+        const json = localStorage.getItem(autosaveKeyFor(replyBox));
         if (json) {
-            const { text_value } = JSON.parse(json);
-            textarea.value = text_value;
+            const { post, isAnonymous } = JSON.parse(json);
+            $(replyBox).find("textarea.thread_post_content").val(post);
+            $(replyBox).find("input.thread-anon-checkbox").prop("checked", isAnonymous);
         }
     }
 }
 
-function clearTextAreaAutosave(textarea) {
+function clearReplyBoxAutosave(replyBox) {
     if (autosaveEnabled) {
-        localStorage.removeItem(autosaveKeyFor(textarea));
+        localStorage.removeItem(autosaveKeyFor(replyBox));
     }
 }
 
 function setupForumAutosave() {
-    $(".post_content_reply").each((_index, textarea) => {
-        restoreTextAreaFromLocal(textarea);
-        $(textarea).on('input', 
-            () => deferredSave(textarea.id, () => saveTextAreaToLocal(textarea), 1)
+    // Include both regular reply boxes on the forum as well as the "reply" box
+    // on the create thread page.
+    $("form.reply-box, form.post_reply_form, #thread_form").each((_index, replyBox) => {
+        restoreReplyBoxFromLocal(replyBox);
+        $(replyBox).find("textarea.thread_post_content").on('input',
+            () => deferredSave(autosaveKeyFor(replyBox), () => saveReplyBoxToLocal(replyBox), 1)
         );
+        $(replyBox).find("input.thread-anon-checkbox").change(() => saveReplyBoxToLocal(replyBox));
     });
 }
 
@@ -1973,13 +1985,11 @@ const CREATE_THREAD_AUTOSAVE_KEY = `${window.location.pathname}-create-autosave`
 function saveCreateThreadToLocal() {
     if (autosaveEnabled) {
         const title = $("#title").val();
-        const isAnonymous = $("input.thread-anon-checkbox").prop("checked");
         const categories = $("div.cat-buttons.btn-selected").get().map(e => e.innerText);
         const status = $("#thread_status").val();
         const data = {
             timestamp: Date.now(),
             title,
-            isAnonymous,
             categories,
             status
         };
@@ -2010,9 +2020,8 @@ function restoreCreateThreadFromLocal() {
         }
 
         const data = JSON.parse(json);
-        const { title, isAnonymous, categories, status } = data;
+        const { title, categories, status } = data;
         $("#title").val(title);
-        $("input.thread-anon-checkbox").prop("checked", isAnonymous);
         $("#thread_status").val(status);
         $("div.cat-buttons").each((_i, e) => {
             if (categories.includes(e.innerText)) {
