@@ -182,14 +182,14 @@ def print_status(epoch_time,num_shippers,num_workers,
 
 class QueueItem:
     def __init__(self, json_file, epoch_time, is_grading=False):
-        # If this is for a queue item currently grading; then we ensure the 
+        # If this is for a queue item currently grading; then we ensure the
         # provided JSON file begins with 'GRADING_', and we get rid of the
         # 'GRADING_' prefix for the regular queue file, while also reading
         # the 'GRADING_' file.
         if is_grading:
             base, tail = os.path.split(json_file)
             assert(tail.startswith('GRADING_'))
-            
+
             with open(json_file, 'r') as infile:
                 self.grading_queue_obj = json.load(infile)
 
@@ -231,10 +231,10 @@ def main():
                 proc = psutil.Process(pid)
                 if DAEMON_USER == proc.username():
                     if (len(proc.cmdline()) >= 2 and
-                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_shipper.py")):
+                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"autograder","submitty_autograding_shipper.py")):
                         num_shippers+=1
                     if (len(proc.cmdline()) >= 2 and
-                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"sbin","submitty_autograding_worker.py")):
+                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"autograder","submitty_autograding_worker.py")):
                         num_workers+=1
             except psutil.NoSuchProcess:
                 pass
@@ -292,7 +292,7 @@ def main():
                 else:
                     interactive_count += 1
                     interactive_grading_count += 1
-                
+
                 full_machine = entry.grading_queue_obj['machine']
 
                 capability = entry.queue_obj['required_capabilities']
@@ -307,7 +307,7 @@ def main():
                         grading_machine = machine
                         break
                 machine_grading_counts[grading_machine] += 1
-                
+
                 if entry.elapsed_time > max_time:
                     machine_stale_job[grading_machine] = True
                     stale = True
@@ -326,10 +326,10 @@ def main():
         # quit when the queues are empty
         if done and not args.continuous:
             raise SystemExit()
-        
+
         # pause before checking again
         time.sleep(5)
-        
+
 
 
 
