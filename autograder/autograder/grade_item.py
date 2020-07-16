@@ -351,6 +351,7 @@ def grade_from_zip(
 
             # Create a jailed sandbox to run validation inside of.
             validation_environment = jailed_sandbox.JailedSandbox(
+                config,
                 job_id,
                 which_untrusted,
                 tmp_work,

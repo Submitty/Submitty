@@ -18,7 +18,7 @@ def str2bool(v):
 
 def insert_into_database(config, semester, course, gradeable_id, user_id, team_id, who_id, is_team,
                          version):
-    db_user = config.database['databse_user']
+    db_user = config.database['database_user']
     db_host = config.database['database_host']
     db_pass = config.database['database_password']
     data_dir = config.submitty['submitty_data_dir']
