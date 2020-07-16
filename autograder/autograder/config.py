@@ -55,7 +55,7 @@ class Config:
         """
         Given a path that contains a 'autograding_worker.json', load it into memory.
         """
-        self.workers_json = _get_data(config_path, 'autograding_worker.json')
+        self.workers_json = get_data(config_path, 'autograding_worker.json')
 
 
 def get_data(config_path, filename):
