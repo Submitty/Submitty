@@ -1474,7 +1474,11 @@ class Gradeable(object):
             if self.is_repository and 'eg_subdirectory' in gradeable:
                 self.subdirectory = gradeable['eg_subdirectory']
             if 'eg_peer_grading' in gradeable:
-                self.peer_grading = gradeable['eg_peer_grading'] is False
+                self.peer_grading = gradeable['eg_peer_grading'] is True
+            if 'eg_peer_grade_set' in gradeable:
+                self.peer_grade_set = gradeable['eg_peer_grade_set']
+            if 'eg_peer_grading_pairs' in gradeable:
+                self.peer_grading_pairs = gradeable['eg_peer_grading_pairs']    
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_student_view' in gradeable:
@@ -1682,6 +1686,8 @@ class Component(object):
 
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
+        if 'gc_is_peer' in component:
+            self.is_peer = component['gc_is_peer']
         if 'gc_student_comment' in component:
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:
