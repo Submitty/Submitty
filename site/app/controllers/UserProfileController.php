@@ -32,7 +32,7 @@ class UserProfileController extends AbstractController {
      * @return MultiResponse
      */
     public function showUserProfile() {
-        $this->core->getOutput()->addBreadcrumb("My Account");
+        $this->core->getOutput()->addBreadcrumb("My Profile");
         return new MultiResponse(
             null,
             new WebResponse(

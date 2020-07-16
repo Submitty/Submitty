@@ -2,8 +2,6 @@
 
 namespace app\controllers;
 
-use app\authentication\DatabaseAuthentication;
-use app\libraries\DateUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;

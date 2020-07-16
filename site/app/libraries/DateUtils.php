@@ -173,8 +173,8 @@ class DateUtils {
 
         // sort the list with respect to UTC offset
         usort($available_time_zones, function ($tz1, $tz2) {
-            $offset1 = floatval(DateUtils::getUTCOffset($tz1));
-            $offset2 = floatval(DateUtils::getUTCOffset($tz2));
+            $offset1 = intval(str_replace(":", "", DateUtils::getUTCOffset($tz1)));
+            $offset2 = intval(str_replace(":", "", DateUtils::getUTCOffset($tz2)));
             return $offset1 === $offset2 ? 0 : ($offset2 > $offset1 ? 1 : -1);
         });
         // Attach the UTC offset value
