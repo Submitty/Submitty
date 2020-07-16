@@ -372,7 +372,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1011 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_filesubmission
@@ -393,7 +394,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1012 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_itempool
@@ -414,7 +416,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1012 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_itempool_random
@@ -435,7 +438,8 @@ gradeables:
   g_grade_start_date: +1005 days
   g_grade_due_date: +1010 days
   g_grade_released_date: +1010 days
-  eg_regrade_request_date: +1015 days
+  eg_grade_inquiry_start_date: +1012 days
+  eg_grade_inquiry_due_date: +1015 days
   eg_max_random_submissions: 0
 
 - gradeable_config: notebook_time_limit
