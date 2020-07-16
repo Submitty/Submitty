@@ -5,6 +5,7 @@ import subprocess
 import os
 import glob
 import shutil
+import traceback
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
@@ -30,7 +31,7 @@ def cleanup(test):
         shutil.rmtree(os.path.join(test.testcase_path,"data"))
     except Exception:
         pass
-    
+
     os.mkdir(os.path.join(test.testcase_path, "data"))
     os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     os.mkdir(os.path.join(test.testcase_path, "data", "part1"))
@@ -47,7 +48,11 @@ def cleanup(test):
 def schema_validation(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    test.validate_complete_config(config_path)
+    try:
+        test.validate_complete_config(config_path)
+    except Exception:
+        traceback.print_exc()
+        raise
 
 @testcase
 def python2(test):
@@ -61,7 +66,7 @@ def python2(test):
     test.diff("grade.txt", "grade.txt_python2", "-b")
     test.json_diff("results.json", "results.json_python2")
 
-    
+
 @testcase
 def python3(test):
     cleanup(test)

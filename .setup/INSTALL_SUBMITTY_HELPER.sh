@@ -27,6 +27,11 @@ set -e
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 CONF_DIR=${THIS_DIR}/../../../config
 
+VAGRANT=0
+if [ -d ${THIS_DIR}/../.vagrant ]; then
+    VAGRANT=1
+fi
+
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
@@ -820,18 +825,24 @@ fi
 ################################################################################################################
 ################################################################################################################
 # confirm permissions on the repository (to allow push updates from primary to worker)
-echo "Preparing to update Submitty installation on worker machines"
 if [ "${WORKER}" == 1 ]; then
     # the supervisor user/group must have write access on the worker machine
+    echo -e -n "Update/confirm worker repository permissions"
     chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    # in order to update the submitty source files on the worker machines
-    # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
-    chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
-    chmod -R g+r ${SUBMITTY_REPOSITORY}
+    if [ ${VAGRANT} == 0 ]; then
+        # in order to update the submitty source files on the worker machines
+        # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
+        echo -e -n "Update/confirm primary repository permissions"
+        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
+        chmod -R g+r ${SUBMITTY_REPOSITORY}
+    fi
 
     # Update any foreign worker machines
-    echo -e -n "Updating worker machines\n\n"
-    sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    echo -e -n "Update workers and install autograding docker images on primary and worker machines"
+    # note: unbuffer the output (python3 -u), since installing docker images takes a while
+    #       and we'd like to watch the progress
+    sudo -H -u ${DAEMON_USER} python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    echo -e -n "Done updating workers and installing docker images\n\n"
 fi

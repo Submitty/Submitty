@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 from typing import Set
+import subprocess
 
 from sqlalchemy.exc import OperationalError
 
@@ -420,3 +421,45 @@ def run_migration(database, migration, environment, args):
                 database.migration_table(id=migration['id'], status=status)
             )
         database.session.commit()
+
+
+def dump(args):
+    if args.config.database['database_driver'] != 'psql':
+        raise SystemExit('Cannot dump schema for non-postgresql database')
+
+    data_dir = Path(args.path) if 'path' in args else Path(__file__).resolve().parent
+    data_dir /= 'data'
+
+    if 'master' in args.environments:
+        out_file = data_dir / 'submitty_db.sql'
+        print(f'Dumping master environment to {str(out_file)}... ', end='')
+        out = subprocess.check_output([
+            'su',
+            '-',
+            'postgres',
+            '-c',
+            'pg_dump -d submitty --schema-only --no-privileges --no-owner'
+        ], universal_newlines=True)
+
+        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
+        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
+        out_file.write_text(out)
+        print('DONE')
+
+    if 'course' in args.environments:
+        out_file = data_dir / 'course_tables.sql'
+        print(f'Dumping course environment to {str(out_file)}... ', end='')
+        today = datetime.today()
+        semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
+
+        out = subprocess.check_output([
+            'su',
+            '-',
+            'postgres',
+            '-c',
+            f'pg_dump -d submitty_{semester}_sample --schema-only --no-privileges --no-owner'
+        ], universal_newlines=True)
+        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
+        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
+        out_file.write_text(out)
+        print('DONE')

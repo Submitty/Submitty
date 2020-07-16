@@ -19,6 +19,10 @@
 # If you don't want any submissions to be automatically generated for the courses created
 # by vagrant, you'll want to specify NO_SUBMISSIONS flag.
 
+# Don't buffer output.
+$stdout.sync = true
+$stderr.sync = true
+
 extra_command = ''
 if ENV.has_key?('NO_SUBMISSIONS')
     extra_command << '--no_submissions '

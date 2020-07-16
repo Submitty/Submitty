@@ -91,8 +91,7 @@ $(document).ready(function () {
     };
 
     ajaxCheckBuildStatus();
-
-    $('input,select,textarea').change(function () {
+    $('input:not(#random_peer_graders_list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
@@ -455,7 +454,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
                 else {
                     alert('Internal server error');
-                    console.error(response.status);
+                    console.error(response);
                 }
             },
             error: function (response) {

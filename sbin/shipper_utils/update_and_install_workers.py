@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 -u
 
 import os
 from os import path
@@ -34,8 +34,6 @@ def install_worker(user, host):
 # ==================================================================================
 # Tells a worker to update it's docker container dependencies
 def update_docker_images(user, host, worker, autograding_workers, autograding_containers):
-    
-    print('updating docker images')
     images_to_update = set()
     worker_requirements = autograding_workers[worker]['capabilities']
 
@@ -153,6 +151,9 @@ if __name__ == "__main__":
     submitty_repository = submitty_config['submitty_repository']
 
     for worker, stats in autograding_workers.items():
+
+        print(f"Update machine: {worker}")
+
         user = stats['username']
         host = stats['address']
         enabled = stats['enabled']
@@ -179,3 +180,5 @@ if __name__ == "__main__":
 
         # Install new docker containers for everyone.
         update_docker_images(user, host, worker, autograding_workers, autograding_containers)
+
+        print (f"finished updating machine: {worker}")
