@@ -32,7 +32,7 @@ def install_worker(user, host):
     return run_commands_on_worker(user, host, [command,], 'installation' )
 
 # ==================================================================================
-# Tells a worker to update it's docker container dependencies
+# Tells a worker to update its docker container dependencies
 def update_docker_images(user, host, worker, autograding_workers, autograding_containers):
     images_to_update = set()
     worker_requirements = autograding_workers[worker]['capabilities']
@@ -128,6 +128,51 @@ def parse_arguments():
     parser.add_argument("--docker_images", action="store_true", default=False, help="When specified, only update docker images." )
     return parser.parse_args()
 
+
+def update_machine(worker,stats,args):
+
+    print(f"Update machine: {worker}")
+
+    user = stats['username']
+    host = stats['address']
+    enabled = stats['enabled']
+    primary = worker == 'primary' or host == 'localhost'
+
+    if not enabled:
+        print(f"Skipping update of {worker} because it is disabled.")
+        return False
+
+    print(f"Stop workers on {worker}...")
+    if not primary and not args.docker_images:
+        exit_code = run_systemctl_command(worker, 'stop')
+        if exit_code != 0:
+            print ("ERROR: Failed to stop workers on {worker}")
+            #return False
+        
+    # We don't have to update the code for the primary machine or docker_images is specified. 
+    if not primary and not args.docker_images:
+        print("copy Submitty source code...")
+        copy_code_to_worker(worker, user, host, submitty_repository)
+        print("beginning installation...")
+        success = install_worker(user, host)
+        if success == False:
+            print ("ERROR: Failed to install Submitty software update on {worker}")
+            #return False
+
+    # Install/update docker containers
+    # do this before restarting the workers
+    update_docker_images(user, host, worker, autograding_workers, autograding_containers)
+    
+    if not primary and not args.docker_images:
+        print(f"Restart workers {worker}...")
+        exit_code = run_systemctl_command(worker, 'start')
+        if exit_code != 0:
+            print (f"ERROR: Failed to start workers on {worker}")
+            #return False
+
+    print (f"finished updating machine: {worker}")
+    return True
+
 if __name__ == "__main__":
 
     # verify the DAEMON_USER is running this script
@@ -150,35 +195,11 @@ if __name__ == "__main__":
 
     submitty_repository = submitty_config['submitty_repository']
 
+    print("-------------------------------------------------------")
     for worker, stats in autograding_workers.items():
-
-        print(f"Update machine: {worker}")
-
-        user = stats['username']
-        host = stats['address']
-        enabled = stats['enabled']
-        primary = worker == 'primary' or host == 'localhost'
-
-        if not enabled:
-            print(f"Skipping update of {worker} because it is disabled.")
-            continue
-        
-        # We don't have to update the code for the primary machine or docker_images is specified. 
-        if not primary and not args.docker_images:
-            copy_code_to_worker(worker, user, host, submitty_repository)
-
-            print("beginning installation...")
-            success = install_worker(user, host)
-            if success == True:
-                print(f"Installed Submitty on {worker}")
-                print(f"Restart workers {worker}...")
-                exit_code = run_systemctl_command(worker, 'start')
-            else:
-                print(f"Failed to update {worker}. This likely indicates an error when installing submitty on the worker. Please attempt an install locally on the worker and inspect for errors.")
-                exit_code = run_systemctl_command(worker, 'stop')
-            print()
-
-        # Install new docker containers for everyone.
-        update_docker_images(user, host, worker, autograding_workers, autograding_containers)
-
-        print (f"finished updating machine: {worker}")
+        success = update_machine(worker,stats,args)
+        if success == False:
+            print (f"FAILURE TO update machine {worker}")
+        else:
+            print (f"SUCCESS updating machine {worker}")
+        print("-------------------------------------------------------")

@@ -61,6 +61,9 @@ def perform_systemctl_command_on_all_workers(daemon, mode):
     # Don't run on local machines
     if target == 'primary' or WORKERS[target]['address'] == 'localhost':
       continue
+    if WORKERS[target]['enabled'] == False:
+        print (f"skip {target}")
+        continue
     status = perform_systemctl_command_on_worker(daemon, mode, target)
     print_status_message(status, mode, daemon, target)
     verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=True)
@@ -163,8 +166,9 @@ def main(daemon, target, mode):
   status_command = 'sudo systemctl is-active submitty_autograding_{0}'.format(daemon)
   
   if local:
-    # If running locally, verify we are running usin sudo.
+    # If running locally, verify we are running using sudo.
     if not int(os.getuid()) == 0:
+      print (f"SYSTEMCTL WRAPPER getuid= {os.getuid()}")
       print("ERROR: If running locally, this script must be run using sudo")
       sys.exit(EXIT_CODES['failure'])
     #we always run the status command, regardless of what was passed in. If a command other than
