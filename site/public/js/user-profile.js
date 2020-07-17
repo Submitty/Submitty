@@ -124,6 +124,10 @@ function updateUserProfilePhoto () {
         if (data.image_data && data.image_mime_type) {
           updated_element = `<img src="data:${data.image_mime_type};base64,${data.image_data}" alt="${data.image_alt_data}"/>`;
         }
+        // check whether the image flag status is updated
+        data.image_flagged_state === "flagged" ?
+          $("#flagged-message").addClass("show")
+          : $("#flagged-message").removeClass("show");
         $(".user-img-cont").html(updated_element);
       } else {
         displayErrorMessage(response.message);
@@ -146,6 +150,10 @@ $(document).ready(function() {
         updateTheme();
     });
 
+    if ($('#flagged-message').data('flagged') === "flagged") {
+      $('#flagged-message').addClass('show');
+    }
+
     // Populate the time zone selector box with options
     let availableTimeZones = getAvailableTimeZones();
     availableTimeZones.forEach(function(elem) {
@@ -156,12 +164,6 @@ $(document).ready(function() {
         let timeZoneWithOffset = $(this).children('option:selected').val();
         // extract out the time_zone from the timezone with utc offset
         let time_zone = timeZoneWithOffset === "NOT_SET/NOT_SET" ? timeZoneWithOffset : timeZoneWithOffset.split(') ')[1];
-        // If user didnt select any specific area its value will be null and in this case we will not make API call
-        // if (specific_area === "null") {
-        //   // display error message or just return without informing the user?
-        //   displayErrorMessage("Please select a specific area.");
-        //   return;
-        // }
 
         $.getJSON({
             type: "POST",

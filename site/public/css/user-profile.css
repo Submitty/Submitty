@@ -65,6 +65,14 @@
     margin-bottom: 20px;
 }
 
+#flagged-message {
+    display: none;
+}
+
+#flagged-message.show {
+    display: inline;
+}
+
 #basic_info span:first-of-type, #time_zone_selector_label a {
     margin-right: 15px;
 }

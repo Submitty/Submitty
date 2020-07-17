@@ -155,6 +155,7 @@ class UserProfileController extends AbstractController {
                     'image_data' => !is_null($display_image) ? $display_image->getImageBase64MaxDimension(200) : '',
                     'image_mime_type' => !is_null($display_image) ? $display_image->getMimeType() : '',
                     'image_alt_data' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                    'image_flagged_state' => $user->getDisplayImageState(),
                 ]);
             }
         }
