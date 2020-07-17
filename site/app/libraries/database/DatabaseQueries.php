@@ -680,7 +680,7 @@ WHERE status = 1"
 
     public function getPost($post_id) {
         $this->course_db->query("SELECT * FROM posts where id = ?", [$post_id]);
-        return $this->course_db->row();
+        return $this->course_db->rows()[0];
     }
 
     public function removeNotificationsPost($post_id) {
@@ -763,7 +763,7 @@ WHERE status = 1"
 
     public function getThreadTitle($thread_id) {
         $this->course_db->query("SELECT title FROM threads where id=?", [$thread_id]);
-        return $this->course_db->row()['title'];
+        return $this->course_db->rows()[0];
     }
 
     public function setAnnouncement($thread_id, $onOff) {
@@ -4129,8 +4129,6 @@ AND gc_id IN (
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
-                  eg_peer_grading AS peer_grading,
-                  eg_peer_grade_set AS peer_grade_set,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
@@ -4816,15 +4814,13 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
-                  eg_peer_grading,
-                  eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -4934,8 +4930,6 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    $gradeable->isPeerGrading(),
-                    $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     $gradeable->isRegradeAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
@@ -4964,8 +4958,6 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
-                      eg_peer_grading=?,
-                      eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
