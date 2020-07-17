@@ -412,6 +412,9 @@ class HomeworkView extends AbstractView {
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
 
+        // Import autosave utility functions
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
+
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));

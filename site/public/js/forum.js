@@ -184,6 +184,9 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 $('#messages').append(message);
                 return;
             }
+            // Now that we've successfully submitted the form, clear autosave data
+            cancelDeferredSave(autosaveKeyFor(form));
+            clearReplyBoxAutosave(form);
 
             var course = document.body.dataset.courseUrl.split('/').pop();
             var thread_id = json['data']['thread_id'];
@@ -200,6 +203,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
               var max_post_box_id = Math.max.apply(Math, post_box_ids);
               window.socketClient.send({'course': course, 'type': "new_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': max_post_box_id});
             }
+
             window.location.href = json['data']['next_page'];
         },
         error: function(){
@@ -1718,6 +1722,7 @@ function loadThreadHandler(){
                 window.history.pushState({"pageTitle":document.title},"", url);
 
                 enableTabsInTextArea('.post_content_reply');
+                setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
                 $(".post_reply_form").submit(publishPost);
@@ -1919,6 +1924,137 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
         }
     });
 }
+
+function autosaveKeyFor(replyBox) {
+    const parent = $(replyBox).children('[name=parent_id]').val();
+    // Having `reply-to-undefined` in the key is sorta gross and might cause
+    // false positive bug reports. Let's avoid that.
+    if (parent !== undefined) {
+        return `${window.location.pathname}-reply-to-${parent}-forum-autosave`;
+    } else {
+        return `${window.location.pathname}-create-thread-forum-autosave`;
+    }
+}
+
+function saveReplyBoxToLocal(replyBox) {
+    const inputBox = $(replyBox).find("textarea.thread_post_content");
+    if (autosaveEnabled && inputBox.val()) {
+        const anonCheckbox = $(replyBox).find("input.thread-anon-checkbox");
+        const post = inputBox.val();
+        const isAnonymous = anonCheckbox.prop("checked");
+        localStorage.setItem(autosaveKeyFor(replyBox), JSON.stringify({
+            timestamp: Date.now(),
+            post,
+            isAnonymous
+        }));
+    }
+}
+
+function restoreReplyBoxFromLocal(replyBox) {
+    if (autosaveEnabled) {
+        const json = localStorage.getItem(autosaveKeyFor(replyBox));
+        if (json) {
+            const { post, isAnonymous } = JSON.parse(json);
+            $(replyBox).find("textarea.thread_post_content").val(post);
+            $(replyBox).find("input.thread-anon-checkbox").prop("checked", isAnonymous);
+        }
+    }
+}
+
+function clearReplyBoxAutosave(replyBox) {
+    if (autosaveEnabled) {
+        localStorage.removeItem(autosaveKeyFor(replyBox));
+    }
+}
+
+function setupForumAutosave() {
+    // Include both regular reply boxes on the forum as well as the "reply" box
+    // on the create thread page.
+    $("form.reply-box, form.post_reply_form, #thread_form").each((_index, replyBox) => {
+        restoreReplyBoxFromLocal(replyBox);
+        $(replyBox).find("textarea.thread_post_content").on('input',
+            () => deferredSave(autosaveKeyFor(replyBox), () => saveReplyBoxToLocal(replyBox), 1)
+        );
+        $(replyBox).find("input.thread-anon-checkbox").change(() => saveReplyBoxToLocal(replyBox));
+    });
+}
+
+const CREATE_THREAD_DEFER_KEY = `create-thread`;
+const CREATE_THREAD_AUTOSAVE_KEY = `${window.location.pathname}-create-autosave`;
+
+function saveCreateThreadToLocal() {
+    if (autosaveEnabled) {
+        const title = $("#title").val();
+        const categories = $("div.cat-buttons.btn-selected").get().map(e => e.innerText);
+        const status = $("#thread_status").val();
+        const data = {
+            timestamp: Date.now(),
+            title,
+            categories,
+            status
+        };
+
+        // These fields don't always show up
+        const lockDate = $("#lock_thread_date").val();
+        if (lockDate !== undefined) {
+            data.lockDate = lockDate;
+        }
+        const isAnnouncement = $("#Announcement").prop("checked");
+        if (isAnnouncement !== undefined) {
+            data.isAnnouncement = isAnnouncement;
+        }
+        const pinThread = $("#pinThread").prop("checked");
+        if (pinThread !== undefined) {
+            data.pinThread = pinThread;
+        }
+
+        localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify(data));
+    }
+}
+
+function restoreCreateThreadFromLocal() {
+    if (autosaveEnabled) {
+        const json = localStorage.getItem(CREATE_THREAD_AUTOSAVE_KEY);
+        if (!json) {
+            return;
+        }
+
+        const data = JSON.parse(json);
+        const { title, categories, status } = data;
+        $("#title").val(title);
+        $("#thread_status").val(status);
+        $("div.cat-buttons").each((_i, e) => {
+            if (categories.includes(e.innerText)) {
+                e.classList.add("btn-selected");
+                $(e).find("input[type='checkbox']").prop("checked", true);
+            } else {
+                e.classList.remove("btn-selected");
+                $(e).find("input[type='checkbox']").prop("checked", false);
+            }
+            $(e).trigger("eventChangeCatClass");
+        });
+
+        // Optional fields
+        if (data.hasOwnProperty('lockDate')) {
+            $("#lock_thread_date").val(data.lockDate);
+        }
+        if (data.hasOwnProperty('isAnnouncement')) {
+            $("#Announcement").prop("checked", data.isAnnouncement);
+        }
+        if (data.hasOwnProperty('pinThread')) {
+            $("#pinThread").prop("checked", data.pinThread);
+        }
+    }
+}
+
+function clearCreateThreadAutosave() {
+    localStorage.removeItem(CREATE_THREAD_AUTOSAVE_KEY);
+}
+
+$(() => {
+    cleanupAutosaveHistory('-forum-autosave');
+    setupForumAutosave();
+});
 
 //When the user uses tab navigation on the thread list, this function
 //helps to make sure the current thread is always visible on the page
