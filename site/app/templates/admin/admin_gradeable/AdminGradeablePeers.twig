@@ -1,4 +1,4 @@
- <p align="right"><input type="button" class="btn btn-primary key_to_click ignore" id="peer-settings" onclick="toggleControls()" value="Settings"></input></p>
+ <p align="right"><input type="button" class="btn btn-primary key_to_click ignore" id="peer-settings" onclick="toggleControls()" value="Options"></input></p>
  <div id="peer-control" class="hide">
     <h1> Options for Peer Matrix </h1>
     <div class="row">
@@ -21,8 +21,9 @@
         <div class="content"style="margin:0px">
         <p align="justify">Other Controls: </p>
         <div class="btn-wrapper" >
-            <input type="button" name="all_grade_all" class="btn btn-default key_to_click" id="all_grade_all" tabindex="0" value="All grade All"></input>
-            <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix"></input>
+            <input type="button" name="all_grade_all" class="btn btn-default key_to_click ignore" id="all_grade_all" tabindex="0" value="All grade All"></input>
+            <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click ignore" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix"></input>
+            <input type="button" name="download_peer_csv" class="btn btn-default key_to_click ignore" id="download_peer_csv" tabindex="0" value="Download Peer CSV" onclick="downloadPeerDataAsCsv('peer-table')"></input>
         </div>
         <br>
         </div>
@@ -200,4 +201,32 @@
         $("#peer-table").on("click", ".fa-pencil-alt", adminGradeablePeerForm);
         $('#admin-gradeable-peers-form').on("change", ":text", checkSubmitValid);
     });
+    function downloadPeerDataAsCsv(table_id) {
+    // Select rows from table_id
+    var rows = document.querySelectorAll('table#' + table_id + ' tr');
+    // Construct csv
+    var csv = [];
+    for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll('td, th');
+        for (var j = 0; j < cols.length-1; j++) {
+            // Clean innertext to remove multiple spaces and jumpline (break csv)
+            var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+            data = data.replace(" ", '\n'+cols[0].innerText+",");
+            row.push(data);
+        }
+        csv.push(row.join(','));
+    }
+    var csv_string = csv.join('\n');
+    // Download it
+    var filename = 'peer_assign_data' + table_id + '_' + new Date().toLocaleDateString() + '.csv';
+    var link = document.createElement('a');
+    link.style.display = 'none';
+    link.setAttribute('target', '_blank');
+    link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
+
