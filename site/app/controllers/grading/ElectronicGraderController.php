@@ -966,7 +966,8 @@ class ElectronicGraderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false, $showNewInterface = true) {
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false, $version = null) {
+        $showNewInterface = isset($version);
         $anon_mode = false;
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
