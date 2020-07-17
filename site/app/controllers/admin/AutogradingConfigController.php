@@ -233,7 +233,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode}", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
      * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
      * notebook builder know to save a new configuration or edit the existing one
