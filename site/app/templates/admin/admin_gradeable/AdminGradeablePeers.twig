@@ -37,7 +37,7 @@
                 <thead>
                     <tr>
                         <th>Grader</th>
-                        <th>Student</th>
+                        <th>Students</th>
                         <th>Edit Students</th>
                     </tr>
                 </thead>
@@ -206,8 +206,10 @@
     var rows = document.querySelectorAll('table#' + table_id + ' tr');
     // Construct csv
     var csv = [];
-    for (var i = 0; i < rows.length; i++) {
-        var row = [], cols = rows[i].querySelectorAll('td, th');
+    header=['grader','student'];
+    csv.push(header.join(','));
+    for (var i = 1; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll('td');
         for (var j = 0; j < cols.length-1; j++) {
             // Clean innertext to remove multiple spaces and jumpline (break csv)
             var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
@@ -219,7 +221,7 @@
     }
     var csv_string = csv.join('\n');
     // Download it
-    var filename = $('#g_id').val()+'_'+peer_assign_data' + '_' + new Date().toLocaleDateString() + '.csv';
+    var filename = $('#g_id').val()+'_'+'peer_assign_data' + '_' + new Date().toLocaleDateString() + '.csv';
     var link = document.createElement('a');
     link.style.display = 'none';
     link.setAttribute('target', '_blank');
