@@ -20,6 +20,11 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('pgsql:dbname=submitty', $database->getDSN());
     }
 
+    public function testPostgresqlUnixSocket() {
+        $database = new PostgresqlDatabase(['host' => '/var/run/postgresql', 'port' => 5432]);
+        $this->assertEquals('pgsql:host=/var/run/postgresql', $database->getDSN());
+    }
+
     public function arrayData() {
         return [
             ['{}', []],
