@@ -414,9 +414,7 @@ class Access {
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading() && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
-                        &&
-                        !($group === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
+                        !((($group === User::GROUP_STUDENT && $gradeable->isPeerGrading()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
