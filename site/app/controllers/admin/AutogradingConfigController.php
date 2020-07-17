@@ -240,21 +240,18 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilder(string $g_id, string $mode) {
-        $gradeable = null;
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
         }
         catch (\Exception $exception) {
-            // Pass
+            return new RedirectResponse($this->core->buildUrl());
         }
 
-        // Redirect home if attempting to start notebook builder with invalid state
-        // Mostly only possible if attempting to access by manually setting invalid url parameters
-        $valid_mode = in_array($mode, ['new', 'edit']);
-        $invalid_state = $gradeable && $gradeable->isUsingDefaultConfig() && $mode === 'edit';
-        if (!$valid_mode || $invalid_state) {
-            $this->core->addErrorMessage('Invalid settings used when attempting to start Notebook Builder.');
-            return new RedirectResponse($this->core->buildUrl());
+        $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
+
+        if ($gradeable->isUsingDefaultConfig() && $mode === 'edit') {
+            $this->core->addErrorMessage("You may not edit a provided configuration.  Press the 'Start New' button to start a new configuration instead.");
+            return new RedirectResponse($failure_url);
         }
 
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
@@ -268,8 +265,8 @@ class AutogradingConfigController extends AbstractController {
         $config_string = json_encode($config_string);
 
         if ($config_string === 'null') {
-            $this->core->addErrorMessage('Notebook Builder failure attempting to load configuration.');
-            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1');
+            $this->core->addErrorMessage('Failure attempting to load the current configuration.');
+            return new RedirectResponse($failure_url);
         }
 
         $config_string = Utils::escapeDoubleQuotes($config_string);
