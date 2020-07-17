@@ -278,6 +278,7 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/image-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
@@ -351,4 +352,14 @@ class AutogradingConfigController extends AbstractController {
         $admin_gradeable_controller = new AdminGradeableController($this->core);
         $admin_gradeable_controller->enqueueBuild($gradeable);
     }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/notebook_builder/file", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function notebookBuilderFile(): JsonResponse {}
+
+    private function notebookBuilderFileUpload() {}
+
+    private function notebookBuilderFileDelete() {}
 }
