@@ -1,6 +1,11 @@
 <div class="content">
-    {% if hasInstructorPermission %}
+    {% if has_full_access %}
         <div style="float: right; margin-bottom: 20px;">
+            {% if view == 'all' and has_sections %}
+                <a class="btn btn-primary" tabindex="0" href="{{ student_photos_url ~ '?view=sections' }}">View Your Sections</a>
+            {% elseif has_sections %}
+                <a class="btn btn-primary" tabindex="0" href="{{ student_photos_url ~ '?view=all' }}">View All Sections</a>
+            {% endif %}
             <a onclick="newUploadImagesForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Student Photos</a>
         </div>
     {% endif %}
@@ -18,21 +23,21 @@
                     {% if loop.index % 5 == 1 %}
                         <tr>
                     {% endif %}
-                        <td>
+                        <td class="{{ student.getId() }}-image-container">
                             {% set image = student.getDisplayImage() %}
                             {% if image is not null %}
-                                {{ base64_image(image.getImageBase64MaxDimension(200), image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
+                                {{ base64_image(image.getImageBase64MaxDimension(constant('app\\views\\grading\\ImagesView::IMG_MAX_DIMENSION')), image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
                             {% else %}
                                 <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                             {% endif %}
                             <div class="name">
                                 <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                                 <br />{{student.getId()}}
-                                {% if hasInstructorPermission %}
+                                {% if has_full_access %}
                                     {% if student.getDisplayImageState() == 'preferred' %}
-                                        <a href="javascript:flagUserImage('{{ student.getId() }}', true)"><i class="fas fa-flag"></i></a>
+                                        <a href="javascript:flagUserImage('{{ student.getId() }}', true)">{{ constant('app\\views\\grading\\ImagesView::FLAG_ICON_HTML') | raw  }}</a>
                                     {% elseif student.getDisplayImageState() == 'flagged' %}
-                                        <a href="javascript:flagUserImage('{{ student.getId() }}', false)"><i class="fas fa-undo"></i></a>
+                                        <a href="javascript:flagUserImage('{{ student.getId() }}', false)">{{ constant('app\\views\\grading\\ImagesView::UNDO_ICON_HTML') | raw }}</a>
                                     {% endif %}
                                 {% endif %}
                             </div>

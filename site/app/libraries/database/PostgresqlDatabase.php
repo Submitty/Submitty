@@ -6,7 +6,6 @@ class PostgresqlDatabase extends AbstractDatabase {
     protected $host;
     protected $port;
     protected $dbname;
-    protected $unix_socket;
 
     /**
      * @inheritdoc
@@ -36,7 +35,8 @@ class PostgresqlDatabase extends AbstractDatabase {
         if ($this->host !== null) {
             $params[] = "host={$this->host}";
         }
-        if ($this->port !== null) {
+
+        if ($this->port !== null && ($this->host === null || $this->host[0] !== '/')) {
             $params[] = "port={$this->port}";
         }
 
