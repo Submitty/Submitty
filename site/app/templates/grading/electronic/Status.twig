@@ -606,16 +606,17 @@
                                 <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                                 <br/>
                                 <br/>
-                                <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                                <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ ta_graded_percentage }}%)
                             {% endif %}
                         
                             <br/>
                             <br/>
                         {% endif %}
-                        {# To be used when functionality to view peer data in instructor view is to be added 
+                        {# To be used when functionality to view peer data in instructor view is to be added #}
                         {% if peer %}
-                        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
-                        {% endif %} #}
+                        <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})
+                        <br>
+                        {% endif %} {##}
                             <b>TA Grading By Grading Sections:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
