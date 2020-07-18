@@ -325,13 +325,20 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
       return false;} 
     }
     var gradeable_id=$('#g_id').val();
+    var restrict_to_registration="unchecked";
     $('#peer_loader').removeClass("hide");
+    if($('#restrict_to_registration').is(':checked')){
+        restrict_to_registration="checked";
+    }
+        
     $.ajax({
         type: "POST", 
         url: buildCourseUrl(['gradeable', gradeable_id, 'RandomizePeers']),
-        data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade},
+        data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade,restrict_to_registration:restrict_to_registration},
         success: function(response){
+            console.log(response);
             let res=JSON.parse(response);
+            console.log(res);
             if (res.data === "Invalid Number of Students Entered") {
                 confirm("Do you Want to go with ALL grade ALL?");
             }
@@ -364,7 +371,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
             }
             alert("error occured"+msg);
         }
-    });
+    }); 
 }
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     if('peer_graders_list' in p_values && $('#peer_graders_list').length){

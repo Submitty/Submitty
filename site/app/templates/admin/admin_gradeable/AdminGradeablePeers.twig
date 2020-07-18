@@ -1,5 +1,4 @@
- <p align="right"><input type="button" class="btn btn-primary key_to_click ignore" id="peer-settings" onclick="toggleControls()" value="Options"></input></p>
- <div id="peer-control" class="hide">
+<div id="peer-control">
     <h1> Options for Peer Matrix </h1>
     <div class="row">
     <div class="card col-md-6" style="margin:0px">
@@ -9,6 +8,7 @@
     <div class="card col-md-6" style="margin:0px">
         <div class="content" style="margin:0px">Enter number of peers for one student to grade and randomly assign peer grading in class. <br>
             <hr>
+            <input type="checkbox" class="ignore" name="restrict_to_registration" id="restrict_to_registration" value="Restrict to Registration Sections">Restrict to Registration Sections</input>
             <div class="btn-container" >
                 <input type="text" id="number_to_peer_grade" placeholder="Number of Students">
                 <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate"></input>
@@ -70,12 +70,7 @@
         var form = $("#admin-gradeable-peers-form");
         $('#edit_user_id_'+i+'', form).remove();
     }
-    function toggleControls(){
-        if($('#peer-control').hasClass("hide")){
-            $('#peer-control').removeClass("hide");
-        }
-        else {$('#peer-control').addClass("hide");}
-    }
+    
 
     function addNewStudent() {
         let form = $("#admin-gradeable-peers-form");
