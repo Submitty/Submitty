@@ -316,6 +316,7 @@ class ForumThreadView extends AbstractView {
             $activeThreadTitle = "";
             $activeThread = [];
             $displayThreadContent = $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds, false);
+//                var_dump($activeThread);
 
             if (count($activeThread) == 0) {
                 $activeThread = $this->core->getQueries()->getThread($currentThread);
@@ -595,7 +596,20 @@ class ForumThreadView extends AbstractView {
         return $str;
     }
 
-    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render) {
+    public function showFullThreadsPage($threads, $category_ids) {
+        $activeThreadAnnouncements = [];
+        $activeThreadTitle = "";
+        $activeThread = [];
+        $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
+        // add css and js files
+        $this->core->getOutput()->addInternalCss("forum.css");
+        $this->core->getOutput()->addInternalJs("forum.js");
+        return $this->core->getOutput()->renderTwigTemplate("forum/showFullThreadsPage.twig", [
+            "thread_content" => $thread_content["thread_content"],
+        ]);
+    }
+
+    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $isFullPage = false) {
         $used_active = false; //used for the first one if there is not thread_id set
         $current_user = $this->core->getUser()->getId();
         $display_thread_ids = $this->core->getUser()->getGroup() <= 2;
@@ -621,7 +635,7 @@ class ForumThreadView extends AbstractView {
                 $thread['status'] = 0;
             }
 
-            $class = "thread_box";
+            $class = $isFullPage ? "thread_box thread-box-full" : "thread_box";
             // $current_categories_ids should be subset of $thread["categories_ids"]
             $issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
             if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {

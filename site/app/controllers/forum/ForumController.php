@@ -852,6 +852,31 @@ class ForumController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
+     */
+    public function showFullThreads() {
+        // TODO add support for query params
+        // No filtering based on category id
+        $category_ids = [];
+        // No filtering of threads based opn thread status
+        $thread_status = [];
+        // Not used in the function
+        $max_threads = 0;
+        // DO not show deleted threads
+        $show_deleted = false;
+        // DO not show merged threads
+        $show_merged_thread = false;
+        // show all the threads and not just the unread threads
+        $unread_threads = false;
+        // use the default thread id
+        $thread_id = -1;
+        $pageNumber = 1;
+        $this->core->getOutput()->addBreadcrumb("Forum threads");
+        $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids);
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/forum/threads", methods={"GET"})
      * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */

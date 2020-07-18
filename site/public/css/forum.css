@@ -80,6 +80,7 @@
     padding:5px;
     overflow-y: auto;
     word-wrap: break-word;
+    align-items: stretch;
 }
 
 .thread_box h5{
@@ -596,4 +597,21 @@
 [data-theme="dark"] .create_thread_button,
 [data-theme="dark"] .well {
   box-shadow: none;
+}
+
+
+.thread-box-full {
+    padding: 10px 20px;
+    margin: 5px auto;
+}
+
+.content .thread_box_link {
+    text-decoration: none;
+    color: var(--text-black);
+}
+
+.thread-right-cont {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
