@@ -453,7 +453,7 @@ class ElectronicGraderController extends AbstractController {
                 $sections['peer_stu_grad'] = [
                    // Total peer components to grade = Number of peer components * Number of Students who submitted
                   // 'total_peer_components' =>
-                   'total_components' => count($gradeable->getPeerComponents()) * sizeof($num_submitted),
+                   'total_components' => count($gradeable->getPeerComponents()) * count($num_submitted),
                    // Graded Components = Sum of components graded by each peer grader in a class.
                    'graded_components' => $peer_graded_components,
                    'ta_graded_components' => 0,
