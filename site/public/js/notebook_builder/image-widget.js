@@ -10,10 +10,6 @@ class ImageWidget extends Widget {
     }
 
     render() {
-        if (this.dom_pointer) {
-            this.commitState();
-        }
-
         const container = this.getContainer('Image');
         container.classList.add('image-widget');
 
