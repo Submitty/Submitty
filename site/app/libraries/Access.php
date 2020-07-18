@@ -113,7 +113,7 @@ class Access {
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
         
-        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP;
+        $this->permissions["grading.electronic.status"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
         $this->permissions["grading.electronic.status.full"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.status.warnings"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.peer_panel"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_PEER_ASSIGNMENT_STUDENT;
@@ -414,7 +414,7 @@ class Access {
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
                         &&
                         //Students are allowed to see this if its a peer graded assignment
-                        !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
+                        !((($group === User::GROUP_STUDENT && $gradeable->isPeerGrading()) || $group === User::GROUP_LIMITED_ACCESS_GRADER) && $gradeable->getGradeStartDate() <= $this->core->getDateTimeNow())
                     ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
