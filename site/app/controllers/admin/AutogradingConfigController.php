@@ -272,6 +272,7 @@ class AutogradingConfigController extends AbstractController {
         $config_string = Utils::escapeDoubleQuotes($config_string);
 
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder-utils.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/form-options-widget.js');
@@ -357,9 +358,34 @@ class AutogradingConfigController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/notebook_builder/file", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function notebookBuilderFile(): JsonResponse {}
+    public function notebookBuilderFile(): JsonResponse {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
+        }
+        catch (\Exception $exception) {
+            return JsonResponse::getErrorResponse('Invalid gradeable ID.');
+        }
 
-    private function notebookBuilderFileUpload() {}
+        if ($_POST['operation'] === 'upload' && isset($_FILES) && isset($_FILES['file'])) {
+            return $this->notebookBuilderFileUpload($gradeable);
+        }
+
+        return JsonResponse::getErrorResponse('Something went wrong.');
+    }
+
+    private function notebookBuilderFileUpload(Gradeable $gradeable): JsonResponse {
+        $dependency_type = $_POST['dependency_type'];
+
+        // Create test_input or test_output directory if it doesn't exist
+        $test_input_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), "test_$dependency_type");
+        FileUtils::createDir($test_input_path);
+
+        // Move uploaded file
+        $full_path = FileUtils::joinPaths($test_input_path, $_FILES['file']['name']);
+        $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
+
+        return $move_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
+    }
 
     private function notebookBuilderFileDelete() {}
 }

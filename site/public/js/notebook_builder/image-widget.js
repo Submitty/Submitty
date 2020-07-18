@@ -22,10 +22,20 @@ class ImageWidget extends Widget {
         return container;
     }
 
-    commitState() {}
+    commitState() {
+        const height_input = this.dom_pointer.querySelector('.height-input');
+        height_input.value ? this.state.height = parseInt(height_input.value) : delete this.state.height;
+
+        const width_input = this.dom_pointer.querySelector('.width-input');
+        width_input.value ? this.state.width = parseInt(width_input.value) : delete this.state.width;
+
+        const alt_text_input = this.dom_pointer.querySelector('.alt-text-input');
+        alt_text_input.value ? this.state.alt_text = alt_text_input.value : delete this.state.alt_text;
+    }
 
     getJSON() {
         this.commitState();
+        return this.state;
     }
 
     load(data) {
@@ -40,19 +50,19 @@ class ImageWidget extends Widget {
             <div class="image-col-small">
                 <label>
                     Height:
-                    <input type="number" placeholder="Default">
+                    <input class="height-input" type="number" placeholder="Default" min="1">
                 </label>
             </div>
             <div class="image-col-small">
                 <label>
                     Width:
-                    <input type="number" placeholder="Default">
+                    <input class="width-input" type="number" placeholder="Default" min="1">
                 </label>
             </div>
             <div class="image-col-large">
                 <label>
-                    Description:
-                    <textarea placeholder="For accessibility, provide a short description of this image's contents."></textarea>
+                    Alternate Text:
+                    <textarea class="alt-text-input" placeholder="For accessibility, provide a short description of this image's contents."></textarea>
                 </label>
             </div>
         </div>`
@@ -73,8 +83,11 @@ class ImageWidget extends Widget {
 
         file_selector.addEventListener('change', event => {
             const f = event.target.files[0];
+            uploadFile(f, builder_data.g_id, 'input');
             reader.readAsDataURL(f);
         });
     }
+
+
 }
 
