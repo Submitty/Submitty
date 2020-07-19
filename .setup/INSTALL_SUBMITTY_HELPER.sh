@@ -38,9 +38,11 @@ SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 source ${THIS_DIR}/bin/versions.sh
 
 if [ ${WORKER} == 0 ]; then
-    DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+    ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+    RESTART_DAEMONS=( submitty_websocket_server submitty_daemon_jobs_handler )
 else
-    DAEMONS=( submitty_autograding_worker )
+    ALL_DAEMONS=( submitty_autograding_worker )
+    RESTART_DAEMONS=( )
 fi
 
 ########################################################################################################################
@@ -82,18 +84,6 @@ if [ $? -eq 1 ]; then
 fi
 set -e
 
-
-################################################################################################################
-################################################################################################################
-# REMEMBER IF THE ANY OF OUR DAEMONS ARE ACTIVE BEFORE INSTALLATION BEGINS
-# Note: We will stop & restart the daemons at the end of this script.
-#       But it may be necessary to stop the the daemons as part of the migration.
-set +e
-for i in "${DAEMONS[@]}"; do
-    systemctl is-active --quiet ${i}
-    declare is_${i}_active_before=$?
-done
-set -e
 
 ################################################################################################################
 ################################################################################################################
@@ -586,7 +576,6 @@ find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 #####################################
 # Obtain API auth token for submitty-admin user
 if [ "${WORKER}" == 0 ]; then
-
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 fi
 #####################################
@@ -626,8 +615,8 @@ chown root:root /etc/sudoers.d/submitty
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 #############################################################
-# stop the any of the submitty daemons (if they're running)
-for i in "${DAEMONS[@]}"; do
+# stop the submitty daemons (if they're running)
+for i in "${ALL_DAEMONS[@]}"; do
     set +e
     systemctl is-active --quiet ${i}
     is_active_now=$?
@@ -647,8 +636,8 @@ for i in "${DAEMONS[@]}"; do
 done
 
 if [ "${WORKER}" == 0 ]; then
-    # Stop all foreign worker daemons
-    echo -e -n "Stopping worker machine daemons...\n"
+    # Stop all workers on remote machines
+    echo -e -n "Stopping all remote machine workers...\n"
     sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "done"
 fi
@@ -679,7 +668,7 @@ fi
 #############################################################
 # update the various daemons
 
-for i in "${DAEMONS[@]}"; do
+for i in "${ALL_DAEMONS[@]}"; do
     # update the autograding shipper & worker daemons
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/${i}.service  /etc/systemd/system/${i}.service
     chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/${i}.service
@@ -738,23 +727,17 @@ fi
 # If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload
 
-# start the shipper daemon (if it was running)
-
-for i in "${DAEMONS[@]}"; do
-    is_active=is_${i}_active_before
-    if [[ "${!is_active}" == "0" ]]; then
-        systemctl start ${i}
-        set +e
-        systemctl is-active --quiet ${i}
-        is_active_after=$?
-        set -e
-        if [[ "$is_active_after" != "0" ]]; then
-            echo -e "\nERROR!  Failed to restart ${i}\n"
-        fi
-        echo -e "Restarted ${i}"
+# restart the socket & jobs handler daemons
+for i in "${RESTART_DAEMONS[@]}"; do
+    systemctl start ${i}
+    set +e
+    systemctl is-active --quiet ${i}
+    is_active_after=$?
+    set -e
+    if [[ "$is_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart ${i}\n"
     else
-        echo -e "\nNOTE: ${i} is not currently running\n"
-        echo -e "To start the daemon, run:\n   sudo systemctl start ${i}\n"
+        echo -e "Restarted ${i}"
     fi
 done
 
@@ -845,4 +828,10 @@ else
     #       and we'd like to watch the progress
     sudo -H -u ${DAEMON_USER} python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     echo -e -n "Done updating workers and installing docker images\n\n"
+
+    # Restart the shipper & workers
+    echo -e -n "Restart shipper & workers\n\n"
+    python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
+    echo -e -n "Done restarting shipper & workers\n\n"
+    
 fi

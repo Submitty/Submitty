@@ -94,10 +94,10 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
 
 # Rsynch the local (primary) codebase to a worker machine.
 def copy_code_to_worker(worker, user, host, submitty_repository):
-    exit_code = run_systemctl_command(worker, 'status')
+    exit_code = run_systemctl_command(worker, 'status', False)
     if exit_code == 1:
         print("ERROR: {0}'s worker daemon was active when before rsyncing began. Attempting to turn off.".format(worker))
-        exit_code = run_systemctl_command(worker, 'stop')
+        exit_code = run_systemctl_command(worker, 'stop', False)
         if exit_code != 0:
             print("Could not turn off {0}'s daemon. Please allow rsyncing to continue and then attempt another install.".format(worker))
 
@@ -115,7 +115,7 @@ def copy_code_to_worker(worker, user, host, submitty_repository):
 
 
 
-def run_systemctl_command(machine, command):
+def run_systemctl_command(machine, command, is_primary):
     command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
     process = subprocess.Popen(command)
     process.communicate()
@@ -129,48 +129,48 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def update_machine(worker,stats,args):
+def update_machine(machine,stats,args):
 
-    print(f"Update machine: {worker}")
+    print(f"UPDATE MACHINE: {machine}")
 
     user = stats['username']
     host = stats['address']
     enabled = stats['enabled']
-    primary = worker == 'primary' or host == 'localhost'
+    primary = machine == 'primary' or host == 'localhost'
 
     if not enabled:
-        print(f"Skipping update of {worker} because it is disabled.")
+        print(f"Skipping update of {machine} because it is disabled.")
         return False
 
-    print(f"Stop workers on {worker}...")
-    if not primary and not args.docker_images:
-        exit_code = run_systemctl_command(worker, 'stop')
-        if exit_code != 0:
-            print ("ERROR: Failed to stop workers on {worker}")
-            #return False
+    #print(f"Stop workers on {machine}...")
+    #if not args.docker_images:
+    #    exit_code = run_systemctl_command(machine, 'stop', primary)
+    #    if exit_code != 0:
+    #        print ("ERROR: Failed to stop workers on {machine}")
+    #        #return False
         
-    # We don't have to update the code for the primary machine or docker_images is specified. 
+    # We don't have to update the code for the primary machine or if docker_images is specified. 
     if not primary and not args.docker_images:
         print("copy Submitty source code...")
-        copy_code_to_worker(worker, user, host, submitty_repository)
+        copy_code_to_worker(machine, user, host, submitty_repository)
         print("beginning installation...")
         success = install_worker(user, host)
         if success == False:
-            print ("ERROR: Failed to install Submitty software update on {worker}")
+            print ("ERROR: Failed to install Submitty software update on {machine}")
             #return False
 
     # Install/update docker containers
     # do this before restarting the workers
-    update_docker_images(user, host, worker, autograding_workers, autograding_containers)
+    update_docker_images(user, host, machine, autograding_workers, autograding_containers)
     
-    if not primary and not args.docker_images:
-        print(f"Restart workers {worker}...")
-        exit_code = run_systemctl_command(worker, 'start')
-        if exit_code != 0:
-            print (f"ERROR: Failed to start workers on {worker}")
-            #return False
+    #if not args.docker_images:
+    #    print(f"Restart workers {machine}...")
+    #    exit_code = run_systemctl_command(machine, 'start', primary)
+    #    if exit_code != 0:
+    #        print (f"ERROR: Failed to start workers on {machine}")
+    #        #return False
 
-    print (f"finished updating machine: {worker}")
+    print (f"finished updating machine: {machine}")
     return True
 
 if __name__ == "__main__":
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     for worker, stats in autograding_workers.items():
         success = update_machine(worker,stats,args)
         if success == False:
-            print (f"FAILURE TO update machine {worker}")
+            print (f"FAILURE TO UPDATE MACHINE {worker}")
         else:
-            print (f"SUCCESS updating machine {worker}")
+            print (f"SUCCESS UPDATING MACHINE {worker}")
         print("-------------------------------------------------------")
