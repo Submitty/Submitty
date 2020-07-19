@@ -74,6 +74,7 @@ class ElectronicGraderView extends AbstractView {
         $overall_total = 0;
         $overall_percentage = 0;
         $autograded_percentage = 0;
+        $ta_graded_percentage = 0;
         $component_percentages = [];
         $component_overall_score = 0;
         $component_overall_max = 0;
@@ -109,6 +110,7 @@ class ElectronicGraderView extends AbstractView {
                 $total_students = $total_submissions;
             }
             $num_peer_components = 0;
+            $ta_graded_percentage = 0;
             $num_non_peer_components = count($gradeable->getNonPeerComponents());
             $num_components = $num_peer_components + $num_non_peer_components;
             $submitted_total = $num_components > 0 ? $total / $num_components : 0;
