@@ -15,8 +15,15 @@ class ImageWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
-        interactive_area.innerHTML = this.getImageTemplate();
+        interactive_area.innerHTML = this.getImageTemplate(this.state.height, this.state.width, this.state.alt_text);
         this.imageSelectedAction(interactive_area);
+
+        const remove_button = container.querySelector('input[type=button][value="Remove"]');
+        remove_button.addEventListener('click', event => {
+            if (this.state.image) {
+                syncFile(null, this.state.image, builder_data.g_id, 'input', 'delete');
+            }
+        });
 
         this.dom_pointer = container;
         return container;
@@ -35,14 +42,17 @@ class ImageWidget extends Widget {
 
     getJSON() {
         this.commitState();
-        return this.state;
+
+        if (this.state.image) {
+            return this.state;
+        }
     }
 
     load(data) {
         this.state = data;
     }
 
-    getImageTemplate() {
+    getImageTemplate(height, width, alt_text) {
         return `
         <div class="image-container"></div>
         <input type="file" accept="image/*">
@@ -50,19 +60,19 @@ class ImageWidget extends Widget {
             <div class="image-col-small">
                 <label>
                     Height:
-                    <input class="height-input" type="number" placeholder="Default" min="1">
+                    <input class="height-input" type="number" placeholder="Default" min="1" value="${height ? height : ''}">
                 </label>
             </div>
             <div class="image-col-small">
                 <label>
                     Width:
-                    <input class="width-input" type="number" placeholder="Default" min="1">
+                    <input class="width-input" type="number" placeholder="Default" min="1" value="${width ? width : ''}">
                 </label>
             </div>
             <div class="image-col-large">
                 <label>
                     Alternate Text:
-                    <textarea class="alt-text-input" placeholder="For accessibility, provide a short description of this image's contents."></textarea>
+                    <textarea class="alt-text-input" placeholder="For accessibility, provide a short description of this image's contents.">${alt_text ? alt_text : ''}</textarea>
                 </label>
             </div>
         </div>`
@@ -82,12 +92,14 @@ class ImageWidget extends Widget {
         }
 
         file_selector.addEventListener('change', event => {
-            const f = event.target.files[0];
-            uploadFile(f, builder_data.g_id, 'input');
-            reader.readAsDataURL(f);
+            const file = event.target.files[0];
+
+            if (file) {
+                syncFile(file, file.name, builder_data.g_id, 'input', 'upload');
+                this.state.image = file.name;
+                reader.readAsDataURL(file);
+                file_selector.style.display = 'none';
+            }
         });
     }
-
-
 }
-

@@ -51,6 +51,9 @@ class NotebookBuilder {
                 case 'short_answer':
                     widget = new ShortAnswerWidget();
                     break;
+                case 'image':
+                    widget = new ImageWidget();
+                    break;
                 default:
                     break;
             }

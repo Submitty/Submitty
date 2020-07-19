@@ -336,10 +336,7 @@ class AutogradingConfigController extends AbstractController {
         $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
         $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
         $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
-
-        // Update group permission
-        $group = $this->core->getConfig()->getCourse() . '_tas_www';
-        $permission_res = chgrp($json_path, $group);
+        $permission_res = $this->notebookBuilderUpdateGroupPermission($json_path);
 
         $this->notebookBuilderRebuildGradeable($gradeable);
 
@@ -366,8 +363,11 @@ class AutogradingConfigController extends AbstractController {
             return JsonResponse::getErrorResponse('Invalid gradeable ID.');
         }
 
-        if ($_POST['operation'] === 'upload' && isset($_FILES) && isset($_FILES['file'])) {
+        if ($_POST['operation'] === 'upload') {
             return $this->notebookBuilderFileUpload($gradeable);
+        }
+        elseif ($_POST['operation'] === 'delete') {
+            return $this->notebookBuilderFileDelete($gradeable);
         }
 
         return JsonResponse::getErrorResponse('Something went wrong.');
@@ -383,9 +383,19 @@ class AutogradingConfigController extends AbstractController {
         // Move uploaded file
         $full_path = FileUtils::joinPaths($test_input_path, $_FILES['file']['name']);
         $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
+        $permission_res = $this->notebookBuilderUpdateGroupPermission($full_path);
 
-        return $move_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
+        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
     }
 
-    private function notebookBuilderFileDelete() {}
+    private function notebookBuilderFileDelete(Gradeable $gradeable) {
+        $dependency_type = $_POST['dependency_type'];
+        $path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), "test_$dependency_type", $_POST['file_name']);
+        return unlink($path) ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure deleting file.');
+    }
+
+    private function notebookBuilderUpdateGroupPermission(string $path): bool {
+        $group = $this->core->getConfig()->getCourse() . '_tas_www';
+        return chgrp($path, $group);
+    }
 }
