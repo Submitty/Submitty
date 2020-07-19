@@ -2,25 +2,175 @@
     <legend>Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column:</legend>
     <label for="peer_graders_list">Select CSV file to upload for grader-student pairs</label>
     <input type="file" name="peer_graders_list" id="peer_graders_list">
+
     </br>
-    <div id="peer_loader" class="loader hide"></div>
-    <div class="table-wrapper">
-        <table class = "peer table">
-            <tr>
-                <th> grader </th>
-                <th> student </th>
-            </tr>
-            {% for key,value in peer_grader_pairs %}
-            <tr>
-                <td>{{key}}</td>
-                <td>{% for entry in value %}<span>{{entry}} </span>{% endfor %}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="btn-container" >
-        <input type="text" id="number_to_peer_grade" placeholder="Enter Number of Students to Grade">
-        <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate random assignments"></input>
-    </div>
+     <div id="peer_loader" class="loader hide"></div>
+        <div class="table-wrapper">
+            <table id="peer-table" class = "table table-striped mobile-table directory-table">
+                <thead>
+                    <tr>
+                        <th>Grader</th>
+                        <th>Students</th>
+                        <th>Edit Students</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key,value in peer_grader_pairs %}
+                        <tr>
+                            <td class="peer-table-grader">{{key}}</td>
+                            <td class="peer-table-students">
+                                {% for entry in value %}
+                                    <span>{{entry}} </span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a aria-label="edit {{key.getDisplayedFirstName()}} {{key.getDisplayedLastName()}}'s students"><i class="fas fa-pencil-alt"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+            <div class="btn-container" >
+            <input type="text" id="number_to_peer_grade" placeholder="Enter Number of Students to Grade">
+            <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate random assignments"></input>
+        </div>
 </fieldset>
 
+<script>
+    function removeGraderAlert($grader_to_edit) {
+        $('#students-to-edit').empty();
+        $('#students-to-add').empty();
+        $('#removed-all').append('Grader ' + $grader_to_edit + ' and their students have been removed from the Peer Matrix. Press Submit to save changes.<br><br>');
+    }
+
+    function removeStudent(i, $grader_to_edit) {
+        var form = $("#admin-gradeable-peers-form");
+        $('#edit_user_id_'+i+'', form).remove();
+    }
+
+    function addNewStudent() {
+        let form = $("#admin-gradeable-peers-form");
+        let add_students_div = $("#students-to-add");
+        let student_autofill = JSON.parse($('#student_autofill').val());
+        let j = $('.add_user_ids').length;
+        $('#add_student_button').remove();
+        add_students_div.append('<p class="add_user_ids" id="add_user_id_'+j+'"><input type="text" name="add_user_id_'+j+'" /><br></p>');
+        $('[name="add_user_id_'+j+'"]', form).autocomplete({
+            source: student_autofill
+        });
+        $('[name="add_user_id_'+j+'"]').autocomplete( "option", "appendTo", form );
+        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addNewStudent();" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
+
+    }
+
+    function adminGradeablePeerForm() {
+        //make admin peers popup appear
+        $('.popup-form').css('display', 'none');
+        var form = $("#admin-gradeable-peers-form");
+        form.css("display", "block");
+        captureTabInModal("admin-gradeable-peers-form");
+        $('#admin-gradeable-peers-submit').prop('disabled', false);
+        //set the title for popup
+        let grader_to_edit = $(this).parents('tr').find('.peer-table-grader').text();
+        let title_div = $("#admin-gradeable-peers-title");
+        title_div.empty();
+        title_div.append('Edit Students for ' + grader_to_edit);
+        //set the left panel to list all current students to edit
+        let peer_grader_pairs = JSON.parse($('#peer_grader_pairs').val());
+        let len = peer_grader_pairs[grader_to_edit].length;
+        let curr_students_div = $("#students-to-edit");
+        curr_students_div.empty();
+        curr_students_div.append("Edit Current Students:<br />")
+        for (var i = 0; i < len; i++) {
+            curr_students_div.append('<p class="edit_user_ids" id="edit_user_id_' + i + '"><input class="readonly peerstudents" type="text" name="edit_user_id_' + i + '" readonly="readonly" value="' + peer_grader_pairs[grader_to_edit][i] + '" /> <input id="remove_student_'+i+'" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeStudent('+i+',\''+grader_to_edit+'\');" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br /></p>');
+        }
+        //set right panel to allow removing grader completely
+        $('#removed-all').empty();
+        let add_students_div = $("#students-to-add");
+        add_students_div.empty();
+        add_students_div.append("Remove Grader:<br />");
+        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\''+grader_to_edit+'\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br><br>');
+        //set the right panel to allow adding new students
+        add_students_div.append("Add New Students:<br />")
+        let student_autofill = JSON.parse($('#student_autofill').val());
+        add_students_div.append('<p class="add_user_ids" id="add_user_id_0"><input type="text" name="add_user_id_0" /><br></p>');
+        $('[name="add_user_id_0"]', form).autocomplete({
+            source: student_autofill
+        });
+        $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
+        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addNewStudent();" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');        
+    }
+
+    function checkSubmitValid() {
+        let student_autofill = JSON.parse($('#student_autofill').val());
+        let valid_user_ids = student_autofill.map(tmp => tmp['value']);
+        let found = valid_user_ids.includes($(this).val()) ? true : false;
+        let valid_entry = found || ($(this).val() == '');
+        if (valid_entry) {
+            $('#admin-gradeable-peers-submit').prop('disabled', false);
+        } else {
+            $('#admin-gradeable-peers-submit').prop('disabled', true);
+        }
+    }
+
+    function submitFormAjax() {
+        let url = $('#peers_submit_url').val();
+        let form = $("#admin-gradeable-peers-form");
+        let grader_id = $("#admin-gradeable-peers-title").text().substr(18);
+        let fd = new FormData();
+        fd.append('csrf_token', $("#csrf_token").val());
+        fd.append('grader_id', grader_id);
+        fd.append('remove_grader', $('#removed-all').text());
+        let curr_student_ids = [];
+        $(".edit_user_ids :input.peerstudents").each(function() {
+            if ($(this).val() != "") curr_student_ids.push($(this).val());
+        });
+        fd.append('curr_student_ids', JSON.stringify(curr_student_ids));
+        let add_student_ids = [];
+        $(".add_user_ids :input").each(function() {
+            if ($(this).val() != "") add_student_ids.push($(this).val());
+        });
+        fd.append('add_student_ids', JSON.stringify(add_student_ids));
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: fd,
+            processData: false,
+            cache: false,
+            contentType: false,
+            success: function(data) {
+                $('.popup-form').css('display', 'none');
+                let new_peers = JSON.parse(data)["data"];
+                let grader_found = false;
+                for (grader in new_peers) {
+                    if (grader == grader_id) {
+                        grader_found = true;
+                    }
+                }
+                let grader_content = $('.peer-table-grader').filter(function() {
+                    return $(this).text() == grader_id
+                });
+                if (grader_found == false) {
+                    //the entire grader row is removed from new peers
+                    grader_content.parents('tr').remove();
+                } else {
+                    //otherwise, fill in new students in the table
+                    let students_list = grader_content.parents('tr').find('.peer-table-students');
+                    students_list.empty();
+                    for (i in new_peers[grader_id]) {
+                        students_list.append('<span>'+new_peers[grader_id][i]+'</span> ');
+                    }
+                }
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#peer-table").on("click", ".fa-pencil-alt", adminGradeablePeerForm);
+        $('#admin-gradeable-peers-form').on("change", ":text", checkSubmitValid);
+    });
+</script>
