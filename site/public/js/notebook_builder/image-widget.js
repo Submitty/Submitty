@@ -18,13 +18,6 @@ class ImageWidget extends Widget {
         interactive_area.innerHTML = this.getImageTemplate(this.state.height, this.state.width, this.state.alt_text);
         this.imageSelectedAction(interactive_area);
 
-        const remove_button = container.querySelector('input[type=button][value="Remove"]');
-        remove_button.addEventListener('click', event => {
-            if (this.state.image) {
-                syncFile(null, this.state.image, builder_data.g_id, 'input', 'delete');
-            }
-        });
-
         this.dom_pointer = container;
         return container;
     }
@@ -95,7 +88,6 @@ class ImageWidget extends Widget {
             const file = event.target.files[0];
 
             if (file) {
-                syncFile(file, file.name, builder_data.g_id, 'input', 'upload');
                 this.state.image = file.name;
                 reader.readAsDataURL(file);
                 file_selector.style.display = 'none';
