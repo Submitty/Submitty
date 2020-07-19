@@ -54,7 +54,8 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # check optional argument
-if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" && "$1" != "restart_web" ]]; then
+if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
+       && "$1" != "restart_web" && "$1" != "disable_shipper_worker" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
@@ -66,6 +67,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh restart_web"
+    echo -e "   ./INSTALL_SUBMITTY.sh disable_shipper_worker"
     exit 1
 fi
 
@@ -642,6 +644,21 @@ if [ "${WORKER}" == 0 ]; then
     echo -e "done"
 fi
 
+# force kill any other shipper processes that may be manually running on the primary machine
+if [ "${WORKER}" == 0 ]; then
+    for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
+        echo "ERROR: Also kill shipper pid $i";
+        kill $i;
+    done
+fi
+
+# force kill any other worker processes that may be manually running on the primary machine
+for i in $(ps -ef | grep submitty_autograding_worker | grep -v grep | awk '{print $2}'); do
+    echo "ERROR: Also kill shipper pid $i";
+    kill $i;
+done
+
+
 #############################################################
 # cleanup the TODO and DONE folders
 original_autograding_workers=/var/local/submitty/autograding_TODO/autograding_worker.json
@@ -828,10 +845,13 @@ else
     #       and we'd like to watch the progress
     sudo -H -u ${DAEMON_USER} python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     echo -e -n "Done updating workers and installing docker images\n\n"
-
-    # Restart the shipper & workers
-    echo -e -n "Restart shipper & workers\n\n"
-    python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
-    echo -e -n "Done restarting shipper & workers\n\n"
     
+    if [[ "$#" -ge 1 && $1 == "disable_shipper_worker" ]]; then
+        echo -e -n "WARNING: Autograding shipper and worker are disabled\n\n"
+    else
+        # Restart the shipper & workers
+        echo -e -n "Restart shipper & workers\n\n"
+        python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
+        echo -e -n "Done restarting shipper & workers\n\n"
+    fi
 fi
