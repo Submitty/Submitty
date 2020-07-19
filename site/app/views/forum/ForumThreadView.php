@@ -135,7 +135,7 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
             $this->core->getOutput()->addInternalJs('autosave-utils.js');
-            $this->core->getOutput()->addInternalJs('websocket.js');
+//            $this->core->getOutput()->addInternalJs('websocket.js');
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
             $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
@@ -1044,7 +1044,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
 
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
-        $this->core->getOutput()->addInternalJs('websocket.js');
+//        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 

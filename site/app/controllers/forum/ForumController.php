@@ -851,26 +851,34 @@ class ForumController extends AbstractController {
     }
 
     /**
+     * @param array $category_ids filter threads to only have these mentioned category ids
+     * @param array $thread_status only include threads having one of the status in mentioned in this array
+     * @param bool $show_deleted include deleted threads also
+     * @param bool $show_merged_thread include merged threads also
+     * @param bool $unread_threads show only unread threads
+     *
      * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
      */
-    public function showFullThreads() {
-        // TODO add support for query params
-        // No filtering based on category id
-        $category_ids = [];
-        // No filtering of threads based opn thread status
-        $thread_status = [];
+    public function showFullThreads($category_ids = [], $thread_status = [], $show_deleted = false, $show_merged_thread = false, $unread_threads = false) {
+        // preparing the query params
+        $category_ids = array_map(function($category_id) {
+            return intval($category_id);
+        }, $category_ids);
+        if (!is_bool($show_deleted)) {
+            $show_deleted = $show_deleted === "true";
+        }
+        if (!is_bool($show_merged_thread)) {
+            $show_merged_thread = $show_merged_thread === "true";
+        }
+        if (!is_bool($unread_threads)) {
+            $unread_threads = $unread_threads === "true";
+        }
         // Not used in the function
         $max_threads = 0;
-        // DO not show deleted threads
-        $show_deleted = false;
-        // DO not show merged threads
-        $show_merged_thread = false;
-        // show all the threads and not just the unread threads
-        $unread_threads = false;
         // use the default thread id
         $thread_id = -1;
         $pageNumber = 1;
-        $this->core->getOutput()->addBreadcrumb("Forum threads");
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum");
         $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids);
@@ -881,6 +889,7 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
     public function showThreads($thread_id = null, $option = 'tree') {
+
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
