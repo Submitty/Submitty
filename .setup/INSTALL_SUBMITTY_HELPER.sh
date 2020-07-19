@@ -652,7 +652,7 @@ if [ "${WORKER}" == 0 ]; then
     done
 fi
 
-# force kill any other worker processes that may be manually running on the primary machine
+# force kill any other worker processes that may be manually running on the primary or remote machines
 for i in $(ps -ef | grep submitty_autograding_worker | grep -v grep | awk '{print $2}'); do
     echo "ERROR: Also kill shipper pid $i";
     kill $i;
@@ -840,12 +840,12 @@ else
     fi
 
     # Update any foreign worker machines
-    echo -e -n "Update workers and install autograding docker images on primary and worker machines\n\n"
+    echo -e -n "Update worker machines software and install docker images on all machines\n\n"
     # note: unbuffer the output (python3 -u), since installing docker images takes a while
     #       and we'd like to watch the progress
     sudo -H -u ${DAEMON_USER} python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     echo -e -n "Done updating workers and installing docker images\n\n"
-    
+
     if [[ "$#" -ge 1 && $1 == "disable_shipper_worker" ]]; then
         echo -e -n "WARNING: Autograding shipper and worker are disabled\n\n"
     else

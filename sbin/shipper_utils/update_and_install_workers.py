@@ -37,6 +37,8 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     images_to_update = set()
     worker_requirements = autograding_workers[worker]['capabilities']
 
+    success = True
+
     for requirement, images in autograding_containers.items():
         if requirement in worker_requirements:
             images_to_update.update(set(images))
@@ -53,14 +55,16 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
               client.images.pull(repository=repo, tag=tag)
             except Exception as e:
               print(f"ERROR: Could not pull {image}")
-              traceback.print_exc()   
+              traceback.print_exc()
+              success = False
     else:
         commands = list()
         script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
-        run_commands_on_worker(user, host, commands, operation='docker image update')
+        success = run_commands_on_worker(user, host, commands, operation='docker image update')
 
+    return success
 
 def run_commands_on_worker(user, host, commands, operation='unspecified operation'):
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
@@ -142,14 +146,7 @@ def update_machine(machine,stats,args):
         print(f"Skipping update of {machine} because it is disabled.")
         return False
 
-    #print(f"Stop workers on {machine}...")
-    #if not args.docker_images:
-    #    exit_code = run_systemctl_command(machine, 'stop', primary)
-    #    if exit_code != 0:
-    #        print ("ERROR: Failed to stop workers on {machine}")
-    #        #return False
-        
-    # We don't have to update the code for the primary machine or if docker_images is specified. 
+    # We don't have to update the code for the primary machine or if docker_images is specified.
     if not primary and not args.docker_images:
         print("copy Submitty source code...")
         copy_code_to_worker(machine, user, host, submitty_repository)
@@ -157,21 +154,17 @@ def update_machine(machine,stats,args):
         success = install_worker(user, host)
         if success == False:
             print ("ERROR: Failed to install Submitty software update on {machine}")
-            #return False
+            return False
 
     # Install/update docker containers
     # do this before restarting the workers
-    update_docker_images(user, host, machine, autograding_workers, autograding_containers)
-    
-    #if not args.docker_images:
-    #    print(f"Restart workers {machine}...")
-    #    exit_code = run_systemctl_command(machine, 'start', primary)
-    #    if exit_code != 0:
-    #        print (f"ERROR: Failed to start workers on {machine}")
-    #        #return False
+    success = update_docker_images(user, host, machine, autograding_workers, autograding_containers)
+    if success == False:
+        print ("ERROR: Failed to pull one or more required docker images on {machine}")
 
     print (f"finished updating machine: {machine}")
     return True
+
 
 if __name__ == "__main__":
 
