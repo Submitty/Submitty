@@ -163,7 +163,7 @@ $(document).ready(function () {
                         $(val).val('0');
                     }
                     data[val.name] = $(val).val();
-                    var all_grade_all=false;
+                    let all_grade_all=false;
             };
             setRandomGraders($('#g_id').val(), data, function (response_data) {
                 // Clear errors by setting new values
@@ -191,7 +191,7 @@ $(document).ready(function () {
                 if ( confirm("Each student grades every other student! Continue?")) {
                     let data = {'csrf_token': csrfToken};
                     data[this.name] = $(this).val();
-                    var all_grade_all=true;
+                    let all_grade_all=true;
                     let addDataToRequest = function (i, val) {
                         if (val.type === 'radio' && !$(val).is(':checked')) {
                             return;
@@ -314,9 +314,13 @@ function ajaxCheckBuildStatus() {
     });
 }
 function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,all_grade_all) {
-    var number_to_grade=1;
-    if(all_grade_all===true){number_to_grade=10000;}
-    else {number_to_grade=$('#number_to_peer_grade').val();}
+    let number_to_grade=1;
+    if(all_grade_all===true){
+        number_to_grade=10000;
+    }
+    else {
+        number_to_grade=$('#number_to_peer_grade').val();
+    }
     if(number_to_grade<=0) {
         if (confirm("This will clear Peer Matrix. Continue?")) {
         }
@@ -324,8 +328,8 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
       $('#peer_loader').addClass("hide");
       return false;} 
     }
-    var gradeable_id=$('#g_id').val();
-    var restrict_to_registration="unchecked";
+    let gradeable_id=$('#g_id').val();
+    let restrict_to_registration="unchecked";
     $('#peer_loader').removeClass("hide");
     if($('#restrict_to_registration').is(':checked')){
         restrict_to_registration="checked";
@@ -334,11 +338,13 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
     $.ajax({
         type: "POST", 
         url: buildCourseUrl(['gradeable', gradeable_id, 'RandomizePeers']),
-        data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade,restrict_to_registration:restrict_to_registration},
+        data: {
+            csrf_token:p_values['csrf_token'],
+            number_to_grade:number_to_grade,
+            restrict_to_registration:restrict_to_registration
+        },
         success: function(response){
-            console.log(response);
             let res=JSON.parse(response);
-            console.log(res);
             if (res.data === "Invalid Number of Students Entered") {
                 confirm("Do you Want to go with ALL grade ALL?");
             }
@@ -352,7 +358,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
         
       /* To check for Server Error Messages */
         error: function (jqXHR, exception) {
-            var msg = '';
+            let msg = '';
             if (jqXHR.status === 0) {
                 msg = 'Not connect.\n Verify Network.';
             } 

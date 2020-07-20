@@ -198,26 +198,26 @@
     });
     function downloadPeerDataAsCsv(table_id) {
     // Select rows from table_id
-    var rows = document.querySelectorAll('table#' + table_id + ' tr');
+    let rows = document.querySelectorAll('table#' + table_id + ' tr');
     // Construct csv
-    var csv = [];
+    let csv = [];
     header=['grader','student'];
     csv.push(header.join(','));
-    for (var i = 1; i < rows.length; i++) {
-        var row = [], cols = rows[i].querySelectorAll('td');
-        for (var j = 0; j < cols.length-1; j++) {
+    for (let i = 1; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td');
+        for (let j = 0; j < cols.length-1; j++) {
             // Clean innertext to remove multiple spaces and jumpline (break csv)
-            var data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
-            for(var it=0;it<cols[j].innerText.length;++it){
+            let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ')
+            for(let it=0;it<cols[j].innerText.length;++it){
             data = data.replace(" ", '\n'+cols[0].innerText+",");}
             row.push(data);
         }
         csv.push(row.join(','));
     }
-    var csv_string = csv.join('\n');
+    let csv_string = csv.join('\n');
     // Download it
-    var filename = $('#g_id').val()+'_'+'peer_assign_data' + '_' + new Date().toLocaleDateString() + '.csv';
-    var link = document.createElement('a');
+    let filename = $('#g_id').val()+'_'+'peer_assign_data' + '_' + new Date().toLocaleDateString() + '.csv';
+    let link = document.createElement('a');
     link.style.display = 'none';
     link.setAttribute('target', '_blank');
     link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv_string));
