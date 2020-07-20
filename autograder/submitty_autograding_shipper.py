@@ -117,10 +117,10 @@ def update_all_foreign_autograding_workers():
 
     for machine, value in autograding_workers.items():
         if value['enabled'] is False:
-            print (f"SKIPPING WORKER MACHINE {machine} because it is not enabled")
+            print(f"SKIPPING WORKER MACHINE {machine} because it is not enabled")
             success_map[machine] = False
             continue
-        print (f"UPDATE CONFIGURATION FOR WORKER MACHINE: {machine}")
+        print(f"UPDATE CONFIGURATION FOR WORKER MACHINE: {machine}")
         formatted_entry = {machine: value}
         formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, machine)
         success = update_worker_json(machine, formatted_entry)
@@ -1523,7 +1523,7 @@ def launch_shippers(worker_status_map):
     # One (or more) of the machines must accept "default" jobs.
     default_present = False
     for _name, machine in autograding_workers.items():
-        if machine["enabled"] == False:
+        if not machine["enabled"]:
             continue
         if "default" in machine["capabilities"]:
             default_present = True
@@ -1549,10 +1549,10 @@ def launch_shippers(worker_status_map):
                 os.remove(grading)
 
         if not worker_status_map[name]:
-            print(f"{name} is not enabled / could not be reached, so we are not spinning up shipper threads.")
+            print(f"{name} is not enabled / could not be reached => no shipper threads.")
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"{name} is not enabled / could not be reached, so we are not spinning up shipper threads."
+                message=f"{name} is not enabled / could not be reached => no shipper threads."
             )
             continue
         if 'enabled' in machine and not machine['enabled']:
