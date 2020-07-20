@@ -219,6 +219,7 @@ class ElectronicGraderView extends AbstractView {
                 && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
+            "blind_status" => $gradeable->getPeerBlind(),
             "team_total" => $team_total,
             "team_percentage" => $team_percentage,
             "total_students" => $total_students,
