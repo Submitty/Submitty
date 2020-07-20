@@ -2480,6 +2480,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
     public function ajaxClearPeerMarks($gradeable_id) {
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -2497,6 +2498,7 @@ class ElectronicGraderController extends AbstractController {
             $component = $container->getComponent();
             $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
         }
+        $ta_graded_gradeable->setOverallComment("", $gradeable_id);
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
         $this->core->getOutput()->renderJsonSuccess('Marks removed successfully!');
         return true;

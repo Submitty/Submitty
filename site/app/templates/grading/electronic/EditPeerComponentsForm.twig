@@ -25,7 +25,7 @@
 	    	</br>
 	    	{% for component in components %}
 	    		<div class="box-badge">
-	        		{{ Badge.render(component_scores[component.id][peer], component.max, false) }}
+	        		{{ Badge.render(5, 10, false) }}
 	        	</div>
 	        	<span class="component-title col-no-gutters">
     				<b>{{ component.title|escape }}</b>
@@ -57,7 +57,6 @@
 <script>
 	function changeCurrentPeer(){
 		let peer = $('#edit-peer-select').val();
-		console.log('edit-peer-components-form-'+peer);
 		$('.edit-peer-components-block').hide();
 		$('#edit-peer-components-form-'+peer).show();
 	}
