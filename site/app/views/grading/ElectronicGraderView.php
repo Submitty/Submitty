@@ -463,6 +463,8 @@ HTML;
         $sections = [];
         /** @var GradedGradeable $row */
         foreach ($graded_gradeables as $row) {
+            var_dump($row->getSubmitter()->getId());
+            var_dump($row->getSubmitter()->getAnonId());
             //Extra info for the template
             $info = [
                 "graded_gradeable" => $row
