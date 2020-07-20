@@ -331,7 +331,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
     let gradeable_id=$('#g_id').val();
     let restrict_to_registration="unchecked";
     $('#peer_loader').removeClass("hide");
-    if($('#restrict_to_registration').is(':checked')){
+    if($('#restrict-to-registration').is(':checked')){
         restrict_to_registration="checked";
     }
         
