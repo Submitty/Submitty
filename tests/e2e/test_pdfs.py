@@ -1,11 +1,12 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
-
+import os
+import unittest
 
 class TestPDFs(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
-
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_pdf_instructor_basic_access(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
