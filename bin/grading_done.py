@@ -129,8 +129,7 @@ def print_header(num_shippers,num_workers,
 last_print = 100
 
 def print_status(epoch_time,num_shippers,num_workers,
-                 interactive_count, interactive_grading_count,
-                 regrade_count,regrade_grading_count,
+                 queue_counts,
                  OPEN_AUTOGRADING_WORKERS_JSON,
                  machine_stale_job,
                  machine_grading_counts,
@@ -163,16 +162,13 @@ def print_status(epoch_time,num_shippers,num_workers,
     print ("    | ",end="")
 
     # print overall interactive & regrade queue status
-    print_helper("g",1,interactive_grading_count,6)
-    interactive_queue_count = interactive_count-interactive_grading_count
-    print_helper("q",1,interactive_queue_count,5)
-    if interactive_count != 0:
-        done = False
-    print_helper("g",1,regrade_grading_count,6)
-    regrade_queue_count = regrade_count-regrade_grading_count
-    print_helper("q",1,regrade_queue_count,4)
+    print_helper("g",1,queue_counts["interactive_grading"],6)
+    print_helper("q",1,queue_counts["interactive"]-queue_counts["interactive_grading"],5)
+    print_helper("g",1,queue_counts["regrade_grading"],6)
+    print_helper("q",1,queue_counts["regrade"]-queue_counts["regrade_grading"],4)
     print ("{:2}".format("|"),end="")
-    if regrade_count != 0:
+    if (queue_counts["interactive"] + queue_counts["interactive_grading"] +
+        queue_counts["regrade"] + queue_counts["regrade_grading"]) != 0:
         done = False
 
     # print the data on currently grading work for each machine
@@ -199,7 +195,7 @@ def print_status(epoch_time,num_shippers,num_workers,
 
 
 class QueueItem:
-    def __init__(self, json_file, epoch_time, is_grading=False):
+    def __init__(self, json_file, epoch_time, is_grading):
         # If this is for a queue item currently grading; then we ensure the
         # provided JSON file begins with 'GRADING_', and we get rid of the
         # 'GRADING_' prefix for the regular queue file, while also reading
@@ -218,6 +214,48 @@ class QueueItem:
         with open(json_file, 'r') as infile:
             self.queue_obj = json.load(infile)
         self.is_regrade = "regrade" in self.queue_obj
+
+
+def update_queue_counts(queue_or_grading_file,is_grading,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job):
+    try:
+        entry = QueueItem(queue_or_grading_file, epoch_time, is_grading)
+    except Exception as e:
+        print(f"Whoops: could not read for {json_file}: {e}")
+        return
+
+    if entry.is_regrade:
+        if is_grading:
+            queue_counts["regrade_grading"] += 1
+        else:
+            queue_counts["regrade"] += 1
+    else:
+        if is_grading:
+            queue_counts["interactive_grading"] += 1
+        else:
+            queue_counts["interactive"] += 1
+
+    capability = entry.queue_obj["required_capabilities"]
+
+    if not is_grading:
+        capability_queue_counts[capability] += 1
+
+    else:
+        max_time = entry.queue_obj["max_possible_grading_time"]
+        full_machine = entry.grading_queue_obj['machine']
+
+        grading_machine = "NONE"
+        for machine in OPEN_AUTOGRADING_WORKERS_JSON:
+            m = OPEN_AUTOGRADING_WORKERS_JSON[machine]["address"]
+            if OPEN_AUTOGRADING_WORKERS_JSON[machine]["username"] != "":
+                m = f"{OPEN_AUTOGRADING_WORKERS_JSON[machine]['username']}@{m}"
+            if full_machine == m:
+                grading_machine = machine
+                break
+            machine_grading_counts[grading_machine] += 1
+
+            if entry.elapsed_time > max_time:
+                machine_stale_job[grading_machine] = True
+                print(f"--> STALE JOB: {int(entry.elapsed_time):5d} seconds   {json_file:s}")
 
 
 def main():
@@ -270,72 +308,42 @@ def main():
             num_workers = 0
 
         # most instructors do not have read access to the interactive queue
-        interactive_count = 0
-        interactive_grading_count = 0
-        regrade_count = 0
-        regrade_grading_count = 0
+        queue_counts = {}
+        queue_counts["interactive"] = 0
+        queue_counts["interactive_grading"] = 0
+        queue_counts["regrade"] = 0
+        queue_counts["regrade_grading"] = 0
 
         for full_path_file in Path(GRADING_QUEUE).glob("*"):
-            full_path_file = str(full_path_file)
-            json_file = full_path_file
-
-            try:
-                entry = QueueItem(json_file, epoch_time)
-            except Exception as e:
-                print(f"Whoops: could not read for {json_file}: {e}")
-                continue
-
-            if entry.is_regrade:
-                regrade_count += 1
-            else:
-                interactive_count += 1
-
-            capability = entry.queue_obj["required_capabilities"]
-            max_time = entry.queue_obj["max_possible_grading_time"]
-
-            capability_queue_counts[capability] += 1
+            update_queue_counts(full_path_file,False,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job)
 
         for worker_folder in filter(os.path.isdir, Path(IN_PROGRESS_DIR).glob('*')):
-            for grading_file in Path(worker_folder).glob('GRADING_*'):
-                json_file = str(grading_file)
+            all_the_files = Path(worker_folder).glob('*')
+            just_grading_files = Path(worker_folder).glob('GRADING_*')
+            all_files = []
+
+            for a_file in all_the_files:
+                all_files.append(a_file)
+
+            for grading_file in just_grading_files:
+                non_grading_tmp = (grading_file.name)[8:]
+                non_grading_file = os.path.join(grading_file.parent,non_grading_tmp)
                 try:
-                    entry = QueueItem(json_file, epoch_time, is_grading=True)
+                    all_files.remove(non_grading_file)
                 except Exception as e:
-                    print(f"Whoops: could not read for entry {json_file}: {e}")
-                    continue
+                    print (f"WARNING -- {non_grading_file} wasn't in all_files list")
+                try:
+                    all_files.remove(grading_file)
+                except Exception as e:
+                    print (f"WARNING -- {grading_file} wasn't in all_files list")
+                update_queue_counts(grading_file,True,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job)
 
-                if entry.is_regrade:
-                    regrade_count += 1
-                    regrade_grading_count += 1
-                else:
-                    interactive_count += 1
-                    interactive_grading_count += 1
-
-                full_machine = entry.grading_queue_obj['machine']
-
-                capability = entry.queue_obj['required_capabilities']
-                max_time = entry.queue_obj['max_possible_grading_time']
-
-                grading_machine = "NONE"
-                for machine in OPEN_AUTOGRADING_WORKERS_JSON:
-                    m = OPEN_AUTOGRADING_WORKERS_JSON[machine]["address"]
-                    if OPEN_AUTOGRADING_WORKERS_JSON[machine]["username"] != "":
-                        m = f"{OPEN_AUTOGRADING_WORKERS_JSON[machine]['username']}@{m}"
-                    if full_machine == m:
-                        grading_machine = machine
-                        break
-                machine_grading_counts[grading_machine] += 1
-
-                if entry.elapsed_time > max_time:
-                    machine_stale_job[grading_machine] = True
-                    stale = True
-                    print(f"--> STALE JOB: {int(entry.elapsed_time):5d} seconds   {json_file:s}")
-
+            for not_yet_started in all_files:
+                update_queue_counts(not_yet_started,False,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job)
 
         done = print_status(epoch_time,
                             num_shippers,num_workers,
-                            interactive_count, interactive_grading_count,
-                            regrade_count,regrade_grading_count,
+                            queue_counts,
                             OPEN_AUTOGRADING_WORKERS_JSON,
                             machine_stale_job,
                             machine_grading_counts,
