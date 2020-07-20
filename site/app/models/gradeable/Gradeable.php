@@ -1573,7 +1573,7 @@ class Gradeable extends AbstractModel {
         return $total;
     }
     
-    public function isPeerGrading(){
+    public function isPeerGrading() {
         foreach ($this->getComponents() as $component) {
             if ($component->isPeer()) {
                 return true;
