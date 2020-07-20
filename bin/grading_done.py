@@ -26,7 +26,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 GRADING_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
-IN_PROGRESS_DIR = os.path.join(SUBMITTY_DATA_DIR, "grading")
+IN_PROGRESS_DIR = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_USERS_JSON = json.load(open_file)

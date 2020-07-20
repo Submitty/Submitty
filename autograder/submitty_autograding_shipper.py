@@ -41,7 +41,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
-IN_PROGRESS_PATH = os.path.join(SUBMITTY_DATA_DIR, "grading")
+IN_PROGRESS_PATH = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
 
 JOB_ID = '~SHIP~'
 
