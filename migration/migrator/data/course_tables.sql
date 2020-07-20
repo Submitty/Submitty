@@ -917,6 +917,7 @@ ALTER SEQUENCE public.student_favorites_id_seq OWNED BY public.student_favorites
 CREATE TABLE public.teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
+    anon_id character varying(255),
     state integer NOT NULL,
     last_viewed_time timestamp(6) with time zone DEFAULT NULL::timestamp with time zone
 );

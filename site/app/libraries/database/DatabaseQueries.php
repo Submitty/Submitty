@@ -3705,7 +3705,8 @@ AND gc_id IN (
 
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id] ?? 
+                null;
     }
 
     // NOTIFICATION/EMAIL QUERIES
