@@ -486,6 +486,7 @@
         {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
+        {{dump(graded_gradeable.getSubmitter())}}
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getAnonId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
             {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
