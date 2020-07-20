@@ -20,7 +20,8 @@ def up(config, database, semester, course):
     for gradeable_level_dir in os.scandir(annotations_dir):
         for user_level_dir in os.scandir(Path(annotations_dir, gradeable_level_dir)):
             for version_level_dir in os.scandir(Path(annotations_dir, gradeable_level_dir, user_level_dir)):
-                for annotation_full_path, annotation_name, files in os.walk(Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)):
+                annotation_full_path = Path(annotations_dir, gradeable_level_dir, user_level_dir, version_level_dir)
+                for files in os.listdir(annotation_full_path):
                     for name in files:
                         if "_" in name:
                             [file_name, grader_id] = name.split('_', 1)
