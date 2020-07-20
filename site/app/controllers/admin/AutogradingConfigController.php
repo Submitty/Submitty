@@ -254,6 +254,9 @@ class AutogradingConfigController extends AbstractController {
             return new RedirectResponse($failure_url);
         }
 
+        $sync_data = json_encode(FileUtils::getAllFiles($gradeable->getAutogradingConfigPath()));
+        $sync_data = Utils::escapeDoubleQuotes($sync_data);
+
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
         $json_contents = file_get_contents($json_path);
 
@@ -285,7 +288,8 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
             'config_string' => $config_string,
-            'mode' => $mode
+            'mode' => $mode,
+            'sync_data' => $sync_data
         ]);
     }
 

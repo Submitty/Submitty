@@ -28,7 +28,8 @@
         window.builder_data = {
             g_id: '{{ gradeable.getId() }}',
             mode: '{{ mode }}',
-            config: config
+            config: config,
+            sync_data: JSON.parse('{{ sync_data|raw }}')
         };
     </script>
 
