@@ -15,12 +15,12 @@ def up(config, database, semester, course):
     :type course: str
     """
 
-    '''database.execute(
+    database.execute(
         """
-        ALTER TABLE ONLY teams
-            ADD COLUMN anon_id VARCHAR (255)
+        ALTER TABLE teams
+            ADD COLUMN IF NOT EXISTS anon_id VARCHAR (255)
         """
-    )'''
+    )
 
 def down(config, database, semester, course):
     """
