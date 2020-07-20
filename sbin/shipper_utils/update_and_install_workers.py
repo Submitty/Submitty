@@ -38,6 +38,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     worker_requirements = autograding_workers[worker]['capabilities']
 
     success = True
+    print(f'download/update docker images on {host}')
 
     for requirement, images in autograding_containers.items():
         if requirement in worker_requirements:
@@ -100,17 +101,17 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
 def copy_code_to_worker(worker, user, host, submitty_repository):
     exit_code = run_systemctl_command(worker, 'status', False)
     if exit_code == 1:
-        print("ERROR: {0}'s worker daemon was active when before rsyncing began. Attempting to turn off.".format(worker))
+        print(f"ERROR: {worker}'s worker daemon was active when before rsyncing began. Attempting to turn off.")
         exit_code = run_systemctl_command(worker, 'stop', False)
         if exit_code != 0:
-            print("Could not turn off {0}'s daemon. Please allow rsyncing to continue and then attempt another install.".format(worker))
+            print(f"Could not turn off {worker}'s daemon. Please allow rsyncing to continue and then attempt another install.")
 
     local_directory = submitty_repository
     remote_host = '{0}@{1}'.format(user, host)
     foreign_directory = submitty_repository
 
     # rsync the file
-    print("performing rsync to {0}...".format(worker))
+    print(f"performing rsync to {worker}...")
     # If this becomes too slow, we can exculde directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
     command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
@@ -143,7 +144,7 @@ def update_machine(machine,stats,args):
     primary = machine == 'primary' or host == 'localhost'
 
     if not enabled:
-        print(f"Skipping update of {machine} because it is disabled.")
+        print(f"Skipping update of {machine} because it is not enabled.")
         return False
 
     # We don't have to update the code for the primary machine or if docker_images is specified.
@@ -153,16 +154,17 @@ def update_machine(machine,stats,args):
         print("beginning installation...")
         success = install_worker(user, host)
         if success == False:
-            print ("ERROR: Failed to install Submitty software update on {machine}")
+            print(f"ERROR: Failed to install Submitty software update on {machine}")
             return False
 
     # Install/update docker containers
     # do this before restarting the workers
     success = update_docker_images(user, host, machine, autograding_workers, autograding_containers)
     if success == False:
-        print ("ERROR: Failed to pull one or more required docker images on {machine}")
+        print(f"ERROR: Failed to pull one or more required docker images on {machine}")
+        return False
 
-    print (f"finished updating machine: {machine}")
+    print(f"finished updating machine: {machine}")
     return True
 
 
@@ -189,10 +191,17 @@ if __name__ == "__main__":
     submitty_repository = submitty_config['submitty_repository']
 
     print("-------------------------------------------------------")
-    for worker, stats in autograding_workers.items():
-        success = update_machine(worker,stats,args)
-        if success == False:
-            print (f"FAILURE TO UPDATE MACHINE {worker}")
+    for machine, stats in autograding_workers.items():
+
+        enabled = stats['enabled']
+        if not enabled:
+            print(f"SKIPPING UPDATE OF MACHINE {machine}")
+            print(f"because it is not enabled")
         else:
-            print (f"SUCCESS UPDATING MACHINE {worker}")
+            success = update_machine(machine,stats,args)
+            if success == False:
+                print(f"FAILURE TO UPDATE MACHINE {machine}")
+                raise SystemExit("ERROR: FAILURE TO UPDATE ONE OR MORE MACHINES")
+            else:
+                print(f"SUCCESS UPDATING MACHINE {machine}")
         print("-------------------------------------------------------")

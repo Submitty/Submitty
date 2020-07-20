@@ -110,7 +110,10 @@ def print_header(num_shippers,num_workers,
     print ("{:29}".format(""),end="")
     print ("{:2}".format("|"),end="")
     for machine in OPEN_AUTOGRADING_WORKERS_JSON:
+        enabled = OPEN_AUTOGRADING_WORKERS_JSON[machine]["enabled"]
         num = OPEN_AUTOGRADING_WORKERS_JSON[machine]["num_autograding_workers"]
+        if enabled==False:
+            num = 0
         print ("{:9s}".format("["+str(num)+"]"),end="")
     print (' '*pad_machines,end="")
     print ("{:2}".format("|"),end="")
@@ -174,7 +177,6 @@ def print_status(epoch_time,num_shippers,num_workers,
 
     # print the data on currently grading work for each machine
     for machine in OPEN_AUTOGRADING_WORKERS_JSON:
-        num = OPEN_AUTOGRADING_WORKERS_JSON[machine]["num_autograding_workers"]
         print_helper("g",1,machine_grading_counts[machine],4)
         if machine_stale_job[machine]:
             print ("** ",end="")
