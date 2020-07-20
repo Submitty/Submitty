@@ -53,11 +53,15 @@ class FormOptionsWidget extends Widget {
             return;
         }
 
-        const file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
+        const config_json = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
+        // Currently only deals with uploading images, will rework later to accommodate other files/directories as needed
+        const file_selectors = document.querySelectorAll('input[type=file]');
+        uploadFiles(file_selectors, builder_data.g_id, 'test_input');
+
         const form_data = new FormData();
-        form_data.append('config_upload', file, 'config.json');
+        form_data.append('config_upload', config_json, 'config.json');
         form_data.append('csrf_token', csrfToken);
         form_data.append('g_id', builder_data.g_id);
         form_data.append('mode', builder_data.mode);

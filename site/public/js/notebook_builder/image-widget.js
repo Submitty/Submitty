@@ -16,7 +16,16 @@ class ImageWidget extends Widget {
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
         interactive_area.innerHTML = this.getImageTemplate(this.state.height, this.state.width, this.state.alt_text);
-        this.imageSelectedAction(interactive_area);
+
+        if (this.state.image) {
+            const file_selector = interactive_area.querySelector('input[type=file]');
+            file_selector.style.display = 'none';
+
+            this.loadExistingImage(builder_data.images[this.state.image], interactive_area.querySelector('.image-container'))
+        }
+        else {
+            this.captureNewImage(interactive_area);
+        }
 
         this.dom_pointer = container;
         return container;
@@ -71,27 +80,47 @@ class ImageWidget extends Widget {
         </div>`
     }
 
-    imageSelectedAction(interactive_area) {
+    captureNewImage(interactive_area) {
         const reader = new FileReader();
+        const image = new Image();
         const file_selector = interactive_area.querySelector('input[type=file]');
         const image_container = interactive_area.querySelector('.image-container');
 
-        reader.onload = event => {
-            const image = document.createElement('img');
-            image.src = event.target.result;
+        this.attachImageOnLoadHandler(image, image_container);
 
-            image_container.innerHTML = '';
-            image_container.appendChild(image);
+        reader.onload = event => {
+            image.src = event.target.result;
+            image_container.prepend(image);
         }
 
-        file_selector.addEventListener('change', event => {
+        file_selector.onchange = event => {
             const file = event.target.files[0];
 
             if (file) {
                 this.state.image = file.name;
                 reader.readAsDataURL(file);
                 file_selector.style.display = 'none';
+
+                const file_name_msg = document.createElement('p');
+                file_name_msg.innerText = `Filename: ${file.name}`;
+
+                image_container.appendChild(file_name_msg);
             }
-        });
+        }
+    }
+
+    loadExistingImage(image_data_url, image_container) {
+        const image = new Image();
+        this.attachImageOnLoadHandler(image, image_container);
+        image.src = image_data_url;
+        image_container.prepend(image);
+    }
+
+    attachImageOnLoadHandler(image, image_container) {
+        image.onload = () => {
+            const msg = document.createElement('p');
+            msg.innerText = `Dimensions (width x height)\nNative: ${image.naturalWidth} x ${image.naturalHeight}\nShown at: ${image.width} x ${image.height}`;
+            image_container.appendChild(msg);
+        }
     }
 }

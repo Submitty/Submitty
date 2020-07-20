@@ -254,9 +254,6 @@ class AutogradingConfigController extends AbstractController {
             return new RedirectResponse($failure_url);
         }
 
-        $sync_data = json_encode(FileUtils::getAllFiles($gradeable->getAutogradingConfigPath()));
-        $sync_data = Utils::escapeDoubleQuotes($sync_data);
-
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
         $json_contents = file_get_contents($json_path);
 
@@ -285,12 +282,26 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/image-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
+        $images = json_encode($this->notebookBuilderGetFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
+
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
             'config_string' => $config_string,
             'mode' => $mode,
-            'sync_data' => $sync_data
+            'images' => $images
         ]);
+    }
+
+    private function notebookBuilderGetFiles($directory) {
+        $result = [];
+        $paths = FileUtils::getAllFilesTrimSearchPath($directory, 0);
+
+        foreach ($paths as $path) {
+            $parts = explode('/', $path);
+            $result[$parts[sizeof($parts) - 1]] = FileUtils::readAsDataURL($path);
+        }
+
+        return $result;
     }
 
     /**
@@ -370,32 +381,21 @@ class AutogradingConfigController extends AbstractController {
         if ($_POST['operation'] === 'upload') {
             return $this->notebookBuilderFileUpload($gradeable);
         }
-        elseif ($_POST['operation'] === 'delete') {
-            return $this->notebookBuilderFileDelete($gradeable);
-        }
 
-        return JsonResponse::getErrorResponse('Something went wrong.');
+        return JsonResponse::getErrorResponse('Invalid operation.');
     }
 
     private function notebookBuilderFileUpload(Gradeable $gradeable): JsonResponse {
-        $dependency_type = $_POST['dependency_type'];
-
-        // Create test_input or test_output directory if it doesn't exist
-        $test_input_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), "test_$dependency_type");
-        FileUtils::createDir($test_input_path);
+        // Create directory if it doesn't exist
+        $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
+        FileUtils::createDir($directory_path);
 
         // Move uploaded file
-        $full_path = FileUtils::joinPaths($test_input_path, $_FILES['file']['name']);
+        $full_path = FileUtils::joinPaths($directory_path, $_FILES['file']['name']);
         $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
         $permission_res = $this->notebookBuilderUpdateGroupPermission($full_path);
 
         return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
-    }
-
-    private function notebookBuilderFileDelete(Gradeable $gradeable) {
-        $dependency_type = $_POST['dependency_type'];
-        $path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), "test_$dependency_type", $_POST['file_name']);
-        return unlink($path) ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure deleting file.');
     }
 
     private function notebookBuilderUpdateGroupPermission(string $path): bool {
