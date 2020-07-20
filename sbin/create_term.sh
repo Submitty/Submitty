@@ -10,11 +10,17 @@ fi
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 
 DATABASE_HOST=$(jq -r '.database_host' ${CONF_DIR}/database.json)
+DATABASE_PORT=$(jq -r '.database_port' ${CONF_DIR}/database.json)
 DATABASE_USER=$(jq -r '.database_user' ${CONF_DIR}/database.json)
 DATABASE_PASS=$(jq -r '.database_password' ${CONF_DIR}/database.json)
 
+CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER}"
+if [ -d ${DATABASE_HOST} ]; then
+    CONN_STRING="${CONN_STRING} -p ${DATABASE_PORT}"
+fi
+
 # Check that Submitty Master DB exists.
-PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -lqt | cut -d \| -f 1 | grep -qw submitty
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Submitty master database doesn't exist."
     exit 1
@@ -22,7 +28,7 @@ fi
 
 # Ensure that terms table exists within Submitty Master DB.
 sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms');"
-table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "${sql}"`
+table_count=`PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -tAc "${sql}"`
 if [[ $table_count -ne "1" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit 1
@@ -68,7 +74,7 @@ if [[ $? -ne "0" ]] ; then
 fi
 
 # INSERT new term into master DB
-PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -qc "
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -qc "
 INSERT INTO terms (term_id, name, start_date, end_date)
 VALUES ('${semester}', '${name}', '${start}', '${end}');"
 

@@ -8,51 +8,43 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 
 class ImagesView extends AbstractView {
+
+    /** Defines the html for the icon used to flag an image */
+    const FLAG_ICON_HTML = '<i class="fas fa-flag"></i>';
+
+    /** Defines the html for the icon used to unflag an image */
+    const UNDO_ICON_HTML = '<i class="fas fa-undo"></i>';
+
+    /** Defines the maximum dimension for images being displayed on the student photos page */
+    const IMG_MAX_DIMENSION = 200;
+
     /**
      * @param User[] $students
      * @return string
      */
-    public function listStudentImages($students, $grader_sections, $instructor_permission) {
+    public function listStudentImages($students, $grader_sections, $has_full_access, $view) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->enableMobileViewport();
 
-        $image_data = [];
-        $error_image_data = '_NONE_';
-
-        // image files can be specific to this course (uploaded by instructor)
-        // or in a common path per term (uploaded manually by sysadmin)
-        $term = explode('/', $this->core->getConfig()->getCoursePath());
-        $term = $term[count($term) - 2];
-        // the places we will look for this students photo (in order)
-        $path_locations =
-            [ FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images"),
-              FileUtils::joinPaths("/var/local/submitty", "student_images", $term),
-              FileUtils::joinPaths("/var/local/submitty", "student_images")
-              ];
-        $file_extensions = [ ".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG" ];
-
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
-            $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-            if (empty($grader_sections) || in_array($registration, $grader_sections)) {
-                $sections[$registration][] = $student;
-                foreach ($path_locations as $path) {
-                    foreach ($file_extensions as $extension) {
-                        $possible_match =  FileUtils::joinPaths($path, $student->getId() . $extension);
-                        if (file_exists($possible_match) && FileUtils::isValidImage($possible_match)) {
-                            $mime_subtype = explode('/', mime_content_type($possible_match), 2)[1];
-                            $image_data[$student->getId()] =
-                                [
-                                    'subtype' => $mime_subtype,
-                                    'path' => $possible_match
-                                 ];
-                            break;
-                        }
-                    }
-                }
+            $student_section = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
+            $student_belongs_to_grader = in_array($student_section, $grader_sections);
+
+            if ($has_full_access && (empty($grader_sections) || $view === 'all')) {
+                // Full access no sections or view all
+                $sections[$student_section][] = $student;
+            }
+            elseif ($has_full_access && $view === 'sections' && $student_belongs_to_grader) {
+                // Full access view sections
+                $sections[$student_section][] = $student;
+            }
+            elseif ($student_belongs_to_grader) {
+                // Limited access only show their sections
+                $sections[$student_section][] = $student;
             }
         }
 
@@ -62,11 +54,12 @@ class ImagesView extends AbstractView {
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
-            "imageData" => $image_data,
-            "errorImageData" => $error_image_data,
-            "hasInstructorPermission" => $instructor_permission,
+            "has_full_access" => $has_full_access,
             "csrf_token" => $this->core->getCsrfToken(),
-            "max_size_string" => $max_size_string
+            "max_size_string" => $max_size_string,
+            "view" => $view,
+            "student_photos_url" => $this->core->buildCourseUrl(['student_photos']),
+            "has_sections" => !empty($grader_sections)
         ]);
     }
 }
