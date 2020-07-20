@@ -66,12 +66,15 @@ def print_helper(label,label_width,value,value_width):
 
 def print_header(num_shippers,num_workers,
                  OPEN_AUTOGRADING_WORKERS_JSON,
-                 capability_queue_counts):
+                 capability_queue_counts,
+                 pad_machines,pad_capabilities):
 
     num_machines = len(OPEN_AUTOGRADING_WORKERS_JSON)
     num_capabilities = len(capability_queue_counts)
 
-    table_width = num_machines*9 + num_capabilities*9 + 48
+    machine_width = pad_machines+num_machines*9
+    capabilities_width = pad_capabilities+num_capabilities*9
+    table_width = machine_width + capabilities_width + 48
     print ('-'*table_width)
 
     print ("{:<3}{:9}".format(num_shippers,"SHIPPERS"),end="")
@@ -79,9 +82,9 @@ def print_header(num_shippers,num_workers,
     print ("{:15}".format("INTERACTIVE"),end="")
     print ("{:14}".format("REGRADE"),end="")
     print ("{:2}".format("|"),end="")
-    print ('{x:{width}}'.format(x="MACHINES (active work)", width=num_machines*9),end="")
+    print ('{x:{width}}'.format(x="MACHINES (active work)", width=machine_width),end="")
     print ("{:2}".format("|"),end="")
-    print ('{x:{width}}'.format(x="CAPABILITIES (queue)", width=num_capabilities*9),end="")
+    print ('{x:{width}}'.format(x="CAPABILITIES (queue)", width=capabilities_width),end="")
     print ("{:1}".format("|"),end="")
     print()
 
@@ -94,9 +97,11 @@ def print_header(num_shippers,num_workers,
     print ("{:2}".format("|"),end="")
     for machine in OPEN_AUTOGRADING_WORKERS_JSON:
         print ("{:9}".format(machine.upper()),end="")
+    print (' '*pad_machines,end="")
     print ("{:2}".format("|"),end="")
     for cap in capability_queue_counts:
         print ("{:9}".format(cap.lower()),end="")
+    print (' '*pad_capabilities,end="")
     print ("{:1}".format("|"),end="")
     print()
 
@@ -105,11 +110,16 @@ def print_header(num_shippers,num_workers,
     print ("{:29}".format(""),end="")
     print ("{:2}".format("|"),end="")
     for machine in OPEN_AUTOGRADING_WORKERS_JSON:
+        enabled = OPEN_AUTOGRADING_WORKERS_JSON[machine]["enabled"]
         num = OPEN_AUTOGRADING_WORKERS_JSON[machine]["num_autograding_workers"]
+        if enabled==False:
+            num = 0
         print ("{:9s}".format("["+str(num)+"]"),end="")
+    print (' '*pad_machines,end="")
     print ("{:2}".format("|"),end="")
     for cap in capability_queue_counts:
         print ("{:9}".format(""),end="")
+    print (' '*pad_capabilities,end="")
     print ("{:1}".format("|"),end="")
     print()
 
@@ -129,13 +139,20 @@ def print_status(epoch_time,num_shippers,num_workers,
     # if there is no autograding work and the queue is empty, return true
     done = True
 
+    num_machines = len(OPEN_AUTOGRADING_WORKERS_JSON)
+    num_capabilities = len(capability_queue_counts)
+
+    pad_machines = max(0, 23 - num_machines*9)
+    pad_capabilities = max(0, 21 - num_capabilities*9)
+
     # print the column headings every 2 minutes
     global last_print
     if (epoch_time > last_print+120):
         last_print = epoch_time
         print_header(num_shippers,num_workers,
                      OPEN_AUTOGRADING_WORKERS_JSON,
-                     capability_queue_counts)
+                     capability_queue_counts,
+                     pad_machines, pad_capabilities)
 
     # print time
     dt = datetime.datetime.fromtimestamp(epoch_time)
@@ -160,13 +177,13 @@ def print_status(epoch_time,num_shippers,num_workers,
 
     # print the data on currently grading work for each machine
     for machine in OPEN_AUTOGRADING_WORKERS_JSON:
-        num = OPEN_AUTOGRADING_WORKERS_JSON[machine]["num_autograding_workers"]
         print_helper("g",1,machine_grading_counts[machine],4)
         if machine_stale_job[machine]:
             print ("** ",end="")
         else:
             print ("   ",end="")
         print ("",end="")
+    print (' '*pad_machines,end="")
     print ("{:2}".format("|"),end="")
 
     # print the data on items waiting in the queue to be picked up
@@ -174,6 +191,7 @@ def print_status(epoch_time,num_shippers,num_workers,
         x = capability_queue_counts[cap]
         print_helper("q",1,x,4)
         print ("   ",end="")
+    print (' '*pad_capabilities,end="")
     print ("{:1}".format("|"),end="")
     print()
 
