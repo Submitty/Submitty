@@ -3357,11 +3357,6 @@ SQL;
         return $return;
     }
 
-    public function getPeerGradingAssignNumber($g_id) {
-        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", [$g_id]);
-        return $this->course_db->rows()[0]['eg_peer_grade_set'];
-    }
-
     public function getNumPeerComponents($g_id) {
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE gc_is_peer='t' and g_id=?", [$g_id]);
         return intval($this->course_db->rows()[0]['cnt']);
