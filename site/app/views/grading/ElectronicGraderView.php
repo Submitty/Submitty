@@ -763,6 +763,7 @@ HTML;
             $isRegradePanel = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+        $this->core->getOutput()->enableMobileViewport();
 
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
 

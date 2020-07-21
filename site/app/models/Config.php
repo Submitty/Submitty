@@ -294,6 +294,7 @@ class Config extends AbstractModel {
         $this->submitty_database_params = [
             'dbname' => 'submitty',
             'host' => $database_json['database_host'],
+            'port' => $database_json['database_port'],
             'username' => $database_json['database_user'],
             'password' => $database_json['database_password']
         ];
