@@ -115,13 +115,16 @@ def update_all_foreign_autograding_workers():
         )
         raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
 
-    for key, value in autograding_workers.items():
+    for machine, value in autograding_workers.items():
         if value['enabled'] is False:
+            print(f"SKIPPING WORKER MACHINE {machine} because it is not enabled")
+            success_map[machine] = False
             continue
-        formatted_entry = {key: value}
-        formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, key)
-        success = update_worker_json(key, formatted_entry)
-        success_map[key] = success
+        print(f"UPDATE CONFIGURATION FOR WORKER MACHINE: {machine}")
+        formatted_entry = {machine: value}
+        formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, machine)
+        success = update_worker_json(machine, formatted_entry)
+        success_map[machine] = success
     return success_map
 
 
@@ -1520,18 +1523,21 @@ def launch_shippers(worker_status_map):
     # One (or more) of the machines must accept "default" jobs.
     default_present = False
     for _name, machine in autograding_workers.items():
+        if not machine["enabled"]:
+            continue
         if "default" in machine["capabilities"]:
             default_present = True
             break
     if not default_present:
         raise SystemExit(
-            "ERROR: autograding_workers.json contained no machine with default capabilities"
+            "ERROR: autograding_workers.json contained no enabled machine with default capabilities"
         )
 
     # Launch a shipper process for every worker on the primary machine and each worker machine
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+
         thread_count = machine["num_autograding_workers"]
 
         # Cleanup previous in-progress submissions
@@ -1543,17 +1549,17 @@ def launch_shippers(worker_status_map):
                 os.remove(grading)
 
         if not worker_status_map[name]:
-            print(f"{name} could not be reached, so we are not spinning up shipper threads.")
+            print(f"{name} is not enabled / could not be reached => no shipper threads.")
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"{name} could not be reached, so we are not spinning up shipper threads."
+                message=f"{name} is not enabled / could not be reached => no shipper threads."
             )
             continue
         if 'enabled' in machine and not machine['enabled']:
-            print(f"{name} is disabled, so we are not spinning up shipper threads.")
+            print(f"{name} is not enabled, so we are not spinning up shipper threads.")
             autograding_utils.log_message(
                 AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"{name} is disabled, so we are not spinning up shipper threads."
+                message=f"{name} is not enabled, so we are not spinning up shipper threads."
             )
             continue
         try:
