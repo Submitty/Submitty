@@ -211,16 +211,12 @@ class PDFController extends AbstractController {
         else {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id);
         }
-
         $grader_id = $this->core->getUser()->getId();
         if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             if ($gradeable->isPeerGrading()) {
                 $user_ids = $this->core->getQueries()->getPeerAssignment($gradeable_id, $grader_id);
                 if (!$gradeable->isTeamAssignment()) {
                     if (!in_array($id, $user_ids)) {
-                        return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
-                    }
-                    else {
                         return $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
                     }
                 }
