@@ -190,9 +190,11 @@ def print_status(epoch_time,
 
     # print overall interactive & regrade queue status
     print_helper("g",1,queue_counts["interactive_grading"],6)
-    print_helper("q",1,queue_counts["interactive"]-queue_counts["interactive_grading"],5)
+    #print_helper("q",1,queue_counts["interactive"]-queue_counts["interactive_grading"],5)
+    print_helper("q",1,queue_counts["interactive"],5)
     print_helper("g",1,queue_counts["regrade_grading"],6)
-    print_helper("q",1,queue_counts["regrade"]-queue_counts["regrade_grading"],4)
+    print_helper("q",1,queue_counts["regrade"],4)
+    #print_helper("q",1,queue_counts["regrade"]-queue_counts["regrade_grading"],4)
     print ("{:2}".format("|"),end="")
     if (queue_counts["interactive"] + queue_counts["interactive_grading"] +
         queue_counts["regrade"] + queue_counts["regrade_grading"]) != 0:
@@ -244,10 +246,13 @@ class QueueItem:
 
 
 def update_queue_counts(queue_or_grading_file,is_grading,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job):
+
+    job_dir, job_file = os.path.split(queue_or_grading_file)
+
     try:
         entry = QueueItem(queue_or_grading_file, epoch_time, is_grading)
     except Exception as e:
-        print(f"Whoops: could not read for {json_file}: {e}")
+        print(f"Whoops: could not read for {queue_or_grading_file}: {e}")
         return
 
     if entry.is_regrade:
@@ -264,7 +269,6 @@ def update_queue_counts(queue_or_grading_file,is_grading,epoch_time,queue_counts
     capability = entry.queue_obj["required_capabilities"]
 
     if not is_grading:
-        job_dir, job_file = os.path.split(queue_or_grading_file)
         if not capability in capability_queue_counts:
 
             print(f"ERROR: {job_file} requires {capability} which is not provided by any worker")
@@ -292,11 +296,11 @@ def update_queue_counts(queue_or_grading_file,is_grading,epoch_time,queue_counts
             if full_machine == m:
                 grading_machine = machine
                 break
-            machine_grading_counts[grading_machine] += 1
+        machine_grading_counts[grading_machine] += 1
 
-            if entry.elapsed_time > max_time:
-                machine_stale_job[grading_machine] = True
-                print(f"--> STALE JOB: {int(entry.elapsed_time):5d} seconds   {json_file:s}")
+        if entry.elapsed_time > max_time:
+            machine_stale_job[grading_machine] = True
+            print(f"--> STALE JOB: {int(entry.elapsed_time):5d} seconds   {job_file:s}")
 
 
 def main():
@@ -326,28 +330,31 @@ def main():
         queue_counts["regrade"] = 0
         queue_counts["regrade_grading"] = 0
 
+        # collect all the jobs that are still in the queue
         for full_path_file in Path(GRADING_QUEUE).glob("*"):
             update_queue_counts(full_path_file,False,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job)
 
+        # collect all the jobs that are in the worker directories
         for worker_folder in filter(os.path.isdir, Path(IN_PROGRESS_DIR).glob('*')):
             all_the_files = Path(worker_folder).glob('*')
             just_grading_files = Path(worker_folder).glob('GRADING_*')
             all_files = []
 
             for a_file in all_the_files:
-                all_files.append(a_file)
+                all_files.append(str(a_file))
 
             for grading_file in just_grading_files:
-                non_grading_tmp = (grading_file.name)[8:]
-                non_grading_file = os.path.join(grading_file.parent,non_grading_tmp)
+                non_grading_tmp = str((grading_file.name)[8:])
+                non_grading_file = str(os.path.join(grading_file.parent,non_grading_tmp))
                 try:
                     all_files.remove(non_grading_file)
                 except Exception as e:
                     print (f"WARNING -- {non_grading_file} wasn't in all_files list")
                 try:
-                    all_files.remove(grading_file)
+                    all_files.remove(str(grading_file))
                 except Exception as e:
                     print (f"WARNING -- {grading_file} wasn't in all_files list")
+                    pass
                 update_queue_counts(grading_file,True,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job)
 
             for not_yet_started in all_files:

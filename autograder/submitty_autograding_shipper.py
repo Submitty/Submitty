@@ -1492,8 +1492,12 @@ def cleanup_shippers(worker_status_map, autograding_workers):
                 os.remove(f)
                 print(f"cancelling in progress job: {fname}")
             else:
-                shutil.move(str(f), INTERACTIVE_QUEUE)
-                print(f"Returned job to the to_be_graded_queue: {fname}")
+                try:
+                    shutil.move(str(f), INTERACTIVE_QUEUE)
+                    print(f"Returned job to the to_be_graded_queue: {fname}")
+                except Exception as e:
+                    print(f"WARNING: Failed to return job: {fname} ERROR: {e}")
+                    os.remove(f)
         os.rmdir(p)
         print(f"cleaned up directory: {p}")
 
