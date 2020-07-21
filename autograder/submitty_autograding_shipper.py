@@ -1501,7 +1501,7 @@ def cleanup_shippers(worker_status_map, autograding_workers):
         os.rmdir(p)
         print(f"cleaned up directory: {p}")
 
-        
+
 # ==================================================================================
 # ==================================================================================
 def launch_shippers(worker_status_map, autograding_workers):
