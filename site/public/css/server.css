@@ -665,6 +665,8 @@ td>a.active-sort {
     vertical-align: top;
     margin-left: 10px;
     padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .box-block > h4 {
@@ -685,11 +687,15 @@ td>a.active-sort {
     margin-right: 10px;
 }
 
-/*.diff-element {*/
-/*    float: left;*/
-/*    margin-right: 20px;*/
-/*}*/
+.diff-element {
+    flex: 1;
+    max-width: 100%;
+    margin-right: 2px;
+}
 
+.diff-element > h4 {
+    white-space: nowrap;
+}
 .badge {
     float: left;
     display: inline-block;
