@@ -1436,9 +1436,9 @@ class Gradeable extends AbstractModel {
             }
             else {
                 $user = $gg->getSubmitter()->getUser();
-            }
-            $late_days = LateDays::fromUser($this->core, $user);
-            $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
+            } 
+            $late_day = new LateDays($this->core, $user, [$gg]);
+            $late_status = $late_day->getLateDayInfoByGradeable($this)->getStatus();
             if ($is_rotate) {
                 $key = $user->getRotatingSection();
             }
@@ -1473,8 +1473,8 @@ class Gradeable extends AbstractModel {
             else {
                 $user = $gg->getSubmitter()->getUser();
             }
-            $late_days = LateDays::fromUser($this->core, $user);
-            $late_status = $late_days->getLateDayInfoByGradeable($this)->getStatus();
+            $late_day = new LateDays($this->core, $user, [$gg]);
+            $late_status = $late_day->getLateDayInfoByGradeable($this)->getStatus();
             if ($is_rotate) {
                 $key = $user->getRotatingSection();
             }
