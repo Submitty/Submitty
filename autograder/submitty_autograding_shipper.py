@@ -1586,7 +1586,7 @@ def get_job_requirements(job_file):
             job_obj = json.load(infile)
         return job_obj["required_capabilities"]
     except Exception:
-        print (f"ERROR: This job does not have required capabilities: {job_file}")
+        print(f"ERROR: This job does not have required capabilities: {job_file}")
         return None
 
 
