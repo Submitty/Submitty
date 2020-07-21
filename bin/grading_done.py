@@ -36,6 +36,8 @@ with open(os.path.join(CONFIG_PATH, 'autograding_workers.json')) as open_file:
 
 DAEMON_USER=OPEN_USERS_JSON['daemon_user']
 
+GLOBAL_LAST_PRINT = 100
+
 # ======================================================================
 # some error checking on the queues (& permissions of this user)
 
@@ -64,10 +66,38 @@ def print_helper(label,label_width,value,value_width):
         print(("{:"+str(label_width)+"s}:{:<"+str(value_width)+"d}").format(label,value), end="")
 
 
-def print_header(num_shippers,num_workers,
-                 OPEN_AUTOGRADING_WORKERS_JSON,
+def print_header(OPEN_AUTOGRADING_WORKERS_JSON,
                  capability_queue_counts,
                  pad_machines,pad_capabilities):
+
+    # count the shipper & worker processes
+    pid_list = psutil.pids()
+    num_shippers=0
+    num_workers=0
+    for pid in pid_list:
+        try:
+            proc = psutil.Process(pid)
+            if DAEMON_USER == proc.username():
+                if (len(proc.cmdline()) >= 2 and
+                    proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"autograder","submitty_autograding_shipper.py")):
+                    num_shippers+=1
+                if (len(proc.cmdline()) >= 2 and
+                    proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"autograder","submitty_autograding_worker.py")):
+                    num_workers+=1
+        except psutil.NoSuchProcess:
+            pass
+
+    # remove 1 from the count...  each worker is forked from the
+    # initial process
+    num_shippers-=1
+    num_workers-=1
+
+    if num_shippers <= 0:
+        print ("WARNING: No matching submitty_autograding_shipper.py processes!")
+        num_shippers = 0
+    if num_workers <= 0:
+        print ("WARNING: No matching (local machine) submitty_autograding_worker.py processes!")
+        num_workers = 0
 
     num_machines = len(OPEN_AUTOGRADING_WORKERS_JSON)
     num_capabilities = len(capability_queue_counts)
@@ -126,9 +156,7 @@ def print_header(num_shippers,num_workers,
     print ('-'*table_width)
 
 
-last_print = 100
-
-def print_status(epoch_time,num_shippers,num_workers,
+def print_status(epoch_time,
                  queue_counts,
                  OPEN_AUTOGRADING_WORKERS_JSON,
                  machine_stale_job,
@@ -145,11 +173,10 @@ def print_status(epoch_time,num_shippers,num_workers,
     pad_capabilities = max(0, 21 - num_capabilities*9)
 
     # print the column headings every 2 minutes
-    global last_print
-    if (epoch_time > last_print+120):
-        last_print = epoch_time
-        print_header(num_shippers,num_workers,
-                     OPEN_AUTOGRADING_WORKERS_JSON,
+    global GLOBAL_LAST_PRINT
+    if (epoch_time > GLOBAL_LAST_PRINT+120):
+        GLOBAL_LAST_PRINT = epoch_time
+        print_header(OPEN_AUTOGRADING_WORKERS_JSON,
                      capability_queue_counts,
                      pad_machines, pad_capabilities)
 
@@ -237,7 +264,21 @@ def update_queue_counts(queue_or_grading_file,is_grading,epoch_time,queue_counts
     capability = entry.queue_obj["required_capabilities"]
 
     if not is_grading:
-        capability_queue_counts[capability] += 1
+        job_dir, job_file = os.path.split(queue_or_grading_file)
+        if not capability in capability_queue_counts:
+
+            print(f"ERROR: {job_file} requires {capability} which is not provided by any worker")
+        else:
+            capability_queue_counts[capability] += 1
+
+            enabled_worker = False
+            for machine in OPEN_AUTOGRADING_WORKERS_JSON:
+                if OPEN_AUTOGRADING_WORKERS_JSON[machine]["enabled"]:
+                    if capability in OPEN_AUTOGRADING_WORKERS_JSON[machine]["capabilities"]:
+                        enabled_worker = True
+
+            if not enabled_worker:
+                print(f"ERROR: {job_file} requires {capability} which is not provided by any *ENABLED* worker")
 
     else:
         max_time = entry.queue_obj["max_possible_grading_time"]
@@ -278,35 +319,6 @@ def main():
         for machine in OPEN_AUTOGRADING_WORKERS_JSON:
             machine_stale_job[machine] = False
 
-        # count the processes
-        pid_list = psutil.pids()
-        num_shippers=0
-        num_workers=0
-        for pid in pid_list:
-            try:
-                proc = psutil.Process(pid)
-                if DAEMON_USER == proc.username():
-                    if (len(proc.cmdline()) >= 2 and
-                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"autograder","submitty_autograding_shipper.py")):
-                        num_shippers+=1
-                    if (len(proc.cmdline()) >= 2 and
-                        proc.cmdline()[1] == os.path.join(SUBMITTY_INSTALL_DIR,"autograder","submitty_autograding_worker.py")):
-                        num_workers+=1
-            except psutil.NoSuchProcess:
-                pass
-
-        # remove 1 from the count...  each worker is forked from the
-        # initial process
-        num_shippers-=1
-        num_workers-=1
-
-        if num_shippers <= 0:
-            print ("WARNING: No matching submitty_autograding_shipper.py processes!")
-            num_shippers = 0
-        if num_workers <= 0:
-            print ("WARNING: No matching (local machine) submitty_autograding_worker.py processes!")
-            num_workers = 0
-
         # most instructors do not have read access to the interactive queue
         queue_counts = {}
         queue_counts["interactive"] = 0
@@ -342,7 +354,6 @@ def main():
                 update_queue_counts(not_yet_started,False,epoch_time,queue_counts,capability_queue_counts,machine_grading_counts,machine_stale_job)
 
         done = print_status(epoch_time,
-                            num_shippers,num_workers,
                             queue_counts,
                             OPEN_AUTOGRADING_WORKERS_JSON,
                             machine_stale_job,
