@@ -2497,9 +2497,9 @@ class ElectronicGraderController extends AbstractController {
             $component = $container->getComponent();
             $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
         }
-        $ta_graded_gradeable->setOverallComment("", $gradeable_id);
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id);
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-        $this->core->getOutput()->renderJsonSuccess('Marks removed successfully!');
+        $this->core->getOutput()->renderJsonSuccess($peer_id);
         return true;
     }
 }

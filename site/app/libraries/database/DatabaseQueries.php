@@ -5196,6 +5196,10 @@ AND gc_id IN (
         $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
         $this->course_db->query($query, $params);
     }
+    
+    public function deleteOverallComment($gradeable_id, $grader_id) {
+        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+    }
 
     /**
      * Update/create the components/marks for a gradeable.
