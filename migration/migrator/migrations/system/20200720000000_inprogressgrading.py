@@ -20,9 +20,9 @@ def down(config):
     after = Path(config.submitty['submitty_data_dir'], 'grading')
 
     if not os.path.isdir(before):
-        raise SystemExit("ERROR: grading directory does not exist")
+        raise SystemExit("ERROR: in_progress_grading directory does not exist")
     if os.path.isdir(after):
-        raise SystemExit("ERROR: in_progress_grading directory already exists")
+        raise SystemExit("ERROR: grading directory already exists")
 
     shutil.move(before,after)
 
