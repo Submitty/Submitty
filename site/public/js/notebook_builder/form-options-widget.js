@@ -56,10 +56,6 @@ class FormOptionsWidget extends Widget {
         const config_json = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
-        // Currently only deals with uploading images, will rework later to accommodate other files/directories as needed
-        const file_selectors = document.querySelectorAll('input[type=file]');
-        uploadFiles(file_selectors, builder_data.g_id, 'test_input');
-
         const form_data = new FormData();
         form_data.append('config_upload', config_json, 'config.json');
         form_data.append('csrf_token', csrfToken);
@@ -68,6 +64,11 @@ class FormOptionsWidget extends Widget {
 
         const makeRequest = async () => {
             this.appendStatusMessage('Saving...');
+
+            // Currently only deals with uploading images, will rework later to accommodate other files/directories as needed
+            // Wait for all files to be uploaded before continuing
+            const file_selectors = document.querySelectorAll('input[type=file]');
+            await uploadFiles(file_selectors, builder_data.g_id, 'test_input');
 
             const response = await fetch(url, {method: 'POST', body: form_data});
             const result = await response.json();

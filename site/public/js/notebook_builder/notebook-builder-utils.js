@@ -35,8 +35,8 @@ async function uploadFile(file, g_id, directory) {
     }
 }
 
-async function uploadFiles(file_inputs, g_id, directory) {
-    for (const file_input of file_inputs) {
+async function uploadFiles(file_selectors, g_id, directory) {
+    for (const file_input of file_selectors) {
         if (file_input.files[0]) {
             await uploadFile(file_input.files[0], g_id, directory);
         }
