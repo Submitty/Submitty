@@ -79,6 +79,8 @@ textarea.sa-box {
 .mc label {
     float: left;
     clear: both;
+    display: flex;
+    align-items: center;
 }
 
 .mc input[type='checkbox'],
