@@ -648,14 +648,14 @@ fi
 if [ "${WORKER}" == 0 ]; then
     for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
         echo "ERROR: Also kill shipper pid $i";
-        kill $i;
+        kill $i || true;
     done
 fi
 
 # force kill any other worker processes that may be manually running on the primary or remote machines
 for i in $(ps -ef | grep submitty_autograding_worker | grep -v grep | awk '{print $2}'); do
     echo "ERROR: Also kill shipper pid $i";
-    kill $i;
+    kill $i || true;
 done
 
 
