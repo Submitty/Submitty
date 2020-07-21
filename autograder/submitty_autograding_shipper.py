@@ -1487,16 +1487,17 @@ def cleanup_shippers(worker_status_map, autograding_workers):
     # clean up the worker queue files and queue directories (they will be recreated)
     for p in Path(IN_PROGRESS_PATH).glob('*'):
         for f in Path(p).glob('*'):
-            dname,fname = os.path.split(f)
+            dname, fname = os.path.split(f)
             if fname.startswith("GRADING_"):
                 os.remove(f)
-                print (f"cancelling in progress job: {fname}")
+                print(f"cancelling in progress job: {fname}")
             else:
-                shutil.move(str(f),INTERACTIVE_QUEUE)
-                print (f"Returned job to the to_be_graded_queue: {fname}")
+                shutil.move(str(f), INTERACTIVE_QUEUE)
+                print(f"Returned job to the to_be_graded_queue: {fname}")
         os.rmdir(p)
-        print (f"cleaned up directory: {p}")
+        print(f"cleaned up directory: {p}")
 
+        
 # ==================================================================================
 # ==================================================================================
 def launch_shippers(worker_status_map, autograding_workers):
@@ -1589,27 +1590,24 @@ def get_job_requirements(job_file):
         return None
 
 
-def worker_job_match(worker,autograding_workers,job_requirements):
+def worker_job_match(worker, autograding_workers, job_requirements):
     try:
         machine = worker.split("_")[0]
         capabilities = autograding_workers[machine]["capabilities"]
         return job_requirements in capabilities
     except Exception:
-        print (f"ERROR: This worker / machine does not have capabilities {worker}")
+        print(f"ERROR: This worker / machine does not have capabilities {worker}")
         return None
 
 
 def monitoring_loop(autograding_workers, processes):
 
-    print ("MONITORING LOOP")
+    print("MONITORING LOOP")
     total_num_workers = len(processes)
 
     # main monitoring loop
     try:
         while True:
-
-            #print (f"LOOPING {len(processes)} {total_num_workers}")
-
             alive = 0
             for name, p in processes:
                 if p.is_alive:
@@ -1647,7 +1645,7 @@ def monitoring_loop(autograding_workers, processes):
                 job_requirements = get_job_requirements(job)
                 # prune the list to the workers that have the necessary capabilities for this job
                 matching_workers = list(filter(
-                    lambda n: worker_job_match(n,autograding_workers,job_requirements),
+                    lambda n: worker_job_match(n, autograding_workers, job_requirements),
                     idle_workers
                 ))
                 if len(matching_workers) == 0:
@@ -1694,7 +1692,7 @@ def monitoring_loop(autograding_workers, processes):
 
 # ==================================================================================
 def load_autograding_workers_json():
-    print ("LOAD AUTOGRADING WORKERS JSON")
+    print("LOAD AUTOGRADING WORKERS JSON")
 
     # The names of the worker machines, the capabilities of each
     # worker machine, and the number of workers per machine are stored
@@ -1743,6 +1741,6 @@ if __name__ == "__main__":
 
     autograding_workers = load_autograding_workers_json()
     worker_status_map = update_all_foreign_autograding_workers(autograding_workers)
-    cleanup_shippers(worker_status_map,autograding_workers)
-    processes = launch_shippers(worker_status_map,autograding_workers)
+    cleanup_shippers(worker_status_map, autograding_workers)
+    processes = launch_shippers(worker_status_map, autograding_workers)
     monitoring_loop(autograding_workers, processes)
