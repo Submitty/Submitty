@@ -363,14 +363,6 @@ class TaGradedGradeable extends AbstractModel {
     public function setOverallComment($comment, $grader_id) {
         $this->overall_comments[$grader_id] = $comment;
     }
-    
-    /**
-     * Remove the overall comment for a grader. Access should be checked before calling this function.
-     * @param string $grader_id. The grader that made the comment.
-     */
-    public function removeOverallComment($grader_id) {
-        unset($this->overall_comments[$grader_id]);
-    }
 
     /**
      * Retrieves a mapping of grader id to overall comment. If grader is passed in, returns only
