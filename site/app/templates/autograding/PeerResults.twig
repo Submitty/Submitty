@@ -297,7 +297,7 @@ function switch_feedback_modes() {
                                             {% else %}
                                                 <i class="far fa-square fa-1g"></i>
                                             {% endif %}
-                                            {{ mark.points|number_format(num_decimals) }}
+                                            {{ (mark.points)|number_format(num_decimals) }}
                                             {{ mark.title|nl2br }}
                                             </br>
                                         {% endfor %}
