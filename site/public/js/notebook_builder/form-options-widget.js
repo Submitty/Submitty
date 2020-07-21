@@ -60,7 +60,6 @@ class FormOptionsWidget extends Widget {
         form_data.append('config_upload', config_json, 'config.json');
         form_data.append('csrf_token', csrfToken);
         form_data.append('g_id', builder_data.g_id);
-        form_data.append('mode', builder_data.mode);
 
         const makeRequest = async () => {
             this.appendStatusMessage('Saving...');
@@ -81,9 +80,6 @@ class FormOptionsWidget extends Widget {
 
                 this.appendStatusMessage(`Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`);
                 this.appendStatusMessage(`To make other changes to the gradeable configuration visit the <a href="${edit_gradeable_url}">edit gradeable page</a>.`);
-
-                // Set mode to 'edit' so any additional edits on a 'new' config will be handled correctly
-                builder_data.mode = 'edit';
             }
             else {
                 this.appendStatusMessage(result.message);

@@ -18,10 +18,16 @@ class ImageWidget extends Widget {
         interactive_area.innerHTML = this.getImageTemplate(this.state.height, this.state.width, this.state.alt_text);
 
         if (this.state.image) {
+            const image_container = interactive_area.querySelector('.image-container');
+
             const file_selector = interactive_area.querySelector('input[type=file]');
             file_selector.style.display = 'none';
 
-            this.loadExistingImage(builder_data.images[this.state.image], interactive_area.querySelector('.image-container'))
+            const file_name_msg = document.createElement('p');
+            file_name_msg.innerText = `Filename: ${this.state.image}`;
+            image_container.appendChild(file_name_msg);
+
+            this.loadExistingImage(builder_data.images[this.state.image], image_container);
         }
         else {
             this.captureNewImage(interactive_area);
@@ -61,14 +67,14 @@ class ImageWidget extends Widget {
         <div class="image-options">
             <div class="image-col-small">
                 <label>
-                    Height:
-                    <input class="height-input" type="number" placeholder="Default" min="1" value="${height ? height : ''}">
+                    Width:
+                    <input class="width-input" type="number" placeholder="Default" min="1" value="${width ? width : ''}">
                 </label>
             </div>
             <div class="image-col-small">
                 <label>
-                    Width:
-                    <input class="width-input" type="number" placeholder="Default" min="1" value="${width ? width : ''}">
+                    Height:
+                    <input class="height-input" type="number" placeholder="Default" min="1" value="${height ? height : ''}">
                 </label>
             </div>
             <div class="image-col-large">
@@ -119,7 +125,7 @@ class ImageWidget extends Widget {
     attachImageOnLoadHandler(image, image_container) {
         image.onload = () => {
             const msg = document.createElement('p');
-            msg.innerText = `Dimensions (width x height)\nNative: ${image.naturalWidth} x ${image.naturalHeight}\nShown at: ${image.width} x ${image.height}`;
+            msg.innerText = `Resolution (width x height)\nNative: ${image.naturalWidth} x ${image.naturalHeight}\nShown at: ${image.width} x ${image.height}`;
             image_container.appendChild(msg);
         }
     }
