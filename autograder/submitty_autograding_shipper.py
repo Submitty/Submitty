@@ -101,20 +101,8 @@ def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
 
 
 # ==================================================================================
-def update_all_foreign_autograding_workers():
+def update_all_foreign_autograding_workers(autograding_workers):
     success_map = dict()
-    all_workers_json = os.path.join(SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json")
-
-    try:
-        with open(all_workers_json, 'r') as infile:
-            autograding_workers = json.load(infile)
-    except FileNotFoundError as e:
-        autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH,
-            trace=traceback.format_exc()
-        )
-        raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
-
     for machine, value in autograding_workers.items():
         if value['enabled'] is False:
             print(f"SKIPPING WORKER MACHINE {machine} because it is not enabled")
@@ -1473,17 +1461,14 @@ def write_grading_outputs(
 
 # ==================================================================================
 # ==================================================================================
-def launch_shippers(worker_status_map):
-    # verify the DAEMON_USER is running this script
-    if not int(os.getuid()) == int(DAEMON_UID):
-        raise SystemExit(
-            "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
-        )
+def cleanup_shippers(worker_status_map, autograding_workers):
+    print("CLEANUP SHIPPERS")
     autograding_utils.log_message(
         AUTOGRADING_LOG_PATH, JOB_ID,
-        message="grade_scheduler.py launched"
+        message="cleanup prior to launching submitty_autograding_shipper.py"
     )
 
+    # remove the temporary files for any incomplete autograding
     for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
         file_path = str(file_path)
         autograding_utils.log_message(
@@ -1499,69 +1484,67 @@ def launch_shippers(worker_status_map):
         )
         os.remove(file_path)
 
-    # The names of the worker machines, the capabilities of each
-    # worker machine, and the number of workers per machine are stored
-    # in the autograding_workers json.
-    try:
-        autograding_workers_path = os.path.join(
-            SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json"
-        )
-        with open(autograding_workers_path, 'r') as infile:
-            autograding_workers = json.load(infile)
-    except Exception as e:
-        autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-            trace=traceback.format_exc()
-        )
-        raise SystemExit(f"ERROR: could not locate the autograding workers json: {e}")
+    # clean up the worker queue files and queue directories (they will be recreated)
+    for p in Path(IN_PROGRESS_PATH).glob('*'):
+        print (f"A PATH {p}")
+        for f in Path(p).glob('*'):
+            print (f"A FILE {f}")
 
-    # There must always be a primary machine, it may or may not have
-    # autograding workers.
-    if "primary" not in autograding_workers:
-        raise SystemExit("ERROR: autograding_workers.json contained no primary machine.")
+            dname,fname = os.path.split(f)
 
-    # One (or more) of the machines must accept "default" jobs.
-    default_present = False
-    for _name, machine in autograding_workers.items():
-        if not machine["enabled"]:
-            continue
-        if "default" in machine["capabilities"]:
-            default_present = True
-            break
-    if not default_present:
-        raise SystemExit(
-            "ERROR: autograding_workers.json contained no enabled machine with default capabilities"
-        )
+            print (f"JUST FILE {fname}")
+
+            if fname.startswith("GRADING_"):
+                os.remove(f)
+                print ("removed")
+            else:
+                shutil.move(str(f),INTERACTIVE_QUEUE)
+                print ("moved")
+
+        os.rmdir(p)
+        print ("cleaned up directory")
+
+# ==================================================================================
+# ==================================================================================
+def launch_shippers(worker_status_map, autograding_workers):
+    print("LAUNCH SHIPPERS")
+    autograding_utils.log_message(
+        AUTOGRADING_LOG_PATH, JOB_ID,
+        message="submitty_autograding_shipper.py launched"
+    )
 
     # Launch a shipper process for every worker on the primary machine and each worker machine
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
 
-        thread_count = machine["num_autograding_workers"]
+        # SKIP MACHINES THAT ARE NOT ENABLED OR NOT REACHABLE
+        if not machine['enabled']:
+            print(f"NOTE: MACHINE {name} is not enabled")
+            autograding_utils.log_message(
+                AUTOGRADING_LOG_PATH, JOB_ID,
+                message=f"NOTE: MACHINE {name} is not enabled"
+            )
+            continue
+        if not worker_status_map[name]:
+            print(f"ERROR: MACHINE {name} could not be reached => no shipper threads.")
+            autograding_utils.log_message(
+                AUTOGRADING_LOG_PATH, JOB_ID,
+                message=f"ERROR: MACHINE {name} could not be reached => no shipper threads."
+            )
+            continue
 
-        # Cleanup previous in-progress submissions
-        worker_folders = [worker_folder(f'{name}_{i}') for i in range(thread_count)]
+        # CREATE THE QUEUE FILE DIRECTORIES
+        num_workers_on_machine = machine["num_autograding_workers"]
+        if num_workers_on_machine < 0:
+            raise SystemExit(
+                f"ERROR: num_workers_on_machine for '{machine}' must be non-negative."
+            )
+        worker_folders = [worker_folder(f'{name}_{i}') for i in range(num_workers_on_machine)]
         for folder in worker_folders:
             os.makedirs(folder, exist_ok=True)
-            # Clear out in-progress files, as these will be re-done.
-            for grading in Path(folder).glob('GRADING_*'):
-                os.remove(grading)
 
-        if not worker_status_map[name]:
-            print(f"{name} is not enabled / could not be reached => no shipper threads.")
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"{name} is not enabled / could not be reached => no shipper threads."
-            )
-            continue
-        if 'enabled' in machine and not machine['enabled']:
-            print(f"{name} is not enabled, so we are not spinning up shipper threads.")
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"{name} is not enabled, so we are not spinning up shipper threads."
-            )
-            continue
+        # PREPARE FULL ADDRESS
         try:
             full_address = ""
             if machine["address"] != "localhost":
@@ -1574,13 +1557,6 @@ def launch_shippers(worker_status_map):
                 if not machine["username"] == "":
                     raise SystemExit('ERROR: username for primary (localhost) must be ""')
                 full_address = machine['address']
-
-            num_workers_on_machine = machine["num_autograding_workers"]
-            if num_workers_on_machine < 0:
-                raise SystemExit(
-                    f"ERROR: num_workers_on_machine for '{machine}' must be non-negative."
-                )
-
             single_machine_data = {name: machine}
             single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
         except Exception as e:
@@ -1596,8 +1572,9 @@ def launch_shippers(worker_status_map):
                         "For more details, see trace entry."
             )
             continue
-        # launch the shipper threads
-        for i in range(thread_count):
+
+        # LAUNCH SHIPPER THREADS
+        for i in range(num_workers_on_machine):
             thread_name = f'{name}_{i}'
             u = "untrusted" + str(i).zfill(2)
             p = multiprocessing.Process(
@@ -1607,6 +1584,14 @@ def launch_shippers(worker_status_map):
             p.start()
             processes.append((thread_name, p))
         total_num_workers += num_workers_on_machine
+
+    return total_num_workers, processes
+
+
+
+def monitoring_loop(autograding_workers, total_num_workers, processes):
+
+    print ("MONITORING LOOP")
 
     # main monitoring loop
     try:
@@ -1684,6 +1669,47 @@ def launch_shippers(worker_status_map):
 
 
 # ==================================================================================
+def load_autograding_workers_json():
+    print ("LOAD AUTOGRADING WORKERS JSON")
+
+    # The names of the worker machines, the capabilities of each
+    # worker machine, and the number of workers per machine are stored
+    # in the autograding_workers json.
+    try:
+        autograding_workers_path = os.path.join(
+            SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json"
+        )
+        with open(autograding_workers_path, 'r') as infile:
+            autograding_workers = json.load(infile)
+    except Exception as e:
+        autograding_utils.log_stack_trace(
+            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            trace=traceback.format_exc()
+        )
+        raise SystemExit(f"ERROR: could not locate the autograding workers json: {e}")
+
+    # There must always be a primary machine, it may or may not have
+    # autograding workers.
+    if "primary" not in autograding_workers:
+        raise SystemExit("ERROR: autograding_workers.json contained no primary machine.")
+
+    # One (or more) of the machines must accept "default" jobs.
+    default_present = False
+    for _name, machine in autograding_workers.items():
+        if not machine["enabled"]:
+            continue
+        if "default" in machine["capabilities"]:
+            default_present = True
+            break
+    if not default_present:
+        raise SystemExit(
+            "ERROR: autograding_workers.json contained no enabled machine with default capabilities"
+        )
+
+    return autograding_workers
+
+
+# ==================================================================================
 if __name__ == "__main__":
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
@@ -1691,5 +1717,8 @@ if __name__ == "__main__":
             "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
         )
 
-    worker_status_map = update_all_foreign_autograding_workers()
-    launch_shippers(worker_status_map)
+    autograding_workers = load_autograding_workers_json()
+    worker_status_map = update_all_foreign_autograding_workers(autograding_workers)
+    cleanup_shippers(worker_status_map,autograding_workers)
+    total_num_workers, processes = launch_shippers(worker_status_map,autograding_workers)
+    monitoring_loop(autograding_workers, total_num_workers, processes)
