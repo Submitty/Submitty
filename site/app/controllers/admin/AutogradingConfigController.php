@@ -314,27 +314,6 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * Generate an associative array of files in the given directory.  The file contents are encoded into a base64
-     * data url.  The result array can be easily json encoded and has the form:
-     *
-     * [<file_name> => <data_url>]
-     *
-     * @param string $directory Absolute path to the directory.
-     * @return array
-     */
-    private function notebookBuilderGetFiles(string $directory): array {
-        $result = [];
-        $paths = FileUtils::getAllFilesTrimSearchPath($directory, 0);
-
-        foreach ($paths as $path) {
-            $parts = explode('/', $path);
-            $result[$parts[sizeof($parts) - 1]] = FileUtils::readAsDataURL($path);
-        }
-
-        return $result;
-    }
-
-    /**
      * @Route("/courses/{_semester}/{_course}/notebook_builder/save", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
@@ -356,14 +335,6 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * Helper function used to trigger a gradeable rebuild.
-     */
-    private function notebookBuilderRebuildGradeable(Gradeable $gradeable): void {
-        $admin_gradeable_controller = new AdminGradeableController($this->core);
-        $admin_gradeable_controller->enqueueBuild($gradeable);
-    }
-
-    /**
      * @Route("/courses/{_semester}/{_course}/notebook_builder/file", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
@@ -379,6 +350,25 @@ class AutogradingConfigController extends AbstractController {
         }
 
         return JsonResponse::getErrorResponse('Invalid operation.');
+    }
+
+    /**
+     * Helper function which deals with capturing files uploaded via the notebook builder 'file' endpoint
+     *
+     * @param Gradeable $gradeable
+     * @return JsonResponse
+     */
+    private function notebookBuilderFileUpload(Gradeable $gradeable): JsonResponse {
+        // Create directory if it doesn't exist
+        $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
+        FileUtils::createDir($directory_path);
+
+        // Move uploaded file
+        $full_path = FileUtils::joinPaths($directory_path, $_FILES['file']['name']);
+        $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
+        $permission_res = $this->notebookBuilderUpdateGroupPermission($full_path);
+
+        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
     }
 
     /**
@@ -405,25 +395,6 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * Helper function which deals with capturing files uploaded via the notebook builder 'file' endpoint
-     *
-     * @param Gradeable $gradeable
-     * @return JsonResponse
-     */
-    private function notebookBuilderFileUpload(Gradeable $gradeable): JsonResponse {
-        // Create directory if it doesn't exist
-        $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
-        FileUtils::createDir($directory_path);
-
-        // Move uploaded file
-        $full_path = FileUtils::joinPaths($directory_path, $_FILES['file']['name']);
-        $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
-        $permission_res = $this->notebookBuilderUpdateGroupPermission($full_path);
-
-        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
-    }
-
-    /**
      * Helper function to fix the group permission on newly uploaded files.
      *
      * @param string $path Absolute path to file.
@@ -432,5 +403,34 @@ class AutogradingConfigController extends AbstractController {
     private function notebookBuilderUpdateGroupPermission(string $path): bool {
         $group = $this->core->getConfig()->getCourse() . '_tas_www';
         return chgrp($path, $group);
+    }
+
+    /**
+     * Helper function used to trigger a gradeable rebuild.
+     */
+    private function notebookBuilderRebuildGradeable(Gradeable $gradeable): void {
+        $admin_gradeable_controller = new AdminGradeableController($this->core);
+        $admin_gradeable_controller->enqueueBuild($gradeable);
+    }
+
+    /**
+     * Generate an associative array of files in the given directory.  The file contents are encoded into a base64
+     * data url.  The result array can be easily json encoded and has the form:
+     *
+     * [<file_name> => <data_url>]
+     *
+     * @param string $directory Absolute path to the directory.
+     * @return array
+     */
+    private function notebookBuilderGetFiles(string $directory): array {
+        $result = [];
+        $paths = FileUtils::getAllFilesTrimSearchPath($directory, 0);
+
+        foreach ($paths as $path) {
+            $parts = explode('/', $path);
+            $result[$parts[sizeof($parts) - 1]] = FileUtils::readAsDataURL($path);
+        }
+
+        return $result;
     }
 }
