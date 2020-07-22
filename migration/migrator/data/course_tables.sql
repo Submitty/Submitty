@@ -197,7 +197,6 @@ CREATE TABLE public.electronic_gradeable (
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
-    eg_grade_inquiry_start_date timestamp(6) with time zone,
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
@@ -598,40 +597,6 @@ CREATE TABLE public.peer_assign (
 
 
 --
--- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.peer_feedback (
-    pf_id integer NOT NULL,
-    grader_id character varying(255) NOT NULL,
-    user_id character varying(255),
-    team_id character varying(255),
-    g_id character varying(255) NOT NULL,
-    feedback character varying(255),
-    CONSTRAINT user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
-);
-
-
---
--- Name: peer_feedback_pf_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.peer_feedback_pf_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: peer_feedback_pf_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.peer_feedback_pf_id_seq OWNED BY public.peer_feedback.pf_id;
-
-
---
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -951,8 +916,7 @@ CREATE TABLE public.teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     state integer NOT NULL,
-    last_viewed_time timestamp(6) with time zone DEFAULT NULL::timestamp with time zone,
-    anon_id character varying(255)
+    last_viewed_time timestamp(6) with time zone DEFAULT NULL::timestamp with time zone
 );
 
 
@@ -1082,13 +1046,6 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment ALTER COLUMN goc_id SET D
 --
 
 ALTER TABLE ONLY public.notifications ALTER COLUMN id SET DEFAULT nextval('public.notifications_id_seq'::regclass);
-
-
---
--- Name: peer_feedback pf_id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.peer_feedback ALTER COLUMN pf_id SET DEFAULT nextval('public.peer_feedback_pf_id_seq'::regclass);
 
 
 --
@@ -1361,14 +1318,6 @@ ALTER TABLE ONLY public.notifications
 
 ALTER TABLE ONLY public.peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
-
-
---
--- Name: peer_feedback peer_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.peer_feedback
-    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (pf_id);
 
 
 --
@@ -1899,38 +1848,6 @@ ALTER TABLE ONLY public.peer_assign
 
 ALTER TABLE ONLY public.peer_assign
     ADD CONSTRAINT peer_assign_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
-
-
---
--- Name: peer_feedback peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.peer_feedback
-    ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
-
-
---
--- Name: peer_feedback peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.peer_feedback
-    ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
-
-
---
--- Name: peer_feedback peer_feedback_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.peer_feedback
-    ADD CONSTRAINT peer_feedback_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
-
-
---
--- Name: peer_feedback peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.peer_feedback
-    ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
