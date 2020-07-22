@@ -247,7 +247,7 @@ class AutogradingConfigController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
      * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
-     * notebook builder know to save a new configuration or edit the existing one
+     * notebook builder know to save a new configuration or edit the existing one.
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilder(string $g_id, string $mode) {
@@ -277,6 +277,8 @@ class AutogradingConfigController extends AbstractController {
             return new RedirectResponse($failure_url);
         }
 
+        $images = json_encode($this->notebookBuilderGetFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
+
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
 
         $json_contents = file_get_contents($json_path);
@@ -303,8 +305,6 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/image-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
-
-        $images = json_encode($this->notebookBuilderGetFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
