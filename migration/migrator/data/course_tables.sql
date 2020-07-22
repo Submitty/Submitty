@@ -427,8 +427,7 @@ CREATE TABLE peer_feedback (
     user_id character varying(255),
     team_id character varying(255),
     g_id character varying(255) NOT NULL,
-    feedback_full character varying(255),
-    feedback_id character varying(255),
+    feedback character varying(255),
     CONSTRAINT user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL)
 );
 

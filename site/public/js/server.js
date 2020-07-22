@@ -1641,7 +1641,6 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         contentType: false,
         success: function(data) {
             try {
-                console.log(data);
                 $('#save_status').html('All Changes Saved');
             } catch(err){
                 return;
