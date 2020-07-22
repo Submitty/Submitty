@@ -266,7 +266,9 @@ def update_queue_counts(queue_or_grading_file,is_grading,epoch_time,queue_counts
         else:
             queue_counts["interactive"] += 1
 
-    capability = entry.queue_obj["required_capabilities"]
+    capability = "default"
+    if "required_capabilities" in entry.queue_obj:
+        capability = entry.queue_obj["required_capabilities"]
 
     if not is_grading:
         if not capability in capability_queue_counts:
