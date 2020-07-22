@@ -60,7 +60,15 @@ class ImageWidget extends Widget {
         this.state = data;
     }
 
-    getImageTemplate(height, width, alt_text) {
+    /**
+     * Get the image widget template
+     *
+     * @param {int} width Value to be shown in the enter width box
+     * @param {int} height Value to be shown in the enter height box
+     * @param {string} alt_text Value to be shown in the alternate text box
+     * @returns {string}
+     */
+    getImageTemplate(width, height, alt_text) {
         return `
         <div class="image-container"></div>
         <input type="file" accept="image/*">
@@ -83,9 +91,15 @@ class ImageWidget extends Widget {
                     <textarea class="alt-text-input" placeholder="For accessibility, provide a short description of this image's contents.">${alt_text ? alt_text : ''}</textarea>
                 </label>
             </div>
-        </div>`
+        </div>`;
     }
 
+    /**
+     * Handles displaying the image and other misc information immediately after the image has been selected in a file
+     * selector.
+     *
+     * @param {HTMLDivElement} interactive_area The widget's interactive area div
+     */
     captureNewImage(interactive_area) {
         const reader = new FileReader();
         const image = new Image();
@@ -115,6 +129,12 @@ class ImageWidget extends Widget {
         }
     }
 
+    /**
+     * Handle loading an existing image that has been passed from the server.
+     *
+     * @param {string} image_data_url The image encoded as a base64 data url.
+     * @param {HTMLDivElement} image_container The div which holds the image.
+     */
     loadExistingImage(image_data_url, image_container) {
         const image = new Image();
         this.attachImageOnLoadHandler(image, image_container);
@@ -122,6 +142,13 @@ class ImageWidget extends Widget {
         image_container.prepend(image);
     }
 
+    /**
+     * Attaches a handler to the given image.  This handler takes care of displaying some additional information
+     * about the image when it is loaded.
+     *
+     * @param {Image} image
+     * @param {HTMLDivElement} image_container The widget's interactive container div.
+     */
     attachImageOnLoadHandler(image, image_container) {
         image.onload = () => {
             const msg = document.createElement('p');

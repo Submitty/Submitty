@@ -471,6 +471,7 @@ class FileUtils {
      * This function is meant to mimic javascript's FileReader::readAsDataURL() method.
      *
      * @param string $path Path to the file to be encoded.
+     * @throws FileReadException Unable to read file at the given path.
      * @return string
      */
     public static function readAsDataURL(string $path) {

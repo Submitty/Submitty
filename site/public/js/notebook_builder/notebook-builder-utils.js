@@ -1,9 +1,4 @@
 /**
- * This file provides helper functions to be used with notebook builder.
- */
-
-
-/**
  * Asynchronous upload of configuration dependency file.
  * These would typically be files that go in the 'test_input' or 'test_output' directory
  *
@@ -35,6 +30,16 @@ async function uploadFile(file, g_id, directory) {
     }
 }
 
+/**
+ * From an array of html file selector inputs, collect files that have been selected by the user, and upload them
+ * asynchronously to the server.
+ *
+ * @param {Array.<HTMLInputElement>} file_selectors
+ * @param {string} g_id Gradeable ID
+ * @param {string} directory A subdirectory inside the autograding configuration directory the file should be uploaded
+ *                           to.
+ * @returns {Promise}
+ */
 async function uploadFiles(file_selectors, g_id, directory) {
     for (const file_input of file_selectors) {
         if (file_input.files[0]) {

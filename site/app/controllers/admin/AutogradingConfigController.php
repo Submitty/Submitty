@@ -428,7 +428,7 @@ class AutogradingConfigController extends AbstractController {
 
         foreach ($paths as $path) {
             $parts = explode('/', $path);
-            $result[$parts[sizeof($parts) - 1]] = FileUtils::readAsDataURL($path);
+            $result[$parts[count($parts) - 1]] = FileUtils::readAsDataURL($path);
         }
 
         return $result;
