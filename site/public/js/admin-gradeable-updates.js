@@ -328,7 +328,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
       $('#peer_loader').addClass("hide");
       return false;} 
     }
-    let gradeable_id=$('#g_id').val();
+    var gradeable_id=$('#g_id').val();
     let restrict_to_registration="unchecked";
     $('#peer_loader').removeClass("hide");
     if($('#restrict-to-registration').is(':checked')){
@@ -344,6 +344,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
             restrict_to_registration:restrict_to_registration
         },
         success: function(response){
+            console.log(response);
             let res=JSON.parse(response);
             if (res.data === "Invalid Number of Students Entered") {
                 confirm("Do you Want to go with ALL grade ALL?");
