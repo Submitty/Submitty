@@ -860,6 +860,9 @@ class ForumController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/forum", methods={"GET"})
      */
     public function showFullThreads($category_ids = [], $thread_status = [], $show_deleted = false, $show_merged_thread = false, $unread_threads = false) {
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $show_deleted = $this->showDeleted();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
         // preparing the query params
         $category_ids = array_map(function($category_id) {
             return intval($category_id);
@@ -881,7 +884,7 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
         $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread);
     }
 
     /**
