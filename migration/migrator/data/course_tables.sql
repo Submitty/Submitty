@@ -465,6 +465,7 @@ ALTER SEQUENCE public.gradeable_data_overall_comment_goc_id_seq OWNED BY public.
 CREATE TABLE public.gradeable_teams (
     team_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
+    anon_id character varying(255),
     registration_section character varying(255),
     rotating_section integer
 );
@@ -917,7 +918,6 @@ ALTER SEQUENCE public.student_favorites_id_seq OWNED BY public.student_favorites
 CREATE TABLE public.teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
-    anon_id character varying(255),
     state integer NOT NULL,
     last_viewed_time timestamp(6) with time zone DEFAULT NULL::timestamp with time zone
 );

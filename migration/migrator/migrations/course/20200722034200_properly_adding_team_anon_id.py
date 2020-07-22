@@ -17,7 +17,7 @@ def up(config, database, semester, course):
 
     database.execute(
         """
-        ALTER TABLE teams
+        ALTER TABLE gradeable_teams
             ADD COLUMN IF NOT EXISTS anon_id VARCHAR (255)
         """
     )
