@@ -15,7 +15,7 @@ def up(config, database, semester, course):
     :type course: str
     """
 
-'''database.execute(
+    '''database.execute(
         """
         ALTER TABLE ONLY teams
             ADD COLUMN anon_id VARCHAR (255)
