@@ -10,6 +10,7 @@ gradeables:
 - g_id: future_peer_grading
   g_title: Future Peer Homework
   gradeable_config: python_simple_homework
+  eg_peer_grading: true
   components:
   - gc_lower_clamp: 0
     gc_is_peer: true
@@ -206,6 +207,7 @@ gradeables:
   g_bucket: homework
 
 - g_id: open_peer_homework
+  eg_peer_grading: true
   components:
   - gc_lower_clamp: 0
     gc_is_peer: true
@@ -473,6 +475,7 @@ gradeables:
   g_bucket: homework
 
 - g_id: grading_only_peer_team_homework
+  eg_peer_grading: true
   components:
   - gc_lower_clamp: 0
     gc_is_peer: true
@@ -544,6 +547,7 @@ gradeables:
   g_bucket: homework
 
 - g_id: closed_team_homework
+  eg_peer_grading: true
   components:
   - gc_lower_clamp: 0
     gc_default: 2
