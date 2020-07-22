@@ -10,9 +10,9 @@
     </p>
     <div class="flex-col" id="user_settings_modal">
         <input id="user-preferred-name-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <h2>Preferred Name</h2>
+        <h2>My Preferred Name</h2>
         <div class="edit_user_row">
-            <label for="user-firstname-change">Preferred First Name:&emsp;</label>
+            <label for="user-firstname-change">Preferred First / Given Name:&emsp;</label>
             <input type="text"
                    name="user_firstname_change"
                    value="{{ user_first }}"
@@ -20,7 +20,7 @@
                    data-current-name="{{ user_first }}"/>
         </div>
         <div class="edit_user_row">
-            <label for="user-lastname-change">Preferred Last Name:&emsp;</label>
+            <label for="user-lastname-change">Preferred Last / Family Name:&emsp;</label>
             <input type="text"
                    name="user_lastname_change"
                    value="{{ user_last }}"
