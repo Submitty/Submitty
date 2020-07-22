@@ -2,8 +2,8 @@
     <div class="sub">
 
         {# Actual results #}
-        {% if in_queue or grading %}
-            {% if grading %}
+        {% if in_queue or in_progress_grading %}
+            {% if in_progress_grading %}
                 <p class="red-message">
                     This submission is currently being graded.
                 </p>
@@ -17,7 +17,7 @@
             </script>
         {% elseif results is not defined %}
             <p class="red-message">
-                Something has gone wrong with grading this submission. Please contact your instructor about this.
+                Something went wrong when grading this submission. Please contact your instructor about this.
             </p>
         {% else %}
             {# Has results! #}

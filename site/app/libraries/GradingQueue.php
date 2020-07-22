@@ -39,7 +39,7 @@ class GradingQueue {
 
     public function __construct($semester, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
-        $this->grading_path = FileUtils::joinPaths($submitty_path, 'grading');
+        $this->grading_path = FileUtils::joinPaths($submitty_path, 'in_progress_grading');
         $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
     }
 

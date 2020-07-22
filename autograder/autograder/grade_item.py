@@ -143,6 +143,7 @@ def grade_from_zip(
             try:
                 # Perform archival.
                 autograding_utils.archive_autograding_results(
+                    config,
                     working_directory,
                     job_id,
                     which_untrusted,
@@ -416,6 +417,7 @@ def grade_from_zip(
             try:
                 # Perform archival.
                 autograding_utils.archive_autograding_results(
+                    config,
                     working_directory,
                     job_id,
                     which_untrusted,
