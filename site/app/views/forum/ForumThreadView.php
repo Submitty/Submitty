@@ -285,13 +285,6 @@ class ForumThreadView extends AbstractView {
 
     // Returns the set of buttons with the corresponding attributes
     public function getAllForumButtons($thread_exists, $thread_id, $display_option, $show_deleted, $show_merged_thread) {
-        $show_deleted_class = '';
-        $show_deleted_action = '';
-        $show_deleted_thread_title = '';
-        $show_merged_thread_class = '';
-        $show_merged_thread_action = '';
-        $show_merged_thread_title = '';
-
         $currentCourse = $this->core->getConfig()->getCourse();
 
         $default_button = [
@@ -336,7 +329,6 @@ class ForumThreadView extends AbstractView {
             $show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
             $show_merged_thread_title = "Show Merged Threads";
         }
-
 
         if (!$thread_exists) {
             $button_params["show_threads"] = false;
@@ -601,6 +593,13 @@ class ForumThreadView extends AbstractView {
         $activeThreadTitle = "";
         $activeThread = [];
         $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
+        $categories = $this->core->getQueries()->getCategories();
+        $current_course = $this->core->getConfig()->getCourse();
+        $cookieSelectedCategories = [];
+        $cookieSelectedThreadStatus = [];
+        $cookieSelectedUnread = false;
+        $category_ids_array = array_column($categories, 'category_id');
+
         // getting the forum page buttons
         $thread_id = -1;
         $thread_exists = $this->core->getQueries()->threadExists();
@@ -609,9 +608,48 @@ class ForumThreadView extends AbstractView {
         // add css and js files
         $this->core->getOutput()->addInternalCss("forum.css");
         $this->core->getOutput()->addInternalJs("forum.js");
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
+
+        if (!empty($_COOKIE[$current_course . '_forum_categories'])) {
+            foreach (explode('|', $_COOKIE[$current_course . '_forum_categories']) as $selectedId) {
+                if (in_array((int) $selectedId, $category_ids_array)) {
+                    $cookieSelectedCategories[] = $selectedId;
+                }
+            }
+        }
+
+        if (!empty($_COOKIE['forum_thread_status'])) {
+            foreach (explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
+                if (in_array((int) $selectedStatus, [-1,0,1])) {
+                    $cookieSelectedThreadStatus[] = $selectedStatus;
+                }
+            }
+        }
+
+        if (!empty($_COOKIE['unread_select_value'])) {
+            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
+        }
+
+
+        $filterFormData = [
+            "categories" => $categories,
+            "current_thread" => $thread_id,
+            "current_category_ids" => [],
+            "current_course" => $current_course,
+            "cookie_selected_categories" => $cookieSelectedCategories,
+            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
+            "cookie_selected_unread_value" => $cookieSelectedUnread,
+            "thread_exists" => $thread_exists
+        ];
+
+
         return $this->core->getOutput()->renderTwigTemplate("forum/showFullThreadsPage.twig", [
             "thread_content" => $thread_content["thread_content"],
             "button_params" => $button_params,
+            "filterFormData" => $filterFormData,
+            "csrf_token" => $this->core->getCsrfToken(),
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
+            "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
         ]);
     }
 

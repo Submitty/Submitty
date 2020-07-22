@@ -14,8 +14,19 @@
         "cookie_selected_categories" : filterFormData.cookie_selected_categories,
         "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
         "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
-        "thread_exists" : filterFormData.thread_exists,
-        "show_filter": true
+        "show_filter": true,
+        "isFullThreadsPage": true,
     } %}
-    {% include 'forum/displayThreadList.twig' %}
+    <div id="thread_list">
+        {% include 'forum/displayThreadList.twig' %}
+    </div>
+    <script>
+        $(function(){
+            dynamicScrollContentOnDemand($('#thread_list'), buildCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ button_params.current_thread }}, '', '{{ filterFormData.current_course }}');
+            let active_thread = $('#thread_list .active');
+            if(active_thread.length > 0) {
+                active_thread[0].scrollIntoView(true);
+            }
+        });
+    </script>
 </div>
