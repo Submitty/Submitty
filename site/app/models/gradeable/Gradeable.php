@@ -1925,9 +1925,9 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Determine if $this gradeable is using a default configuration
+     * Determine if $this gradeable is using a default configuration.
      *
-     * @return bool
+     * @return bool True if using a system default configuration, false otherwise.
      */
     public function isUsingDefaultConfig(): bool {
         foreach ($this->getDefaultConfigPaths() as $option) {
@@ -1937,5 +1937,19 @@ class Gradeable extends AbstractModel {
         }
 
         return false;
+    }
+
+    /**
+     * Determine if $this gradeable is using a configuration that was user uploaded or created by notebook builder.
+     *
+     * @return bool True if using an uploaded configuration, false otherwise.
+     */
+    public function isUsingUploadedConfig(): bool {
+        $config_upload_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'config_upload'
+        );
+
+        return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
     }
 }

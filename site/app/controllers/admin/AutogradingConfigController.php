@@ -124,6 +124,12 @@ class AutogradingConfigController extends AbstractController {
         );
     }
 
+    /**
+     * Generates a new configuration directory in the course's 'config_upload' directory.  The name for the new
+     * directory starts at '1' with additional created directories being named incrementally.
+     *
+     * @return string The absolute path to/including the new directory
+     */
     public function createConfigDirectory(): string {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $counter = count(scandir($target_dir)) - 1;
@@ -266,8 +272,8 @@ class AutogradingConfigController extends AbstractController {
 
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
 
-        if ($gradeable->isUsingDefaultConfig() && $mode === 'edit') {
-            $this->core->addErrorMessage("You may not edit a provided configuration.  Press the 'Start New' button to start a new configuration instead.");
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
             return new RedirectResponse($failure_url);
         }
 
@@ -307,7 +313,16 @@ class AutogradingConfigController extends AbstractController {
         ]);
     }
 
-    private function notebookBuilderGetFiles($directory) {
+    /**
+     * Generate an associative array of files in the given directory.  The file contents are encoded into a base64
+     * data url.  The result array can be easily json encoded and has the form:
+     *
+     * [<file_name> => <data_url>]
+     *
+     * @param string $directory Absolute path to the directory.
+     * @return array
+     */
+    private function notebookBuilderGetFiles(string $directory): array {
         $result = [];
         $paths = FileUtils::getAllFilesTrimSearchPath($directory, 0);
 
@@ -324,8 +339,13 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilderSave(): JsonResponse {
+        $gradeable = $this->notebookBuilderGetValidGradeable($_POST['g_id']);
+
+        if (is_string($gradeable)) {
+            return JsonResponse::getErrorResponse($gradeable);
+        }
+
         // Overwrite existing configuration with newly uploaded one
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
         $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
         $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
         $permission_res = $this->notebookBuilderUpdateGroupPermission($json_path);
@@ -336,7 +356,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * Helper function used to trigger a gradeable rebuild used in the notebook builder save process.
+     * Helper function used to trigger a gradeable rebuild.
      */
     private function notebookBuilderRebuildGradeable(Gradeable $gradeable): void {
         $admin_gradeable_controller = new AdminGradeableController($this->core);
@@ -348,11 +368,10 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilderFile(): JsonResponse {
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
-        }
-        catch (\Exception $exception) {
-            return JsonResponse::getErrorResponse('Invalid Gradeable ID.');
+        $gradeable = $this->notebookBuilderGetValidGradeable($_POST['g_id']);
+
+        if (is_string($gradeable)) {
+            return JsonResponse::getErrorResponse($gradeable);
         }
 
         if ($_POST['operation'] === 'upload') {
@@ -362,6 +381,35 @@ class AutogradingConfigController extends AbstractController {
         return JsonResponse::getErrorResponse('Invalid operation.');
     }
 
+    /**
+     * Helper function to get and validate gradeable has a configuration which notebook builder is allowed to edit.
+     *
+     * @param string $g_id
+     * @return Gradeable|string If a gradeable was found for the passed gradeable id, then that gradeable will be
+     *                          returned.  Otherwise an error string is returned.  Calling code should check the return
+     *                          type.
+     */
+    private function notebookBuilderGetValidGradeable(string $g_id) {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        }
+        catch (\Exception $exception) {
+            return 'Invalid Gradeable ID.';
+        }
+
+        if (!$gradeable->isUsingUploadedConfig()) {
+            return 'Unable to make configuration changes outside of the current course and semester config_upload folder.';
+        }
+
+        return $gradeable;
+    }
+
+    /**
+     * Helper function which deals with capturing files uploaded via the notebook builder 'file' endpoint
+     *
+     * @param Gradeable $gradeable
+     * @return JsonResponse
+     */
     private function notebookBuilderFileUpload(Gradeable $gradeable): JsonResponse {
         // Create directory if it doesn't exist
         $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
@@ -375,6 +423,12 @@ class AutogradingConfigController extends AbstractController {
         return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
     }
 
+    /**
+     * Helper function to fix the group permission on newly uploaded files.
+     *
+     * @param string $path Absolute path to file.
+     * @return bool True if operation was successful, false otherwise.
+     */
     private function notebookBuilderUpdateGroupPermission(string $path): bool {
         $group = $this->core->getConfig()->getCourse() . '_tas_www';
         return chgrp($path, $group);
