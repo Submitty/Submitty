@@ -1771,7 +1771,6 @@ if __name__ == "__main__":
             "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
         )
 
-
     autograding_workers = load_autograding_workers_json(config)
     worker_status_map = update_remote_autograding_workers(config, autograding_workers)
     cleanup_shippers(config, worker_status_map, autograding_workers)
