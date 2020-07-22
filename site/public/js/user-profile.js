@@ -67,7 +67,7 @@ function updateUserPreferredNames () {
     data.append('csrf_token', csrfToken);
     data.append('first_name', first_name_field.val());
     data.append('last_name', last_name_field.val());
-    let url = buildUrl(['current_user', 'change_preferred_names']);
+    let url = buildUrl(['user_profile', 'change_preferred_names']);
     $.ajax({
       url,
       type: "POST",
@@ -104,7 +104,7 @@ function updateUserProfilePhoto () {
   let data = new FormData();
   data.append('csrf_token', $("#user-profile-photo-csrf").val());
   data.append('user_image', $("#user-image-button").prop('files')[0]);
-  let url = buildUrl(['current_user', 'change_profile_photo']);
+  let url = buildUrl(['user_profile', 'change_profile_photo']);
 
   $.ajax({
     url,
@@ -167,7 +167,7 @@ $(document).ready(function() {
 
         $.getJSON({
             type: "POST",
-            url: buildUrl(['current_user', 'change_time_zone']),
+            url: buildUrl(['user_profile', 'change_time_zone']),
             data: {
                 csrf_token: csrfToken,
                 time_zone

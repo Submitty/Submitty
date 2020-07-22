@@ -74,7 +74,7 @@ class GlobalController extends AbstractController {
                     ]);
                 }
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['current_user']),
+                    "href" => $this->core->buildUrl(['user_profile']),
                     "title" => "My Profile",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-my-profile",
@@ -341,7 +341,7 @@ class GlobalController extends AbstractController {
                 ]);
 
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['current_user']),
+                    "href" => $this->core->buildUrl(['user_profile']),
                     "title" => "My Profile",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-my-profile",

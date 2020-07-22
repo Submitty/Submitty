@@ -86,7 +86,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/reports', 'Grade Reports'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
-            [self.test_url + '/current_user', 'My Profile'],
+            [self.test_url + '/user_profile', 'My Profile'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -105,7 +105,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/student_photos', 'Student Photos'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
-            [self.test_url + '/current_user', 'My Profile'],
+            [self.test_url + '/user_profile', 'My Profile'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -123,7 +123,7 @@ class TestSidebar(BaseTestCase):
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
-            [self.test_url + '/current_user', 'My Profile'],
+            [self.test_url + '/user_profile', 'My Profile'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]

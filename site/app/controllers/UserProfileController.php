@@ -28,7 +28,7 @@ class UserProfileController extends AbstractController {
     /**
      * Show User's profile data
      *
-     * @Route("/current_user", methods={"GET"})
+     * @Route("/user_profile", methods={"GET"})
      * @return MultiResponse
      */
     public function showUserProfile() {
@@ -47,7 +47,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/current_user/change_time_zone", methods={"POST"})
+     * @Route("/user_profile/change_time_zone", methods={"POST"})
      * @return JsonResponse
      *
      * Handle ajax request to update the currently logged in user's time zone data.
@@ -70,7 +70,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/current_user/change_password", methods={"POST"})
+     * @Route("/user_profile/change_password", methods={"POST"})
      * @return MultiResponse
      */
     public function changePassword() {
@@ -94,7 +94,7 @@ class UserProfileController extends AbstractController {
 
 
     /**
-     * @Route("/current_user/change_preferred_names", methods={"POST"})
+     * @Route("/user_profile/change_preferred_names", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
      */
@@ -127,7 +127,7 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @Route("/current_user/change_profile_photo", methods={"POST"})
+     * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
      */

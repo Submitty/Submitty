@@ -50,9 +50,7 @@ class UserProfileView extends AbstractView {
             "csrf_token" => $csrf_token,
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
-            "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
-            "change_username_url" => $this->output->buildUrl(['current_user', 'change_preferred_names']),
-            "change_profile_photo_url" => $this->output->buildUrl(['current_user', 'change_profile_photo']),
+            "change_password_url" => $this->output->buildUrl(['user_profile', 'change_password']),
             'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),
             'user_time_zone_with_offset' => "(UTC" . DateUtils::getUTCOffset($user->getTimeZone()) . ") " . $user->getTimeZone(),
             'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
