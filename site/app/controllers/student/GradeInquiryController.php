@@ -217,7 +217,9 @@ class GradeInquiryController extends AbstractController {
             $submitter = $graded_gradeable->getSubmitter();
             $user_id = $this->core->getUser()->getId();
             $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
-
+            $component = "";
+            $component_title = "";
+            $component_string = "";
             $graders = [];
             if (!is_null($gc_id)) {
                 $component = $graded_gradeable->getGradeable()->getComponent($gc_id);
