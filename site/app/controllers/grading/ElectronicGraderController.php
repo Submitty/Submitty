@@ -2485,7 +2485,6 @@ class ElectronicGraderController extends AbstractController {
         $grader_id = $_POST['grader_id'] ?? '';
         $user_id = $_POST['user_id'] ?? '';
         $feedback = $_POST['feedback'];
-
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return null;

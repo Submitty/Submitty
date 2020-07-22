@@ -25,23 +25,11 @@ def up(config, database, semester, course):
     database.execute(
         """
        CREATE TABLE IF NOT EXISTS peer_feedback (
-            pf_id integer NOT NULL,
             grader_id character varying(255) NOT NULL,
-            user_id character varying(255),
-            team_id character varying(255),
+            user_id character varying(255) NOT NULL,
             g_id character varying(255) NOT NULL,
-            feedback character varying(255),
-            CONSTRAINT user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL)
+            feedback character varying(255)
         );
-        """
-    )
-
-
-    database.execute("ALTER TABLE peer_feedback DROP CONSTRAINT IF EXISTS peer_feedback_pkey")
-    database.execute(
-        """
-        ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (pf_id);
         """
     )
     
@@ -70,29 +58,6 @@ def up(config, database, semester, course):
 
         """
     )
-
-    database.execute("ALTER TABLE peer_feedback DROP CONSTRAINT IF EXISTS peer_feedback_team_id_fkey")
-    database.execute(
-        """
-        ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_team_id_fkey FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
-
-        """
-    )
-
-    database.execute(
-        """
-        CREATE SEQUENCE IF NOT EXISTS peer_feedback_pf_id_seq
-            START WITH 1
-            INCREMENT BY 1
-            NO MINVALUE
-            NO MAXVALUE
-            CACHE 1;
-        """)
-
-    database.execute("ALTER SEQUENCE peer_feedback_pf_id_seq OWNED BY peer_feedback.pf_id;")
-    database.execute("ALTER TABLE ONLY peer_feedback ALTER COLUMN pf_id SET DEFAULT nextval('peer_feedback_pf_id_seq'::regclass);")
-
 
 def down(config, database, semester, course):
     """
