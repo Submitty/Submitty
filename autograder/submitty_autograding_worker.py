@@ -9,7 +9,6 @@ from submitty_utils import dateutils
 import multiprocessing
 import contextlib
 import traceback
-import tempfile
 import zipfile
 from pathlib import Path
 
@@ -54,53 +53,48 @@ def worker_process(which_machine, address, which_untrusted, my_server):
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     counter = 0
 
-    servername_workername = "{0}_{1}".format(my_server, address)
-    autograding_zip = os.path.join(
-        SUBMITTY_DATA_DIR, "autograding_TODO",
-        f"{servername_workername}_{which_untrusted}_autograding.zip"
-    )
-    submission_zip = os.path.join(
-        SUBMITTY_DATA_DIR, "autograding_TODO",
-        f"{servername_workername}_{which_untrusted}_submission.zip"
-    )
-    todo_queue_file = os.path.join(
-        SUBMITTY_DATA_DIR, "autograding_TODO",
-        f"{servername_workername}_{which_untrusted}_queue.json"
+    # The full name of this worker
+    worker_name = f"{my_server}_{address}_{which_untrusted}"
+
+    # Set up key autograding_DONE directories
+    done_dir = os.path.join(SUBMITTY_DATA_DIR, "autograding_DONE")
+    done_queue_file = os.path.join(done_dir, f"{worker_name}_queue.json")
+    results_zip = os.path.join(done_dir, f"{worker_name}_results.zip")
+
+    # Set up key autograding_TODO directories
+    todo_dir = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO")
+    autograding_zip = os.path.join(todo_dir, f"{worker_name}_autograding.zip")
+    submission_zip = os.path.join(todo_dir, f"{worker_name}_submission.zip")
+    todo_queue_file = os.path.join(todo_dir, f"{worker_name}_queue.json")
+
+    # Establish the the directory in which we will do our work
+    working_directory = os.path.join(
+        SUBMITTY_DATA_DIR,
+        'autograding_tmp',
+        which_untrusted,
+        "tmp"
     )
 
     while True:
         if os.path.exists(todo_queue_file):
             try:
-                working_directory = os.path.join(
-                    "/var/local/submitty/autograding_tmp/", which_untrusted, "tmp"
-                )
+                # Attempt to grade the submission. Get back the location of the results.
                 results_zip_tmp = grade_item.grade_from_zip(
-                    working_directory, which_untrusted, autograding_zip, submission_zip
+                    working_directory,
+                    which_untrusted,
+                    autograding_zip,
+                    submission_zip
                 )
-                results_zip = os.path.join(
-                    SUBMITTY_DATA_DIR, "autograding_DONE",
-                    f"{servername_workername}_{which_untrusted}_results.zip"
-                )
-                done_queue_file = os.path.join(
-                    SUBMITTY_DATA_DIR, "autograding_DONE",
-                    f"{servername_workername}_{which_untrusted}_queue.json"
-                )
-                # move doesn't inherit the permissions of the destination directory. Copyfile does.
-                try:
-                    shutil.copyfile(results_zip_tmp, results_zip)
-                except Exception as e:
-                    autograding_utils.log_message(
-                        AUTOGRADING_LOG_PATH, JOB_ID,
-                        message=f"{e} {results_zip}"
-                    )
-
+                shutil.copyfile(results_zip_tmp, results_zip)
                 os.remove(results_zip_tmp)
-                with open(todo_queue_file, 'r') as infile:
-                    queue_obj = json.load(infile)
-                    queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
-                with open(done_queue_file, 'w') as outfile:
-                    json.dump(queue_obj, outfile, sort_keys=True, indent=4)
+                # At this point, we will assume that grading has progressed successfully enough to
+                # return a coherent answer, and will say as much in the done queue file
+                response = {
+                        'status': 'success',
+                        'message': 'Grading completed successfully'
+                    }
             except Exception:
+                # If we threw an error while grading, log it.
                 autograding_utils.log_message(
                     AUTOGRADING_LOG_PATH, JOB_ID,
                     message=f"ERROR attempting to unzip graded item: {which_machine} "
@@ -110,42 +104,35 @@ def worker_process(which_machine, address, which_untrusted, my_server):
                     AUTOGRADING_STACKTRACE_PATH, JOB_ID,
                     trace=traceback.format_exc()
                 )
-                with contextlib.suppress(FileNotFoundError):
-                    os.remove(autograding_zip)
-                with contextlib.suppress(FileNotFoundError):
-                    os.remove(submission_zip)
+                # TODO: It is possible that autograding failed after multiple steps.
+                # In this case, we may be able to salvage a portion of the autograding_results
+                # directory.
 
-                # Respond with a failure zip file.
-                results_zip = os.path.join(
-                    SUBMITTY_DATA_DIR, "autograding_DONE",
-                    f"{servername_workername}_{which_untrusted}_results.zip"
-                )
-                tmp_dir = tempfile.mkdtemp()
-                with open(os.path.join(tmp_dir, 'failure.txt'), 'w') as outfile:
-                    outfile.write("grading failed.\n")
-
+                # Because we failed grading, we will respond with an empty results zip.
                 results_zip_tmp = zipfile.ZipFile(results_zip, 'w')
-                results_zip_tmp.write(os.path.join(tmp_dir, 'failure.txt'))
                 results_zip_tmp.close()
 
-                shutil.rmtree(tmp_dir)
-                done_queue_file = os.path.join(
-                    SUBMITTY_DATA_DIR, "autograding_DONE",
-                    f"{servername_workername}_{which_untrusted}_queue.json"
-                )
+                # We will also respond with a done_queue_file which contains a failure message.
+                response = {
+                    'status': 'fail',
+                    'message': traceback.format_exc()
+                }
+            finally:
+                # Regardless of if we succeeded or failed, create a done queue file to
+                # send to the shipper.
                 with open(todo_queue_file, 'r') as infile:
                     queue_obj = json.load(infile)
                     queue_obj["done_time"] = dateutils.write_submitty_date(milliseconds=True)
+                    queue_obj['autograding_status'] = response
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)
-            finally:
-                if os.path.exists(autograding_zip):
+                # Clean up temporary files.
+                with contextlib.suppress(FileNotFoundError):
                     os.remove(autograding_zip)
-                if os.path.exists(submission_zip):
+                with contextlib.suppress(FileNotFoundError):
                     os.remove(submission_zip)
-
-            with contextlib.suppress(FileNotFoundError):
-                os.remove(todo_queue_file)
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(todo_queue_file)
             counter = 0
         else:
             if counter >= 10:

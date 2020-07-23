@@ -412,6 +412,9 @@ class HomeworkView extends AbstractView {
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
 
+        // Import autosave utility functions
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
+
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
@@ -827,7 +830,7 @@ class HomeworkView extends AbstractView {
 
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
-                'grading' => $version_instance->isGrading(),
+                'in_progress_grading' => $version_instance->isGrading(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
 
