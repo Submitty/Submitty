@@ -233,3 +233,13 @@ div.btn-container {
     top: 5px;
     float: right;
 }
+
+.notebook-builder-info {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.notebook-builder-info div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

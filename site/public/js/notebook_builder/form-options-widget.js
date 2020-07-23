@@ -1,6 +1,9 @@
 class FormOptionsWidget extends Widget {
     constructor() {
         super();
+
+        // Input boxes which fail validation will have their background color changed to this color
+        this.failed_validation_color = getComputedStyle(document.documentElement).getPropertyValue('--alert-invalid-entry-pink');
     }
 
     render() {
@@ -37,47 +40,137 @@ class FormOptionsWidget extends Widget {
     }
 
     /**
-     * Pack up all the configuration data from the GUI into a nice config.json and submit it to the server
+     * Pack up all the configuration data from the GUI into a nice config.json and submit it to the server.
+     * Additionally perform validation on inputs and prevent saving if validation errors were found.
      */
     saveButtonAction() {
+        // Clear any previous validation errors
+        this.clearStatusMessages();
+        this.resetInputColors();
+
+        // Only continue if validation passed
+        if(!this.validate()) {
+            return;
+        }
+
         const file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
-        const g_id = window.location.pathname.split('/').pop();
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
         const form_data = new FormData();
         form_data.append('config_upload', file, 'config.json');
         form_data.append('csrf_token', csrfToken);
-        form_data.append('g_id', g_id);
+        form_data.append('g_id', builder_data.g_id);
+        form_data.append('mode', builder_data.mode);
 
         const makeRequest = async () => {
-            const status_div = document.querySelector('.form-options-widget .status');
-            status_div.innerHTML = 'Saving...';
+            this.appendStatusMessage('Saving...');
 
             const response = await fetch(url, {method: 'POST', body: form_data});
             const result = await response.json();
 
-            status_div.innerHTML = '';
+            this.clearStatusMessages();
 
             if (result.status === 'success') {
-                const gradeable_submission_url = buildCourseUrl(['gradeable', g_id]);
-                const edit_gradeable_url = buildCourseUrl(['gradeable', g_id, 'update']);
+                const gradeable_submission_url = buildCourseUrl(['gradeable', builder_data.g_id]);
+                const edit_gradeable_url = buildCourseUrl(['gradeable', builder_data.g_id, 'update']);
 
-                const submission_msg = document.createElement('p');
-                submission_msg.innerHTML = `Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`;
+                this.appendStatusMessage(`Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`);
+                this.appendStatusMessage(`To make other changes to the gradeable configuration visit the <a href="${edit_gradeable_url}">edit gradeable page</a>.`);
 
-                const edit_msg = document.createElement('p');
-                edit_msg.innerHTML = `To make other changes to the gradeable configuration visit the <a href="${edit_gradeable_url}">edit gradeable page</a>.`;
-
-                status_div.appendChild(submission_msg);
-                status_div.appendChild(edit_msg);
+                // Set mode to 'edit' so any additional edits on a 'new' config will be handled correctly
+                builder_data.mode = 'edit';
             }
             else {
-                const msg = document.createElement('p');
-                msg.innerHTML = result.message;
-                status_div.appendChild(msg);
+                this.appendStatusMessage(result.message);
             }
         };
 
         makeRequest().catch(err => console.error(err));
+    }
+
+    /**
+     * Validate current form configuration/data
+     *
+     * @returns {boolean}
+     */
+    validate() {
+        return this.validateFileNames();
+    }
+
+    /**
+     * Append a message to the status div
+     *
+     * @param {string} message Text to be displayed
+     */
+    appendStatusMessage(message) {
+        const status_div = document.querySelector('.form-options-widget .status');
+        const p = document.createElement('p');
+        p.innerHTML = message;
+        status_div.appendChild(p);
+    }
+
+    /**
+     * Remove all messages from the status div
+     */
+    clearStatusMessages() {
+        const status_div = document.querySelector('.form-options-widget .status');
+        status_div.innerHTML = '';
+    }
+
+    /**
+     * Reset the all input boxes to have a white background
+     */
+    resetInputColors() {
+        document.querySelectorAll('input').forEach(elem => {
+            elem.style.backgroundColor = '';
+        });
+    }
+
+    /**
+     * Validates to see if all filename boxes contain unique values.  If validation errors are found then a message
+     * is added to the status div and the offending input boxes will have their background color changed to indicate
+     * they are the ones that failed validation.
+     *
+     * @returns {boolean} True if validation was successful, false otherwise
+     */
+    validateFileNames() {
+        const duplicated_filenames = this.getDuplicatedFileNames();
+
+        duplicated_filenames.forEach(filename => {
+            this.appendStatusMessage(`Filename: '${filename}' was found to be duplicated.  All filenames must be unique.`);
+
+            document.querySelectorAll(`.filename-input`).forEach(elem => {
+                if (elem.value === filename) {
+                    elem.style.backgroundColor = this.failed_validation_color;
+                }
+            });
+        });
+
+        return duplicated_filenames.size === 0;
+    }
+
+    /**
+     * Collects and returns the set of strings which were found to be duplicated in more than one filename input box.
+     *
+     * @returns {Set<string>}
+     */
+    getDuplicatedFileNames() {
+        const json = notebook_builder.getJSON();
+
+        const filenames = [];
+        const duplicated_filenames = new Set();
+
+        json.notebook.forEach(cell => {
+            if (cell.filename) {
+                if (filenames.includes(cell.filename)) {
+                    duplicated_filenames.add(cell.filename);
+                }
+                else {
+                    filenames.push(cell.filename);
+                }
+            }
+        });
+
+        return duplicated_filenames;
     }
 }
