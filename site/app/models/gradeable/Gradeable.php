@@ -1259,7 +1259,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function anyActiveRegradeRequests() {
-        return $this->active_regrade_request_count > 0;
+        return $this->active_regrade_request_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
     }
 
     /**

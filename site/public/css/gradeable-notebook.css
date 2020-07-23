@@ -34,11 +34,6 @@
     font-family: monospace;
 }
 
-fieldset.mc {
-    display: flex;
-    flex-direction: column;
-}
-
 /* Display notebook multiple choice descriptions on same line as radio button or checkbox */
 /* Input field is the first child */
 .mc > label > :nth-child(2)
@@ -82,8 +77,9 @@ textarea.sa-box {
 }
 
 .mc label {
+    float: left;
+    clear: both;
     display: flex;
-    flex-direction: row;
     align-items: center;
 }
 
