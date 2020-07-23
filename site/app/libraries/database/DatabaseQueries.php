@@ -2543,7 +2543,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $anon_id
      */
     public function updateTeamAnonId($team_id, $anon_id) {
-        $this->course_db->query("UPDATE teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
+        $this->course_db->query("UPDATE gradeable_teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
     }
 
     public function updateTeamRotatingSection($team_id, $section) {
@@ -3652,7 +3652,7 @@ AND gc_id IN (
         $params = (is_array($team_id)) ? $team_id : [$team_id];
 
         $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT team_id, anon_id FROM teams WHERE team_id IN {$question_marks}", $params);
+        $this->course_db->query("SELECT team_id, anon_id FROM gradeable_teams WHERE team_id IN {$question_marks}", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
             $return[$id_map['team_id']] = $id_map['anon_id'];
@@ -3676,7 +3676,7 @@ AND gc_id IN (
         $params = is_array($anon_id) ? $anon_id : [$anon_id];
 
         $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT anon_id, team_id FROM teams WHERE anon_id IN {$question_marks}", $params);
+        $this->course_db->query("SELECT anon_id, team_id FROM gradeable_teams WHERE anon_id IN {$question_marks}", $params);
         $return = [];
         foreach ($this->course_db->rows() as $id_map) {
             $return[$id_map['anon_id']] = $id_map['team_id'];

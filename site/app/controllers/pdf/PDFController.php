@@ -44,14 +44,13 @@ class PDFController extends AbstractController {
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = implode('_', array_slice($pdf_info, 0, -1));
                         $grader_id = $pdf_info[count($pdf_info) - 1];
-                        if ($pdf_id . '.pdf' === $filename && $grader_id == $grader) {
+                        if ($pdf_id . '.pdf' === $filename) {
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
                     }
                 }
             }
         }
-
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, urldecode($path), $annotation_jsons, true, 1, true);
     }
 

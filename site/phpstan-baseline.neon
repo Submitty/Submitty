@@ -221,11 +221,6 @@ parameters:
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
-			message: "#^Variable \\$component_string might not be defined\\.$#"
-			count: 8
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
 			message: "#^Variable \\$body might not be defined\\.$#"
 			count: 5
 			path: app/controllers/student/GradeInquiryController.php

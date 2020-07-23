@@ -465,6 +465,7 @@ ALTER SEQUENCE public.gradeable_data_overall_comment_goc_id_seq OWNED BY public.
 CREATE TABLE public.gradeable_teams (
     team_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
+    anon_id character varying(255),
     registration_section character varying(255),
     rotating_section integer
 );
