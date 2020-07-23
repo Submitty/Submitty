@@ -233,7 +233,7 @@ class ForumThreadView extends AbstractView {
                 $max_length = 25;
                 $fullTitle = $currentThreadArrValues[0]["title"];
                 $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0,  $max_length - 3) . "..." : $fullTitle;
-                $this->core->getOutput()->addBreadcrumb("( " . $currentThreadArrValues[0]["id"] . " ) " . $title, $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
+                $this->core->getOutput()->addBreadcrumb("(" . $currentThreadArrValues[0]["id"] . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
             }
 
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
