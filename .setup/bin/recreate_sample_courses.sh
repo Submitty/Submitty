@@ -3,6 +3,19 @@
 # Automated regeneration of sample course data
 
 ########################################################################
+EXTRA=
+
+while :; do
+    case $1 in
+        --no_submissions)
+            EXTRA="--no_submissions"
+            ;;
+        *) # No more options, so break out of the loop.
+            break
+    esac
+
+    shift
+done
 
 # If any command fails, we need to bail
 set -ev
@@ -22,8 +35,8 @@ fi
 # GIT_CHECKOUT/Submitty/.setup/bin -> GIT_CHECKOUT/Submitty
 cd ../../
 
-python3 ./.setup/bin/partial_reset.py
-python3 ./.setup/bin/setup_sample_courses.py
+# python3 ./.setup/bin/partial_reset.py
+python3 ./.setup/bin/setup_sample_courses.py ${EXTRA}
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 service php${PHP_VERSION}-fpm restart

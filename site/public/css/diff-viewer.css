@@ -1,9 +1,15 @@
 @import url("google/inconsolata.css");
 
-.diff-container {
+/*.diff-container {*/
+/*    background-color: var(--standard-pale-gray);*/
+/*    border: 1px solid var(--standard-light-gray);*/
+/*    width: 100%;*/
+/*}*/
+
+.diff-container-box {
+    overflow: auto;
     background-color: var(--standard-pale-gray);
     border: 1px solid var(--standard-light-gray);
-    width: 100%;
 }
 
 .diff-code {
@@ -62,15 +68,18 @@
 }
 
 .autocheck-header {
-    height: 30px;
     margin-top: 5px;
     margin-bottom: 2px;
 }
 
 .autocheck-header-button {
-    height:23px;
-    float:right;
-    margin-left: 5px;
+    display: flex;
+    flex-direction: row-reverse;
+    height: auto;
+}
+
+.autocheck-header-button a {
+    white-space: break-spaces;
 }
 
 .autograding-action-wrapper {

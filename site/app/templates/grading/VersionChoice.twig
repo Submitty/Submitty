@@ -1,5 +1,9 @@
-<select aria-label="Submission Version Select" style="margin: 0 10px;{{ formatting|default('')|raw }}"
-        name="submission_version" onChange="{{ on_change|default('')|raw }}" id="submission-version-select">
+<select id="submission-version-select"
+        aria-label="Submission Version Select"
+        style="margin-right: 10px;{{ formatting|default('')|raw }}"
+        name="submission_version"
+        onChange="{{ on_change|default('')|raw }}"
+>
 
     {% if active_version == 0 %}
         <option value="0" {{ display_version == active_version ? "selected" : "" }}></option>

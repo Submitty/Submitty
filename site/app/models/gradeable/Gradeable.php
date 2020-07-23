@@ -472,7 +472,44 @@ class Gradeable extends AbstractModel {
         $parsedDates['late_days'] = intval($dates['late_days'] ?? 0);
         return $parsedDates;
     }
-
+    public function setRandomPeerGradersList(&$input) {
+        $bad_rows = [];
+        foreach ($input as $grader => $grading_list) {
+            if ($this->core->getQueries()->getUserById($grading_list[0]) == null) {
+                array_push($bad_rows, ($grading_list[0]));
+            }
+        }
+        if (!empty($bad_rows)) {
+            $msg = "The given user id is not valid: ";
+            array_walk(
+                $bad_rows,
+                function ($val) use (&$msg) {
+                    $msg .= " {$val}";
+                }
+            );
+            $this->core->addErrorMessage($msg);
+        }
+        else {
+            $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
+            $g_id = $this->getId();
+            $query_string = "";
+            if (count($input[0][1]) < 1) {
+                return;
+            }
+            foreach ($input as $grading_list) {
+                $grader = $grading_list[0];
+                for ($j = 0; $j < count($grading_list[1]); $j++) {
+                    $peer = $grading_list[1][$j];
+                    $query_string .= " ('$grader', '$peer','$g_id'),";
+                }
+            }
+            $query_string = chop($query_string, ',');
+            $query_string .= ";";
+                $this->core->getQueries()->insertBulkPeerGradingAssignment($query_string);
+                $this->modified = true;
+                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+        }
+    }
     public function setPeerGradersList($input) {
         $bad_rows = [];
         foreach ($input as $row_num => $vals) {
@@ -1222,7 +1259,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function anyActiveRegradeRequests() {
-        return $this->active_regrade_request_count > 0;
+        return $this->active_regrade_request_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
     }
 
     /**
@@ -1854,5 +1891,51 @@ class Gradeable extends AbstractModel {
      */
     public function getWouldBeDaysLate() {
         return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
+    }
+
+    /**
+     * Gets a multidimensional array containing data for all possible default configuration paths
+     *
+     * @return array
+     */
+    public function getDefaultConfigPaths(): array {
+        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
+        return [
+            ['PROVIDED: upload_only (1 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
+            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
+            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
+            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
+            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
+            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
+            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
+            ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
+            ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload/config')],
+            ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload_3page/config')]
+        ];
+    }
+
+    /**
+     * Determine if $this gradeable is using a default configuration
+     *
+     * @return bool
+     */
+    public function isUsingDefaultConfig(): bool {
+        foreach ($this->getDefaultConfigPaths() as $option) {
+            if ($option[1] === $this->getAutogradingConfigPath()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
