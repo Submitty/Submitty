@@ -27,7 +27,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         }
         $config_files = [
             'autograding_workers' => '{"primary":{"capabilities":["default"],"address":"localhost","username":"","num_autograding_workers":5,"enabled":true}}',
-            'database' => '{"authentication_method":"PamAuthentication","database_host":"\/var\/run\/postgresql","database_user":"submitty_dbuser","database_password":"submitty_dbuser","debugging_enabled":true}',
+            'database' => '{"authentication_method":"PamAuthentication","database_host":"\/var\/run\/postgresql","database_port":5432,"database_user":"submitty_dbuser","database_password":"submitty_dbuser","debugging_enabled":true}',
             'email' => '{"email_enabled":true,"email_user":"","email_password":"","email_sender":"submitty@vagrant","email_reply_to":"do-not-reply@vagrant","email_server_hostname":"localhost","email_server_port":25}',
             'secrets_submitty_php' => '{"session":"cGRZSDnVxdDjQwGyiq4ECnJyiZ8IQXEL1guSsJ1XlSKSEqisqvdCPhCRcYDEjpjm"}',
             'submitty_admin' => '{"submitty_admin_username":"submitty-admin","submitty_admin_password":"submitty-admin","token":"token"}',
