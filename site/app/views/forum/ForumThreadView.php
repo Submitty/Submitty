@@ -149,8 +149,6 @@ class ForumThreadView extends AbstractView {
         $currentThreadArr = array_filter($threadsHead, function ($ar) use ($currentThread) {
             return ($ar['id'] == $currentThread);
         });
-        // Add breadcrumb for the current thread
-        $this->core->getOutput()->addBreadcrumb($currentThreadArr[0]["title"], $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
 
         $categories = $this->core->getQueries()->getCategories();
 
@@ -229,6 +227,15 @@ class ForumThreadView extends AbstractView {
         $button_params = $this->getAllForumButtons($threadExists, $currentThread, $display_option, $show_deleted, $show_merged_thread);
 
         if (!$ajax) {
+            // Add breadcrumb for the current thread
+            $currentThreadArrValues = array_values($currentThreadArr);
+            if ($currentThreadArrValues) {
+                $max_length = 25;
+                $fullTitle = $currentThreadArrValues[0]["title"];
+                $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0,  $max_length - 3) . "..." : $fullTitle;
+                $this->core->getOutput()->addBreadcrumb("( " . $currentThreadArrValues[0]["id"] . " ) " . $title, $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
+            }
+
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
                 "categories" => $categories,
                 "filterFormData" => $filterFormData,

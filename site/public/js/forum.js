@@ -1682,6 +1682,10 @@ function sortTable(sort_element_index, reverse=false){
 
 function loadThreadHandler(){
     $("a.thread_box_link").click(function(event){
+        // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
+        if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
+          return;
+        }
         event.preventDefault();
         var obj = this;
         var thread_id = $(obj).data("thread_id");

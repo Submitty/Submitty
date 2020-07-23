@@ -18,7 +18,13 @@
         "isFullThreadsPage": true,
     } %}
     <div id="thread_list">
+        <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
+        <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; {{ arrowup_visibility }}" aria-hidden="true"></i>
+
         {% include 'forum/displayThreadList.twig' %}
+
+        <i class="fas fa-caret-down fa-2x fa-fw fill-available" style="color:gray;" aria-hidden="true"></i>
+        <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
     </div>
     <script>
         $(function(){
