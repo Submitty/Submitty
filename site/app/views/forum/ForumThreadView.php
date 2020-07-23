@@ -149,6 +149,8 @@ class ForumThreadView extends AbstractView {
         $currentThreadArr = array_filter($threadsHead, function ($ar) use ($currentThread) {
             return ($ar['id'] == $currentThread);
         });
+        // Add breadcrumb for the current thread
+        $this->core->getOutput()->addBreadcrumb($currentThreadArr[0]["title"], $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
 
         $categories = $this->core->getQueries()->getCategories();
 
@@ -608,6 +610,7 @@ class ForumThreadView extends AbstractView {
         // add css and js files
         $this->core->getOutput()->addInternalCss("forum.css");
         $this->core->getOutput()->addInternalJs("forum.js");
+        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
 
         if (!empty($_COOKIE[$current_course . '_forum_categories'])) {
@@ -647,6 +650,7 @@ class ForumThreadView extends AbstractView {
             "thread_content" => $thread_content["thread_content"],
             "button_params" => $button_params,
             "filterFormData" => $filterFormData,
+            "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
