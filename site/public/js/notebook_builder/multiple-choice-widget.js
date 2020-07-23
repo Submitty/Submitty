@@ -58,6 +58,10 @@ class MultipleChoiceWidget extends Widget {
         }
     }
 
+    load(data) {
+        this.state = data;
+    }
+
     /**
      * Get and setup the area of the multiple choice widget which allows the user to add a new multiple choice
      * option.
