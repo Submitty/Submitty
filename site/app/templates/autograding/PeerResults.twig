@@ -98,7 +98,7 @@ function switch_feedback_modes() {
                         {{ self.renderManyPeerResults(component) }}
                     {% endif %}                
                 {% endfor %}
-                </div>
+            </div>
             {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback)  }}
             {# /Peer Component boxes #}
         {% endif %}

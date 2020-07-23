@@ -1640,6 +1640,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
         cache: false,
         contentType: false,
         success: function(data) {
+            console.log(data);
             try {
                 $('#save_status').html('All Changes Saved');
             } catch(err){

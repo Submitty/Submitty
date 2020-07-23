@@ -3251,8 +3251,8 @@ SQL;
     /**
      * Adds an assignment for someone to grade another person for peer grading
      *
-     * @param string $student
      * @param string $grader
+     * @param string $student
      * @param string $gradeable_id
      * @param string $feedback
      */
@@ -3306,7 +3306,7 @@ SQL;
      *
      * @param string $gradeable_id
      */
-    public function getPeerFeedback($gradeable_id) {
+    public function getAllPeerFeedback($gradeable_id) {
         $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
         $return = [];
         foreach ($this->course_db->rows() as $id) {
@@ -3316,14 +3316,13 @@ SQL;
     }
     
     public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
-        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
         $results = $this->course_db->rows();
         if (count($results) > 0) {
-            return $results;
+            return $results[0]['feedback'];
         }
         return null;
     }
-
     /**
      * Get all assignments a student is assigned to peer grade
      *

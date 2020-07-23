@@ -422,13 +422,10 @@ CREATE TABLE peer_assign (
 --
 
 CREATE TABLE peer_feedback (
-    pf_id integer NOT NULL,
     grader_id character varying(255) NOT NULL,
-    user_id character varying(255),
-    team_id character varying(255),
+    user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    feedback character varying(255),
-    CONSTRAINT user_team_id_check CHECK (user_id IS NOT NULL OR team_id IS NOT NULL)
+    feedback character varying(255)
 );
 
 
@@ -1201,24 +1198,6 @@ ALTER TABLE ONLY peer_feedback
 
 ALTER TABLE ONLY peer_feedback
             ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
-
---
--- Name: peer_feedback_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_team_id_fkey FOREIGN KEY (team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE;
-
-CREATE SEQUENCE IF NOT EXISTS peer_feedback_pf_id_seq
-            START WITH 1
-            INCREMENT BY 1
-            NO MINVALUE
-            NO MAXVALUE
-            CACHE 1;
-            
-
-ALTER SEQUENCE peer_feedback_pf_id_seq OWNED BY peer_feedback.pf_id;
-ALTER TABLE ONLY peer_feedback ALTER COLUMN pf_id SET DEFAULT nextval('peer_feedback_pf_id_seq'::regclass);
 
 --
 -- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
