@@ -100,16 +100,6 @@
             {% endfor %} {# invite in received #}
         {% endif %} {# invites length == 0 #}
 
-        {# Set Seeking Message #}
-        {% if seeking_partner %}
-            <br />
-            <form action="{{ set_message_url }}" method="post">
-                <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                <input type="submit" value = "Set Message" class="btn btn-primary" />
-            </form>
-        {% endif %}
-
         {# Create new team button #}
         <br />
         <button class="btn btn-primary key_to_click" tabindex="0" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
@@ -119,6 +109,21 @@
         {% else %}
             &nbsp;or&nbsp;<button class="btn btn-primary key_to_click" tabindex="0" onclick="location.href='{{ seek_url }}'">Seek Team/Partner </button>
             <br>
+        {% endif %}
+
+        {# Set Seeking Message #}
+        {% if seeking_partner %}
+            <br /> 
+            <br /> 
+            <p>
+            Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.
+            </p>
+            <br />
+            <form action="{{ set_message_url }}" method="post">
+                <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                <input type="submit" value = "Set Message" class="btn btn-primary" />
+            </form>
         {% endif %}
 
     </div>
