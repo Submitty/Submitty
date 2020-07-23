@@ -189,7 +189,7 @@ function switch_feedback_modes() {
                                     {{ mark.num_earned }}
                                 </td>
                                 <td class="peer-table-data">
-                                    {{ (mark.points)|number_format(num_decimals) }}
+                                    {{ mark.points|number_format(num_decimals) }}
                                 </td>
                                 <td class="peer-table-title-data">
                                     {{ mark.title|nl2br }}
@@ -248,7 +248,7 @@ function switch_feedback_modes() {
                                     </td>
                                 {% endfor %}
                                 <td class="peer-table-data">
-                                    {{ (mark.points)|number_format(num_decimals) }}
+                                    {{ mark.points|number_format(num_decimals) }}
                                 </td>
                                 <td class="peer-table-title-data">
                                     {{ mark.title|nl2br }}
@@ -297,7 +297,7 @@ function switch_feedback_modes() {
                                             {% else %}
                                                 <i class="far fa-square fa-1g"></i>
                                             {% endif %}
-                                            {{ (mark.points)|number_format(num_decimals) }}
+                                            {{ mark.points|number_format(num_decimals) }}
                                             {{ mark.title|nl2br }}
                                             </br>
                                         {% endfor %}
