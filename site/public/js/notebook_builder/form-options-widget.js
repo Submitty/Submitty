@@ -53,11 +53,11 @@ class FormOptionsWidget extends Widget {
             return;
         }
 
-        const config_json = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
+        const config_json_file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
         const form_data = new FormData();
-        form_data.append('config_upload', config_json, 'config.json');
+        form_data.append('config_upload', config_json_file, 'config.json');
         form_data.append('csrf_token', csrfToken);
         form_data.append('g_id', builder_data.g_id);
 
