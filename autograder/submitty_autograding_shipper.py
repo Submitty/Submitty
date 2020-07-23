@@ -24,6 +24,8 @@ import urllib
 
 from enum import Enum
 from math import floor
+from os import PathLike
+from typing import List, Tuple
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
@@ -58,6 +60,41 @@ class GradingStatus(Enum):
     SUCCESS = 1
     WAITING = 2
     FAILURE = 3
+
+
+def move_files(
+    address: str,
+    files: List[Tuple[PathLike, PathLike]]
+):
+    """Move files around, both locally and remotely.
+
+    Parameters
+    ----------
+    address : str
+        Address of the destination. May be either `localhost` for copying files locally, or some
+        `username@hostname` format for copying files to some remote location via SFTP.
+    files : list of tuple of paths
+        List of source and destination file paths.
+    """
+    if address == 'localhost':
+        for src, dest in files:
+            shutil.copy(src, dest)
+    else:
+        user, host = address.split('@')
+        sftp = ssh = None
+
+        try:
+            # TODO: Figure out a proper strategy for `my_name` param.
+            ssh = establish_ssh_connection('', user, host)
+            sftp = ssh.open_sftp()
+
+            for local, remote in files:
+                sftp.put(local, remote)
+        finally:
+            if sftp is not None:
+                sftp.close()
+            if ssh is not None:
+                ssh.close()
 
 
 def worker_folder(worker_name):
@@ -223,7 +260,7 @@ def update_worker_json(name, entry):
         return success
 
 
-def establish_ssh_connection(my_name, user, host, only_try_once=False):
+def establish_ssh_connection(my_name, user, host, only_try_once=False) -> paramiko.SSHClient:
     """
     Returns a connected paramiko ssh session.
     Tries to connect until a connection is established, unless only_try_once
