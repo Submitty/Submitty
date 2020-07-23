@@ -3,13 +3,6 @@
 {% import _self as self %}
 
 <script>
-$( document ).ready(function() {
-    var numPosts = $('.post_box').length;
-    if (numPosts > 0) {
-        $("#regradeBoxSection").show();
-        $("#ShowRegradeRequestButton").hide();
-    }
-});
 function open_peer_feedback_tab(user, ordered_graders) {
     $('.page-content').hide();
     $('#peer-feedback-'+user).show();
