@@ -5546,6 +5546,11 @@ AND gc_id IN (
         return $this->course_db->rows()[0]['max'];
     }
 
+    public function getQueueId($queue_code) {
+        $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
+        return $this->course_db->rows()[0]['id'];
+    }
+
     public function addToQueue($queue_code, $user_id, $name, $contact_info) {
         $last_time_in_queue = $this->getLastTimeInQueue($user_id, $queue_code);
         $this->course_db->query("INSERT INTO queue

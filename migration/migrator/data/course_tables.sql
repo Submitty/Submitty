@@ -714,7 +714,8 @@ CREATE TABLE public.queue (
     removed_by text,
     contact_info text,
     last_time_in_queue timestamp with time zone,
-    time_help_start timestamp with time zone
+    time_help_start timestamp with time zone,
+    paused boolean DEFAULT false NOT NULL
 );
 
 

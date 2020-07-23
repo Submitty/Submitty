@@ -174,7 +174,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function cleanForId($str) {
-        return strtoupper($str);
+        return $this->core->getQueries()->getQueueId($str);
     }
 
     public function getLastQueueUpdate() {
@@ -193,16 +193,16 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->colors[$index];
     }
 
-    public function removeUnderScores($value) {
-        return preg_replace('/_/', ' ', $value);
-    }
-
     public function isContactInfoEnabled() {
         return $this->core->getConfig()->getQueueContactInfo();
     }
 
     public function getQueueMessage() {
         return $this->core->getConfig()->getQueueMessage();
+    }
+
+    public function getQueueAnnouncementMessage() {
+        return $this->core->getConfig()->getQueueAnnouncementMessage();
     }
 
     public function getNumberAheadInQueueThisWeek() {

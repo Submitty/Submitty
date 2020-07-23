@@ -1,5 +1,4 @@
 {% if viewer.inQueue() == 0 %}
-  <br>
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <label for="name_box">Your Name:</label>
@@ -8,10 +7,10 @@
     <div class="form-group">
       <label for="queue_code">Queue Name:
       </label>
-      <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+      <select id="queue_code" class="form-control" name="code" required="required">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllQueues() if queue['open'] == 'true' %}
-          <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
+          <option value="{{queue['code']}}">{{queue['code']}}</option>
         {% endfor %}
       </select>
     </div>
@@ -37,7 +36,7 @@
     </p>
 
     <p>You are currently in:
-      <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
+      <b>{{viewer.getCurrentQueueCode()}}</b>
     </p>
 
     <p>
