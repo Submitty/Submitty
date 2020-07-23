@@ -12,6 +12,39 @@ class ForumThreadView extends AbstractView {
         return $this->core->getConfig()->isForumEnabled();
     }
 
+    private function getSavedForumCategories($current_course, $categories) {
+        $category_ids_array = array_column($categories, 'category_id');
+        $cookieSelectedCategories = [];
+        if (!empty($_COOKIE[$current_course . '_forum_categories'])) {
+            foreach (explode('|', $_COOKIE[$current_course . '_forum_categories']) as $selectedId) {
+                if (in_array((int) $selectedId, $category_ids_array)) {
+                    $cookieSelectedCategories[] = $selectedId;
+                }
+            }
+        }
+        return $cookieSelectedCategories;
+    }
+
+    private function getSavedThreadStatuses() {
+        $cookieSelectedThreadStatus = [];
+        if (!empty($_COOKIE['forum_thread_status'])) {
+            foreach (explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
+                if (in_array((int) $selectedStatus, [-1,0,1])) {
+                    $cookieSelectedThreadStatus[] = $selectedStatus;
+                }
+            }
+        }
+        return $cookieSelectedThreadStatus;
+    }
+
+    private function getUnreadThreadStatus() {
+        $cookieSelectedUnread = false;
+        if (!empty($_COOKIE['unread_select_value'])) {
+            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
+        }
+        return $cookieSelectedUnread;
+    }
+
     public function searchResult($threads) {
 
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
@@ -152,30 +185,9 @@ class ForumThreadView extends AbstractView {
 
         $categories = $this->core->getQueries()->getCategories();
 
-        $cookieSelectedCategories = [];
-        $cookieSelectedThreadStatus = [];
-        $cookieSelectedUnread = false;
-        $category_ids_array = array_column($categories, 'category_id');
-
-        if (!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
-            foreach (explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
-                if (in_array((int) $selectedId, $category_ids_array)) {
-                    $cookieSelectedCategories[] = $selectedId;
-                }
-            }
-        }
-
-        if (!empty($_COOKIE['forum_thread_status'])) {
-            foreach (explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
-                if (in_array((int) $selectedStatus, [-1,0,1])) {
-                    $cookieSelectedThreadStatus[] = $selectedStatus;
-                }
-            }
-        }
-
-        if (!empty($_COOKIE['unread_select_value'])) {
-            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
-        }
+        $cookieSelectedCategories = $this->getSavedForumCategories($currentCourse, $categories);
+        $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
+        $cookieSelectedUnread = $this->getUnreadThreadStatus();
 
         $filterFormData = [
             "categories" => $categories,
@@ -597,18 +609,18 @@ class ForumThreadView extends AbstractView {
         return $str;
     }
 
-    public function showFullThreadsPage($threads, $category_ids, $show_deleted, $show_merged_threads) {
+    public function showFullThreadsPage($threads, $category_ids, $show_deleted, $show_merged_threads, $page_number) {
         $activeThreadAnnouncements = [];
         $activeThreadTitle = "";
         $activeThread = [];
         $thread_content =  $this->displayThreadList($threads, false, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
         $categories = $this->core->getQueries()->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
-        $cookieSelectedCategories = [];
-        $cookieSelectedThreadStatus = [];
-        $cookieSelectedUnread = false;
-        $category_ids_array = array_column($categories, 'category_id');
-
+        $cookieSelectedCategories = $this->getSavedForumCategories($current_course, $categories);
+        $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
+        $cookieSelectedUnread = $this->getUnreadThreadStatus();
+        $next_page = 0;
+        $prev_page = 0;
         // getting the forum page buttons
         $thread_id = -1;
         $thread_exists = $this->core->getQueries()->threadExists();
@@ -620,26 +632,10 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
 
-        if (!empty($_COOKIE[$current_course . '_forum_categories'])) {
-            foreach (explode('|', $_COOKIE[$current_course . '_forum_categories']) as $selectedId) {
-                if (in_array((int) $selectedId, $category_ids_array)) {
-                    $cookieSelectedCategories[] = $selectedId;
-                }
-            }
+        if ($thread_exists) {
+            $next_page = $page_number + 1;
+            $prev_page = $page_number - 1;
         }
-
-        if (!empty($_COOKIE['forum_thread_status'])) {
-            foreach (explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
-                if (in_array((int) $selectedStatus, [-1,0,1])) {
-                    $cookieSelectedThreadStatus[] = $selectedStatus;
-                }
-            }
-        }
-
-        if (!empty($_COOKIE['unread_select_value'])) {
-            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
-        }
-
 
         $filterFormData = [
             "categories" => $categories,
@@ -657,6 +653,8 @@ class ForumThreadView extends AbstractView {
             "thread_content" => $thread_content["thread_content"],
             "button_params" => $button_params,
             "filterFormData" => $filterFormData,
+            "next_page" => $next_page,
+            "prev_page" => $prev_page,
             "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),

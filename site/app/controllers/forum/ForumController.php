@@ -45,7 +45,7 @@ class ForumController extends AbstractController {
     }
 
     private function getSavedCategoryIds($currentCourse, $category_ids) {
-        if (!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_ids[0] == -1) {
+        if (empty($category_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
             $category_ids = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         foreach ($category_ids as &$id) {
@@ -55,7 +55,7 @@ class ForumController extends AbstractController {
     }
 
     private function getSavedThreadStatus($thread_status) {
-        if (!empty($_COOKIE['forum_thread_status'])) {
+        if (empty($thread_status) && !empty($_COOKIE['forum_thread_status'])) {
             $thread_status = explode("|", $_COOKIE['forum_thread_status']);
         }
         foreach ($thread_status as &$status) {
@@ -836,18 +836,10 @@ class ForumController extends AbstractController {
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
-        if (empty($categories_ids) && !empty($_COOKIE[$currentCourse . '_forum_categories'])) {
-            $categories_ids = explode("|", $_COOKIE[$currentCourse . '_forum_categories']);
-        }
-        if (empty($thread_status) && !empty($_COOKIE['forum_thread_status'])) {
-            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
-        }
-        foreach ($categories_ids as &$id) {
-            $id = (int) $id;
-        }
-        foreach ($thread_status as &$status) {
-            $status = (int) $status;
-        }
+
+        $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
+        $thread_status = $this->getSavedThreadStatus($thread_status);
+
         $max_thread = 0;
         $threads = $this->getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, -1);
         $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : [];
@@ -886,7 +878,7 @@ class ForumController extends AbstractController {
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_deleted = $this->showDeleted();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
-        $category_ids = $this->getSavedCategoryIds($currentCourse, [-1]);
+        $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
 
@@ -894,11 +886,11 @@ class ForumController extends AbstractController {
         $max_threads = 0;
         // use the default thread id
         $thread_id = -1;
-        $pageNumber = 1;
+        $pageNumber = 0;
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
         $threads = $this->getSortedThreads($category_ids, $max_threads, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
     }
 
     /**
@@ -909,8 +901,8 @@ class ForumController extends AbstractController {
 
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
-        $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
-        $category_ids = $this->getSavedCategoryIds($currentCourse, [$category_id]);
+        $category_id = in_array('thread_category', $_POST) ? [$_POST['thread_category']] : [];
+        $category_ids = $this->getSavedCategoryIds($currentCourse, $category_id);
         $thread_status = $this->getSavedThreadStatus([]);
         $new_posts = [];
         $unread_threads = $this->showUnreadThreads();
