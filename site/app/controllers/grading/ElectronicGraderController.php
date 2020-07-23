@@ -1034,7 +1034,7 @@ class ElectronicGraderController extends AbstractController {
 
             // Reassign who_id
             if (!is_null($goToStudent)) {
-                $who_id = $peer && !$team ? $goToStudent->getAnonId() :   $goToStudent->getId();
+                $who_id = $peer && !$team ? $goToStudent->getAnonId() :   $goToStudent->getAnonId();
             }
         }
 
