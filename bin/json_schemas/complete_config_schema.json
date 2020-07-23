@@ -41,6 +41,9 @@
       "assignment_message" : {
         "type" : "string"
       },
+      "required_capabilities" : {
+        "type" : "string"
+      },
       "grading_parameters" : {
         "type" : "object",
         "properties" : {

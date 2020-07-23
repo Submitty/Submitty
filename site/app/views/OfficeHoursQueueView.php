@@ -12,13 +12,7 @@ class OfficeHoursQueueView extends AbstractView {
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
         $this->core->getOutput()->enableMobileViewport();
 
-        $output = $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/FilterQueues.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/QueueHistory.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/QueueFooter.twig");
-
-        return $output;
+        return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
     }
 
     public function renderCurrentQueue($viewer) {

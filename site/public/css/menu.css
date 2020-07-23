@@ -29,7 +29,7 @@
     to {right: 0;}
 }
 
-#mobile-menu a, #mobile-menu .fa {
+#mobile-menu a, #mobile-menu .fa, #mobile-menu .fab {
     text-decoration: none;
     color: var(--btn-text-white);
     font-size: 20px;
