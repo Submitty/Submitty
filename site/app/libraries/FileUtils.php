@@ -474,7 +474,7 @@ class FileUtils {
      * @throws FileReadException Unable to read file at the given path.
      * @return string
      */
-    public static function readAsDataURL(string $path) {
+    public static function readAsDataURL(string $path): string {
         if (!is_readable($path)) {
             throw new FileReadException('Unable to read file at the given path.');
         }
