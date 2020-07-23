@@ -361,57 +361,31 @@ def prepare_job(
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
         return False
 
-    if address == "localhost":
-        try:
-            shutil.move(autograding_zip_tmp, autograding_zip)
-            shutil.move(submission_zip_tmp, submission_zip)
-            with open(todo_queue_file, 'w') as outfile:
-                json.dump(queue_obj, outfile, sort_keys=True, indent=4)
-        except Exception as e:
-            autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-                trace=traceback.format_exc()
-            )
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: could not move files due to the following error: {e}"
-            )
-            print(f"ERROR: could not move files due to the following error: {e}")
-            return False
-    else:
-        sftp = ssh = None
-        try:
-            user, host = which_machine.split("@")
+    with open(todo_queue_file, 'w') as outfile:
+        json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
-            ssh = establish_ssh_connection(my_name, user, host)
-            sftp = ssh.open_sftp()
-            sftp.put(autograding_zip_tmp, autograding_zip)
-            sftp.put(submission_zip_tmp, submission_zip)
-            with open(todo_queue_file, 'w') as outfile:
-                json.dump(queue_obj, outfile, sort_keys=True, indent=4)
-            sftp.put(todo_queue_file, todo_queue_file)
+    try:
+        move_files(address, [
+            (autograding_zip_tmp, autograding_zip),
+            (submission_zip_tmp, submission_zip),
+            (todo_queue_file, todo_queue_file)
+        ])
+    except Exception as e:
+        autograding_utils.log_stack_trace(
+            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            trace=traceback.format_exc()
+        )
+        autograding_utils.log_message(
+            AUTOGRADING_LOG_PATH, JOB_ID,
+            message=f"ERROR: could not move files due to the following error: {e}"
+        )
+        print(f"ERROR: could not move files due to the following error: {e}")
+        return False
+    finally:
+        os.remove(autograding_zip_tmp)
+        os.remove(submission_zip_tmp)
+        if address != 'localhost':
             os.remove(todo_queue_file)
-            print("Successfully forwarded files to {0}".format(my_name))
-            success = True
-        except Exception as e:
-            autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-                trace=traceback.format_exc()
-            )
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: could not move files due to the following error: {e}"
-            )
-            print(f"Could not move files due to the following error: {e}")
-            success = False
-        finally:
-            if sftp:
-                sftp.close()
-            if ssh:
-                ssh.close()
-            os.remove(autograding_zip_tmp)
-            os.remove(submission_zip_tmp)
-        return success
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(JOB_ID, next_directory, next_to_grade)
