@@ -35,7 +35,10 @@ class GradeableList extends AbstractModel {
     /** @prop @var User */
     protected $user;
 
-    /** @prop @var array<string, \app\models\Gradeable\Gradeable>  */
+    /**
+     * @prop
+     * @var array<string, \app\models\Gradeable\Gradeable>
+     */
     protected $gradeables = [];
 
     /*
@@ -134,15 +137,14 @@ class GradeableList extends AbstractModel {
                 $this->future_gradeables[$id] = $gradeable;
             }
         }
-
-        $sort_array = array(
+        $sort_array = [
             'future_gradeables' => 'getGradeStartDate',
             'beta_gradeables' => 'getGradeStartDate',
             'open_gradeables' => 'getSubmissionDueDate',
             'closed_gradeables' => 'getSubmissionDueDate',
             'grading_gradeables' => 'getGradeStartDate',
             'graded_gradeables' => 'getGradeReleasedDate'
-        );
+        ];
         foreach ($sort_array as $list => $function) {
             uasort($this->$list, function (Gradeable $a, Gradeable $b) use ($function) {
                 if ($a->$function() == $b->$function()) {
@@ -212,7 +214,7 @@ class GradeableList extends AbstractModel {
      * @return Gradeable[]
      */
     public function getSubmittableElectronicGradeables() {
-        $return = array();
+        $return = [];
         foreach ($this->gradeables as $id => $gradeable) {
             if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
                 continue;

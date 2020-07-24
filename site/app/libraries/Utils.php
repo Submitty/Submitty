@@ -253,7 +253,7 @@ class Utils {
      * students_version is an array of user and their highest submitted version
      */
 
-    public static function getAutoFillData($students, $students_version = null): string {
+    public static function getAutoFillData($students, $students_version = null, $append_numeric_id = false): string {
         $students_full = new Set();
         $null_students = new Set();
         foreach ($students as $student) {
@@ -261,6 +261,10 @@ class Utils {
                 'value' => $student->getId(),
                 'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
             ];
+
+            if ($append_numeric_id) {
+                $student_entry['label'] .= ' <' . $student->getNumericId() . '>';
+            }
 
             if ($students_version !== null) {
                 if ($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
@@ -304,15 +308,21 @@ class Utils {
     }
 
     /**
-    * Convert bytes to a specified format thats human readable
-    * E.g : MB, 10485760 => 10MB
-    * @param string $format
-    * @param int $bytes
-    * @return string
-    */
-    public static function formatBytes(string $format, int $bytes): string {
+     * Convert bytes to a specified format thats human readable
+     * E.g : MB, 10485760 => 10MB
+     * @param string $format
+     * @param int $bytes
+     * @param bool $round should the result be rounded to the nearest number
+     * @return string
+     */
+    public static function formatBytes(string $format, int $bytes, bool $round = false): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
-        return ($bytes / pow(1024, floor($formats[strtolower($format)]))) . (strtoupper($format));
+        $result = $bytes / pow(1024, floor($formats[strtolower($format)]));
+        if ($round) {
+            $result = round($result);
+        }
+
+        return $result . (strtoupper($format));
     }
 
     /**
@@ -380,5 +390,29 @@ class Utils {
             default:
                 return 'text/plain';
         }
+    }
+
+    /**
+     * Remove comments from the given string.
+     * This function will remove any comments that are considered valid comments in the c programming language including
+     * single line, end of line, or multi-line comments.
+     *
+     * It will not work for html, python, etc comments.
+     *
+     * @param string $str
+     * @return string|null Original string with comments removed, or null on failure.
+     */
+    public static function stripComments(string $str): ?string {
+        return preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*/', '', $str);
+    }
+
+    /**
+     * Escape double quotes in the given string.
+     *
+     * @param string $str
+     * @return string|null Original string with double quotes escaped, or null on failure.
+     */
+    public static function escapeDoubleQuotes(string $str): ?string {
+        return preg_replace('["]', '\"', $str);
     }
 }

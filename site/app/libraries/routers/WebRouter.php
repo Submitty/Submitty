@@ -61,6 +61,32 @@ class WebRouter {
         $this->parameters = $matcher->matchRequest($this->request);
     }
 
+
+    /**
+     * If a request is a post request check to see if its less than the post_max_size or if its empty
+     * @return MultiResponse|bool
+     */
+    private function checkPostMaxSize(Request $request) {
+        if ($request->isMethod('POST')) {
+            $max_post_length = ini_get("post_max_size");
+            $max_post_bytes = Utils::returnBytes($max_post_length);
+            /** if a post request exceeds the max length set in the ini, php will drop everything set under $_POST, however the router might add routing information later so check both cases
+            */
+            if (($max_post_bytes > 0 && $_SERVER["CONTENT_LENGTH"] >= $max_post_bytes) || empty($_POST)) {
+                $msg = "POST request exceeds maximum size of " . $max_post_length;
+                $this->core->addErrorMessage($msg);
+
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse($msg)
+                );
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+
     /**
      * @param Request $request
      * @param Core $core
@@ -97,6 +123,11 @@ class WebRouter {
                     JsonResponse::getFailResponse('Feature is not yet available.')
                 );
             }
+
+            $check_post_max_size = $router->checkPostMaxSize($request);
+            if ($check_post_max_size instanceof MultiResponse) {
+                return $check_post_max_size;
+            }
         }
         catch (ResourceNotFoundException $e) {
             return new MultiResponse(JsonResponse::getFailResponse("Endpoint not found."));
@@ -130,6 +161,11 @@ class WebRouter {
             $login_check_response = $router->loginRedirectCheck($logged_in);
             if ($login_check_response instanceof MultiResponse || $login_check_response instanceof WebResponse) {
                 return $login_check_response;
+            }
+
+            $check_post_max_size = $router->checkPostMaxSize($request);
+            if ($check_post_max_size instanceof MultiResponse) {
+                return $check_post_max_size;
             }
 
             $csrf_check_response = $router->csrfCheck();
@@ -174,7 +210,7 @@ class WebRouter {
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
 
-        $arguments = array();
+        $arguments = [];
         /** @noinspection PhpUnhandledExceptionInspection */
         $method = new \ReflectionMethod($this->controller_name, $this->method_name);
         foreach ($method->getParameters() as $param) {
@@ -228,10 +264,10 @@ class WebRouter {
 
     /**
      * Check if the user needs a redirection depending on their login status.
-     * @param $logged_in
+     * @param bool $logged_in
      * @return MultiResponse|bool
      */
-    private function loginRedirectCheck($logged_in) {
+    private function loginRedirectCheck(bool $logged_in) {
         if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
 
@@ -263,8 +299,9 @@ class WebRouter {
             if ($logged_in) {
                 if (
                     $this->parameters['_method'] !== 'logout'
-                    && $this->parameters['_controller'] !== \app\controllers\HomePageController::class
-                    && $this->parameters['_controller'] !== \app\controllers\superuser\GradeablesController::class
+                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                    && !Utils::endsWith($this->parameters['_controller'], 'UserProfileController')
+                    && !Utils::endsWith($this->parameters['_controller'], 'DockerInterfaceController')
                 ) {
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))

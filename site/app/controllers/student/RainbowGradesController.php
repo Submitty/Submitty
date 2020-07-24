@@ -7,7 +7,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class RainbowGradesController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/grades")
+     * @Route("/courses/{_semester}/{_course}/grades")
      */
     public function run() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
@@ -18,6 +18,6 @@ class RainbowGradesController extends AbstractController {
             $grade_file = file_get_contents($grade_path);
         }
 
-        $this->core->getOutput()->renderOutput(array('submission', 'RainbowGrades'), 'showGrades', $grade_file);
+        $this->core->getOutput()->renderOutput(['submission', 'RainbowGrades'], 'showGrades', $grade_file);
     }
 }

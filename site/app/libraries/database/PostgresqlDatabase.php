@@ -6,7 +6,6 @@ class PostgresqlDatabase extends AbstractDatabase {
     protected $host;
     protected $port;
     protected $dbname;
-    protected $unix_socket;
 
     /**
      * @inheritdoc
@@ -18,7 +17,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      * port
      * dbname
      */
-    public function __construct($connection_params = array()) {
+    public function __construct($connection_params = []) {
         parent::__construct($connection_params);
         if (isset($connection_params['host'])) {
             $this->host = $connection_params['host'];
@@ -32,11 +31,12 @@ class PostgresqlDatabase extends AbstractDatabase {
     }
 
     public function getDSN() {
-        $params = array();
+        $params = [];
         if ($this->host !== null) {
             $params[] = "host={$this->host}";
         }
-        if ($this->port !== null) {
+
+        if ($this->port !== null && ($this->host === null || $this->host[0] !== '/')) {
             $params[] = "port={$this->port}";
         }
 
@@ -64,10 +64,10 @@ class PostgresqlDatabase extends AbstractDatabase {
         $text = trim($text);
 
         if (empty($text) || $text[0] != "{") {
-            return array();
+            return [];
         }
         elseif (is_string($text)) {
-            $return = array();
+            $return = [];
             $element = "";
             $in_string = false;
             $have_string = false;
@@ -125,7 +125,7 @@ class PostgresqlDatabase extends AbstractDatabase {
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -147,8 +147,8 @@ class PostgresqlDatabase extends AbstractDatabase {
             }
             else {
                 $lower = strtolower($element);
-                if ($parse_bools && in_array($lower, array("true", "t", "false", "f"))) {
-                    $return[] = ($lower === "true" || $lower === "t") ? true : false;
+                if ($parse_bools && in_array($lower, ["true", "t", "false", "f"])) {
+                    $return[] = ($lower === "true" || $lower === "t");
                 }
                 elseif ($lower == "null") {
                     $return[] = null;
@@ -176,7 +176,7 @@ class PostgresqlDatabase extends AbstractDatabase {
         if (!is_array($array)) {
             return '{}';
         }
-        $elements = array();
+        $elements = [];
         foreach ($array as $e) {
             if ($e === null) {
                 $elements[] = "null";

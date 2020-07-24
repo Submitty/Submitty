@@ -364,19 +364,19 @@ STRING;
     }
 
     public function joinPathsData() {
-        return array(
-            array("", ""),
-            array("", "", ""),
-            array("/", "/"),
-            array("/", "", "/"),
-            array("/a", "/", "a"),
-            array("/a", "/", "/a"),
-            array("abc/def", "abc", "def"),
-            array("abc/def", "abc", "/def"),
-            array("/abc/def", "/abc", "/def"),
-            array("foo.jpg", "", "foo.jpg"),
-            array("dir/0/a.jpg", "dir", "0", "a.jpg")
-        );
+        return [
+            ["", ""],
+            ["", "", ""],
+            ["/", "/"],
+            ["/", "", "/"],
+            ["/a", "/", "a"],
+            ["/a", "/", "/a"],
+            ["abc/def", "abc", "def"],
+            ["abc/def", "abc", "/def"],
+            ["/abc/def", "/abc", "/def"],
+            ["foo.jpg", "", "foo.jpg"],
+            ["dir/0/a.jpg", "dir", "0", "a.jpg"]
+        ];
     }
 
     /**
@@ -390,7 +390,7 @@ STRING;
         for ($i = 0; $i < count($rest); $i++) {
             $rest[$i] = str_replace("/", DIRECTORY_SEPARATOR, $rest[$i]);
         }
-        $actual = forward_static_call_array(array('app\\libraries\\FileUtils', 'joinPaths'), array_slice($args, 1));
+        $actual = forward_static_call_array(['app\\libraries\\FileUtils', 'joinPaths'], array_slice($args, 1));
         $this->assertEquals($expected, $actual);
     }
 
@@ -459,7 +459,7 @@ STRING;
     public function testGetAllDirs() {
         $base_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         FileUtils::createDir($base_dir);
-        $folders = array();
+        $folders = [];
         for ($i = 0; $i < 10; $i++) {
             FileUtils::createDir(FileUtils::joinPaths($base_dir, "folder{$i}"));
             $folders[] = "folder{$i}";

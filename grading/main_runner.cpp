@@ -190,9 +190,10 @@ int main(int argc, char *argv[]) {
       actions  = mapOrArrayOfMaps((*tc)[which_testcase-1],"actions");
       dispatcher_actions = mapOrArrayOfMaps((*tc)[which_testcase-1],"dispatcher_actions");
 
-      if(generation_type != "output"){
-        assert (commands.size() > 0);
-      }
+      // This is not required to be true for notebook gradeables
+      //if(generation_type != "output"){
+      //  assert (commands.size() > 0);
+      //}
     }
 
     executeSetOfCommands(commands, actions, dispatcher_actions, windowed, display_variable, my_testcase, "execute_logfile.txt", config_json, which_testcase);

@@ -23,11 +23,11 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students) {
-            $files[$start_dir_name] = array();
+        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link) {
+            $files[$start_dir_name] = [];
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
-            $no_json = array();
+            $no_json = [];
 
             foreach ($course_materials_array as $file) {
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
@@ -50,6 +50,10 @@ class CourseMaterialsView extends AbstractView {
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
+                        if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
+                            $contents = json_decode(file_get_contents($expected_file_path));
+                            $external_link[$expected_file_path] = [$contents->url, $contents->name];
+                        }
 
                         if ($release_date > $now_date_time) {
                             $isMaterialReleased = '0';
@@ -64,6 +68,10 @@ class CourseMaterialsView extends AbstractView {
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
+                        if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
+                            $contents = json_decode(file_get_contents($expected_file_path));
+                            $external_link[$expected_file_path] = [$contents->url, $contents->name];
+                        }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
                         if (isset($json[$expected_file_path]['sections'])) {
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
@@ -72,12 +80,13 @@ class CourseMaterialsView extends AbstractView {
                     }
                 }
                 else {
-                    $ex_file_path = array();
+                    $ex_file_path = [];
                     $isMaterialReleased = '1';
                     $date = $now_date_time->format("Y-m-d H:i:sO");
                     $date = substr_replace($date, "9999", 0, 4);
                     $ex_file_path['release_datetime'] = $date;
                     $ex_file_path['hide_from_students'] = "on";
+                    $ex_file_path['external_link'] = false;
                     $releaseData = $ex_file_path['release_datetime'];
                     $no_json[$expected_file_path] = $ex_file_path;
                 }
@@ -93,7 +102,7 @@ class CourseMaterialsView extends AbstractView {
 
                 foreach ($path as $dir) {
                     if (!isset($working_dir[$dir])) {
-                        $working_dir[$dir] = array();
+                        $working_dir[$dir] = [];
                     }
                     $working_dir = &$working_dir[$dir];
                 }
@@ -105,7 +114,7 @@ class CourseMaterialsView extends AbstractView {
                     $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
-                $file_release_dates[$expected_file_path] = $releaseData;
+                $file_release_dates[$expected_file_path] = DateUtils::convertTimeStamp($this->core->getUser(), $releaseData, $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'));
             }
 
             if ($json == false) {
@@ -117,11 +126,12 @@ class CourseMaterialsView extends AbstractView {
             }
         };
 
-        $submissions = array();
-        $file_release_dates = array();
-        $in_dir = array();
-        $file_sections = array();
-        $hide_from_students = array();
+        $submissions = [];
+        $file_release_dates = [];
+        $in_dir = [];
+        $file_sections = [];
+        $hide_from_students = [];
+        $external_link = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
@@ -133,7 +143,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students);
+        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
@@ -145,11 +155,10 @@ class CourseMaterialsView extends AbstractView {
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $server_time = DateUtils::getServerTimeJson($this->core);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
-            'date_format' => 'Y-m-d H:i:sO',
+            'date_format' => 'Y-m-d H:i:s',
             "folderPath" => $expected_path,
             "uploadFolderPath" => $upload_path,
             "submissions" => $submissions,
@@ -160,12 +169,12 @@ class CourseMaterialsView extends AbstractView {
             "delete_url" => $this->core->buildCourseUrl(["course_materials", "delete"]),
             "delete_folder_url" => $this->core->buildCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
-            'server_time' => $server_time,
             "display_file_url" => $this->core->buildCourseUrl(['display_file']),
             "user_section" => $user_section,
             "reg_sections" => $reg_sections,
             "file_sections" => $file_sections,
-            "hide_from_students" => $hide_from_students
+            "hide_from_students" => $hide_from_students,
+            "external_link" => $external_link
         ]);
     }
 }

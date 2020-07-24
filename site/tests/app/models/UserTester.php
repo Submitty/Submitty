@@ -2,6 +2,7 @@
 
 namespace tests\app\models;
 
+use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\models\User;
 
@@ -12,7 +13,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testUserNoPreferred() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
@@ -26,8 +27,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
-        );
+            'grading_registration_sections' => [1, 2]
+        ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
@@ -42,7 +43,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['registration_section'], $user->getRegistrationSection());
         $this->assertEquals($details['rotating_section'], $user->getRotatingSection());
         $this->assertEquals($details['manual_registration'], $user->isManualRegistration());
-        $this->assertEquals(array(1,2), $user->getGradingRegistrationSections());
+        $this->assertEquals([1,2], $user->getGradingRegistrationSections());
         $this->assertTrue($user->accessAdmin());
         $this->assertTrue($user->accessFullGrading());
         $this->assertTrue($user->accessGrading());
@@ -50,7 +51,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testUserPreferred() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'anon_id' => "TestAnon",
             'user_numeric_id' => '123456789',
@@ -63,8 +64,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1,2)
-        );
+            'grading_registration_sections' => [1,2]
+        ];
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
@@ -78,7 +79,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testPassword() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'user_numeric_id' => "123456789",
             'user_password' => "test",
@@ -91,8 +92,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1,2)
-        );
+            'grading_registration_sections' => [1,2]
+        ];
         $user = new User($this->core, $details);
         $this->assertTrue(password_verify("test", $user->getPassword()));
         $user->setPassword("test1");
@@ -102,7 +103,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testToObject() {
-        $details = array(
+        $details = [
             'user_id' => "test",
             'anon_id' => "TestAnonymous",
             'user_numeric_id' => '123456789',
@@ -117,19 +118,19 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1,2)
-        );
+            'grading_registration_sections' => [1,2]
+        ];
         $user = new User($this->core, $details);
         $actual = $user->toArray();
         password_verify("test", $actual['password']);
         unset($actual['password']);
         ksort($actual);
-        $expected = array(
+        $expected = [
             'displayed_first_name' => 'User',
             'displayed_last_name' => 'Tester',
             'email' => 'test@example.com',
             'legal_first_name' => 'User',
-            'grading_registration_sections' => array(1,2),
+            'grading_registration_sections' => [1,2],
             'group' => User::GROUP_INSTRUCTOR,
             'access_level' => User::LEVEL_FACULTY,
             'id' => 'test',
@@ -145,7 +146,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnonymous",
             'user_updated' => false,
             'instructor_updated' => false,
-            'notification_settings' => array(
+            'display_image_state' => null,
+            'notification_settings' => [
                 'reply_in_post_thread' => false,
                 'merge_threads' => false,
                 'all_new_threads' => false,
@@ -164,14 +166,100 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_joined_email' => true,
                 'team_member_submission_email' => true,
                 'self_notification_email' => false
-            )
-        );
+            ]
+        ];
         $this->assertEquals($expected, $actual);
     }
 
     public function testErrorUser() {
-        $user = new User($this->core, array());
+        $user = new User($this->core, []);
         $this->assertFalse($user->isLoaded());
         $this->assertNull($user->getId());
+    }
+
+    public function testGetNiceFormatTimeZoneExplicitlySet() {
+        $user = new User($this->core, [
+            'user_id' => 'test',
+            'user_firstname' => 'test',
+            'user_lastname' => 'test',
+            'user_email' => 'user@email.com',
+            'time_zone' => 'NOT_SET/NOT_SET'
+        ]);
+        $this->assertEquals('NOT SET', $user->getNiceFormatTimeZone());
+    }
+
+    public function testGetUTCOffsetExplicitlySet() {
+        $user = new User($this->core, [
+            'user_id' => 'test',
+            'user_firstname' => 'test',
+            'user_lastname' => 'test',
+            'user_email' => 'user@email.com',
+            'time_zone' => 'NOT_SET/NOT_SET'
+        ]);
+        $this->assertEquals('NOT SET', $user->getUTCOffset());
+    }
+
+
+    public function validateUserDataProvider(): array {
+        $return = [
+            ['user_id', 'test', true],
+            ['user_id', 'system_user-1', true],
+            ['user_id', 'te#t', false],
+            ['user_email', '', true],
+            ['user_email', 'pevelm@rpi.edu', true],
+            ['user_email', 'student@faculty.university-of-xy.edu', true],
+            ['user_email', '_______@example.com', true],
+            ['user_email', 'firstname-lastname@example.com', true],
+            ['user_email', 'invalid', false],
+            ['user_email', '@example.com', false],
+            ['user_email', 'Abc..123@example.com', false],
+            ['user_group', '0', false],
+            ['user_group', '1', true],
+            ['user_group', '2', true],
+            ['user_group', '3', true],
+            ['user_group', '4', true],
+            ['user_group', '5', false],
+            ['registration_section', null, true],
+            ['registration_section', 'test', true],
+            ['registration_section', '1', true],
+            ['registration_section', 'section-1', true],
+            ['registration_section', 'section 1', false],
+            ['registration_section', 'Section_1-2', true],
+            ['user_password', '', false],
+            ['user_password', 'test', true],
+        ];
+
+        foreach (['firstname', 'lastname'] as $key) {
+            $return[] = ["user_legal_{$key}", '', false];
+            $return[] = ["user_legal_{$key}", 'Test', true];
+            $return[] = ["user_legal_{$key}", "Test-Phil Mc'Duffy Sr.", true];
+            $return[] = ["user_legal_{$key}", 'Test!!', false];
+            $return[] = ["user_legal_{$key}", "A very long name that goes on for a long time and uses a lot of characters and holy smokes what a name it just keeps going", true];
+            $return[] = ["user_preferred_{$key}", '', true];
+            $return[] = ["user_preferred_{$key}", 'Test', true];
+            $return[] = ["user_preferred_{$key}", "Test-Phil Mc'Duffy Sr.", true];
+            $return[] = ["user_preferred_{$key}", 'Test!!', false];
+            $return[] = ["user_preferred_{$key}", "A very long name that goes on for a long time and uses a lot of characters and holy smokes what a name it just keeps going", false];
+        }
+
+        return $return;
+    }
+
+    /**
+     * @dataProvider validateUserDataProvider
+     */
+    public function testValidateUserData(string $field, ?string $value, bool $expected): void {
+        $this->assertSame($expected, User::validateUserData($field, $value));
+    }
+
+    public function testInvalidFieldForValidate(): void {
+        try {
+            User::validateUserData('invalid_field', 'blah');
+            $this->fail('ValidationException should have been thrown');
+        }
+        catch (ValidationException $exc) {
+            $this->assertSame('User::validateUserData() called with unknown $field.  See extra details, below.', $exc->getMessage());
+            $this->assertSame(['$field: \'invalid_field\'', '$data: \'blah\''], $exc->getDetails());
+        }
     }
 }
