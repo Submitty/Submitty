@@ -26,7 +26,12 @@ class NavigationController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
      */
     public function navigationPage() {
-        $gradeables_list = new GradeableList($this->core);
+        try {
+            $gradeables_list = new GradeableList($this->core);
+        }
+        catch (\Exception $e) {
+            return $this->core->getOutput()->renderOutput('Error', 'brokenGradeable');
+        }
 
         $future_gradeables_list = $gradeables_list->getFutureGradeables();
         $beta_gradeables_list = $gradeables_list->getBetaGradeables();

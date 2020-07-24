@@ -35,4 +35,8 @@ class ErrorView extends AbstractView {
             'title' => $gradeable_title
         ]);
     }
+
+    public function brokenGradeable() {
+        return $this->core->getOutput()->renderTwigTemplate('error/BrokenGradeable.twig');
+    }
 }
