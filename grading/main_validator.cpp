@@ -56,9 +56,9 @@ int main(int argc, char *argv[]) {
     std::cout << "time_of_submission " << time_of_submission << std::endl;
   }
   catch (TCLAP::ArgException &e)  // catch any exceptions
-  { 
+  {
     std::cerr << "INCORRECT ARGUMENTS TO Validator" << std::endl;
-    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
+    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
     return 1;
   }
 
@@ -167,7 +167,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             // PREPARE THE JSON DIFF FILE
             std::stringstream diff_path;
             diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
-            std::ofstream diff_stream(diff_path.str().c_str()); 
+            std::ofstream diff_stream(diff_path.str().c_str());
             result.printJSON(diff_stream);
             std::stringstream expected_path;
             std::string id = hw_id;
@@ -324,7 +324,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       //
       // NOTE: Editing this? Make sure this branch stays in-sync with the
       //       check_submission_limit_penalty_inline() function in
-      //       sbin/submitty_autograding_shipper.py
+      //       autograder/submitty_autograding_shipper.py
       //
       /////////////////////////////////////////////////////////////////////////
       int max = my_testcase.getMaxSubmissions();
@@ -405,7 +405,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   //
   // NOTE: Editing this file? Make sure that the parts of this function that
   //       write to the output files stay in-sync with the write_grading_outputs
-  //       function in sbin/submitty_autograding_shipper.py
+  //       function in autograder/submitty_autograding_shipper.py
   //
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -435,7 +435,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   assert (tc != config_json.end());
   for (unsigned int i = 0; i < tc->size(); i++) {
     std::cout << "------------------------------------------\n";
-    ValidateATestCase(config_json, i, 
+    ValidateATestCase(config_json, i,
                       subnum,hw_id,
                       automated_points_awarded,
                       automated_points_possible,

@@ -5,6 +5,7 @@ import subprocess
 import os
 import glob
 import shutil
+import traceback
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
@@ -41,7 +42,7 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
     subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
-    
+
     os.mkdir(os.path.join(test.testcase_path, 'data', "test_output"))
     for i in [str(n) for n in range(1, 5)]:
         subprocess.call(["cp",
@@ -52,7 +53,11 @@ def cleanup(test):
 def schema_validation(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    test.validate_complete_config(config_path)
+    try:
+        test.validate_complete_config(config_path)
+    except Exception:
+        traceback.print_exc()
+        raise
 
 @testcase
 def correct(test):

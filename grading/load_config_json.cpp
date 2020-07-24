@@ -62,18 +62,72 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+/**
+* Add global booleans and configuration options to the configuration
+**/
+void AddGlobalDefaults(nlohmann::json &whole_config) {
+
+  /*************************************************
+  * Add Global File Copy Commands
+  **************************************************/
+  AddAutogradingConfiguration(whole_config);
+
+  /*************************************************
+  * Add Global Booleans
+  **************************************************/
+  if (!whole_config["timestamped_stdout"].is_boolean()) {
+    whole_config["timestamped_stdout"] = false;
+  }
+
+  if (!whole_config["publish_actions"].is_boolean()) {
+    whole_config["publish_actions"] = false;
+  }
+
+  /*************************************************
+  * Global Docker Configuration
+  **************************************************/
+
+  if (!whole_config["autograding_method"].is_string()) {
+    whole_config["autograding_method"] = "jailed_sandbox";
+  }else{
+    assert(whole_config["autograding_method"] == "docker"
+        || whole_config["autograding_method"]  == "jailed_sandbox");
+  }
+
+  //check if there are global container defaults present. If not, add an empty object.
+  if(whole_config["container_options"].is_null()){
+    whole_config["container_options"] = nlohmann::json::object();
+  }
+
+  //Fill in the defaults.
+  if(!whole_config["container_options"]["container_image"].is_string()){
+    whole_config["container_options"]["container_image"] = "submitty/autograding-default:latest";
+  }
+
+  if (!whole_config["container_options"]["use_router"].is_boolean()){
+    whole_config["container_options"]["use_router"] = false;
+  }
+
+  if (!whole_config["container_options"]["single_port_per_container"].is_boolean()){
+    whole_config["container_options"]["single_port_per_container"] = false; // connection
+  }
+
+  if (!whole_config["container_options"]["number_of_ports"].is_number_integer()){
+    whole_config["container_options"]["number_of_ports"] = 1; // connection
+  }
+
+}
+
 
 // This function ensures that any file explicitly tagged as an
 // executable in a compilation step is validated and copied
 // to each testcase directory.
-void PreserveCompiledFiles(nlohmann::json &whole_config) {
+void PreserveCompiledFiles(nlohmann::json& testcases, nlohmann::json &whole_config) {
 
   // Loop over all of the test cases
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  assert (tc != whole_config.end());
   int which_testcase = 0;
-  for (nlohmann::json::iterator my_testcase = tc->begin();
-       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+  for (nlohmann::json::iterator my_testcase = testcases.begin();
+       my_testcase != testcases.end(); my_testcase++,which_testcase++) {
 
     std::string testcase_type = my_testcase->value("type","Execution");
     //Skip non compilation tests
@@ -102,14 +156,12 @@ void PreserveCompiledFiles(nlohmann::json &whole_config) {
 // This function will automatically archive all non-executable files
 // that are validated.  This ensures that the web viewers will have
 // the necessary files to display the results to students and graders.
-void ArchiveValidatedFiles(nlohmann::json &whole_config) {
+void ArchiveValidatedFiles(nlohmann::json &testcases, nlohmann::json &whole_config) {
 
   // FIRST, loop over all of the test cases
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  assert (tc != whole_config.end());
   int which_testcase = 0;
-  for (nlohmann::json::iterator my_testcase = tc->begin();
-       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+  for (nlohmann::json::iterator my_testcase = testcases.begin();
+       my_testcase != testcases.end(); my_testcase++,which_testcase++) {
 
 
     nlohmann::json::iterator validators = my_testcase->find("validation");
@@ -145,160 +197,125 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
   }
 }
 
-void AddDockerConfiguration(nlohmann::json &whole_config) {
-
-  //check if docker is globally enabled.
-  if (!whole_config["autograding_method"].is_string()) {
-    whole_config["autograding_method"] = "jailed_sandbox";
-  }else{
-    assert(whole_config["autograding_method"] == "docker"
-        || whole_config["autograding_method"]  == "jailed_sandbox");
-  }
-
-  //check if there are global container defaults present. If not, add an empty object.
-  if(whole_config["container_options"].is_null()){
-    whole_config["container_options"] = nlohmann::json::object();
-  }
-
-  //Fill in the defaults.
-  if(!whole_config["container_options"]["container_image"].is_string()){
-    whole_config["container_options"]["container_image"] = "submitty/autograding-default:latest";
-  }
-
-  if (!whole_config["container_options"]["use_router"].is_boolean()){
-    whole_config["container_options"]["use_router"] = false;
-  }
-
-  if (!whole_config["container_options"]["single_port_per_container"].is_boolean()){
-    whole_config["container_options"]["single_port_per_container"] = false; // connection
-  }
-
-  if (!whole_config["container_options"]["number_of_ports"].is_number_integer()){
-    whole_config["container_options"]["number_of_ports"] = 1; // connection
-  }
-
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  assert (tc != whole_config.end());
+void AddDockerConfiguration(nlohmann::json &testcases, nlohmann::json &whole_config) {
 
   int testcase_num = 0;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++)
-  {
-    std::string title = whole_config["testcases"][testcase_num].value("title","BAD_TITLE");
+  for (typename nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++,testcase_num++) {
+    std::string title = (*itr).value("title","BAD_TITLE");
 
-    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
-    if (!this_testcase["use_router"].is_boolean()){
-      this_testcase["use_router"] = whole_config["container_options"]["use_router"];
+    if (!(*itr)["use_router"].is_boolean()){
+      (*itr)["use_router"] = whole_config["container_options"]["use_router"];
     }
 
-    if (!this_testcase["single_port_per_container"].is_boolean()){
-      this_testcase["single_port_per_container"] = whole_config["container_options"]["single_port_per_container"];
+    if (!(*itr)["single_port_per_container"].is_boolean()){
+      (*itr)["single_port_per_container"] = whole_config["container_options"]["single_port_per_container"];
     }
 
-    assert(!(this_testcase["single_port_per_container"] && this_testcase["use_router"]));
+    assert(!((*itr)["single_port_per_container"] && (*itr)["use_router"]));
 
-    
+
     // if "command" or "solution_commands" exists in whole_config, we must wrap it in a container.
-    for(std::pair<std::string, std::string> option : std::vector<std::pair<std::string, std::string>>{ 
-                                                       std::pair<std::string, std::string>{"command", "containers"}, 
+    for(std::pair<std::string, std::string> option : std::vector<std::pair<std::string, std::string>>{
+                                                       std::pair<std::string, std::string>{"command", "containers"},
                                                        std::pair<std::string, std::string>{"solution_commands", "solution_containers"}
                                                      }){
       nlohmann::json commands = nlohmann::json::array();
       std::string command_type = option.first;
       std::string container_type = option.second;
       bool found_commands = false;
-      if(this_testcase.find(command_type) != this_testcase.end()){
+      if((*itr).find(command_type) != (*itr).end()){
         found_commands = true;
-        if (this_testcase[command_type].is_array()){
-          commands = this_testcase[command_type];
+        if ((*itr)[command_type].is_array()){
+          commands = (*itr)[command_type];
         }
         else{
-          commands.push_back(this_testcase[command_type]);
+          commands.push_back((*itr)[command_type]);
         }
 
-        this_testcase.erase(command_type);
+        (*itr).erase(command_type);
       }
 
-      assert (this_testcase[container_type].is_null() || !found_commands);
+      assert ((*itr)[container_type].is_null() || !found_commands);
 
-      if(!this_testcase[container_type].is_null()){
-        assert(this_testcase[container_type].is_array());
+      if(!(*itr)[container_type].is_null()){
+        assert((*itr)[container_type].is_array());
       }else{
-        this_testcase[container_type] = nlohmann::json::array();
+        (*itr)[container_type] = nlohmann::json::array();
         //commands may have to be a json::array();
-        this_testcase[container_type][0] = nlohmann::json::object();
-        this_testcase[container_type][0]["commands"] = commands;
+        (*itr)[container_type][0] = nlohmann::json::object();
+        (*itr)[container_type][0]["commands"] = commands;
       }
 
       //get the testcase type
-      std::string testcase_type = this_testcase.value("type","Execution");
+      std::string testcase_type = (*itr).value("type","Execution");
       if (testcase_type == "Compilation"){
-        assert(this_testcase[container_type].size() == 1);
+        assert((*itr)[container_type].size() == 1);
       }
 
-      if(this_testcase[container_type].size() > 1){
+      if((*itr)[container_type].size() > 1){
         assert(whole_config["autograding_method"] == "docker");
       }
 
       int router_container = -1;
       bool found_non_server = false;
 
-      for (int container_num = 0; container_num < this_testcase[container_type].size(); container_num++){
-        if(this_testcase[container_type][container_num]["commands"].is_string()){
-          std::string this_command = this_testcase[container_type][container_num].value("commands", "");
-          this_testcase[container_type][container_num].erase("commands");
-          this_testcase[container_type][container_num]["commands"] = nlohmann::json::array();
-          this_testcase[container_type][container_num]["commands"].push_back(this_command);
+      for (int container_num = 0; container_num < (*itr)[container_type].size(); container_num++){
+        if((*itr)[container_type][container_num]["commands"].is_string()){
+          std::string this_command = (*itr)[container_type][container_num].value("commands", "");
+          (*itr)[container_type][container_num].erase("commands");
+          (*itr)[container_type][container_num]["commands"] = nlohmann::json::array();
+          (*itr)[container_type][container_num]["commands"].push_back(this_command);
         }
 
-        if(!this_testcase[container_type][container_num]["commands"].is_array()){
-          this_testcase[container_type][container_num]["commands"] = nlohmann::json::array();
+        if(!(*itr)[container_type][container_num]["commands"].is_array()){
+          (*itr)[container_type][container_num]["commands"] = nlohmann::json::array();
         }
 
-        if(this_testcase[container_type][container_num]["container_name"].is_null()){
-          this_testcase[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
+        if((*itr)[container_type][container_num]["container_name"].is_null()){
+          (*itr)[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
         }
 
-        if (!this_testcase[container_type][container_num]["number_of_ports"].is_number_integer()){
-          this_testcase[container_type][container_num]["number_of_ports"] = whole_config["container_options"]["number_of_ports"];
+        if (!(*itr)[container_type][container_num]["number_of_ports"].is_number_integer()){
+          (*itr)[container_type][container_num]["number_of_ports"] = whole_config["container_options"]["number_of_ports"];
         }
 
-        if (this_testcase[container_type][container_num]["container_name"] == "router"){
+        if ((*itr)[container_type][container_num]["container_name"] == "router"){
           assert(router_container == -1);
           router_container = container_num;
         }
 
-        if(!this_testcase[container_type][container_num]["server"].is_boolean()){
-          this_testcase[container_type][container_num]["server"] = false;
+        if(!(*itr)[container_type][container_num]["server"].is_boolean()){
+          (*itr)[container_type][container_num]["server"] = false;
         }
 
-        if(this_testcase[container_type][container_num]["server"] == true){
-          assert(this_testcase[container_type][container_num]["commands"].size() == 0);
+        if((*itr)[container_type][container_num]["server"] == true){
+          assert((*itr)[container_type][container_num]["commands"].size() == 0);
         }else{
           found_non_server = true;
         }
 
-        std::string container_name = this_testcase[container_type][container_num]["container_name"];
+        std::string container_name = (*itr)[container_type][container_num]["container_name"];
 
         assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
 
-        if(this_testcase[container_type][container_num]["outgoing_connections"].is_null()){
-          this_testcase[container_type][container_num]["outgoing_connections"] = nlohmann::json::array();
+        if((*itr)[container_type][container_num]["outgoing_connections"].is_null()){
+          (*itr)[container_type][container_num]["outgoing_connections"] = nlohmann::json::array();
         }
 
-        if(this_testcase[container_type][container_num]["container_image"].is_null()){
+        if((*itr)[container_type][container_num]["container_image"].is_null()){
           //TODO: store the default system image somewhere and fill it in here.
-          this_testcase[container_type][container_num]["container_image"] = whole_config["container_options"]["container_image"];
+          (*itr)[container_type][container_num]["container_image"] = whole_config["container_options"]["container_image"];
         }
       }
 
-      if(this_testcase[container_type].size() <= 2 && this_testcase["use_router"]){
+      if((*itr)[container_type].size() <= 2 && (*itr)["use_router"]){
         // If there are only two containers specified, make sure that neither is the router.
         // The router MUST go between at least two containers.
         assert(router_container == -1);
       }
 
       // If we are using the router, and it isn't specified, and this testcase is a valid candidate for a router (2 or more containers specified).
-      if(this_testcase["use_router"] && router_container == -1 && this_testcase[container_type].size() > 1){
+      if((*itr)["use_router"] && router_container == -1 && (*itr)[container_type].size() > 1){
         nlohmann::json insert_router = nlohmann::json::object();
         insert_router["outgoing_connections"] = nlohmann::json::array();
         insert_router["commands"] = nlohmann::json::array();
@@ -307,39 +324,33 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         insert_router["import_default_router"] = true;
         insert_router["container_image"] = "submitty/autograding-default:latest";
         insert_router["server"] = false;
-        this_testcase[container_type].push_back(insert_router);
+        (*itr)[container_type].push_back(insert_router);
       }
       //We now always add the default router in case of instructor overriding
-      else if(this_testcase["use_router"] && router_container != -1){
-        this_testcase[container_type][router_container]["import_default_router"] = true;
+      else if((*itr)["use_router"] && router_container != -1){
+        (*itr)[container_type][router_container]["import_default_router"] = true;
       }
       assert(found_non_server == true);
     }
-    whole_config["testcases"][testcase_num] = this_testcase;
-    assert(!whole_config["testcases"][testcase_num]["title"].is_null());
-    assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
+    assert(!(*itr)["title"].is_null());
+    assert(!(*itr)["containers"].is_null());
   }
   return;
 }
 
-void FormatDispatcherActions(nlohmann::json &whole_config) {
+void FormatDispatcherActions(nlohmann::json &testcases, const nlohmann::json &whole_config) {
 
-  bool docker_enabled = (whole_config["autograding_method"] == "docker") ? true : false;
-
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  assert (tc != whole_config.end());
+  bool docker_enabled = (whole_config["autograding_method"] == "docker");
 
   int testcase_num = 0;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+  for (typename nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++,testcase_num++){
 
-    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
-
-    if(this_testcase["dispatcher_actions"].is_null()){
-      whole_config["testcases"][testcase_num]["dispatcher_actions"] = nlohmann::json::array();
+    if((*itr)["dispatcher_actions"].is_null()){
+      (*itr)["dispatcher_actions"] = nlohmann::json::array();
       continue;
     }
 
-    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps(this_testcase, "dispatcher_actions");
+    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps((*itr), "dispatcher_actions");
 
     if(dispatcher_actions.size() > 0){
       assert(docker_enabled);
@@ -374,7 +385,7 @@ void FormatDispatcherActions(nlohmann::json &whole_config) {
 
         if(action == "stdin"){
           assert(!dispatcher_action["string"].is_null());
-          whole_config["testcases"][testcase_num]["dispatcher_actions"][i] = dispatcher_action;
+          (*itr)["dispatcher_actions"][i] = dispatcher_action;
         }else{
           assert(action == "stop" || action == "start" || action == "kill");
         }
@@ -446,24 +457,19 @@ void validate_gif_or_screenshot_name(std::string filename){
   assert(filename.find("*") == std::string::npos);
 }
 
-void FormatGraphicsActions(nlohmann::json &whole_config) {
-
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  assert (tc != whole_config.end());
+void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
 
   int testcase_num = 0;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
+  for (typename nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++,testcase_num++){
     //screenshot number resets per testcase.
     int number_of_screenshots = 0;
     int number_of_gifs = 0;
 
-    nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
-
-    if(this_testcase["actions"].is_null()){
+    if((*itr).find("actions") == (*itr).end()){
       continue;
     }
 
-    std::vector<nlohmann::json> actions = mapOrArrayOfMaps(this_testcase, "actions");
+    std::vector<nlohmann::json> actions = mapOrArrayOfMaps((*itr), "actions");
 
     for (int action_num = 0; action_num < actions.size(); action_num++){
       nlohmann::json action = actions[action_num];
@@ -640,33 +646,28 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       else{
         bool valid_action_type = false;
         if(action_name == ""){
-          std::cout << "ERROR: no 'action' feild defined." << std::endl;
+          std::cout << "ERROR: no 'action' field defined." << std::endl;
         }else{
           std::cout << "ERROR: Could not recognize action " << action_name << std::endl;
         }
         assert(valid_action_type == true);
       }
-      whole_config["testcases"][testcase_num]["actions"][action_num] = action;
+      (*itr)["actions"][action_num] = action;
     }
   }
 }
 
-void formatPreActions(nlohmann::json &whole_config) {
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  if (tc == whole_config.end()) { /* no testcases */ return; }
-
+void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
   // loop over testcases
   int which_testcase = 0;
-  for (nlohmann::json::iterator my_testcase = tc->begin(); my_testcase != tc->end(); my_testcase++, which_testcase++) {
+  for (nlohmann::json::iterator my_testcase = testcases.begin(); my_testcase != testcases.end(); my_testcase++, which_testcase++) {
 
-    nlohmann::json this_testcase = whole_config["testcases"][which_testcase];
-
-    if(this_testcase["pre_commands"].is_null()){
-      whole_config["testcases"][which_testcase]["pre_commands"] = nlohmann::json::array();
+    if((*my_testcase)["pre_commands"].is_null()){
+      (*my_testcase)["pre_commands"] = nlohmann::json::array();
       continue;
     }
 
-    std::vector<nlohmann::json> pre_commands = mapOrArrayOfMaps(this_testcase, "pre_commands");
+    std::vector<nlohmann::json> pre_commands = mapOrArrayOfMaps((*my_testcase), "pre_commands");
 
     for (int i = 0; i < pre_commands.size(); i++){
       nlohmann::json pre_command = pre_commands[i];
@@ -721,7 +722,7 @@ void formatPreActions(nlohmann::json &whole_config) {
       assert(source_name.find("\'") == std::string::npos);
 
       if(!pre_command["pattern"].is_string()){
-         this_testcase["pattern"] = "";
+         (*my_testcase)["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
         //The pattern must not container .. or $
@@ -744,23 +745,20 @@ void formatPreActions(nlohmann::json &whole_config) {
       assert(destination.find("\"") == std::string::npos);
       assert(destination.find("\'") == std::string::npos);
 
-      whole_config["testcases"][which_testcase]["pre_commands"][i] = pre_command;
+      (*my_testcase)["pre_commands"][i] = pre_command;
     }
   }
 }
 
-void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
-
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  if (tc == whole_config.end()) { /* no testcases */ return; }
-
+void RewriteDeprecatedMyersDiff(nlohmann::json &testcases, nlohmann::json &whole_config) {
   // loop over testcases
   int which_testcase = 0;
-  for (nlohmann::json::iterator my_testcase = tc->begin();
-       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+  for (nlohmann::json::iterator my_testcase = testcases.begin(); my_testcase != testcases.end(); my_testcase++,which_testcase++) {
     nlohmann::json::iterator validators = my_testcase->find("validation");
-    if (validators == my_testcase->end()) { /* no autochecks */ continue; }
-
+    if (validators == my_testcase->end()) {
+      /* no autochecks */
+      continue;
+    }
     // loop over autochecks
     for (int which_autocheck = 0; which_autocheck < validators->size(); which_autocheck++) {
       nlohmann::json& autocheck = (*validators)[which_autocheck];
@@ -777,7 +775,7 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLinebyChar";
-    } else if (method == "myersDiffbyLinebyWord") {
+      } else if (method == "myersDiffbyLinebyWord") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLinebyChar";
@@ -802,23 +800,10 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
   }
 }
 
-void InflateTestcases(nlohmann::json &whole_config){
-  nlohmann::json::iterator tc = whole_config.find("testcases");
-  assert (tc != whole_config.end());
+void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config){
 
-  if (!whole_config["timestamped_stdout"].is_boolean()) {
-    whole_config["timestamped_stdout"] = false;
-  }
-
-  if (!whole_config["publish_actions"].is_boolean()) {
-    whole_config["publish_actions"] = false;
-  }
-
-  int testcase_num = 0;
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
-      nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
-      InflateTestcase(this_testcase, whole_config);
-      whole_config["testcases"][testcase_num] = this_testcase;
+  for (typename nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++){
+      InflateTestcase(*itr, whole_config);
   }
 }
 
@@ -858,7 +843,6 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
     std::vector<nlohmann::json> containers = mapOrArrayOfMaps(single_testcase, "containers");
     AddDefaultGraphicsChecks(*itr,single_testcase);
     AddDefaultGraders(containers,*itr,whole_config);
-
      for (int i = 0; i < (*itr).size(); i++) {
       nlohmann::json& grader = (*itr)[i];
       nlohmann::json::iterator itr2;
@@ -911,24 +895,54 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   nlohmann::json answer;
   std::stringstream sstr(GLOBAL_config_json_string);
   sstr >> answer;
-  AddDockerConfiguration(answer);
-  FormatDispatcherActions(answer);
-  formatPreActions(answer);
-  FormatGraphicsActions(answer);
-  AddSubmissionLimitTestCase(answer);
-  AddAutogradingConfiguration(answer);
 
+  AddGlobalDefaults(answer);
+
+  /**
+  * Validate/complete-ify the global testcases array.
+  **/
+  nlohmann::json::iterator testcases = answer.find("testcases");
+  if(testcases == answer.end()) {
+    answer["testcases"] = nlohmann::json::array();
+    testcases = answer.find("testcases");
+  }
+
+  AddDockerConfiguration(*testcases, answer);
+  FormatDispatcherActions(*testcases, answer);
+  formatPreActions(*testcases, answer);
+  FormatGraphicsActions(*testcases, answer);
+  RewriteDeprecatedMyersDiff(*testcases, answer);
+  InflateTestcases(*testcases, answer);
+  ArchiveValidatedFiles(*testcases, answer);
+  PreserveCompiledFiles(*testcases, answer);
+
+  /**
+  * Validate/complete-ify the testcases in each item in the item_pool.
+  **/
+  nlohmann::json::iterator item_pool = answer.find("item_pool");
+  if(item_pool != answer.end()) {
+    for(nlohmann::json::iterator item = answer["item_pool"].begin(); item != answer["item_pool"].end(); item++) {
+      nlohmann::json::iterator item_testcases = (*item).find("testcases");
+      if(item_testcases == (*item).end()) {
+        (*item)["testcases"] = nlohmann::json::array();
+        item_testcases = (*item).find("testcases");
+      }
+      AddDockerConfiguration(*item_testcases, answer);
+      FormatDispatcherActions(*item_testcases, answer);
+      formatPreActions(*item_testcases, answer);
+      FormatGraphicsActions(*item_testcases, answer);
+      RewriteDeprecatedMyersDiff(*item_testcases, answer);
+      InflateTestcases(*item_testcases, answer);
+      ArchiveValidatedFiles(*item_testcases, answer);
+      PreserveCompiledFiles(*item_testcases, answer);
+    }
+  }
+
+
+  AddSubmissionLimitTestCase(answer);
   if (rcsid != "") {
     CustomizeAutoGrading(rcsid,answer);
   }
-
-  RewriteDeprecatedMyersDiff(answer);
-
-  InflateTestcases(answer);
-
-  ArchiveValidatedFiles(answer);
-  PreserveCompiledFiles(answer);
-
   return answer;
 }
 
