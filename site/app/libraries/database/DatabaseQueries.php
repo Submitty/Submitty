@@ -5198,7 +5198,7 @@ AND gc_id IN (
     }
     
     public function deleteOverallComment($gradeable_id, $grader_id) {
-        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_user_id=?", [$gradeable_id, $grader_id]);
     }
 
     /**
