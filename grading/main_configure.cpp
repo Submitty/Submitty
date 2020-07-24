@@ -221,6 +221,15 @@ nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann:
                       << (item_label.empty() ? "[no label]" : item_label) << std::endl;
           }*/
         }
+        // Check if the indices mapped to users are in 'from_pool' array range
+        for (auto i=user_item_map.begin(); i!=user_item_map.end(); i++) {
+           int item_index = i.value();
+           if(item_index < 0 || item_index > in_notebook_cell_from_pool.size()) {
+               std::cout << "ERROR: user (" << i.key() <<") mapped with index \"" << item_index;
+               std::cout << "\" which is out of 'from_pool' array range: 0 to " << user_item_map.size() << std::endl;
+               throw -1;
+           }
+        }
 
         // Write the empty string if no label provided, otherwise pass forward item_label
         out_notebook_cell["item_label"] = item_label;
