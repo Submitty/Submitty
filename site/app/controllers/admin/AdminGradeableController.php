@@ -268,6 +268,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm2', $gradeable);
     }
 
     /**
@@ -286,29 +287,25 @@ class AdminGradeableController extends AbstractController {
             $grading_assignment_for_grader = $tmp[$gradeable_id];
             foreach ($grading_assignment_for_grader as $i => $student_id) {
                 if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
-                    if ($this->core->getQueries()->getUserById($student_id) == null) {
-                        $this->core->addErrorMessage("{$student_id} is not a valid student");
-                    }
-                    else {
-                        $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
-                    }
+                    $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                 }
             }
             //then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
-                if (in_array($student_id, $grading_assignment_for_grader)) {
-                    $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
-                }
-                elseif ($this->core->getQueries()->getUserById($student_id) == null) {
-                    $this->core->addErrorMessage("{$student_id} is not a valid student");
-                }
-                else {
-                    $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
-                }
+                $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
         }
+        // return new peer assignments to AJAX success
         $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
         $this->core->getOutput()->renderJsonSuccess($new_peers);
+    }
+
+     /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function newGraderPeerSubmit($gradeable_id) {
+
     }
 
     /* Http request methods (i.e. ajax) */
