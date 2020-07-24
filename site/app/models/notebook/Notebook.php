@@ -79,8 +79,8 @@ class Notebook extends AbstractModel {
                 }
             }
             elseif (
-                isset($notebook_cell['type']) &&
-                $notebook_cell['type'] === 'short_answer'
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'short_answer'
                 && !empty($notebook_cell['programming_language'])
                 && empty($notebook_cell['codemirror_mode'])
             ) {

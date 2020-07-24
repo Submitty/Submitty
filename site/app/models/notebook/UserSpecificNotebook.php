@@ -111,7 +111,8 @@ class UserSpecificNotebook extends Notebook {
         $item_label = $item['item_label'];
         $selected = null;
         // Check if user-mapping is available or not
-        if (isset($item["user_item_map"])
+        if (
+            isset($item["user_item_map"])
             && isset($item["user_item_map"][$this->user_id])
             && $item["user_item_map"][$this->user_id] >= 0
             && $item["user_item_map"][$this->user_id] < count($item['from_pool'])
