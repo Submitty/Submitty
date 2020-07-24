@@ -1192,10 +1192,10 @@ HTML;
         $return = "";
         $anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
-        if ($gradeable->isTeamAssignment()){
+        if ($gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamById($graded_gradeable->getSubmitter()->getId());
             foreach ($team->getMemberUsers() as $user) {
-                $anon_ids [] = $user->getAnonId();
+                $anon_ids[] = $user->getAnonId();
             }
         }
         // Disable grading if the requested version isn't the active one
