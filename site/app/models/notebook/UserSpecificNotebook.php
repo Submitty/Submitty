@@ -142,6 +142,7 @@ class UserSpecificNotebook extends Notebook {
     /**
      * Given an item_pool name return all associated notebook values and their testcases
      * @param string $tgt_name the name of the item_pool to search for
+     * @return array
      */
     private function searchForItemPool(string $tgt_name): array {
         $ret = ["notebook" => [], "testcases" => []];
