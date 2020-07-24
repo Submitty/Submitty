@@ -2497,8 +2497,16 @@ class ElectronicGraderController extends AbstractController {
             $component = $container->getComponent();
             $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
         }
-        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id);
+        $ta_graded_gradeable->removeOverallComment($peer_id);
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id, $gradeable->isTeamAssignment());
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Finally, save the graded gradeable
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
         $this->core->getOutput()->renderJsonSuccess("Marks removed successfully!");
         return true;
     }

@@ -1291,6 +1291,11 @@ HTML;
         $gradeable = $graded_gradeable->getGradeable();
         $submitter = $graded_gradeable->getSubmitter()->getId();
         $peers_to_list = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $submitter);
+        if ($gradeable->isTeamAssignment()) {
+            foreach ($this->core->getQueries()->getTeamById($submitter)->getMemberUserIds() as $student_id) {
+                $peers_to_list = array_merge($peers_to_list, $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $student_id));
+            }
+        }
         $components = $gradeable->getComponents();
         $components_details_array = [];
         $peer_details = [];
