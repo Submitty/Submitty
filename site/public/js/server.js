@@ -1624,12 +1624,6 @@ function enableKeyToClick(){
   }
 }
 
-function newEditPeerComponentsForm() {
-    $('.popup-form').css('display', 'none');
-    let form = $("#edit-peer-components-form");
-    form.css("display", "block");
-    captureTabInModal("edit-peer-components-form");
-}
 /**
  * Function for instructor to flag/unflag a user's preferred photo as inappropriate.
  *
