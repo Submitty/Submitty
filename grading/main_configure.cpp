@@ -178,6 +178,7 @@ nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann:
       }
       else if(type == "item"){
         std::string item_label = in_notebook_cell.value("item_label", "");
+        nlohmann::json user_item_map = in_notebook_cell.value("user_item_map", nlohmann::json::object());
 
         // Update the complete_config if we had a blank label
         complete[i]["item_label"] = "";
@@ -223,6 +224,10 @@ nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann:
 
         // Write the empty string if no label provided, otherwise pass forward item_label
         out_notebook_cell["item_label"] = item_label;
+        
+        // Write the empty object if no 'mapping' provided, otherwise pass forward user_item_map
+        out_notebook_cell["user_item_map"] = user_item_map;
+                
         // Pass forward other items
         out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
         if(in_notebook_cell.find("points") != in_notebook_cell.end()){

@@ -109,7 +109,14 @@ class UserSpecificNotebook extends Notebook {
      */
     private function getItemFromPool(array $item): string {
         $item_label = $item['item_label'];
-        $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
+        $selected = null;
+        // Check if user-mapping is available or not
+        if (isset($item["user_item_map"]) && isset($item["user_item_map"][$this->user_id])) {
+            $selected = $item["user_item_map"][$this->user_id];
+        }
+        else {
+            $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
+        }
         $item_from_pool = $item['from_pool'][$selected];
         $this->selected_questions[] = $item_from_pool;
 
