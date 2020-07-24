@@ -26,7 +26,7 @@
 	    	</br>
 	    	{% for component in components %}
 	    		<div class="box-badge">
-	        		{{ Badge.render(5, 10, false) }}
+	        		{{ Badge.render(component_scores[component.id][peer], component.max, false) }}
 	        	</div>
 	        	<span class="component-title col-no-gutters">
     				<b>{{ component.title|escape }}</b>
