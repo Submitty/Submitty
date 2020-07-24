@@ -1945,12 +1945,11 @@ ALTER TABLE ONLY public.regrade_discussion
     ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id);
 
 --
--- Name: peer_feedback_pkey; Type: PK CONSTRAINT; Schema: public; Owner: -
+-- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (pf_id);
-
+    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
 --
 -- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -1964,6 +1963,13 @@ ALTER TABLE ONLY peer_feedback
 
 ALTER TABLE ONLY peer_feedback
             ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
+            
+--
+-- Name: peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY peer_feedback
+            ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
 -- Name: regrade_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
