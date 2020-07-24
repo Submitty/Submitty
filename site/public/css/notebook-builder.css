@@ -60,9 +60,8 @@
     flex-direction: column;
 }
 
-.selector-widget select {
-    margin-top: 0;
-    width: 90%;
+.selector-widget .interactive-container {
+    justify-content: space-evenly;
 }
 
 /**
@@ -136,4 +135,17 @@
     display: flex;
     flex-direction: column;
     text-align: right;
+}
+
+/**
+ * Form options widget styles
+ */
+.form-options-widget,
+.form-options-widget .interactive-container {
+    flex-direction: column;
+}
+
+.form-options-widget .buttons {
+    display: flex;
+    margin-bottom: 15px;
 }

@@ -53,5 +53,9 @@ class MarkdownWidget extends Widget {
             return this.state;
         }
     }
+
+    load(data) {
+        this.state = data;
+    }
 }
 

@@ -1,94 +1,34 @@
-<div class="flex-wrapper">
-    <div id="courses" class="content">
-        {% for ranks in statuses %}
-            {% if loop.index == 1 or ranks|length > 0 %}
-                <h1>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
-                {% for rank in ranks %}
-                    <h2>As {{ rank.title }}</h2>
-                    {% set display_semester = '' %}
-                    {% for course in rank.courses %}
-                        {% if display_semester != course.display_semester %}
-                            {% if display_semester != '' %}
+<div id="courses" class="content">
+    {% for ranks in statuses %}
+        {% if loop.index == 1 or ranks|length > 0 %}
+            <h1>My {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
+            {% for rank in ranks %}
+                <h2>As {{ rank.title }}</h2>
+                {% set display_semester = '' %}
+                {% for course in rank.courses %}
+                    {% if display_semester != course.display_semester %}
+                        {% if display_semester != '' %}
                             </ul>
-                            {% endif %}
-                            {% set display_semester = course.display_semester %}
-                            <h3> {{ display_semester }} </h3>
-                            <ul class="bare-list course-list">
                         {% endif %}
-                                <li>
-                                    <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}">
-                                        {{ course['display_semester'] }} &nbsp; &nbsp;
-                                        {{ course['title'] | upper }} &nbsp; &nbsp;
-                                        {% if course['display_name'] != "" %}
-                                            {{ course['display_name'] }}
-                                        {% endif %}
-                                        {{ user.accessAdmin() }}
-                                    </a>
-                                </li>
-                    {% endfor %}
-                    {% if display_semester != '' %}
-                            </ul>
+                        {% set display_semester = course.display_semester %}
+                        <h3> {{ display_semester }} </h3>
+                        <ul class="bare-list course-list">
                     {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    </div>
-    <div class="content">
-        <h1>About You</h1>
-        <div id="user_card">
-            {% set image = user.getDisplayImage() %}
-            {% if image is not null %}
-                <div id="user_card_image">
-                    {{ base64_image(image.getImageBase64MaxDimension(250), image.getMimeType(), '%s %s'|format(user.getDisplayedFirstName(), user.getDisplayedLastName())) }}
-                </div>
-            {% endif %}
-            <div id="user_card_info">
-                <div><b>Username:</b> {{ user.getId() }}</div>
-                <div class="flex-row">
-                    <span><b>First Name:</b>&nbsp;{{ user.getDisplayedFirstName() }}</span>
-                </div>
-                <div><b>Last Name:</b> {{ user.getDisplayedLastName() }}</div>
-                <div><b>Email:</b> {{ user.getEmail() }}</div>
-                {% if display_access_level %}
-                    <div><b>Access Level: </b> {{ access_level }}</div>
-                {% endif %}
-                {% if show_change_password %}
-                    <div class="flex-row">
-                        <b>Change Password</b>
-                        <a class="icon" tabindex="0" href="javascript:passwordChange()" aria-label="Change password" title="Change password">
-                            <i class="fas fa-pencil-alt"></i>
+                    <li>
+                        <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}">
+                            {{ course['display_semester'] }} &nbsp; &nbsp;
+                            {{ course['title'] | upper }} &nbsp; &nbsp;
+                            {% if course['display_name'] != "" %}
+                                {{ course['display_name'] }}
+                            {% endif %}
+                            {{ user.accessAdmin() }}
                         </a>
-                    </div>
+                    </li>
+                {% endfor %}
+                {% if display_semester != '' %}
+                    </ul>
                 {% endif %}
-                {% if user.getDisplayImageState() == 'flagged' %}
-                    <span class="red-message">Your preferred image was flagged as inappropriate.</span>
-                {% endif %}
-            </div>
-            <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Edit user information" title="Edit user information">
-                <i class="fas fa-pencil-alt"></i>
-            </a>
-        </div>
-        <div class="div_with_drop_down">
-            <b id="time_zone_selector_label" data-user_time_zone="{{ user_time_zone }}" data-available_time_zones="{{ available_time_zones }}">Time Zone (<span id="utc_offset_stub">UTC Offset <span id="user_utc_offset">{{ user_utc_offset }}</span></span>): <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
-                <i style="font-style:normal;" class="fa-question-circle"></i></a></b>
-            <label for="time_zone_general_drop_down">General Area:</label>
-            <select id="time_zone_general_drop_down"></select>
-            <label for="time_zone_specific_drop_down">Specific Area:</label>
-            <select id="time_zone_specific_drop_down"></select>
-        </div>
-        <div class="div_with_drop_down">
-            <b>Color Theme:</b>
-            <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
-                <option value="system">Follow Device Theme</option>
-                <option value="system_black">Follow Device Theme (Black)</option>
-                <option value="light">Light Mode</option>
-                <option value="dark">Dark Mode</option>
-                <option value="dark_black">Dark Mode (Black)</option>
-          </select>
-        </div>
-    </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
 </div>
-{% include 'EditNameForm.twig' %}
-{% if show_change_password %}
-    {% include 'ChangePasswordForm.twig' %}
-{% endif %}
