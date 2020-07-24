@@ -198,8 +198,8 @@ CREATE TABLE public.electronic_gradeable (
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
-    eg_grade_inquiry_due_date timestamp(6) with time zone,
-    eg_grade_inquiry_start_date timestamp(6) with time zone,
+    eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
+    eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -468,7 +468,8 @@ CREATE TABLE public.gradeable_teams (
     team_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
     registration_section character varying(255),
-    rotating_section integer
+    rotating_section integer,
+    anon_id character varying(255)
 );
 
 
@@ -715,7 +716,8 @@ CREATE TABLE public.queue (
     help_started_by text,
     removed_by text,
     contact_info text,
-    last_time_in_queue timestamp with time zone
+    last_time_in_queue timestamp with time zone,
+    paused boolean DEFAULT false NOT NULL
 );
 
 

@@ -17,7 +17,7 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE electronic_gradeable DROP CONSTRAINT eg_regrade_request_date_max")
 
     database.execute("ALTER TABLE electronic_gradeable RENAME COLUMN eg_regrade_request_date TO eg_grade_inquiry_due_date")
-    database.execute("ALTER TABLE electronic_gradeable ADD COLUMN IF NOT EXISTS eg_grade_inquiry_start_date timestamp(6) with time zone")
+    database.execute("ALTER TABLE electronic_gradeable ADD COLUMN IF NOT EXISTS eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL")
 
     database.execute("UPDATE electronic_gradeable SET eg_grade_inquiry_start_date=(SELECT g_grade_released_date FROM gradeable WHERE gradeable.g_id=electronic_gradeable.g_id) WHERE eg_grade_inquiry_start_date IS NULL")
 
@@ -43,8 +43,6 @@ def down(config, database, semester, course):
     database.execute("ALTER TABLE electronic_gradeable DROP CONSTRAINT eg_grade_inquiry_due_date_max")
 
     database.execute("ALTER TABLE electronic_gradeable RENAME COLUMN eg_grade_inquiry_due_date TO eg_regrade_request_date")
-
-    database.execute("UPDATE electronic_gradeable SET eg_regrade_request_date='9999-02-02 00:00:00.000000' WHERE eg_regrade_request_date IS NULL")
 
     database.execute("ALTER TABLE electronic_gradeable ADD CONSTRAINT eg_regrade_request_date_max CHECK(eg_regrade_request_date <= '9999-03-01 00:00:00.000000')")
 
