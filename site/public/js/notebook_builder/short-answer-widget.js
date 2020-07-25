@@ -55,6 +55,21 @@ class ShortAnswerWidget extends Widget {
         this.state = data;
     }
 
+    getShortAnswerTemplate(rows) {
+        return `
+        <div>
+            <div>
+                ${this.getShortAnswerTemplate(rows)}
+            </div>
+            <div>
+                Filename: <input type="text">
+            </div>
+            <div>
+                Codebox: <input type="checkbox">
+            </div>
+        </div>`;
+    }
+
     /**
      * Get the html template for the size selector part of the short answer widget.
      *
@@ -62,6 +77,6 @@ class ShortAnswerWidget extends Widget {
      * @returns {string}
      */
     getSizeSelectorTemplate(rows) {
-        return `<span>Height in lines: </span><input class="rows-input" type="text" value="${rows}">`;
+        return `<span>Height in lines: </span><input class="rows-input" type="number" value="${rows}" min="1">`;
     }
 }
