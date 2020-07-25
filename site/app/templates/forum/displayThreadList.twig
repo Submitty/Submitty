@@ -76,12 +76,21 @@
                         {% if not (thread.is_thread_locked != 1 or user_group <= 3) %}
                             {#pass#}
                         {% else %}
+                            {% if thread.deleted and user_group <= 3 %}
+                                {% set status = 'false' %}
+                                {% set title = 'Undelete Post' %}
+                                {% set icon = 'fa-undo' %}
+                            {% else %}
+                                {% set status = 'true' %}
+                                {% set title = 'Delete Post' %}
+                                {% set icon = 'fa-trash' %}
+                            {% endif %}
                             <a class="post_button delete-post-button key_to_click"
                                tabindex = "0"
-                               onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ thread.thread_id }}, {{ thread.post_id }}, '{{ thread.author_info.user_id }}', '{{ post_date }}', '{{ csrf_token }}' )"
-                               title="{{ post_buttons.delete.ud_button_title }}"
-                               aria-label="{{ post_buttons.delete.ud_button_title }}"
-                            ><i class="fa fa-trash"></i></a>
+                               onClick="deletePostToggle({{ status }}, {{ thread.thread_id }}, {{ thread.post_id }}, '{{ thread.author_info.user_id }}', '{{ post_date }}', '{{ csrf_token }}' )"
+                               title="{{ title }}"
+                               aria-label="{{ title }}"
+                            ><i class="fa {{ icon }}"></i></a>
                             <a class="post_button edit-post-button key_to_click"
                                tabindex = "0"
                                onClick="showEditPostForm({{ thread.post_id }}, {{ thread.thread_id }}, true, {{ thread.render_markdown ? 1 : 0 }}, '{{ csrf_token }}')"
@@ -90,12 +99,7 @@
                             ><i class="fas fa-edit"></i></a>
                         {% endif %}
                     {% endif %}
-                    <span class="last-edit">
-                        <strong class="post_user_id">{{ thread.author_info.name }}</strong>
-                        {% if edit_date is not null %}
-                            (<i>Last edit at {{ edit_date }}</i>)
-                        {% endif %}
-                    </span>
+                    <strong class="post_user_id">{{ thread.author_info.name }}</strong>
                 </span>
             </div>
         </div>

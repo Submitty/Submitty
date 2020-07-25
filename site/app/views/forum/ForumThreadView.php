@@ -631,6 +631,11 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs("forum.js");
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
 
         if ($thread_exists) {
             $next_page = $page_number + 1;
@@ -657,6 +662,7 @@ class ForumThreadView extends AbstractView {
             "prev_page" => $prev_page,
             "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
             "csrf_token" => $this->core->getCsrfToken(),
+            "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
             "current_user" => $this->core->getUser()->getId(),
@@ -664,7 +670,7 @@ class ForumThreadView extends AbstractView {
         ]);
     }
 
-    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $isFullPage = false) {
+    public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $is_full_page = false) {
         $used_active = false; //used for the first one if there is not thread_id set
         $current_user = $this->core->getUser()->getId();
         $display_thread_ids = $this->core->getUser()->getGroup() <= 2;
@@ -690,7 +696,7 @@ class ForumThreadView extends AbstractView {
                 $thread['status'] = 0;
             }
 
-            $class = $isFullPage ? "thread_box thread-box-full" : "thread_box";
+            $class = $is_full_page ? "thread_box thread-box-full" : "thread_box";
             // $current_categories_ids should be subset of $thread["categories_ids"]
             $issubset = (count(array_intersect($current_categories_ids, $thread["categories_ids"])) == count($current_categories_ids));
             if (((isset($_REQUEST["thread_id"]) && $_REQUEST["thread_id"] == $thread["id"]) || $thread_id_p == $thread["id"] || $thread_id_p == -1) && !$used_active && $issubset) {
@@ -801,7 +807,7 @@ class ForumThreadView extends AbstractView {
                 "current_user_posted" => $thread["current_user_posted"]
             ];
 
-            if ($isFullPage) {
+            if ($is_full_page) {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
                 $email = trim($user_info['user_email']);
                 $first_name = trim($user_info["first_name"]);
@@ -820,8 +826,12 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
+                    "title" =>  $thread['title'],
+                    "deleted" => $first_post['deleted'],
+                    "content" => $first_post_content
                 ]);
             }
+//            var_dump($first_post);
 
             $thread_content[] = $thread_info;
         }

@@ -95,7 +95,7 @@
               <li title="Click to edit categories" class='dropdown-item' role="menuitem">
             	<a href ="{{ manage_categories_url }}" title="Edit Forum Categories" target="_blank" >Edit Categories</a>
 			{% endif %}
-			{% if thread_exists and not isFullThreadsPage %}
+			{% if thread_exists and not is_full_threads_page %}
 	          <li class="dropdown-divider"></li>
 	          <li title="Click to toggle all post attachments" class='dropdown-item' role="menuitem">
 	          	<a href="#" class="key_to_click" tabindex="0" onclick="loadAllInlineImages()">

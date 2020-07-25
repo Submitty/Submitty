@@ -15,7 +15,7 @@
         "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
         "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
         "show_filter": true,
-        "isFullThreadsPage": true,
+        "is_full_threads_page": true,
     } %}
     <div id="thread_list" data-prev_page="{{ prev_page }}" data-next_page="{{ next_page }}">
         <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
@@ -36,3 +36,7 @@
         });
     </script>
 </div>
+
+{%  include "forum/EditPostForm.twig" with {
+    "categories" : filterFormData.categories,
+} %}
