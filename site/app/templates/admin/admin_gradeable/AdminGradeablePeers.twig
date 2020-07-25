@@ -248,22 +248,63 @@
     function submitFormAjax2() {
         let url = $('#peer_grader_submit_url').val();
         let form = $("#admin-gradeable-peers-form2");
-        let fd = new FormData();
-        fd.append('csrf_token', $("#csrf_token").val());
+        let csrf_token = $("#csrf_token2", form).val();
+        // let fd = new FormData();
+        // fd.append('csrf_token', csrf_token);
+        // fd.append('new_grader_id', $(":text#new_peer_grader", form).val());
+        // set to check for duplicate user entries
+        /* let add_student_ids = new Set();
+        $(".add_user_ids", form).each(function() {
+            if ($(this).val() != "") add_student_ids.add($(this).val());
+        }); */
+        // let add_student_ids_arr = JSON.stringify(Array.from(add_student_ids));
+        // fd.append('add_student_ids', add_student_ids_arr);
+        /*for(var pair of fd.entries()) {
+           console.log(pair[0]+ ', '+ pair[1]); 
+        }*/
         $.ajax({
             url: url,
-            type: "POST",
+            type: 'POST',
             data: fd,
             processData: false,
-            cache: false,
             contentType: false,
             success: function(data) {
                 $('.popup-form').css('display', 'none');
+                console.log(data);
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
             }
         });
+
+        /*
+
+            success: function(data) {
+                $('.popup-form').css('display', 'none');
+                let new_peers = JSON.parse(data)["data"];
+                let grader_found = false;
+                for (grader in new_peers) {
+                    if (grader == grader_id) {
+                        grader_found = true;
+                    }
+                }
+                let grader_content = $('.peer-table-grader').filter(function() {
+                    return $(this).text() == grader_id
+                });
+                if (grader_found == false) {
+                    //the entire grader row is removed from new peers
+                    grader_content.parents('tr').remove();
+                } else {
+                    //otherwise, fill in new students in the table
+                    let students_list = grader_content.parents('tr').find('.peer-table-students');
+                    students_list.empty();
+                    for (i in new_peers[grader_id]) {
+                        students_list.append('<span>'+new_peers[grader_id][i]+'</span> ');
+                    }
+                }
+            },
+        });
+        */
     }
 
     $(document).ready(function() {

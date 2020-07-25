@@ -269,6 +269,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm2', $gradeable);
+        // $old_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
+        // var_dump($old_peers);
     }
 
     /**
@@ -290,7 +292,7 @@ class AdminGradeableController extends AbstractController {
                     $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                 }
             }
-            //then, add new students
+            // then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
                 $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
@@ -305,7 +307,7 @@ class AdminGradeableController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function newGraderPeerSubmit($gradeable_id) {
-
+        $this->core->getOutput()->renderJsonSuccess();
     }
 
     /* Http request methods (i.e. ajax) */
