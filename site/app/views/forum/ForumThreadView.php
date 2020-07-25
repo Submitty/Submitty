@@ -519,7 +519,7 @@ class ForumThreadView extends AbstractView {
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
-            
+
             // Get first post of each thread. To be used later
             // to obtain the content of the post to be displayed
             // in the modal.
@@ -659,6 +659,8 @@ class ForumThreadView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+            "current_user" => $this->core->getUser()->getId(),
+            "user_group" => $this->core->getUser()->getGroup(),
         ]);
     }
 
@@ -780,7 +782,7 @@ class ForumThreadView extends AbstractView {
                 $date_content["formatted"] = $date;
             }
 
-            $thread_content[] = [
+            $thread_info = [
                 'thread_id' => $thread['id'],
                 "title" => $titleDisplay,
                 "content" => $contentDisplay,
@@ -798,6 +800,30 @@ class ForumThreadView extends AbstractView {
                 "date" => $date_content,
                 "current_user_posted" => $thread["current_user_posted"]
             ];
+
+            if ($isFullPage) {
+                $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($first_post["author_user_id"]);
+                $email = trim($user_info['user_email']);
+                $first_name = trim($user_info["first_name"]);
+                $last_name = trim($user_info["last_name"]);
+
+                $author_info = [
+                    "user_id" => $first_post['author_user_id'],
+                    "name" => $first_post['anonymous'] ? "Anonymous" : $first_name . " " . substr($last_name, 0, 1) . ".",
+                    "email" => $email,
+                    "full_name" => $first_name . " " . $last_name . " (" . $first_post['author_user_id'] . ")",
+                ];
+                $thread_info = array_merge($thread_info, [
+                    "post_id" => $first_post["id"],
+                    "is_thread_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
+                    "thread_resolve_state" => $this->core->getQueries()->getResolveState($thread['id'])[0]['status'],
+                    "is_anon" => $first_post["anonymous"],
+                    "render_markdown" => $first_post["render_markdown"],
+                    "author_info" => $author_info,
+                ]);
+            }
+
+            $thread_content[] = $thread_info;
         }
 
         $return = "";

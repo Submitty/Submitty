@@ -1,43 +1,103 @@
 {% for thread in thread_content %}
     <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" id="thread_box_link_{{ thread.thread_id }}">
-        <div class="{{ thread.class }} flex-row">
-            <span class="thread-left-cont">
-                <span class="thread-list-item">
-                    {% if thread.current_user_posted %}
-                        <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
-                    {% endif %}
-                    {{ thread.title }}
+        <div class="{{ thread.class }}">
+            <div class="flex-row">
+                <span class="thread-left-cont">
+                    <span class="thread-list-item">
+                        {% if thread.current_user_posted %}
+                            <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
+                        {% endif %}
+                        {{ thread.title }}
+                    </span>
+                    <span class="thread-content">{{ thread.content }}</span>
+
+                    {% for category in thread.categories %}
+                        <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
+                    {% endfor %}
                 </span>
-                <span class="thread-content">{{ thread.content }}</span>
+                <span class="thread-right-cont">
+                    <span>
+                        {% if thread.pinned %}
+                            <i class="fas fa-thumbtack thread-announcement" title = "Pinned to the top" aria-label="Pinned to the top"></i>
+                        {% endif %}
+                        {% if thread.favorite %}
+                            <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
+                        {% endif %}
+                        {% if thread.merged_thread_id != -1 %}
+                            <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
+                        {% endif %}
 
-                {% for category in thread.categories %}
-                    <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
-                {% endfor %}
-            </span>
-            <span class="thread-right-cont">
-                <span>
-                    {% if thread.pinned %}
-                        <i class="fas fa-thumbtack thread-announcement" title = "Pinned to the top" aria-label="Pinned to the top"></i>
-                    {% endif %}
-                    {% if thread.favorite %}
-                        <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
-                    {% endif %}
-                    {% if thread.merged_thread_id != -1 %}
-                        <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
-                    {% endif %}
+                        {% if thread.status != 0 %}
+                            <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status"
+                               title="{{ thread.tooltip }}"
+                               aria-label="{{ thread.tooltip }}"
+                            ></i>
+                        {% endif %}
 
-                    {% if thread.status != 0 %}
-                        <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status" title="{{ thread.tooltip }}" aria-label="{{ thread.tooltip }}"></i>
-                    {% endif %}
-
-                    {% if thread.is_locked %}
-                        <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
+                        {% if thread.is_locked %}
+                            <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
+                        {% endif %}
+                    </span>
+                    {% if thread.date.not_null %}
+                        <span class="thread-date">{{ thread.date.formatted }}</span>
                     {% endif %}
                 </span>
-                {% if thread.date.not_null %}
-                    <span class="thread-date">{{ thread.date.formatted }}</span>
+            </div>
+            <div class="flex-row">
+                <hr>
+                {% if (user_group <= 3 or thread.author_info.user_id == current_user) and thread_resolve_state == -1 %}
+                    <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click"
+                       tabindex = "0"
+                       onClick="changeThreadStatus({{ thread.thread_id }})"
+                       title="Mark thread as resolved"
+                    >Mark as resolved</a>
                 {% endif %}
-            </span>
+
+                <span class="post-action-container">
+                    {% if user_group <= 2 and thread.author_info.user_id != current_user %}
+                        <a class="post-email-toggle key_to_click"
+                           tabindex = "0"
+                           onClick='$(this).next().toggle();'
+                           title="Show/Hide email address"
+                           aria-label="Show/Hide email address"
+                        ><i class="fas fa-envelope"></i></a>
+                        <a href="mailto:{{ thread.author_info.email }}" style="display: none;">{{ thread.author_info.email }}</a>
+                    {% endif %}
+                    {% if user_group <= 2 %}
+                        <a class="post-user-info key_to_click"
+                           tabindex = "0"
+                           onClick='changeName(this.parentNode, "{{ thread.author_info.full_name }}", "{{ thread.author_info.name}}", "{{ thread.author_info.is_anon }}")'
+                           title="Show full user information"
+                           aria-label="Show full user information"
+                        ><i class="fas fa-eye"></i></a>
+                    {% endif %}
+
+                    {% if user_group <= 3 or thread.author_info.user_id == current_user %}
+                        {% if not (thread.is_thread_locked != 1 or user_group <= 3) %}
+                            {#pass#}
+                        {% else %}
+                            <a class="post_button delete-post-button key_to_click"
+                               tabindex = "0"
+                               onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ thread.thread_id }}, {{ thread.post_id }}, '{{ thread.author_info.user_id }}', '{{ post_date }}', '{{ csrf_token }}' )"
+                               title="{{ post_buttons.delete.ud_button_title }}"
+                               aria-label="{{ post_buttons.delete.ud_button_title }}"
+                            ><i class="fa fa-trash"></i></a>
+                            <a class="post_button edit-post-button key_to_click"
+                               tabindex = "0"
+                               onClick="showEditPostForm({{ thread.post_id }}, {{ thread.thread_id }}, true, {{ thread.render_markdown ? 1 : 0 }}, '{{ csrf_token }}')"
+                               title="Edit thread and post"
+                               aria-label="Edit thread and post"
+                            ><i class="fas fa-edit"></i></a>
+                        {% endif %}
+                    {% endif %}
+                    <span class="last-edit">
+                        <strong class="post_user_id">{{ thread.author_info.name }}</strong>
+                        {% if edit_date is not null %}
+                            (<i>Last edit at {{ edit_date }}</i>)
+                        {% endif %}
+                    </span>
+                </span>
+            </div>
         </div>
     </a>
     <a class="skip-btn" href="#posts_list" onfocus="scrollThreadListTo(this)">Skip into thread</a>
