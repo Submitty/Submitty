@@ -1199,7 +1199,7 @@ HTML;
             }
         }
         else {
-            $student_anon_ids [] = $graded_gradeable->getSubmitter()->getAnonId();
+            $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId();
         }
         // Disable grading if the requested version isn't the active one
         $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
