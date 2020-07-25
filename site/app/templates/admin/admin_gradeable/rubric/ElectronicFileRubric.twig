@@ -1,6 +1,15 @@
 <label for="point_precision_id">Point precision:</label>
-<input type="text" id="point_precision_id" name="precision" onchange="onPrecisionChange()" value="{{ gradeable.getPrecision() }}" class="ignore" />
-
+<select id = "point_precision_id" name="precision" onchange = "onPrecisionChange()" value="{{ gradeable.getPrecision() }}">
+  <option value="0.01">0.01</option>
+  <option value="0.05">0.05</option>
+  <option value="0.1">0.1</option>
+  <option value="0.25">0.25</option>
+  <option value="0.33">0.33</option>
+  <option value="0.5">0.5</option>
+  <option value="1">1</option>
+  <option value="5">5</option>
+  <option value="10">10</option>
+</select>
 <div class="electronic_file ignore" id="gradeable_rubric">
     <fieldset>
         <legend>
