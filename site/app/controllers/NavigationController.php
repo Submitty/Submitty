@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\exceptions\DatabaseException;
 use app\libraries\Core;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
@@ -29,7 +30,7 @@ class NavigationController extends AbstractController {
         try {
             $gradeables_list = new GradeableList($this->core);
         }
-        catch (\Exception $e) {
+        catch (DatabaseException $e) {
             $error_messages = ['A broken gradeable was detected when collecting gradeable information from the database.  Contact the system administrator for assistance.'];
             return $this->core->getOutput()->renderOutput('Error', 'genericError', $error_messages);
         }
