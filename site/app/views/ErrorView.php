@@ -36,7 +36,9 @@ class ErrorView extends AbstractView {
         ]);
     }
 
-    public function brokenGradeable() {
-        return $this->core->getOutput()->renderTwigTemplate('error/BrokenGradeable.twig');
+    public function genericError(array $error_messages) {
+        return $this->core->getOutput()->renderTwigTemplate('error/genericError.twig', [
+            'error_messages' => $error_messages
+        ]);
     }
 }

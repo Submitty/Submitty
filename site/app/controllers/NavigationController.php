@@ -30,7 +30,8 @@ class NavigationController extends AbstractController {
             $gradeables_list = new GradeableList($this->core);
         }
         catch (\Exception $e) {
-            return $this->core->getOutput()->renderOutput('Error', 'brokenGradeable');
+            $error_messages = ['A broken gradeable was detected when collecting gradeable information from the database.  Contact the system administrator for assistance.'];
+            return $this->core->getOutput()->renderOutput('Error', 'genericError', $error_messages);
         }
 
         $future_gradeables_list = $gradeables_list->getFutureGradeables();
