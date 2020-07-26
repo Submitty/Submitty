@@ -605,6 +605,7 @@
     box-shadow: 4px 7px 5px #ccc;
 }
 
+.thread_box .flex-row,
 .thread-box-full .flex-row {
     align-items: stretch;
 }

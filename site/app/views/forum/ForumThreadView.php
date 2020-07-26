@@ -830,7 +830,7 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
-                    "title" =>  $thread['title'],
+                    "title" =>  "(" . $thread['id'] . ") " . $thread['title'],
                     "deleted" => $first_post['deleted'],
                     "content" => $first_post_content
                 ]);
