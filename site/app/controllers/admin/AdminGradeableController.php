@@ -276,10 +276,10 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($new_peers);
     }
 
-     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    /**
+    * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
+    * @AccessControl(role="INSTRUCTOR")
+    */
     public function newGraderPeerSubmit($gradeable_id) {
         $new_grader_id = $_POST['new_grader_id'];
         // add the new grader and all their students

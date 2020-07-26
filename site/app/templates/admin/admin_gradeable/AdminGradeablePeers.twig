@@ -210,6 +210,8 @@
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
         grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-peers-form2\',\'#new-grader-students\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
+        // start the submit button on disabled
+        $('#admin-gradeable-peers2-submit').prop('disabled', true);
     }
 
     function checkNewGraderValid(user_input) {
@@ -304,7 +306,7 @@
         });
         $('#admin-gradeable-peers-form2').on("change", ':text#new_peer_grader', function() {
             valid_grader = checkNewGraderValid($(this));
-            updateSubmitButton(valid_grader, valid_students);
+            updateSubmitButton(valid_grader, valid_students, "#admin-gradeable-peers2-submit", true);
         });
         $('#admin-gradeable-peers-form2').on("change", ':text.add_user_ids', function() {
             let grader_id = $(":text#new_peer_grader").val();
