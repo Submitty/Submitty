@@ -59,7 +59,7 @@
         let student_autofill = JSON.parse($('#student_autofill').val());
         let j = $('.add_user_ids').length;
         $('#add_student_button', form).remove();
-        add_students_div.append('<input class="add_user_ids" type="text" name="add_user_id_'+j+'" /><br></p>');
+        add_students_div.append('<input class="add_user_ids" type="text" name="add_user_id_'+j+'" /><br>');
         $('[name="add_user_id_'+j+'"]', form).autocomplete({
             source: student_autofill
         });
