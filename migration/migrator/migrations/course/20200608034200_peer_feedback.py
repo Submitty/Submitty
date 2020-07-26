@@ -14,12 +14,6 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    
-    database.execute(
-        """
-       DROP TABLE IF EXISTS peer_feedback;
-        """
-    )
 
     # Create overall comment table
     database.execute(
@@ -30,6 +24,14 @@ def up(config, database, semester, course):
             g_id character varying(255) NOT NULL,
             feedback character varying(255)
         );
+        """
+    )
+    
+    database.execute("ALTER TABLE peer_feedback DROP CONSTRAINT IF EXISTS peer_feedback_pkey")
+    database.execute(
+        """
+        ALTER TABLE ONLY peer_feedback
+            ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
         """
     )
     
