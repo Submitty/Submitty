@@ -43,3 +43,14 @@ def down(config, database, semester, course):
             ADD COLUMN eg_peer_grade_set integer DEFAULT 0 NOT NULL
         """
     )
+    database.execute(
+        """
+        UPDATE electronic_gradeable
+        SET eg_peer_grading = component.is_gradeable_peer
+        FROM
+            (SELECT g_id, bool_or(gc_is_peer) AS is_gradeable_peer
+            FROM gradeable_component
+            GROUP BY g_id) component
+        WHERE electronic_gradeable.g_id = component.g_id
+        """
+    )
