@@ -1,12 +1,13 @@
 <script>
+  $('#queue_code').change(function(){
+    document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';
+  })
+
   //Get the list of queue_codes
   var current_queues = [{% for queue in viewer.getAllQueues() %}
-      "{{queue['code']}}",
+      "{{queue['id']}}",
     {% endfor %}]
   current_queues = Array.from(new Set(current_queues));
-  current_queues = current_queues.map(function(x) {
-    return x.toUpperCase()
-  })
 
   //checks if the filter settings are in local storage
   if (!localStorage.getItem('office_hour_queue_filters')) {
@@ -104,6 +105,10 @@
 
   {% if viewer.isGrader() %}
 
+    $('#old_queue_code').change(function(){
+      document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';
+    })
+
     let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
 
     if (!localStorage.getItem('office_hour_queue_auto_refresh')) {
@@ -134,7 +139,9 @@
             $("#current_queue").replaceWith(newQueue);
             filterQueues();
             if(notifications_enabled && queueEmpty && $( ".help_btn:visible" ).length > 0){
-              new Notification("A student has joined the queue");
+              if($('.btn-success.finish_helping_btn').length === 0){
+                new Notification("A student has joined the queue");
+              }
             }
           });
           $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {
@@ -170,6 +177,9 @@
         if (lastQueueEdit < JSON.parse(data)['data']) {
           $.get("{{base_url}}/new_status", function(newStatus) {
             $("#queue_status").replaceWith(newStatus);
+          });
+          $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {
+            $("#queue_history").replaceWith(newStatus);
           });
         }
       });
