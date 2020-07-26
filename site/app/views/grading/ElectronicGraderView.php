@@ -1195,7 +1195,7 @@ HTML;
         if ($gradeable->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamById($graded_gradeable->getSubmitter()->getId());
             foreach ($team->getMemberUsers() as $user) {
-                $anon_ids[] = $user->getAnonId();
+                $student_anon_ids[] = $user->getAnonId();
             }
         }
         else {
