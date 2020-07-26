@@ -43,17 +43,17 @@
                     {% endif %}
                 </span>
             </div>
-            <div class="flex-row">
-                <hr>
-                {% if (user_group <= 3 or thread.author_info.user_id == current_user) and thread_resolve_state == -1 %}
-                    <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click"
-                       tabindex = "0"
-                       onClick="changeThreadStatus({{ thread.thread_id }})"
-                       title="Mark thread as resolved"
-                    >Mark as resolved</a>
-                {% endif %}
-
-                <span class="post-action-container">
+            <div class="flex-row action-btns-cont">
+                <span>
+                    {% if (user_group <= 3 or thread.author_info.user_id == current_user) and thread.thread_resolve_state == -1 %}
+                        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click"
+                           tabindex = "0"
+                           onClick="changeThreadStatus({{ thread.thread_id }})"
+                           title="Mark thread as resolved"
+                        >Mark as resolved</a>
+                    {% endif %}
+                </span>
+                <span>
                     {% if user_group <= 2 and thread.author_info.user_id != current_user %}
                         <a class="post-email-toggle key_to_click"
                            tabindex = "0"
@@ -78,11 +78,11 @@
                         {% else %}
                             {% if thread.deleted and user_group <= 3 %}
                                 {% set status = 'false' %}
-                                {% set title = 'Undelete Post' %}
+                                {% set title = 'Undelete thread and post' %}
                                 {% set icon = 'fa-undo' %}
                             {% else %}
                                 {% set status = 'true' %}
-                                {% set title = 'Delete Post' %}
+                                {% set title = 'Delete thread and post' %}
                                 {% set icon = 'fa-trash' %}
                             {% endif %}
                             <a class="post_button delete-post-button key_to_click"
@@ -104,6 +104,4 @@
             </div>
         </div>
     </a>
-    <a class="skip-btn" href="#posts_list" onfocus="scrollThreadListTo(this)">Skip into thread</a>
-    <hr style="margin-top: 0px;margin-bottom:0px;">
 {% endfor %}

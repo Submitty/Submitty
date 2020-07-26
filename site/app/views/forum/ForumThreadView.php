@@ -306,6 +306,10 @@ class ForumThreadView extends AbstractView {
 
     // Returns the set of buttons with the corresponding attributes
     public function getAllForumButtons($thread_exists, $thread_id, $display_option, $show_deleted, $show_merged_thread) {
+        $show_deleted_class = "";
+        $show_deleted_action = "";
+        $show_deleted_thread_title = "";
+
         $currentCourse = $this->core->getConfig()->getCourse();
 
         $default_button = [
