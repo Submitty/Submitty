@@ -330,9 +330,13 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
     }
     var gradeable_id=$('#g_id').val();
     let restrict_to_registration="unchecked";
+    let submit_before_grading="unchecked";
     $('#peer_loader').removeClass("hide");
     if($('#restrict-to-registration').is(':checked')){
         restrict_to_registration="checked";
+    }
+    if($('#submit-before-grading').is(':checked')){
+        submit_before_grading="checked";
     }
         
     $.ajax({
@@ -341,7 +345,8 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
         data: {
             csrf_token:p_values['csrf_token'],
             number_to_grade:number_to_grade,
-            restrict_to_registration:restrict_to_registration
+            restrict_to_registration:restrict_to_registration,
+            submit_before_grading:submit_before_grading,
         },
         success: function(response){
             console.log(response);

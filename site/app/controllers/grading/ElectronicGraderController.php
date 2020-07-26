@@ -64,6 +64,7 @@ class ElectronicGraderController extends AbstractController {
         */
         $number_to_grade = $_POST['number_to_grade'];
         $restrict_to_registration = $_POST['restrict_to_registration'];
+        $submit_before_grading = $_POST['submit_before_grading'];
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
@@ -84,9 +85,21 @@ class ElectronicGraderController extends AbstractController {
                 $students = $this->core->getQueries()->getUsersByRegistrationSections([$section]);
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
-                    array_push($student_array, $student->getId());
+                    if($submit_before_grading == "checked"){
+                        if($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()){
+                      
+                        } 
+                        else {
+                            array_push($student_array, $student->getId());
+                        }
+                    }
+                    else {
+                        array_push($student_array, $student->getId());
+                    }
+                    
                 }
-                $number_of_students = count($student_list);
+                
+                $number_of_students = count($student_array);
                 
                 /* If number of students entered is more than number of students in registration section,
                    then for each registration section with less number of students, everyone will grade everyone */
@@ -162,9 +175,19 @@ class ElectronicGraderController extends AbstractController {
              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
-             array_push($student_array, $student->getId());
+             if($submit_before_grading == "checked"){
+                if($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()){
+              
+                } 
+                else {
+                    array_push($student_array, $student->getId());
+                }
+            }
+            else {
+                array_push($student_array, $student->getId());
+            }
         }
-        $number_of_students = count($student_list);
+        $number_of_students = count($student_array);
         if ($number_to_grade > $number_of_students) {
             $all_grade_all = true;
         }
