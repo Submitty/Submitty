@@ -8,6 +8,8 @@ class ShortAnswerWidget extends Widget {
             type: 'short_answer',
             filename: 'default.txt'
         };
+
+        this.place_holder_msg = 'You may prepopulate the input by entering that data here.';
     }
 
     render() {
@@ -15,35 +17,19 @@ class ShortAnswerWidget extends Widget {
         const container = this.getContainer('Short Answer');
         container.classList.add('short-answer-widget');
 
-        const rows = this.state.rows ? this.state.rows : 1;
-        const size_selector = document.createElement('div');
-        size_selector.innerHTML = this.getSizeSelectorTemplate(rows);
-
-        const filename = document.createElement('input');
-        filename.classList.add('filename-input');
-        filename.setAttribute('type', 'text');
-        filename.value = this.state.filename;
-
-        const filename_label = document.createElement('label');
-        filename_label.innerText = 'Filename: ';
-        filename_label.appendChild(filename);
-
         // Setup interactive area
-        const interactive_area = container.getElementsByClassName('interactive-container')[0];
-        interactive_area.appendChild(size_selector);
-        interactive_area.appendChild(filename_label);
+        const interactive_area = container.querySelector('.interactive-container');
+        interactive_area.innerHTML = this.getShortAnswerTemplate('');
+        interactive_area.querySelector('.prepopulate-area').appendChild(this.getTextArea(''));
+
+        interactive_area.querySelector('.filename-input').value = this.state.filename;
 
         this.dom_pointer = container;
         return container;
     }
 
     commitState() {
-        const rows = this.dom_pointer.querySelector('.rows-input');
-        const rows_int = parseInt(rows.value);
-        rows_int === 1 ? delete this.state.rows : this.state.rows = rows_int;
 
-        const filename = this.dom_pointer.querySelector('.filename-input');
-        this.state.filename = filename.value;
     }
 
     getJSON() {
@@ -57,17 +43,40 @@ class ShortAnswerWidget extends Widget {
 
     getShortAnswerTemplate(rows) {
         return `
-        <div>
+        <div class="type-options">
             <div>
-                ${this.getShortAnswerTemplate(rows)}
+                Answer Type:
+                <select>
+                    <option>Text</option>
+                    <option>Code</option>
+                </select>
+            </div>
+            <div class="language-select-div">
+                <select>
+                    ${Object.keys(CodeMirror.modes).forEach(mode => `<option>${mode}</option>`)}
+                </select>
+            </div>
+        </div>
+        <div class="basic-options">
+            <div>
+                Height: <input class="rows-input" type="number" value="${rows}" placeholder="Default">
             </div>
             <div>
-                Filename: <input type="text">
+                Filename: <input class="filename-input" type="text">
             </div>
-            <div>
-                Codebox: <input type="checkbox">
-            </div>
-        </div>`;
+        </div>
+        <div class="prepopulate-area"></div>`;
+    }
+
+    getTextArea(value) {
+        const text_area = document.createElement('textarea');
+        text_area.placeholder = this.place_holder_msg;
+        text_area.value = value;
+        return text_area;
+    }
+
+    getCodeBox(value) {
+
     }
 
     /**
