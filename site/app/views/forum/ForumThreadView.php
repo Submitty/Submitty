@@ -667,7 +667,6 @@ class ForumThreadView extends AbstractView {
             "prev_page" => $prev_page,
             "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
             "csrf_token" => $this->core->getCsrfToken(),
-            "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
             "current_user" => $this->core->getUser()->getId(),

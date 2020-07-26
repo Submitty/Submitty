@@ -1875,6 +1875,56 @@ function forumFilterBar(){
     $('#forum_filter_bar').toggle();
 }
 
+function updateThread(e) {
+  // Only proceed if its full forum page
+  if (buildCourseUrl(['forum']) !== window.location.origin + window.location.pathname) {
+    return;
+  }
+
+  e.preventDefault();
+  let cat = [];
+  $('input[name="cat[]"]:checked').each(item => cat.push($('input[name="cat[]"]:checked')[item].value));
+
+  let data =  {
+    edit_thread_id: $('#edit_thread_id').val(),
+    edit_post_id: $('#edit_post_id').val(),
+    csrf_token: $('input[name="csrf_token"]').val(),
+    title: $('input#title').val(),
+    thread_post_content: $('textarea#reply_box_').val(),
+    thread_status: $('#thread_status').val(),
+    Anon: $('input#thread_post_anon_edit').is(':checked') ? $('input#thread_post_anon_edit').val() : 0,
+    lock_thread_date: $('input#lock_thread_date').text(),
+    cat,
+    markdown_status: $("input#markdown_input_").val() ? $("input#markdown_input_").val() : 0,
+  };
+
+  $.ajax({
+    url: buildCourseUrl(['forum', 'posts', 'modify']) + '?modify_type=1',
+    type: 'POST',
+    data,
+    success: function (response) {
+      try {
+        response = JSON.parse(response);
+        if (response.status === 'success') {
+          displaySuccessMessage("Thread post updated successfully!");
+        } else {
+          displayErrorMessage("Failed to update thread post");
+        }
+      }
+      catch (e) {
+        console.log(e);
+        displayErrorMessage("Something went wrong while updating thread post")
+      }
+      window.location.reload();
+    },
+    error: function (err) {
+      console.log(err);
+      displayErrorMessage("Something went wrong while updating thread post");
+      window.location.reload();
+    }
+  });
+}
+
 function checkUnread(){
     if($('#unread').prop("checked")){
         unread_marked = true;
@@ -2058,6 +2108,7 @@ function clearCreateThreadAutosave() {
 $(() => {
     cleanupAutosaveHistory('-forum-autosave');
     setupForumAutosave();
+    $('form#thread_form').submit(updateThread);
 });
 
 //When the user uses tab navigation on the thread list, this function
