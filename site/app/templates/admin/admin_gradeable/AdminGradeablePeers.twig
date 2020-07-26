@@ -24,7 +24,7 @@
                                 {% endfor %}
                             </td>
                             <td>
-                                <a aria-label="edit {{key.getDisplayedFirstName()}} {{key.getDisplayedLastName()}}'s students"><i class="fas fa-pencil-alt"></i></a>
+                                <a aria-label="edit {{key}}'s students"><i class="fas fa-pencil-alt"></i></a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -212,27 +212,19 @@
         grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-peers-form2\',\'#new-grader-students\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
     }
 
-    // TODO: also check if the new grader has at least 1 student
-    // another function to check that all student fields are not empty -- there's at least 1 student
-    // assigned
-
     function checkNewGraderValid(user_input) {
         // check if the new grader is a valid student by autofill
         let student_autofill = JSON.parse($('#student_autofill').val());
         let valid_user_ids = student_autofill.map(tmp => tmp['value']);
         let valid_entry = valid_user_ids.includes(user_input.val());
-        // check if the new grader is already a grader in the peer matrix
+        // check that the new grader is not already a grader in the peer matrix
         let existing_graders = [];
         $(".peer-table-grader").each(function(i, selected) {
             existing_graders[i] = $(selected).text();
         });
         let new_grader = !existing_graders.includes(user_input.val());
         // if both above conditions are met, allow user to submit
-        if (valid_entry && new_grader) {
-            return true;
-        } else {
-            return false;
-        }
+        return (valid_entry && new_grader);
     }
 
     function updateSubmitButton(valid_grader, valid_students, button_id, new_grader) {
@@ -248,20 +240,18 @@
     function submitFormAjax2() {
         let url = $('#peer_grader_submit_url').val();
         let form = $("#admin-gradeable-peers-form2");
+        let fd = new FormData();
         let csrf_token = $("#csrf_token2", form).val();
-        // let fd = new FormData();
-        // fd.append('csrf_token', csrf_token);
-        // fd.append('new_grader_id', $(":text#new_peer_grader", form).val());
+        fd.append('csrf_token', csrf_token);
+        let new_grader_id = $(":text#new_peer_grader", form).val();
+        fd.append('new_grader_id', new_grader_id);
         // set to check for duplicate user entries
-        /* let add_student_ids = new Set();
+        let add_student_ids = new Set();
         $(".add_user_ids", form).each(function() {
             if ($(this).val() != "") add_student_ids.add($(this).val());
-        }); */
-        // let add_student_ids_arr = JSON.stringify(Array.from(add_student_ids));
-        // fd.append('add_student_ids', add_student_ids_arr);
-        /*for(var pair of fd.entries()) {
-           console.log(pair[0]+ ', '+ pair[1]); 
-        }*/
+        });
+        let add_student_ids_arr = JSON.stringify(Array.from(add_student_ids));
+        fd.append('add_student_ids', add_student_ids_arr);
         $.ajax({
             url: url,
             type: 'POST',
@@ -270,41 +260,28 @@
             contentType: false,
             success: function(data) {
                 $('.popup-form').css('display', 'none');
-                console.log(data);
+                let new_peers = JSON.parse(data)["data"];
+                // temporarily add new grader's row to the end of the peer table
+                let new_row_html = '<tr><td class="peer-table-grader">'+ new_grader_id +'</td><td class="peer-table-students">';
+                let new_students = new_peers[new_grader_id];
+                for (i in new_students) {
+                    new_row_html += '<span>'+new_students[i]+'</span> ';
+                }
+                new_row_html += '</td><td><a aria-label="edit'+new_grader_id+'\'s students"><i class="fas fa-pencil-alt"></i></a></td>';
+                $('#peer-table tr:last').after(new_row_html);
+                // move the row to where it belongs lexicographically
+                let new_grader_index = Object.keys(new_peers).indexOf(new_grader_id) + 1;
+                // if it already belongs in the last row, then leave it
+                if (new_grader_index != $('#peer-table tr').length - 2) {
+                    let next_tr = $('#peer-table tr:eq(' + new_grader_index + ')');
+                    $('#peer-table tr:last').insertBefore(next_tr);
+                }
+                
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
             }
         });
-
-        /*
-
-            success: function(data) {
-                $('.popup-form').css('display', 'none');
-                let new_peers = JSON.parse(data)["data"];
-                let grader_found = false;
-                for (grader in new_peers) {
-                    if (grader == grader_id) {
-                        grader_found = true;
-                    }
-                }
-                let grader_content = $('.peer-table-grader').filter(function() {
-                    return $(this).text() == grader_id
-                });
-                if (grader_found == false) {
-                    //the entire grader row is removed from new peers
-                    grader_content.parents('tr').remove();
-                } else {
-                    //otherwise, fill in new students in the table
-                    let students_list = grader_content.parents('tr').find('.peer-table-students');
-                    students_list.empty();
-                    for (i in new_peers[grader_id]) {
-                        students_list.append('<span>'+new_peers[grader_id][i]+'</span> ');
-                    }
-                }
-            },
-        });
-        */
     }
 
     $(document).ready(function() {
