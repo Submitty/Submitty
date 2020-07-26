@@ -5205,7 +5205,7 @@ AND gc_id IN (
         else {
             $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_user_id=?", [$gradeable_id, $grader_id]);
         }
-    }   
+    }
 
     /**
      * Update/create the components/marks for a gradeable.
