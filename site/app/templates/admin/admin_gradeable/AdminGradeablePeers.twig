@@ -188,6 +188,7 @@
         $('.popup-form').css('display', 'none');
         let form = $("#admin-gradeable-peers-form2");
         form.css("display", "block");
+        $('#admin-gradeable-peers2-submit').prop('disabled', true);
         captureTabInModal("admin-gradeable-peers-form2");
         // set the left panel to allow a new grader to be added
         let peer_grader_pairs = JSON.parse($('#peer_grader_pairs').val());
@@ -210,8 +211,6 @@
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
         grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-peers-form2\',\'#new-grader-students\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
-        // start the submit button on disabled
-        $('#admin-gradeable-peers2-submit').prop('disabled', true);
     }
 
     function checkNewGraderValid(user_input) {
@@ -294,7 +293,7 @@
             valid_grader = true;
             valid_students = [];
         });
-        $('#admin-gradeable-peers-form').on("change", ":text.add_user_ids", function() {
+        $('#admin-gradeable-peers-form').on('blur change', ":text.add_user_ids", function() {
             let grader_id = $("#admin-gradeable-peers-title").text().substr(18);
             checkNewStudentsValid(grader_id, $(this), valid_students, false);
             updateSubmitButton(valid_grader, valid_students, "#admin-gradeable-peers-submit", false);
@@ -304,11 +303,11 @@
             valid_grader = false;
             valid_students = [];
         });
-        $('#admin-gradeable-peers-form2').on("change", ':text#new_peer_grader', function() {
+        $('#admin-gradeable-peers-form2').on('blur change', ':text#new_peer_grader', function() {
             valid_grader = checkNewGraderValid($(this));
             updateSubmitButton(valid_grader, valid_students, "#admin-gradeable-peers2-submit", true);
         });
-        $('#admin-gradeable-peers-form2').on("change", ':text.add_user_ids', function() {
+        $('#admin-gradeable-peers-form2').on('blur change', ':text.add_user_ids', function() {
             let grader_id = $(":text#new_peer_grader").val();
             checkNewStudentsValid(grader_id, $(this), valid_students, true);
             updateSubmitButton(valid_grader, valid_students, "#admin-gradeable-peers2-submit", true);
