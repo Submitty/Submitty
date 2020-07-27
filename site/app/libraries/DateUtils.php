@@ -161,6 +161,31 @@ class DateUtils {
     }
 
     /**
+     * Returns the list of available time zones in the increasing order of UTC offset
+     * each list item(or time zone string) also contains info regarding the UTC offset
+     * @return array
+     */
+    public static function getOrderedTZWithUTCOffset() {
+        $available_time_zones = \DateTimeZone::listIdentifiers();
+
+        // Get rid of 'UTC' time zone
+        unset($available_time_zones[count($available_time_zones) - 1]);
+
+        // sort the list with respect to UTC offset
+        usort($available_time_zones, function ($tz1, $tz2) {
+            $offset1 = intval(str_replace(":", "", DateUtils::getUTCOffset($tz1)));
+            $offset2 = intval(str_replace(":", "", DateUtils::getUTCOffset($tz2)));
+            return $offset1 === $offset2 ? 0 : ($offset2 > $offset1 ? 1 : -1);
+        });
+        // Attach the UTC offset value
+        $timezone_with_offset = array_map(function ($tz) {
+            return "(UTC" . DateUtils::getUTCOffset($tz) . ") " . $tz;
+        }, $available_time_zones);
+        // Add 'NOT_SET/NOT_SET' on top of the ordered list
+        return array_merge(['NOT_SET/NOT_SET'], $timezone_with_offset);
+    }
+
+    /**
      * Compute the offset in hours:minutes between the given time zone identifier string, and the UTC timezone.
      *
      * @param string $time_zone A time zone identifier string collected from getAvailableTimeZones()

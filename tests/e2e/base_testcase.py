@@ -227,3 +227,4 @@ class BaseTestCase(unittest.TestCase):
         ws_msg = json.loads(self.ws.recv())
         self.assertIn('type', ws_msg.keys())
         self.assertEqual(ws_msg['type'], message)
+
