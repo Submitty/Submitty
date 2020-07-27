@@ -75,7 +75,8 @@ $(function () {
     let panelSpanId = $(this).parent().attr('id');
     let position = $(this).val();
     if (panelSpanId) {
-      const panelId = panelSpanId.split('_btn')[0];
+      const panelId = panelSpanId.split(/(_|-)btn/)[0]; 
+      console.log(panelId);
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
     }
