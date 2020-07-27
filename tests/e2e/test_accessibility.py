@@ -4,6 +4,8 @@ import os
 import tempfile
 import subprocess
 
+from .test_office_hours_queue import enableQueue
+
 
 class TestAccessibility(BaseTestCase):
     """
@@ -73,6 +75,9 @@ class TestAccessibility(BaseTestCase):
         super().setUp()
         self.baseline_path = f'{os.path.dirname(os.path.realpath(__file__))}/accessibility_baseline.json'
         self.urls_formatted = [url.format(self.semester, 'sample') for url in self.urls]
+
+        # Enables the office hours queue
+        enableQueue(self)
 
     def validatePages(self):
         self.log_out()
