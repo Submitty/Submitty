@@ -1,36 +1,36 @@
 <div id="peer-control">
     <h1> Options for Peer Matrix </h1>
-    <div class="row">
-    <div class="card col-md-6" style="margin:0px">
-        <div class="content" style="margin:0px">Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column: <BR><hr>
-        <input class="custom-file-input" type="file" name="peer_graders_list" id="peer_graders_list"> </div>
-    </div>
-    <div class="card col-md-6" style="margin:0px">
-        <div class="content" style="margin:0px">Enter number of peers for one student to grade and randomly assign peer grading in class. <br>
-            <hr>
-            <input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections">Restrict to Registration Sections</input>
-            <input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading">Submit Before Grading</input>
-            <div class="btn-container" >
-                <input type="text" id="number_to_peer_grade" placeholder="Number of Students">
-                <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate"></input>
+        <div class="row">
+            <div class="card col-md-6" style="margin:0px">
+                <div class="content" style="margin:0px">Upload a csv file dictating grader-student pairs for peer grading. The csv file must contain a labelled 'student' column and a 'grader' column: <BR><hr>
+                    <input class="custom-file-input" type="file" name="peer_graders_list" id="peer_graders_list"> 
+                </div>
+            </div>
+            <div class="card col-md-6" style="margin:0px">
+                <div class="content" style="margin:0px">Enter number of peers for one student to grade and randomly assign peer grading in class. <br>
+                    <hr>
+                    <input type="checkbox" class="ignore" name="restrict-to-registration" id="restrict-to-registration" value="Restrict to Registration Sections">Restrict to Registration Sections</input>
+                    <input type="checkbox" class="ignore" name="submit-before-grading" id="submit-before-grading" value="Submit Before Grading">Submit Before Grading</input>
+                    <div class="btn-container" >
+                        <input type="text" id="number_to_peer_grade" placeholder="Number of Students">
+                        <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate"></input>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-<div class="row">
-    <div class="card col-md-12" style="margin:0px">
-        <div class="content"style="margin:0px">
-        <p>Other Controls: </p>
-        <div class="btn-wrapper" >
-            <input type="button" name="all_grade_all" class="btn btn-default key_to_click ignore" id="all_grade_all" tabindex="0" value="All grade All"></input>
-            <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click ignore" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix"></input>
-            <input type="button" name="download_peer_csv" class="btn btn-default key_to_click ignore" id="download_peer_csv" tabindex="0" value="Download Peer CSV" onclick="downloadPeerDataAsCsv('peer-table')"></input>
-        </div>
-        <br>
-        </div>
-    </div>
-    </div>
-    
+        <div class="row">
+            <div class="card col-md-12" style="margin:0px">
+                <div class="content"style="margin:0px">
+                    <p>Other Controls: </p>
+                    <div class="btn-wrapper" >
+                        <input type="button" name="all_grade_all" class="btn btn-default key_to_click ignore" id="all_grade_all" tabindex="0" value="All grade All"></input>
+                        <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click ignore" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix"></input>
+                         <input type="button" name="download_peer_csv" class="btn btn-default key_to_click ignore" id="download_peer_csv" tabindex="0" value="Download Peer CSV" onclick="downloadPeerDataAsCsv('peer-table')"></input>
+                    </div>
+                    <br>
+                </div>
+            </div>
+        </div> 
 </div>
     <div id="peer_loader" class="loader hide"></div>
         <div class="table-wrapper">

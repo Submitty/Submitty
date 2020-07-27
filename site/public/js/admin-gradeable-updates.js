@@ -183,8 +183,7 @@ $(document).ready(function () {
         }
         else {
             return false;
-        }
-            
+        }  
         });
         $('#all_grade_all').click(
             function () {
@@ -219,9 +218,8 @@ $(document).ready(function () {
             }
             else {
                 return false;
-            }
-                
-            });
+            }  
+        });
     });
     
 function ajaxRebuildGradeableButton() {
