@@ -2,258 +2,82 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.7
--- Dumped by pg_dump version 9.5.1
-
--- Started on 2017-06-12 14:35:03 EDT
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
+SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 1 (class 3079 OID 12393)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
 
 --
--- TOC entry 2161 (class 0 OID 0)
--- Dependencies: 1
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
-SET search_path = public, pg_catalog;
-
-SET default_with_oids = false;
-
 --
--- TOC entry 183 (class 1259 OID 19646)
--- Name: courses; Type: TABLE; Schema: public; Owner: -
+-- Name: dblink; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE TABLE terms (
-    term_id character varying(255) NOT NULL,
-    name character varying(255) NOT NULL,
-    start_date date NOT NULL,
-    end_date date NOT NULL,
-    CONSTRAINT terms_check CHECK (end_date > start_date)
-);
-
-
-CREATE TABLE courses (
-    semester character varying(255) NOT NULL,
-    course character varying(255) NOT NULL,
-    status smallint NOT NULL default 1
-);
-
-
-CREATE TABLE emails (
-    id serial NOT NULL,
-    user_id character varying NOT NULL,
-    subject TEXT NOT NULL,
-    body TEXT NOT NULL,
-    created TIMESTAMP WITHOUT TIME zone NOT NULL,
-    sent TIMESTAMP WITHOUT TIME zone,
-    error character varying NOT NULL default ''
-);
-
-
-CREATE TABLE mapped_courses (
-    semester character varying(255) NOT NULL,
-    course character varying(255) NOT NULL,
-    registration_section character varying(255) NOT NULL,
-    mapped_course character varying(255) NOT NULL,
-    mapped_section character varying(255) NOT NULL
-);
-
-
-CREATE TABLE migrations_master (
-  id VARCHAR(100) PRIMARY KEY NOT NULL,
-  commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status NUMERIC(1) DEFAULT 0 NOT NULL
-);
-
-
-CREATE TABLE migrations_system (
-  id VARCHAR(100) PRIMARY KEY NOT NULL,
-  commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  status NUMERIC(1) DEFAULT 0 NOT NULL
-);
+CREATE EXTENSION IF NOT EXISTS dblink WITH SCHEMA public;
 
 
 --
--- TOC entry 184 (class 1259 OID 19651)
--- Name: courses_users; Type: TABLE; Schema: public; Owner: -
+-- Name: EXTENSION dblink; Type: COMMENT; Schema: -; Owner: -
 --
 
-CREATE TABLE courses_users (
-    semester character varying(255) NOT NULL,
-    course character varying(255) NOT NULL,
-    user_id character varying NOT NULL,
-    user_group integer NOT NULL,
-    registration_section character varying(255),
-    manual_registration boolean DEFAULT false,
-    CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
-);
+COMMENT ON EXTENSION dblink IS 'connect to other PostgreSQL databases from within a database';
 
 
 --
--- TOC entry 182 (class 1259 OID 19631)
--- Name: sessions; Type: TABLE; Schema: public; Owner: -
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE TABLE sessions (
-    session_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
-    csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
-);
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 
 --
--- TOC entry 181 (class 1259 OID 19623)
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
 --
 
-CREATE TABLE users (
-    user_id character varying NOT NULL,
-    user_numeric_id character varying,
-    user_password character varying,
-    user_firstname character varying NOT NULL,
-    user_preferred_firstname character varying,
-    user_lastname character varying NOT NULL,
-    user_preferred_lastname character varying,
-    user_access_level INTEGER NOT NULL DEFAULT 3,
-    user_email character varying NOT NULL,
-    user_updated BOOLEAN NOT NULL DEFAULT FALSE,
-    instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
-    last_updated timestamp(6) with time zone,
-    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
-    time_zone VARCHAR NOT NULL DEFAULT 'NOT_SET/NOT_SET',
-    display_image_state VARCHAR NOT NULL DEFAULT 'system',
-    CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3))
-);
-
-CREATE TABLE courses_registration_sections (
-    semester character varying(255) NOT NULL,
-    course character varying(255) NOT NULL,
-    registration_section_id character varying(255) NOT NULL
-);
-
---
--- TOC entry 2035 (class 2606 OID 19650)
--- Name: courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY terms
-    ADD CONSTRAINT terms_pkey PRIMARY KEY (term_id);
-
-ALTER TABLE ONLY courses
-    ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
-
-ALTER TABLE ONLY emails
-    ADD CONSTRAINT emails_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY mapped_courses
-    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (semester, course, registration_section);
-
---
--- TOC entry 2037 (class 2606 OID 19658)
--- Name: courses_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY courses_users
-    ADD CONSTRAINT courses_users_pkey PRIMARY KEY (semester, course, user_id);
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
--- TOC entry 2033 (class 2606 OID 19638)
--- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: generate_api_key(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY sessions
-    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
-
-
---
--- TOC entry 2031 (class 2606 OID 19640)
--- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
-
-
-ALTER TABLE ONLY courses_registration_sections
-    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id);
-
-ALTER TABLE ONLY courses
-    ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES terms (term_id) ON UPDATE CASCADE;
-
-ALTER TABLE ONLY mapped_courses
-    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
---
--- TOC entry 2039 (class 2606 OID 19659)
--- Name: courses_users_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY courses_users
-    ADD CONSTRAINT courses_users_course_fkey FOREIGN KEY (semester, course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
+CREATE FUNCTION public.generate_api_key() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+-- TRIGGER function to generate api_key on INSERT or UPDATE of user_password in
+-- table users.
+BEGIN
+    NEW.api_key := encode(gen_random_bytes(16), 'hex');
+    RETURN NEW;
+END;
+$$;
 
 
 --
--- TOC entry 2040 (class 2606 OID 19664)
--- Name: courses_users_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: sync_courses_user(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY courses_users
-    ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
-
-
-
-ALTER TABLE ONLY emails
-    ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- TOC entry 2038 (class 2606 OID 19641)
--- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY sessions
-    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-ALTER TABLE ONLY courses_registration_sections
-    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES courses(semester, course) ON UPDATE CASCADE;
-
-
--- Completed on 2017-06-12 14:35:07 EDT
-
---
--- PostgreSQL database dump complete
---
-
---
--- plpgsql functions and triggers
---
-
-CREATE EXTENSION IF NOT EXISTS dblink;
-
-CREATE OR REPLACE FUNCTION sync_courses_user() RETURNS TRIGGER AS
--- TRIGGER function to sync users data on INSERT or UPDATE of user_record in
--- table courses_user.
-$$
+CREATE FUNCTION public.sync_courses_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     user_row record;
     db_conn varchar;
@@ -286,13 +110,143 @@ BEGIN
     -- All done.
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
-CREATE OR REPLACE FUNCTION sync_user() RETURNS trigger AS
--- TRIGGER function to sync users data on UPDATE of user_record in table users.
--- NOTE: INSERT should not trigger this function as function sync_courses_users
--- will also sync users -- but only on INSERT.
-$$
+
+--
+-- Name: sync_delete_registration_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_delete_registration_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+-- BEFORE DELETE trigger function to DELETE registration sections from course DB, as needed.
+DECLARE
+    registration_row RECORD;
+    db_conn VARCHAR;
+    query_string TEXT;
+BEGIN
+    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
+    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+    IF query_string IS NULL THEN
+        RAISE EXCEPTION 'query_string error in trigger function sync_delete_registration_section()';
+    END IF;
+    PERFORM dblink_exec(db_conn, query_string);
+
+    -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
+    RETURN OLD;
+
+-- Trying to delete a registration section while users are still enrolled will raise an integrity constraint violation exception.
+-- We should catch this exception and stop execution with no rows processed.
+-- No rows processed will indicate to the UsersController that deletion had an error and did not occur.
+EXCEPTION WHEN integrity_constraint_violation THEN
+    RAISE NOTICE 'Users are still enrolled in registration section ''%''', OLD.registration_section_id;
+    -- Return NULL so we do not proceed with original triggering DELETE query.
+    RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: sync_delete_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_delete_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+-- BEFORE DELETE trigger function to DELETE users from course DB.
+DECLARE
+    db_conn VARCHAR;
+    query_string TEXT;
+BEGIN
+    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    query_string := 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
+    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+    IF query_string IS NULL THEN
+        RAISE EXCEPTION 'query_string error in trigger function sync_delete_user()';
+    END IF;
+    PERFORM dblink_exec(db_conn, query_string);
+
+    -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
+    RETURN OLD;
+
+-- Trying to delete a user with existing data (via foreign keys) will raise an integrity constraint violation exception.
+-- We should catch this exception and stop execution with no rows processed.
+-- No rows processed will indicate that deletion had an error and did not occur.
+EXCEPTION WHEN integrity_constraint_violation THEN
+    -- Show that an exception occurred, and what was the exception.
+    RAISE NOTICE 'User ''%'' still has existing data in course DB ''%''', OLD.user_id, substring(db_conn FROM 8);
+    RAISE NOTICE '%', SQLERRM;
+    -- Return NULL so we do not proceed with original triggering DELETE query.
+    RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: sync_delete_user_cleanup(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_delete_user_cleanup() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+-- AFTER DELETE trigger function removes user from master.users if they have no
+-- existing course enrollment.  (i.e. no entries in courses_users)
+DECLARE
+    user_courses INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO user_courses FROM courses_users WHERE user_id = OLD.user_id;
+    IF user_courses = 0 THEN
+        DELETE FROM users WHERE user_id = OLD.user_id;
+    END IF;
+    RETURN NULL;
+
+-- The SELECT Count(*) / If check should prevent this exception, but this
+-- exception handling is provided 'just in case' so process isn't interrupted.
+EXCEPTION WHEN integrity_constraint_violation THEN
+    -- Show that an exception occurred, and what was the exception.
+    RAISE NOTICE 'Integrity constraint prevented user ''%'' from being deleted from master.users table.', OLD.user_id;
+    RAISE NOTICE '%', SQLERRM;
+    RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: sync_insert_registration_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_insert_registration_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+-- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
+DECLARE
+    registration_row RECORD;
+    db_conn VARCHAR;
+    query_string TEXT;
+BEGIN
+    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+    query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
+    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
+    IF query_string IS NULL THEN
+        RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section()';
+    END IF;
+    PERFORM dblink_exec(db_conn, query_string);
+
+    -- All done.
+    RETURN NULL;
+END;
+$$;
+
+
+--
+-- Name: sync_user(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.sync_user() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     course_row RECORD;
     db_conn VARCHAR;
@@ -326,129 +280,370 @@ BEGIN
     -- All done.
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 
-CREATE OR REPLACE FUNCTION sync_insert_registration_section() RETURNS trigger AS $$
--- AFTER INSERT trigger function to INSERT registration sections to course DB, as needed.
-DECLARE
-    registration_row RECORD;
-    db_conn VARCHAR;
-    query_string TEXT;
-BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
-    query_string := 'INSERT INTO sections_registration VALUES(' || quote_literal(NEW.registration_section_id) || ') ON CONFLICT DO NOTHING';
-    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-    IF query_string IS NULL THEN
-        RAISE EXCEPTION 'query_string error in trigger function sync_insert_registration_section()';
-    END IF;
-    PERFORM dblink_exec(db_conn, query_string);
+SET default_tablespace = '';
 
-    -- All done.
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
+SET default_with_oids = false;
 
-CREATE OR REPLACE FUNCTION sync_delete_registration_section() RETURNS TRIGGER AS $$
--- BEFORE DELETE trigger function to DELETE registration sections from course DB, as needed.
-DECLARE
-    registration_row RECORD;
-    db_conn VARCHAR;
-    query_string TEXT;
-BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
-    query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
-    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-    IF query_string IS NULL THEN
-        RAISE EXCEPTION 'query_string error in trigger function sync_delete_registration_section()';
-    END IF;
-    PERFORM dblink_exec(db_conn, query_string);
+--
+-- Name: courses; Type: TABLE; Schema: public; Owner: -
+--
 
-    -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
-    RETURN OLD;
+CREATE TABLE public.courses (
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    status smallint DEFAULT 1 NOT NULL
+);
 
--- Trying to delete a registration section while users are still enrolled will raise an integrity constraint violation exception.
--- We should catch this exception and stop execution with no rows processed.
--- No rows processed will indicate to the UsersController that deletion had an error and did not occur.
-EXCEPTION WHEN integrity_constraint_violation THEN
-    RAISE NOTICE 'Users are still enrolled in registration section ''%''', OLD.registration_section_id;
-    -- Return NULL so we do not proceed with original triggering DELETE query.
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION generate_api_key() RETURNS TRIGGER AS $generate_api_key$
--- TRIGGER function to generate api_key on INSERT or UPDATE of user_password in
--- table users.
-BEGIN
-    NEW.api_key := encode(gen_random_bytes(16), 'hex');
-    RETURN NEW;
-END;
-$generate_api_key$ LANGUAGE plpgsql;
+--
+-- Name: courses_registration_sections; Type: TABLE; Schema: public; Owner: -
+--
 
-CREATE OR REPLACE FUNCTION sync_delete_user() RETURNS TRIGGER AS $$
--- BEFORE DELETE trigger function to DELETE users from course DB.
-DECLARE
-    db_conn VARCHAR;
-    query_string TEXT;
-BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
-    query_string := 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
-    -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
-    IF query_string IS NULL THEN
-        RAISE EXCEPTION 'query_string error in trigger function sync_delete_user()';
-    END IF;
-    PERFORM dblink_exec(db_conn, query_string);
+CREATE TABLE public.courses_registration_sections (
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    registration_section_id character varying(255) NOT NULL
+);
 
-    -- All done.  As this is a BEFORE DELETE trigger, RETURN OLD allows original triggering DELETE query to proceed.
-    RETURN OLD;
 
--- Trying to delete a user with existing data (via foreign keys) will raise an integrity constraint violation exception.
--- We should catch this exception and stop execution with no rows processed.
--- No rows processed will indicate that deletion had an error and did not occur.
-EXCEPTION WHEN integrity_constraint_violation THEN
-    -- Show that an exception occurred, and what was the exception.
-    RAISE NOTICE 'User ''%'' still has existing data in course DB ''%''', OLD.user_id, substring(db_conn FROM 8);
-    RAISE NOTICE '%', SQLERRM;
-    -- Return NULL so we do not proceed with original triggering DELETE query.
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
+--
+-- Name: courses_users; Type: TABLE; Schema: public; Owner: -
+--
 
-CREATE OR REPLACE FUNCTION sync_delete_user_cleanup() RETURNS TRIGGER AS $$
--- AFTER DELETE trigger function removes user from master.users if they have no
--- existing course enrollment.  (i.e. no entries in courses_users)
-DECLARE
-    user_courses INTEGER;
-BEGIN
-    SELECT COUNT(*) INTO user_courses FROM courses_users WHERE user_id = OLD.user_id;
-    IF user_courses = 0 THEN
-        DELETE FROM users WHERE user_id = OLD.user_id;
-    END IF;
-    RETURN NULL;
+CREATE TABLE public.courses_users (
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    user_id character varying NOT NULL,
+    user_group integer NOT NULL,
+    registration_section character varying(255),
+    manual_registration boolean DEFAULT false,
+    CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+);
 
--- The SELECT Count(*) / If check should prevent this exception, but this
--- exception handling is provided 'just in case' so process isn't interrupted.
-EXCEPTION WHEN integrity_constraint_violation THEN
-    -- Show that an exception occurred, and what was the exception.
-    RAISE NOTICE 'Integrity constraint prevented user ''%'' from being deleted from master.users table.', OLD.user_id;
-    RAISE NOTICE '%', SQLERRM;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
 
--- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
--- Updates can happen in either users and/or courses_users.
-CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
-CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE sync_user();
+--
+-- Name: emails; Type: TABLE; Schema: public; Owner: -
+--
 
--- INSERT and DELETE triggers for syncing registration sections happen on different instances of TG_WHEN (after vs before).
-CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_insert_registration_section();
-CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();
+CREATE TABLE public.emails (
+    id integer NOT NULL,
+    user_id character varying NOT NULL,
+    subject text NOT NULL,
+    body text NOT NULL,
+    created timestamp without time zone NOT NULL,
+    sent timestamp without time zone,
+    error character varying DEFAULT ''::character varying NOT NULL
+);
 
--- Generate API key when a user is created or its password is changed.
-CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON users FOR EACH ROW EXECUTE PROCEDURE generate_api_key();
 
--- DELETE triggers for user data.
-CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_delete_user();
-CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_delete_user_cleanup();
+--
+-- Name: emails_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.emails_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: emails_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.emails_id_seq OWNED BY public.emails.id;
+
+
+--
+-- Name: mapped_courses; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.mapped_courses (
+    semester character varying(255) NOT NULL,
+    course character varying(255) NOT NULL,
+    registration_section character varying(255) NOT NULL,
+    mapped_course character varying(255) NOT NULL,
+    mapped_section character varying(255) NOT NULL
+);
+
+
+--
+-- Name: migrations_master; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.migrations_master (
+    id character varying(100) NOT NULL,
+    commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    status numeric(1,0) DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: migrations_system; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.migrations_system (
+    id character varying(100) NOT NULL,
+    commit_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    status numeric(1,0) DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sessions (
+    session_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    csrf_token character varying(255) NOT NULL,
+    session_expires timestamp(6) with time zone NOT NULL
+);
+
+
+--
+-- Name: terms; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.terms (
+    term_id character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    CONSTRAINT terms_check CHECK ((end_date > start_date))
+);
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    user_id character varying NOT NULL,
+    user_numeric_id character varying,
+    user_password character varying,
+    user_firstname character varying NOT NULL,
+    user_preferred_firstname character varying,
+    user_lastname character varying NOT NULL,
+    user_preferred_lastname character varying,
+    user_access_level integer DEFAULT 3 NOT NULL,
+    user_email character varying NOT NULL,
+    user_updated boolean DEFAULT false NOT NULL,
+    instructor_updated boolean DEFAULT false NOT NULL,
+    last_updated timestamp(6) with time zone,
+    api_key character varying(255) DEFAULT encode(public.gen_random_bytes(16), 'hex'::text) NOT NULL,
+    time_zone character varying DEFAULT 'NOT_SET/NOT_SET'::character varying NOT NULL,
+    display_image_state character varying DEFAULT 'system'::character varying NOT NULL,
+    CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3)))
+);
+
+
+--
+-- Name: emails id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.emails_id_seq'::regclass);
+
+
+--
+-- Name: courses courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses
+    ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
+
+
+--
+-- Name: courses_registration_sections courses_registration_sections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses_registration_sections
+    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id);
+
+
+--
+-- Name: courses_users courses_users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses_users
+    ADD CONSTRAINT courses_users_pkey PRIMARY KEY (semester, course, user_id);
+
+
+--
+-- Name: emails emails_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.emails
+    ADD CONSTRAINT emails_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mapped_courses mapped_courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mapped_courses
+    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (semester, course, registration_section);
+
+
+--
+-- Name: migrations_master migrations_master_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.migrations_master
+    ADD CONSTRAINT migrations_master_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: migrations_system migrations_system_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.migrations_system
+    ADD CONSTRAINT migrations_system_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
+
+
+--
+-- Name: terms terms_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.terms
+    ADD CONSTRAINT terms_pkey PRIMARY KEY (term_id);
+
+
+--
+-- Name: users users_api_key_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_api_key_key UNIQUE (api_key);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: courses_users after_delete_sync_delete_user_cleanup; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user_cleanup();
+
+
+--
+-- Name: courses_users before_delete_sync_delete_user; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user();
+
+
+--
+-- Name: courses_registration_sections delete_sync_registration_id; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON public.courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_registration_section();
+
+
+--
+-- Name: users generate_api_key; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON public.users FOR EACH ROW EXECUTE PROCEDURE public.generate_api_key();
+
+
+--
+-- Name: courses_registration_sections insert_sync_registration_id; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON public.courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE public.sync_insert_registration_section();
+
+
+--
+-- Name: courses_users user_sync_courses_users; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_courses_user();
+
+
+--
+-- Name: users user_sync_users; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER user_sync_users AFTER UPDATE ON public.users FOR EACH ROW EXECUTE PROCEDURE public.sync_user();
+
+
+--
+-- Name: courses courses_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses
+    ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES public.terms(term_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: courses_registration_sections courses_registration_sections_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses_registration_sections
+    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+
+
+--
+-- Name: courses_users courses_users_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses_users
+    ADD CONSTRAINT courses_users_course_fkey FOREIGN KEY (semester, course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+
+
+--
+-- Name: courses_users courses_users_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.courses_users
+    ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: emails emails_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.emails
+    ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: mapped_courses mapped_courses_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mapped_courses
+    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+
+
+--
+-- Name: sessions sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
