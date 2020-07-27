@@ -73,6 +73,19 @@
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
     </form>
+    <br>
+    <p>The pause button is meant for short breaks such as going to the bathroom and not to hold your place until you have a question.</p>
+    <form method="post" action="{{base_url}}/togglePause">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <input type="hidden" name="pause_state" value="{{ viewer.isCurrentlyPaused()?'false':'true' }}"/>
+      <button id="pause_user" type="submit" class="btn btn-primary">
+        {% if viewer.isCurrentlyPaused() %}
+          Unpause place in queue
+        {% else %}
+          Pause place in queue
+        {% endif %}
+      </button>
+    </form>
   </div>
 {% else %}
   <div id="queue_status">
