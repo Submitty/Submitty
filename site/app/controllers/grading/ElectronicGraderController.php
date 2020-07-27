@@ -85,10 +85,9 @@ class ElectronicGraderController extends AbstractController {
                 $students = $this->core->getQueries()->getUsersByRegistrationSections([$section]);
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
-                    if($submit_before_grading == "checked"){
-                        if($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()){
-                      
-                        } 
+                    if ($submit_before_grading == "checked") {
+                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
+                        }
                         else {
                             array_push($student_array, $student->getId());
                         }
@@ -96,7 +95,6 @@ class ElectronicGraderController extends AbstractController {
                     else {
                         array_push($student_array, $student->getId());
                     }
-                    
                 }
                 
                 $number_of_students = count($student_array);
@@ -175,10 +173,9 @@ class ElectronicGraderController extends AbstractController {
              $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
-             if($submit_before_grading == "checked"){
-                if($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()){
-              
-                } 
+            if ($submit_before_grading == "checked") {
+                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
+                }
                 else {
                     array_push($student_array, $student->getId());
                 }
