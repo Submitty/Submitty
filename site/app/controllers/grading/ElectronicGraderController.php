@@ -452,7 +452,7 @@ class ElectronicGraderController extends AbstractController {
                 $total_submissions += $value;
             }
              /* Allow instructor to see Peer completion stats */
-            if ($isPeerGradeable) {
+            if (!$gradeable->isTeamAssignment() and $isPeerGradeable) {
                 $sections['peer_stu_grad'] = [
                    // Total peer components to grade = Number of peer components * Number of Students who submitted
                   // 'total_peer_components' =>
