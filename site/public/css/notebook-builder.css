@@ -94,11 +94,11 @@
     margin-right: 15px;
 }
 
-.short-answer-widget .prepopulate-area {
+.short-answer-widget .initial-value-div {
     margin-top: 15px;
 }
 
-.short-answer-widget .prepopulate-area textarea {
+.short-answer-widget .initial-value-div textarea {
     width: 100%;
     min-height: 75px;
 }

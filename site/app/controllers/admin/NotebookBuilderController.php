@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\CodeMirrorLoader;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -116,12 +117,7 @@ class NotebookBuilderController extends AbstractController {
 
     private function loadDependencies(): void {
         // Code mirror dependencies
-        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
-        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
-        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+        CodeMirrorLoader::loadDefaultDependencies($this->core);
 
         // Notebook builder dependencies
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
