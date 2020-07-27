@@ -391,4 +391,28 @@ class Utils {
                 return 'text/plain';
         }
     }
+
+    /**
+     * Remove comments from the given string.
+     * This function will remove any comments that are considered valid comments in the c programming language including
+     * single line, end of line, or multi-line comments.
+     *
+     * It will not work for html, python, etc comments.
+     *
+     * @param string $str
+     * @return string|null Original string with comments removed, or null on failure.
+     */
+    public static function stripComments(string $str): ?string {
+        return preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*/', '', $str);
+    }
+
+    /**
+     * Escape double quotes in the given string.
+     *
+     * @param string $str
+     * @return string|null Original string with double quotes escaped, or null on failure.
+     */
+    public static function escapeDoubleQuotes(string $str): ?string {
+        return preg_replace('["]', '\"', $str);
+    }
 }

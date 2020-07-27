@@ -55,24 +55,42 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-star"
                 ]);
             }
-            elseif ($this->core->getUser()->accessFaculty()) {
+            else {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home', 'courses', 'new']),
-                    "title" => "New Course",
+                    "href" => $this->core->buildUrl(['home']),
+                    "title" => "My Courses",
                     "class" => "nav-row",
-                    "id" => "nav-sidebar-new-course",
-                    "icon" => "fa-plus-square"
+                    "id" => "nav-sidebar-my-courses",
+                    "icon" => "fa-book-reader"
                 ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['admin', 'docker']),
-                    "title" => "Docker UI",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-docker-link",
-                    "icon" => "fa-docker",
-                    "prefix" => "fab",
-                ]);
-            }
 
+                if ($this->core->getUser()->accessFaculty()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['home', 'courses', 'new']),
+                        "title" => "New Course",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-new-course",
+                        "icon" => "fa-plus-square"
+                    ]);
+                }
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['user_profile']),
+                    "title" => "My Profile",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-my-profile",
+                    "icon" => "fa-user"
+                ]);
+                if ($this->core->getUser()->accessFaculty()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['admin', 'docker']),
+                        "title" => "Docker UI",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-docker-link",
+                        "icon" => "fa-docker",
+                        "prefix" => "fab",
+                    ]);
+                }
+            }
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['notifications']),
@@ -314,8 +332,22 @@ class GlobalController extends AbstractController {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line",
                 ]);
-            }
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['home']),
+                    "title" => "My Courses",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-my-courses",
+                    "icon" => "fa-book-reader"
+                ]);
 
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['user_profile']),
+                    "title" => "My Profile",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-my-profile",
+                    "icon" => "fa-user"
+                ]);
+            }
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => "javascript: toggleSidebar();",
                 "title" => "Collapse Sidebar",
