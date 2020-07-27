@@ -5,6 +5,7 @@ import subprocess
 import os
 import glob
 import shutil
+import traceback
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
@@ -37,8 +38,12 @@ def cleanup(test):
 def schema_validation(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    test.validate_complete_config(config_path)
-   
+    try:
+        test.validate_complete_config(config_path)
+    except Exception:
+        traceback.print_exc()
+        raise
+
 
 @testcase
 def correct(test):
@@ -51,7 +56,7 @@ def correct(test):
     test.run_validator()
     test.diff("grade.txt", "grade.txt_correct", "-b")
     test.json_diff("results.json","results.json_correct")
-    
+
 
 @testcase
 def buggy(test):
@@ -79,7 +84,7 @@ def alternate(test):
     test.diff("grade.txt", "grade.txt_alternate", "-b")
     subprocess.call(["rm", os.path.join(test.testcase_path, "data", "alternate.c")])
     test.json_diff("results.json","results.json_alternate")
-    
+
 
 @testcase
 def hello_world(test):

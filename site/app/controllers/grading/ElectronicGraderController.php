@@ -35,9 +35,10 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
+
     /**
      * Checks that a given diff viewer type is valid using DiffViewer::isValidType
-     * @param  string $type
+     * @param string $type
      * @return bool
      */
     private function validateDiffViewerType(string $type) {
@@ -445,10 +446,10 @@ class ElectronicGraderController extends AbstractController {
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
                 if ($gradeable->isTeamAssignment()) {
-                        $sections['stu_grad']['no_team'] = 0;
-                        $sections['stu_grad']['team'] = 0;
-                        $sections['all']['no_team'] = 0;
-                        $sections['all']['team'] = 0;
+                    $sections['stu_grad']['no_team'] = 0;
+                    $sections['stu_grad']['team'] = 0;
+                    $sections['all']['no_team'] = 0;
+                    $sections['all']['team'] = 0;
                 }
             }
             else {
@@ -784,7 +785,7 @@ class ElectronicGraderController extends AbstractController {
                         $team->getId(),
                         $team->getRegistrationSection(),
                         $team->getRotatingSection()
-                        ]);
+                    ]);
                     $csvdata .= $nl;
                 }
             }
@@ -963,9 +964,14 @@ class ElectronicGraderController extends AbstractController {
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1") {
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $version = null) {
+        // If the version is set, user is requesting for new TA grading interface
+        $showNewInterface = isset($version);
+
         /** @var Gradeable $gradeable */
+
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
@@ -973,7 +979,6 @@ class ElectronicGraderController extends AbstractController {
         }
         $peer = $gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
-
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         if ($who_id === '') {
@@ -1196,13 +1201,18 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
         $this->core->getOutput()->addInternalCss('forum.css');
+        if ($showNewInterface) {
+            $this->core->getOutput()->addInternalCss('electronic.css');
+        }
+        else {
+            $this->core->getOutput()->addInternalCss('ta-grading.css');
+        }
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $showNewInterface);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -1791,10 +1801,10 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
- /**
-  * Route for adding a new component to a gradeable
-  * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
-  */
+    /**
+     * Route for adding a new component to a gradeable
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
+     */
     public function ajaxAddComponent($gradeable_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -2472,5 +2482,39 @@ class ElectronicGraderController extends AbstractController {
         foreach ($total_users as $key => $value) {
             $total_total += $value * $num_components;
         }
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     */
+    public function ajaxClearPeerMarks($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        $peer_id = $_POST['peer_id'] ?? '';
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch gradeable');
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch graded gradeable');
+        }
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
+            $component = $container->getComponent();
+            $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
+        }
+        $ta_graded_gradeable->removeOverallComment($peer_id);
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id, $gradeable->isTeamAssignment());
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Finally, save the graded gradeable
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
+        $this->core->getOutput()->renderJsonSuccess("Marks removed successfully!");
+        return true;
     }
 }

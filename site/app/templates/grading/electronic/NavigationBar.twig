@@ -33,6 +33,7 @@
         {% if regrade_panel_available %}
             <button title="Show/Hide Grade Inquiry Information (Press X)" class="invisible-btn key_to_click" tabindex="0" onclick="toggleRegrade(); updateCookies();"> <i class="fas {{ grade_inquiry_pending ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon icon-header" ></i> </button>
         {% endif %}
+        <button title="Try new TA grading page" class="invisible-btn key_to_click" tabindex="0" onclick="renderNewTaGradingPage();"> <i class="fas fa-tags icon-header" ></i> </button>
         <button title="Show Grading Settings" class="invisible-btn key_to_click" tabindex="0" onclick="showSettings();"> <i class="fas fa-wrench icon-header" ></i> </button>
         {# /Panel buttons #}
     </div>
