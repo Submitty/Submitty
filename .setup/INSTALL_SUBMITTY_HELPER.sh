@@ -286,13 +286,10 @@ chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
-    # remove the old versions of the queues
-    rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
-    rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
     # if the to_be_graded directories do not exist, then make them
     mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
     mkdir -p $SUBMITTY_DATA_DIR/daemon_job_queue
-    mkdir -p $SUBMITTY_DATA_DIR/grading
+    mkdir -p $SUBMITTY_DATA_DIR/in_progress_grading
 
     # set the permissions of these directories
     # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
@@ -301,8 +298,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
-    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/grading
-    chmod  750                                      $SUBMITTY_DATA_DIR/grading
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/in_progress_grading
+    chmod  750                                      $SUBMITTY_DATA_DIR/in_progress_grading
 fi
 
 
@@ -648,14 +645,14 @@ fi
 if [ "${WORKER}" == 0 ]; then
     for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
         echo "ERROR: Also kill shipper pid $i";
-        kill $i;
+        kill $i || true;
     done
 fi
 
 # force kill any other worker processes that may be manually running on the primary or remote machines
 for i in $(ps -ef | grep submitty_autograding_worker | grep -v grep | awk '{print $2}'); do
     echo "ERROR: Also kill shipper pid $i";
-    kill $i;
+    kill $i || true;
 done
 
 

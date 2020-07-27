@@ -1589,7 +1589,7 @@ function resizeNoScrollTextareas() {
     // Make sure textareas resize correctly
     $('textarea.noscroll').each(function() {
         auto_grow(this);
-    })
+    });
 }
 
 $(document).ready(function() {

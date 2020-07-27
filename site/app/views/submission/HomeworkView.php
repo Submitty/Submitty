@@ -830,7 +830,7 @@ class HomeworkView extends AbstractView {
 
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
-                'grading' => $version_instance->isGrading(),
+                'in_progress_grading' => $version_instance->isGrading(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
 
