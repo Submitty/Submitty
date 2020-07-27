@@ -359,7 +359,8 @@
                     {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
                         {% if info.graded_groups[index] =="peer-null"   %}
                             {# Indicates Ungraded Peer Component #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL }}"></i>
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-
+                            circle grader-NULL }}"></i>
                         {% else %}
                             {# Indicates Non-Peer Component (Hidden)#}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
