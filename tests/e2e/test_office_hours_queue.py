@@ -95,7 +95,6 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(1, 0, success_text=['Queue emptied'], error_text=[])
         self.assertEqual(base_queue_history_count+4, self.queueHistoryCount(False))
         self.assertEqual(0, self.currentQueueCount())
-        self.switchToUser('student')
 
         announcement_string = ''.join(choice(ascii_lowercase) for i in range(10))
         self.editAnnouncement(announcement_string)
@@ -103,7 +102,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.editAnnouncement("")
         self.assertEqual(True, self.verifyElementMissing('id', ['announcement']))
 
-        self.switchToStudent('student')
+        self.switchToUser('student')
         # Students should not be able to see any of theses elements
         self.assertEqual(True, self.verifyElementMissing('class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
         self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new_queue_token', 'new_queue_rand_token', 'open_new_queue_btn']))
@@ -294,7 +293,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(self.countAlertError(error_text), error)
 
 def enableQueue(self):
-    self.log_in(user_id='instructor')
+    #self.log_in(user_id='instructor')
     self.get(f"/courses/{self.semester}/sample/config")
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):

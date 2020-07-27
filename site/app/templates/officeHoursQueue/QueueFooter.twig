@@ -115,6 +115,11 @@
 
 
   {% if viewer.isGrader() %}
+
+      $('#old_queue_code').change(function(){
+          document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';
+      });
+
       var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
       if ("Notification" in window && Notification.permission === "granted" && notifications_enabled) {
           setNotificationState(true);
