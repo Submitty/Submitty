@@ -533,6 +533,11 @@ function togglePeer() {
     setPeerVisible(!isPeerVisible());
 }
 
+function renderNewTaGradingPage () {
+  // Just add beta as the prefix
+  window.location = window.location.pathname + '/beta' + window.location.search;
+}
+
 function resetModules() {
     var width = $("main").width();
     var height = $("main").height();
@@ -892,12 +897,12 @@ function adjustSize(name) {
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
 
-function getNonAnonPath(path, anon_submitter_id){
+function getNonAnonPath(path, anon_submitter_id, user_ids){
     nonAnonPath = "";
     pathPieces = path.split("/");
     for (i = 1; i < pathPieces.length; i++) {
         if(i == 9){
-            nonAnonPath += "/" + anon_submitter_id; 
+            nonAnonPath += "/" + user_ids[anon_submitter_id];
         }
         else{
             nonAnonPath += "/" + pathPieces[i];

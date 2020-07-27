@@ -19,7 +19,7 @@ class ShortAnswerWidget extends Widget {
         const container = this.getContainer('Short Answer');
         container.classList.add('short-answer-widget');
 
-        const rows = this.state.rows ?? 1;
+        const rows = this.state.rows ? this.state.rows : 1;
         const size_selector = document.createElement('div');
         size_selector.innerHTML = this.getSizeSelectorTemplate(rows);
 
@@ -53,6 +53,10 @@ class ShortAnswerWidget extends Widget {
     getJSON() {
         this.commitState();
         return this.state;
+    }
+
+    load(data) {
+        this.state = data;
     }
 
     /**
