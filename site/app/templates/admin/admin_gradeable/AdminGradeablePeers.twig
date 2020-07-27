@@ -273,7 +273,7 @@
                 // move the row to where it belongs lexicographically
                 let new_grader_index = Object.keys(new_peers).indexOf(new_grader_id) + 1;
                 // if it already belongs in the last row, then leave it
-                if (new_grader_index != $('#peer-table tr').length - 2) {
+                if (new_grader_index != $('#peer-table tr').length - 1) {
                     let next_tr = $('#peer-table tr:eq(' + new_grader_index + ')');
                     $('#peer-table tr:last').insertBefore(next_tr);
                 }

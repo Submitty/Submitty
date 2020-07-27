@@ -2,8 +2,6 @@
 {% block popup_id %}admin-gradeable-peers-form2{% endblock %}
 {% block title_tag %}<h1 id="admin-gradeable-peers2-title">Add New Grader to Matrix</h1>{% endblock %}
 {% block body %}
-	<input type="hidden" id="peer_grader_pairs" value='{{ pair_grader_pairs }}'/>
-	<input type="hidden" id="student_autofill" value='{{ student_autofill }}'/>
 	<input type="hidden" id="peer_grader_submit_url" value='{{ peer_grader_submit_url }}'/>
 	<input type="hidden" id="csrf_token2" value='{{ csrf_token }}'/>
 	<div id="new-grader" class="left-panel"></div>
