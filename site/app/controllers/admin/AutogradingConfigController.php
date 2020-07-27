@@ -9,6 +9,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\Utils;
+use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -123,7 +125,6 @@ class AutogradingConfigController extends AbstractController {
         $this->core->addSuccessMessage($msg);
         return new MultiResponse(
             JsonResponse::getSuccessResponse([
-                'config_name' => $counter,
                 'config_path' => $target_dir
             ]),
             null,
@@ -232,14 +233,44 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
+     * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
+     * notebook builder know to save a new configuration or edit the existing one
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function notebookBuilder(string $g_id) {
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+    public function notebookBuilder(string $g_id, string $mode) {
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        }
+        catch (\Exception $exception) {
+            return new RedirectResponse($this->core->buildUrl());
+        }
 
-        // Load JS and CSS dependencies
+        $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
+
+        if ($gradeable->isUsingDefaultConfig() && $mode === 'edit') {
+            $this->core->addErrorMessage("You may not edit a provided configuration.  Press the 'Start New' button to start a new configuration instead.");
+            return new RedirectResponse($failure_url);
+        }
+
+        $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
+        $json_contents = file_get_contents($json_path);
+
+        $config_string = $mode === 'edit' ? $json_contents : '{"notebook": [], "testcases": []}';
+        $config_string = Utils::stripComments($config_string);
+
+        // Remove pretty print by decoding and re-encoding
+        $config_string = json_decode($config_string);
+        $config_string = json_encode($config_string);
+
+        if ($config_string === 'null') {
+            $this->core->addErrorMessage('Failure attempting to load the current configuration.');
+            return new RedirectResponse($failure_url);
+        }
+
+        $config_string = Utils::escapeDoubleQuotes($config_string);
+
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
@@ -250,7 +281,9 @@ class AutogradingConfigController extends AbstractController {
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
-            'gradeable' => $gradeable
+            'gradeable' => $gradeable,
+            'config_string' => $config_string,
+            'mode' => $mode
         ]);
     }
 
@@ -259,6 +292,22 @@ class AutogradingConfigController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function notebookBuilderSave(): JsonResponse {
+        if ($_POST['mode'] === 'new') {
+            return $this->notebookBuilderSaveNew();
+        }
+        elseif ($_POST['mode'] === 'edit') {
+            return $this->notebookBuilderSaveExisting();
+        }
+
+        return JsonResponse::getErrorResponse('Illegal "mode" was passed.');
+    }
+
+    /**
+     * Helper function for saving a new config.json using notebook builder
+     *
+     * @return JsonResponse
+     */
+    private function notebookBuilderSaveNew(): JsonResponse {
         $result = $this->uploadConfig();
 
         if ($result->json_response->json['status'] === 'success') {
@@ -269,11 +318,37 @@ class AutogradingConfigController extends AbstractController {
             $gradeable->setAutogradingConfigPath($config_path);
             $this->core->getQueries()->updateGradeable($gradeable);
 
-            // Rebuild
-            $admin_gradeable_controller = new AdminGradeableController($this->core);
-            $admin_gradeable_controller->enqueueBuild($gradeable);
+            $this->notebookBuilderRebuildGradeable($gradeable);
         }
 
         return $result->json_response;
+    }
+
+    /**
+     * Helper function used for editing and saving an existing config.json using notebook builder
+     *
+     * @return JsonResponse
+     */
+    private function notebookBuilderSaveExisting(): JsonResponse {
+        // Overwrite existing configuration with newly uploaded one
+        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['g_id']);
+        $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
+        $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
+
+        // Update group permission
+        $group = $this->core->getConfig()->getCourse() . '_tas_www';
+        $permission_res = chgrp($json_path, $group);
+
+        $this->notebookBuilderRebuildGradeable($gradeable);
+
+        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('An error occurred saving the modified config.json.');
+    }
+
+    /**
+     * Helper function used to trigger a gradeable rebuild used in the notebook builder save process.
+     */
+    private function notebookBuilderRebuildGradeable(Gradeable $gradeable): void {
+        $admin_gradeable_controller = new AdminGradeableController($this->core);
+        $admin_gradeable_controller->enqueueBuild($gradeable);
     }
 }
