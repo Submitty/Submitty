@@ -37,7 +37,7 @@ class ErrorView extends AbstractView {
     }
 
     public function genericError(array $error_messages) {
-        return $this->core->getOutput()->renderTwigTemplate('error/genericError.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('error/GenericError.twig', [
             'error_messages' => $error_messages
         ]);
     }
