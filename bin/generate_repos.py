@@ -43,6 +43,7 @@ def create_folder(folder):
 
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
+parser.add_argument("--non-interactive", action='store_true', default=False)
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
 parser.add_argument("repo_name", help="repository name")
@@ -104,15 +105,15 @@ eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
 select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
 eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
 
-if eg is None:
+is_team = False
+if eg is not None:
+    is_team = eg.eg_team_assignment
+elif not args.non_interactive:
     print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
     response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
     if not response.lower() == 'y':
         print ("exiting");
         sys.exit()
-    is_team = False
-else:
-    is_team = eg.eg_team_assignment
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
