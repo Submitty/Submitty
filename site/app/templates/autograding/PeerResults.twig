@@ -290,6 +290,7 @@ function switch_feedback_modes() {
                 <a class="nav-bar key_to_click" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
             {% endfor %}
         </div>
+        <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
         
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
@@ -340,7 +341,6 @@ function switch_feedback_modes() {
 
             {% endfor %}
             </br>
-            <span style="float: right" id="save_status"></span>
             <b>Peer Feedback:</b>
             <div>
                 </br>
