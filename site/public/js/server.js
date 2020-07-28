@@ -1225,7 +1225,7 @@ function displaySuccessMessage(message) {
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type
+ * @param {string} type either 'error' or 'success'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
@@ -1589,29 +1589,120 @@ function resizeNoScrollTextareas() {
     // Make sure textareas resize correctly
     $('textarea.noscroll').each(function() {
         auto_grow(this);
-    })
+    });
 }
 
 $(document).ready(function() {
   enableKeyToClick();
 });
 
-function enableKeyToClick(){
-  var key_to_click = document.getElementsByClassName("key_to_click");
-  for (var i = 0; i < key_to_click.length; i++) {
-    key_to_click[i].addEventListener('keydown', function(event) {
-      if (event.keyCode === 13) {//ENTER key
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).click();
-      }
-    });
-    key_to_click[i].addEventListener('keyup', function(event) {
-      if (event.keyCode === 32) { //SPACE key
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).click();
-      }
-    });
+function keyToClickKeydown(event){
+  if (event.keyCode === 13) {//ENTER key
+    event.preventDefault();
+    event.stopPropagation();
+    $(event.target).click();
   }
+}
+
+function keyToClickKeyup(event){
+  if (event.keyCode === 32) { //SPACE key
+    event.preventDefault();
+    event.stopPropagation();
+    $(event.target).click();
+  }
+}
+
+function enableKeyToClick(){
+  const key_to_click = document.getElementsByClassName("key_to_click");
+  for (var i = 0; i < key_to_click.length; i++) {
+    //In case this function is run multiple times, we need to remove the old event listeners
+    key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
+    key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
+
+    key_to_click[i].addEventListener('keyup', keyToClickKeyup);
+    key_to_click[i].addEventListener('keydown', keyToClickKeydown);
+  }
+}
+
+/**
+ * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
+ *
+ * @param user_id The user_id of the user who's preferred photo should be flagged
+ * @param flag A boolean indicating whether to flag or unflag the image.
+ *             True to flag
+ *             False to unflag
+ */
+function flagUserImage(user_id, flag) {
+    let confirm_message;
+    let success_message;
+
+    if (flag) {
+        confirm_message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
+        success_message = `${user_id}'s preferred image was successfully flagged.`;
+    }
+    else {
+        confirm_message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
+        success_message = `${user_id}'s preferred image was successfully restored.`;
+    }
+
+    const confirmed = confirm(confirm_message);
+
+    if (confirmed) {
+        const url = buildCourseUrl(['flag_user_image']);
+
+        const form_data = new FormData();
+        form_data.append('user_id', user_id);
+        form_data.append('csrf_token', csrfToken);
+        form_data.append('flag', flag);
+
+        const makeRequest = async () => {
+            const image_container = document.querySelector(`.${user_id}-image-container`);
+
+            // Show working message
+            const working_message = document.createElement('i');
+            working_message.innerHTML = '<span style="color:var(--no-image-available)">Working...</span>';
+            image_container.removeChild(image_container.firstElementChild);
+            image_container.prepend(working_message);
+
+            const response = await fetch(url, {method: 'POST', body: form_data});
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const data = result.data;
+
+                // Change image
+                let new_content;
+                if (data.image_data && data.image_mime_type) {
+                    new_content = document.createElement('img');
+                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
+                }
+                else {
+                    new_content = document.createElement('i');
+                    new_content.innerHTML = '<span style="color:var(--no-image-available)">No Image Available</span>';
+                }
+
+                image_container.removeChild(image_container.firstElementChild);
+                image_container.prepend(new_content);
+
+                // Change icon
+                const a = image_container.querySelector('a');
+                a.href = data.href;
+                a.innerHTML = data.icon_html;
+
+                displaySuccessMessage(success_message);
+            }
+            else {
+                displayErrorMessage(result.message);
+            }
+        };
+
+        try {
+            makeRequest();
+        }
+        catch (err) {
+            console.error(err);
+            displayErrorMessage('Something went wrong!');
+        }
+    }
 }

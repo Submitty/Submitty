@@ -55,24 +55,52 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-star"
                 ]);
             }
-            elseif ($this->core->getUser()->accessFaculty()) {
+            else {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home', 'courses', 'new']),
-                    "title" => "New Course",
+                    "href" => $this->core->buildUrl(['home']),
+                    "title" => "My Courses",
                     "class" => "nav-row",
-                    "id" => "nav-sidebar-new-course",
-                    "icon" => "fa-plus-square"
+                    "id" => "nav-sidebar-my-courses",
+                    "icon" => "fa-book-reader"
                 ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['admin', 'docker']),
-                    "title" => "Docker UI",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-docker-link",
-                    "icon" => "fa-docker",
-                    "prefix" => "fab",
-                ]);
-            }
 
+                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['update']),
+                        "title" => "System Update",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-update",
+                        "icon" => "fas fa-sync"
+                    ]);
+                }
+
+                if ($this->core->getUser()->accessFaculty()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['home', 'courses', 'new']),
+                        "title" => "New Course",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-new-course",
+                        "icon" => "fa-plus-square"
+                    ]);
+                }
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['user_profile']),
+                    "title" => "My Profile",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-my-profile",
+                    "icon" => "fa-user"
+                ]);
+                if ($this->core->getUser()->accessFaculty()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['admin', 'docker']),
+                        "title" => "Docker UI",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-docker-link",
+                        "icon" => "fa-docker",
+                        "prefix" => "fab",
+                    ]);
+                }
+            }
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['notifications']),
@@ -122,6 +150,16 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-door-closed"
                     ]);
                 }
+            }
+
+            if ($this->core->getConfig()->isPollsEnabled()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(['polls']),
+                    "title" => "Polls",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-polls",
+                    "icon" => "fa-question-circle"
+                ]);
             }
 
             $course_path = $this->core->getConfig()->getCoursePath();
@@ -183,10 +221,7 @@ class GlobalController extends AbstractController {
                 }
             }
 
-            $at_least_one_grader_link = false;
-
             if ($this->core->getUser()->accessAdmin()) {
-                $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['users']),
                     "title" => "Manage Students",
@@ -211,43 +246,13 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getUser()->accessGrading()) {
-                $images_course_path = $this->core->getConfig()->getCoursePath();
-                // FIXME: this code is duplicated in ImagesController.php
-                $images_path = FileUtils::joinPaths($images_course_path, "uploads/student_images");
-                $common_images_path_1 = FileUtils::joinPaths("/var/local/submitty/student_images");
-                $term = explode('/', $this->core->getConfig()->getCoursePath());
-                $term = $term[count($term) - 2];
-                $common_images_path_2 = FileUtils::joinPaths("/var/local/submitty/student_images", $term);
-                // FIXME: consider searching through the common location for matches to my students
-                // (but this would be expensive)
-                $any_images_files = array_merge(
-                    FileUtils::getAllFiles($images_path, [], true),
-                    FileUtils::getAllFiles($common_images_path_1, [], true),
-                    FileUtils::getAllFiles($common_images_path_2, [], true)
-                );
-                if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
-                    $at_least_one_grader_link = true;
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildCourseUrl(['student_photos']),
-                        "title" => "Student Photos",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-photos",
-                        "icon" => "fa-id-card"
-                    ]);
-                }
-                elseif (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
-                    $sections = $this->core->getUser()->getGradingRegistrationSections();
-                    if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
-                        $at_least_one_grader_link = true;
-                        $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $this->core->buildCourseUrl(['student_photos']),
-                            "title" => "Student Photos",
-                            "class" => "nav-row",
-                            "id" => "nav-sidebar-photos",
-                            "icon" => "fa-id-card"
-                        ]);
-                    }
-                }
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(['student_photos']),
+                    "title" => "Student Photos",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-photos",
+                    "icon" => "fa-id-card"
+                ]);
             }
 
             if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {
@@ -260,7 +265,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
+            if ($this->core->getUser()->accessGrading()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);
@@ -337,8 +342,32 @@ class GlobalController extends AbstractController {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line",
                 ]);
-            }
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['home']),
+                    "title" => "My Courses",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-my-courses",
+                    "icon" => "fa-book-reader"
+                ]);
 
+                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['update']),
+                        "title" => "System Update",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-update",
+                        "icon" => "fas fa-sync"
+                    ]);
+                }
+
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['user_profile']),
+                    "title" => "My Profile",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-my-profile",
+                    "icon" => "fa-user"
+                ]);
+            }
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => "javascript: toggleSidebar();",
                 "title" => "Collapse Sidebar",
@@ -375,20 +404,74 @@ class GlobalController extends AbstractController {
             }
         }
 
-        $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
-        $month = $now['mon'];
-        $day = $now['mday'];
-
-        $duck_img = 'moorthy_duck.png';
-        if ($month === 10 && ($day >= 27 && $day <= 31)) {
-            //halloween
-            $duck_img = 'moorthy_halloween.png';
-        }
-        //else if(...){}
-        //more Holidays go here!
+        $now = $this->core->getDateTimeNow();
+        $duck_img = $this->getDuckImage($now);
 
         return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
     }
+
+
+    private function getDuckImage(\DateTime $now): string {
+        $duck_img = 'moorthy_duck/00-original.svg';
+        $day = (int) $now->format('j');
+        $month = (int) $now->format('n');
+
+        switch ($month) {
+            case 12:
+                break;
+            case 11:
+                break;
+            case 10:
+                //October (Halloween)
+                if ($day >= 25 && $day <= 31) {
+                    $duck_img = 'moorthy_duck/halloween.png';
+                }
+                break;
+            case 9:
+                break;
+            case 8:
+                break;
+            case 7:
+                //July (Independence)
+                if ($day >= 1 && $day <= 7) {
+                    $duck_img = 'moorthy_duck/07-july.svg';
+                }
+                break;
+            case 6:
+                //June (Pride)
+                $duck_img = 'moorthy_duck/06-june.svg';
+                break;
+            case 5:
+                //May (Graduation)
+                $duck_img = 'moorthy_duck/05-may.svg';
+                break;
+            case 4:
+                //April (Flowers)
+                $duck_img = 'moorthy_duck/04-april.svg';
+                break;
+            case 3:
+                //Saint Patrick's Day (Shamrock)
+                if ($day >= 14 && $day <= 20) {
+                    $duck_img = 'moorthy_duck/03-march.svg';
+                }
+                break;
+            case 2:
+                //Valentines (Hearts)
+                if ($day >= 11 && $day <= 17) {
+                    $duck_img = 'moorthy_duck/02-february.svg';
+                }
+                break;
+            case 1:
+                //January (Snowflakes)
+                $duck_img = 'moorthy_duck/01-january.svg';
+                break;
+            default:
+                break;
+        }
+
+        return $duck_img;
+    }
+
 
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();

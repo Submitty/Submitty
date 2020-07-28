@@ -1,6 +1,11 @@
 <div class="content">
-    {% if hasInstructorPermission %}
+    {% if has_full_access %}
         <div style="float: right; margin-bottom: 20px;">
+            {% if view == 'all' and has_sections %}
+                <a class="btn btn-primary" tabindex="0" href="{{ student_photos_url ~ '?view=sections' }}">View Your Sections</a>
+            {% elseif has_sections %}
+                <a class="btn btn-primary" tabindex="0" href="{{ student_photos_url ~ '?view=all' }}">View All Sections</a>
+            {% endif %}
             <a onclick="newUploadImagesForm()" class="btn btn-primary key_to_click" tabindex="0">Upload Student Photos</a>
         </div>
     {% endif %}
@@ -18,19 +23,23 @@
                     {% if loop.index % 5 == 1 %}
                         <tr>
                     {% endif %}
-                        <td>
-                            {% if imageData[student.getId()] is defined %}
-                                {{ base64_image(imageData[student.getId()].path, student.getId()) }}
+                        <td class="{{ student.getId() }}-image-container">
+                            {% set image = student.getDisplayImage() %}
+                            {% if image is not null %}
+                                {{ base64_image(image.getImageBase64MaxDimension(constant('app\\views\\grading\\ImagesView::IMG_MAX_DIMENSION')), image.getMimeType(), '%s %s'|format(student.getDisplayedFirstName(), student.getDisplayedLastName())) }}
                             {% else %}
-                                {% if errorImageData == '_NONE_' %}
-                                    <i><span style="color:var(--no-image-available)">No Image Available</span></i>
-                                {% else %}
-                                    {{ base64_image(errorImageData.path, 'No Image Available') }}
-                                {% endif %}
+                                <i><span style="color:var(--no-image-available)">No Image Available</span></i>
                             {% endif %}
                             <div class="name">
                                 <br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
                                 <br />{{student.getId()}}
+                                {% if has_full_access %}
+                                    {% if student.getDisplayImageState() == 'preferred' %}
+                                        <a href="javascript:flagUserImage('{{ student.getId() }}', true)">{{ constant('app\\views\\grading\\ImagesView::FLAG_ICON_HTML') | raw  }}</a>
+                                    {% elseif student.getDisplayImageState() == 'flagged' %}
+                                        <a href="javascript:flagUserImage('{{ student.getId() }}', false)">{{ constant('app\\views\\grading\\ImagesView::UNDO_ICON_HTML') | raw }}</a>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         </td>
                     {% if loop.index % 5 == 0 %}
@@ -48,7 +57,7 @@
             {% endfor %}
         {% else %}
             <tr>
-                <td>No students found</td>
+                <td>You may only view students in your grading sections.  You have no grading sections assigned.</td>
             </tr>
         {% endif %}
     </table>

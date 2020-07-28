@@ -18,13 +18,14 @@ use app\libraries\Logger;
 use app\models\GradingOrder;
 use app\models\User;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ElectronicGraderController extends AbstractController {
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
-     * @param string $option
+     * @param  string $option
      * @return bool
      */
     private function validateDiffViewerOption(string $option) {
@@ -47,7 +48,101 @@ class ElectronicGraderController extends AbstractController {
         }
         return true;
     }
-
+    /**
+     * Route for randomizing peer assignments with 'One Grades Many'
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function RandomizePeers($gradeable_id) {
+        /* How does this function work?
+        1 - Number of students to grade (Y) is taken from the client using POST
+            1.1 - If the number is > number of students, then ALL grade ALL.
+        2 - Query DB to get students from registration section(X) (Without taking in students in NULL section)
+        3 - Randomize the order of students
+        4 - Randomly Select Y offsets
+        5 - Shift the random order by the offsets to create the matrix, with no duplicates, and exactly Y assignments and & graders for each student.  no student grades self.
+        */
+        $number_to_grade = $_POST['number_to_grade'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid Gradeable!');
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+        $all_grade_all = false;
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+        $student_array = [];
+        $student_list = [];
+        $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+        foreach ($students as $student) {
+             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+             $sorted_students[$reg_sec][] = $student;
+             array_push($student_list, ['user_id' => $student->getId()]);
+             array_push($student_array, $student->getId());
+        }
+        $number_of_students = count($student_list);
+        if ($number_to_grade > $number_of_students) {
+            $all_grade_all = true;
+        }
+        if ($all_grade_all) {
+            $final_grading_info = [];
+            for ($grader = 0; $grader < count($student_array); ++$grader) {
+                $peer_array = $student_array;
+                unset($peer_array[$grader]);
+                $peer_array = array_values($peer_array);
+                array_push($final_grading_info, [$student_array[$grader],$peer_array]);
+            }
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse($final_grading_info);
+        }
+        $graded_array = $student_array;
+          /*n_array_peers : An Array of arrays that holds information on to be graded peers
+          [ [A,B,C,D,E,F], [E,F,A,B,C,D], [C,D,E,F,A,B] ]
+          A grades C and E and is graded by C and E.
+          */
+        $n_array_peers = [];
+        shuffle($student_array);
+        array_push($n_array_peers, $student_array);
+          /*final_grading_info : An Array with clear structure of grading rules for peer grading
+          [ [A,[C,E]],[B,[F,D]], ...]
+          A grades C and E, B grades F and D ..and so on!
+          */
+        $final_grading_info = [];
+        $max_offset = count($student_array);
+        $offset_array = [];
+        $temp_offset = [];
+        for ($i = 1; $i < $max_offset; ++$i) {
+            array_push($temp_offset, $i);
+        }
+        /* $offset_array contains randomly chosen offsets.
+            $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
+            Upon every random choice of an offset from $temp_offset, the value is removed from it.
+        */
+        for ($i = 0; $i < $number_to_grade; ++$i) {
+            $random_offset = array_rand($temp_offset, 1);
+            array_push($offset_array, $temp_offset[$random_offset]);
+            unset($temp_offset[$random_offset]);
+        }
+        foreach ($offset_array as $element) {
+            $temp_array = $student_array;
+            for ($i = 0; $i < $element; $i++) {
+                array_push($temp_array, array_shift($temp_array));
+            }
+            array_push($n_array_peers, $temp_array);
+        }
+        for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
+            $temp = [];
+            for ($j = 1; $j < count($n_array_peers); ++$j) {
+                array_push($temp, $n_array_peers[$j][$i]);
+            }
+            array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
+        }
+        if ($number_to_grade < 1) {
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse("Clear Peer Matrix");
+        }
+        $gradeable->setRandomPeerGradersList($final_grading_info);
+        return JsonResponse::getSuccessResponse($final_grading_info);
+    }
     /**
      * Route for getting whitespace information for the diff viewer
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output/remove")
@@ -82,7 +177,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return;
         }
-
+ 
         // get the requested version
         $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
         if ($version_instance === false) {
@@ -126,7 +221,8 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for verifying the grader of a graded component
-     * @param bool verify all components or not
+     * @param string $gradeable_id verify all components or not
+     * @param bool $verify_all false be default
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
      * @AccessControl(permission="grading.electronic.verify_grader")
      */
@@ -350,10 +446,10 @@ class ElectronicGraderController extends AbstractController {
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
                 if ($gradeable->isTeamAssignment()) {
-                        $sections['stu_grad']['no_team'] = 0;
-                        $sections['stu_grad']['team'] = 0;
-                        $sections['all']['no_team'] = 0;
-                        $sections['all']['team'] = 0;
+                    $sections['stu_grad']['no_team'] = 0;
+                    $sections['stu_grad']['team'] = 0;
+                    $sections['all']['no_team'] = 0;
+                    $sections['all']['team'] = 0;
                 }
             }
             else {
@@ -701,8 +797,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Randomly redistributes teams with members into Rotating Grading Sections
      * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
-     *      Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
-     *
+     * Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")
      */
     public function randomizeTeamRotatingSections($gradeable_id) {
@@ -869,13 +964,14 @@ class ElectronicGraderController extends AbstractController {
      * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
      *
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade/{version}", requirements={"version"="^beta$"})
      */
-    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false) {
-        $anon_mode = false;
-        if(empty($this->core->getQueries()->getTeamsById(array($who_id))) && $this->core->getQueries()->getUserById($who_id) == null){
-            $anon_mode = true;
-        }
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $version = null) {
+        // If the version is set, user is requesting for new TA grading interface
+        $showNewInterface = isset($version);
+
         /** @var Gradeable $gradeable */
+
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
@@ -898,7 +994,6 @@ class ElectronicGraderController extends AbstractController {
             $limited_access_blind = true;
         }
         
-
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         if ($who_id === '') {
@@ -961,7 +1056,7 @@ class ElectronicGraderController extends AbstractController {
         }
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
-        if (($peer_double_blind || $limited_access_blind || $anon_mode)) {
+        if ($peer_double_blind || $limited_access_blind || $anon_mode) {
             if ($this->core->getQueries()->getSubmitterIdFromAnonId($who_id) !== null) {
                 $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getSubmitterIdFromAnonId($who_id), false);
             }
@@ -1116,13 +1211,18 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
         $this->core->getOutput()->addInternalCss('forum.css');
+        if ($showNewInterface) {
+            $this->core->getOutput()->addInternalCss('electronic.css');
+        }
+        else {
+            $this->core->getOutput()->addInternalCss('ta-grading.css');
+        }
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $showNewInterface);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -1167,9 +1267,9 @@ class ElectronicGraderController extends AbstractController {
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
-            return $component->toArray();
+                return $component->toArray();
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
-            return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+                return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
         //return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         $return['components'] = array_values($return['components']);
@@ -1575,7 +1675,7 @@ class ElectronicGraderController extends AbstractController {
                 'default' => $default,
                 'max_value' => $max_value,
                 'upper_clamp' => $upper_clamp
-            ]);
+                ]);
             $component->setPage($page);
 
             $this->core->getQueries()->saveComponent($component);
@@ -1711,10 +1811,10 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-/**
- * Route for adding a new component to a gradeable
- * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
- */
+    /**
+     * Route for adding a new component to a gradeable
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
+     */
     public function ajaxAddComponent($gradeable_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -2359,9 +2459,8 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Gets... stats
      * @param Gradeable $gradeable
-     * @param User $grader
-     * @param bool $full_sets
-     * @param $sections
+     * @param User      $grader
+     * @param bool      $full_sets
      */
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
@@ -2393,5 +2492,39 @@ class ElectronicGraderController extends AbstractController {
         foreach ($total_users as $key => $value) {
             $total_total += $value * $num_components;
         }
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     */
+    public function ajaxClearPeerMarks($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        $peer_id = $_POST['peer_id'] ?? '';
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch gradeable');
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch graded gradeable');
+        }
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
+            $component = $container->getComponent();
+            $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
+        }
+        $ta_graded_gradeable->removeOverallComment($peer_id);
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id, $gradeable->isTeamAssignment());
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Finally, save the graded gradeable
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
+        $this->core->getOutput()->renderJsonSuccess("Marks removed successfully!");
+        return true;
     }
 }

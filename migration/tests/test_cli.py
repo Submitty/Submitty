@@ -55,7 +55,7 @@ class TestCli(unittest.TestCase):
             config_path = tempfile.mkdtemp()
             with self.assertRaises(ValueError) as cm:
                 migrator.cli.parse_args(['-e', 'system', 'bad'], Path(config_path))
-            self.assertEqual("argument command: invalid choice: 'bad' (choose from 'create', 'status', 'migrate', 'rollback')", str(cm.exception))
+            self.assertEqual("argument command: invalid choice: 'bad' (choose from 'create', 'status', 'migrate', 'rollback', 'dump')", str(cm.exception))
         finally:
             shutil.rmtree(config_path)
 
@@ -244,6 +244,24 @@ class TestCli(unittest.TestCase):
             expected.choose_course = None
             expected.command = 'create'
             expected.name = 'test'
+            expected.config_path = config_path.resolve()
+            expected.environments = ['system']
+            expected.config = 'config_object'
+            self.assertEqual(expected, mock_method.call_args[0][0])
+        finally:
+            shutil.rmtree(str(config_path))
+
+    @patch('migrator.main.dump')
+    def test_run_dump(self, mock_method):
+        try:
+            config_path = Path(tempfile.mkdtemp()).resolve()
+            with patch.object(migrator.cli, 'Config', return_value='config_object') as mock_class:
+                migrator.cli.run(['-e', 'system', 'dump'], config_path)
+            self.assertTrue(mock_class.called)
+            self.assertTrue(mock_method.called)
+            expected = argparse.Namespace()
+            expected.choose_course = None
+            expected.command = 'dump'
             expected.config_path = config_path.resolve()
             expected.environments = ['system']
             expected.config = 'config_object'

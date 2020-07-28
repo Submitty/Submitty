@@ -511,7 +511,7 @@ class FileUtils {
     }
 
     /**
-     * Given an array of uploaded files, makes sure they are properlly uploaded
+     * Given an array of uploaded files, makes sure they are properly uploaded
      *
      * @param array $files - should be in the same format as the $_FILES[] variable
      * @return array representing the status of each file

@@ -96,9 +96,9 @@
                     {% endif %}
                 {% endif %}
                 <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a class="key_to_click" tabindex="0" onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
-                <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
+                <ul id='{{ id }}' style='margin-left: {{ margin_left }}px; list-style-type: none; display: none'>
                     {{ self.display_files(self, file.files, indent + 1, true, inuse_config, display_url) }}
-                </div>
+                </ul>
             </li>
         {% else %}
             <div>

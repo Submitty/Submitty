@@ -134,6 +134,8 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
             $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
+            $this->core->getOutput()->addInternalJs('websocket.js');
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
             $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
@@ -316,7 +318,7 @@ class ForumThreadView extends AbstractView {
             $displayThreadContent = $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds, false);
 
             if (count($activeThread) == 0) {
-                $activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+                $activeThread = $this->core->getQueries()->getThread($currentThread);
             }
 
             $currentThreadArrValues = array_values($currentThreadArr);
@@ -394,7 +396,7 @@ class ForumThreadView extends AbstractView {
 
     public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false, $render = true) {
 
-        $activeThread = $this->core->getQueries()->getThread($currentThread)[0];
+        $activeThread = $this->core->getQueries()->getThread($currentThread);
 
         $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$activeThread['id']}) " : '') . $activeThread['title'];
         $activeThreadAnnouncement = $activeThread['pinned'];
@@ -409,6 +411,7 @@ class ForumThreadView extends AbstractView {
         $csrf_token = $this->core->getCsrfToken();
 
         $totalAttachments = 0;
+        $GLOBALS['totalAttachments'] = 0;
 
         if ($display_option == "tree") {
             $order_array = [];
@@ -449,7 +452,7 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $totalAttachments);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply);
 
                         break;
                     }
@@ -468,7 +471,7 @@ class ForumThreadView extends AbstractView {
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply, $totalAttachments);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $first, 1, $display_option, $includeReply);
 
                 if ($first) {
                     $first = false;
@@ -496,6 +499,7 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
             $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addInternalCss('forum.css');
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
@@ -537,7 +541,7 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "total_attachments" => $totalAttachments,
+                "total_attachments" => $GLOBALS['totalAttachments'],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
             ]);
@@ -560,17 +564,27 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "total_attachments" => $totalAttachments
+                "total_attachments" => $GLOBALS['totalAttachments']
             ];
         }
 
         return $return;
     }
 
-    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids) {
+    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $ajax = false) {
         $tempArray = [];
         $threadAnnouncement = false;
         $activeThreadTitle = "";
+        $thread = "";
+        if ($ajax) {
+            for ($i = 0; $i < count($threads); $i++) {
+                if ($threads[$i]["id"] == $thread_id) {
+                    $thread = $threads[$i];
+                    break;
+                }
+            }
+            $threads = [$thread];
+        }
         return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
     }
 
@@ -622,7 +636,7 @@ class ForumThreadView extends AbstractView {
                     $thread_id_p = $thread["id"];
                 }
             }
-            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"])) {
+            if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"]) && $current_user != $thread['created_by']) {
                 $class .= " new_thread";
             }
             if ($thread["deleted"]) {
@@ -776,16 +790,17 @@ class ForumThreadView extends AbstractView {
         return $post_content;
     }
 
-    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, &$totalAttachments) {
+    public function createPost($thread_id, $post, $unviewed_posts, $first, $reply_level, $display_option, $includeReply, $render = false) {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
+        $parent_id = $post["parent_id"];
 
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), $post['timestamp'], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
-        if (!is_null($post["edit_timestamp"])) {
+        if (isset($post["edit_timestamp"])) {
             $edit_date = DateUtils::convertTimeStamp($this->core->getUser(), $post["edit_timestamp"], $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
         }
         else {
@@ -933,7 +948,7 @@ class ForumThreadView extends AbstractView {
                 $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
 
                 $attachment_file_count++;
-                $totalAttachments++;
+                $GLOBALS['totalAttachments']++;
             }
 
             $attachment_encoded_data[] = $attachment_id;
@@ -953,7 +968,7 @@ class ForumThreadView extends AbstractView {
 
         $has_history = $this->core->getQueries()->postHasHistory($post_id);
 
-        return [
+        $created_post = [
             "classes" => $classes,
             "post_id" => $post_id,
             "reply_level" => $reply_level,
@@ -978,11 +993,24 @@ class ForumThreadView extends AbstractView {
             "form_post_url" => $this->core->buildCourseUrl(['forum', 'posts', 'new']),
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
-            "parent_id" => $post_id,
+            "parent_id" => $parent_id,
             "render_markdown" => $markdown,
             "has_history" => $has_history,
             "thread_previously_merged" => $merged_thread
         ];
+
+        if ($render) {
+            if ($first) {
+                $thread_title = $this->core->getQueries()->getThreadTitle($thread_id);
+                $activeThreadTitle = ($this->core->getUser()->accessFullGrading() ? "({$thread_id}) " : '') . $thread_title;
+                $created_post['activeThreadTitle'] = $activeThreadTitle;
+            }
+            $created_post['csrf_token'] = $this->core->getCsrfToken();
+            return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
+        }
+        else {
+            return $created_post;
+        }
     }
 
     public function createThread($category_colors) {
@@ -1001,6 +1029,8 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
 
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 
@@ -1051,6 +1081,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildCourseUrl(['forum', 'categories']));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
@@ -1108,6 +1139,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 
+        $this->core->getOutput()->addInternalJs('autosave-utils.js');
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 

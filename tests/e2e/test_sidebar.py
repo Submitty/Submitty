@@ -12,7 +12,7 @@ class TestSidebar(BaseTestCase):
     def sidebar_test_helper(self, expected, user_id, user_name):
         self.log_in(user_id=user_id, user_name=user_name)
         self.click_class('sample')
-        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.semester + '/sample'
 
         title_map = {
             'Manage Sections': 'Manage Registration Sections',
@@ -66,7 +66,7 @@ class TestSidebar(BaseTestCase):
             current_idx += 1
 
     def test_click_sidebar_links_instructor(self):
-        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.semester + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -85,6 +85,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/plagiarism', 'Plagiarism Detection'],
             [base_url + '/reports', 'Grade Reports'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
+            [self.test_url + '/home', 'My Courses'],
+            [self.test_url + '/user_profile', 'My Profile'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
@@ -92,7 +94,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper(expected, 'instructor', 'Quinn')
 
     def test_click_sidebar_links_ta(self):
-        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.semester + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -102,6 +104,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/student_photos', 'Student Photos'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
+            [self.test_url + '/home', 'My Courses'],
+            [self.test_url + '/user_profile', 'My Profile'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
@@ -109,7 +113,7 @@ class TestSidebar(BaseTestCase):
         self.sidebar_test_helper(expected, 'ta', 'Jill')
 
     def test_click_sidebar_links_student(self):
-        base_url = self.test_url + '/courses/' + self.get_current_semester() + '/sample'
+        base_url = self.test_url + '/courses/' + self.semester + '/sample'
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
@@ -118,6 +122,8 @@ class TestSidebar(BaseTestCase):
             # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
+            [self.test_url + '/home', 'My Courses'],
+            [self.test_url + '/user_profile', 'My Profile'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]

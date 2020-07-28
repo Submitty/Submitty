@@ -23,6 +23,6 @@ if [ $? -ne 0 ]; then
 For whatever reason, Vagrant has failed to build. If reporting
 an error to the developers, please be sure to also send the
 build log of Vagrant located at:
-.vagrant/${DISTRO}/${VERSION}/logs/vagrant.log.
+.vagrant/install_${DISTRO}_${VERSION}.log.
 "
 fi

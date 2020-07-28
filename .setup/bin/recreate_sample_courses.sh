@@ -3,6 +3,19 @@
 # Automated regeneration of sample course data
 
 ########################################################################
+EXTRA=
+
+while :; do
+    case $1 in
+        --no_submissions)
+            EXTRA="--no_submissions"
+            ;;
+        *) # No more options, so break out of the loop.
+            break
+    esac
+
+    shift
+done
 
 # If any command fails, we need to bail
 set -ev
@@ -23,7 +36,12 @@ fi
 cd ../../
 
 python3 ./.setup/bin/partial_reset.py
-python3 ./.setup/bin/setup_sample_courses.py
+python3 ./.setup/bin/setup_sample_courses.py ${EXTRA}
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 service php${PHP_VERSION}-fpm restart
+
+DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+for i in "${DAEMONS[@]}"; do
+    systemctl start ${i}
+done

@@ -63,12 +63,16 @@ use app\libraries\FileUtils;
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
  * @method bool getQueueContactInfo()
+ * @method bool isPollsEnabled()
+ * @method float getPollsPtsForCorrect()
+ * @method float getPollsPtsForIncorrect()
  * @method void setSemester(string $semester)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
+ * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  */
@@ -245,9 +249,18 @@ class Config extends AbstractModel {
     /** @prop @var string */
     protected $queue_message;
     /** @prop @var string */
+    protected $queue_announcement_message;
+    /** @prop @var string */
     protected $submitty_install_path;
     /** @prop @var bool */
     protected $duck_banner_enabled;
+    /** @prop @var bool */
+    protected $polls_enabled;
+    /** @prop @var float */
+    protected $polls_pts_for_correct;
+    /** @prop @var float */
+    protected $polls_pts_for_incorrect;
+
 
     /** @prop-read @var array */
     protected $feature_flags = [];
@@ -284,6 +297,7 @@ class Config extends AbstractModel {
         $this->submitty_database_params = [
             'dbname' => 'submitty',
             'host' => $database_json['database_host'],
+            'port' => $database_json['database_port'],
             'username' => $database_json['database_user'],
             'password' => $database_json['database_password']
         ];
@@ -440,7 +454,8 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message'
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'polls_enabled', 'polls_pts_for_correct',
+            'polls_pts_for_incorrect', 'queue_announcement_message'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -468,7 +483,8 @@ class Config extends AbstractModel {
             'forum_enabled', 'regrade_enabled',
             'seating_only_for_instructor',
             'queue_enabled',
-            'queue_contact_info'
+            'queue_contact_info',
+            'polls_enabled'
         ];
         foreach ($array as $key) {
             $this->$key = (bool) $this->$key;

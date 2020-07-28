@@ -2,6 +2,8 @@ includes:
     - %rootDir%/../../../phpstan-baseline.neon
 
 parameters:
+    ignoreErrors:
+        - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
     level: 3
     excludes_analyse:
         # these should be unignored once put into production
@@ -9,7 +11,9 @@ parameters:
         - %rootDir%/../../../app/libraries/database/ForumQueries.php
         - %rootDir%/../../../app/models/forum/Thread.php
 
+
 services:
     - class: tests\phpstan\ModelClassExtension
       tags:
         - phpstan.broker.methodsClassReflectionExtension
+

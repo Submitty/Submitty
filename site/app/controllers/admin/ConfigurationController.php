@@ -55,6 +55,10 @@ class ConfigurationController extends AbstractController {
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
+            'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
+            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
+            'polls_pts_for_correct'          => $this->core->getConfig()->getPollsPtsForCorrect(),
+            'polls_pts_for_incorrect'        => $this->core->getConfig()->getPollsPtsForIncorrect(),
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -144,7 +148,8 @@ class ConfigurationController extends AbstractController {
                     'regrade_enabled',
                     'seating_only_for_instructor',
                     'queue_enabled',
-                    'queue_contact_info'
+                    'queue_contact_info',
+                    'polls_enabled'
                 ]
             )
         ) {
