@@ -910,3 +910,37 @@ function getNonAnonPath(path, anon_submitter_id, user_ids){
     }
     return nonAnonPath;
 }
+
+function changeCurrentPeer(){
+    let peer = $('#edit-peer-select').val();
+    $('.edit-peer-components-block').hide();
+    $('#edit-peer-components-form-'+peer).show();
+}
+
+function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
+    var peer_id = $("#edit-peer-select").val();
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
+    $.ajax({
+        url: url,
+        data: {
+            csrf_token: csrf_token,
+            peer_id: peer_id,
+            submitter_id: submitter_id
+        },
+        type: "POST",
+        success: function(data) {
+            console.log("Successfully deleted peer marks");
+            window.location.reload(true);
+        },
+        error: function(e) {
+            console.log("Failed to delete");
+        }
+    });
+}
+
+function newEditPeerComponentsForm() {
+    $('.popup-form').css('display', 'none');
+    let form = $("#edit-peer-components-form");
+    form.css("display", "block");
+    captureTabInModal("edit-peer-components-form");
+}
