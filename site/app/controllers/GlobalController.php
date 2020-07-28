@@ -9,32 +9,7 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
 
-    public function header() {
-        $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-        $wrapper_urls = array_map(function ($file) {
-            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
-                'dir' => 'site',
-                'path' => $file,
-                'file' => pathinfo($file, PATHINFO_FILENAME),
-                'csrf_token' => $this->core->getCsrfToken()
-            ]);
-        }, $wrapper_files);
-
-        $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
-        $page_name = $this->core->getOutput()->getPageName();
-        $css = $this->core->getOutput()->getCss();
-        $js = $this->core->getOutput()->getJs();
-
-        if (array_key_exists('override.css', $wrapper_urls)) {
-            $css->add($wrapper_urls['override.css']);
-        }
-
-        $unread_notifications_count = null;
-        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
-            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
-        }
-
-        $sidebar_buttons = [];
+    public function prep_course_sidebar(&$sidebar_buttons, $unread_notifications_count) {
         if ($this->core->userLoaded()) {
             if ($this->core->getConfig()->isCourseLoaded()) {
                 if ($this->core->getConfig()->getCourseHomeUrl() != "") {
@@ -56,50 +31,8 @@ class GlobalController extends AbstractController {
                 ]);
             }
             else {
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home']),
-                    "title" => "My Courses",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-courses",
-                    "icon" => "fa-book-reader"
-                ]);
 
-                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['update']),
-                        "title" => "System Update",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-update",
-                        "icon" => "fas fa-sync"
-                    ]);
-                }
 
-                if ($this->core->getUser()->accessFaculty()) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['home', 'courses', 'new']),
-                        "title" => "New Course",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-new-course",
-                        "icon" => "fa-plus-square"
-                    ]);
-                }
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['user_profile']),
-                    "title" => "My Profile",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-profile",
-                    "icon" => "fa-user"
-                ]);
-                if ($this->core->getUser()->accessFaculty()) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['admin', 'docker']),
-                        "title" => "Docker UI",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-docker-link",
-                        "icon" => "fa-docker",
-                        "prefix" => "fab",
-                    ]);
-                }
             }
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -336,54 +269,126 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-calendar"
             ]);
         }
+    }
 
-        if ($this->core->userLoaded()) {
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                $sidebar_buttons[] = new Button($this->core, [
-                    "class" => "nav-row short-line",
-                ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home']),
-                    "title" => "My Courses",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-courses",
-                    "icon" => "fa-book-reader"
-                ]);
+    public function prep_user_sidebar(&$sidebar_buttons) {
 
-                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['update']),
-                        "title" => "System Update",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-update",
-                        "icon" => "fas fa-sync"
-                    ]);
-                }
+        // ==========================================================================
+        // ALL USERS
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['home']),
+            "title" => "My Courses",
+            "class" => "nav-row",
+            "id" => "nav-Wsidebar-my-courses",
+            "icon" => "fa-book-reader"
+        ]);
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['user_profile']),
+            "title" => "My Profile",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-my-profile",
+            "icon" => "fa-user"
+        ]);
 
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['user_profile']),
-                    "title" => "My Profile",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-profile",
-                    "icon" => "fa-user"
-                ]);
-            }
+        // ==========================================================================
+        // FACULTY & SUPERUSERS ONLY
+        if ($this->core->getUser()->accessFaculty()) {
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => "javascript: toggleSidebar();",
-                "title" => "Collapse Sidebar",
-                "class" => "nav-row",
-                "id" => "nav-sidebar-collapse",
-                "icon" => "fa-bars"
+                "class" => "nav-row short-line",
             ]);
-
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(['authentication', 'logout']),
-                "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
-                "id" => "logout",
+                "href" => $this->core->buildUrl(['admin', 'docker']),
+                "title" => "Docker UI",
                 "class" => "nav-row",
-                "icon" => "fa-power-off"
+                "id" => "nav-sidebar-docker-link",
+                "icon" => "fa-docker",
+                "prefix" => "fab",
+            ]);
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['home', 'courses', 'new']),
+                "title" => "New Course",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-new-course",
+                "icon" => "fa-plus-square"
             ]);
         }
+
+        // ==========================================================================
+        // SUPERUSERS ONLY
+        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['update']),
+                "title" => "System Update",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-update",
+                "icon" => "fas fa-sync"
+            ]);
+        }
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "class" => "nav-row short-line",
+        ]);
+    }
+          
+    public function prep_sidebar(&$sidebar_buttons, $unread_notifications_count) {
+
+        if (!$this->core->userLoaded()) {
+            return;
+        }
+
+        if ($this->core->getConfig()->isCourseLoaded()) {
+            $this->prep_course_sidebar($sidebar_buttons, $unread_notifications_count);
+            $sidebar_buttons[] = new Button($this->core, [
+                "class" => "nav-row short-line",
+            ]);
+        }
+        
+        $this->prep_user_sidebar($sidebar_buttons);
+        
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => "javascript: toggleSidebar();",
+            "title" => "Collapse Sidebar",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-collapse",
+            "icon" => "fa-bars"
+        ]);
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['authentication', 'logout']),
+            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
+            "id" => "logout",
+            "class" => "nav-row",
+            "icon" => "fa-power-off"
+        ]);
+    }
+      
+    public function header() {
+        $wrapper_files = $this->core->getConfig()->getWrapperFiles();
+        $wrapper_urls = array_map(function ($file) {
+            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
+                'dir' => 'site',
+                'path' => $file,
+                'file' => pathinfo($file, PATHINFO_FILENAME),
+                'csrf_token' => $this->core->getCsrfToken()
+            ]);
+        }, $wrapper_files);
+
+        $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
+        $page_name = $this->core->getOutput()->getPageName();
+        $css = $this->core->getOutput()->getCss();
+        $js = $this->core->getOutput()->getJs();
+
+        if (array_key_exists('override.css', $wrapper_urls)) {
+            $css->add($wrapper_urls['override.css']);
+        }
+
+        $unread_notifications_count = null;
+        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
+            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
+        }
+
+        $sidebar_buttons = [];
+        $this->prep_sidebar($sidebar_buttons, $unread_notifications_count);
 
         $current_route = $_SERVER["REQUEST_URI"];
         foreach ($sidebar_buttons as $button) {
