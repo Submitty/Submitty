@@ -2493,6 +2493,7 @@ class ElectronicGraderController extends AbstractController {
         }
         $gradeable->setPeerFeedback($grader_id, $user_id, $feedback);
         $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        return true;
     }
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
