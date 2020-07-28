@@ -183,7 +183,6 @@ function initializeTaLayout() {
 }
 
 function updateLayoutDimensions() {
-  console.log("updateLayoutDimensions");
   // updates width of left columns (normal + full-left-col) with the last saved layout width
   $(".two-panel-item.two-panel-left").css({
     width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : "50%"
