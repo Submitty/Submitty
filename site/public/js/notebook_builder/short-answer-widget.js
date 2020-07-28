@@ -11,10 +11,6 @@ class ShortAnswerWidget extends Widget {
     }
 
     render() {
-        if (this.dom_pointer) {
-            this.commitState();
-        }
-
         // Setup container
         const container = this.getContainer('Short Answer');
         container.classList.add('short-answer-widget');

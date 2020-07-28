@@ -1,7 +1,8 @@
 {# Render a component #}
 {# @var obj component     A component object #}
 {# @var bool anonymous    Whether the component should be rendered without grader info #}
-{% macro renderComponent(component, anonymous) %}
+{# @var int num_decimals  The number of decimals places the score should contain #}
+{% macro renderComponent(component, anonymous, num_decimals) %}
     {% import 'functions/Badge.twig' as Badge %}
     <div class="box grade-results">
         <div class="box-badge">

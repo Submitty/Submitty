@@ -1225,7 +1225,7 @@ function displaySuccessMessage(message) {
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type
+ * @param {string} type either 'error' or 'success'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
