@@ -9,6 +9,89 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
 
+    public function header() {
+        $wrapper_files = $this->core->getConfig()->getWrapperFiles();
+        $wrapper_urls = array_map(function ($file) {
+            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
+                'dir' => 'site',
+                'path' => $file,
+                'file' => pathinfo($file, PATHINFO_FILENAME),
+                'csrf_token' => $this->core->getCsrfToken()
+            ]);
+        }, $wrapper_files);
+
+        $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
+        $page_name = $this->core->getOutput()->getPageName();
+        $css = $this->core->getOutput()->getCss();
+        $js = $this->core->getOutput()->getJs();
+
+        if (array_key_exists('override.css', $wrapper_urls)) {
+            $css->add($wrapper_urls['override.css']);
+        }
+
+        $unread_notifications_count = null;
+        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
+            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
+        }
+
+        $sidebar_buttons = [];
+        $this->prep_sidebar($sidebar_buttons, $unread_notifications_count);
+
+        $current_route = $_SERVER["REQUEST_URI"];
+        foreach ($sidebar_buttons as $button) {
+            /* @var Button $button */
+            $href = $button->getHref();
+            if ($href !== null) {
+                $parse = parse_url($href);
+                $path = isset($parse['path']) ? $parse['path'] : '';
+                $query = isset($parse['query']) ? '?' . $parse['query'] : '';
+                $fragment = isset($parse['fragment']) ? '#' . $parse['fragment'] : '';
+                $route = $path . $query . $fragment;
+
+                if ($this->routeEquals($route, $current_route)) {
+                    $class = $button->getClass() ?? "";
+                    $class = ($class === "" ? "selected" : $class . " selected");
+                    $button->setClass($class);
+                }
+            }
+        }
+
+        $now = $this->core->getDateTimeNow();
+        $duck_img = $this->getDuckImage($now);
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
+    }
+
+    // ==========================================================================================
+    // ==========================================================================================
+    public function prep_sidebar(&$sidebar_buttons, $unread_notifications_count) {
+
+        if (!$this->core->userLoaded()) {
+            return;
+        }
+        if ($this->core->getConfig()->isCourseLoaded()) {
+            $this->prep_course_sidebar($sidebar_buttons, $unread_notifications_count);
+        }
+        $this->prep_user_sidebar($sidebar_buttons);
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => "javascript: toggleSidebar();",
+            "title" => "Collapse Sidebar",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-collapse",
+            "icon" => "fa-bars"
+        ]);
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['authentication', 'logout']),
+            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
+            "id" => "logout",
+            "class" => "nav-row",
+            "icon" => "fa-power-off"
+        ]);
+    }
+
+    // ==========================================================================================
     public function prep_course_sidebar(&$sidebar_buttons, $unread_notifications_count) {
 
         if ($this->core->getConfig()->getCourseHomeUrl() != "") {
@@ -111,11 +194,17 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
+            // --------------------------------------------------------------------------
+
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line"
             ]);
 
-            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', 'sidebar.json');
+            $sidebar_links = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                'site',
+                'sidebar.json'
+            );
             if (file_exists($sidebar_links)) {
                 $links = json_decode(file_get_contents($sidebar_links), true);
                 if (is_array($links)) {
@@ -146,6 +235,8 @@ class GlobalController extends AbstractController {
                     }
                 }
             }
+
+            // --------------------------------------------------------------------------
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -181,7 +272,10 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {
+            if (
+                $this->core->getUser()->accessAdmin()
+                && $this->core->getConfig()->displayRainbowGradesSummary()
+            ) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(["gradebook"]),
                     "title" => "Gradebook",
@@ -190,6 +284,8 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-book-reader"
                 ]);
             }
+
+            // --------------------------------------------------------------------------
 
             if ($this->core->getUser()->accessGrading()) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -242,6 +338,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
+            // --------------------------------------------------------------------------
 
             $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
             if ($display_rainbow_grades_summary) {
@@ -262,12 +359,17 @@ class GlobalController extends AbstractController {
                 "icon" => "fa-calendar"
             ]);
         }
+
+        // --------------------------------------------------------------------------
+        $sidebar_buttons[] = new Button($this->core, [
+            "class" => "nav-row short-line",
+        ]);
     }
 
-
+    // ==========================================================================================
     public function prep_user_sidebar(&$sidebar_buttons) {
 
-        // ==========================================================================
+        // --------------------------------------------------------------------------
         // ALL USERS
         $sidebar_buttons[] = new Button($this->core, [
             "href" => $this->core->buildUrl(['home']),
@@ -284,7 +386,7 @@ class GlobalController extends AbstractController {
             "icon" => "fa-user"
         ]);
 
-        // ==========================================================================
+        // --------------------------------------------------------------------------
         // FACULTY & SUPERUSERS ONLY
         if ($this->core->getUser()->accessFaculty()) {
             $sidebar_buttons[] = new Button($this->core, [
@@ -308,7 +410,7 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        // ==========================================================================
+        // --------------------------------------------------------------------------
         // SUPERUSERS ONLY
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $sidebar_buttons[] = new Button($this->core, [
@@ -325,92 +427,7 @@ class GlobalController extends AbstractController {
         ]);
     }
           
-    public function prep_sidebar(&$sidebar_buttons, $unread_notifications_count) {
-
-        if (!$this->core->userLoaded()) {
-            return;
-        }
-
-        if ($this->core->getConfig()->isCourseLoaded()) {
-            $this->prep_course_sidebar($sidebar_buttons, $unread_notifications_count);
-            $sidebar_buttons[] = new Button($this->core, [
-                "class" => "nav-row short-line",
-            ]);
-        }
-        
-        $this->prep_user_sidebar($sidebar_buttons);
-        
-        $sidebar_buttons[] = new Button($this->core, [
-            "href" => "javascript: toggleSidebar();",
-            "title" => "Collapse Sidebar",
-            "class" => "nav-row",
-            "id" => "nav-sidebar-collapse",
-            "icon" => "fa-bars"
-        ]);
-
-        $sidebar_buttons[] = new Button($this->core, [
-            "href" => $this->core->buildUrl(['authentication', 'logout']),
-            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
-            "id" => "logout",
-            "class" => "nav-row",
-            "icon" => "fa-power-off"
-        ]);
-    }
-      
-    public function header() {
-        $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-        $wrapper_urls = array_map(function ($file) {
-            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
-                'dir' => 'site',
-                'path' => $file,
-                'file' => pathinfo($file, PATHINFO_FILENAME),
-                'csrf_token' => $this->core->getCsrfToken()
-            ]);
-        }, $wrapper_files);
-
-        $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
-        $page_name = $this->core->getOutput()->getPageName();
-        $css = $this->core->getOutput()->getCss();
-        $js = $this->core->getOutput()->getJs();
-
-        if (array_key_exists('override.css', $wrapper_urls)) {
-            $css->add($wrapper_urls['override.css']);
-        }
-
-        $unread_notifications_count = null;
-        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
-            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
-        }
-
-        $sidebar_buttons = [];
-        $this->prep_sidebar($sidebar_buttons, $unread_notifications_count);
-
-        $current_route = $_SERVER["REQUEST_URI"];
-        foreach ($sidebar_buttons as $button) {
-            /* @var Button $button */
-            $href = $button->getHref();
-            if ($href !== null) {
-                $parse = parse_url($href);
-                $path = isset($parse['path']) ? $parse['path'] : '';
-                $query = isset($parse['query']) ? '?' . $parse['query'] : '';
-                $fragment = isset($parse['fragment']) ? '#' . $parse['fragment'] : '';
-                $route = $path . $query . $fragment;
-
-                if ($this->routeEquals($route, $current_route)) {
-                    $class = $button->getClass() ?? "";
-                    $class = ($class === "" ? "selected" : $class . " selected");
-                    $button->setClass($class);
-                }
-            }
-        }
-
-        $now = $this->core->getDateTimeNow();
-        $duck_img = $this->getDuckImage($now);
-
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
-    }
-
-
+    // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
