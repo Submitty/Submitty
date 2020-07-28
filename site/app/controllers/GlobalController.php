@@ -64,6 +64,16 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-book-reader"
                 ]);
 
+                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['update']),
+                        "title" => "System Update",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-update",
+                        "icon" => "fas fa-sync"
+                    ]);
+                }
+
                 if ($this->core->getUser()->accessFaculty()) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildUrl(['home', 'courses', 'new']),
@@ -339,6 +349,16 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-my-courses",
                     "icon" => "fa-book-reader"
                 ]);
+
+                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['update']),
+                        "title" => "System Update",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-update",
+                        "icon" => "fas fa-sync"
+                    ]);
+                }
 
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildUrl(['user_profile']),
