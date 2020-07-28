@@ -40,7 +40,7 @@ class Config:
         :param config_path: Path or str to the config directory for Submitty
         """
         database = get_data(config_path, 'database')
-        if 'database_driver' not in database:
+        if database is not None and 'database_driver' not in database:
             database['database_driver'] = DEFAULT_DATABASE_DRIVER
 
         submitty = get_data(config_path, 'submitty')
@@ -59,5 +59,10 @@ class Config:
 
 
 def get_data(config_path, filename):
-    with Path(config_path, filename + '.json').open('r') as open_file:
-        return json.load(open_file)
+    myfile = Path(config_path, filename + '.json')
+    if os.path.isfile(myfile):
+        with myfile.open('r') as open_file:
+            return json.load(open_file)
+    else:
+        # NOTE: database.json does not exist on the worker machine!
+        return None
