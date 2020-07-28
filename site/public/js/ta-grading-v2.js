@@ -29,10 +29,11 @@ const taLayoutDet = {
     right: null,
   },
   leftPanelWidth: "50%",
+  panelsContSelector: ".two-panel-cont",
   panelsBucket: {
     leftSelector : ".two-panel-item.two-panel-left",
-      rightSelector : ".two-panel-item.two-panel-right",
-      dragBarSelector: ".two-panel-drag-bar",
+    rightSelector : ".two-panel-item.two-panel-right",
+    dragBarSelector: ".two-panel-drag-bar",
   },
 };
 
@@ -131,8 +132,8 @@ function saveTaLayoutDetails() {
 function initializeTwoPanelDrag () {
   // Select all the DOM elements for dragging in two-panel-mode
   const leftPanel = document.querySelector(taLayoutDet.panelsBucket.leftSelector);
-  const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
-  const panelCont = leftPanel.parentElement;
+  // const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
+  const panelCont = document.querySelector(taLayoutDet.panelsContSelector);
   const dragbar = document.querySelector(taLayoutDet.panelsBucket.dragBarSelector);
 
   let xPos = 0, yPos = 0, leftPanelWidth = 0;
@@ -193,7 +194,7 @@ function initializeTaLayout() {
     // initialize the layout
     initializeTwoPanelDrag();
     if (taLayoutDet.isFullLeftColumnMode) {
-      toggleFullLeftColumnMode();
+      toggleFullLeftColumnMode(taLayoutDet.isFullLeftColumnMode);
     }
   }
   else {
@@ -461,7 +462,7 @@ function resetTwoPanelLayout() {
   // current open panel will be either left or right panel from two-panel-mode
   // passing forceVisible = true, otherwise this method will just toggle it and it will get hidden
   setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
-  initializeTwoPanelDrag();
+  // initializeTwoPanelDrag();
 }
 
 function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPosition = null) {
@@ -534,29 +535,19 @@ function toggleFullScreenMode () {
   saveTaLayoutDetails();
 }
 
-function toggleFullLeftColumnMode () {
+function toggleFullLeftColumnMode (forceVal=null) {
   // toggle between the normal left and full left panel mode
-  $(".content-item-left, .content-drag-bar, .two-panel-item.two-panel-left, .two-panel-drag-bar, #full-left-column-btn")
-    .toggleClass("active");
+  $("#full-left-column-btn").toggleClass("active");
 
-  // Update the DOM selector for the left container
-  let newLeftPanelBucketSelector, newDragBarSelector;
-  if ($(".content-item-left").is(':visible')) {
-    newLeftPanelBucketSelector = ".content-item-left";
-    newDragBarSelector = ".content-drag-bar";
-    taLayoutDet.isFullLeftColumnMode = true;
-  } else {
-    newLeftPanelBucketSelector = ".two-panel-item.two-panel-left";
-    newDragBarSelector = ".two-panel-drag-bar";
-    taLayoutDet.isFullLeftColumnMode = false;
-  }
-  // Move the children from previous left column to new "full sized" left column bucket
-  const leftPanelBucket = document.querySelector(taLayoutDet.panelsBucket.leftSelector).childNodes;
-  for(let idx = 0; idx < leftPanelBucket.length; idx++) {
-    document.querySelector(newLeftPanelBucketSelector).append(leftPanelBucket[idx]);
-  }
-  taLayoutDet.panelsBucket.leftSelector = newLeftPanelBucketSelector;
-  taLayoutDet.panelsBucket.dragBarSelector = newDragBarSelector;
+  taLayoutDet.isFullLeftColumnMode = typeof forceVal === "boolean" ? forceVal : !taLayoutDet.isFullLeftColumnMode;
+
+  let newPanelsContSelector = taLayoutDet.isFullLeftColumnMode ? ".content-items-container" : ".two-panel-cont";
+
+  let leftPanel = document.querySelector(taLayoutDet.panelsBucket.leftSelector);
+  let dragBar = document.querySelector(taLayoutDet.panelsBucket.dragBarSelector);
+  document.querySelector(newPanelsContSelector).prepend(leftPanel, dragBar);
+
+  taLayoutDet.panelsContSelector = newPanelsContSelector;
   // update the dragging event for two panels
   initializeTwoPanelDrag();
 }
@@ -607,6 +598,7 @@ function updateTwoPanelLayout () {
 
   setTwoPanelModeVisibilities();
   for (const panelIdx in taLayoutDet.panelsBucket) {
+    debugger;
     const panelCont = document.querySelector(taLayoutDet.panelsBucket[panelIdx]).childNodes;
     // Move all the panels from the left and right buckets to the main panels-container
     for (let idx = 0; idx < panelCont.length; idx++) {
