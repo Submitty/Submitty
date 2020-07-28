@@ -403,7 +403,7 @@ HTML;
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                if($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== 3){
+                if($gradeable->getPeerBlind() !== 3){
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
                 }
                 else{
@@ -413,7 +413,7 @@ HTML;
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
-                if($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== 3){
+                if($gradeable->getPeerBlind() !== 3){
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
                 }
                 else{
@@ -702,7 +702,6 @@ HTML;
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalJs('details.js');
         $this->core->getOutput()->addInternalJs('collapsible-panels.js');
-
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
@@ -829,7 +828,7 @@ HTML;
 HTML;
         }
         else {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $showNewInterface);
         }
 
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases, $showNewInterface);
@@ -849,7 +848,7 @@ HTML;
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
-        if (!$peer && $gradeable->getLimitedAccessBlind() !== 2) {
+        if ($this->core->getUser()->getGroup() < 4 && $gradeable->getLimitedAccessBlind() !== 2) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
         }
         if ($this->core->getConfig()->isRegradeEnabled() && $this->core->getUser()->getGroup() < 4) {
@@ -1048,27 +1047,6 @@ HTML;
         ]);
     }
     
-    /**
-     * Replace the userId with the corresponding anon_id in the given file_path
-     * @param string $file_path
-     * @return string $anon_path
-     */
-    public function setAnonPath($file_path) {
-        $file_path_parts = explode("/", $file_path);
-        $anon_path = "";
-        for ($index = 1; $index < count($file_path_parts); $index++) {
-            if ($index == 9) {
-                $user_id[] = $file_path_parts[$index];
-                $anon_id = $this->core->getQueries()->getUsersOrTeamsById($user_id)[$user_id[0]]->getAnonId();
-                $anon_path = $anon_path . "/" . $anon_id;
-            }
-            else {
-                $anon_path = $anon_path . "/" . $file_path_parts[$index];
-            }
-        }
-        return $anon_path;
-    }
-
     /**
      * Replace the userId with the corresponding anon_id in the given file_path
      * @param string $file_path

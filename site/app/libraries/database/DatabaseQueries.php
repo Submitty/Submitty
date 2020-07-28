@@ -2535,16 +2535,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function updateTeamRegistrationSection($team_id, $section) {
         $this->course_db->query("UPDATE gradeable_teams SET registration_section=? WHERE team_id=?", [$section, $team_id]);
     }
-    
-    /**
-     * Set team $team_id's anon_id
-     *
-     * @param string $team_id
-     * @param string $anon_id
-     */
-    public function updateTeamAnonId($team_id, $anon_id) {
-        $this->course_db->query("UPDATE teams SET anon_id=? WHERE team_id=?", [$anon_id, $team_id]);
-    }
 
     /**
      * Set team $team_id's anon_id
@@ -3671,18 +3661,6 @@ AND gc_id IN (
         }
         return $return;
     }
-    
-    public function getTeamAnonId($team_id) {
-        $params = (is_array($team_id)) ? $team_id : [$team_id];
-
-        $question_marks = $this->createParamaterList(count($params));
-        $this->course_db->query("SELECT team_id, anon_id FROM teams WHERE team_id IN {$question_marks}", $params);
-        $return = [];
-        foreach ($this->course_db->rows() as $id_map) {
-            $return[$id_map['team_id']] = $id_map['anon_id'];
-        }
-        return $return;
-    }
 
     public function getTeamAnonId($team_id) {
         $params = (is_array($team_id)) ? $team_id : [$team_id];
@@ -4369,14 +4347,6 @@ AND gc_id IN (
         return $users;
     }
     
-    public function getUsersOrTeamsById(array $ids) {
-        $users = $this->getUsersById($ids);
-        if (empty($users)) {
-            return $this->getTeamsById($ids);
-        }
-        return $users;
-    }
-
     public function getUsersOrTeamsById(array $ids) {
         $users = $this->getUsersById($ids);
         if (empty($users)) {
