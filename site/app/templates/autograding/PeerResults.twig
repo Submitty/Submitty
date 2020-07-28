@@ -60,9 +60,9 @@ function switch_feedback_modes() {
             {# Peer Component boxes #}
             {% for component in peer_components %}
                 {% if component.peer_ids | length <= 5 %}
-                    {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
+                    {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals)  }}
                 {% else %}
-                    {{ self.renderManyPeerResults(component) }}
+                    {{ self.renderManyPeerResults(component, num_decimals) }}
                 {% endif %}                
             {% endfor %}
             {# /Peer Component boxes #}
@@ -151,7 +151,7 @@ function switch_feedback_modes() {
 {% endif %}
 
 
-{%- macro renderManyPeerResults(component) -%}
+{%- macro renderManyPeerResults(component, num_decimals) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
@@ -198,7 +198,7 @@ function switch_feedback_modes() {
 {%- endmacro -%}
 
 
-{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders) -%}
+{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
@@ -256,7 +256,7 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
         <div class="box grade-results">
             {% set first_grader = true %}
