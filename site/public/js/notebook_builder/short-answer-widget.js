@@ -71,6 +71,7 @@ class ShortAnswerWidget extends Widget {
     setupAnswerTypeHandlers(interactive_area) {
         const answer_type_selector = interactive_area.querySelector('.answer-type');
         const initial_value_div = interactive_area.querySelector('.initial-value-div');
+        answer_type_selector.value = this.state.programming_language ? this.state.programming_language : 'Default';
 
         answer_type_selector.onchange = () => {
             this.commitState();
@@ -86,7 +87,7 @@ class ShortAnswerWidget extends Widget {
             else  {
                 const codebox_config = {
                     lineNumbers: true,
-                    mode: answer_type_selector.value,
+                    mode: builder_data.codemirror_langauges[answer_type_selector.value],
                     value: this.state.initial_value ? this.state.initial_value : ''
                 };
 
@@ -94,7 +95,7 @@ class ShortAnswerWidget extends Widget {
             }
         }
 
-        answer_type_selector.value = this.state.programming_language ? this.state.programming_language : 'Default';
+        // Manually fire off a change event to setup the input boxes on initial load
         answer_type_selector.dispatchEvent(new Event('change'));
     }
 
@@ -106,7 +107,7 @@ class ShortAnswerWidget extends Widget {
                 <select class="answer-type">
                     ${this.getTypeOptions()}
                 </select>
-                <span class="italics">Note: Some languages may listed several times with different names.  They are identical.</span>
+                <a><i class="fa fa-question-circle" title="Some languages may be shown multiple times with slightly different names.  They are identical."></i></a>
             </div>
         </div>
         <div class="basic-options">
@@ -122,7 +123,7 @@ class ShortAnswerWidget extends Widget {
 
     getTypeOptions() {
         let all_modes = ['Default'];
-        all_modes = all_modes.concat(builder_data.codemirror_langauges);
+        all_modes = all_modes.concat(Object.keys(builder_data.codemirror_langauges));
 
         let result = '';
         all_modes.forEach(mode => {

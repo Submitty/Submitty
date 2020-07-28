@@ -73,7 +73,7 @@ class NotebookBuilderController extends AbstractController {
             'gradeable' => $gradeable,
             'config_string' => $config_string,
             'images' => $images,
-            'codemirror_languages' => json_encode(CodeMirrorUtils::getLanguages())
+            'codemirror_languages' => json_encode(CodeMirrorUtils::MIME_TYPE_MAP)
         ]);
     }
 
