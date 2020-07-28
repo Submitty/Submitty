@@ -108,7 +108,7 @@ class BaseTestCase(unittest.TestCase):
         :return:
         """
         if url is None:
-            url = "/index.php"
+            url = self.test_url + "/index.php"
 
         if user_password is None:
             user_password = user_id if user_id is not None else self.user_password
