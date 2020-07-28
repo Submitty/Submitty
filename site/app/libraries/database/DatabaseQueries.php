@@ -3249,10 +3249,28 @@ SQL;
     }
 
     /**
-     * Bulk Uploads Peer Grading Assignments
+     * Adds an assignment for someone to grade another person for peer grading
      *
-     * @param string $values
+     * @param string $grader
+     * @param string $student
+     * @param string $gradeable_id
+     * @param string $feedback
      */
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
+        if (count($this->course_db->rows()) > 0) {
+            $this->course_db->query("UPDATE peer_feedback SET feedback = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback, $grader, $student, $gradeable_id]);
+        }
+        else {
+            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
+        }
+    }
+  
+  /**
+   * Bulk Uploads Peer Grading Assignments
+   *
+   * @param string $values
+   */
     public function insertBulkPeerGradingAssignment($values) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
     }
@@ -3284,6 +3302,28 @@ SQL;
         return $return;
     }
     
+    /**
+     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getAllPeerFeedback($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[$id['grader_id']][$id['user_id']]['feedback'] = $id['feedback'];
+        }
+        return $return;
+    }
+    
+    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
+        $results = $this->course_db->rows();
+        if (count($results) > 0) {
+            return $results[0]['feedback'];
+        }
+        return null;
+    }
     /**
      * Get all peers assigned to grade a specific student
      *

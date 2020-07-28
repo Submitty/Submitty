@@ -137,7 +137,7 @@ class Gradeable extends AbstractModel {
     
     /** @prop @var array */
     protected $peer_grading_pairs = [];
-
+    
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
     /** @prop @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
@@ -513,10 +513,10 @@ class Gradeable extends AbstractModel {
     public function setPeerGradersList($input) {
         $bad_rows = [];
         foreach ($input as $row_num => $vals) {
-            if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
+            if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
                 array_push($bad_rows, ($vals["student"]));
             }
-            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
+            if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
                 array_push($bad_rows, ($vals["grader"]));
             }
         }
@@ -535,6 +535,44 @@ class Gradeable extends AbstractModel {
                 $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
             }
         }
+    }
+    
+    public function setPeerFeedback($grader_id, $student_id, $feedback) {
+        $bad_input = [];
+        if ($this->core->getQueries()->getUserById($grader_id) === null) {
+            array_push($bad_input, ($grader_id));
+        }
+        if ($this->core->getQueries()->getUserById($student_id) === null) {
+            array_push($bad_input, ($student_id));
+        }
+        if (!empty($bad_input)) {
+            $msg = "The given user id is not valid: ";
+            array_walk($bad_input, function ($val) use (&$msg) {
+                $msg .= " {$val}";
+            });
+            $this->core->addErrorMessage($msg);
+        }
+        else {
+            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
+        }
+    }
+    
+    public function getPeerFeedback($grader_id, $anon_id) {
+        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        if ($feedback == 'thanks') {
+            return 'Thank you!';
+        }
+        elseif ($feedback == 'helpful') {
+            return 'This feedback was helpful to me!';
+        }
+        elseif ($feedback == 'detailed') {
+            return 'This feedback was detailed, specific, and/or technical';
+        }
+        elseif ($feedback == 'inappropriate') {
+            return 'This feedback was inaccurate and/or inappropriate';
+        }
+        return 'No response';
     }
 
     /**

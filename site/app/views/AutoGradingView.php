@@ -661,7 +661,7 @@ class AutoGradingView extends AbstractView {
         
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
-
+        $gradeable_id = $gradeable->getId();
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -682,12 +682,13 @@ class AutoGradingView extends AbstractView {
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
-            'gradeable_id' => $gradeable->getId(),
+            'gradeable_id' => $gradeable_id,
             'can_download' => !$gradeable->isVcs(),
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            "annotated_file_names" =>  $annotated_file_names,
+            "peer_feedback" => $this->core->getQueries()->getAllPeerFeedback($gradeable_id),
             'student_pdf_download_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'download_pdf']),
-            "annotated_file_names" =>  $annotated_file_names
         ]);
     }
 }
