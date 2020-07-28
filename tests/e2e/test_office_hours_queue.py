@@ -132,6 +132,7 @@ class TestOfficeHoursQueue(BaseTestCase):
     def saveAnnouncementSettings(self):
         self.assertEqual(False,self.driver.execute_script("return $('#announcement-settings').is(':hidden')"))
         self.driver.find_element(By.ID, 'save_announcement').click()
+        self.check_socket_message('announcement_update')
         self.assertEqual(True,self.driver.execute_script("return $('#announcement-settings').is(':hidden')"))
 
     def editAnnouncement(self, text):
@@ -139,7 +140,6 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.driver.find_element(By.ID, 'queue-announcement-message').clear()
         self.driver.find_element(By.ID, 'queue-announcement-message').send_keys(text)
         self.saveAnnouncementSettings()
-
 
     def deleteAllQueues(self):
         self.openFilterSettings()

@@ -490,8 +490,31 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
         $this->core->addSuccessMessage("Updated announcement");
+        $this->sendSocketMessage(['type' => 'announcement_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods={"GET"})
+     * @return MultiResponse
+     */
+    public function showNewAnnouncement() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'renderNewAnnouncement',
+                new OfficeHoursQueueModel($this->core)
+            )
         );
     }
 

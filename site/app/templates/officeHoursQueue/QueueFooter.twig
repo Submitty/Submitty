@@ -190,6 +190,9 @@
                 {% endif %}
                 updateHistory();
                 break;
+            case "announcement_update":
+                updateAnnouncement();
+                break;
             default:
                 console.log("Unknown message received.");
                 break;
@@ -216,6 +219,16 @@
   function updateHistory() {
       $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newHistory) {
           $("#queue_history").replaceWith(newHistory);
+      });
+  }
+
+  function updateAnnouncement() {
+      $.get("{{base_url}}/new_announcement", function(newAnnouncement) {
+          if ($('#announcement').length > 0){
+              $('#announcement').next().remove();
+              $('#announcement').replaceWith(newAnnouncement);
+          }
+          else $(newAnnouncement).insertAfter($('h1').next());
       });
   }
 
