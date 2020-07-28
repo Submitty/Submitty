@@ -87,6 +87,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/late_table', 'My Late Days/Extensions'],
             [self.test_url + '/home', 'My Courses'],
             [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/admin/docker', 'Docker UI'],
+            [self.test_url + '/home/courses/new', 'New Course'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
