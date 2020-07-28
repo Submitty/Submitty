@@ -1925,17 +1925,16 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Determine if $this gradeable is using a default configuration
+     * Determine if $this gradeable is using a configuration that was user uploaded or created by notebook builder.
      *
-     * @return bool
+     * @return bool True if using an uploaded configuration, false otherwise.
      */
-    public function isUsingDefaultConfig(): bool {
-        foreach ($this->getDefaultConfigPaths() as $option) {
-            if ($option[1] === $this->getAutogradingConfigPath()) {
-                return true;
-            }
-        }
+    public function isUsingUploadedConfig(): bool {
+        $config_upload_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'config_upload'
+        );
 
-        return false;
+        return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
     }
 }
