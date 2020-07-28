@@ -36,7 +36,7 @@ $( document ).ready(function() {
 
             {# TA Component boxes #}
             {% for component in ta_components %}
-                {{ TAResultsFunctions.renderComponent(component, false) }}
+                {{ TAResultsFunctions.renderComponent(component, false, num_decimals) }}
             {% endfor %}
         <div class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in overall_comments | keys | sort %}

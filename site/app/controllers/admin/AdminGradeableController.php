@@ -123,32 +123,8 @@ class AdminGradeableController extends AbstractController {
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
 
-        $saved_config_path = $gradeable->getAutogradingConfigPath();
-
         // These are hard coded default config options.
-        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
-        $default_config_paths = [
-            ['PROVIDED: upload_only (1 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
-            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
-            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
-            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
-            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
-            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
-            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
-            ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
-            ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload/config')],
-            ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
-            FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload_3page/config')]
-        ];
+        $default_config_paths = $gradeable->getDefaultConfigPaths();
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
@@ -818,17 +794,24 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        $repo_name = '';
+
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
+            $subdir = '';
 
-            // Find which radio button is pressed and what host type to use
             $host_type = -1;
+            // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
+                $repo_name = $details['id'];
+                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
+                $repo_name = $details['vcs_url'];
+                $subdir = $details['vcs_url'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -837,15 +820,6 @@ class AdminGradeableController extends AbstractController {
                 $host_type = 3;
             }
 
-            $subdir = '';
-            // Submitty hosted -> this gradeable subdirectory
-            if ($host_type === 0) {
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
-            }
-            // Submitty hosted -> custom url
-            if ($host_type === 1) {
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
-            }
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
@@ -954,9 +928,17 @@ class AdminGradeableController extends AbstractController {
         // start the build
         $build_status = $this->enqueueBuild($gradeable);
 
-        $config = $this->core->getConfig();
-        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+        if (
+            $build_status == null
+            && $gradeable->isVcs()
+            && ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1)
+            && !$gradeable->isTeamAssignment()
+        ) {
+            $this->enqueueGenerateRepos(
+                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getCourse(),
+                $repo_name
+            );
         }
 
         return $build_status;
