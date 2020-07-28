@@ -6,6 +6,4 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    
-    database.execute('ALTER TABLE electronic_gradeable DROP COLUMN eg_limited_access_blind')
-    database.execute('ALTER TABLE electronic_gradeable DROP COLUMN eg_peer_blind')
+	pass

@@ -4,7 +4,6 @@ let errors = {};
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
         $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
-        console.log(Object.keys(errors));
     }
     else {
         if(updateInProgressCount === 0) {
