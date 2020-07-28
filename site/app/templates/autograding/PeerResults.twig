@@ -178,7 +178,7 @@ function switch_feedback_modes() {
 {% endif %}
 
 
-{%- macro renderManyPeerResults(component) -%}
+{%- macro renderManyPeerResults(component, num_decimals) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
@@ -225,7 +225,7 @@ function switch_feedback_modes() {
 {%- endmacro -%}
 
 
-{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders) -%}
+{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
