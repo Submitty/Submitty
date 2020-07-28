@@ -3,7 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\libraries\CodeMirrorLoader;
+use app\libraries\CodeMirrorUtils;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -72,7 +72,8 @@ class NotebookBuilderController extends AbstractController {
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
             'config_string' => $config_string,
-            'images' => $images
+            'images' => $images,
+            'codemirror_languages' => json_encode(CodeMirrorUtils::getLanguages())
         ]);
     }
 
@@ -117,7 +118,7 @@ class NotebookBuilderController extends AbstractController {
 
     private function loadDependencies(): void {
         // Code mirror dependencies
-        CodeMirrorLoader::loadDefaultDependencies($this->core);
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         // Notebook builder dependencies
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');

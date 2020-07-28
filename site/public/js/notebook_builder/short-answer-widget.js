@@ -94,6 +94,7 @@ class ShortAnswerWidget extends Widget {
             }
         }
 
+        answer_type_selector.value = this.state.programming_language ? this.state.programming_language : 'Default';
         answer_type_selector.dispatchEvent(new Event('change'));
     }
 
@@ -105,6 +106,7 @@ class ShortAnswerWidget extends Widget {
                 <select class="answer-type">
                     ${this.getTypeOptions()}
                 </select>
+                <span class="italics">Note: Some languages may listed several times with different names.  They are identical.</span>
             </div>
         </div>
         <div class="basic-options">
@@ -119,15 +121,20 @@ class ShortAnswerWidget extends Widget {
     }
 
     getTypeOptions() {
-        let result = '';
-
         let all_modes = ['Default'];
-        all_modes = all_modes.concat(Object.keys(CodeMirror.mimeModes));
+        all_modes = all_modes.concat(builder_data.codemirror_langauges);
 
+        let result = '';
         all_modes.forEach(mode => {
             result = result.concat(`<option value="${mode}">${mode}</option>`);
         });
 
         return result;
+    }
+
+    codeMirrorRefresh() {
+        if (this.codebox_pointer) {
+            this.codebox_pointer.refresh();
+        }
     }
 }
