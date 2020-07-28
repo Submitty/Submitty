@@ -284,15 +284,19 @@ class WebRouter {
                 new RedirectResponse($this->core->buildCourseUrl(['no_access']))
             );
         }
+        elseif (
+            $logged_in
+            && Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && $this->parameters['_method'] !== 'logout'
+        ) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildUrl(['home']))
+            );
+        }
 
         if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
             if ($logged_in) {
-                if (
-                    $this->parameters['_method'] !== 'logout'
-                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
-                    && !Utils::endsWith($this->parameters['_controller'], 'UserProfileController')
-                    && !Utils::endsWith($this->parameters['_controller'], 'DockerInterfaceController')
-                ) {
+                if (isset($this->parameters['_semester']) && isset($this->parameters['_course'])) {
                     return MultiResponse::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );
