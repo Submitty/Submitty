@@ -2783,8 +2783,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
             [$g_id, $user_id]
         );
 
-        $user_message = $this->course_db->rows()[0]['message'];
-        return $user_message;
+        return $this->course_db->rows()[0]['message'];
     }
 
     /**

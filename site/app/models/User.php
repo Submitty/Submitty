@@ -214,7 +214,7 @@ class User extends AbstractModel {
         else {
             return $ret;
         }
-    }    
+    }
 
     /**
      * Set $this->time_zone
