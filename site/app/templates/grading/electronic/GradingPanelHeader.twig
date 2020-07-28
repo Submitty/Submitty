@@ -94,9 +94,12 @@
 </div>
 
 {% macro renderPanelPositionSelector(panelId) %}
-    <select class="panel-position-cont" id="{{ panelId }}_select" size="2">
-        <option class="panel-position-left" value="left">
-            Open as left panel
+    <select class="panel-position-cont" id="{{ panelId }}_select" size="3">
+        <option class="panel-position-left" value="leftTop">
+            Open as top left panel
+        </option>
+        <option class="panel-position-left" value="leftBottom">
+            Open as bottom left panel
         </option>
         <option class="panel-position-right" value="right">
             Open as right panel
