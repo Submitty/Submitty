@@ -3283,6 +3283,20 @@ SQL;
         }
         return $return;
     }
+    
+    /**
+     * Get all peers assigned to grade a specific student
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerGradingAssignmentForSubmitter($gradeable_id, $submitter_id) {
+        $this->course_db->query("SELECT grader_id FROM peer_assign WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $submitter_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[] = $id['grader_id'];
+        }
+        return $return;
+    }
 
     /**
      * Get all assignments a student is assigned to peer grade
@@ -3691,7 +3705,8 @@ AND gc_id IN (
 
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id] ??
+                null;
     }
 
     // NOTIFICATION/EMAIL QUERIES
@@ -5181,6 +5196,16 @@ AND gc_id IN (
         $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
         $this->course_db->query($query, $params);
     }
+    
+    public function deleteOverallComment($gradeable_id, $grader_id, $is_team) {
+        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+        if ($is_team) {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_team_id=?", [$gradeable_id, $grader_id]);
+        }
+        else {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_user_id=?", [$gradeable_id, $grader_id]);
+        }
+    }
 
     /**
      * Update/create the components/marks for a gradeable.
@@ -5544,6 +5569,11 @@ AND gc_id IN (
     public function getLastTimeInQueue($user_id, $queue_code) {
         $this->course_db->query("SELECT max(time_in) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL) ", [$user_id, $queue_code]);
         return $this->course_db->rows()[0]['max'];
+    }
+
+    public function getQueueId($queue_code) {
+        $this->course_db->query("select * from queue_settings where code = ?;", [$queue_code]);
+        return $this->course_db->rows()[0]['id'];
     }
 
     public function addToQueue($queue_code, $user_id, $name, $contact_info) {
