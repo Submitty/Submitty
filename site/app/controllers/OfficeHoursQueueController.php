@@ -62,10 +62,10 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         //Replace whitespace with "_"
-        $queue_code = preg_replace('/\s+/', '_', trim($_POST['code']));
-        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
+        $queue_code = trim($_POST['code']);
+        $token = trim($_POST['token']);
 
-        $re = '/^[a-zA-Z0-9_\-]+$/m';
+        $re = '/^[\sa-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
         preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         if (count($matches_code) !== 1 || count($matches_token) !== 1) {
@@ -127,8 +127,8 @@ class OfficeHoursQueueController extends AbstractController {
             }
         }
 
-        $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
-        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
+        $queue_code = trim($queue_code);
+        $token = trim($_POST['token']);
 
         $validated_code = $this->core->getQueries()->isValidCode($queue_code, $token);
         if (!$validated_code) {
@@ -376,8 +376,8 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         //Replace whitespace with "_"
-        $token = preg_replace('/\s+/', '_', trim($_POST['token']));
-        $re = '/^[a-zA-Z0-9_\-]+$/m';
+        $token = trim($_POST['token']);
+        $re = '/^[\sa-zA-Z0-9_\-]+$/m';
         preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         if (count($matches_token) !== 1) {
             $this->core->addErrorMessage('Queue secret code must only contain letters, numbers, spaces, "_", and "-"');
@@ -386,7 +386,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $queue_code = preg_replace('/\s+/', '_', trim($queue_code));
+        $queue_code = trim($queue_code);
         $this->core->getQueries()->changeQueueToken($token, $queue_code);
         $this->core->addSuccessMessage("Queue Access Code Changed");
         return MultiResponse::RedirectOnlyResponse(
@@ -457,6 +457,32 @@ class OfficeHoursQueueController extends AbstractController {
                 'renderNewStatus',
                 new OfficeHoursQueueModel($this->core)
             )
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/update_announcement", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     * @return MultiResponse
+     */
+    public function updateAnnouncement() {
+        if (!isset($_POST['queue_announcement_message'])) {
+            $this->core->addErrorMessage("Missing announcement content");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $config_json = $this->core->getConfig()->getCourseJson();
+        $config_json['course_details']['queue_announcement_message'] = $_POST['queue_announcement_message'];
+        if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Could not save config file')
+            );
+        }
+        $this->core->addSuccessMessage("Updated announcement");
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
     }
 }

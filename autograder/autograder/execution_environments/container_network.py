@@ -181,12 +181,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     Therefore, code is effectively run in a Jailed Sandbox within the container. Containers may
     be networked together to test networked gradeables.
     """
-    def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job,
-                 complete_config_obj, testcase_info, autograding_directory, log_path,
-                 stack_trace_log_path, is_test_environment):
-        super().__init__(job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job,
-                         complete_config_obj, testcase_info, autograding_directory, log_path,
-                         stack_trace_log_path, is_test_environment)
+    def __init__(self, config, job_id, untrusted_user, testcase_directory, is_vcs,
+                 is_batch_job, complete_config_obj, testcase_info, autograding_directory,
+                 log_path, stack_trace_log_path, is_test_environment):
+        super().__init__(config, job_id, untrusted_user, testcase_directory, is_vcs,
+                         is_batch_job, complete_config_obj, testcase_info, autograding_directory,
+                         log_path, stack_trace_log_path, is_test_environment)
 
         containers = []
         container_specs = testcase_info.get('containers', [])
