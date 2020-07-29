@@ -1327,6 +1327,17 @@ function getTaGradingTotal() {
     });
     return total;
 }
+/**
+ * Gets the number of ta grading points that can be earned
+ * @return {number}
+ */
+function getPeerGradingTotal() {
+    let total = 0.0;
+    $('.peer-component').each(function () {
+        total += parseFloat($(this).attr('data-max_value'));
+    });
+    return total;
+}
 
 /**
  * Gets the overall comment message stored in the DOM

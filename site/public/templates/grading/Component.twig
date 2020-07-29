@@ -14,11 +14,11 @@ Required Input:
      class="box">
 {% else %}
 <div id="component-{{ component.id }}"
-     class="box component
-     {% if peer_component %}
-        peer-border
+    {% if peer_component %}
+        class="box component peer-border"
+    {% else %}
+       class="box component"
     {% endif %}
-    "
      data-component_id="{{ component.id }}"
      data-title="{{ component.title|escape }}"
      data-ta_comment="{{ component.ta_comment|escape }}"
