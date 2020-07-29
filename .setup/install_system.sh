@@ -322,16 +322,6 @@ usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
-if [ ${VAGRANT} == 1 ]; then
-    # add these users so that they can write to .vagrant/logs folder
-    if [ ${WORKER} == 0 ]; then
-        usermod -a -G vagrant "${PHP_USER}"
-        usermod -a -G vagrant "${CGI_USER}"
-        usermod -a -G vagrant postgres # needed by preferred_name_logging
-    fi
-    usermod -a -G vagrant "${DAEMON_USER}"
-fi
-
 usermod -a -G docker "${DAEMON_USER}"
 
 #################################################################
@@ -538,6 +528,10 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 
 #Set up database and copy down the tutorial repo if not in worker mode
 if [ ${WORKER} == 0 ]; then
+    # create the courses directory. This is needed for the first time we run
+    # the migrator in the INSTALL_SUBMITTY_HELPER.sh
+    mkdir -p ${SUBMITTY_DATA_DIR}/courses
+
     # create a list of valid userids and put them in /var/local/submitty/instructors
     # one way to create your list is by listing all of the userids in /home
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -689,17 +683,6 @@ if [ ${WORKER} == 0 ]; then
     else
         echo "Submitty master database already exists"
     fi
-fi
-
-if [[ ${VAGRANT} == 1 ]]; then
-    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-    VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
-
-    rm -rf ${SUBMITTY_DATA_DIR}/logs/
-    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty ${SUBMITTY_DATA_DIR}/logs
 fi
 
 echo Beginning Install Submitty Script

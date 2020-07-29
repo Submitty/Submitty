@@ -369,6 +369,13 @@ class TeamController extends AbstractController {
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
+        $seeking = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
+
+        if (in_array($user_id, $seeking)) {
+            $this->core->addErrorMessage('Already in the list of users seeking team/partner!');
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
         $this->core->getQueries()->addToSeekingTeam($gradeable_id, $user_id, $message);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
         $this->core->redirect($return_url);
