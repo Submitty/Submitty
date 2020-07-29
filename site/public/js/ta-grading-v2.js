@@ -74,18 +74,6 @@ $(function () {
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
 
-  // panel position selector change event
-  $(".grade-panel .panel-position-cont").change(function() {
-    let panelSpanId = $(this).parent().attr('id');
-    let position = $(this).val();
-    console.log(position);
-    if (panelSpanId) {
-      const panelId = panelSpanId.split('_btn')[0];
-      setPanelsVisibilities(panelId, null, position);
-      $('select#' + panelId + '_select').hide();
-    }
-  });
-
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
@@ -100,9 +88,9 @@ $(function () {
       return;
     }
     const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
-    // If panel is not in-view and two-panel-mode is enabled show the drop-down to select position,
+    // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it
-    if (isPanelOpen || !(taLayoutDet.numOfPanelsEnabled && !isMobileView)) {
+    if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
       setPanelsVisibilities(panelId);
     } else {
       // removing previously selected option
@@ -110,6 +98,19 @@ $(function () {
       selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
     }
   });
+
+  // panel position selector change event
+  $(".grade-panel .panel-position-cont").change(function() {
+    let panelSpanId = $(this).parent().attr('id');
+    let position = $(this).val();
+    console.log(position);
+    if (panelSpanId) {
+      const panelId = panelSpanId.split('_btn')[0];
+      setPanelsVisibilities(panelId, null, position);
+      $('select#' + panelId + '_select').hide();
+    }
+  });
+
   // Remove the select options which are open
   function hidePanelPositionSelect() {
     $('select.panel-position-cont').hide();
@@ -274,6 +275,7 @@ function initializeTaLayout() {
     toggleFullScreenMode();
   }
   updateLeftColsWidth();
+  updatePanelOptions();
 }
 
 // updates width of left columns (normal + full-left-col) with the last saved layout width
@@ -289,6 +291,41 @@ function updateBottomRowWidth() {
   const leftBottomCol = $(".panel-item-section.left-top");
   leftBottomCol.css({
     height: taLayoutDet.leftBottomPanelHeight ? taLayoutDet.leftBottomPanelHeight : "50%"
+  });
+}
+
+function updatePanelOptions() {
+  if (taLayoutDet.numOfPanelsEnabled === 1) {
+    return;
+  }
+  $(".grade-panel .panel-position-cont").attr("size", taLayoutDet.numOfPanelsEnabled);
+  console.log("inside updatePanel Options");
+  const panelOptions = $(".grade-panel .panel-position-cont option");
+  panelOptions.each(idx => {
+    if (panelOptions[idx].value === "leftTop") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+        panelOptions[idx].text = "Open as left panel";
+      }
+      else {
+        panelOptions[idx].text = "Open as top left panel";
+      }
+    }
+    else if (panelOptions[idx].value === "leftBottom" || panelOptions[idx].value === "rightBottom") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+        panelOptions[idx].classList.add("hide");
+      }
+      else {
+        panelOptions[idx].classList.remove("hide");
+      }
+    }
+    else if (panelOptions[idx].value === "rightTop") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+        panelOptions[idx].text = "Open as right panel";
+      }
+      else {
+        panelOptions[idx].text = "Open as top right panel";
+      }
+    }
   });
 }
 
@@ -712,6 +749,7 @@ function togglePanelLayoutModes(forceVal = false) {
       right: null
     };
   }
+  updatePanelOptions();
 }
 
 // Handles the DOM manipulation to update the two panel layout
@@ -744,7 +782,10 @@ function updatePanelLayoutModes () {
 
 // Exchanges positions of left and right panels
 function exchangeTwoPanels () {
-  if (taLayoutDet.currentTwoPanels.left && taLayoutDet.currentTwoPanels.right) {
+  if ((taLayoutDet.currentTwoPanels.leftTop &&
+      taLayoutDet.currentTwoPanels.leftBottom) &&
+      taLayoutDet.currentTwoPanels.right
+  ) {
     const leftPanel = taLayoutDet.currentTwoPanels.left;
     taLayoutDet.currentTwoPanels = {
       left: taLayoutDet.currentTwoPanels.right,
