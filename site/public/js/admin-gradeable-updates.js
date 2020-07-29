@@ -179,7 +179,7 @@ $(document).ready(function () {
                     }
                 }
                 updateErrorMessage();
-            }, updateGradeableErrorCallback, all_grade_all);
+            }, updateGradeableErrorCallback, false);
         }
         else {
             return false;
