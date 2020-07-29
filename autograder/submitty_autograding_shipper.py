@@ -27,23 +27,18 @@ from math import floor
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
+from autograder import config as submitty_config
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
-SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
-AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
-AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['site_log_path'], 'autograding_stack_traces')
 
-with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DAEMON_UID = OPEN_JSON['daemon_uid']
-
-INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
-IN_PROGRESS_PATH = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
-
+INTERACTIVE_QUEUE = ''
+IN_PROGRESS_PATH = ''
 JOB_ID = '~SHIP~'
+
+
+def instantiate_global_variables(config):
+    global INTERACTIVE_QUEUE, IN_PROGRESS_PATH
+    INTERACTIVE_QUEUE = os.path.join(config.submitty['submitty_data_dir'], "to_be_graded_queue")
+    IN_PROGRESS_PATH = os.path.join(config.submitty['submitty_data_dir'], "in_progress_grading")
 
 
 class GradingStatus(Enum):
@@ -78,9 +73,13 @@ def initialize(untrusted_queue):
 
 
 # ==================================================================================
-def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
+def add_fields_to_autograding_worker_json(config, autograding_worker_json, entry):
 
-    submitty_config = os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'version.json')
+    submitty_config = os.path.join(
+        config.submitty['submitty_install_dir'],
+        'config',
+        'version.json'
+    )
 
     try:
         with open(submitty_config) as infile:
@@ -89,7 +88,7 @@ def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
             most_recent_tag = submitty_details['most_recent_git_tag']
     except FileNotFoundError as e:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH,
+            config.error_path,
             trace=traceback.format_exc()
         )
         raise SystemExit("ERROR, could not locate the submitty.json:", e)
@@ -101,7 +100,7 @@ def add_fields_to_autograding_worker_json(autograding_worker_json, entry):
 
 
 # ==================================================================================
-def update_all_foreign_autograding_workers(autograding_workers):
+def update_remote_autograding_workers(config, autograding_workers):
     success_map = dict()
     for machine, value in autograding_workers.items():
         if value['enabled'] is False:
@@ -110,8 +109,8 @@ def update_all_foreign_autograding_workers(autograding_workers):
             continue
         print(f"UPDATE CONFIGURATION FOR WORKER MACHINE: {machine}")
         formatted_entry = {machine: value}
-        formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, machine)
-        success = update_worker_json(machine, formatted_entry)
+        formatted_entry = add_fields_to_autograding_worker_json(config, formatted_entry, machine)
+        success = update_worker_json(config, machine, formatted_entry)
         success_map[machine] = success
     return success_map
 
@@ -119,10 +118,14 @@ def update_all_foreign_autograding_workers(autograding_workers):
 # ==================================================================================
 # Updates the autograding_worker.json in a workers autograding_TODO folder (tells it)
 #   how many threads to be running on startup.
-def update_worker_json(name, entry):
+def update_worker_json(config, name, entry):
 
     fd, tmp_json_path = tempfile.mkstemp()
-    foreign_json = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO", "autograding_worker.json")
+    foreign_json = os.path.join(
+        config.submitty['submitty_data_dir'],
+        "autograding_TODO",
+        "autograding_worker.json"
+    )
     autograding_worker_to_ship = entry
 
     try:
@@ -131,11 +134,11 @@ def update_worker_json(name, entry):
     except Exception as e:
         print(f"ERROR: autograding_workers.json entry for {e} is malformatted. {name}")
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"ERROR: autograding_workers.json entry for {name} is malformed. {e}"
         )
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         return False
@@ -150,17 +153,17 @@ def update_worker_json(name, entry):
             shutil.move(tmp_json_path, foreign_json)
             print("Successfully updated local autograding_TODO/autograding_worker.json")
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message="Successfully updated local autograding_TODO/autograding_worker.json"
             )
             return True
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message="ERROR: could not mv to local autograding_TODO/autograding_worker.json "
                         f"due to the following error: {e}"
             )
@@ -175,14 +178,14 @@ def update_worker_json(name, entry):
     else:
         # try to establish an ssh connection to the host
         try:
-            ssh = establish_ssh_connection(None, user, host, only_try_once=True)
+            ssh = establish_ssh_connection(config, None, user, host, only_try_once=True)
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"ERROR: could not ssh to {user}@{host} due to following error: {e}"
             )
             print(f"ERROR: could not ssh to {user}@{host} due to following error: {e}")
@@ -196,17 +199,17 @@ def update_worker_json(name, entry):
             sftp.close()
             print("Successfully forwarded autograding_worker.json to {0}".format(name))
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message="Successfully forwarded autograding_worker.json to {0}".format(name)
             )
             success = True
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json "
                         f"due to the following error: {e}"
             )
@@ -223,7 +226,7 @@ def update_worker_json(name, entry):
         return success
 
 
-def establish_ssh_connection(my_name, user, host, only_try_once=False):
+def establish_ssh_connection(config, my_name, user, host, only_try_once=False):
     """
     Returns a connected paramiko ssh session.
     Tries to connect until a connection is established, unless only_try_once
@@ -245,12 +248,12 @@ def establish_ssh_connection(my_name, user, host, only_try_once=False):
             time.sleep(retry_delay)
             retry_delay = min(10, retry_delay * 2)
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"{my_name} Could not establish connection with {user}@{host} going "
                         "to re-try."
             )
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
     return ssh
@@ -258,6 +261,7 @@ def establish_ssh_connection(my_name, user, host, only_try_once=False):
 
 # ==================================================================================
 def prepare_job(
+    config,
     my_name,
     which_machine,
     which_untrusted,
@@ -266,9 +270,9 @@ def prepare_job(
     random_identifier
 ):
     # verify the DAEMON_USER is running this script
-    if not int(os.getuid()) == int(DAEMON_UID):
+    if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message="ERROR: must be run by DAEMON_USER"
         )
         raise SystemExit(
@@ -283,6 +287,7 @@ def prepare_job(
     # prepare the zip files
     try:
         zips = packer_unpacker.prepare_autograding_and_submission_zip(
+            config,
             which_machine,
             which_untrusted,
             next_directory,
@@ -293,15 +298,15 @@ def prepare_job(
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(
-            SUBMITTY_DATA_DIR, "autograding_TODO",
+            config.submitty['submitty_data_dir'], "autograding_TODO",
             f"{servername_workername}_{which_untrusted}_autograding.zip"
         )
         submission_zip = os.path.join(
-            SUBMITTY_DATA_DIR, "autograding_TODO",
+            config.submitty['submitty_data_dir'], "autograding_TODO",
             f"{servername_workername}_{which_untrusted}_submission.zip"
         )
         todo_queue_file = os.path.join(
-            SUBMITTY_DATA_DIR, "autograding_TODO",
+            config.submitty['submitty_data_dir'], "autograding_TODO",
             f"{servername_workername}_{which_untrusted}_queue.json"
         )
 
@@ -314,11 +319,11 @@ def prepare_job(
 
     except Exception as e:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"ERROR: failed preparing submission zip or accessing next to grade {e}"
         )
         print("ERROR: failed preparing submission zip or accessing next to grade ", e)
@@ -332,11 +337,11 @@ def prepare_job(
                 json.dump(queue_obj, outfile, sort_keys=True, indent=4)
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"ERROR: could not move files due to the following error: {e}"
             )
             print(f"ERROR: could not move files due to the following error: {e}")
@@ -346,7 +351,7 @@ def prepare_job(
         try:
             user, host = which_machine.split("@")
 
-            ssh = establish_ssh_connection(my_name, user, host)
+            ssh = establish_ssh_connection(config, my_name, user, host)
             sftp = ssh.open_sftp()
             sftp.put(autograding_zip_tmp, autograding_zip)
             sftp.put(submission_zip_tmp, submission_zip)
@@ -358,11 +363,11 @@ def prepare_job(
             success = True
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"ERROR: could not move files due to the following error: {e}"
             )
             print(f"Could not move files due to the following error: {e}")
@@ -377,7 +382,7 @@ def prepare_job(
         return success
 
     # log completion of job preparation
-    obj = packer_unpacker.load_queue_file_obj(JOB_ID, next_directory, next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
         item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
@@ -387,7 +392,7 @@ def prepare_job(
         )
     is_batch = "regrade" in obj and obj["regrade"]
     autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH, JOB_ID,
+        config.log_path, JOB_ID,
         jobname=item_name, which_untrusted=which_untrusted, is_batch=is_batch,
         message=f"Prepared job for {which_machine}"
     )
@@ -396,15 +401,19 @@ def prepare_job(
 
 # ==================================================================================
 # ==================================================================================
-def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, random_identifier):
-    """
-    Unpack a job from the worker. This function returns a GradingStatus.
-    """
+def unpack_job(
+    config,
+    which_machine,
+    which_untrusted,
+    next_directory,
+    next_to_grade,
+    random_identifier
+):
 
     # verify the DAEMON_USER is running this script
-    if not int(os.getuid()) == int(DAEMON_UID):
+    if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message="ERROR: must be run by DAEMON_USER"
         )
         raise SystemExit(
@@ -412,7 +421,7 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         )
 
     # Grab the path to this assignment for logging purposes
-    obj = packer_unpacker.load_queue_file_obj(JOB_ID, next_directory, next_to_grade)
+    obj = packer_unpacker.load_queue_file_obj(config, JOB_ID, next_directory, next_to_grade)
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
         item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
@@ -427,11 +436,11 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
     worker_name = f"{socket.getfqdn()}_{address}_{which_untrusted}"
 
     target_results_zip = os.path.join(
-        SUBMITTY_DATA_DIR, "autograding_DONE",
+        config.submitty['submitty_data_dir'], "autograding_DONE",
         f"{worker_name}_results.zip"
     )
     target_done_queue_file = os.path.join(
-        SUBMITTY_DATA_DIR, "autograding_DONE",
+        config.submitty['submitty_data_dir'], "autograding_DONE",
         f"{worker_name}_queue.json"
     )
 
@@ -452,7 +461,7 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         ssh = sftp = fd1 = fd2 = local_done_queue_file = local_results_zip = None
         try:
             user, host = which_machine.split("@")
-            ssh = establish_ssh_connection(which_machine, user, host)
+            ssh = establish_ssh_connection(config, which_machine, user, host)
             sftp = ssh.open_sftp()
             # Make temporary local files for the queue file and the results zip
             fd1, local_done_queue_file = tempfile.mkstemp()
@@ -483,12 +492,12 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         # TODO catch other types of exception as we identify them.
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=f'{traceback.format_exc()}\n'
                       'Consider exception handling for the above error to the shipper.'
             )
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"ERROR: Could not retrieve the file from the foreign machine {e}"
             )
             print(f"ERROR: Could not retrieve the file from the foreign machine.\nERROR: {e}")
@@ -529,13 +538,13 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
             if local_done_queue_obj['autograding_status']['status'] == 'fail':
                 msg += ' discarded job failed. Check the stack traces log for details.'
                 autograding_utils.log_stack_trace(
-                    AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                    config.error_path, job_id=JOB_ID,
                     trace=f"ERROR: {worker_name} returned the following error for a stale job:\n"
                           f"{local_done_queue_obj['autograding_status']['message']}"
                 )
             print(msg)
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name,
+                config.log_path, JOB_ID, jobname=item_name,
                 which_untrusted=which_untrusted, is_batch=is_batch,
                 message=msg
             )
@@ -550,11 +559,11 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         # otherwise, check to see if the returned status was a failure
         elif status_str == 'fail':
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name,
+                config.log_path, JOB_ID, jobname=item_name,
                 message=f"ERROR: failure returned by {worker_name}. View stack traces for more info"
             )
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=f"ERROR: {worker_name} returned the following error:\n"
                       f"{local_done_queue_obj['autograding_status']['message']}"
             )
@@ -563,13 +572,13 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         # If we hit this else statement, a bad status was returned.
         else:
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name,
+                config.log_path, JOB_ID, jobname=item_name,
                 which_untrusted=which_untrusted, is_batch=is_batch,
                 message=f'ERROR: {worker_name} returned unexpected status {status_str}'
             )
             # Report this as a stack trace as well.
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=f'ERROR: {worker_name} returned unexpected status {status_str}'
             )
             # Set the status to failure, as we don't know the state of the returned job.
@@ -579,13 +588,13 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
         # TODO: make packer_unpacker.unpack_grading_results_zip more robust
         # to partial grading/failures.
         could_unpack = packer_unpacker.unpack_grading_results_zip(
-            which_machine, which_untrusted, local_results_zip
+            config, which_machine, which_untrusted, local_results_zip
         )
         # If we couldn't unpack the returned job, we consider it to be a failure.
         if not could_unpack:
             status = GradingStatus.FAILURE
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=f'ERROR: {worker_name} could not unpack {local_results_zip}'
             )
             print(f'ERROR: {worker_name} could not unpack {local_results_zip}')
@@ -594,11 +603,11 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
     # to failure, and carry on.
     except Exception:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name,
+            config.log_path, JOB_ID, jobname=item_name,
             message="ERROR: Exception when unpacking results zip."
                     "For more details, see traces entry."
         )
@@ -613,14 +622,14 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
 
     if status == GradingStatus.SUCCESS:
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name,
+            config.log_path, JOB_ID, jobname=item_name,
             message=f"Unpacked job from {worker_name}"
         )
     return status
 
 
 # ==================================================================================
-def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
+def grade_queue_file(config, my_name, which_machine, which_untrusted, queue_file):
     """
     Oversees the autograding of single item from the queue
 
@@ -636,8 +645,8 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
 
     # Try to short-circuit this job. If it's possible, then great! Clean
     # everything up and return.
-    if try_short_circuit(queue_file):
-        grading_cleanup(my_name, queue_file, grading_file)
+    if try_short_circuit(config, queue_file):
+        grading_cleanup(config, my_name, queue_file, grading_file)
         return
 
     # TODO: break which_machine into id, address, and passphrase.
@@ -647,7 +656,7 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
         shipper_counter = 0
         random_identifier = string_utils.generate_random_string(64)
         while not prepare_job(
-            my_name, which_machine, which_untrusted, my_dir, queue_file, random_identifier
+            config, my_name, which_machine, which_untrusted, my_dir, queue_file, random_identifier
         ):
             time.sleep(5)
 
@@ -656,7 +665,7 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
         if not prep_job_success:
             print(my_name, " ERROR unable to prepare job: ", queue_file)
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"{my_name} ERROR unable to prepare job: {queue_file}"
             )
 
@@ -664,7 +673,7 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
             # then wait for grading to be completed
             shipper_counter = 0
             while unpack_job(
-                which_machine, which_untrusted, my_dir, queue_file, random_identifier
+                config, which_machine, which_untrusted, my_dir, queue_file, random_identifier
             ) == GradingStatus.WAITING:
                 shipper_counter += 1
                 time.sleep(1)
@@ -674,43 +683,43 @@ def grade_queue_file(my_name, which_machine, which_untrusted, queue_file):
 
     except Exception as e:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         print(my_name, " ERROR attempting to grade item: ", queue_file, " exception=", str(e))
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"{my_name} ERROR attempting to grade item: {queue_file} exception={e}"
         )
 
-    grading_cleanup(my_name, queue_file, grading_file)
+    grading_cleanup(config, my_name, queue_file, grading_file)
 
 
-def grading_cleanup(my_name, queue_file, grading_file):
+def grading_cleanup(config, my_name, queue_file, grading_file):
     # note: not necessary to acquire lock for these statements, but
     # make sure you remove the queue file, then the grading file
     try:
         os.remove(queue_file)
     except Exception as e:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         print(f"{my_name} ERROR attempting to remove queue file: {queue_file} exception={e}")
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"{my_name} ERROR attempting to remove queue file: {queue_file} exception={e}"
         )
     try:
         os.remove(grading_file)
     except Exception as e:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         print(f"{my_name} ERROR attempting to remove grading file: {grading_file} exception={e}")
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"{my_name} ERROR attempting to remove grading file: "
                     f"{grading_file} exception={e}"
         )
@@ -753,20 +762,26 @@ def valid_github_repo_id(repoid):
     return True
 
 
-def checkout_vcs_repo(my_file):
+def checkout_vcs_repo(config, my_file):
     print("SHIPPER CHECKOUT VCS REPO ", my_file)
 
     with open(my_file, 'r') as infile:
         obj = json.load(infile)
 
     partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-    course_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", obj["semester"], obj["course"])
+    course_dir = os.path.join(
+        config.submitty['submitty_data_dir'],
+        "courses",
+        obj["semester"],
+        obj["course"]
+    )
     submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
 
     vcs_info = packer_unpacker.get_vcs_info(
-        SUBMITTY_DATA_DIR,
+        config,
+        config.submitty['submitty_data_dir'],
         obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
     is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = vcs_info
@@ -880,7 +895,7 @@ def checkout_vcs_repo(my_file):
             # exception on git rev-list
             except subprocess.CalledProcessError as error:
                 autograding_utils.log_message(
-                    AUTOGRADING_LOG_PATH, job_id,
+                    config.log_path, job_id,
                     message=f"ERROR: failed to determine version on master branch {error}"
                 )
                 os.chdir(checkout_path)
@@ -901,7 +916,7 @@ def checkout_vcs_repo(my_file):
         # exception on git clone
         except subprocess.CalledProcessError as error:
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, job_id,
+                config.log_path, job_id,
                 message=f"ERROR: failed to clone repository {error}"
             )
             os.chdir(checkout_path)
@@ -919,7 +934,7 @@ def checkout_vcs_repo(my_file):
     # exception in constructing full git repository url/path
     except Exception as error:
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, job_id,
+            config.log_path, job_id,
             message=f"ERROR: failed to construct valid repository url/path {error}"
         )
         os.chdir(checkout_path)
@@ -937,7 +952,7 @@ def checkout_vcs_repo(my_file):
 
 
 # ==================================================================================
-def get_job(my_name, which_machine, my_capabilities, which_untrusted):
+def get_job(config, my_name, which_machine, my_capabilities, which_untrusted):
     """
     Pick a job from the queue.
     """
@@ -986,7 +1001,7 @@ def get_job(my_name, which_machine, my_capabilities, which_untrusted):
         vcs_file = f[len(folder)+1:]
         no_vcs_file = f[len(folder)+1+5:]
         # do the checkout
-        updated_obj = checkout_vcs_repo(folder+"/"+vcs_file)
+        updated_obj = checkout_vcs_repo(config, folder+"/"+vcs_file)
         # save the regular grading queue file
         with open(os.path.join(folder, no_vcs_file), "w") as queue_file:
             json.dump(updated_obj, queue_file)
@@ -1059,7 +1074,7 @@ def get_job(my_name, which_machine, my_capabilities, which_untrusted):
     if time_delta > datetime.timedelta(milliseconds=100):
         print(my_name, " WARNING: submitty_autograding shipper get_job time ", time_delta)
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
+            config.log_path,
             JOB_ID,
             message=f"{my_name} WARNING: submitty_autograding shipper get_job time {time_delta}"
         )
@@ -1069,7 +1084,7 @@ def get_job(my_name, which_machine, my_capabilities, which_untrusted):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name, my_data, full_address, which_untrusted):
+def shipper_process(config, my_name, my_data, full_address, which_untrusted):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -1088,11 +1103,11 @@ def shipper_process(my_name, my_data, full_address, which_untrusted):
     counter = 0
     while True:
         try:
-            my_job = get_job(my_name, which_machine, my_capabilities, which_untrusted)
+            my_job = get_job(config, my_name, which_machine, my_capabilities, which_untrusted)
             if not my_job == "":
                 counter = 0
                 grade_queue_file(
-                    my_name, which_machine, which_untrusted, os.path.join(my_folder, my_job)
+                    config, my_name, which_machine, which_untrusted, os.path.join(my_folder, my_job)
                 )
                 continue
             else:
@@ -1106,14 +1121,14 @@ def shipper_process(my_name, my_data, full_address, which_untrusted):
 
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             my_message = (
                 f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. "
                 "For more details, see traces entry"
             )
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
+            autograding_utils.log_message(config.log_path, JOB_ID, message=my_message)
             time.sleep(1)
 
 
@@ -1229,7 +1244,7 @@ def history_short_circuit_helper(
     }
 
 
-def try_short_circuit(queue_file: str) -> bool:
+def try_short_circuit(config: dict, queue_file: str) -> bool:
     """Attempt to short-circuit the job represented by the given queue file.
 
     Returns True if the job is short-circuitable and was successfully
@@ -1250,7 +1265,7 @@ def try_short_circuit(queue_file: str) -> bool:
         queue_obj = json.load(fd)
 
     course_path = os.path.join(
-        SUBMITTY_DATA_DIR,
+        config.submitty['submitty_data_dir'],
         'courses',
         queue_obj['semester'],
         queue_obj['course']
@@ -1276,7 +1291,7 @@ def try_short_circuit(queue_file: str) -> bool:
     job_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
     gradeable_id = f"{queue_obj['semester']}/{queue_obj['course']}/{queue_obj['gradeable']}"
     autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH,
+        config.log_path,
         message=f"Short-circuiting {gradeable_id}",
         job_id=job_id
     )
@@ -1368,16 +1383,16 @@ def try_short_circuit(queue_file: str) -> bool:
         results_zip_path = os.path.join(base_dir, 'results.zip')
         autograding_utils.zip_my_directory(results_dir, results_zip_path)
         packer_unpacker.unpack_grading_results_zip(
-            '(short-circuit)', '(short-circuit)', results_zip_path
+            config, '(short-circuit)', '(short-circuit)', results_zip_path
         )
     except Exception:
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, job_id=job_id,
+            config.log_path, job_id=job_id,
             message=f"Short-circuit failed for {gradeable_id} (check stack traces). "
                     "Falling back to standard grade."
         )
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=job_id,
+            config.error_path, job_id=job_id,
             trace=traceback.format_exc()
         )
         return False
@@ -1385,7 +1400,7 @@ def try_short_circuit(queue_file: str) -> bool:
         shutil.rmtree(base_dir, ignore_errors=True)
 
     autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH, job_id=job_id,
+        config.log_path, job_id=job_id,
         message=f"Successfully short-circuited {gradeable_id}!",
     )
     return True
@@ -1461,25 +1476,29 @@ def write_grading_outputs(
 
 # ==================================================================================
 # ==================================================================================
-def cleanup_shippers(worker_status_map, autograding_workers):
+def cleanup_shippers(config, worker_status_map, autograding_workers):
     print("CLEANUP SHIPPERS")
     autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH, JOB_ID,
+        config.log_path, JOB_ID,
         message="cleanup prior to launching submitty_autograding_shipper.py"
     )
 
     # remove the temporary files for any incomplete autograding
-    for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
+    for file_path in Path(
+        config.submitty['submitty_data_dir'],
+        "autograding_TODO"
+    ).glob("untrusted*"):
         file_path = str(file_path)
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"Remove autograding TODO file: {file_path}"
         )
         os.remove(file_path)
-    for file_path in Path(SUBMITTY_DATA_DIR, "autograding_DONE").glob("*"):
+
+    for file_path in Path(config.submitty['submitty_data_dir'], "autograding_DONE").glob("*"):
         file_path = str(file_path)
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message=f"Remove autograding DONE file: {file_path}"
         )
         os.remove(file_path)
@@ -1490,7 +1509,7 @@ def cleanup_shippers(worker_status_map, autograding_workers):
             dname, fname = os.path.split(f)
             if fname.startswith("GRADING_"):
                 os.remove(f)
-                print(f"cancelling in progress job: {fname}")
+                print(f"canceling in progress job: {fname}")
             else:
                 try:
                     shutil.move(str(f), INTERACTIVE_QUEUE)
@@ -1504,29 +1523,28 @@ def cleanup_shippers(worker_status_map, autograding_workers):
 
 # ==================================================================================
 # ==================================================================================
-def launch_shippers(worker_status_map, autograding_workers):
+def launch_shippers(config, worker_status_map, autograding_workers):
     print("LAUNCH SHIPPERS")
     autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH, JOB_ID,
+        config.log_path, JOB_ID,
         message="submitty_autograding_shipper.py launched"
     )
 
     # Launch a shipper process for every worker on the primary machine and each worker machine
     processes = list()
     for name, machine in autograding_workers.items():
-
         # SKIP MACHINES THAT ARE NOT ENABLED OR NOT REACHABLE
         if not machine['enabled']:
             print(f"NOTE: MACHINE {name} is not enabled")
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"NOTE: MACHINE {name} is not enabled"
             )
             continue
         if not worker_status_map[name]:
             print(f"ERROR: MACHINE {name} could not be reached => no shipper threads.")
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"ERROR: MACHINE {name} could not be reached => no shipper threads."
             )
             continue
@@ -1555,16 +1573,20 @@ def launch_shippers(worker_status_map, autograding_workers):
                     raise SystemExit('ERROR: username for primary (localhost) must be ""')
                 full_address = machine['address']
             single_machine_data = {name: machine}
-            single_machine_data = add_fields_to_autograding_worker_json(single_machine_data, name)
+            single_machine_data = add_fields_to_autograding_worker_json(
+                config,
+                single_machine_data,
+                name
+            )
         except Exception as e:
             autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+                config.error_path, job_id=JOB_ID,
                 trace=traceback.format_exc()
             )
             print(f"ERROR: autograding_workers.json entry for {name} contains an error: {e}. "
                   "For more details, see trace entry.")
             autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
+                config.log_path, JOB_ID,
                 message=f"ERROR: autograding_workers.json entry for {name} contains an error: {e} "
                         "For more details, see trace entry."
             )
@@ -1576,7 +1598,7 @@ def launch_shippers(worker_status_map, autograding_workers):
             u = "untrusted" + str(i).zfill(2)
             p = multiprocessing.Process(
                 target=shipper_process,
-                args=(thread_name, single_machine_data[name], full_address, u)
+                args=(config, thread_name, single_machine_data[name], full_address, u)
             )
             p.start()
             processes.append((thread_name, p))
@@ -1604,7 +1626,7 @@ def worker_job_match(worker, autograding_workers, job_requirements):
         return None
 
 
-def monitoring_loop(autograding_workers, processes):
+def monitoring_loop(config, autograding_workers, processes):
 
     print("MONITORING LOOP")
     total_num_workers = len(processes)
@@ -1618,12 +1640,12 @@ def monitoring_loop(autograding_workers, processes):
                     alive = alive+1
                 else:
                     autograding_utils.log_message(
-                        AUTOGRADING_LOG_PATH, JOB_ID,
+                        config.log_path, JOB_ID,
                         message=f"ERROR: process {name} is not alive"
                     )
             if alive != total_num_workers:
                 autograding_utils.log_message(
-                    AUTOGRADING_LOG_PATH, JOB_ID,
+                    config.log_path, JOB_ID,
                     message=f"ERROR: #shippers={total_num_workers} != #alive={alive}"
                 )
 
@@ -1658,7 +1680,7 @@ def monitoring_loop(autograding_workers, processes):
                 # pick one of the matching workers randomly
                 dest = random.choice(matching_workers)
                 autograding_utils.log_message(
-                    AUTOGRADING_LOG_PATH, JOB_ID,
+                    config.log_path, JOB_ID,
                     message=f"Pushing job {os.path.basename(job)} to {dest}."
                 )
                 shutil.move(job, worker_folder(dest))
@@ -1668,7 +1690,7 @@ def monitoring_loop(autograding_workers, processes):
 
     except KeyboardInterrupt:
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH, JOB_ID,
+            config.log_path, JOB_ID,
             message="grade_scheduler.py keyboard interrupt"
         )
         # just kill everything in this group id right now
@@ -1689,13 +1711,13 @@ def monitoring_loop(autograding_workers, processes):
             processes[i].join()
 
     autograding_utils.log_message(
-        AUTOGRADING_LOG_PATH, JOB_ID,
+        config.log_path, JOB_ID,
         message="grade_scheduler.py terminated"
     )
 
 
 # ==================================================================================
-def load_autograding_workers_json():
+def load_autograding_workers_json(config):
     print("LOAD AUTOGRADING WORKERS JSON")
 
     # The names of the worker machines, the capabilities of each
@@ -1703,13 +1725,13 @@ def load_autograding_workers_json():
     # in the autograding_workers json.
     try:
         autograding_workers_path = os.path.join(
-            SUBMITTY_INSTALL_DIR, 'config', "autograding_workers.json"
+            config.submitty['submitty_install_dir'], 'config', "autograding_workers.json"
         )
         with open(autograding_workers_path, 'r') as infile:
             autograding_workers = json.load(infile)
     except Exception as e:
         autograding_utils.log_stack_trace(
-            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            config.error_path, job_id=JOB_ID,
             trace=traceback.format_exc()
         )
         raise SystemExit(f"ERROR: could not locate the autograding workers json: {e}")
@@ -1737,14 +1759,20 @@ def load_autograding_workers_json():
 
 # ==================================================================================
 if __name__ == "__main__":
+
+    config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+    config = submitty_config.Config.path_constructor(config_dir)
+
+    instantiate_global_variables(config)
+
     # verify the DAEMON_USER is running this script
-    if not int(os.getuid()) == int(DAEMON_UID):
+    if not int(os.getuid()) == int(config.submitty_users['daemon_uid']):
         raise SystemExit(
             "ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER"
         )
 
-    autograding_workers = load_autograding_workers_json()
-    worker_status_map = update_all_foreign_autograding_workers(autograding_workers)
-    cleanup_shippers(worker_status_map, autograding_workers)
-    processes = launch_shippers(worker_status_map, autograding_workers)
-    monitoring_loop(autograding_workers, processes)
+    autograding_workers = load_autograding_workers_json(config)
+    worker_status_map = update_remote_autograding_workers(config, autograding_workers)
+    cleanup_shippers(config, worker_status_map, autograding_workers)
+    processes = launch_shippers(config, worker_status_map, autograding_workers)
+    monitoring_loop(config, autograding_workers, processes)
