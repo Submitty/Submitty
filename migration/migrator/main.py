@@ -223,9 +223,15 @@ def handle_migration(args):
         if environment == 'course':
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
-                raise SystemExit(
-                    f"Migrator Error:  Could not find courses directory: {course_dir}"
-                )
+                # NOTE: Do not crash here.  On a fresh vagrant up, we
+                # do not have a courses directory the first time we
+                # run this script.
+                # raise SystemExit(
+                #     f"Migrator Error:  Could not find courses directory: {course_dir}"
+                # )
+                print(f"Migrator Warning:  Could not find courses directory: {course_dir} "
+                      "(only ok on new system installation)")
+                continue
             for semester in sorted(os.listdir(str(course_dir))):
                 courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
                 for course in courses:
