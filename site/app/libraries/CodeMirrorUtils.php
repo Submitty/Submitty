@@ -70,7 +70,6 @@ class CodeMirrorUtils {
         return array_keys(self::MIME_TYPE_MAP);
     }
 
-
     /**
      * Given a language find the corresponding codemirror mime-type.
      *
