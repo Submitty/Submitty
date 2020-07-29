@@ -479,7 +479,7 @@ class Gradeable extends AbstractModel {
                 array_push($bad_rows, ($grading_list[0]));
             }
         }
-        if(count($input) == 0){
+        if (count($input) == 0) {
             $this->core->addErrorMessage("Changes Failed, Not Enough Submissions");
             return;
         }
