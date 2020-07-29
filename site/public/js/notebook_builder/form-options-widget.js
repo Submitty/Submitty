@@ -53,17 +53,21 @@ class FormOptionsWidget extends Widget {
             return;
         }
 
-        const file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
+        const config_json_file = new File([JSON.stringify(notebook_builder.getJSON(), null, 2)], 'config.json', {type: "text/plain"});
         const url = buildCourseUrl(['notebook_builder', 'save']);
 
         const form_data = new FormData();
-        form_data.append('config_upload', file, 'config.json');
+        form_data.append('config_upload', config_json_file, 'config.json');
         form_data.append('csrf_token', csrfToken);
         form_data.append('g_id', builder_data.g_id);
-        form_data.append('mode', builder_data.mode);
 
         const makeRequest = async () => {
             this.appendStatusMessage('Saving...');
+
+            // Currently only deals with uploading images, will rework later to accommodate other files/directories as needed
+            // Wait for all files to be uploaded before continuing
+            const file_selectors = document.querySelectorAll('input[type=file]');
+            await uploadFiles(file_selectors, builder_data.g_id, 'test_input');
 
             const response = await fetch(url, {method: 'POST', body: form_data});
             const result = await response.json();
@@ -76,9 +80,6 @@ class FormOptionsWidget extends Widget {
 
                 this.appendStatusMessage(`Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`);
                 this.appendStatusMessage(`To make other changes to the gradeable configuration visit the <a href="${edit_gradeable_url}">edit gradeable page</a>.`);
-
-                // Set mode to 'edit' so any additional edits on a 'new' config will be handled correctly
-                builder_data.mode = 'edit';
             }
             else {
                 this.appendStatusMessage(result.message);
