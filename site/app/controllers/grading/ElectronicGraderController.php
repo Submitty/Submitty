@@ -1388,6 +1388,9 @@ class ElectronicGraderController extends AbstractController {
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
             if ($gradeable->isPeerGrading()) {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
+                $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
+                $response_data['peer_total'] = $gradeable->getPeerPoints();
+                $response_data['user_group'] = $this->core->getUser()->getGroup();
             }
             else {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore(null);

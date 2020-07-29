@@ -8,31 +8,41 @@ Required Parameters:
 
 #}
 {% set show_total = auto_grading_total is defined and ta_grading_total is defined %}
-{% if auto_grading_total is defined %}
-    <div class="box-title badge-container">
-        <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total, auto_grading_complete) }}">
-            {{ auto_grading_earned is defined ? auto_grading_earned|round(decimal_precision) : '&minus;' }} / {{ auto_grading_total|round(decimal_precision) }}
-        </strong>
-        <strong>Autograding Total</strong>
-    </div>
-{% endif %}
-{% if ta_grading_total is defined %}
-    <div class="box-title badge-container">
-        <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total, ta_grading_complete) }}">
-            {{ ta_grading_earned is defined ? ta_grading_earned|round(decimal_precision) : '&minus;' }} / {{ ta_grading_total|round(decimal_precision) }}
-        </strong>
-        <strong>Manual Grading Total</strong>
-    </div>
-{% endif %}
-{% if show_total %}
-    {% set any_earned = ta_grading_earned is defined or auto_grading_earned is defined %}
-    {% if any_earned %}
-        {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) %}
+{% if user_group < 4 %}
+    {% if auto_grading_total is defined %}
+        <div class="box-title badge-container">
+            <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total, auto_grading_complete) }}">
+                {{ auto_grading_earned is defined ? auto_grading_earned|round(decimal_precision) : '&minus;' }} / {{ auto_grading_total|round(decimal_precision) }}
+            </strong>
+            <strong>Autograding Total</strong>
+        </div>
     {% endif %}
+    {% if ta_grading_total is defined %}
+        <div class="box-title badge-container">
+            <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total, ta_grading_complete) }}">
+                {{ ta_grading_earned is defined ? ta_grading_earned|round(decimal_precision) : '&minus;' }} / {{ ta_grading_total|round(decimal_precision) }}
+            </strong>
+            <strong>TA Grading Total</strong>
+        </div>
+    {% endif %}
+    {% if show_total %}
+        {% set any_earned = ta_grading_earned is defined or auto_grading_earned is defined %}
+        {% if any_earned %}
+            {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) %}
+        {% endif %}
+        <div class="box-title badge-container">
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, (ta_grading_total + auto_grading_total), ta_grading_complete) }}">
+                {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (ta_grading_total + auto_grading_total)|round(decimal_precision) }}
+            </strong>
+            <strong>Total</strong>
+        </div>
+    {% endif %}
+{% endif %}
+{% if user_group == 4 %}
     <div class="box-title badge-container">
         <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, (ta_grading_total + auto_grading_total), ta_grading_complete) }}">
-            {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (ta_grading_total + auto_grading_total)|round(decimal_precision) }}
+            {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
-        <strong>Total</strong>
+        <strong>My Peer Grading Total</strong>
     </div>
 {% endif %}
