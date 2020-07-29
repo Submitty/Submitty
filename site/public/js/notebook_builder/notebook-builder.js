@@ -1,33 +1,22 @@
 // Attach notebook_builder object to the window
 window.addEventListener('DOMContentLoaded', (event) => {
     window.notebook_builder = new NotebookBuilder();
-    notebook_builder.render();
 });
 
 class NotebookBuilder {
     constructor() {
-        this.widgets = [];
+        // Setup object properties
+        this.reorderable_widgets = [];
         this.selector = new SelectorWidget();
         this.form_options = new FormOptionsWidget();
-    }
 
-    /**
-     * Display all widgets the notebook builder is keeping track of.
-     */
-    render() {
-        // Get a handle on the main div
+        // Setup fixed position widgets
         const main_div = document.getElementById('notebook-builder');
-
-        // Clear
-        main_div.innerHTML = '';
-
-        // Draw widgets
-        this.widgets.forEach(widget => {
-            main_div.appendChild(widget.render());
-        });
-
         main_div.appendChild(this.selector.render());
         main_div.appendChild(this.form_options.render());
+
+        // Load and render reorderable notebook widgets
+        this.load();
     }
 
     /**
@@ -36,7 +25,7 @@ class NotebookBuilder {
     getJSON() {
         const notebook_array = [];
 
-        this.widgets.forEach(widget => {
+        this.reorderable_widgets.forEach(widget => {
             // Ensure we got something back before adding to the notebook_array
             const widget_json = widget.getJSON();
             if (widget_json) {
@@ -44,10 +33,36 @@ class NotebookBuilder {
             }
         });
 
-        return {
-            notebook: notebook_array,
-            testcases: []
-        };
+        builder_data.config.notebook = notebook_array;
+        return builder_data.config;
+    }
+
+    load() {
+        builder_data.config.notebook.forEach(cell => {
+            let widget;
+
+            switch (cell.type) {
+                case 'multiple_choice':
+                    widget = new MultipleChoiceWidget();
+                    break;
+                case 'markdown':
+                    widget = new MarkdownWidget();
+                    break;
+                case 'short_answer':
+                    widget = new ShortAnswerWidget();
+                    break;
+                case 'image':
+                    widget = new ImageWidget();
+                    break;
+                default:
+                    break;
+            }
+
+            if (widget) {
+                widget.load(cell);
+                this.widgetAdd(widget);
+            }
+        });
     }
 
     /**
@@ -56,8 +71,10 @@ class NotebookBuilder {
      * @param {Widget} widget
      */
     widgetAdd(widget) {
-        this.widgets.push(widget);
-        this.render();
+        this.reorderable_widgets.push(widget);
+
+        const widgets_div = document.getElementById('reorderable-widgets');
+        widgets_div.appendChild(widget.render());
     }
 
     /**
@@ -66,9 +83,10 @@ class NotebookBuilder {
      * @param {Widget} widget
      */
     widgetRemove(widget) {
-        const index = this.widgets.indexOf(widget);
-        this.widgets.splice(index, 1);
-        this.render();
+        widget.dom_pointer.remove();
+
+        const index = this.reorderable_widgets.indexOf(widget);
+        this.reorderable_widgets.splice(index, 1);
     }
 
     /**
@@ -77,16 +95,18 @@ class NotebookBuilder {
      * @param {Widget} widget
      */
     widgetUp(widget) {
-        const index = this.widgets.indexOf(widget);
+        const index = this.reorderable_widgets.indexOf(widget);
 
         // If index is 0 then do nothing
         if (index === 0) {
             return;
         }
 
-        this.widgets.splice(index, 1);
-        this.widgets.splice(index - 1, 0, widget);
-        this.render();
+        this.reorderable_widgets.splice(index, 1);
+        this.reorderable_widgets.splice(index - 1, 0, widget);
+
+        const elem = widget.dom_pointer;
+        elem.parentElement.insertBefore(elem, elem.previousElementSibling);
     }
 
     /**
@@ -95,15 +115,17 @@ class NotebookBuilder {
      * @param {Widget} widget
      */
     widgetDown(widget) {
-        const index = this.widgets.indexOf(widget);
+        const index = this.reorderable_widgets.indexOf(widget);
 
         // If widget is already at the end of the form then do nothing
-        if (index === this.widgets.length - 1) {
+        if (index === this.reorderable_widgets.length - 1) {
             return;
         }
 
-        this.widgets.splice(index, 1);
-        this.widgets.splice(index + 1, 0, widget);
-        this.render();
+        this.reorderable_widgets.splice(index, 1);
+        this.reorderable_widgets.splice(index + 1, 0, widget);
+
+        const elem = widget.dom_pointer;
+        elem.parentElement.insertBefore(elem, elem.nextElementSibling.nextElementSibling);
     }
 }

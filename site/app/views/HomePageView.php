@@ -69,4 +69,12 @@ class HomePageView extends AbstractView {
             "add_term_url" => $this->output->buildUrl(['term', 'new'])
         ]);
     }
+
+    public function showSystemUpdatePage(string $csrf_token): string {
+        $this->output->addBreadcrumb("System Update");
+        return $this->output->renderTwigTemplate('admin/SystemUpdate.twig', [
+            "csrf_token" => $csrf_token,
+            "latest_tag" => $this->core->getConfig()->getLatestTag()
+        ]);
+    }
 }
