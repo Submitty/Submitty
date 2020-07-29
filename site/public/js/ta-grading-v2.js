@@ -580,7 +580,7 @@ function resetTwoPanelLayout() {
     taLayoutDet.currentOpenPanel = rightBottomPanelId;
   }
   if (rightTopPanel) {
-    document.querySelector('.panels-container').append(rightTopPanelId);
+    document.querySelector('.panels-container').append(rightTopPanel);
     taLayoutDet.currentOpenPanel = rightTopPanelId;
   }
   if (leftBottomPanel) {
@@ -729,7 +729,7 @@ function togglePanelLayoutModes(forceVal = false) {
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
-    $(".panel-item-section.left-bottom, .panel-item-section-drag-bar").addClass("active");
+    $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
     // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
     let prevPanel = taLayoutDet.currentTwoPanels.leftTop ? taLayoutDet.currentTwoPanels.leftTop : taLayoutDet.currentTwoPanels.rightTop;
     let nextIdx = -1;
