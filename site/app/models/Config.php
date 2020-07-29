@@ -73,11 +73,8 @@ use app\libraries\FileUtils;
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
-<<<<<<< HEAD
  * @method string getSeekMessageInstructions()
-=======
  * @method string getQueueAnnouncementMessage()
->>>>>>> df815e426c437e909b12dc0f120bb39f426bcc87
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  */
