@@ -98,7 +98,10 @@ class ElectronicGraderController extends AbstractController {
                 }
                 
                 $number_of_students = count($student_array);
-                
+                if ($number_of_students <= 1) {
+                    $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
+                    return JsonResponse::getFailResponse("Not Enough Submissions");
+                }
                 /* If number of students entered is more than number of students in registration section,
                    then for each registration section with less number of students, everyone will grade everyone */
                 if ($number_to_grade >= $number_of_students) {
@@ -185,6 +188,10 @@ class ElectronicGraderController extends AbstractController {
             }
         }
         $number_of_students = count($student_array);
+        if ($number_of_students <= 1) {
+            $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
+            return JsonResponse::getFailResponse("Not Enough Submissions");
+        }
         if ($number_to_grade > $number_of_students) {
             $all_grade_all = true;
         }
@@ -222,6 +229,10 @@ class ElectronicGraderController extends AbstractController {
             $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
             Upon every random choice of an offset from $temp_offset, the value is removed from it.
         */
+        if (count($temp_offset) == 0) {
+            $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
+            return JsonResponse::getFailResponse("Not Enough Submissions");
+        }
         for ($i = 0; $i < $number_to_grade; ++$i) {
             $random_offset = array_rand($temp_offset, 1);
             array_push($offset_array, $temp_offset[$random_offset]);
