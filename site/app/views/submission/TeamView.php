@@ -23,6 +23,7 @@ class TeamView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
+            "config" => $this->core->getConfig(),
             "team" => $team,
             "user" => $this->core->getUser(),
             "lock" => $lock,

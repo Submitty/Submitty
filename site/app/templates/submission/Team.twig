@@ -112,14 +112,11 @@
         {% endif %}
 
         {# Set Seeking Message #}
-        {% if viewer.isSeekMessageEnabled() %}
+        {% if config.isSeekMessageEnabled() %}
             {% if seeking_partner %}
                 <br /> 
                 <br /> 
-                <p> 
-                {# <p> {{entry['seek_message_info']}} </p> #}
-                Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.
-                </p>
+                <p> {{entry['seek_message_instructions']}} </p>
                 <br />
                 <form action="{{ set_message_url }}" method="post">
                     <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
@@ -147,9 +144,9 @@
                     <th style="width:9%">Last Name</th>
                     <th style="width:8%">User ID</th>
                     <th style="width:30%">Email</th>
-                    {# {% if viewer.isSeekMessageEnabled() %} #}
+                    {% if config.isSeekMessageEnabled() %}
                         <th style="width:40%">Message</th>
-                    {# {% endif %} #}
+                    {% endif %}
                     
                 </tr>
             </thead>
@@ -161,9 +158,9 @@
                         <td>{{ user_details.getDisplayedLastName() }}</td>
                         <td>{{ user_details.getId() }}</td>
                         <td>{{ user_details.getEmail() }}</td>
-                        {# {% if viewer.isSeekMessageEnabled() %} #}  
+                        {% if config.isSeekMessageEnabled() %}
                             <td>{{ user_details.getSeekMessage(gradeable.getId()) }}</td>
-                        {# {% endif %} #}       
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>

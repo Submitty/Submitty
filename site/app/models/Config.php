@@ -460,7 +460,7 @@ class Config extends AbstractModel {
             'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'seek_message_enabled', 'seek_message_instructions', 'polls_enabled', 'polls_pts_for_correct',
             'polls_pts_for_incorrect'
         ];
-        var_dump($course_json_path);
+        //var_dump($course_json_path);
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
@@ -490,7 +490,6 @@ class Config extends AbstractModel {
             'queue_enabled',
             'queue_contact_info',
             'seek_message_enabled',
-            'seek_message_instructions',
             'polls_enabled'
         ];
         foreach ($array as $key) {
