@@ -8,6 +8,7 @@ use app\models\OfficeHoursQueueModel;
 class OfficeHoursQueueView extends AbstractView {
 
     public function showTheQueue($viewer) {
+        var_dump($viewer);
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
         $this->core->getOutput()->enableMobileViewport();

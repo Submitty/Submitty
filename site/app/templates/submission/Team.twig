@@ -112,18 +112,21 @@
         {% endif %}
 
         {# Set Seeking Message #}
-        {% if seeking_partner %}
-            <br /> 
-            <br /> 
-            <p>
-            Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.
-            </p>
-            <br />
-            <form action="{{ set_message_url }}" method="post">
-                <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                <input type="submit" value = "Set Message" class="btn btn-primary" />
-            </form>
+        {% if viewer.isSeekMessageEnabled() %}
+            {% if seeking_partner %}
+                <br /> 
+                <br /> 
+                <p> 
+                {# <p> {{entry['seek_message_info']}} </p> #}
+                Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.
+                </p>
+                <br />
+                <form action="{{ set_message_url }}" method="post">
+                    <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <input type="submit" value = "Set Message" class="btn btn-primary" />
+                </form>
+            {% endif %}
         {% endif %}
 
     </div>
@@ -158,14 +161,9 @@
                         <td>{{ user_details.getDisplayedLastName() }}</td>
                         <td>{{ user_details.getId() }}</td>
                         <td>{{ user_details.getEmail() }}</td>
-                        {# {% if viewer.isSeekMessageEnabled() %} #}
-                            <td class="mobile-hide">
-                              <a onclick="unhideMessage(this, '{{ user_details.getSeekMessage(gradeable.getId()) }}')" onkeypress="unhideMessage(this, '{{ user_details.getSeekMessage(gradeable.getId()) }}')" title="Show user message" aria-label="Show user message" tabindex="0">
-                                <i class="fas fa-eye"></i>
-                              </a>
-                            </td>
-                        {# <td>{{ user_details.getSeekMessage(gradeable.getId()) }}</td>
-                        {% endif %} #}       
+                        {# {% if viewer.isSeekMessageEnabled() %} #}  
+                            <td>{{ user_details.getSeekMessage(gradeable.getId()) }}</td>
+                        {# {% endif %} #}       
                     </tr>
                 {% endfor %}
             </tbody>
@@ -184,7 +182,4 @@
         },0);
     }
 
-    function unhideMessage(element, id) {
-        element.parentElement.innerHTML = id;
-    }
 </script>

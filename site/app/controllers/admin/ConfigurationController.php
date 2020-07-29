@@ -55,6 +55,8 @@ class ConfigurationController extends AbstractController {
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
+            'seek_message_enabled'                  => $this->core->getConfig()->isSeekMessageEnabled(),
+            'seek_message_instructions'             => $this->core->getConfig()->getSeekMessageInstructions(),
             'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
             'polls_pts_for_correct'          => $this->core->getConfig()->getPollsPtsForCorrect(),
             'polls_pts_for_incorrect'        => $this->core->getConfig()->getPollsPtsForIncorrect(),
@@ -148,6 +150,8 @@ class ConfigurationController extends AbstractController {
                     'seating_only_for_instructor',
                     'queue_enabled',
                     'queue_contact_info',
+                    'seek_message_enabled',
+                    'seek_message_instructions',
                     'polls_enabled'
                 ]
             )
