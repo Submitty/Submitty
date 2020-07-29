@@ -149,7 +149,7 @@ def print_header(OPEN_AUTOGRADING_WORKERS_JSON, capability_queue_counts,
         print("{:9s}".format("["+str(num)+"]"), end="")
     print(' '*pad_machines, end="")
     print("{:2}".format("|"), end="")
-    for cap in capability_queue_counts:
+    for _cap in capability_queue_counts:
         print("{:9}".format(""), end="")
     print(' '*pad_capabilities, end="")
     print("{:1}".format("|"), end="")
