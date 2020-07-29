@@ -55,7 +55,7 @@
         {% endfor %}
 
         {# Directories underneath #}
-        {% for dir, path in files if path is iterable %}
+        {% for dir, path in files|filter(path => path is iterable) %}
             {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
         {% endfor %}
 {% endmacro %}
