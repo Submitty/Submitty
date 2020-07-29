@@ -30,9 +30,11 @@ const taLayoutDet = {
     right: null,
   },
   leftPanelWidth: "50%",
+  leftTopPanelHeight: "50%",
   panelsContSelector: ".two-panel-cont",
   leftSelector : ".two-panel-item.two-panel-left",
-  dragBarSelector: ".two-panel-drag-bar",
+  verticalDragBarSelector: ".two-panel-drag-bar",
+  horizontalDragBarSelector: ".panel-item-section-drag-bar",
   panelsBucket: {
     leftTopSelector : ".two-panel-item.two-panel-left .left-top",
     leftBottomSelector : ".two-panel-item.two-panel-left .left-bottom",
@@ -133,12 +135,12 @@ function saveTaLayoutDetails() {
   localStorage.setItem("taLayoutDetails", JSON.stringify(taLayoutDet));
 }
 
-function initializeTwoPanelDrag () {
+function initializeVerticalTwoPanelDrag () {
   // Select all the DOM elements for dragging in two-panel-mode
   const leftPanel = document.querySelector(taLayoutDet.leftSelector);
   // const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
   const panelCont = document.querySelector(taLayoutDet.panelsContSelector);
-  const dragbar = document.querySelector(taLayoutDet.dragBarSelector);
+  const dragbar = document.querySelector(taLayoutDet.verticalDragBarSelector);
 
   let xPos = 0, yPos = 0, leftPanelWidth = 0;
 
@@ -189,6 +191,63 @@ function initializeTwoPanelDrag () {
   saveTaLayoutDetails();
 }
 
+function initializeHorizontalTwoPanelDrag () {
+  console.log("Inside initializeHorizontalTwoPanelDrag");
+  // Select all the DOM elements for dragging in two-panel-mode
+  const leftTopPanel = document.querySelector(taLayoutDet.panelsBucket.leftTopSelector);
+  // const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
+  const panelCont = document.querySelector(taLayoutDet.leftSelector);
+  const dragbar = document.querySelector(taLayoutDet.horizontalDragBarSelector);
+
+  let xPos = 0, yPos = 0, leftPanelHeight = 0;
+
+  // Width of left side
+  const mouseDownHandler = function(e) {
+    // Get the current mouse position
+    xPos = e.clientX;
+    yPos = e.clientY;
+    leftPanelHeight = leftTopPanel.getBoundingClientRect().height;
+
+    // Attach the listeners to `document`
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseUpHandler = () => {
+    // remove the dragging CSS props to go back to initial styling
+    dragbar.style.removeProperty("cursor");
+    document.body.style.removeProperty("cursor");
+    document.body.style.removeProperty("user-select");
+    document.body.style.removeProperty("pointer-events");
+    dragbar.style.removeProperty("filter");
+
+    // Remove the handlers of `mousemove` and `mouseup`
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    document.removeEventListener("mouseup", mouseUpHandler);
+  };
+
+  const mouseMoveHandler = (e) => {
+    const dy = e.clientY - yPos;
+    const updateLeftPanelHeight = (leftPanelHeight + dy) * 100 / panelCont.getBoundingClientRect().height;
+    leftTopPanel.style.height = `${updateLeftPanelHeight}%`;
+    // save the updated width of left column
+    taLayoutDet.leftTopPanelHeight = `${updateLeftPanelHeight}%`;
+    saveTaLayoutDetails();
+
+    // consistent mouse pointer during dragging
+    document.body.style.cursor = "col-resize";
+    // Disable text selection when dragging
+    document.body.style.userSelect = "none";
+    document.body.style.pointerEvents = "none";
+    // Add blurry effect on drag-bar
+    dragbar.style.filter = "blur(5px)";
+  };
+  dragbar.addEventListener("mousedown", mouseDownHandler);
+  // update the width whenever left-cols are switched between normal and full-left-col
+  updateTopAndBottomColsWidth();
+  saveTaLayoutDetails();
+}
+
 function initializeTaLayout() {
   if (isMobileView) {
     console.log("Run resetTwoPanelLayout");
@@ -200,7 +259,8 @@ function initializeTaLayout() {
     togglePanelLayoutModes(true);
     // initialize the layout
     console.log("Run initializeTwoPanelDrag");
-    initializeTwoPanelDrag();
+    initializeVerticalTwoPanelDrag();
+    initializeHorizontalTwoPanelDrag();
     if (taLayoutDet.isFullLeftColumnMode) {
       console.log("Run toggleFullLeftColumnMode");
       toggleFullLeftColumnMode(true);
@@ -221,6 +281,14 @@ function updateLeftColsWidth() {
   const leftColumns = $(".two-panel-item.two-panel-left, .content-item.content-item-left");
   leftColumns.css({
     width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : "50%"
+  });
+}
+
+// updates width of left columns (normal + full-left-col) with the last saved layout width
+function updateTopAndBottomColsWidth() {
+  const leftTopCol = $(".panel-item-section.left-top");
+  leftTopCol.css({
+    height: taLayoutDet.leftTopPanelHeight ? taLayoutDet.leftTopPanelHeight : "50%"
   });
 }
 
@@ -572,12 +640,12 @@ function toggleFullLeftColumnMode (forceVal = false) {
   let newPanelsContSelector = taLayoutDet.isFullLeftColumnMode ? ".content-items-container" : ".two-panel-cont";
 
   let leftPanelCont = document.querySelector(taLayoutDet.leftSelector);
-  let dragBar = document.querySelector(taLayoutDet.dragBarSelector);
+  let dragBar = document.querySelector(taLayoutDet.verticalDragBarSelector);
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   taLayoutDet.panelsContSelector = newPanelsContSelector;
   // update the dragging event for two panels
-  initializeTwoPanelDrag();
+  initializeVerticalTwoPanelDrag();
 }
 
 function togglePanelLayoutModes(forceVal = false) {

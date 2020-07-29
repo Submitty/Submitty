@@ -434,7 +434,6 @@ progress::-webkit-progress-value {
 }
 
 .panel-item-section.left-top{
-    flex: 1;
     height: 50%;
     min-height: 100px;
     background: var(--standard-medium-gray);
