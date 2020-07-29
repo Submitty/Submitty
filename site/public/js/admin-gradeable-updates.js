@@ -163,7 +163,7 @@ $(document).ready(function () {
                         $(val).val('0');
                     }
                     data[val.name] = $(val).val();
-                    let all_grade_all=false;
+                   
             };
             setRandomGraders($('#g_id').val(), data, function (response_data) {
                 // Clear errors by setting new values
@@ -190,7 +190,6 @@ $(document).ready(function () {
                 if ( confirm("Each student grades every other student! Continue?")) {
                     let data = {'csrf_token': csrfToken};
                     data[this.name] = $(this).val();
-                    let all_grade_all=true;
                     let addDataToRequest = function (i, val) {
                         if (val.type === 'radio' && !$(val).is(':checked')) {
                             return;
@@ -214,7 +213,7 @@ $(document).ready(function () {
                         }
                     }
                     updateErrorMessage();
-                }, updateGradeableErrorCallback, all_grade_all);
+                }, updateGradeableErrorCallback, true);
             }
             else {
                 return false;
