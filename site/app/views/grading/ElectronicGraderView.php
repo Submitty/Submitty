@@ -269,7 +269,6 @@ class ElectronicGraderView extends AbstractView {
             "peer_graded" => $peer_graded,
             "peer_percentage" => $peer_percentage,
             "entire_peer_total" => $entire_peer_total,
-            "total_students_submitted" => $total_students_submitted,
             "total_grading_percentage" => $total_grading_percentage,
             "entire_peer_graded" => $entire_peer_graded,
             "entire_peer_percentage" => $entire_peer_percentage,

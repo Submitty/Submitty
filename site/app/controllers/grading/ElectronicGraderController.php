@@ -340,6 +340,7 @@ class ElectronicGraderController extends AbstractController {
         $total_indvidual_students = 0;
         $viewed_grade = 0;
         $num_gradeables = 1;
+        $total_who_submitted = 0;
         $peers_to_grade = 0;
         $peer_graded_components = 0;
 
