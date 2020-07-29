@@ -1023,7 +1023,6 @@ class ElectronicGraderController extends AbstractController {
         }
         $peer = $gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
-
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         if ($who_id === '') {
@@ -1078,22 +1077,28 @@ class ElectronicGraderController extends AbstractController {
 
             // Reassign who_id
             if (!is_null($goToStudent)) {
-                $who_id = $peer && !$team ? $goToStudent->getAnonId() :   $goToStudent->getId();
+                $who_id = $peer ? $goToStudent->getAnonId() :   $goToStudent->getId();
+            }
+            else {
+                // There is no next/prev student found
+                // Either the grading is completed or current user has no ungraded assigned student left to grade
+                $error_msg = "No " . $to . " assigned " . ($to_ungraded ? "ungraded" : "") . " student found!";
+                $this->core->addErrorMessage($error_msg);
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
             }
         }
 
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
-        if ($peer) {
-            if ($this->core->getQueries()->getSubmitterIdFromAnonId($who_id) !== null) {
-                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getSubmitterIdFromAnonId($who_id), false);
-            }
+        $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
+        if ($id_from_anon !== null) {
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
         else {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
         if ($graded_gradeable === false) {
-            //$this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             $peer = false;
         }
 
@@ -2521,5 +2526,58 @@ class ElectronicGraderController extends AbstractController {
         foreach ($total_users as $key => $value) {
             $total_total += $value * $num_components;
         }
+    }
+    
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
+     */
+    public function ajaxSetPeerFeedback($gradeable_id) {
+        $grader_id = $_POST['grader_id'] ?? '';
+        $user_id = $_POST['user_id'] ?? '';
+        $feedback = $_POST['feedback'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return null;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() == $gradeable_id;
+        if ($graded_gradeable === false) {
+            return null;
+        }
+        $gradeable->setPeerFeedback($grader_id, $user_id, $feedback);
+        $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        return true;
+    }
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     */
+    public function ajaxClearPeerMarks($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        $peer_id = $_POST['peer_id'] ?? '';
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch gradeable');
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            $this->core->getOutput()->renderJsonFail('Could not fetch graded gradeable');
+        }
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($ta_graded_gradeable->getGradedComponentContainers() as $container) {
+            $component = $container->getComponent();
+            $ta_graded_gradeable->deleteGradedComponent($component, $this->core->getQueries()->getUserById($peer_id));
+        }
+        $ta_graded_gradeable->removeOverallComment($peer_id);
+        $this->core->getQueries()->deleteOverallComment($gradeable_id, $peer_id, $gradeable->isTeamAssignment());
+        $ta_graded_gradeable->resetUserViewedDate();
+
+        // Finally, save the graded gradeable
+        $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
+        $this->core->getOutput()->renderJsonSuccess("Marks removed successfully!");
+        return true;
     }
 }

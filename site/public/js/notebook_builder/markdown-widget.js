@@ -11,10 +11,6 @@ class MarkdownWidget extends Widget {
     }
 
     render() {
-        if (this.dom_pointer) {
-            this.commitState();
-        }
-
         // Setup container
         const container = this.getContainer('Markdown');
         container.classList.add('markdown-widget');
