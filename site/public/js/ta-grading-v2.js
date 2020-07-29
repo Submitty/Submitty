@@ -30,7 +30,7 @@ const taLayoutDet = {
     right: null,
   },
   leftPanelWidth: "50%",
-  leftTopPanelHeight: "50%",
+  leftBottomPanelHeight: "50%",
   panelsContSelector: ".two-panel-cont",
   leftSelector : ".two-panel-item.two-panel-left",
   verticalDragBarSelector: ".two-panel-drag-bar",
@@ -194,7 +194,7 @@ function initializeVerticalTwoPanelDrag () {
 function initializeHorizontalTwoPanelDrag () {
   console.log("Inside initializeHorizontalTwoPanelDrag");
   // Select all the DOM elements for dragging in two-panel-mode
-  const leftTopPanel = document.querySelector(taLayoutDet.panelsBucket.leftTopSelector);
+  const leftBottomPanel = document.querySelector(taLayoutDet.panelsBucket.leftBottomSelector);
   // const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
   const panelCont = document.querySelector(taLayoutDet.leftSelector);
   const dragbar = document.querySelector(taLayoutDet.horizontalDragBarSelector);
@@ -206,7 +206,7 @@ function initializeHorizontalTwoPanelDrag () {
     // Get the current mouse position
     xPos = e.clientX;
     yPos = e.clientY;
-    leftPanelHeight = leftTopPanel.getBoundingClientRect().height;
+    leftPanelHeight = leftBottomPanel.getBoundingClientRect().height;
 
     // Attach the listeners to `document`
     document.addEventListener("mousemove", mouseMoveHandler);
@@ -228,10 +228,10 @@ function initializeHorizontalTwoPanelDrag () {
 
   const mouseMoveHandler = (e) => {
     const dy = e.clientY - yPos;
-    const updateLeftPanelHeight = (leftPanelHeight + dy) * 100 / panelCont.getBoundingClientRect().height;
-    leftTopPanel.style.height = `${updateLeftPanelHeight}%`;
+    const updateLeftPanelHeight = (leftPanelHeight - dy) * 100 / panelCont.getBoundingClientRect().height;
+    leftBottomPanel.style.height = `${updateLeftPanelHeight}%`;
     // save the updated width of left column
-    taLayoutDet.leftTopPanelHeight = `${updateLeftPanelHeight}%`;
+    taLayoutDet.leftBottomPanelHeight = `${updateLeftPanelHeight}%`;
     saveTaLayoutDetails();
 
     // consistent mouse pointer during dragging
@@ -244,7 +244,7 @@ function initializeHorizontalTwoPanelDrag () {
   };
   dragbar.addEventListener("mousedown", mouseDownHandler);
   // update the width whenever left-cols are switched between normal and full-left-col
-  updateTopAndBottomColsWidth();
+  updateBottomRowWidth();
   saveTaLayoutDetails();
 }
 
@@ -285,10 +285,10 @@ function updateLeftColsWidth() {
 }
 
 // updates width of left columns (normal + full-left-col) with the last saved layout width
-function updateTopAndBottomColsWidth() {
-  const leftTopCol = $(".panel-item-section.left-top");
-  leftTopCol.css({
-    height: taLayoutDet.leftTopPanelHeight ? taLayoutDet.leftTopPanelHeight : "50%"
+function updateBottomRowWidth() {
+  const leftBottomCol = $(".panel-item-section.left-top");
+  leftBottomCol.css({
+    height: taLayoutDet.leftBottomPanelHeight ? taLayoutDet.leftBottomPanelHeight : "50%"
   });
 }
 

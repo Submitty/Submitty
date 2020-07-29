@@ -434,13 +434,14 @@ progress::-webkit-progress-value {
 }
 
 .panel-item-section.left-top{
+    flex: 1 1 0%;
     height: 50%;
     min-height: 100px;
     background: var(--standard-medium-gray);
 }
 .panel-item-section.left-bottom.active {
     display: block;
-    flex: 1 1 0%;
+    height: 50%;
     min-height: 100px;
     background: var(--standard-medium-gray);
 }
