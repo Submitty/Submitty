@@ -2022,6 +2022,10 @@ header > * {
         width: min-content;
         width: -moz-min-content;
     }
+
+    #add-new-term .popup-window {
+        min-height: auto;
+    }
 }
 
 .pre-wrap{

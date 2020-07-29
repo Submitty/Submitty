@@ -317,6 +317,33 @@ WHERE status = 1"
     }
 
     /**
+     * @return string[]
+     */
+    public function getAllTerms() {
+        $this->submitty_db->query(
+            "SELECT term_id FROM terms ORDER BY start_date DESC"
+        );
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['term_id'];
+        }
+        return $return;
+    }
+
+    /**
+     * @param string $term_id
+     * @param string $term_name
+     * @param \DateTime $start_date
+     * @param \DateTime $end_date
+     */
+    public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
+        $this->submitty_db->query(
+            "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
+            [$term_id, $term_name, $start_date, $end_date]
+        );
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {

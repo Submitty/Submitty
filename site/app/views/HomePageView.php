@@ -65,7 +65,8 @@ class HomePageView extends AbstractView {
             "is_superuser" => $is_superuser,
             "semesters" => $semesters,
             "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
-            "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements()
+            "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements(),
+            "add_term_url" => $this->output->buildUrl(['term', 'new'])
         ]);
     }
 
