@@ -360,15 +360,6 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/check_updates", methods={"GET"})
-     * @return MultiResponse
-     */
-    public function checkUpdates() {
-        return MultiResponse::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($this->core->getQueries()->getLastQueueUpdate())
-        );
-    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods={"POST"})

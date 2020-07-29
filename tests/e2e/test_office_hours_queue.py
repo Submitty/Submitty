@@ -27,12 +27,11 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(0, 1, success_text=[], error_text=['Unable to add queue. Make sure you have a unique queue name'])
         self.openQueue("random code")
         self.expectedAlerts(1, 0, success_text=['New queue added'], error_text=[])
-
-
         self.changeQueueCode("random code")
         self.expectedAlerts(1, 0, success_text=['Queue Access Code Changed'], error_text=[])
         self.changeQueueCode("custom code", "new code")
         self.expectedAlerts(1, 0, success_text=['Queue Access Code Changed'], error_text=[])
+
         self.switchToUser('student')
         base_queue_history_count_student = self.queueHistoryCount(False)
         self.studentJoinQueue('custom code', 'new code')
@@ -42,22 +41,25 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(base_queue_history_count_student+1, self.queueHistoryCount(False))
         self.studentJoinQueue('custom code', 'new code')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
-        self.switchToUser('instructor')
 
+        self.switchToUser('instructor')
         self.assertEqual(1, self.currentQueueCount())
         self.helpFirstStudent()
         self.expectedAlerts(1, 0, success_text=['Started helping student'], error_text=[])
         self.assertEqual(1, self.currentQueueCount())
+
         self.switchToUser('student')
         self.studentFinishHelpSelf()
         self.expectedAlerts(1, 0, success_text=['Finished helping student'], error_text=[])
         self.assertEqual(base_queue_history_count_student+2, self.queueHistoryCount(False))
         self.studentJoinQueue('custom code', 'new code')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
+
         self.switchToUser('aphacker')
         base_queue_history_count_aphacker = self.queueHistoryCount(False)
         self.studentJoinQueue('custom code', 'new code', 'nick name hacker')
         self.expectedAlerts(1, 0, success_text=['Added to queue'], error_text=[])
+
         self.switchToUser('instructor')
         self.assertEqual(2, self.currentQueueCount())
         self.helpFirstStudent()
@@ -95,7 +97,6 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.expectedAlerts(1, 0, success_text=['Queue emptied'], error_text=[])
         self.assertEqual(base_queue_history_count+4, self.queueHistoryCount(False))
         self.assertEqual(0, self.currentQueueCount())
-
         announcement_string = ''.join(choice(ascii_lowercase) for i in range(10))
         self.editAnnouncement(announcement_string)
         self.assertEqual(' '.join(self.driver.find_element(By.ID, 'announcement').text.split()), f"Office Hours Queue Announcements: {announcement_string}")
@@ -234,7 +235,6 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.driver.switch_to.alert.accept()
         self.check_socket_message('full_update')
 
-
     def currentQueueCount(self):
         return len(self.driver.find_elements(By.CLASS_NAME, "shown_queue_row"))
 
@@ -293,7 +293,6 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(self.countAlertError(error_text), error)
 
 def enableQueue(self):
-    #self.log_in(user_id='instructor')
     self.get(f"/courses/{self.semester}/sample/config")
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(not self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
