@@ -27,7 +27,8 @@ const taLayoutDet = {
   currentTwoPanels: {
     leftTop: null,
     leftBottom: null,
-    right: null,
+    rightTop: null,
+    rightBottom: null,
   },
   leftPanelWidth: "50%",
   leftBottomPanelHeight: "50%",
@@ -38,7 +39,8 @@ const taLayoutDet = {
   panelsBucket: {
     leftTopSelector : ".two-panel-item.two-panel-left .left-top",
     leftBottomSelector : ".two-panel-item.two-panel-left .left-bottom",
-    rightSelector : ".two-panel-item.two-panel-right",
+    rightTopSelector : ".two-panel-item.two-panel-right .right-top",
+    rightBottomSelector : ".two-panel-item.two-panel-right .right-bottom",
   },
 };
 
@@ -565,15 +567,21 @@ function resetTwoPanelLayout() {
 
   const leftTopPanelId = taLayoutDet.currentTwoPanels.leftTop;
   const leftBottomPanelId = taLayoutDet.currentTwoPanels.leftBottom;
-  const rightPanelId = taLayoutDet.currentTwoPanels.right;
+  const rightTopPanelId = taLayoutDet.currentTwoPanels.rightTop;
+  const rightBottomPanelId = taLayoutDet.currentTwoPanels.rightBottom;
   //Now Fetch the panels from DOM
   const leftTopPanel = document.getElementById(leftTopPanelId);
   const leftBottomPanel = document.getElementById(leftBottomPanelId);
-  const rightPanel = document.getElementById(rightPanelId);
+  const rightTopPanel = document.getElementById(rightTopPanelId);
+  const rightBottomPanel = document.getElementById(rightBottomPanelId);
 
-  if (rightPanel) {
-    document.querySelector('.panels-container').append(rightPanel);
-    taLayoutDet.currentOpenPanel = rightPanelId;
+  if (rightBottomPanel) {
+    document.querySelector('.panels-container').append(rightBottomPanel);
+    taLayoutDet.currentOpenPanel = rightBottomPanelId;
+  }
+  if (rightTopPanel) {
+    document.querySelector('.panels-container').append(rightTopPanelId);
+    taLayoutDet.currentOpenPanel = rightTopPanelId;
   }
   if (leftBottomPanel) {
     document.querySelector('.panels-container').append(leftBottomPanel);
@@ -602,8 +610,8 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
     else if (taLayoutDet.currentTwoPanels.leftBottom === panelId ) {
       taLayoutDet.currentTwoPanels.leftBottom = null;
     }
-    else if (taLayoutDet.currentTwoPanels.right === panelId ) {
-      taLayoutDet.currentTwoPanels.right = null;
+    else if (taLayoutDet.currentTwoPanels.rightTop === panelId ) {
+      taLayoutDet.currentTwoPanels.rightTop = null;
     }
   }
   console.log(isPanelAdded, taLayoutDet.currentTwoPanels);
@@ -615,7 +623,7 @@ function setTwoPanelModeVisibilities () {
     panelElements.forEach((panel) => {
       if (taLayoutDet.currentTwoPanels.leftTop === panel.str
           || taLayoutDet.currentTwoPanels.leftBottom === panel.str
-          || taLayoutDet.currentTwoPanels.right === panel.str
+          || taLayoutDet.currentTwoPanels.rightTop === panel.str
       ) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
@@ -643,7 +651,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
-      && taLayoutDet.currentTwoPanels.right !== panel.str
+      && taLayoutDet.currentTwoPanels.rightTop !== panel.str
       && taLayoutDet.currentTwoPanels.leftTop !== panel.str
       &&  taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele ) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
@@ -696,12 +704,12 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $("#full-left-column-btn").addClass("visible");
     // If there is any panel opened just use that and fetch the next one for left side...
-    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.right)) {
+    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
       taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
       panelElements.every((panel, idx) => {
         if (taLayoutDet.currentTwoPanels.leftTop === panel.str) {
           let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          taLayoutDet.currentTwoPanels.right = panelElements[nextIdx].str;
+          taLayoutDet.currentTwoPanels.rightTop = panelElements[nextIdx].str;
           return false;
         }
         return true;
@@ -712,7 +720,8 @@ function togglePanelLayoutModes(forceVal = false) {
       taLayoutDet.currentTwoPanels = {
         leftTop: panelElements[0].str,
         leftBottom: null,
-        right: panelElements[1].str
+        rightTop: panelElements[1].str,
+        rightBottom: null,
       };
     }
     updatePanelLayoutModes();
@@ -722,14 +731,14 @@ function togglePanelLayoutModes(forceVal = false) {
     twoPanelCont.addClass("active");
     $(".panel-item-section.left-bottom, .panel-item-section-drag-bar").addClass("active");
     // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
-    let prevPanel = taLayoutDet.currentTwoPanels.leftTop ? taLayoutDet.currentTwoPanels.leftTop : taLayoutDet.currentTwoPanels.right;
+    let prevPanel = taLayoutDet.currentTwoPanels.leftTop ? taLayoutDet.currentTwoPanels.leftTop : taLayoutDet.currentTwoPanels.rightTop;
     let nextIdx = -1;
     if (!taLayoutDet.currentTwoPanels.leftBottom) {
       panelElements.every((panel, idx) => {
         if (prevPanel === panel.str) {
             nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
             // Now check if panel indexed with nextIdx is already open in somewhere
-            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.right=== panelElements[nextIdx].str) {
+            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.rightTop === panelElements[nextIdx].str) {
               // If yes update the nextIdx
               nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
             }
@@ -746,7 +755,8 @@ function togglePanelLayoutModes(forceVal = false) {
     taLayoutDet.currentTwoPanels = {
       leftTop: null,
       leftBottom: null,
-      right: null
+      rightTop: null,
+      rightBottom: null,
     };
   }
   updatePanelOptions();
@@ -757,7 +767,8 @@ function updatePanelLayoutModes () {
   // fetch the panels by their ids
   const leftTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftTop);
   const leftBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftBottom);
-  const rightPanel = document.getElementById(taLayoutDet.currentTwoPanels.right);
+  const rightTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightTop);
+  const rightBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightBottom);
 
   setTwoPanelModeVisibilities();
   for (const panelIdx in taLayoutDet.panelsBucket) {
@@ -774,8 +785,11 @@ function updatePanelLayoutModes () {
   if (leftBottomPanel) {
     document.querySelector(taLayoutDet.panelsBucket.leftBottomSelector).append(leftBottomPanel);
   }
-  if (rightPanel) {
-    document.querySelector(taLayoutDet.panelsBucket.rightSelector).append(rightPanel);
+  if (rightTopPanel) {
+    document.querySelector(taLayoutDet.panelsBucket.rightTopSelector).append(rightTopPanel);
+  }
+  if (rightBottomPanel) {
+    document.querySelector(taLayoutDet.panelsBucket.rightBottomSelector).append(rightBottomPanel);
   }
   saveTaLayoutDetails();
 }
