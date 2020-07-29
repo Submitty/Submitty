@@ -433,12 +433,20 @@ progress::-webkit-progress-value {
     background: var(--standard-medium-gray);
 }
 
-.panel-item-section.left-top, .panel-item-section.left-bottom {
+.panel-item-section.left-top{
     flex: 1;
-    min-height: 0;
+    height: 50%;
+    min-height: 100px;
+    background: var(--standard-medium-gray);
+}
+.panel-item-section.left-bottom.active {
+    display: block;
+    flex: 1 1 0%;
+    min-height: 100px;
+    background: var(--standard-medium-gray);
 }
 
-.two-panel-left, .two-panel-drag-bar {
+.two-panel-left, .two-panel-drag-bar, .panel-item-section.left-bottom, .panel-item-section-drag-bar {
     display: none;
 }
 
@@ -447,7 +455,7 @@ progress::-webkit-progress-value {
     flex-direction: column;
 }
 
-.two-panel-drag-bar.active {
+.two-panel-drag-bar.active, .panel-item-section-drag-bar.active {
     display: block;
 }
 
@@ -461,6 +469,25 @@ progress::-webkit-progress-value {
     position: relative;
     width: 20px;
     background: transparent;
+}
+
+.panel-item-section-drag-bar {
+    position: relative;
+    height: 20px;
+}
+
+.panel-item-section-drag-bar:after {
+    content: "";
+    position: absolute;
+    height: 10px;
+    width: 30%;
+    max-width: 80px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50px;
+    background: var(--submitty-logo-blue);
+    transition: all 0.5s;
 }
 
 .two-panel-drag-bar:after, .content-drag-bar:after {

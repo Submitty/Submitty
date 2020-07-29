@@ -445,6 +445,9 @@ function resetTwoPanelLayout() {
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".content-item-left, .content-drag-bar, #full-left-column-btn").removeClass("active");
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+
+  // remove the left bottom sectin and its drag bar
+  $(".panel-item-section.left-bottom, .panel-item-section-drag-bar").removeClass("active");
   // reset other variables
   // taLayoutDet.leftSelector = ".two-panel-item.two-panel-left";
   // taLayoutDet.dragBarSelector = ".two-panel-drag-bar";
@@ -599,7 +602,30 @@ function togglePanelLayoutModes(forceVal = 0) {
     }
     updatePanelLayoutModes();
     $("#two-panel-mode-btn").addClass("active");
-  } else {
+  }
+  else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
+    $(".panel-item-section.left-bottom, .panel-item-section-drag-bar").addClass("active");
+    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
+    let prevPanel = taLayoutDet.currentTwoPanels.leftTop ? taLayoutDet.currentTwoPanels.leftTop : taLayoutDet.currentTwoPanels.right;
+    let nextIdx = -1;
+    if (!taLayoutDet.currentTwoPanels.leftBottom) {
+      panelElements.every((panel, idx) => {
+        if (prevPanel === panel.str) {
+            nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
+            // Now check if panel indexed with nextIdx is already open in somewhere
+            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.right=== panelElements[nextIdx].str) {
+              // If yes update the nextIdx
+              nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
+            }
+            taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
+            return false;
+        }
+        return true;
+      })
+    }
+    updatePanelLayoutModes();
+  }
+  else {
     resetTwoPanelLayout();
     taLayoutDet.currentTwoPanels = {
       leftTop: null,
