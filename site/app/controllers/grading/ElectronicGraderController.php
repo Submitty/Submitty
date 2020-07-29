@@ -1076,22 +1076,28 @@ class ElectronicGraderController extends AbstractController {
 
             // Reassign who_id
             if (!is_null($goToStudent)) {
-                $who_id = $peer && !$team ? $goToStudent->getAnonId() :   $goToStudent->getId();
+                $who_id = $peer ? $goToStudent->getAnonId() :   $goToStudent->getId();
+            }
+            else {
+                // There is no next/prev student found
+                // Either the grading is completed or current user has no ungraded assigned student left to grade
+                $error_msg = "No " . $to . " assigned " . ($to_ungraded ? "ungraded" : "") . " student found!";
+                $this->core->addErrorMessage($error_msg);
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
             }
         }
 
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
-        if ($peer) {
-            if ($this->core->getQueries()->getSubmitterIdFromAnonId($who_id) !== null) {
-                $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getSubmitterIdFromAnonId($who_id), false);
-            }
+        $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
+        if ($id_from_anon !== null) {
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
         else {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         }
         if ($graded_gradeable === false) {
-            //$this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             $peer = false;
         }
 
@@ -2515,7 +2521,26 @@ class ElectronicGraderController extends AbstractController {
             $total_total += $value * $num_components;
         }
     }
-
+    
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
+     */
+    public function ajaxSetPeerFeedback($gradeable_id) {
+        $grader_id = $_POST['grader_id'] ?? '';
+        $user_id = $_POST['user_id'] ?? '';
+        $feedback = $_POST['feedback'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return null;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() == $gradeable_id;
+        if ($graded_gradeable === false) {
+            return null;
+        }
+        $gradeable->setPeerFeedback($grader_id, $user_id, $feedback);
+        $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
+        return true;
+    }
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")
