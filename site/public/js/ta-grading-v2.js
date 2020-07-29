@@ -633,7 +633,7 @@ function toggleFullScreenMode () {
 function toggleFullLeftColumnMode (forceVal = false) {
   // toggle between the normal left and full left panel mode
   $("#full-left-column-btn").toggleClass("active");
-  if (forceVal) {
+  if (!forceVal) {
     taLayoutDet.isFullLeftColumnMode = !taLayoutDet.isFullLeftColumnMode;
   }
 
