@@ -1,6 +1,6 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-username-form{% endblock %}
-{% block title %}Edit User Information{% endblock %}
+{% block title %}Edit Preferred Names{% endblock %}
 {% block body %}
     <p class="std-margin">{{ change_name_text }}</p>
     <p class="std-margin">
@@ -9,27 +9,28 @@
         or is being used for misrepresentation.
     </p>
     <div class="flex-col" id="user_settings_modal">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <h2>Preferred Name</h2>
+        <input id="user-preferred-name-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <h2>My Preferred Name</h2>
         <div class="edit_user_row">
-            <label for="user-firstname-change">Preferred First Name:&emsp;</label>
-            <input type="text" name="user_firstname_change" value="{{ user_first }}" id="user-firstname-change" />
+            <label for="user-firstname-change">Preferred First / Given Name:&emsp;</label>
+            <input type="text"
+                   name="user_firstname_change"
+                   value="{{ user_first }}"
+                   id="user-firstname-change"
+                   data-current-name="{{ user_first }}"/>
         </div>
         <div class="edit_user_row">
-            <label for="user-lastname-change">Preferred Last Name:&emsp;</label>
-            <input value="{{ user_last }}" type="text" name="user_lastname_change" id="user-lastname-change" />
+            <label for="user-lastname-change">Preferred Last / Family Name:&emsp;</label>
+            <input type="text"
+                   name="user_lastname_change"
+                   value="{{ user_last }}"
+                   id="user-lastname-change"
+                   data-current-name="{{ user_last }}"/>
         </div>
-        <hr />
-        <h2>Preferred User Image</h2>
-        <label for="user_image_button">
-            You may upload a passport-style photograph of yourself for display to course teaching staff.<br>
-            NOTE:  This feature is NOT for avatars, memes, etc.
-        </label>
-        <input type="file" name="user_image" id="user_image_button" accept="image/*">
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" enctype="multipart/form-data" action="{{ change_username_url }}" >
+    <form method="post" onsubmit="return updateUserPreferredNames()">
         {{ parent() }}
     </form>
 {% endblock %}
