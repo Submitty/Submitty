@@ -92,6 +92,7 @@ class ShortAnswerWidget extends Widget {
                 };
 
                 this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
+                makeCodeMirrorAccessible(this.codebox_pointer);
             }
         }
 

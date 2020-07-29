@@ -1735,3 +1735,13 @@ function flagUserImage(user_id, flag) {
         }
     }
 }
+
+/**
+ * Get an array of all focusable elements currently in the dom.
+ *
+ * @returns {Element[]}
+ */
+function getFocusableElements() {
+    let focusable_elements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    return Array.from(focusable_elements);
+}

@@ -90,12 +90,14 @@ class CodeMirrorUtils {
      * @param Core $core
      */
     public static function loadDefaultDependencies(Core $core): void {
-        foreach (self::DEFAULT_CSS_FILES as $file) {
-            $core->getOutput()->addVendorCss($file);
-        }
+        $core->getOutput()->addInternalJs('code-mirror-utils.js');
 
         foreach (self::DEFAULT_JS_FILES as $file) {
             $core->getOutput()->addVendorJs($file);
+        }
+
+        foreach (self::DEFAULT_CSS_FILES as $file) {
+            $core->getOutput()->addVendorCss($file);
         }
     }
 }
