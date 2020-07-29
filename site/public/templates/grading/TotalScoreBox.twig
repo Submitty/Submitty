@@ -8,7 +8,6 @@ Required Parameters:
 
 #}
 {% set show_total = auto_grading_total is defined and ta_grading_total is defined %}
-{% if user_group < 4 %}
     {% if auto_grading_total is defined %}
         <div class="box-title badge-container">
             <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total, auto_grading_complete) }}">
@@ -37,12 +36,11 @@ Required Parameters:
             <strong>Total</strong>
         </div>
     {% endif %}
-{% endif %}
-{% if user_group == 4 %}
+{# {% if user_group == 4 %}
     <div class="box-title badge-container">
         <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, (ta_grading_total + auto_grading_total), ta_grading_complete) }}">
             {{ peer_grade_earned is defined ? peer_grade_earned|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
         <strong>My Peer Grading Total</strong>
     </div>
-{% endif %}
+{% endif %} #}
