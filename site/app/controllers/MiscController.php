@@ -290,9 +290,10 @@ class MiscController extends AbstractController {
 
         // TODO: Zip file anonymization is currently done based on access level (students==peers)
         // When single/double blind grading is merged, this will need to be updated.
-        if($this->core->getUser()->getGroup() === User::GROUP_STUDENT){
+        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
-        } else {
+        }
+        else {
             $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
         }
 
