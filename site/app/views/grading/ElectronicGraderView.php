@@ -782,7 +782,7 @@ HTML;
                     <div class="two-panel-cont">
                          <div class="two-panel-item two-panel-left active">
                             <div class="panel-item-section left-top"></div>
-                            <div class="panel-item-section-drag-bar panel-item-right-drag"></div>
+                            <div class="panel-item-section-drag-bar panel-item-left-drag"></div>
                             <div class="panel-item-section left-bottom"></div>
                          </div>
                          <div class="two-panel-drag-bar active">
