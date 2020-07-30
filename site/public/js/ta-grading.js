@@ -897,16 +897,50 @@ function adjustSize(name) {
     textarea.style.height = Math.min(textarea.scrollHeight, 300) + "px";
 }
 
-function getNonAnonPath(path, anon_submitter_id){
+function getNonAnonPath(path, anon_submitter_id, user_ids){
     nonAnonPath = "";
     pathPieces = path.split("/");
     for (i = 1; i < pathPieces.length; i++) {
         if(i == 9){
-            nonAnonPath += "/" + anon_submitter_id; 
+            nonAnonPath += "/" + user_ids[anon_submitter_id];
         }
         else{
             nonAnonPath += "/" + pathPieces[i];
         }
     }
     return nonAnonPath;
+}
+
+function changeCurrentPeer(){
+    let peer = $('#edit-peer-select').val();
+    $('.edit-peer-components-block').hide();
+    $('#edit-peer-components-form-'+peer).show();
+}
+
+function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
+    var peer_id = $("#edit-peer-select").val();
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
+    $.ajax({
+        url: url,
+        data: {
+            csrf_token: csrf_token,
+            peer_id: peer_id,
+            submitter_id: submitter_id
+        },
+        type: "POST",
+        success: function(data) {
+            console.log("Successfully deleted peer marks");
+            window.location.reload(true);
+        },
+        error: function(e) {
+            console.log("Failed to delete");
+        }
+    });
+}
+
+function newEditPeerComponentsForm() {
+    $('.popup-form').css('display', 'none');
+    let form = $("#edit-peer-components-form");
+    form.css("display", "block");
+    captureTabInModal("edit-peer-components-form");
 }
