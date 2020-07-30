@@ -98,10 +98,10 @@ class ElectronicGraderController extends AbstractController {
                 }
                 
                 $number_of_students = count($student_array);
-                if ($number_of_students <= 1) {
+                /*if ($number_of_students <= 1) {
                     $this->core->addErrorMessage("Peer assignments failed: Not enough submissions");
                     return JsonResponse::getFailResponse("Not Enough Submissions");
-                }
+                }*/
                 /* If number of students entered is more than number of students in registration section,
                    then for each registration section with less number of students, everyone will grade everyone */
                 if ($number_to_grade >= $number_of_students) {
