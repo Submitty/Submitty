@@ -12,14 +12,16 @@
     },
     "parserOptions": {
         "ecmaVersion": 2017,
-        "sourceType": "module"
+        "sourceType": "script"
     },
     "rules": {
+        "arrow-spacing": ["error"],
+        "block-spacing": ["error"],
         "brace-style": ["error", "stroustrup"],
         "comma-dangle": ["error", "always-multiline"],
         "default-param-last": ["error"],
         "eol-last": ["error"],
-        "indent": ["error", 2],
+        "indent": ["error", 4, {"SwitchCase": 1}],
         "keyword-spacing": ["error", {"before": true, "after": true}],
         "linebreak-style": ["error", "unix"],
         "no-trailing-spaces": ["error"],
@@ -29,6 +31,7 @@
         "prefer-template": ["error"],
         "quotes": ["error", "single"],
         "semi": ["error", "always"],
-        "semi-style": ["error", "last"]
+        "semi-style": ["error", "last"],
+        "template-curly-spacing": ["error", "never"]
     }
 }
