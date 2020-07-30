@@ -1824,6 +1824,11 @@ function onCancelComponent(me) {
 
 }
 
+function onCancelEditRubricComponent(me) {
+  const component_id = getComponentIdFromDOMElement(me);
+  toggleComponent(component_id, false);
+}
+
 /**
  * Called when the overall comment box is changed
  */
