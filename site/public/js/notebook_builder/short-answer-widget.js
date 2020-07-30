@@ -74,39 +74,7 @@ class ShortAnswerWidget extends Widget {
 
         const initial_value_div = interactive_area.querySelector('.initial-value-div');
 
-        const generateCodeBox = () => {
-            const codebox_config = {
-                lineNumbers: true,
-                mode: builder_data.codemirror_langauges[answer_type_selector.value],
-                value: this.state.initial_value ? this.state.initial_value : '',
-            };
-
-            const height = this.state.rows ? this.state.rows * 16 : null;
-
-            this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
-            this.codebox_pointer.setSize(null, height);
-
-            makeCodeMirrorAccessible(this.codebox_pointer);
-        }
-
-        const rowSelectorChangeAction = () => {
-            this.commitState();
-            initial_value_div.innerHTML = '';
-
-            if (answer_type_selector.value !== 'Default') {
-                generateCodeBox();
-            }
-        }
-
-        rows_selector.onchange = () => {
-            rowSelectorChangeAction();
-        }
-
-        rows_selector.onkeyup = () => {
-            rowSelectorChangeAction();
-        }
-
-        answer_type_selector.onchange = () => {
+        const generateInputBox = () => {
             this.commitState();
             initial_value_div.innerHTML = '';
 
@@ -118,8 +86,32 @@ class ShortAnswerWidget extends Widget {
                 initial_value_div.appendChild(text_area);
             }
             else  {
-                generateCodeBox();
+                const codebox_config = {
+                    lineNumbers: true,
+                    mode: builder_data.codemirror_langauges[answer_type_selector.value],
+                    value: this.state.initial_value ? this.state.initial_value : '',
+                    theme: 'eclipse'
+                };
+
+                const height = this.state.rows ? rowsToPixels(this.state.rows) : null;
+
+                this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
+                this.codebox_pointer.setSize(null, height);
+
+                makeCodeMirrorAccessible(this.codebox_pointer);
             }
+        }
+
+        rows_selector.onchange = () => {
+            generateInputBox();
+        }
+
+        rows_selector.onkeyup = () => {
+            generateInputBox()
+        }
+
+        answer_type_selector.onchange = () => {
+            generateInputBox();
         }
 
         // Manually fire off a change event to setup the input boxes on initial load

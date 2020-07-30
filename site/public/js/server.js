@@ -1742,6 +1742,6 @@ function flagUserImage(user_id, flag) {
  * @returns {Element[]}
  */
 function getFocusableElements() {
-    let focusable_elements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    let focusable_elements = $(':focusable:tabbable');
     return Array.from(focusable_elements);
 }

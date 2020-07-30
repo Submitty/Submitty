@@ -30,5 +30,7 @@ function makeCodeMirrorAccessible(cm) {
     });
 }
 
-
+function rowsToPixels(rows) {
+    return rows * 16;
+}
 
