@@ -9,29 +9,68 @@ class TestPDFs(BaseTestCase):
         super().__init__(testname, log_in=False)
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_pdf_basic_access(self):
-        self.switch_settings("Limited Access Grader")
-        self.pdf_access("instructor", "Quinn", "aphacker", "grading_homework_pdf", "words_1463.pdf")
-        self.pdf_access("ta", "Jill", "aphacker", "grading_homework_pdf", "words_1463.pdf")
-        self.pdf_access("grader", "Tim", "jastm", "grading_homework_pdf", "words_1463.pdf")
+    #    self.switch_settings("Limited Access Grader")
+        self.pdf_access("instructor", "Quinn", "bechta", "grading_homework_pdf", "words_249.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("ta", "Jill", "bechta", "grading_homework_pdf", "words_249.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("grader", "Tim", "jastm", "grading_homework_pdf", "words_881.pdf")
     
     def test_pdf_basic_no_access(self):
         self.switch_settings("Instructor")
-        self.pdf_no_access("ta", "Jill", "aphacker", "grading_homework_pdf", "words_1463.pdf")
-        self.pdf_no_access("grader", "Tim", "jastm", "grading_homework_pdf", "words_1463.pdf")
-        
-    def test_peer_basic_access(self):
-        self.log_in(user_id="student", user_name="Student")
-
-    def test_pdf_instructor_basic_access(self):
-        self.log_in(user_id="instructor", user_name="Quinn")
-        self.click_class('sample')
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_pdf/grading/status")]').click()
-        self.driver.find_element_by_link_text("Grading Index").click()
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_pdf/grading/grade?who_id=bechta&sort=id&direction=ASC")]').click()
-        self.driver.find_element_by_id('submissions').click()
-        self.driver.find_element_by_xpath('//a[contains(@file-url,"words_249.pdf")]').click()
+        self.pdf_no_access("ta", "Jill", "bechta", "grading_homework_pdf", "words_249.pdf")
         self.driver.implicitly_wait(10)
-        self.driver.find_element_by_id('pageContainer1')
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_no_access("grader", "Tim", "jastm", "grading_homework_pdf", "words_1463.pdf")
+    
+    def test_pdf_team_access(self):
+        self.switch_settings("Limited Access Grader")
+        self.pdf_access("instructor", "Quinn", "00002_aphacker", "grading_homework_team_pdf", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("ta", "Jill", "00002_aphacker", "grading_homework_team_pdf", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("grader", "Tim", "00020_kovaco", "grading_homework_team_pdf", "words_881.pdf")
+        
+    def test_pdf_peer_access(self):
+        self.switch_settings("Limited Access Grader")
+        self.pdf_access("instructor", "Quinn", "bechta", "grading_pdf_peer_homework", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("ta", "Jill", "bechta", "grading_pdf_peer_homework", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("grader", "Tim", "jastm", "grading_pdf_peer_homework", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("student", "Joe", "aphacker", "grading_pdf_peer_homework", "words_881.pdf")
+        
+    def test_pdf_peer_team_access(self):
+        self.switch_settings("Limited Access Grader")
+        self.pdf_access("instructor", "Quinn", "00002_aphacker", "grading_pdf_peer_team_homework", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("ta", "Jill", "00002_aphacker", "grading_pdf_peer_team_homework", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("grader", "Tim", "00020_kovaco", "grading_pdf_peer_team_homework", "words_881.pdf")
+        self.driver.implicitly_wait(10)
+        self.log_out()
+        self.driver.implicitly_wait(10)
+        self.pdf_access("student", "Joe", "00002_aphacker", "grading_pdf_peer_team_homework", "words_881.pdf")
     
     def switch_settings(self, setting):
         self.log_out()
@@ -46,6 +85,7 @@ class TestPDFs(BaseTestCase):
         
     def pdf_access(self, user_id, user_name, student_id, gradeable_id, pdf_name):
         self.driver.get(self.test_url + "/authentication/login")
+        self.driver.implicitly_wait(10)
         self.log_in(user_id=user_id, user_name=user_name)
         self.click_class('sample')
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/'+gradeable_id+'/grading/status")]').click()
