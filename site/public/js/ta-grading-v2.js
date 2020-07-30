@@ -31,11 +31,13 @@ const taLayoutDet = {
     rightBottom: null,
   },
   leftPanelWidth: "50%",
+  dividedColName: "LEFT",
   leftBottomPanelHeight: "50%",
   panelsContSelector: ".two-panel-cont",
   leftSelector : ".two-panel-item.two-panel-left",
   verticalDragBarSelector: ".two-panel-drag-bar",
-  horizontalDragBarSelector: ".panel-item-section-drag-bar",
+  leftHorizDragBarSelector: ".panel-item-section-drag-bar.panel-item-left-drag",
+  rightHorizDragBarSelector: ".panel-item-section-drag-bar.panel-item-right-drag",
   panelsBucket: {
     leftTopSelector : ".two-panel-item.two-panel-left .left-top",
     leftBottomSelector : ".two-panel-item.two-panel-left .left-bottom",
@@ -197,10 +199,17 @@ function initializeVerticalTwoPanelDrag () {
 function initializeHorizontalTwoPanelDrag () {
   console.log("Inside initializeHorizontalTwoPanelDrag");
   // Select all the DOM elements for dragging in two-panel-mode
-  const leftBottomPanel = document.querySelector(taLayoutDet.panelsBucket.leftBottomSelector);
+
+  const bottomPanel = document.querySelector(taLayoutDet.dividedColName === "RIGHT"
+      ? taLayoutDet.panelsBucket.rightBottomSelector
+      : taLayoutDet.panelsBucket.leftBottomSelector
+  );
   // const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
-  const panelCont = document.querySelector(taLayoutDet.leftSelector);
-  const dragbar = document.querySelector(taLayoutDet.horizontalDragBarSelector);
+  const panelCont = bottomPanel.parentElement;
+  const dragbar = document.querySelector(taLayoutDet.dividedColName === "RIGHT"
+      ? taLayoutDet.rightHorizDragBarSelector
+      : taLayoutDet.leftHorizDragBarSelector
+  );
 
   let xPos = 0, yPos = 0, leftPanelHeight = 0;
 
@@ -209,7 +218,7 @@ function initializeHorizontalTwoPanelDrag () {
     // Get the current mouse position
     xPos = e.clientX;
     yPos = e.clientY;
-    leftPanelHeight = leftBottomPanel.getBoundingClientRect().height;
+    leftPanelHeight = bottomPanel.getBoundingClientRect().height;
 
     // Attach the listeners to `document`
     document.addEventListener("mousemove", mouseMoveHandler);
@@ -232,9 +241,9 @@ function initializeHorizontalTwoPanelDrag () {
   const mouseMoveHandler = (e) => {
     const dy = e.clientY - yPos;
     const updateLeftPanelHeight = (leftPanelHeight - dy) * 100 / panelCont.getBoundingClientRect().height;
-    leftBottomPanel.style.height = `${updateLeftPanelHeight}%`;
+    bottomPanel.style.height = `${updateLeftPanelHeight}%`;
     // save the updated width of left column
-    taLayoutDet.leftBottomPanelHeight = `${updateLeftPanelHeight}%`;
+    taLayoutDet.bottomPanelHeight = `${updateLeftPanelHeight}%`;
     saveTaLayoutDetails();
 
     // consistent mouse pointer during dragging
@@ -290,9 +299,9 @@ function updateLeftColsWidth() {
 
 // updates width of left columns (normal + full-left-col) with the last saved layout width
 function updateBottomRowWidth() {
-  const leftBottomCol = $(".panel-item-section.left-top");
-  leftBottomCol.css({
-    height: taLayoutDet.leftBottomPanelHeight ? taLayoutDet.leftBottomPanelHeight : "50%"
+  const topRow = taLayoutDet.dividedColName === "RIGHT" ? $(".panel-item-section.right-top") : $(".panel-item-section.left-top");
+  topRow.css({
+    height: taLayoutDet.topPanelHeight ? taLayoutDet.topPanelHeight : "50%"
   });
 }
 
@@ -301,11 +310,11 @@ function updatePanelOptions() {
     return;
   }
   $(".grade-panel .panel-position-cont").attr("size", taLayoutDet.numOfPanelsEnabled);
-  console.log("inside updatePanel Options", taLayoutDet.dividedColName);
+  console.log("inside updatePanel Options", taLayoutDet.dividedColName, taLayoutDet.numOfPanelsEnabled );
   const panelOptions = $(".grade-panel .panel-position-cont option");
   panelOptions.each(idx => {
     if (panelOptions[idx].value === "leftTop") {
-      if (taLayoutDet.numOfPanelsEnabled === 2 && taLayoutDet.dividedColName === "RIGHT") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName === "RIGHT")) {
         panelOptions[idx].text = "Open as left panel";
       }
       else {
@@ -313,15 +322,15 @@ function updatePanelOptions() {
       }
     }
     else if (panelOptions[idx].value === "leftBottom") {
-      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName === "RIGHT")) {
         panelOptions[idx].classList.add("hide");
       }
-      else if (taLayoutDet.dividedColName === "LEFT") {
+      else {
         panelOptions[idx].classList.remove("hide");
       }
     }
     else if (panelOptions[idx].value === "rightTop") {
-      if (taLayoutDet.numOfPanelsEnabled === 2 && taLayoutDet.dividedColName === "LEFT") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName !== "RIGHT")) {
         panelOptions[idx].text = "Open as right panel";
       }
       else {
@@ -329,10 +338,10 @@ function updatePanelOptions() {
       }
     }
     else if (panelOptions[idx].value === "rightBottom") {
-      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName !== "RIGHT")) {
         panelOptions[idx].classList.add("hide");
       }
-      else if (taLayoutDet.dividedColName === "RIGHT") {
+      else {
         panelOptions[idx].classList.remove("hide");
       }
     }
@@ -740,7 +749,7 @@ function togglePanelLayoutModes(forceVal = false) {
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
-    if (taLayoutDet.dividedColNameName === "RIGHT") {
+    if (taLayoutDet.dividedColName === "RIGHT") {
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
     }
     else {
@@ -827,9 +836,10 @@ function exchangeTwoPanels () {
       rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
     };
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").toggleClass("active");
-    taLayoutDet.dividedColNameName = $(".panel-item-section.right-bottom").is(":visible") ? "RIGHT" : "LEFT";
+    taLayoutDet.dividedColName = $(".panel-item-section.right-bottom").is(":visible") ? "RIGHT" : "LEFT";
     updatePanelOptions();
     updatePanelLayoutModes();
+    initializeHorizontalTwoPanelDrag();
   }
   else {
     // taLayoutDet.numOfPanelsEnabled is 1
