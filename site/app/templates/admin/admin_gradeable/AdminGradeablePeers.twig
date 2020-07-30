@@ -15,6 +15,7 @@
                     {% endif %}
                     <div class="btn-container" >
                         <input type="text" id="number_to_peer_grade" placeholder="Number of Students">
+                        <input type="checkbox" id="all_grade" name="all_grade" class= "ignore" value="All Grade All"> All Grade All
                         <input type="button" name="random_peer_graders_list" class="btn btn-primary key_to_click" id="random_peer_graders_list" tabindex="0" value="Generate"></input>
                     </div>
                 </div>
@@ -25,7 +26,6 @@
                 <div class="content"style="margin:0px">
                     <p>Other Controls: </p>
                     <div class="btn-wrapper" >
-                        <input type="button" name="all_grade_all" class="btn btn-default key_to_click ignore" id="all_grade_all" tabindex="0" value="All grade All"></input>
                         <input type="button" name="clear_peer_matrix" class="btn btn-default key_to_click ignore" id="clear_peer_matrix" tabindex="0" value="Clear Peer Matrix"></input>
                          <input type="button" name="download_peer_csv" class="btn btn-default key_to_click ignore" id="download_peer_csv" tabindex="0" value="Download Peer CSV" onclick="downloadPeerDataAsCsv('peer-table')"></input>
                     </div>

@@ -152,6 +152,28 @@ $(document).ready(function () {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
+            if($('#all_grade').is(':checked')){
+                if ( confirm("Each student grades every other student! Continue?")) {
+                    let data = {'csrf_token': csrfToken};
+                    data[this.name] = $(this).val();
+                    setRandomGraders($('#g_id').val(), data, function (response_data) {
+                        // Clear errors by setting new values
+                        for (let key in response_data) {
+                            if (response_data.hasOwnProperty(key)) {
+                                clearError(key, response_data[key]);
+                            }
+                        }
+                        // Clear errors by just removing red background
+                        for (let key in data) {
+                            if (data.hasOwnProperty(key)) {
+                                clearError(key);
+                            }
+                        }
+                        updateErrorMessage();
+                    }, updateGradeableErrorCallback, true);
+                    return;
+                }
+            }
             if ( confirm("This will update peer matrix. Are you sure?")) {
                 let data = {'csrf_token': csrfToken};
                 data[this.name] = $(this).val();
@@ -184,40 +206,6 @@ $(document).ready(function () {
         else {
             return false;
         }  
-        });
-        $('#all_grade_all').click(
-            function () {
-                if ( confirm("Each student grades every other student! Continue?")) {
-                    let data = {'csrf_token': csrfToken};
-                    data[this.name] = $(this).val();
-                    let addDataToRequest = function (i, val) {
-                        if (val.type === 'radio' && !$(val).is(':checked')) {
-                            return;
-                        }
-                        if($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
-                            $(val).val('0');
-                        }
-                        data[val.name] = $(val).val();
-                };
-                setRandomGraders($('#g_id').val(), data, function (response_data) {
-                    // Clear errors by setting new values
-                    for (let key in response_data) {
-                        if (response_data.hasOwnProperty(key)) {
-                            clearError(key, response_data[key]);
-                        }
-                    }
-                    // Clear errors by just removing red background
-                    for (let key in data) {
-                        if (data.hasOwnProperty(key)) {
-                            clearError(key);
-                        }
-                    }
-                    updateErrorMessage();
-                }, updateGradeableErrorCallback, true);
-            }
-            else {
-                return false;
-            }  
         });
     });
     
