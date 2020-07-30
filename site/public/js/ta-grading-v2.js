@@ -570,11 +570,10 @@ function resetTwoPanelLayout() {
   $('.two-panel-cont').removeClass("active");
   $("#two-panel-mode-btn").removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
-  $("#full-left-column-btn").removeClass("visible");
+  $("#full-left-column-btn").removeClass("visible active");
 
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
-  $(".content-item-left, .content-drag-bar, #full-left-column-btn").removeClass("active");
-  $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+  $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
   // remove the left bottom sectin and its drag bar
   $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
@@ -722,7 +721,7 @@ function togglePanelLayoutModes(forceVal = false) {
     $("#two-panel-exchange-btn").addClass("active");
     $("#full-left-column-btn").addClass("visible");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
-
+    $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
     // If there is any panel opened just use that and fetch the next one for left side...
     if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
       taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
