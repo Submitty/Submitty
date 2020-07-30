@@ -300,32 +300,41 @@ function updatePanelOptions() {
   if (taLayoutDet.numOfPanelsEnabled === 1) {
     return;
   }
+  const dividedCol = $(".panel-item-section.right-bottom").is(":visible") ? "RIGHT" : "LEFT";
   $(".grade-panel .panel-position-cont").attr("size", taLayoutDet.numOfPanelsEnabled);
   console.log("inside updatePanel Options");
   const panelOptions = $(".grade-panel .panel-position-cont option");
   panelOptions.each(idx => {
     if (panelOptions[idx].value === "leftTop") {
-      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+      if (taLayoutDet.numOfPanelsEnabled === 2 && dividedCol === "RIGHT") {
         panelOptions[idx].text = "Open as left panel";
       }
       else {
         panelOptions[idx].text = "Open as top left panel";
       }
     }
-    else if (panelOptions[idx].value === "leftBottom" || panelOptions[idx].value === "rightBottom") {
+    else if (panelOptions[idx].value === "leftBottom") {
       if (taLayoutDet.numOfPanelsEnabled === 2 ) {
         panelOptions[idx].classList.add("hide");
       }
-      else {
+      else if (dividedCol === "LEFT") {
         panelOptions[idx].classList.remove("hide");
       }
     }
     else if (panelOptions[idx].value === "rightTop") {
-      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+      if (taLayoutDet.numOfPanelsEnabled === 2 && dividedCol === "LEFT") {
         panelOptions[idx].text = "Open as right panel";
       }
       else {
         panelOptions[idx].text = "Open as top right panel";
+      }
+    }
+    else if (panelOptions[idx].value === "rightBottom") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 ) {
+        panelOptions[idx].classList.add("hide");
+      }
+      else if (dividedCol === "RIGHT") {
+        panelOptions[idx].classList.remove("hide");
       }
     }
   });
@@ -560,7 +569,7 @@ function resetTwoPanelLayout() {
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
 
   // remove the left bottom sectin and its drag bar
-  $(".panel-item-section.left-bottom, .panel-item-section-drag-bar").removeClass("active");
+  $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
   // reset other variables
   // taLayoutDet.leftSelector = ".two-panel-item.two-panel-left";
   // taLayoutDet.dragBarSelector = ".two-panel-drag-bar";
@@ -624,6 +633,7 @@ function setTwoPanelModeVisibilities () {
       if (taLayoutDet.currentTwoPanels.leftTop === panel.str
           || taLayoutDet.currentTwoPanels.leftBottom === panel.str
           || taLayoutDet.currentTwoPanels.rightTop === panel.str
+          || taLayoutDet.currentTwoPanels.rightBottom === panel.str
       ) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
@@ -703,6 +713,8 @@ function togglePanelLayoutModes(forceVal = false) {
     twoPanelCont.addClass("active");
     $("#two-panel-exchange-btn").addClass("active");
     $("#full-left-column-btn").addClass("visible");
+    $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
+
     // If there is any panel opened just use that and fetch the next one for left side...
     if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
       taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
@@ -796,18 +808,27 @@ function updatePanelLayoutModes () {
 
 // Exchanges positions of left and right panels
 function exchangeTwoPanels () {
-  if ((taLayoutDet.currentTwoPanels.leftTop &&
-      taLayoutDet.currentTwoPanels.leftBottom) &&
-      taLayoutDet.currentTwoPanels.right
-  ) {
-    const leftPanel = taLayoutDet.currentTwoPanels.left;
+  if (+taLayoutDet.numOfPanelsEnabled === 2) {
     taLayoutDet.currentTwoPanels = {
-      left: taLayoutDet.currentTwoPanels.right,
-      right: leftPanel
+      leftTop: taLayoutDet.currentTwoPanels.rightTop,
+      rightTop: taLayoutDet.currentTwoPanels.leftTop,
     };
     updatePanelLayoutModes();
-  } else {
-      alert("Exchange works only when there are two panels...");
+  }
+  else if (+taLayoutDet.numOfPanelsEnabled === 3) {
+    taLayoutDet.currentTwoPanels = {
+      leftTop: taLayoutDet.currentTwoPanels.rightTop,
+      leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
+      rightTop: taLayoutDet.currentTwoPanels.leftTop,
+      rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
+    };
+    updatePanelOptions();
+    updatePanelLayoutModes();
+    $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").toggleClass("active");
+  }
+  else {
+    // taLayoutDet.numOfPanelsEnabled is 1
+    alert("Exchange works only when there are two panels...");
   }
 }
 
