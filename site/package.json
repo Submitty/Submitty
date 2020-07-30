@@ -30,6 +30,7 @@
     "eslint": "^7.1.0"
   },
   "scripts": {
-    "lint": "eslint public/js/*.js public/js/pdf/*.js"
+    "lint": "eslint public/js/*.js public/js/pdf/*.js",
+    "lint:fix": "eslint public/js/*.js public/js/pdf/*.js"
   }
 }
