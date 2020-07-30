@@ -1145,7 +1145,7 @@ class ElectronicGraderController extends AbstractController {
         $show_verify_all = $show_verify_all && $can_verify;
 
         $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
-
+        $show_edit_rubric = $this->core->getAccess()->canI("grading.electronic.edit_rubric");
         $display_version = intval($gradeable_version ?? '0');
         if ($display_version <= 0) {
             $display_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
