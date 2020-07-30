@@ -427,10 +427,8 @@ progress::-webkit-progress-value {
 }
 
 .two-panel-item {
-    /*flex: 1;*/
     min-width: 200px;
     width: 50%;
-    background: var(--standard-medium-gray);
 }
 
 .panel-item-section.left-top, .panel-item-section.right-top {
@@ -476,8 +474,10 @@ progress::-webkit-progress-value {
 }
 
 .panel-item-section-drag-bar {
+    cursor: ns-resize;
     position: relative;
     height: 20px;
+    background: transparent;
 }
 
 .panel-item-section-drag-bar:after {
