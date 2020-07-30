@@ -1235,19 +1235,33 @@ function getGradedComponentFromDOM(component_id) {
         verifier_id: dataDOMElement.attr('data-verifier_id')
     };
 }
-
 /**
  * Gets the scores data from the DOM (auto grading earned/possible and ta grading possible)
  * @return {Object}
  */
 function getScoresFromDOM() {
+    let gradeable_id = getGradeableId();
     let dataDOMElement = $('#gradeable-scores-id');
-
-    // Get the TA grading scores
+    var user_group_txt = $.ajax({
+        type: 'GET',       
+        url: buildCourseUrl(['gradeable', gradeable_id, 'getJsUserGroup']),
+        dataType: 'html',
+        context: document.body,
+        global: false,
+        async:false,
+        success: function(res) {
+            return res.data;
+        }
+    }).responseText;
+    var user_group_obj=JSON.parse(user_group_txt);
+    var user_group = user_group_obj.data;
     let scores = {
+        user_group: user_group,
         ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
         ta_grading_total: getTaGradingTotal(),
+        peer_grade_earned: getPeerGradingTotal(),
+        peer_total: getPeerGradingTotal(),
         auto_grading_complete: false
     };
 
@@ -1322,7 +1336,7 @@ function getTaGradingComplete() {
  */
 function getTaGradingTotal() {
     let total = 0.0;
-    $('.component').each(function () {
+    $('.ta-component').each(function () {
         total += parseFloat($(this).attr('data-max_value'));
     });
     return total;
@@ -1334,6 +1348,17 @@ function getTaGradingTotal() {
 function getPeerGradingTotal() {
     let total = 0.0;
     $('.peer-component').each(function () {
+        total += parseFloat($(this).attr('data-max_value'));
+    });
+    return total;
+}
+/**
+ * Gets the number of Peer points that were earned
+ * @return {number}
+ */
+function getPeerGradingScore() {
+    let total = 0.0;
+    $('.peer-score').each(function () {
         total += parseFloat($(this).attr('data-max_value'));
     });
     return total;
@@ -2288,6 +2313,7 @@ function reloadInstructorEditRubric(gradeable_id) {
 function reloadGradingComponent(component_id, editable = false, showMarkList = false) {
     let component_tmp = null;
     let gradeable_id = getGradeableId();
+    let graded_gradeable = ajaxGetGradedGradeable(gradeable_id, getAnonId(), false);
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then(function (component) {
             // Set the global mark list data for this component for conflict resolution

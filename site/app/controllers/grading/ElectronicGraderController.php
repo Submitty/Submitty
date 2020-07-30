@@ -49,6 +49,14 @@ class ElectronicGraderController extends AbstractController {
         return true;
     }
     /**
+     * Route for Getting Gradeable
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getJsUserGroup", methods={"GET"})
+     */
+    public function getJsUserGroup($gradeable_id) {
+        $user_group = $this->core->getUser()->getGroup();
+        return JsonResponse::getSuccessResponse($user_group);
+    }
+    /**
      * Route for randomizing peer assignments with 'One Grades Many'
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
@@ -1382,12 +1390,14 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
             }
         }
-
+        //$grading_user_name = $this->core->getQueries()->getGraderForPeerAssignment($gradeable_id,'bitdiddle');
+       // $grading_user = $this->core->getQueries()->getSubmittyUser($grading_user_name);
         // If it is graded at all, then send ta score information
         $response_data['ta_grading_total'] = $gradeable->getTaPoints();
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
             if ($gradeable->isPeerGrading()) {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
+                //$response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalScore($grading_user);
                 $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
                 $response_data['peer_total'] = $gradeable->getPeerPoints();
                 $response_data['user_group'] = $this->core->getUser()->getGroup();
