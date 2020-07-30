@@ -159,7 +159,7 @@ class Notebook extends AbstractModel {
        * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
        * blank.
        */
-    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook): array {
+    public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
                 if ($notebookVal['type'] == "short_answer") {
@@ -171,7 +171,7 @@ class Notebook extends AbstractModel {
                         // Else there has been a previous submission try to get it
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
                         }
                         catch (AuthorizationException $e) {
                             // If the user lacked permission then just set to default instructor provided string
@@ -190,7 +190,7 @@ class Notebook extends AbstractModel {
                     else {
                         try {
                             // Try to get the most recent submission
-                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version);
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename'], $version, $student_id);
 
                             // Add field to the array
                             $new_notebook[$notebookKey]['recent_submission'] = $recentSubmission;
@@ -213,17 +213,18 @@ class Notebook extends AbstractModel {
      * Get the data from the student's most recent submission
      *
      * @param string $filename Name of the file to collect the data out of
+     * @param string $version which version to get from
+     * @param string $student_id id of which user to collect data from
      * @throws AuthorizationException if the user lacks permissions to read the submissions file
      * @throws FileNotFoundException if file with passed filename could not be found
      * @throws IOException if there was an error reading contents from the file
      * @return string if successful returns the contents of a students most recent submission
      */
-    private function getRecentSubmissionContents($filename, $version) {
+    private function getRecentSubmissionContents(string $filename, string $version, string $student_id): string {
 
         // Get items in path to student's submission folder
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradable_dir = $this->getGradeableId();
-        $student_id = $this->core->getUser()->getId();
 
         // Join path items
         $complete_file_path = FileUtils::joinPaths(

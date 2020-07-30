@@ -192,6 +192,8 @@
 
     {% endfor %}
 
+
+
 </div>
 
 <script>
@@ -216,6 +218,24 @@
 
 
     $(function(){
+
+        {% if is_grader_view | default(null) %}
+            //disable inputs if we're viewing from the grader's view
+            let nb = document.getElementsByClassName("notebook")[0];
+            let tgts = nb.querySelectorAll('input')
+
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('button');
+
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+        {% endif %}
+
         createArray({{ num_file_submissions }});
 
         {% for file in old_files %}

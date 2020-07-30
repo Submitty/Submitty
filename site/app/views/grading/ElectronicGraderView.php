@@ -829,7 +829,7 @@ HTML;
             $this->core->getOutput()->addInternalJs('drag-and-drop.js');
 
             $notebook_model = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
-                $this->core->getUser()->getId(),
+                $graded_gradeable->getSubmitter()->getId(),
                 $gradeable->getId()
             );
 
@@ -837,7 +837,24 @@ HTML;
             $image_data = $notebook_model->getImagePaths();
             $testcase_messages = $display_version_instance !== null ? $display_version_instance->getTestcaseMessages() : [];
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($highest_version, $notebook);
+
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $highest_version,
+                $notebook,
+                $graded_gradeable->getSubmitter()->getId()
+            );
+
+            $old_files = [];
+            for ($i = 1; $i <= $notebook_model->getNumParts(); $i++) {
+                foreach ($display_version_instance->getPartFiles($i)['submissions'] as $file) {
+                    $old_files[] = [
+                        'name' => str_replace('\'', '\\\'', $file['name']),
+                        'size' => number_format($file['size'] / 1024, 2),
+                        'part' => $i
+                    ];
+                }
+            }
+
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderNotebookPanel',
@@ -845,7 +862,8 @@ HTML;
                 $testcase_messages,
                 $image_data,
                 $gradeable->getId(),
-                $highest_version
+                $highest_version,
+                $old_files
             );
         }
 
@@ -1417,7 +1435,7 @@ HTML;
     }
 
 
-    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version): string {
+    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files): string {
         return $this->core->getOutput()->renderTwigTemplate(
             "grading/electronic/NotebookPanel.twig",
             [
@@ -1434,7 +1452,8 @@ HTML;
             "gradeable_id" => $gradeable_id,
             "highest_version" => $highest_version,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
-            "old_files" => []
+            "old_files" => $old_files,
+            "is_grader_view" => true
             ]
         );
     }

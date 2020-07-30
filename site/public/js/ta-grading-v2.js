@@ -92,7 +92,6 @@ $(function () {
 
     const panelId = panelSpanId.split(/(_|-)btn/)[0];
     const selectEle =  $('select#' + panelId + '_select');
-
     // Hide all select dropdown except the current one
     $('select.panel-position-cont').not(selectEle).hide();
 
@@ -470,25 +469,29 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 // Keep only those panels which are part of the two panel layout
 function setTwoPanelModeVisibilities () {
     panelElements.forEach((panel) => {
+      let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
+
       if (taLayoutDet.currentTwoPanels.left === panel.str || taLayoutDet.currentTwoPanels.right === panel.str) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
-        $("#" + panel.str + "_btn").toggleClass('active', true);
+        $(id_str).toggleClass('active', true);
       } else {
         $("#" + panel.str).toggle(false);
         $(panel.icon).toggleClass('icon-selected', false);
-        $("#" + panel.str + "_btn").toggleClass('active', false);
+        $(id_str).toggleClass('active', false);
       }
     });
 }
 
 function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
+    let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
+
     if (panel.str === ele) {
       const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
-      $("#" + panel.str + "_btn").toggleClass('active', eleVisibility);
+      $(id_str).toggleClass('active', eleVisibility);
 
       if (taLayoutDet.isTwoPanelsEnabled && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
@@ -502,7 +505,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
-      $("#" + panel.str + "_btn").removeClass('active');
+      $(id_str).removeClass('active');
     }
   });
   // update the two-panels-layout if it's enabled
