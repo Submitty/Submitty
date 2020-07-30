@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class GradeOverrideController extends AbstractController {
     /**
-     * @Route("/{_semester}/{_course}/grade_override")
+     * @Route("/courses/{_semester}/{_course}/grade_override")
      */
     public function viewOverriddenGrades() {
         $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
@@ -28,22 +28,22 @@ class GradeOverrideController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/grade_override/{gradeable_id}")
+     * @Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}")
      */
     public function getOverriddenGrades($gradeable_id) {
         $users = $this->core->getQueries()->getUsersWithOverriddenGrades($gradeable_id);
-        $user_table = array();
+        $user_table = [];
         foreach ($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment());
+            $user_table[] = ['user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment()];
         }
-        return $this->core->getOutput()->renderJsonSuccess(array(
+        return $this->core->getOutput()->renderJsonSuccess([
             'gradeable_id' => $gradeable_id,
             'users' => $user_table,
-        ));
+        ]);
     }
 
     /**
-     * @Route("/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods={"POST"})
      */
     public function deleteOverriddenGrades($gradeable_id) {
         $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
@@ -51,21 +51,21 @@ class GradeOverrideController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods={"POST"})
      */
     public function updateOverriddenGrades($gradeable_id) {
         $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-        $isUserNotInCourse = empty($this->core->getQueries()->getUsersById(array($_POST['user_id'])));
+        $isUserNotInCourse = empty($this->core->getQueries()->getUsersById([$_POST['user_id']]));
         if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
             $error = "Invalid Student ID";
             return $this->core->getOutput()->renderJsonFail($error);
         }
-        
+
         if (((!isset($_POST['marks'])) || $_POST['marks'] == "" || is_float($_POST['marks']))) {
             $error = "Marks be a integer";
             return $this->core->getOutput()->renderJsonFail($error);
         }
-        
+
         $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
         $this->getOverriddenGrades($gradeable_id);
     }

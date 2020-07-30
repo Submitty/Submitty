@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestGradeInquiry($gradeable_id) {
@@ -67,7 +67,7 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function makeGradeInquiryPost($gradeable_id) {
@@ -129,7 +129,7 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function changeGradeInquiryStatus($gradeable_id) {
@@ -211,13 +211,15 @@ class GradeInquiryController extends AbstractController {
      * @param int|null $gc_id
      */
     private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id) {
+        $component = "";
+        $component_title = "";
+        $component_string = "";
         if ($graded_gradeable->hasTaGradingInfo()) {
             $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
             $graders = $ta_graded_gradeable->getVisibleGraders();
             $submitter = $graded_gradeable->getSubmitter();
             $user_id = $this->core->getUser()->getId();
             $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
-
             $graders = [];
             if (!is_null($gc_id)) {
                 $component = $graded_gradeable->getGradeable()->getComponent($gc_id);

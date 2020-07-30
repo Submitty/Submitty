@@ -1,0 +1,32 @@
+<script>
+    window.onload = function() {
+        const xPoints = [];
+        const yPoints = [];
+        let string;
+        {% for answer, number in results %}
+            string = "{{ poll.getResponseString(answer) }}";
+            xPoints.push(string);
+            yPoints.push({{ number }});
+        {% endfor %}
+        const data = [
+          {
+            x: xPoints,
+            y: yPoints,
+            type: 'bar'
+          }
+        ];
+        const layout = {
+          title: "{{ poll.getName() }}"
+        }
+        Plotly.newPlot("chartContainer", data, layout);
+    }
+</script>
+
+<div class="content">
+    <h1> Viewing poll results for {{ poll.getName() }} </h1>
+
+    <h2> Question: </h2>
+    {{ poll.getQuestion() | markdown }}
+    <br/>
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+</div>

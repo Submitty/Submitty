@@ -4,67 +4,39 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
+use app\models\DisplayImage;
 use app\models\User;
+use app\views\grading\ImagesView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
+use app\libraries\routers\AccessControl;
 
 class ImagesController extends AbstractController {
+
     /**
-     * @Route("/{_semester}/{_course}/student_photos")
+     * @Route("/courses/{_semester}/{_course}/student_photos")
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
-        $user_group = $this->core->getUser()->getGroup();
-        $images_course_path = $this->core->getConfig()->getCoursePath();
-        // FIXME: this code is duplicated in GlobalController.php
-        $images_path = FileUtils::joinPaths($images_course_path, "uploads/student_images");
-        $common_images_path_1 = FileUtils::joinPaths("/var/local/submitty/student_images");
-        $term = explode('/', $this->core->getConfig()->getCoursePath());
-        $term = $term[count($term) - 2];
-        $common_images_path_2 = FileUtils::joinPaths("/var/local/submitty/student_images", $term);
-        // FIXME: consider searching through the common location for matches to my students
-        // (but this would be expensive)
-        $any_images_files = array_merge(
-            FileUtils::getAllFiles($images_path, array(), true),
-            FileUtils::getAllFiles($common_images_path_1, array(), true),
-            FileUtils::getAllFiles($common_images_path_2, array(), true)
-        );
-        if ($user_group === User::GROUP_STUDENT || (($user_group === User::GROUP_FULL_ACCESS_GRADER || $user_group === User::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
-            $this->core->addErrorMessage("You have no permissions to see images.");
-            $this->core->redirect($this->core->buildCourseUrl());
-            return;
+        $view = 'sections';
+        if (isset($_GET['view']) && $_GET['view'] === 'all') {
+            $view = 'all';
         }
+
         $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
-
-        //limited-access graders with no assigned sections have no permissions to view images
-        if ($user_group === User::GROUP_LIMITED_ACCESS_GRADER && empty($grader_sections)) {
-            $this->core->addErrorMessage("You have no assigned sections and no permissions to see images.");
-            return;
-        }
-
-        if ($user_group !== User::GROUP_LIMITED_ACCESS_GRADER) {
-            $grader_sections = array();  //reset grader section to nothing so permission for every image
-        }
-        else {
-            if (empty($grader_sections)) {
-                return;
-            }
-        }
-        $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
+        $has_full_access = $this->core->getUser()->accessFullGrading();
         $students = $this->core->getQueries()->getAllUsers();
-        $this->core->getOutput()->renderOutput(array('grading', 'Images'), 'listStudentImages', $students, $grader_sections, $instructor_permission);
+        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $has_full_access, $view);
     }
 
     /**
-     * @Route("/{_semester}/{_course}/student_photos/upload")
+     * @Route("/courses/{_semester}/{_course}/student_photos/upload")
      */
     public function ajaxUploadImagesFiles() {
         if (!$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);
-        }
-
-        if (empty($_POST)) {
-            $max_size = ini_get('post_max_size');
-            return $this->core->getOutput()->renderResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
         }
 
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
@@ -87,7 +59,7 @@ class ImagesController extends AbstractController {
             }
         }
 
-        $uploaded_files = array();
+        $uploaded_files = [];
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
         }
@@ -96,7 +68,7 @@ class ImagesController extends AbstractController {
 
         $file_size = 0;
         if (isset($uploaded_files[1])) {
-            $uploaded_files[1]["is_zip"] = array();
+            $uploaded_files[1]["is_zip"] = [];
             for ($j = 0; $j < $count_item; $j++) {
                 if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
@@ -131,7 +103,10 @@ class ImagesController extends AbstractController {
         }
 
         if (isset($uploaded_files[1])) {
+            $users = $this->core->getQueries()->getListOfCourseUsers();
+            // For each item that was uploaded
             for ($j = 0; $j < $count_item; $j++) {
+                // Item was a zip file
                 if ($uploaded_files[1]["is_zip"][$j] === true) {
                     $zip = new \ZipArchive();
                     $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
@@ -140,7 +115,18 @@ class ImagesController extends AbstractController {
                         $upload_img_path_tmp = FileUtils::joinPaths($upload_img_path, "tmp");
                         $zip->extractTo($upload_img_path_tmp);
 
-                        FileUtils::recursiveFlattenImageCopy($upload_img_path_tmp, $upload_img_path);
+                        $files = FileUtils::getAllFilesTrimSearchPath($upload_img_path_tmp, 0);
+
+                        foreach ($files as $file) {
+                            $meta = pathinfo($file);
+                            $user_id = $meta['filename'];
+                            $extension = $meta['extension'];
+
+                            // If user is a member of this course then go ahead and save
+                            if (in_array($user_id, $users)) {
+                                DisplayImage::saveUserImage($this->core, $user_id, $extension, $file, 'system_images');
+                            }
+                        }
 
                         //delete tmp folder
                         FileUtils::recursiveRmdir($upload_img_path_tmp);
@@ -156,10 +142,17 @@ class ImagesController extends AbstractController {
                     }
                 }
                 else {
+                    // Item was an individual image
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                        $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
-                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            return $this->core->getOutput()->renderResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                        $tmp_path = $uploaded_files[1]["tmp_name"][$j];
+
+                        $meta = explode('.', $uploaded_files[1]['name'][$j]);
+                        $user_id = $meta[0];
+                        $extension = $meta[1];
+
+                        // If user is a member of this course then go ahead and save
+                        if (in_array($user_id, $users)) {
+                            DisplayImage::saveUserImage($this->core, $user_id, $extension, $tmp_path, 'system_images');
                         }
                     }
                     else {
@@ -185,5 +178,48 @@ class ImagesController extends AbstractController {
             $message = 'Successfully uploaded!';
         }
         return $this->core->getOutput()->renderResultMessage($message, true);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     */
+    public function flagUserImage(): JsonResponse {
+        $user_id = $_POST['user_id'];
+
+        if ($_POST['flag'] === 'true') {
+            $new_state = 'flagged';
+            $icon_html = ImagesView::UNDO_ICON_HTML;
+            $href = "javascript:flagUserImage('$user_id', false)";
+        }
+        else {
+            $new_state = 'preferred';
+            $icon_html = ImagesView::FLAG_ICON_HTML;
+            $href = "javascript:flagUserImage('$user_id', true)";
+        }
+
+        $result = $this->core->getQueries()->updateUserDisplayImageState($user_id, $new_state);
+        $user = $this->core->getQueries()->getSubmittyUser($user_id);
+
+        $image_data = '';
+        $image_mime_type = '';
+
+        $display_image = $user->getDisplayImage();
+        if ($display_image) {
+            $image_data = $display_image->getImageBase64MaxDimension(ImagesView::IMG_MAX_DIMENSION);
+            $image_mime_type = $display_image->getMimeType();
+        }
+
+        if ($result) {
+            return JsonResponse::getSuccessResponse([
+                'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                'image_data' => $image_data,
+                'image_mime_type' => $image_mime_type,
+                'icon_html' => $icon_html,
+                'href' => $href
+            ]);
+        }
+
+        return JsonResponse::getErrorResponse("An error occurred attempting to set $user_id's preferred photo to $new_state.");
     }
 }

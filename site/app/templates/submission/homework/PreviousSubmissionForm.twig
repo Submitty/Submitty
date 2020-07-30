@@ -2,13 +2,13 @@
 {% block popup_id %}previous-submission-form{% endblock %}
 {% block title %}Previous Submission{% endblock %}
 {% block body %}
-    <div>
-        <p>This user/team has a previous submission.<br>What file(s) should be contained in the new submission?</p>
+    <fieldset>
+        <legend>This user/team has a previous submission.<br>What file(s) should be contained in the new submission?</legend>
         <br>
         <input type="radio" id="instructor-submit-option-new" name="instructor-submit"><label for="instructor-submit-option-new">only the new files</label><br>
         <input type="radio" id="instructor-submit-option-merge-1" name="instructor-submit"><label for="instructor-submit-option-merge-1">old files and new files -- old files with the same name will be renamed.</label><br>
         <input type="radio" id="instructor-submit-option-merge-2" name="instructor-submit"><label for="instructor-submit-option-merge-2">old files and new files -- old files with the same name will be overwritten.</label>
-    </div>
+    </fieldset>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}

@@ -35,6 +35,8 @@ class Team extends AbstractModel {
     protected $member_list;
     /** @var array $assignment_settings */
     protected $assignment_settings;
+    /** @var string $anon_id */
+    protected $anon_id;
 
     /**
      * Team constructor.
@@ -47,10 +49,10 @@ class Team extends AbstractModel {
         $this->id = $details['team_id'];
         $this->registration_section = $details['registration_section'];
         $this->rotating_section = $details['rotating_section'];
-        $this->member_user_ids = array();
-        $this->invited_user_ids = array();
-        $this->member_users = array();
-        $this->invited_users = array();
+        $this->member_user_ids = [];
+        $this->invited_user_ids = [];
+        $this->member_users = [];
+        $this->invited_users = [];
         foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
             if (array_key_exists('anon_id', $user_details)) {
@@ -81,13 +83,30 @@ class Team extends AbstractModel {
      * @return string
      */
     public function getAnonId() {
-        return $this->id;
+        if (empty($this->core->getQueries()->getTeamAnonId($this->getId())) || $this->core->getQueries()->getTeamAnonId($this->getId())[$this->getId()] === null) {
+            $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            $anon_ids = $this->core->getQueries()->getAllAnonIds();
+            $alpha_length = strlen($alpha) - 1;
+            do {
+                $random = "";
+                for ($i = 0; $i < 15; $i++) {
+                    // this throws an exception if there's no avaiable source for generating
+                    // random exists, but that shouldn't happen on our targetted endpoints (Ubuntu/Debian)
+                    // so just ignore this fact
+                    /** @noinspection PhpUnhandledExceptionInspection */
+                    $random .= $alpha[random_int(0, $alpha_length)];
+                }
+            } while (in_array($random, $anon_ids));
+            $this->anon_id = $random;
+            $this->core->getQueries()->updateTeamAnonId($this->getId(), $random);
+        }
+        return $this->core->getQueries()->getTeamAnonId($this->getId())[$this->getId()];
     }
 
     /**
      * Get registration section
      * @return integer
-    */
+     */
     public function getRegistrationSection() {
         return $this->registration_section;
     }
@@ -95,7 +114,7 @@ class Team extends AbstractModel {
     /**
      * Get rotating section
      * @return integer
-    */
+     */
     public function getRotatingSection() {
         return $this->rotating_section;
     }
@@ -103,7 +122,7 @@ class Team extends AbstractModel {
     /**
      * Get user ids of team members
      * @return string[]
-    */
+     */
     public function getMembers() {
         return $this->member_user_ids;
     }
@@ -111,7 +130,7 @@ class Team extends AbstractModel {
     /**
      * Get users of team, sorted by id
      * @return User[]
-    */
+     */
     public function getMemberUsersSorted() {
         $ret = $this->member_users;
         usort($ret, function ($a, $b) {
@@ -123,7 +142,7 @@ class Team extends AbstractModel {
     /**
      * Get user ids of those invited to the team
      * @return string[]
-    */
+     */
     public function getInvitations() {
         return $this->invited_user_ids;
     }
@@ -131,7 +150,7 @@ class Team extends AbstractModel {
     /**
      * Get string list of team members
      * @return string
-    */
+     */
     public function getMemberList() {
         return $this->member_list;
     }
@@ -139,7 +158,7 @@ class Team extends AbstractModel {
     /**
      * Get number of users in team
      * @return integer
-    */
+     */
     public function getSize() {
         return count($this->member_user_ids);
     }

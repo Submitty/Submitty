@@ -166,8 +166,8 @@ function getGradeableBuckets()
 
             // Extract each independent gradeable in the bucket
             var ids = [];
-            var selector = '#gradeables-list-' + type + ' li';
-            $(selector).each(function() {
+            var selector = `#gradeables-list-${type}`;
+            $(selector).children('.gradeable-li').each(function() {
 
                 var gradeable = {};
 

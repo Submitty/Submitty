@@ -17,11 +17,11 @@ class DatabaseExceptionTester extends \PHPUnit\Framework\TestCase {
 
     public function testDatabaseExceptionQuery() {
         try {
-            throw new DatabaseException("exception", "query", array('parameters'));
+            throw new DatabaseException("exception", "query", ['parameters']);
         }
         catch (DatabaseException $exc) {
             $this->assertEquals("exception", $exc->getMessage());
-            $this->assertEquals(array('query' => "query", "parameters" => array('parameters')), $exc->getDetails());
+            $this->assertEquals(['query' => "query", "parameters" => ['parameters']], $exc->getDetails());
         }
     }
 }

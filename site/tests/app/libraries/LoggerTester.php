@@ -106,13 +106,15 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
     public function testTALog() {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = "PHPUnit";
-        $logging_params = array("course_semester" => "test_semester",
-                                "course_name" => "test_course",
-                                "gradeable_id" => "test_gradeable",
-                                "grader_id" => "test_grader",
-                                "submitter_id" => "test_submitter",
-                                "action" => "test_action",
-                                "component_id" => "1");
+        $logging_params = [
+            "course_semester" => "test_semester",
+            "course_name" => "test_course",
+            "gradeable_id" => "test_gradeable",
+            "grader_id" => "test_grader",
+            "submitter_id" => "test_submitter",
+            "action" => "test_action",
+            "component_id" => "1"
+        ];
         Logger::logTAGrading($logging_params);
         $file = file_get_contents($this->ta_grading);
         $lines = explode("\n", $file);

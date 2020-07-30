@@ -11,34 +11,27 @@ import os
 from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 
-from . import CONFIG_PATH
-
-with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DB_HOST = OPEN_JSON['database_host']
-DB_USER = OPEN_JSON['database_user']
-DB_PASSWORD = OPEN_JSON['database_password']
-
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DATA_DIR = OPEN_JSON['submitty_data_dir']
-
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
 
-def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_team,version):
+def insert_into_database(config, semester, course, gradeable_id, user_id, team_id, who_id, is_team,
+                         version):
+    db_user = config.database['database_user']
+    db_host = config.database['database_host']
+    db_pass = config.database['database_password']
+    data_dir = config.submitty['submitty_data_dir']
 
     non_hidden_non_ec = 0
     non_hidden_ec = 0
     hidden_non_ec = 0
     hidden_ec = 0
 
-    testcases = get_testcases(semester, course, gradeable_id)
-    results = get_result_details(semester, course, gradeable_id, who_id, version)
+    testcases = get_testcases(config, semester, course, gradeable_id)
+    results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
     if len(testcases) != len(results['testcases']):
-      print("ERROR!  mismatched # of testcases {} != {}".format(len(testcases), len(results['testcases'])))
+        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
     for i in range(len(testcases)):
         if testcases[i]['hidden'] and testcases[i]['extra_credit']:
             hidden_ec += results['testcases'][i]['points']
@@ -50,13 +43,13 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
             non_hidden_non_ec += results['testcases'][i]['points']
     submission_time = results['submission_time']
 
-    db_name = "submitty_{}_{}".format(semester, course)
+    db_name = f"submitty_{semester}_{course}"
 
     # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
+    if os.path.isdir(db_host):
+        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
 
     engine = create_engine(conn_string)
     db = engine.connect()
@@ -81,8 +74,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
         if row[0] > 0:
             query_type = data_table\
                 .update(
-                    values=
-                    {
+                    values={
                         data_table.c.autograding_non_hidden_non_extra_credit:
                             bindparam("autograding_non_hidden_non_extra_credit"),
                         data_table.c.autograding_non_hidden_extra_credit:
@@ -123,8 +115,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
         if row[0] > 0:
             query_type = data_table\
                 .update(
-                    values=
-                    {
+                    values={
                         data_table.c.autograding_non_hidden_non_extra_credit:
                             bindparam("autograding_non_hidden_non_extra_credit"),
                         data_table.c.autograding_non_hidden_extra_credit:
@@ -156,7 +147,7 @@ def insert_to_database(semester,course,gradeable_id,user_id,team_id,who_id,is_te
     engine.dispose()
 
 
-def get_testcases(semester, course, g_id):
+def get_testcases(config, semester, course, g_id):
     """
     Get all the testcases for a homework from its build json file. This should have a 1-to-1
     correspondance with the testcases that come from the results.json file.
@@ -167,8 +158,15 @@ def get_testcases(semester, course, g_id):
     :return:
     """
     testcases = []
-    build_file = os.path.join(DATA_DIR, "courses", semester, course, "config", "build",
-                              "build_" + g_id + ".json")
+    build_file = os.path.join(
+        config.submitty['submitty_data_dir'],
+        "courses",
+        semester,
+        course,
+        "config",
+        "build",
+        f"build_{g_id}.json"
+    )
     if os.path.isfile(build_file):
         with open(build_file) as build_file:
             build_json = json.load(build_file)
@@ -180,12 +178,12 @@ def get_testcases(semester, course, g_id):
     return testcases
 
 
-def get_result_details(semester, course, g_id, who_id, version):
+def get_result_details(data_dir, semester, course, g_id, who_id, version):
     """
-    Gets the result details for a particular version of a gradeable for the who (user or team). It returns a
-    dictionary that contains a list of the testcases (that should have a 1-to-1 correspondance
-    with the testcases gotten through get_testcases() method) and the submission time for the
-    particular version.
+    Gets the result details for a particular version of a gradeable for the who (user or team).
+    It returns a dictionary that contains a list of the testcases (that should have a 1-to-1
+    correspondence with the testcases gotten through get_testcases() method) and the submission
+    time for the particular version.
 
     :param semester:
     :param course:
@@ -195,7 +193,7 @@ def get_result_details(semester, course, g_id, who_id, version):
     :return:
     """
     result_details = {'testcases': [], 'submission_time': None}
-    result_dir = os.path.join(DATA_DIR, "courses", semester, course, "results", g_id, who_id,
+    result_dir = os.path.join(data_dir, "courses", semester, course, "results", g_id, who_id,
                               str(version))
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:
@@ -207,7 +205,7 @@ def get_result_details(semester, course, g_id, who_id, version):
     if os.path.isfile(os.path.join(result_dir, "history.json")):
         with open(os.path.join(result_dir, "history.json")) as result_file:
             result_json = json.load(result_file)
-            #a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
+            # a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
             a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
             result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
                 .format(a.year, a.month, a.day, a.hour, a.minute, a.second)

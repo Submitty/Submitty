@@ -17,12 +17,12 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     private $upload_path;
 
     public function setUp(): void {
-        $this->config = array();
+        $this->config = [];
         $this->config['course_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $this->config['use_mock_time'] = true;
         $_POST['csrf_token'] = "";
         $this->core = $this->createMockCore($this->config);
-        $_POST['release_time'] = $this->core->getDateTimeNow()->format("Y-m-d H:i:s");
+        $_POST['release_time'] = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
 
         FileUtils::createDir($this->core->getConfig()->getCoursePath() . "/uploads/course_materials", true);
         $this->json_path = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
@@ -31,8 +31,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
     public function tearDown(): void {
         FileUtils::recursiveRmdir($this->config['course_path']);
-        $_POST = array();
-        $_FILES = array();
+        $_POST = [];
+        $_FILES = [];
     }
 
     private function buildFakeFile($filename, $part = 1) {
@@ -51,7 +51,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $zip = new ZipArchive();
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);
-        $files = array();
+        $files = [];
         if ($zip->open($filename_full, ZipArchive::CREATE) === true) {
             $lev = "";
             for ($i = 0; $i < $depth; $i++) {
@@ -100,12 +100,13 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json = [
             $filename_full => [
                 "release_datetime" => $_POST['release_time'],
-                'hide_from_students' => null
+                'hide_from_students' => null,
+                'external_link' => false
             ]
         ];
         $this->assertEquals($expected_json, $json);
         //check the uploads directory now
-        $files = FileUtils::getAllFiles($this->upload_path, array(), true);
+        $files = FileUtils::getAllFiles($this->upload_path, [], true);
 
         $expected_files = [
             $name => [
@@ -126,17 +127,17 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $controller = new CourseMaterialsController($this->core);
 
-        $_FILES = array();
+        $_FILES = [];
         $_POST['expand_zip'] = 'on';
         //create a zip file of depth = 2 with 2 files in each level.
         $fake_files = $this->buildFakeZipFile('foo.zip', 1, 2, 2);
         $ret = $controller->ajaxUploadCourseMaterialsFiles();
         $json = FileUtils::readJsonFile($this->json_path);
 
-        $expected_ret = array('status' => 'success', 'data' => 'Successfully uploaded!');
+        $expected_ret = ['status' => 'success', 'data' => 'Successfully uploaded!'];
         $this->assertEquals($expected_ret, $ret);
 
-        $files = FileUtils::getAllFiles($this->upload_path, array(), true);
+        $files = FileUtils::getAllFiles($this->upload_path, [], true);
         $this->assertEquals(4, count($files));
 
         $f1 = Utils::getFirstArrayElement($files);
@@ -144,7 +145,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $expected_json1 = [
             'release_datetime' => $_POST['release_time'],
-            'hide_from_students' => null
+            'hide_from_students' => null,
+            'external_link' => false
         ];
 
         $this->assertEquals($expected_json1, $json[$keys[1]]);
@@ -157,18 +159,17 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $this->assertEquals($expected_files1, $f1);
     }
-    
+
     /**
      * @runInSeparateProcess
-    */
-
+     */
     public function testModifyCourseMaterials() {
         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
         $controller = new CourseMaterialsController($this->core);
 
-        $_FILES = array();
+        $_FILES = [];
 
         //create a file
         $name = "foo.txt";
@@ -182,7 +183,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json = [
             $this->upload_path . "/" . $name => [
                 'release_datetime' => $_POST['release_time'],
-                'hide_from_students' => null
+                'hide_from_students' => null,
+                'external_link' => false
             ]
         ];
 
@@ -190,7 +192,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_POST['fn'][] = FileUtils::joinPaths($this->upload_path, $name);
         $new_date = new \DateTime('2005-01-01');
-        $new_date = $new_date->format('Y-m-d H:i:s');
+        $new_date = $new_date->format('Y-m-d H:i:sO');
 
         $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date);
 
@@ -201,13 +203,14 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json = [
             $this->upload_path . "/" . $name => [
                 'release_datetime' => $new_date,
-                'hide_from_students' => null
+                'hide_from_students' => null,
+                'external_link' => false
             ]
         ];
 
         $this->assertEquals($expected_json, $json);
 
-        $_FILES = array();
+        $_FILES = [];
         //try multiple
         //create a file
         $name = "foo2.txt";
@@ -225,7 +228,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $expected_json2 = [
             'release_datetime' => $new_date,
-            'hide_from_students' => null
+            'hide_from_students' => null,
+            'external_link' => false
         ];
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
@@ -240,7 +244,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $controller = new CourseMaterialsController($this->core);
 
-        $_FILES = array();
+        $_FILES = [];
 
         //create a file
         $name = "foo.txt";
@@ -269,7 +273,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->willReturn(true);
 
         $controller = new CourseMaterialsController($this->core);
-        $_FILES = array();
+        $_FILES = [];
         $_POST['requested_path'] = 'foo/foo2';
 
         $name = "foo.txt";
@@ -283,7 +287,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json = [
             $filename_full => [
                 "release_datetime" => $_POST['release_time'],
-                "hide_from_students" => null
+                "hide_from_students" => null,
+                'external_link' => false
             ]
         ];
 

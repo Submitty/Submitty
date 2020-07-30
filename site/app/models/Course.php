@@ -13,7 +13,7 @@ use app\libraries\FileUtils;
  * @method string getTitle()
  * @method string getDisplayName()
  * @method int getUserGroup()
-  */
+ */
 class Course extends AbstractModel {
 
     /** @property string $semester the semester (or term) code in which the course is taking place. */

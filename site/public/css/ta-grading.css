@@ -1,14 +1,14 @@
 #bar_wrapper {
-     position: absolute;
-     height: 41px;
-     width: 650px;
-     top: -90px;
-     left: 45%;
-     background-color: var(--standard-pale-blue-gray);
-     cursor: move;
-     z-index:40;
-     border: solid 6px var(--important-post);
-     box-sizing: content-box;
+    position: absolute;
+    height: 41px;
+    width: max-content;
+    top: -90px;
+    left: 45%;
+    background-color: var(--standard-pale-blue-gray);
+    cursor: move;
+    z-index:40;
+    border: solid 6px var(--important-post);
+    box-sizing: content-box;
 }
 
 #footer {
@@ -22,13 +22,13 @@
 }
 
 .grading_toolbar {
-     position:relative;
-     display: block;
-     float: left;
-     padding-top:3px;
-     padding-bottom:3px;
-     background-color: #var(--standard-pale-blue-gray);
- }
+    position:relative;
+    display: block;
+    float: left;
+    padding-top:3px;
+    padding-bottom:3px;
+    background-color: #var(--standard-pale-blue-gray);
+}
 
 .grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;
