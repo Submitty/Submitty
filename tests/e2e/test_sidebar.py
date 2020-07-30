@@ -9,14 +9,14 @@ class TestSidebar(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def sidebar_test_helper(self, is_course, expected, user_id, user_name):
+    def sidebar_test_helper(self, which_course, expected, user_id, user_name):
 
         self.log_in(user_id=user_id, user_name=user_name)
 
-        if is_course:
-            self.click_class('sample')
+        if which_course != '':
+            self.click_class(which_course)
 
-        base_url = self.test_url + '/courses/' + self.semester + '/sample'
+        base_url = self.test_url + '/courses/' + self.semester + '/' + which_course
 
         title_map = {
             'Manage Sections': 'Manage Registration Sections',
@@ -81,7 +81,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Clark']
         ]
 
-        self.sidebar_test_helper(False, expected, 'superuser', 'Clark')
+        self.sidebar_test_helper('', expected, 'superuser', 'Clark')
 
     def test_click_sidebar_links_instructor(self):
         expected = [
@@ -93,7 +93,35 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
 
-        self.sidebar_test_helper(False, expected, 'instructor', 'Quinn')
+        self.sidebar_test_helper('', expected, 'instructor', 'Quinn')
+
+    def test_click_sidebar_links_instructor_blank(self):
+        base_url = self.test_url + '/courses/' + self.semester + '/blank'
+        expected = [
+            [base_url, 'Gradeables'],
+            [base_url + '/notifications', 'Notifications'],
+            [base_url + '/gradeable', 'New Gradeable'],
+            [base_url + '/config', 'Course Settings'],
+            [base_url + '/course_materials', 'Course Materials'],
+            [base_url + '/users', 'Manage Students'],
+            [base_url + '/graders', 'Manage Graders'],
+            [base_url + '/sections', 'Manage Sections'],
+            [base_url + '/student_photos', 'Student Photos'],
+            [base_url + '/late_days', 'Late Days Allowed'],
+            [base_url + '/extensions', 'Excused Absence Extensions'],
+            [base_url + '/grade_override', 'Grade Override'],
+            [base_url + '/plagiarism', 'Plagiarism Detection'],
+            [base_url + '/reports', 'Grade Reports'],
+            [base_url + '/late_table', 'My Late Days/Extensions'],
+            [self.test_url + '/home', 'My Courses'],
+            [self.test_url + '/user_profile', 'My Profile'],
+            [self.test_url + '/admin/docker', 'Docker UI'],
+            [self.test_url + '/home/courses/new', 'New Course'],
+            ['javascript: toggleSidebar();', 'Collapse Sidebar'],
+            [self.test_url + '/authentication/logout', 'Logout Quinn']
+        ]
+
+        self.sidebar_test_helper('blank', expected, 'instructor', 'Quinn')
 
     def test_click_sidebar_links_instructor_sample(self):
         base_url = self.test_url + '/courses/' + self.semester + '/sample'
@@ -123,7 +151,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Quinn']
         ]
 
-        self.sidebar_test_helper(True, expected, 'instructor', 'Quinn')
+        self.sidebar_test_helper('sample', expected, 'instructor', 'Quinn')
 
     def test_click_sidebar_links_ta(self):
         expected = [
@@ -133,7 +161,22 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
 
-        self.sidebar_test_helper(False, expected, 'ta', 'Jill')
+        self.sidebar_test_helper('', expected, 'ta', 'Jill')
+
+    def test_click_sidebar_links_ta_blank(self):
+        base_url = self.test_url + '/courses/' + self.semester + '/blank'
+        expected = [
+            [base_url, 'Gradeables'],
+            [base_url + '/notifications', 'Notifications'],
+            [base_url + '/student_photos', 'Student Photos'],
+            [base_url + '/late_table', 'My Late Days/Extensions'],
+            [self.test_url + '/home', 'My Courses'],
+            [self.test_url + '/user_profile', 'My Profile'],
+            ['javascript: toggleSidebar();', 'Collapse Sidebar'],
+            [self.test_url + '/authentication/logout', 'Logout Jill']
+        ]
+
+        self.sidebar_test_helper('blank', expected, 'ta', 'Jill')
 
     def test_click_sidebar_links_ta_sample(self):
         base_url = self.test_url + '/courses/' + self.semester + '/sample'
@@ -152,7 +195,7 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Jill']
         ]
 
-        self.sidebar_test_helper(True, expected, 'ta', 'Jill')
+        self.sidebar_test_helper('sample', expected, 'ta', 'Jill')
 
     def test_click_sidebar_links_student(self):
         expected = [
@@ -162,7 +205,21 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
 
-        self.sidebar_test_helper(False, expected, 'student', 'Joe')
+        self.sidebar_test_helper('', expected, 'student', 'Joe')
+
+    def test_click_sidebar_links_student_blank(self):
+        base_url = self.test_url + '/courses/' + self.semester + '/blank'
+        expected = [
+            [base_url, 'Gradeables'],
+            [base_url + '/notifications', 'Notifications'],
+            [base_url + '/late_table', 'My Late Days/Extensions'],
+            [self.test_url + '/home', 'My Courses'],
+            [self.test_url + '/user_profile', 'My Profile'],
+            ['javascript: toggleSidebar();', 'Collapse Sidebar'],
+            [self.test_url + '/authentication/logout', 'Logout Joe']
+        ]
+
+        self.sidebar_test_helper('blank', expected, 'student', 'Joe')
 
     def test_click_sidebar_links_student_sample(self):
         base_url = self.test_url + '/courses/' + self.semester + '/sample'
@@ -180,4 +237,4 @@ class TestSidebar(BaseTestCase):
             [self.test_url + '/authentication/logout', 'Logout Joe']
         ]
 
-        self.sidebar_test_helper(True, expected, 'student', 'Joe')
+        self.sidebar_test_helper('sample', expected, 'student', 'Joe')
