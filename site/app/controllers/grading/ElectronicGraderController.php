@@ -1005,9 +1005,10 @@ class ElectronicGraderController extends AbstractController {
             if ($from_graded_gradeable === false) {
                  $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
             }
-            
+
             // Get the user ID of the user we were viewing on the TA grading interface
             $from_id = $from_graded_gradeable->getSubmitter();
+
             // Determine the student to go to based on the button that was pressed
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
@@ -1036,6 +1037,7 @@ class ElectronicGraderController extends AbstractController {
             elseif ($to === 'next' && $to_ungraded === 'true') {
                 $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
             }
+
             // Reassign who_id
             if (!is_null($goToStudent)) {
                 $who_id = $peer ? $goToStudent->getAnonId() :   $goToStudent->getId();
@@ -1062,6 +1064,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
             $peer = false;
         }
+
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
