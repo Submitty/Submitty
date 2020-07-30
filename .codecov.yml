@@ -11,7 +11,7 @@ coverage:
       default: false
       migrator:
         flags: migrator
-        target: 100%
+        target: 99%
     patch: false
     changes: false
 
