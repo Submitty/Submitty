@@ -205,10 +205,18 @@ class Server implements MessageComponentInterface {
             }
             $this->clients[$msg['page']]->attach($from);
             $this->setSocketClientPage($msg['page'], $from);
-            var_dump($this->clients);
-            var_dump($this->pages);
+
+            if ($this->core->getConfig()->isDebug()) {
+                $course_page = explode('-', $this->getSocketClientPage($from));
+                echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
+            }
         }
         elseif (isset($msg['user_id'])) {
+            if ($this->core->getConfig()->isDebug()) {
+                $course_page = explode('-', $msg['page']);
+                echo "New message --> user_id: '" . $msg['user_id'] . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
+            }
+
             $original_from = $this->getSocketClient($msg['user_id']);
             if ($original_from) {
                 $original_from->close();
