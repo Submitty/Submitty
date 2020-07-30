@@ -22,13 +22,8 @@ class ShortAnswerWidget extends Widget {
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
         interactive_area.innerHTML = this.getShortAnswerTemplate();
-        interactive_area.querySelector('.filename-input').value = this.state.filename;
 
-        this.setupAnswerTypeHandlers(interactive_area);
-
-        if (this.state.rows) {
-            interactive_area.querySelector('.rows-input').value = this.state.rows;
-        }
+        this.init(interactive_area);
 
         this.dom_pointer = container;
         return container;
@@ -68,10 +63,48 @@ class ShortAnswerWidget extends Widget {
         this.state = data;
     }
 
-    setupAnswerTypeHandlers(interactive_area) {
+    init(interactive_area) {
+        interactive_area.querySelector('.filename-input').value = this.state.filename;
+
         const answer_type_selector = interactive_area.querySelector('.answer-type');
-        const initial_value_div = interactive_area.querySelector('.initial-value-div');
         answer_type_selector.value = this.state.programming_language ? this.state.programming_language : 'Default';
+
+        const rows_selector = interactive_area.querySelector('.rows-input');
+        rows_selector.value = this.state.rows ? this.state.rows : '';
+
+        const initial_value_div = interactive_area.querySelector('.initial-value-div');
+
+        const generateCodeBox = () => {
+            const codebox_config = {
+                lineNumbers: true,
+                mode: builder_data.codemirror_langauges[answer_type_selector.value],
+                value: this.state.initial_value ? this.state.initial_value : '',
+            };
+
+            const height = this.state.rows ? this.state.rows * 16 : null;
+
+            this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
+            this.codebox_pointer.setSize(null, height);
+
+            makeCodeMirrorAccessible(this.codebox_pointer);
+        }
+
+        const rowSelectorChangeAction = () => {
+            this.commitState();
+            initial_value_div.innerHTML = '';
+
+            if (answer_type_selector.value !== 'Default') {
+                generateCodeBox();
+            }
+        }
+
+        rows_selector.onchange = () => {
+            rowSelectorChangeAction();
+        }
+
+        rows_selector.onkeyup = () => {
+            rowSelectorChangeAction();
+        }
 
         answer_type_selector.onchange = () => {
             this.commitState();
@@ -85,14 +118,7 @@ class ShortAnswerWidget extends Widget {
                 initial_value_div.appendChild(text_area);
             }
             else  {
-                const codebox_config = {
-                    lineNumbers: true,
-                    mode: builder_data.codemirror_langauges[answer_type_selector.value],
-                    value: this.state.initial_value ? this.state.initial_value : ''
-                };
-
-                this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
-                makeCodeMirrorAccessible(this.codebox_pointer);
+                generateCodeBox();
             }
         }
 
@@ -113,7 +139,7 @@ class ShortAnswerWidget extends Widget {
         </div>
         <div class="basic-options">
             <div>
-                Height: <input class="rows-input" type="number" placeholder="Default">
+                Height: <input class="rows-input" type="number" placeholder="Default" min="1">
             </div>
             <div>
                 Filename: <input class="filename-input" type="text">
