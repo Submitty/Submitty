@@ -57,7 +57,11 @@ Required inputs:
     {# Custom mark (only display in non-edit mode #}
     {% set f_mark = component.marks|first %}
     {% if not edit_marks_enabled %}
-        <div class="custom-mark-container mark-container row"
+        <div class="custom-mark-container mark-container row
+        {% if peer_component %}
+            hidden
+            {% endif %}
+            "
              data-mark_id="0">
             <span class="mark-selector-container">
                 <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters key_to_click" tabindex="0"
