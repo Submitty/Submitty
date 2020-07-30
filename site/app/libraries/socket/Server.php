@@ -44,10 +44,12 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         $request = $conn->httpRequest;
         $user_agent = $request->getHeader('User-Agent')[0];
-        $session_secret = $request->getHeader('Session-Secret')[0];
 
-        if ($user_agent === 'websocket-client-php' && $session_secret  === $this->core->getConfig()->getSecretSession()) {
-            return true;
+        if ($user_agent === 'websocket-client-php') {
+            $session_secret = $request->getHeader('Session-Secret')[0];
+            if ($session_secret  === $this->core->getConfig()->getSecretSession()) {
+                return true;
+            }
         }
 
         $cookieString = $request->getHeader("cookie")[0];
