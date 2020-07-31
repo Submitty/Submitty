@@ -542,7 +542,7 @@ gradeables:
   eg_team_assignment: true
   eg_max_team_size: 3
   g_ta_view_start_date: 1970-01-01 23:59:59
-  g_title: Open Only Peer Team Homework
+  g_title: Closed Peer Team Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
 
