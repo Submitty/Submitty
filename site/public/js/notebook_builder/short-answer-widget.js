@@ -95,7 +95,8 @@ class ShortAnswerWidget extends Widget {
                     lineNumbers: true,
                     mode: builder_data.codemirror_langauges[answer_type_selector.value],
                     value: this.state.initial_value ? this.state.initial_value : '',
-                    theme: 'eclipse'
+                    theme: 'eclipse',
+                    placeholder: this.place_holder_msg
                 };
 
                 const height = this.state.rows ? rowsToPixels(this.state.rows) : null;

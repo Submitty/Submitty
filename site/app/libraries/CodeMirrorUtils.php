@@ -12,6 +12,7 @@ class CodeMirrorUtils {
 
     const DEFAULT_JS_FILES = [
         'codemirror/codemirror.js',
+        'codemirror/addon/display/placeholder.js',
         'codemirror/mode/clike/clike.js',
         'codemirror/mode/haskell/haskell.js',
         'codemirror/mode/haskell-literate/haskell-literate.js',
