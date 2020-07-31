@@ -25,7 +25,7 @@ class CodeMirrorUtilsTester extends \PHPUnit\Framework\TestCase {
             ['c#', 'text/x-csharp'],
             ['objective-c', 'text/x-objectivec'],
             ['java', 'text/x-java'],
-            ['scala', 'text/scala'],
+            ['scala', 'text/x-scala'],
             ['matlab', 'text/x-octave'],
             ['node', 'text/javascript'],
             ['nodejs', 'text/javascript'],

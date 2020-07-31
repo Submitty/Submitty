@@ -34,7 +34,7 @@ class CodeMirrorUtils {
         'bash' => 'text/x-sh',
         'c' => 'text/x-csrc',
         'c++' => 'text/x-c++src',
-        'c#' => 'text/x-c-sharp',
+        'c#' => 'text/x-csharp',
         'cpp' => 'text/x-c++src',
         'haskell' => 'text/x-haskell',
         'haskell-literate' => 'text/x-literate-haskell',
