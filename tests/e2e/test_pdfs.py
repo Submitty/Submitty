@@ -43,7 +43,7 @@ class TestPDFs(BaseTestCase):
         self.driver.implicitly_wait(20)
         self.pdf_access("grader", "00022_kovaco", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
         self.driver.implicitly_wait(20)
-        self.pdf_access("bauchg", "FWxkWeZUzRbWtKA", "grading_pdf_peer_team_homework", "words_881.pdf", "1")
+        self.pdf_access("bauchg", "9R5ArOhSmQMlHHc", "grading_pdf_peer_team_homework", "words_881.pdf", "1")
     def pdf_access(self, user_id, student_id, gradeable_id, pdf_name, version):
         self.log_out()
         self.log_in(user_id=user_id)
