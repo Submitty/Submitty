@@ -30,7 +30,13 @@ function makeCodeMirrorAccessible(cm) {
     });
 }
 
+/**
+ * Convert the desired number of rows (lines) in to show in a codemirror box to pixels which can be used for css
+ * styling.  The rows to pixels conversion is a rough estimation and may vary slightly between browsers.
+ *
+ * @param {int} rows Desired number of rows the codemirror should show.
+ * @returns {number} A pixel value which can be used to control the height of the codemirror box.
+ */
 function rowsToPixels(rows) {
     return rows * 16;
 }
-

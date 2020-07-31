@@ -63,6 +63,11 @@ class ShortAnswerWidget extends Widget {
         this.state = data;
     }
 
+    /**
+     * Attach event handlers to appropriate elements and handle loading textarea / codemirror boxes.
+     *
+     * @param {HTMLDivElement} interactive_area
+     */
     init(interactive_area) {
         interactive_area.querySelector('.filename-input').value = this.state.filename;
 
@@ -118,6 +123,11 @@ class ShortAnswerWidget extends Widget {
         answer_type_selector.dispatchEvent(new Event('change'));
     }
 
+    /**
+     * Get the markup for the short answer widget.
+     *
+     * @returns {string}
+     */
     getShortAnswerTemplate() {
         return `
         <div class="type-options">
@@ -140,6 +150,11 @@ class ShortAnswerWidget extends Widget {
         <div class="initial-value-div"></div>`;
     }
 
+    /**
+     * Generate the <option> markup for all the options available in the language selection drop down.
+     *
+     * @returns {string}
+     */
     getTypeOptions() {
         let all_modes = ['Default'];
         all_modes = all_modes.concat(Object.keys(builder_data.codemirror_langauges));
@@ -152,6 +167,10 @@ class ShortAnswerWidget extends Widget {
         return result;
     }
 
+    /**
+     * Codemirror needs to be refreshed after becoming visible on screen.  This function provides a way for the
+     * NotebookBuilder object to access the codemirror object when adding the widget to the screen.
+     */
     codeMirrorRefresh() {
         if (this.codebox_pointer) {
             this.codebox_pointer.refresh();

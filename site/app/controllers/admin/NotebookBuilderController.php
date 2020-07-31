@@ -116,6 +116,9 @@ class NotebookBuilderController extends AbstractController {
         return JsonResponse::getErrorResponse('Invalid operation.');
     }
 
+    /**
+     * Helper function which handles loading all the js / css dependencies notebook builder needs
+     */
     private function loadDependencies(): void {
         // Code mirror dependencies
         CodeMirrorUtils::loadDefaultDependencies($this->core);
