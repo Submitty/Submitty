@@ -31,7 +31,7 @@ function makeCodeMirrorAccessible(cm) {
 }
 
 /**
- * Convert the desired number of rows (lines) in to show in a codemirror box to pixels which can be used for css
+ * Convert the desired number of rows (lines) to show in a codemirror box to pixels which can be used for css
  * styling.  The rows to pixels conversion is a rough estimation and may vary slightly between browsers.
  *
  * @param {int} rows Desired number of rows the codemirror should show.
