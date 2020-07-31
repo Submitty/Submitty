@@ -5,40 +5,38 @@
     {% if gradeable_sections|length > 0 %}
         <div id="gradeables">
         {% for list_section, info in gradeable_sections %}
-            <div id="{{ info.section_id }}" class="course-section-heading">
-                <div class="course-section-title">
-                    {{ info.title }}
-                    {% if info.subtitle != "" %}
-                        &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
-                    {% endif %}
+            <div style='margin-bottom: 20px'>
+                <div id="{{ info.section_id }}" class="course-section-heading">
+                    <div class="course-section-title">
+                        {{ info.title }}
+                        {% if info.subtitle != "" %}
+                            &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
 
-            <div id="{{ info.section_id }}-section" class="course-section">
-                {% for id, gradeable in info.gradeables %}
-                <div id="{{ id }}" class="gradeable-row">
-                    <div class="course-main">
-                        <div class="course-title">
-                            {{ gradeable.title }}
-                            {% if gradeable.url|trim != "" %}
-                                <a class="external" href="{{ gradeable.url }}" target="_blank" aria-label="Go to instructions for {{ gradeable.title }}">
-                                    <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class='course-button'>
-                        {% if gradeable.open != "" %}
-                            <div class='btn btn-default btn-nav btn-nav-submit'>{{ gradeable.open }}</div>
-                        {% endif %}
-                    </div>
-                    <div class='course-button'>
-                        {% if gradeable.grading != "" %}
-                            <div class='btn btn-default btn-nav btn-nav-submit'>{{ gradeable.grading }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
+                <table class='table table-striped table-bordered persist-area' style='text-align: left'>
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Gradeable</th>
+                            <th>Submission Closes</th>
+                            <th>Grading Opens</th>
+                            <th>Grading Closes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for id, gradeable in info.gradeables %}
+                        <tr>
+                            <td>{{ id|split('_')|slice(0, 2)|join(' ') }}</td>
+                            <td>{{ gradeable.title }}</td>
+                            <td>{{ (gradeable.submission != '') ? gradeable.submission|date('m/d/Y @ h:i A T') : '' }}</td>
+                            <td>{{ gradeable.grading_open|date('m/d/Y @ h:i A T') }}</td>
+                            <td>{{ gradeable.grading_due|date('m/d/Y @ h:i A T') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         {% endfor %}
         </div>

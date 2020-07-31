@@ -10,34 +10,25 @@ use app\views\AbstractView;
 use app\views\NavigationView;
 
 class GradeablesView extends AbstractView {
-    const DATE_FORMAT = "m/d/Y @ h:i A T";
-
     public function showGradeablesList(\app\models\gradeable\GradeableList $gradeable_list) {
         $render_sections = [];
-        foreach ($gradeable_list->getGradeablesBySection() as $section => $gradeables) {
+        $gradeable_list_sections = [
+            GradeableList::OPEN => $gradeable_list->getOpenGradeables(),
+            GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
+        ];
+
+        foreach ($gradeable_list_sections as $section => $gradeables) {
             $render_section = NavigationView::gradeableSections[$section];
             $render_section['gradeables'] = [];
-            foreach ($gradeables as $id => $gradeable) {
+            foreach (array_reverse($gradeables, true) as $id => $gradeable) {
+                /** @var \app\models\gradeable\Gradeable $gradeable */
                 $render_section['gradeables'][$id] = [
                     'title' => $gradeable->getTitle(),
                     'url' => $gradeable->getInstructionsUrl(),
-                    'submission' => '',
-                    'grading' => 'GRADING OPENS ' . $gradeable->getGradeStartDate()->format(self::DATE_FORMAT)
+                    'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate() : '',
+                    'grading_open' => $gradeable->getGradeStartDate(),
+                    'grading_due' => $gradeable->getGradeDueDate()
                 ];
-                // opens <>
-                // grading opens <>
-                if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-                    if ($section < GradeableList::OPEN) {
-                        $render_section['gradeables'][$id]['open'] = "OPENS " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT);
-                    }
-                    else {
-                        $prefix = ($section === GradeableList::OPEN) ? 'CLOSES' : 'CLOSED';
-                        $render_section['gradeables'][$id]['open'] = $prefix . " " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT);
-                    }
-                }
-                if ($section >= GradeableList::GRADING) {
-                    $render_section['gradeables'][$id]['grading'] = 'GRADING CLOSED ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT);
-                }
             }
             $render_sections[] = $render_section;
         }

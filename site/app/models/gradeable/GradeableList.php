@@ -16,13 +16,13 @@ use app\models\User;
  * are either by a specific datetime (if different) with later datetimes being earlier in the list
  * and then ids (if datetimes are equal) by alphabetically.
  *
- * @method \app\models\Gradeable\Gradeable[] getGradeables()
- * @method \app\models\Gradeable\Gradeable[] getFutureGradeables()
- * @method \app\models\Gradeable\Gradeable[] getBetaGradeables()
- * @method \app\models\Gradeable\Gradeable[] getOpenGradeables()
- * @method \app\models\Gradeable\Gradeable[] getClosedGradeables()
- * @method \app\models\Gradeable\Gradeable[] getGradingGradeables()
- * @method \app\models\Gradeable\Gradeable[] getGradedGradeables()
+ * @method \app\models\gradeable\Gradeable[] getGradeables()
+ * @method \app\models\gradeable\Gradeable[] getFutureGradeables()
+ * @method \app\models\gradeable\Gradeable[] getBetaGradeables()
+ * @method \app\models\gradeable\Gradeable[] getOpenGradeables()
+ * @method \app\models\gradeable\Gradeable[] getClosedGradeables()
+ * @method \app\models\gradeable\Gradeable[] getGradingGradeables()
+ * @method \app\models\gradeable\Gradeable[] getGradedGradeables()
  */
 class GradeableList extends AbstractModel {
     const FUTURE  = 0;
@@ -37,7 +37,7 @@ class GradeableList extends AbstractModel {
 
     /**
      * @prop
-     * @var array<string, \app\models\Gradeable\Gradeable>
+     * @var array<string, \app\models\gradeable\Gradeable>
      */
     protected $gradeables = [];
 
@@ -45,17 +45,17 @@ class GradeableList extends AbstractModel {
      * All elements of $this->gradeables should fall into one of the following six lists. There should
      * be no overlap between them.
      */
-    /** @prop @var \app\models\Gradeable\Gradeable[] These are gradeables which are only viewable by admin users */
+    /** @prop @var \app\models\gradeable\Gradeable[] These are gradeables which are only viewable by admin users */
     protected $future_gradeables = [];
-    /** @prop @var \app\models\Gradeable\Gradeable[] These are gradeables which are only viewable by admin & TA users */
+    /** @prop @var \app\models\gradeable\Gradeable[] These are gradeables which are only viewable by admin & TA users */
     protected $beta_gradeables = [];
-    /** @prop @var \app\models\Gradeable\Gradeable[] */
+    /** @prop @var \app\models\gradeable\Gradeable[] */
     protected $open_gradeables = [];
-    /** @prop @var \app\models\Gradeable\Gradeable[] */
+    /** @prop @var \app\models\gradeable\Gradeable[] */
     protected $closed_gradeables = [];
-    /** @prop @var \app\models\Gradeable\Gradeable[] */
+    /** @prop @var \app\models\gradeable\Gradeable[] */
     protected $grading_gradeables = [];
-    /** @prop @var \app\models\Gradeable\Gradeable[] */
+    /** @prop @var \app\models\gradeable\Gradeable[] */
     protected $graded_gradeables = [];
 
     /**
