@@ -2,12 +2,14 @@
  * callback attached to run after the initialization of resizeable panels
  *
  * @callback resizeCallback
+ * @param {string} updatedVal updated width/height after the user is done with resizing
+ * @param {boolean} isHorizontalResize helps in updating the value in callback function
  */
 
 /**
  * Initializes Resizables two panels mode
  * where width (height, if horizontal resize) from one panel is be given out to another one i.e resizable widths/height
- * @param {string} panelSel DOM selector for left panel, or top panel if resizing is horizontal
+ * @param {string} panelSel DOM selector for left panel, or bottom panel if resizing is horizontal
  * @param {string} dragBarSel DOM selector for drag-bar on which this resizing event will be attached
  * @param {boolean} isHorizontalResize If set true, horizontal resizing is initiated (top and bottom) else resizing is vertical
  * @param {resizeCallback} callback
@@ -47,14 +49,15 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize, ca
   };
 
   const mouseMoveHandler = (e) => {
+    let updateValue;
     if (isHorizontalResize) {
       const dy = e.clientY - yPos;
-      const updatedTopPanelHeight = (panelHeight + dy) * 100 / panelCont.getBoundingClientRect().height;
-      panelEle.style.height = `${updatedTopPanelHeight}%`;
+      updateValue = (panelHeight - dy) * 100 / panelCont.getBoundingClientRect().height;
+      panelEle.style.height = `${updateValue}%`;
     } else {
       const dx = e.clientX - xPos;
-      const updatedLeftPanelWidth = (panelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
-      panelEle.style.width = `${updatedLeftPanelWidth}%`;
+      updateValue = (panelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
+      panelEle.style.width = `${updateValue}%`;
     }
 
     // consistent mouse pointer during dragging
@@ -64,6 +67,11 @@ function initializeResizablePanels (panelSel, dragBarSel, isHorizontalResize, ca
     document.body.style.pointerEvents = "none";
     // Add blurry effect on drag-bar
     dragbar.style.filter = "blur(5px)";
+
+    // Callback function
+    if (typeof callback === "function") {
+      callback(`${updateValue}%`, isHorizontalResize);
+    }
   };
   dragbar.addEventListener("mousedown", mouseDownHandler);
 }

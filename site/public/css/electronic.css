@@ -100,25 +100,6 @@ aside {
     flex: 1 1 0%;
 }
 
-.content-item-left {
-    background: var(--standard-medium-gray);
-    display: none;
-    width: 50%;
-}
-
-.content-drag-bar {
-    display: none;
-}
-
-.content-item-left.active {
-    display: flex;
-    flex-direction: column;
-}
-
-.content-drag-bar.active {
-    display: block;
-}
-
 .active {
     border: unset;
 }
@@ -152,17 +133,6 @@ aside {
 
 #fullscreen-btn-cont.active i.fa-expand,
 #fullscreen-btn-cont i.fa-compress {
-    display: none;
-}
-
-
-#two-panel-mode-btn.active i.fa-square,
-#two-panel-mode-btn i.fa-columns {
-    display: inline-block;
-}
-
-#two-panel-mode-btn.active i.fa-columns,
-#two-panel-mode-btn i.fa-square {
     display: none;
 }
 
@@ -404,10 +374,6 @@ progress::-webkit-progress-value {
     color: white;
 }
 
-.panel-position-left {}
-
-.panel-position-right {}
-
 /* Grading Panels CSS */
 
 .panels-container {
@@ -465,7 +431,7 @@ progress::-webkit-progress-value {
     flex: 1 1 0%;
 }
 
-.two-panel-drag-bar, .content-drag-bar {
+.two-panel-drag-bar {
     flex: 0 0 auto;
     cursor: col-resize;
     position: relative;
@@ -494,7 +460,7 @@ progress::-webkit-progress-value {
     transition: all 0.5s;
 }
 
-.two-panel-drag-bar:after, .content-drag-bar:after {
+.two-panel-drag-bar:after {
     content: "";
     position: absolute;
     width: 10px;
@@ -508,11 +474,7 @@ progress::-webkit-progress-value {
     transition: all 0.5s;
 }
 
-.content-drag-bar:after {
-    left: 60%;
-}
-
-.two-panel-drag-bar:hover:after, .content-drag-bar:hover:after {
+.two-panel-drag-bar:hover:after {
     filter: blur(3px);
 }
 

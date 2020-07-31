@@ -769,6 +769,8 @@ HTML;
 
         $return = "";
         if ($showNewInterface) {
+            $this->core->getOutput()->addInternalJs("drag-and-resize-two-panels.js");
+
             $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
         		    <div class="content-items-container">
