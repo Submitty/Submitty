@@ -802,6 +802,7 @@ HTML;
 
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version, $showNewInterface);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
         if ($isDiscussionPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment(), $showNewInterface);
@@ -1190,8 +1191,17 @@ HTML;
      */
     public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $showNewInterface) {
         $return = "";
+        $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
-
+        if ($gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamById($graded_gradeable->getSubmitter()->getId());
+            foreach ($team->getMemberUsers() as $user) {
+                $student_anon_ids[] = $user->getAnonId();
+            }
+        }
+        else {
+            $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId();
+        }
         // Disable grading if the requested version isn't the active one
         $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
             || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
@@ -1218,9 +1228,11 @@ HTML;
 
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "showNewInterface" => $showNewInterface,
+                "gradeable" => $gradeable,
+                "student_anon_ids" => $student_anon_ids,
+                "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
-                "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
                 "show_verify_all" => $show_verify_all,
                 "can_verify" => $can_verify,
                 "grading_disabled" => $grading_disabled,
@@ -1279,6 +1291,60 @@ HTML;
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version
             ]);
+    }
+    
+    /**
+     * Render the Grade Inquiry panel
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderPeerEditMarksPanel(GradedGradeable $graded_gradeable) {
+        $gradeable = $graded_gradeable->getGradeable();
+        $submitter = $graded_gradeable->getSubmitter()->getId();
+        $peers_to_list = $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $submitter);
+        if ($gradeable->isTeamAssignment()) {
+            foreach ($this->core->getQueries()->getTeamById($submitter)->getMemberUserIds() as $student_id) {
+                $peers_to_list = array_merge($peers_to_list, $this->core->getQueries()->getPeerGradingAssignmentForSubmitter($gradeable->getId(), $student_id));
+            }
+        }
+        $components = $gradeable->getComponents();
+        $components_details_array = [];
+        $peer_details = [];
+        $component_scores = [];
+        $peer_details["graders"] = [];
+        $marks = [];
+        foreach ($components as $component) {
+            if ($component->isPeer()) {
+                foreach ($peers_to_list as $peer) {
+                    $graded_component = $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getQueries()->getUsersById([$peer])[$peer]);
+                    if ($graded_component !== null) {
+                        $peer_details["graders"][$component->getId()][] = $peer;
+                        $peer_details["marks_assigned"][$component->getId()][$peer] = $graded_component->getMarkIds();
+                        $component_scores[$component->getId()][$peer] = $graded_component->getTotalScore();
+                    }
+                }
+                $component_details["title"] = $component->getTitle();
+                $component_details["marks"] = [];
+                $component_details["max"] = $component->getMaxValue();
+                $component_details["id"] = strval($component->getId());
+                foreach ($component->getMarks() as $mark) {
+                    $component_details["marks"][] = $mark->getId();
+                    $marks[$mark->getId()]["title"] = $mark->getTitle();
+                    $marks[$mark->getId()]["points"] = $mark->getPoints();
+                }
+                $components_details_array[] = $component_details;
+            }
+        }
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/EditPeerComponentsForm.twig", [
+            "gradeable_id" => $gradeable->getId(),
+            "peers" => $peers_to_list,
+            "submitter_id" => $submitter,
+            "peer_details" => $peer_details,
+            "components" => $components_details_array,
+            "csrf_token" => $this->core->getCsrfToken(),
+            "component_scores" => $component_scores,
+            "marks" => $marks
+        ]);
     }
 
     /**

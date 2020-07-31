@@ -2,7 +2,7 @@ class SelectorWidget extends Widget {
     constructor() {
         super();
 
-        this.options = ['Multiple Choice', 'Markdown', 'Short Answer'];
+        this.options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
     }
 
     render() {
@@ -22,6 +22,9 @@ class SelectorWidget extends Widget {
                     break;
                 case 'Short Answer':
                     notebook_builder.widgetAdd(new ShortAnswerWidget());
+                    break;
+                case 'Image':
+                    notebook_builder.widgetAdd(new ImageWidget());
                     break;
                 default:
                     break;

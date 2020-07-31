@@ -467,6 +467,27 @@ class FileUtils {
     }
 
     /**
+     * Encode the file contents as a data url.
+     * This function is meant to mimic javascript's FileReader::readAsDataURL() method.
+     *
+     * @param string $path Path to the file to be encoded.
+     * @throws FileReadException Unable to read file at the given path.
+     * @return string
+     */
+    public static function readAsDataURL(string $path): string {
+        if (!is_readable($path)) {
+            throw new FileReadException('Unable to read file at the given path.');
+        }
+
+        $data_url = 'data:';
+        $data_url .= self::getContentType($path);
+        $data_url .= ';base64,';
+        $data_url .= base64_encode(file_get_contents($path));
+
+        return $data_url;
+    }
+
+    /**
      * Search over a file to see if it contains specified words
      *
      * @param string $file Path to file to search through
