@@ -6,24 +6,22 @@ import subprocess
 import socket
 import traceback
 
-from . import CONFIG_PATH, autograding_utils, testcase
+from . import autograding_utils, testcase
 from . execution_environments import jailed_sandbox
 
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
-AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['site_log_path'], 'autograding_stack_traces')
-SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
-SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
-with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DAEMON_UID = OPEN_JSON['daemon_uid']
+def grade_from_zip(
+    config,
+    working_directory,
+    which_untrusted,
+    autograding_zip_file,
+    submission_zip_file
+):
 
+    os.chdir(config.submitty['submitty_data_dir'])
 
-def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, submission_zip_file):
-
-    os.chdir(SUBMITTY_DATA_DIR)
+    # A useful shorthand for a long variable name
+    install_dir = config.submitty['submitty_install_dir']
 
     # Removes the working directory if it exists, creates subdirectories and unzips files.
     autograding_utils.prepare_directory_for_autograding(
@@ -32,9 +30,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         autograding_zip_file,
         submission_zip_file,
         False,
-        AUTOGRADING_LOG_PATH,
-        AUTOGRADING_STACKTRACE_PATH,
-        SUBMITTY_INSTALL_DIR
+        config.log_path,
+        config.error_path,
+        install_dir
     )
 
     # Now that the files are unzipped, we no longer need them.
@@ -69,7 +67,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
             queue_obj["gradeable"]
         )
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
+            config.log_path,
             job_id,
             is_batch_job,
             which_untrusted,
@@ -86,6 +84,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         testcase_num = 1
         for t in complete_config_obj['testcases']:
             tmp_test = testcase.Testcase(
+                config,
                 testcase_num,
                 queue_obj,
                 complete_config_obj,
@@ -97,8 +96,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                 working_directory,
                 testcases,
                 '',
-                AUTOGRADING_LOG_PATH,
-                AUTOGRADING_STACKTRACE_PATH,
+                config.log_path,
+                config.error_path,
                 is_test_environment=False
             )
 
@@ -116,9 +115,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     # Killalll removes any stray processes left over from output generation.
                     killall_success = subprocess.call(
                         [
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                            os.path.join(install_dir, "sbin", "untrusted_execute"),
                             which_untrusted,
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")
+                            os.path.join(install_dir, "sbin", "killall.py")
                         ],
                         stdout=overall_log
                     )
@@ -144,6 +143,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
             try:
                 # Perform archival.
                 autograding_utils.archive_autograding_results(
+                    config,
                     working_directory,
                     job_id,
                     which_untrusted,
@@ -151,20 +151,20 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     complete_config_obj,
                     gradeable_config_obj,
                     queue_obj,
-                    AUTOGRADING_LOG_PATH,
-                    AUTOGRADING_STACKTRACE_PATH,
+                    config.log_path,
+                    config.error_path,
                     False
                 )
             except Exception:
                 autograding_utils.log_stack_trace(
-                    AUTOGRADING_STACKTRACE_PATH,
+                    config.error_path,
                     job_id,
                     trace=traceback.format_exc()
                 )
             subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
+            config.log_path,
             job_id,
             is_batch_job,
             which_untrusted,
@@ -189,7 +189,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         )
 
         autograding_utils.log_message(
-            AUTOGRADING_LOG_PATH,
+            config.log_path,
             job_id,
             is_batch_job,
             which_untrusted,
@@ -208,6 +208,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         testcase_num = 1
         for t in complete_config_obj['testcases']:
             tmp_test = testcase.Testcase(
+                config,
                 testcase_num,
                 queue_obj,
                 complete_config_obj,
@@ -219,8 +220,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                 working_directory,
                 testcases,
                 submission_string,
-                AUTOGRADING_LOG_PATH,
-                AUTOGRADING_STACKTRACE_PATH,
+                config.log_path,
+                config.error_path,
                 is_test_environment=False
             )
             testcases.append(tmp_test)
@@ -239,9 +240,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     # Killalll removes any stray processes left over from compilation.
                     killall_success = subprocess.call(
                         [
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                            os.path.join(install_dir, "sbin", "untrusted_execute"),
                             which_untrusted,
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")
+                            os.path.join(install_dir, "sbin", "killall.py")
                         ],
                         stdout=overall_log
                     )
@@ -268,9 +269,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     # Killalll removes any stray processes left over from input generation.
                     killall_success = subprocess.call(
                         [
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                            os.path.join(install_dir, "sbin", "untrusted_execute"),
                             which_untrusted,
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")
+                            os.path.join(install_dir, "sbin", "killall.py")
                         ],
                         stdout=overall_log
                     )
@@ -296,9 +297,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     # Killalll removes any stray processes left over from execution.
                     killall_success = subprocess.call(
                         [
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                            os.path.join(install_dir, "sbin", "untrusted_execute"),
                             which_untrusted,
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")
+                            os.path.join(install_dir, "sbin", "killall.py")
                         ],
                         stdout=overall_log
                     )
@@ -326,9 +327,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     # Killalll removes any stray processes left over from output generation.
                     killall_success = subprocess.call(
                         [
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                            os.path.join(install_dir, "sbin", "untrusted_execute"),
                             which_untrusted,
-                            os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")
+                            os.path.join(install_dir, "sbin", "killall.py")
                         ],
                         stdout=overall_log
                     )
@@ -351,6 +352,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
             # Create a jailed sandbox to run validation inside of.
             validation_environment = jailed_sandbox.JailedSandbox(
+                config,
                 job_id,
                 which_untrusted,
                 tmp_work,
@@ -359,8 +361,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                 complete_config_obj,
                 {},
                 working_directory,
-                AUTOGRADING_LOG_PATH,
-                AUTOGRADING_STACKTRACE_PATH,
+                config.log_path,
+                config.error_path,
                 False
             )
 
@@ -371,8 +373,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                 is_vcs,
                 testcases,
                 job_id,
-                AUTOGRADING_LOG_PATH,
-                AUTOGRADING_STACKTRACE_PATH
+                config.log_path,
+                config.error_path
             )
 
             with open(os.path.join(tmp_logs, "validator_log.txt"), 'w') as logfile:
@@ -399,7 +401,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
             os.chdir(working_directory)
             autograding_utils.untrusted_grant_rwx_access(
-                SUBMITTY_INSTALL_DIR,
+                install_dir,
                 which_untrusted,
                 tmp_work
             )
@@ -415,6 +417,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
             try:
                 # Perform archival.
                 autograding_utils.archive_autograding_results(
+                    config,
                     working_directory,
                     job_id,
                     which_untrusted,
@@ -422,8 +425,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
                     complete_config_obj,
                     gradeable_config_obj,
                     queue_obj,
-                    AUTOGRADING_LOG_PATH,
-                    AUTOGRADING_STACKTRACE_PATH,
+                    config.log_path,
+                    config.error_path,
                     False
                 )
             except Exception:

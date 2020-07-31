@@ -794,17 +794,24 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        $repo_name = '';
+
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
+            $subdir = '';
 
-            // Find which radio button is pressed and what host type to use
             $host_type = -1;
+            // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
+                $repo_name = $details['id'];
+                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
+                $repo_name = $details['vcs_url'];
+                $subdir = $details['vcs_url'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -813,15 +820,6 @@ class AdminGradeableController extends AbstractController {
                 $host_type = 3;
             }
 
-            $subdir = '';
-            // Submitty hosted -> this gradeable subdirectory
-            if ($host_type === 0) {
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
-            }
-            // Submitty hosted -> custom url
-            if ($host_type === 1) {
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
-            }
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
@@ -930,9 +928,17 @@ class AdminGradeableController extends AbstractController {
         // start the build
         $build_status = $this->enqueueBuild($gradeable);
 
-        $config = $this->core->getConfig();
-        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+        if (
+            $build_status == null
+            && $gradeable->isVcs()
+            && ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1)
+            && !$gradeable->isTeamAssignment()
+        ) {
+            $this->enqueueGenerateRepos(
+                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getCourse(),
+                $repo_name
+            );
         }
 
         return $build_status;
