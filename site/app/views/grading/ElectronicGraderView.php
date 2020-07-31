@@ -1191,8 +1191,17 @@ HTML;
      */
     public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $showNewInterface) {
         $return = "";
+        $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
-
+        if ($gradeable->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamById($graded_gradeable->getSubmitter()->getId());
+            foreach ($team->getMemberUsers() as $user) {
+                $student_anon_ids[] = $user->getAnonId();
+            }
+        }
+        else {
+            $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId();
+        }
         // Disable grading if the requested version isn't the active one
         $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
             || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
@@ -1219,9 +1228,11 @@ HTML;
 
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "showNewInterface" => $showNewInterface,
+                "gradeable" => $gradeable,
+                "student_anon_ids" => $student_anon_ids,
+                "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
                 "gradeable_id" => $gradeable->getId(),
                 "is_ta_grading" => $gradeable->isTaGrading(),
-                "anon_id" => $graded_gradeable->getSubmitter()->getAnonId(),
                 "show_verify_all" => $show_verify_all,
                 "can_verify" => $can_verify,
                 "grading_disabled" => $grading_disabled,
