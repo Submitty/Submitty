@@ -208,8 +208,10 @@ def handle_migration(args):
             try:
                 database = db.Database(loop_args.config.database, environment)
             except OperationalError:
-                print('Database does not exist for {}'.format(environment))
-                continue
+                raise SystemExit(
+                    'Submitty Database Migration Error:  '
+                    'Database does not exist for {}'.format(environment)
+                )
             migrate_environment(
                 database,
                 environment,
@@ -221,8 +223,9 @@ def handle_migration(args):
         if environment == 'course':
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
-                print("Could not find courses directory: {}".format(course_dir))
-                continue
+                raise SystemExit(
+                    f"Migrator Error:  Could not find courses directory: {course_dir}"
+                )
             for semester in sorted(os.listdir(str(course_dir))):
                 courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
                 for course in courses:
@@ -247,9 +250,17 @@ def handle_migration(args):
                         )
                         database.close()
                     except OperationalError:
-                        print("Submitty Database Migration Warning:  "
-                              "Database does not exist for "
-                              "semester={} course={}".format(semester, course))
+                        # NOTE: Do not fail on missing database.
+                        # Older archived courses may not have a valid
+                        # or active database associated with their
+                        # filesystem.  (Old course submission files
+                        # are useful for plagiarism detection.)
+                        print(
+                            "Submitty Database Migration WARNING:  "
+                            "Database does not exist for "
+                            "semester={} course={}".format(semester, course)
+                        )
+                        continue
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()

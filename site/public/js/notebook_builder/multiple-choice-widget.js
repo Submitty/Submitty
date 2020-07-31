@@ -12,10 +12,6 @@ class MultipleChoiceWidget extends Widget {
     }
 
     render() {
-        if (this.dom_pointer) {
-            this.commitState();
-        }
-
         // Setup container
         const container = this.getContainer('Multiple Choice');
         container.classList.add('multiple-choice-widget');
