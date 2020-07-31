@@ -10,6 +10,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\User;
 
 class MiscController extends AbstractController {
 
@@ -222,6 +223,8 @@ class MiscController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
     public function downloadSubmissionZip($gradeable_id, $user_id, $version, $is_anon, $origin = null) {
+
+        $anon_id = $user_id;
         if ($is_anon === "true") {
             $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
         }
@@ -275,7 +278,6 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $zip_file_name = $gradeable_id . "_" . $user_id . "_" . date("m-d-Y") . ".zip";
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $temp_dir = "/tmp";
@@ -285,6 +287,15 @@ class MiscController extends AbstractController {
         $gradeable_path = $this->core->getConfig()->getCoursePath();
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $version = $version ?? $active_version;
+
+        // TODO: Zip file anonymization is currently done based on access level (students==peers)
+        // When single/double blind grading is merged, this will need to be updated.
+        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
+            $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
+        }
+        else {
+            $zip_file_name = $gradeable_id . "_" . $user_id . "_v" . $version . ".zip";
+        }
 
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
