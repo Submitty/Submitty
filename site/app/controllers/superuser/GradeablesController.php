@@ -20,6 +20,7 @@ class GradeablesController extends AbstractController {
     /**
      * @Route("/api/superuser/gradeables")
      * @Route("/superuser/gradeables")
+     * @AccessControl(level="SUPERUSER")
      */
     public function viewGradeablesList(): MultiResponse {
         $this->core->getUser()->setGroup(\app\models\User::GROUP_INSTRUCTOR);
