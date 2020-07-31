@@ -50,6 +50,7 @@ class Server implements MessageComponentInterface {
             if ($session_secret  === $this->core->getConfig()->getSecretSession()) {
                 return true;
             }
+            return false;
         }
 
         $cookieString = $request->getHeader("cookie")[0];
