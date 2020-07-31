@@ -157,7 +157,7 @@ class ElectronicGraderView extends AbstractView {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));
                         $total_grading_percentage =  number_format(($graded_total / $total_students_submitted ) * 100, 1);
                         $entire_peer_total =  floor(($sections['peer_stu_grad']['total_who_submitted']));
-                        $entire_peer_graded =  $sections['peer_stu_grad']['graded_components'] / $num_peer_components;
+                        $entire_peer_graded =  $sections['peer_stu_grad']['view_peer_graded_components'] / $num_peer_components;
                     }
                     else {
                         $entire_peer_total = 0;
