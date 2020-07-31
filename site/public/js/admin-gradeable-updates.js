@@ -367,7 +367,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
             }
             alert("error occured"+msg);
         }
-    }); 
+    });
 }
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     if('peer_graders_list' in p_values && $('#peer_graders_list').length){
