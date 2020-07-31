@@ -42,7 +42,7 @@ class NumberUtils {
             $shift = $mod > 0 ? 1 : -1;
         }
 
-        return ($qtnt_i + $shift) * $precision;
+        return round(($qtnt_i + $shift) * $precision, 2);
     }
 
     /**
