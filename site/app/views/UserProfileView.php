@@ -41,6 +41,12 @@ class UserProfileView extends AbstractView {
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('My Profile');
+
+        $user_utc_offset = DateUtils::getUTCOffset($user->getTimeZone());
+        $user_time_zone_with_offset = $user_utc_offset === 'NOT SET'
+            ?  $user->getTimeZone()
+            : "(UTC" . $user_utc_offset . ") " . $user->getTimeZone();
+
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
@@ -52,8 +58,8 @@ class UserProfileView extends AbstractView {
             "display_access_level" => $user->accessFaculty(),
             "change_password_url" => $this->output->buildUrl(['user_profile', 'change_password']),
             'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),
-            'user_time_zone_with_offset' => "(UTC" . DateUtils::getUTCOffset($user->getTimeZone()) . ") " . $user->getTimeZone(),
-            'user_utc_offset' => DateUtils::getUTCOffset($user->getTimeZone())
+            'user_time_zone_with_offset' => $user_time_zone_with_offset,
+            'user_utc_offset' => $user_utc_offset
         ]);
     }
 }

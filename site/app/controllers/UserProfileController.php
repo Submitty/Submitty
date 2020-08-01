@@ -61,7 +61,13 @@ class UserProfileController extends AbstractController {
             // Updating went smoothly, so return success
             if ($updated) {
                 $offset = DateUtils::getUTCOffset($_POST['time_zone']);
-                return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
+                $user_time_zone_with_offset = $offset === "NOT SET"
+                    ? $this->core->getUser()->getTimeZone()
+                    : "(UTC" . $offset . ") " . $this->core->getUser()->getTimeZone();
+                return JsonResponse::getSuccessResponse([
+                    'utc_offset' => $offset,
+                    'user_time_zone_with_offset' => $user_time_zone_with_offset
+                ]);
             }
         }
 
