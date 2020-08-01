@@ -96,7 +96,35 @@ class TestMyProfile(BaseTestCase):
 
 
     def test_upload_profile_photo(self):
-        pass
+        self.setup_test_start()
+
+        # click on the upload-profile-photo link
+        self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/span/a").click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-profile-photo-form")))
+        # Hit submit without adding any file
+        self.driver.find_element(By.XPATH, "//div[@id='edit-profile-photo-form']/form/div/div/div[2]/div[2]/div/input").click()
+        # Look for Error message
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "error-js-0")))
+
+        # again click on the edit-preferred-name link
+        self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/span/a").click()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "edit-profile-photo-form")))
+        # Clear the previous name and enter new names
+        image_path = os.path.abspath(os.path.join(CURRENT_PATH, "..", "..", "more_autograding_examples", "image_diff_mirror", "submissions", "student1.png"))
+
+        self.driver.find_element(By.ID, "user-image-button").send_keys(image_path)
+        self.driver.find_element(By.XPATH, "//div[@id='edit-profile-photo-form']/form/div/div/div[2]/div[2]/div/input").click()
+
+        # Look for success message
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "success-js-1")))
+
+        # edit form should be out-of-the screen
+        self.assertFalse(self.driver.find_element(By.ID, "edit-profile-photo-form").is_displayed())
+
+        # Assert that names are updated
+        alt_tag_val = self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img").get_attribute('alt')
+        self.assertTrue(self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img").is_displayed())
+        self.assertEqual("{} {}".format(self.student_first_name, self.student_last_name), alt_tag_val)
 
     def test_flagged_profile_photo(self):
         pass
