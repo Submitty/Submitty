@@ -162,9 +162,9 @@ function renderPDFToolbar() {
             },
             success: function(data){
                 let response = JSON.parse(data);
-                if(response.status == "success"){
+                if(response.status === "success"){
                     $('#save_status').text("Saved");
-                    $('#save_status').css('color', 'black');
+                    $('#save_status').css('color', 'inherit');
                 }
                 else {
                     alert(data.message);
