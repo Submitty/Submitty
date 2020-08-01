@@ -489,18 +489,12 @@ class ElectronicGraderController extends AbstractController {
                 }
                 $sections['all']['total_components'] -= $num_components;
                 $sections['all']['graded_components'] -= $my_grading;
-                if ($gradeable->isTeamAssignment()) {
-                    $sections['stu_grad']['no_team'] = 0;
-                    $sections['stu_grad']['team'] = 0;
-                    $sections['all']['no_team'] = 0;
-                    $sections['all']['team'] = 0;
-                }
             }
             else {
                 foreach ($total_users as $key => $value) {
                     if (array_key_exists($key, $num_submitted)) {
                         $sections[$key] = [
-                            'total_components' => $num_submitted[$key] * $num_components,
+                            'total_components' => $num_submitted[$key],
                             'graded_components' => 0,
                             'ta_graded_components' => 0,
                             'graders' => []
