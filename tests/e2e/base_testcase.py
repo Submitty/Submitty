@@ -13,7 +13,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+import sys
+# explicitly add this import path, so we can run it on a local host
+sys.path.append('../python_submitty_utils/')
+
 from submitty_utils import dateutils
+
 
 
 # noinspection PyPep8Naming
