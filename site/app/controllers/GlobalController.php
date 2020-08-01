@@ -35,123 +35,132 @@ class GlobalController extends AbstractController {
         }
 
         $sidebar_buttons = [];
-        if ($this->core->userLoaded()) {
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                if ($this->core->getConfig()->getCourseHomeUrl() != "") {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->getConfig()->getCourseHomeUrl(),
-                        "title" => "Course Home",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-course-home",
-                        "icon" => "fa-home"
-                    ]);
+        $this->prep_sidebar($sidebar_buttons, $unread_notifications_count);
+
+        $current_route = $_SERVER["REQUEST_URI"];
+        foreach ($sidebar_buttons as $button) {
+            /* @var Button $button */
+            $href = $button->getHref();
+            if ($href !== null) {
+                $parse = parse_url($href);
+                $path = isset($parse['path']) ? $parse['path'] : '';
+                $query = isset($parse['query']) ? '?' . $parse['query'] : '';
+                $fragment = isset($parse['fragment']) ? '#' . $parse['fragment'] : '';
+                $route = $path . $query . $fragment;
+
+                if ($this->routeEquals($route, $current_route)) {
+                    $class = $button->getClass() ?? "";
+                    $class = ($class === "" ? "selected" : $class . " selected");
+                    $button->setClass($class);
                 }
-                $navigation_url = $this->core->buildCourseUrl();
+            }
+        }
+
+        $now = $this->core->getDateTimeNow();
+        $duck_img = $this->getDuckImage($now);
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
+    }
+
+    // ==========================================================================================
+    // ==========================================================================================
+    public function prep_sidebar(&$sidebar_buttons, $unread_notifications_count) {
+
+        if (!$this->core->userLoaded()) {
+            return;
+        }
+        if ($this->core->getConfig()->isCourseLoaded()) {
+            $this->prep_course_sidebar($sidebar_buttons, $unread_notifications_count);
+        }
+        $this->prep_user_sidebar($sidebar_buttons);
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => "javascript: toggleSidebar();",
+            "title" => "Collapse Sidebar",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-collapse",
+            "icon" => "fa-bars"
+        ]);
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['authentication', 'logout']),
+            "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
+            "id" => "logout",
+            "class" => "nav-row",
+            "icon" => "fa-power-off"
+        ]);
+    }
+
+    // ==========================================================================================
+    public function prep_course_sidebar(&$sidebar_buttons, $unread_notifications_count) {
+
+        if ($this->core->getConfig()->getCourseHomeUrl() != "") {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->getConfig()->getCourseHomeUrl(),
+                "title" => "Course Home",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-course-home",
+                "icon" => "fa-home"
+            ]);
+        }
+
+        $navigation_url = $this->core->buildCourseUrl();
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $navigation_url,
+            "title" => "Gradeables",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-submitty",
+            "icon" => "fa-star"
+         ]);
+    
+        if ($unread_notifications_count !== null) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['notifications']),
+                "title" => "Notifications",
+                "badge" => $unread_notifications_count,
+                "class" => "nav-row",
+                "id" => "nav-sidebar-notifications",
+                "icon" => "fa-bell"
+            ]);
+        }
+
+        if ($this->core->getUser()->accessAdmin()) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['gradeable']),
+                "title" => "New Gradeable",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-new-gradeable",
+                "icon" => "fa-plus-square"
+            ]);
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildCourseUrl(['config']),
+                "title" => "Course Settings",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-course-settings",
+                "icon" => "fa-cog"
+            ]);
+        }
+
+        if ($this->core->getConfig()->isQueueEnabled()) {
+            if ($this->core->getQueries()->isAnyQueueOpen()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $navigation_url,
-                    "title" => "Gradeables",
+                    "href" => $this->core->buildCourseUrl(['office_hours_queue']),
+                    "title" => "Office Hours Queue",
                     "class" => "nav-row",
-                    "id" => "nav-sidebar-submitty",
-                    "icon" => "fa-star"
+                    "id" => "nav-sidebar-queue",
+                    "icon" => "fa-door-open"
                 ]);
             }
             else {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home']),
-                    "title" => "My Courses",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-courses",
-                    "icon" => "fa-book-reader"
-                ]);
-
-                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['update']),
-                        "title" => "System Update",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-update",
-                        "icon" => "fas fa-sync"
-                    ]);
-                }
-
-                if ($this->core->getUser()->accessFaculty()) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['home', 'courses', 'new']),
-                        "title" => "New Course",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-new-course",
-                        "icon" => "fa-plus-square"
-                    ]);
-                }
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['user_profile']),
-                    "title" => "My Profile",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-profile",
-                    "icon" => "fa-user"
-                ]);
-                if ($this->core->getUser()->accessFaculty()) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['admin', 'docker']),
-                        "title" => "Docker UI",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-docker-link",
-                        "icon" => "fa-docker",
-                        "prefix" => "fab",
-                    ]);
-                }
-            }
-            if ($unread_notifications_count !== null) {
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildCourseUrl(['notifications']),
-                    "title" => "Notifications",
-                    "badge" => $unread_notifications_count,
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-notifications",
-                    "icon" => "fa-bell"
+                   "href" => $this->core->buildCourseUrl(['office_hours_queue']),
+                   "title" => "Office Hours Queue",
+                   "class" => "nav-row",
+                   "id" => "nav-sidebar-queue",
+                   "icon" => "fa-door-closed"
                 ]);
             }
-        }
-
-        if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
-            if ($this->core->getUser()->accessAdmin()) {
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildCourseUrl(['gradeable']),
-                    "title" => "New Gradeable",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-new-gradeable",
-                    "icon" => "fa-plus-square"
-                ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildCourseUrl(['config']),
-                    "title" => "Course Settings",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-course-settings",
-                    "icon" => "fa-cog"
-                ]);
-            }
-
-            if ($this->core->getConfig()->isQueueEnabled()) {
-                if ($this->core->getQueries()->isAnyQueueOpen()) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours Queue",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-queue",
-                        "icon" => "fa-door-open"
-                    ]);
-                }
-                else {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                        "title" => "Office Hours Queue",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-queue",
-                        "icon" => "fa-door-closed"
-                    ]);
-                }
-            }
-
+            
             if ($this->core->getConfig()->isPollsEnabled()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(['polls']),
@@ -185,11 +194,17 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
+            // --------------------------------------------------------------------------
+
             $sidebar_buttons[] = new Button($this->core, [
                 "class" => "nav-row short-line"
             ]);
 
-            $sidebar_links = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', 'sidebar.json');
+            $sidebar_links = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                'site',
+                'sidebar.json'
+            );
             if (file_exists($sidebar_links)) {
                 $links = json_decode(file_get_contents($sidebar_links), true);
                 if (is_array($links)) {
@@ -220,6 +235,8 @@ class GlobalController extends AbstractController {
                     }
                 }
             }
+
+            // --------------------------------------------------------------------------
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -255,7 +272,10 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            if ($this->core->getUser()->accessAdmin() && $this->core->getConfig()->displayRainbowGradesSummary()) {
+            if (
+                $this->core->getUser()->accessAdmin()
+                && $this->core->getConfig()->displayRainbowGradesSummary()
+            ) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildCourseUrl(["gradebook"]),
                     "title" => "Gradebook",
@@ -264,6 +284,8 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-book-reader"
                 ]);
             }
+
+            // --------------------------------------------------------------------------
 
             if ($this->core->getUser()->accessGrading()) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -316,6 +338,7 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
+            // --------------------------------------------------------------------------
 
             $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
             if ($display_rainbow_grades_summary) {
@@ -337,80 +360,74 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        if ($this->core->userLoaded()) {
-            if ($this->core->getConfig()->isCourseLoaded()) {
-                $sidebar_buttons[] = new Button($this->core, [
-                    "class" => "nav-row short-line",
-                ]);
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['home']),
-                    "title" => "My Courses",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-courses",
-                    "icon" => "fa-book-reader"
-                ]);
-
-                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['update']),
-                        "title" => "System Update",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-update",
-                        "icon" => "fas fa-sync"
-                    ]);
-                }
-
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['user_profile']),
-                    "title" => "My Profile",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-my-profile",
-                    "icon" => "fa-user"
-                ]);
-            }
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => "javascript: toggleSidebar();",
-                "title" => "Collapse Sidebar",
-                "class" => "nav-row",
-                "id" => "nav-sidebar-collapse",
-                "icon" => "fa-bars"
-            ]);
-
-            $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(['authentication', 'logout']),
-                "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
-                "id" => "logout",
-                "class" => "nav-row",
-                "icon" => "fa-power-off"
-            ]);
-        }
-
-        $current_route = $_SERVER["REQUEST_URI"];
-        foreach ($sidebar_buttons as $button) {
-            /* @var Button $button */
-            $href = $button->getHref();
-            if ($href !== null) {
-                $parse = parse_url($href);
-                $path = isset($parse['path']) ? $parse['path'] : '';
-                $query = isset($parse['query']) ? '?' . $parse['query'] : '';
-                $fragment = isset($parse['fragment']) ? '#' . $parse['fragment'] : '';
-                $route = $path . $query . $fragment;
-
-                if ($this->routeEquals($route, $current_route)) {
-                    $class = $button->getClass() ?? "";
-                    $class = ($class === "" ? "selected" : $class . " selected");
-                    $button->setClass($class);
-                }
-            }
-        }
-
-        $now = $this->core->getDateTimeNow();
-        $duck_img = $this->getDuckImage($now);
-
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img, $page_name);
+        // --------------------------------------------------------------------------
+        $sidebar_buttons[] = new Button($this->core, [
+            "class" => "nav-row short-line",
+        ]);
     }
 
+    // ==========================================================================================
+    public function prep_user_sidebar(&$sidebar_buttons) {
 
+        // --------------------------------------------------------------------------
+        // ALL USERS
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['home']),
+            "title" => "My Courses",
+            "class" => "nav-row",
+            "id" => "nav-Wsidebar-my-courses",
+            "icon" => "fa-book-reader"
+        ]);
+        $sidebar_buttons[] = new Button($this->core, [
+            "href" => $this->core->buildUrl(['user_profile']),
+            "title" => "My Profile",
+            "class" => "nav-row",
+            "id" => "nav-sidebar-my-profile",
+            "icon" => "fa-user"
+        ]);
+
+        // --------------------------------------------------------------------------
+        // FACULTY & SUPERUSERS ONLY
+        if ($this->core->getUser()->accessFaculty()) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "class" => "nav-row short-line",
+            ]);
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['admin', 'docker']),
+                "title" => "Docker UI",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-docker-link",
+                "icon" => "fa-docker",
+                "prefix" => "fab",
+            ]);
+
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['home', 'courses', 'new']),
+                "title" => "New Course",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-new-course",
+                "icon" => "fa-plus-square"
+            ]);
+        }
+
+        // --------------------------------------------------------------------------
+        // SUPERUSERS ONLY
+        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $sidebar_buttons[] = new Button($this->core, [
+                "href" => $this->core->buildUrl(['update']),
+                "title" => "System Update",
+                "class" => "nav-row",
+                "id" => "nav-sidebar-update",
+                "icon" => "fas fa-sync"
+            ]);
+        }
+
+        $sidebar_buttons[] = new Button($this->core, [
+            "class" => "nav-row short-line",
+        ]);
+    }
+          
+    // ==========================================================================================
     private function getDuckImage(\DateTime $now): string {
         $duck_img = 'moorthy_duck/00-original.svg';
         $day = (int) $now->format('j');
