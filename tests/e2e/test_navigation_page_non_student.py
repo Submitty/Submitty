@@ -12,11 +12,11 @@ class TestNavigationPageNonStudent(BaseTestCase):
         elements = self.driver.find_elements(By.CLASS_NAME, 'course-section-heading')
         self.assertEqual(6, len(elements))
         self.assertEqual("future", elements[0].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(4, len(self.driver
                          .find_element(By.ID, 'future-section')
                          .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("beta", elements[1].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(6, len(self.driver
                                  .find_element(By.ID, 'beta-section')
                                  .find_elements(By.CLASS_NAME, 'gradeable-row')))
         self.assertEqual("open", elements[2].get_attribute('id'))
