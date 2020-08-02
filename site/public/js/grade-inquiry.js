@@ -80,8 +80,49 @@ function onGradeInquirySubmitClicked(button) {
     type: "POST",
     url: button_clicked.attr("formaction"),
     data: form.serialize(),
-    success: function(){
+    success: function(response){
+      try {
+        let json = JSON.parse(response);
+        if (json['status'] === 'success') {
+          let data = json['data'];
+          if (data.type === 'new_post'){
+            let course = document.body.dataset.courseUrl.split('/').pop();
+            let submitter_id = form.children('#submitter_id').val();
+            let gc_id = form.children('#gc_id').val();
+            window.socketClient.send({'type': data.type, 'post_id': data.post_id, 'course': course, 'submitter_id': submitter_id});
+          }
+        }
+      }
+      catch (e) {
+        console.log(e);
+      }
       window.location.reload();
+    }
+  });
+}
+
+function initGradingInquirySocketClient() {
+  window.socketClient = new WebSocketClient();
+  window.socketClient.onmessage = (msg) => {
+    switch (msg.type) {
+      case "new_post":
+        gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id);
+        break;
+      default:
+        console.log("Undefined message recieved.");
+    }
+  };
+  window.socketClient.open();
+}
+
+function gradeInquiryNewPostHandler(submitter_id, post_id) {
+  $.ajax({
+    type: "POST",
+    url: buildCourseUrl(['gradeable', window.location.pathname.split("gradeable/")[1].split('/')[0], 'grade_inquiry', 'single']),
+    data: {submitter_id: submitter_id, post_id: post_id, csrf_token: window.csrfToken},
+    success: function(new_post){
+        let last_post = $('.grade-inquiry').children('.post_box').last();
+        $(new_post).insertAfter(last_post).hide().fadeIn('slow');
     }
   });
 }

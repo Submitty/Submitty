@@ -1189,4 +1189,33 @@ class HomeworkView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
+
+    /**
+     * @param array $post
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
+        $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+        $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
+        $content = $post['content'];
+        $gc_id = $post['gc_id'];
+        $gc_title = '';
+        if (!is_null($gc_id)) {
+            $gradeable_component = $graded_gradeable->getGradeable()->getComponent($gc_id);
+            $gc_title = $gradeable_component->getTitle();
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Post.twig', [
+            'post' => [
+                'is_staff' => $is_staff,
+                'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),
+                'date_sort' => $date,
+                'name' => $name,
+                'content' => $content,
+                'gc_title' => $gc_title
+            ]
+        ]);
+    }
 }

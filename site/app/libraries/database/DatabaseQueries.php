@@ -4071,7 +4071,7 @@ AND gc_id IN (
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
+            $regrade_post_id = $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
@@ -4114,6 +4114,12 @@ AND gc_id IN (
     public function insertNewRegradePost($regrade_id, $user_id, $content) {
         $params = [$regrade_id, $user_id, $content];
         $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
+        return $this->course_db->getLastInsertId();
+    }
+
+    public function getRegradePost($post_id) {
+        $this->course_db->query("SELECT * FROM regrade_discussion WHERE id = ?", [$post_id]);
+        return $this->course_db->row();
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
