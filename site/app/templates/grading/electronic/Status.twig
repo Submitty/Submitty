@@ -665,7 +665,7 @@
                             <br/>
                             <br/>
                         {% endif %}
-                        {% if peer %}
+                        {% if peer and not team_assignment %}
                             <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})
                             <br>
                         {% endif %}
@@ -782,8 +782,16 @@
             </div>
         </div>
     {% else %}
-         <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
-        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {# This needs to be updated after randomization works correctly for Teams #}
+        {% if team_assignment %}
+            <br/>
+            <br>
+            <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {% else %}
+            <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {% endif %}
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
