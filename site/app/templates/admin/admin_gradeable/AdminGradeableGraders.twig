@@ -71,7 +71,6 @@ Form
 <fieldset>
     <legend>
         How should grading be anonymized for limited access graders?
-        <a class="fa-question-circle" target=_blank aria-label="Manual Grading Anonymization"></a>
     </legend>
     <input type="radio" name="limited_access_blind" value="1" id="unblind_limited_access_grading"
         {{ (gradeable.getLimitedAccessBlind() == 1) ? 'checked' : '' }}> <label for="unblind_limited_access_grading">Unblinded Grading</label>
@@ -87,7 +86,6 @@ Form
     <fieldset>
         <legend>
             How should grading be anonymized for peer graders?
-            <a class="fa-question-circle" target=_blank aria-label="Manual Grading Anonymization"></a>
         </legend>
         <input type="radio" name="peer_blind" value="1" id="unblind_peer_grading"
             {{ (gradeable.getPeerBlind() == 1) ? 'checked' : ''}}><label for="unblind_peer_grading">Unblinded Grading</label>
