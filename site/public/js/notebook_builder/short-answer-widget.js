@@ -88,6 +88,7 @@ class ShortAnswerWidget extends Widget {
                 text_area.classList.add('sa-textarea');
                 text_area.placeholder = this.place_holder_msg;
                 text_area.value = this.state.initial_value ? this.state.initial_value : '';
+                enableTabsInTextArea(text_area);
                 initial_value_div.appendChild(text_area);
             }
             else  {
@@ -137,7 +138,7 @@ class ShortAnswerWidget extends Widget {
                 <select class="answer-type">
                     ${this.getTypeOptions()}
                 </select>
-                <a><i class="fa fa-question-circle" title="Some languages may be shown multiple times with slightly different names.  They are identical."></i></a>
+                <i>Some languages may be shown multiple times with slightly different names.  They are identical.</i>
             </div>
         </div>
         <div class="basic-options">
@@ -148,6 +149,8 @@ class ShortAnswerWidget extends Widget {
                 Filename: <input class="filename-input" type="text">
             </div>
         </div>
+        <hr />
+        <p class="accessibility-msg">Press TAB to indent. Press ESC to advance from input area.</p>
         <div class="initial-value-div"></div>`;
     }
 

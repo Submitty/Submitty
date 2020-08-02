@@ -54,7 +54,7 @@
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
-                                Write your {{ cell.programming_language | title }} below.  Press <kbd>ESC</kbd> to advance from answer area.
+                                Write your {{ cell.programming_language | title }} below.  Press TAB to indent. Press ESC to advance from answer area.
                             {% endif %}
                         </div>
 
@@ -301,7 +301,7 @@
                     {% if short_answer.label %}
                         {{ short_answer.label | markdown }}
                     {% else %}
-                        Write your answer below:
+                        Write your answer below.
                     {% endif %}
                     Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
                 </div>
