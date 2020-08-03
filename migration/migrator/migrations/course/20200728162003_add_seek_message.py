@@ -1,6 +1,6 @@
 """Migration for a given Submitty course database."""
-
-
+import json
+from pathlib import Path
 def up(config, database, semester, course):
     database.execute('ALTER TABLE IF EXISTS seeking_team ADD COLUMN IF NOT EXISTS message character varying;')
     
