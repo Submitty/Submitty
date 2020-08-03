@@ -72,7 +72,21 @@ AJAX_USE_ASYNC = true;
  * Keep All of the ajax functions at the top of this file
  *
  */
-
+let gradeable_id = getGradeableId();
+var custom_mark_req = $.ajax({	        
+                type: 'GET',       
+                url: buildCourseUrl(['gradeable',gradeable_id, 'getCustomMarksAccess']),
+                dataType: 'html',
+                context: document.body,
+                global: false,
+                async:false,
+                success: function(res) {
+                    console.log(res);
+                    return res.data;
+                }
+            }).responseText;
+var custom_mark_obj=JSON.parse(custom_mark_req);
+var custom_mark_enabled = custom_mark_obj.data;
 /**
  * Called internally when an ajax function irrecoverably fails before rejecting
  * @param err
@@ -1803,15 +1817,18 @@ function onCancelComponent(me) {
   const anon_id = getAnonId();
   ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
     // If there is any changes made in comment of a component , prompt the TA
-    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
-      if(confirm( "Are you sure you want to discard all changes to the student message?")){
-        toggleComponent(component_id, false)
-          .catch(function (err) {
-            console.error(err);
-            alert('Error closing component! ' + err.message);
-          });
-      }
+    if(custom_mark_enabled){
+        if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val()) {
+        if(confirm( "Are you sure you want to discard all changes to the student message?")){
+            toggleComponent(component_id, false)
+            .catch(function (err) {
+                console.error(err);
+                alert('Error closing component! ' + err.message);
+            });
+        }
+        }
     }
+
     // There is no change in comment, i.e it is same as the saved comment (before)
     else {
       toggleComponent(component_id, false)
@@ -2887,9 +2904,11 @@ function saveComponent(component_id) {
         // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
         //  so prompt the grader if this is what they really want since it will delete the text / score.
         let gradedComponent = getGradedComponentFromDOM(component_id);
-        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
-            if (!confirm("Are you sure you want to delete the custom mark?")) {
-                return promise.reject();
+        if(custom_mark_enabled){
+            if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+                if (!confirm("Are you sure you want to delete the custom mark?")) {
+                    return promise.reject();
+                }
             }
         }
         // We're in grade mode, so save the graded component

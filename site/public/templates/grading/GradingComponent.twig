@@ -56,12 +56,8 @@ Required inputs:
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
     {% set f_mark = component.marks|first %}
-    {% if not edit_marks_enabled %}
-        <div class="custom-mark-container mark-container row
-        {% if peer_component %}
-            hidden
-            {% endif %}
-            "
+    {% if not edit_marks_enabled and custom_mark_enabled %}
+        <div class="custom-mark-container mark-container row"
              data-mark_id="0">
             <span class="mark-selector-container">
                 <span class="{{ graded_component.custom_mark_selected ? "mark-selected" : "" }} mark-selector col-no-gutters key_to_click" tabindex="0"
@@ -103,7 +99,7 @@ Required inputs:
 
             </span>
             <span class="col-sm mark-title">
-                Custom:
+                Custom: {{ custom_mark_enabled }} 
                 <textarea onchange="onCustomMarkChange(this)"
                           onkeyup="auto_grow(this)"
                           rows="1"

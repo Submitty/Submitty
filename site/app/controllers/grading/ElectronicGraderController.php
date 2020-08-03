@@ -757,6 +757,14 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
+     * Returns Custom marks access boolean
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getCustomMarksAccess", methods={"GET"})
+     */
+    public function getCustomMarksAccess($gradeable_id) {
+        return JsonResponse::getSuccessResponse($this->core->getAccess()->canI("grading.electronic.silent_edit"));
+    }
+
+    /**
      * Exports team into a csv file and displays it to the user
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/export")
      */
