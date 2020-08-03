@@ -12,6 +12,7 @@ let panelElements = [
   { str: "autograding_results", icon: ".grading_toolbar .fa-list"},
   { str: "grading_rubric", icon: ".grading_toolbar .fa-edit"},
   { str: "submission_browser", icon: "grading_toolbar .fa-folder-open.icon-header"},
+  { str: "solution_ta_notes", icon: "grading_toolbar .fa-check.icon-header"},
   { str: "student_info", icon: ".grading_toolbar .fa-user"},
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
