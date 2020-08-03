@@ -721,14 +721,14 @@ CREATE TABLE public.queue (
     queue_code text NOT NULL,
     user_id text NOT NULL,
     name text NOT NULL,
-    time_in timestamp without time zone NOT NULL,
-    time_out timestamp without time zone,
+    time_in timestamp with time zone NOT NULL,
+    time_out timestamp with time zone,
     added_by text NOT NULL,
     help_started_by text,
     removed_by text,
     contact_info text,
     last_time_in_queue timestamp with time zone,
-    time_help_start timestamp without time zone,
+    time_help_start timestamp with time zone,
     paused boolean DEFAULT false NOT NULL
 );
 
@@ -1304,17 +1304,6 @@ ALTER TABLE ONLY public.late_day_exceptions
 
 ALTER TABLE ONLY public.late_days
     ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id, since_timestamp);
-
---
--- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE peer_feedback (
-    grader_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL,
-    feedback character varying(255)
-);
 
 
 --
@@ -1990,32 +1979,6 @@ ALTER TABLE ONLY public.queue
 ALTER TABLE ONLY public.regrade_discussion
     ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id);
 
---
--- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
---
--- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
-
---
--- Name: peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
-            
---
--- Name: peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
 -- Name: regrade_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
