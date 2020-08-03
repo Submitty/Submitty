@@ -462,7 +462,6 @@ class Config extends AbstractModel {
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
             'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'polls_enabled', 'polls_pts_for_correct', 'polls_pts_for_incorrect', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
         ];
-        //var_dump($course_json_path);
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
