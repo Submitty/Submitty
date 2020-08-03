@@ -54,7 +54,7 @@
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
-                                Write your {{ cell.programming_language | title }} below:
+                                Write your {{ cell.programming_language | title }} below.  Press TAB to indent. Press ESC to advance from answer area.
                             {% endif %}
                         </div>
 
@@ -78,6 +78,24 @@
                                     "theme": "eclipse"
                                 }
                             );
+
+                            makeCodeMirrorAccessible(editor_{{ num_codeboxes }});
+
+                            {% if cell.rows is defined and cell.rows > 0 %}
+                                const height = rowsToPixels({{ cell.rows }});
+                                editor_{{ num_codeboxes }}.setSize(null, height);
+                            {% endif %}
+
+                            {# Populate codebox and set state of buttons initially #}
+                            {% if highest_version == 0 %}
+                                setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                            {% else %}
+                                setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                            {% endif %}
                         </script>
                     {% set num_codeboxes = num_codeboxes + 1 %}
                 {% endif %}
@@ -147,6 +165,15 @@
                     {# Populate checkboxes initially #}
                     {% if cell.recent_submission is defined %}
                         setMultipleChoices("mc_field_{{ num_multiple_choice }}");
+                    {% endif %}
+
+                    {# Configure initial state for the button #}
+                    {% if highest_version == 0 %}
+                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                        $("#mc_{{ num_multiple_choice }}_recent_button").hide();
+                    {% else %}
+                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                        $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                     {% endif %}
                 </script>
 
@@ -279,7 +306,7 @@
                     {% if short_answer.label %}
                         {{ short_answer.label | markdown }}
                     {% else %}
-                        Write your answer below:
+                        Write your answer below.
                     {% endif %}
                     Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
                 </div>
