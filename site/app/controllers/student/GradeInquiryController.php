@@ -110,7 +110,7 @@ class GradeInquiryController extends AbstractController {
         $grade_inquiry_id = $grade_inquiry->getId();
 
         try {
-            $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
+            $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id])
@@ -210,7 +210,7 @@ class GradeInquiryController extends AbstractController {
             $grade_inquiry->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
             if ($content != "") {
-                $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
+                $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return MultiResponse::JsonOnlyResponse(

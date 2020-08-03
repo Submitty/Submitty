@@ -89,7 +89,7 @@ function onGradeInquirySubmitClicked(button) {
             let course = document.body.dataset.courseUrl.split('/').pop();
             let submitter_id = form.children('#submitter_id').val();
             let gc_id = form.children('#gc_id').val();
-            window.socketClient.send({'type': data.type, 'post_id': data.post_id, 'course': course, 'submitter_id': submitter_id});
+            window.socketClient.send({'type': data.type, 'post_id': data.post_id, 'course': course, 'submitter_id': submitter_id, 'gc_id': gc_id});
           }
         }
       }
@@ -106,7 +106,7 @@ function initGradingInquirySocketClient() {
   window.socketClient.onmessage = (msg) => {
     switch (msg.type) {
       case "new_post":
-        gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id);
+        gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
         break;
       default:
         console.log("Undefined message recieved.");
@@ -115,14 +115,26 @@ function initGradingInquirySocketClient() {
   window.socketClient.open();
 }
 
-function gradeInquiryNewPostHandler(submitter_id, post_id) {
+function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
   $.ajax({
     type: "POST",
     url: buildCourseUrl(['gradeable', window.location.pathname.split("gradeable/")[1].split('/')[0], 'grade_inquiry', 'single']),
     data: {submitter_id: submitter_id, post_id: post_id, csrf_token: window.csrfToken},
     success: function(new_post){
+      if (gc_id){
+        let all_inquiries = $(".grade-inquiries").children("[data-component_id='0']");
+        let last_post = all_inquiries.children('.post_box').last();
+        $(new_post).insertAfter(last_post).hide().fadeIn('slow');
+
+        let component_grade_inquiry = $(".grade-inquiries").children("[data-component_id='" + gc_id + "']");
+        last_post = component_grade_inquiry.children('.post_box').last();
+        $(new_post).insertAfter(last_post).hide().fadeIn('slow');
+        component_grade_inquiry.find("[data-post_id=" + post_id + "]").children('div').first().remove();
+      }
+      else {
         let last_post = $('.grade-inquiry').children('.post_box').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
+      }
     }
   });
 }

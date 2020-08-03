@@ -1121,13 +1121,15 @@ class HomeworkView extends AbstractView {
                     $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
+                    $post_id = $post['id'];
                     $posts[] = [
                         'is_staff' => $is_staff,
                         'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,
-                        'gc_title' => $gc_title
+                        'gc_title' => $gc_title,
+                        'id' => $post_id
                     ];
                 }
 
@@ -1196,10 +1198,14 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
+        $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+
         $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
         $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
         $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
         $content = $post['content'];
+        $post_id = $post['id'];
+
         $gc_id = $post['gc_id'];
         $gc_title = '';
         if (!is_null($gc_id)) {
@@ -1214,7 +1220,12 @@ class HomeworkView extends AbstractView {
                 'date_sort' => $date,
                 'name' => $name,
                 'content' => $content,
-                'gc_title' => $gc_title
+                'gc_title' => $gc_title,
+                'id' => $post_id
+            ],
+            'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
+            'component' => [
+                'id' => 0
             ]
         ]);
     }
