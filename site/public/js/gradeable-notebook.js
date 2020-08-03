@@ -3,18 +3,16 @@
  *
  * @param mc_field_id The id of the multiple choice fieldset
  */
-function setMultipleChoices(mc_field_id)
+function setMultipleChoices(mc_field_id, checked)
 {
-    var prev_checked = $("#" + mc_field_id).attr("data-prev_checked");
-
-    prev_checked = prev_checked.split("\n");
+    checked = checked.split("\n");
 
     // For each input inside the fieldset see if its value is inside the prev checked array
     $("#" + mc_field_id + " :input").each(function(index,element) {
 
         var value = element.getAttribute("value");
 
-        if(prev_checked.includes(value))
+        if(checked.includes(value))
         {
             $(element).prop("checked", true);
         }
@@ -326,3 +324,49 @@ $(document).ready(function () {
 
     cleanupAutosaveHistory("-notebook-autosave");
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    document.querySelector('.notebook').onclick = event => {
+
+        if (event.target.classList.contains('notebook-btn')) {
+            const button = event.target;
+            const cell_type = button.dataset.cell_type;
+            const index = button.dataset.index;
+            const operation = button.dataset.operation;
+
+            console.log(`${cell_type} ${index} ${operation}`);
+
+            if (cell_type === 'multiple_choice') {
+                mcButtonClickAction(index, operation);
+            }
+            else if (cell_type === 'short_answer') {
+                saButtonClickAction(index, operation);
+            }
+            else {
+                console.error('Invalid notebook cell type');
+            }
+        }
+
+    }
+
+});
+
+function saButtonClickAction(index, operation) {
+    const codebox = document.querySelector(``)
+}
+
+function mcButtonClickAction(index, operation) {
+    const mc_field_id = `mc_field_${index}`;
+    const fieldset = document.querySelector(`#mc_field_${index}`);
+
+    if (operation === 'clear') {
+        clearMultipleChoices(mc_field_id);
+    }
+    else if (operation === 'recent') {
+        setMultipleChoices(mc_field_id, fieldset.dataset.prev_checked);
+    }
+    else {
+        console.error('Invalid button click operation');
+    }
+}

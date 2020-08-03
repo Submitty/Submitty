@@ -68,8 +68,7 @@
                              onkeyup="handle_input_keypress();">
                         </div>
 
-                        <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
-                        <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                        {{ _self.render_buttons(cell, num_codeboxes) }}
 
                         <script>
                             var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
@@ -79,17 +78,6 @@
                                     "theme": "eclipse"
                                 }
                             );
-
-                            {# Populate codebox and set state of buttons initially #}
-                            {% if highest_version == 0 %}
-                                setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
-                            {% else %}
-                                setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                            {% endif %}
                         </script>
                     {% set num_codeboxes = num_codeboxes + 1 %}
                 {% endif %}
@@ -153,23 +141,12 @@
                     {% endif %}
                 </fieldset>
 
-                {# Create reset to recent submission button #}
-                <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
-                <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+                {{ _self.render_buttons(cell, num_multiple_choice) }}
 
                 <script>
                     {# Populate checkboxes initially #}
                     {% if cell.recent_submission is defined %}
                         setMultipleChoices("mc_field_{{ num_multiple_choice }}");
-                    {% endif %}
-
-                    {# Configure initial state for the button #}
-                    {% if highest_version == 0 %}
-                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
-                        $("#mc_{{ num_multiple_choice }}_recent_button").hide();
-                    {% else %}
-                        $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
-                        $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                     {% endif %}
                 </script>
 
@@ -238,6 +215,15 @@
 
 {% endmacro %}
 
+{% macro render_button(cell, index, operation, message) %}
+    <button type="button" class="btn btn-primary notebook-btn" data-cell_type="{{ cell.type }}" data-index="{{ index }}" data-operation="{{ operation }}">{{ message }}</button>
+{% endmacro %}
+
+{% macro render_buttons(cell, index) %}
+    {{ _self.render_button(cell, index, 'clear', 'Clear') }}
+    {{ _self.render_button(cell, index, 'recent', 'Use Most Recent Submission') }}
+    {{ _self.render_button(cell, index, 'selected', 'Use Selected Submission') }}
+{% endmacro %}
 
 {% macro render_testcase_messages(cell, testcase_messages) %}
 
@@ -255,7 +241,6 @@
     {% endif %}
 
 {% endmacro %}
-
 
 {% macro render_short_answer(short_answer, index, version, testcase_messages) %}
     <p class="short-answer">
@@ -323,20 +308,9 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa-clear-reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
-        <script>
 
-            // Setup init state of buttons
-            {% if version == 0 %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
-            {% else %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-            {% endif %}
+        {{ _self.render_buttons(short_answer, index) }}
 
-        </script>
     </p>
 {% endmacro %}
 
