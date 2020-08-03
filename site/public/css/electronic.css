@@ -1224,7 +1224,7 @@ tr.is_publish {
     width:100%;
 }
 
-#file_view {
+#file-view {
     height: 100%;
     width: 100%;
 }
@@ -1237,7 +1237,7 @@ tr.is_publish {
     z-index: 30;
 }
 
-#file_content {
+#file-content {
     height:90%;
     width: 100%;
 }

@@ -50,7 +50,7 @@
             </div>
             {# /Files #}
         </div>
-        <div id="file_view" class="hide">
+        <div id="file-view" class="hide">
             <div class="sticky-file-info">
                 <div class="flex-row">
                     <span>
@@ -66,7 +66,7 @@
                 </div>
                 {% include "grading/electronic/PDFAnnotationBar.twig" %}
             </div>
-            <div id="file_content"></div>
+            <div id="file-content"></div>
         </div>
     </div>
 </div>
@@ -149,13 +149,13 @@
         }
 
         let promise = loadFile(name, path, page_num);
-        $('#file_view').show();
+        $('#file-view').show();
         $("#grading_file_name").html(name);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
         let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#directory_view").hide();
-        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
+        $("#file-view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
         return promise;
     }
 
@@ -176,13 +176,13 @@
                     'csrf_token': csrfToken
                 },
                 success: function(data){
-                    $('#file_content').append(data);
+                    $('#file-content').append(data);
                 }
             });
         }
         else {
             $('#save_status').hide();
-            $('#file_content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+            $('#file-content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
             $("#file_viewer_full_panel").empty();
             $("#file_viewer_full_panel").attr("data-file_name", "");
             $("#file_viewer_full_panel").attr("data-file_url", "");
@@ -204,9 +204,9 @@
         var offset1 = $("#directory_view").css('left');
         var offset2 = $("#directory_view").width();
         $("#directory_view").animate({'left': '-=' + offset1}, 200);
-        $("#file_view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
-            $('#file_view').css('left', "");
-            $('#file_view').hide();
+        $("#file-view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
+            $('#file-view').css('left', "");
+            $('#file-view').hide();
         });
     }
 

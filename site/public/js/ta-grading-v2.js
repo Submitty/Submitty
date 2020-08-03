@@ -933,11 +933,13 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
   return stored_paths;
 }
 
+// Returns Non anonymized path for the submitted files by student
 function getNonAnonPath(path, anon_submitter_id, user_ids){
   let nonAnonPath = "";
   let pathPieces = path.split("/");
   for (i = 1; i < pathPieces.length; i++) {
-    if(i == 9){
+    // for non-anonymized-file-path, get the user-name from anon_submitter_id (if anonymized)
+    if(i === 9){
       nonAnonPath += "/" + user_ids[anon_submitter_id];
     }
     else{

@@ -33,7 +33,7 @@ function renderPDFToolbar() {
                 clicked_button.addClass('tool-selected');
                 switch($(selected[0]).attr('value')){
                     case 'pen':
-                        $('#file_content').css('overflow', 'auto');
+                        $('#file-content').css('overflow', 'auto');
                         $('#scroll_lock_mode').prop('checked', false);
                         PDFAnnotate.UI.disablePen();
                         break;
@@ -238,7 +238,7 @@ function renderPDFToolbar() {
         penColor = pen_color;
         
         if (scrollLock) {
-            $('#file_content').css('overflow', 'hidden');
+            $('#file-content').css('overflow', 'hidden');
         }
         localStorage.setItem('pen/size', pen_size);
         localStorage.setItem('main_color', pen_color);
