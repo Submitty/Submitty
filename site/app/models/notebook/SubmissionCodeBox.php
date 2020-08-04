@@ -2,8 +2,8 @@
 
 namespace app\models\notebook;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\models\notebook\AbstractTextBox;
 
 /**
@@ -21,6 +21,6 @@ class SubmissionCodeBox extends AbstractTextBox {
         parent::__construct($core, $details);
 
         $this->language = $details['programming_language'];
-        $this->codeMirrorMode = $details['codemirror_mode'] ?? Utils::getCodeMirrorMode($this->language);
+        $this->codeMirrorMode = $details['codemirror_mode'] ?? CodeMirrorUtils::getCodeMirrorMode($this->language);
     }
 }

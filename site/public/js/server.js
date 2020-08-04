@@ -1225,7 +1225,7 @@ function displaySuccessMessage(message) {
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type
+ * @param {string} type either 'error' or 'success'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
@@ -1624,6 +1624,35 @@ function enableKeyToClick(){
   }
 }
 
+function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
+    $('#save_status').html('Saving Feedback...');
+    var url = buildCourseUrl(['gradeable', g_id, 'feedback' , 'set']);
+    let formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('grader_id', grader_id);
+    formData.append('user_id', user_id);
+    formData.append('feedback', feedback);
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                $('#save_status').html('All Changes Saved');
+            } catch(err){
+                return;
+            }
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+            $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        }
+    })
+}
+
 /**
  * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
  *
@@ -1705,4 +1734,14 @@ function flagUserImage(user_id, flag) {
             displayErrorMessage('Something went wrong!');
         }
     }
+}
+
+/**
+ * Get an array of all focusable elements currently in the dom.
+ *
+ * @returns {Element[]}
+ */
+function getFocusableElements() {
+    let focusable_elements = $(':focusable:tabbable');
+    return Array.from(focusable_elements);
 }
