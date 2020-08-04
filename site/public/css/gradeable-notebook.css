@@ -19,8 +19,7 @@
 .notebook .sa-clear-reset,
 .notebook .codebox-clear-reset,
 .notebook .mc-recent,
-.notebook .mc-clear
-{
+.notebook .mc-clear {
     margin-top: 7px;
     padding: 3px 6px;
     font-size: 80%;
