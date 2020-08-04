@@ -52,7 +52,7 @@ $(function() {
         snap: false,
         grid: [2, 2],
         stack: ".draggable",
-        cancel: "input,textarea,button,select,option,div#file_content,div#size_selector_menu"
+        cancel: "input,textarea,button,select,option,div#file-content,div#size_selector_menu"
     }).resizable();
 
 
