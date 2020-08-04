@@ -2,8 +2,8 @@
 
 namespace app\models\notebook;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\AbstractModel;
 use app\exceptions\NotImplementedException;
@@ -83,7 +83,7 @@ class Notebook extends AbstractModel {
                 && !empty($notebook_cell['programming_language'])
                 && empty($notebook_cell['codemirror_mode'])
             ) {
-                $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language']);
             }
 
             // Add this cell $this->notebook
