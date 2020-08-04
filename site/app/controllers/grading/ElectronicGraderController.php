@@ -311,7 +311,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
         $isPeerGradeable = false;
-        if ($gradeable->isPeerGrading() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT))  {
+        if ($gradeable->isPeerGrading() && ($this->core->getUser()->getGroup() < User::GROUP_STUDENT)) {
             $isPeerGradeable = true;
         }
         $peer = false;
@@ -472,18 +472,18 @@ class ElectronicGraderController extends AbstractController {
             if ($peer) {
                  // If a team assignment => Team Peer Grading Stats Should be Visible
                  // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
-                 if ($gradeable->isTeamAssignment()) {
+                if ($gradeable->isTeamAssignment()) {
                     $sections['stu_grad'] = [
-                        'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
-                        'graded_components' => $my_grading,
-                        'num_gradeables' => $num_gradeables,
-                        'ta_graded_components' => 0,
-                        'graders' => []
+                       'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
+                       'graded_components' => $my_grading,
+                       'num_gradeables' => $num_gradeables,
+                       'ta_graded_components' => 0,
+                       'graders' => []
                     ];
                     $sections['all'] = [
-                        'total_components' => 0,
-                        'graded_components' => 0,
-                        'graders' => []
+                       'total_components' => 0,
+                       'graded_components' => 0,
+                       'graders' => []
                     ];
                     foreach ($total_users as $key => $value) {
                         if ($key == 'NULL') {

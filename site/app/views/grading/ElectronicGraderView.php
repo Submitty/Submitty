@@ -166,7 +166,7 @@ class ElectronicGraderView extends AbstractView {
                         $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / ($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables'])) * 100, 1);
                         // Correct the below code when Teams work well with randomization
                         if ($gradeable->isTeamAssignment()) {
-                            $peer_total =  floor(($sections['stu_grad']['total_components'])/$num_peer_components);
+                            $peer_total =  floor(($sections['stu_grad']['total_components']) / $num_peer_components);
                             $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / ($sections['stu_grad']['total_components'] * $sections['stu_grad']['num_gradeables'])) * 100, 1);
                         }
                     }
