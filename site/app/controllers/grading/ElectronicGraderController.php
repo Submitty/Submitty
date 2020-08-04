@@ -50,9 +50,9 @@ class ElectronicGraderController extends AbstractController {
     }
     /**
      * Route for Getting Gradeable
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getJsUserGroup", methods={"GET"})
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getUserGroup", methods={"GET"})
      */
-    public function getJsUserGroup($gradeable_id) {
+    public function getUserGroup($gradeable_id) {
         $user_group = $this->core->getUser()->getGroup();
         return JsonResponse::getSuccessResponse($user_group);
     }
@@ -1397,7 +1397,7 @@ class ElectronicGraderController extends AbstractController {
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
             if ($gradeable->isPeerGrading()) {
                 $response_data['ta_grading_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
-                $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalScore($grading_user);
+                $response_data['see_peer_grade'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
                 $response_data['peer_grade_earned'] = $ta_graded_gradeable->getTotalScore($grading_done_by);
                 $response_data['peer_total'] = $gradeable->getPeerPoints();
                 $response_data['user_group'] = $this->core->getUser()->getGroup();

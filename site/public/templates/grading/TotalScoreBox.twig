@@ -35,7 +35,7 @@ l
             <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, (ta_grading_total + auto_grading_total), ta_grading_complete) }}">
                 {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (ta_grading_total + auto_grading_total)|round(decimal_precision) }}
             </strong>
-            <strong>Total</strong>
+            <strong>Total </strong>
         </div>
     {% endif %}
 {% endif %}

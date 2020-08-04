@@ -1244,7 +1244,7 @@ function getScoresFromDOM() {
     let dataDOMElement = $('#gradeable-scores-id');
     var user_group_txt = $.ajax({
         type: 'GET',       
-        url: buildCourseUrl(['gradeable', gradeable_id, 'getJsUserGroup']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'getUserGroup']),
         dataType: 'html',
         context: document.body,
         global: false,
@@ -1260,7 +1260,7 @@ function getScoresFromDOM() {
         ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
         ta_grading_total: getTaGradingTotal(),
-        peer_grade_earned: getPeerGradingTotal(),
+        peer_grade_earned: getTaGradingEarned(),
         peer_total: getPeerGradingTotal(),
         auto_grading_complete: false
     };
