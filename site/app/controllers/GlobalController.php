@@ -238,7 +238,7 @@ class GlobalController extends AbstractController {
         }
 
         // --------------------------------------------------------------------------
-        
+
         if ($this->core->getUser()->accessAdmin()) {
             $sidebar_buttons[] = new Button($this->core, [
                "href" => $this->core->buildCourseUrl(['users']),
