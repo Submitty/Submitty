@@ -171,11 +171,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$order_all_sections might not be defined\\.$#"
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Variable \\$goToStudent might not be defined\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php

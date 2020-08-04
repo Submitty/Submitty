@@ -1549,6 +1549,10 @@
                 "type" : "string"
               }
             },
+            "user_item_map" : {
+              "type" : "object",
+              "description" : "Mapping of username to index of 'from_pool' array. Users in this mapping, will only be shown item corresponding to the mentioned index next to their username and no hash-based randomization will be done for them."
+            },
             "points" : {
               "type" : "number",
               "description" : "The number of points that this item is worth."

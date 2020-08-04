@@ -2484,9 +2484,9 @@ function scrollToPage(page_num){
     for(let i = 0; i < files.length; i++){
         if(files[i].innerText.trim() == "upload.pdf"){
             let page = $("#pageContainer" + page_num);
-            if($("#file_view").is(":visible")){
+            if($("#file-view").is(":visible")){
                 if(page.length) {
-                    $('#file_content').animate({scrollTop: page[0].offsetTop}, 500);
+                    $('#file-content').animate({scrollTop: page[0].offsetTop}, 500);
                 }
             }
             else {
