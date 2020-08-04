@@ -470,10 +470,11 @@ class ElectronicGraderController extends AbstractController {
                 ];
             }
             if ($peer) {
-                 // If not a team assignment => Team Peer Grading Stats Should be Visible
-                if ($gradeable->isTeamAssignment()) {
+                 // If a team assignment => Team Peer Grading Stats Should be Visible
+                 // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
+                 if ($gradeable->isTeamAssignment()) {
                     $sections['stu_grad'] = [
-                        'total_components' => count($gradeable->getPeerComponents()),
+                        'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
                         'graded_components' => $my_grading,
                         'num_gradeables' => $num_gradeables,
                         'ta_graded_components' => 0,
