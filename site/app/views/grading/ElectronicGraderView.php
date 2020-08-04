@@ -179,7 +179,7 @@ class ElectronicGraderView extends AbstractView {
                 }
             }
             foreach ($sections as $key => &$section) {
-                $section['graded'] = round($section['graded_components'] / $num_components, 1);
+                $section['graded'] = round($section['graded_components'], 1);
                 $section['total'] = $section['total_components'];
                 if ($section['total_components'] == 0) {
                     $section['percentage'] = 0;
