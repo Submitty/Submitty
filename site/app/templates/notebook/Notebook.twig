@@ -45,10 +45,11 @@
                     {% if cell.label %}
                         {{ cell.label | markdown }}
                     {% else %}
-                        Write your {{ cell.programming_language | title }} below.  Press TAB to indent. Press ESC to advance from answer area.
+                        Write your {{ cell.programming_language | title }} below:
                     {% endif %}
                 </div>
 
+                <p>Press TAB to indent. Press ESC to advance from answer area.</p>
                 <div class="short-answer"
                      id="short-answer-{{ num_short_answer }}"
                      data-index="{{ num_short_answer }}"
