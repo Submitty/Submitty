@@ -617,7 +617,7 @@ gradeables:
   gradeable_config: cpp_hidden_tests
   g_bucket: homework
   
-  - g_id: closed_team_homework
+- g_id: closed_team_homework
   components:
   - gc_lower_clamp: 0
     gc_default: 2
