@@ -451,13 +451,11 @@
 
     function onIsRegradeAllowedChange() {
         if ($('#yes_regrade_allowed').is(':checked')) {
-            disableElementChildren('.grade_inquiry_start_date', false);
-            disableElementChildren('.grade_inquiry_due_date', false);
+            disableElementChildren('.grade_inquiry_date', false);
             disableElementChildren('.grade_inquiry_per_component_allowed', false);
         }
         else {
-            disableElementChildren('.grade_inquiry_start_date', true);
-            disableElementChildren('.grade_inquiry_due_date', true);
+            disableElementChildren('.grade_inquiry_date', true);
             $('#no_grade_inquiry_per_component_allowed').prop('checked',true);
             disableElementChildren('.grade_inquiry_per_component_allowed', true);
         }
