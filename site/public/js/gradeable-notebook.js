@@ -77,7 +77,6 @@ function saveNotebookToLocal() {
         localStorage.setItem(NOTEBOOK_AUTOSAVE_KEY, JSON.stringify({
             timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
-            short_answer: gatherInputAnswersByType("short_answer"),
             codebox: gatherInputAnswersByType("codebox")
         }));
     }

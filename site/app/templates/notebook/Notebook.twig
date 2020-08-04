@@ -45,10 +45,12 @@
                     {% if cell.label %}
                         {{ cell.label | markdown }}
                     {% else %}
-                        Write your {{ cell.programming_language | title }} below.  Press TAB to indent. Press ESC to advance from input area.
+                        {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                        Write your {{ write_your }} below:
                     {% endif %}
                 </div>
 
+                <i class="accessibility-msg">Press TAB to indent. Press ESC to advance from input area.</i>
                 <div id="codebox_{{ num_codeboxes }}"
                      name="codebox_{{ num_codeboxes }}"
                      autocapitalization="off"
@@ -67,9 +69,6 @@
                     let width_{{ num_codeboxes }};
 
                     if ({{ cell.rows }} > 0) {
-                        config_{{ num_codeboxes }}.lineNumbers = true;
-                        config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
-
                         height_{{ num_codeboxes }} = rowsToPixels({{ cell.rows }});
                     }
                     else {
@@ -77,6 +76,14 @@
 
                         height_{{ num_codeboxes }} = 30;
                         width_{{ num_codeboxes }} = 150;
+                    }
+
+                    if ('{{ cell.programming_language }}') {
+                        config_{{ num_codeboxes }}.lineNumbers = true;
+                        config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    }
+                    else {
+                        config_{{ num_codeboxes }}.mode = null;
                     }
 
                     config_{{ num_codeboxes }}.theme = 'eclipse';

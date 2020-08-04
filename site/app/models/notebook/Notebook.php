@@ -109,13 +109,7 @@ class Notebook extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-                // If programming language is set then this is a codebox, else regular textbox
-                if (isset($actual_input[$i]['programming_language'])) {
                     $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-                }
-                else {
-                    $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-                }
             }
             elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $actual_input[$i]['allow_multiple'] = $actual_input[$i]['allow_multiple'] ?? false;
@@ -148,14 +142,14 @@ class Notebook extends AbstractModel {
     }
 
 
-      /**
-       * Gets a new 'notebook' which contains information about most recent submissions
-       *
-       * @return array An updated 'notebook' which has the most recent submission data entered into the
-       * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
-       * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
-       * blank.
-       */
+    /**
+    * Gets a new 'notebook' which contains information about most recent submissions
+    *
+    * @return array An updated 'notebook' which has the most recent submission data entered into the
+    * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
+    * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
+    * blank.
+    */
     public function getMostRecentNotebookSubmissions(int $version, array $new_notebook): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
@@ -207,14 +201,14 @@ class Notebook extends AbstractModel {
 
 
     /**
-     * Get the data from the student's most recent submission
-     *
-     * @param string $filename Name of the file to collect the data out of
-     * @throws AuthorizationException if the user lacks permissions to read the submissions file
-     * @throws FileNotFoundException if file with passed filename could not be found
-     * @throws IOException if there was an error reading contents from the file
-     * @return string if successful returns the contents of a students most recent submission
-     */
+    * Get the data from the student's most recent submission
+    *
+    * @param string $filename Name of the file to collect the data out of
+    * @throws AuthorizationException if the user lacks permissions to read the submissions file
+    * @throws FileNotFoundException if file with passed filename could not be found
+    * @throws IOException if there was an error reading contents from the file
+    * @return string if successful returns the contents of a students most recent submission
+    */
     private function getRecentSubmissionContents($filename, $version) {
 
         // Get items in path to student's submission folder
