@@ -255,6 +255,18 @@ class TaGradedGradeable extends AbstractModel {
         }
         return $points_earned;
     }
+    /**
+     * Gets the instructor/ta score the student earned
+     * @return float
+     */
+    public function getTotalTaScore($grader = null) {
+        $points_earned = 0.0;
+        /** @var GradedComponentContainer $container */
+        foreach ($this->graded_component_containers as $container) {
+            $points_earned += $container->getTotalTaScore($grader);
+        }
+        return $points_earned;
+    }
 
     /**
      * Gets the percent of points the student has earned of the

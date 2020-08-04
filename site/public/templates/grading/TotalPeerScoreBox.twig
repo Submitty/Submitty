@@ -11,5 +11,5 @@ Required Parameters:
         <strong id="score_total" class="badge {{ functions.getBadgeStyle(peer_grade_earned,  peer_total,  peer_total) }}">
             {{ peer_grade_earned is defined ? (peer_grade_earned)|round(decimal_precision) : '&minus;' }} / {{ peer_total|round(decimal_precision) }}
         </strong>
-        <strong>Peer Grading Total</strong>
+        <strong>Combined Peer Grading Total</strong>
 </div>

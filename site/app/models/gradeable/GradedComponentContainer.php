@@ -226,6 +226,37 @@ class GradedComponentContainer extends AbstractModel {
         $points_earned = Utils::safeCalcPercent($points_earned, max(1, $number_of_graders));
         return NumberUtils::roundPointValue($points_earned, $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->getPrecision());
     }
+    /**
+     * Gets the ta score the submitter received for this component, rounded
+     *  to the precision of the gradeable
+     * @return float
+     */
+    public function getTotalTaScore(User $grader = null) {
+        $points_earned = 0.0;
+        $number_of_graders = 0;
+        // TODO: how should peer grades be calculated: now its an average
+        /** @var GradedComponent $graded_component */
+        foreach ($this->graded_components as $graded_component) {
+            // If there is a grader, we are only computing their total score rather than the total score for all peers.
+            if ($graded_component->getGrader()->getGroup() < User::GROUP_STUDENT) {
+                if($graded_component->isPeer()){
+                    continue;
+                }
+                else {
+                    $points_earned += $graded_component->getTotalScore();
+                }
+            }
+            else {
+                $points_earned = 0;
+                $number_of_graders = 0;
+            }
+            
+        }
+        // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
+        // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
+        //$points_earned = Utils::safeCalcPercent($points_earned, max(1, $number_of_graders));
+        return $points_earned;
+    }
 
     /**
      * Gets whether this component is considered fully graded

@@ -1260,7 +1260,7 @@ function getScoresFromDOM() {
         ta_grading_complete: getTaGradingComplete(),
         ta_grading_earned: getTaGradingEarned(),
         ta_grading_total: getTaGradingTotal(),
-        peer_grade_earned: getTaGradingEarned(),
+        peer_grade_earned: getPeerGradingEarned(),
         peer_total: getPeerGradingTotal(),
         auto_grading_complete: false
     };
@@ -1313,6 +1313,28 @@ function getTaGradingEarned() {
     }
     return total;
 }
+
+/**
+ * Gets the number of peer grading points the student has been awarded
+ * @return {number|undefined} Undefined if no score data exists
+ */
+function getPeerGradingEarned() {
+    let total = 0.0;
+    let anyPoints = false;
+    $('.peer-graded-component-data').each(function () {
+        let pointsEarned = $(this).attr('data-total_score');
+        if (pointsEarned === '') {
+            return;
+        }
+        total += parseFloat(pointsEarned);
+        anyPoints = true;
+    });
+    if (!anyPoints) {
+        return undefined;
+    }
+    return total;
+}
+
 
 /**
  * Gets if all components have a grade assigned

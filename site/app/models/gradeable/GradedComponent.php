@@ -31,6 +31,9 @@ class GradedComponent extends AbstractModel {
     private $ta_graded_gradeable = null;
     /** @prop @var string Id of the component this grade is attached to */
     protected $component_id = 0;
+    
+    /** If the component is peer */
+    private $is_peer = false;
 
     /** @var User The grader of this component */
     private $grader = null;
@@ -79,10 +82,9 @@ class GradedComponent extends AbstractModel {
             throw new \InvalidArgumentException('Cannot create GradedComponent with null TaGradedGradeable');
         }
         $this->ta_graded_gradeable = $ta_graded_gradeable;
-
+        $this->is_peer = $component->isPeer();
         $this->setComponent($component);
         $this->setGrader($grader);
-
         $this->setComment($details['comment'] ?? '');
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
@@ -118,6 +120,14 @@ class GradedComponent extends AbstractModel {
     public function getComponent() {
         return $this->component;
     }
+    /**
+     * Gets if the component is peer
+     * @return bool
+     */
+    public function isPeer() {
+        return $this->is_peer;
+    }
+
 
     /**
      * Gets the TaGradedGradeable that owns this graded component

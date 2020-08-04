@@ -1,6 +1,9 @@
 {% import "Functions.twig" as functions %}
 
-<span class="graded-component-data"
+<span class=
+    {% if component.peer %}'peer-graded-component-data'
+    {% else %}'graded-component-data' 
+    {% endif %}
       data-total_score="{{ graded_component.total_score }}"
       data-graded_version="{{ graded_component.graded_version }}"
       data-grade_time="{{ graded_component.grade_time }}"
