@@ -120,7 +120,7 @@ parameters:
 			count: 2
 			path: app/controllers/forum/ForumController.php
 
-				-	
+		-	
 			message: "#^Variable \\$graded_component might not be defined\\.$#"	
 			count: 2	
 			path: app/controllers/grading/ElectronicGraderController.php			
