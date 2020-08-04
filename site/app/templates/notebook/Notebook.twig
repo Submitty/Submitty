@@ -83,8 +83,8 @@
                             makeCodeMirrorAccessible(editor_{{ num_codeboxes }});
 
                             {% if cell.rows is defined and cell.rows > 0 %}
-                                const height = rowsToPixels({{ cell.rows }});
-                                editor_{{ num_codeboxes }}.setSize(null, height);
+                                const height_{{ num_codeboxes }} = rowsToPixels({{ cell.rows }});
+                                editor_{{ num_codeboxes }}.setSize(null, height_{{ num_codeboxes }});
                             {% endif %}
 
                             {# Populate codebox and set state of buttons initially #}
