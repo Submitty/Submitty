@@ -255,7 +255,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             // scroll to page on load
                             let initialPage = $("#pageContainer" + page_id);
                             if(initialPage.length) {
-                                $('#file_content').animate({scrollTop: initialPage[0].offsetTop}, 500);
+                                $('#file-content').animate({scrollTop: initialPage[0].offsetTop}, 500);
                             }
                         }
                         document.getElementById('pageContainer'+page_id).addEventListener('pointerdown', function(){
