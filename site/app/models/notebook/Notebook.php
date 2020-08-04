@@ -80,10 +80,8 @@ class Notebook extends AbstractModel {
             }
             elseif (
                 $notebook_cell['type'] === 'short_answer'
-                && !empty($notebook_cell['programming_language'])
-                && empty($notebook_cell['codemirror_mode'])
             ) {
-                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language'] ?? null);
             }
 
             // Add this cell $this->notebook
