@@ -124,7 +124,6 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round((($submitted_total) / $total_submissions) * 100, 1);
-               
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = [];
