@@ -1,4 +1,4 @@
-$( document ).ready(function () {
+function onReady(){
   // open last opened grade inquiry or open first component with grade inquiry
   var component_selector = localStorage.getItem('selected_tab');
   var first_unresolved_component = $('.component-unresolved').first();
@@ -12,9 +12,7 @@ $( document ).ready(function () {
   else {
     $('.component-tab').first().click();
   }
-
-
-});
+}
 
 function onComponentTabClicked(tab) {
   var component_id = $(tab).data("component_id");
@@ -85,12 +83,20 @@ function onGradeInquirySubmitClicked(button) {
         let json = JSON.parse(response);
         if (json['status'] === 'success') {
           let data = json['data'];
-          if (data.type === 'new_post'){
-            let course = document.body.dataset.courseUrl.split('/').pop();
-            let submitter_id = form.children('#submitter_id').val();
+          let course = document.body.dataset.courseUrl.split('/').pop();
+          let submitter_id = form.children('#submitter_id').val();
+          if (data.type === 'new_post') {
             let gc_id = form.children('#gc_id').val();
-            window.socketClient.send({'type': data.type, 'post_id': data.post_id, 'course': course, 'submitter_id': submitter_id, 'gc_id': gc_id});
+            window.socketClient.send({
+              'type': data.type,
+              'post_id': data.post_id,
+              'course': course,
+              'submitter_id': submitter_id,
+              'gc_id': gc_id
+            });
           }
+          else if (data.type === 'toggle_status')
+            window.socketClient.send({'type': data.type, 'course': course, 'submitter_id': submitter_id});
         }
       }
       catch (e) {
@@ -108,6 +114,9 @@ function initGradingInquirySocketClient() {
       case "new_post":
         gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
         break;
+      case "toggle_status":
+        gradeInquiryDiscussionHandler(msg.submitter_id);
+        break;
       default:
         console.log("Undefined message recieved.");
     }
@@ -121,11 +130,14 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
     url: buildCourseUrl(['gradeable', window.location.pathname.split("gradeable/")[1].split('/')[0], 'grade_inquiry', 'single']),
     data: {submitter_id: submitter_id, post_id: post_id, csrf_token: window.csrfToken},
     success: function(new_post){
+      // if grading inquiry per component is allowed
       if (gc_id){
+        // add new post to all tab
         let all_inquiries = $(".grade-inquiries").children("[data-component_id='0']");
         let last_post = all_inquiries.children('.post_box').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
 
+        // add to grading component
         let component_grade_inquiry = $(".grade-inquiries").children("[data-component_id='" + gc_id + "']");
         last_post = component_grade_inquiry.children('.post_box').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
@@ -135,6 +147,27 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
         let last_post = $('.grade-inquiry').children('.post_box').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
       }
+    }
+  });
+}
+
+function gradeInquiryDiscussionHandler(submitter_id) {
+  $.ajax({
+    type: "POST",
+    url: buildCourseUrl(['gradeable', window.location.pathname.split("gradeable/")[1].split('/')[0], 'grade_inquiry', 'discussion']),
+    data: {submitter_id: submitter_id, csrf_token: window.csrfToken},
+    success: function(discussion){
+      // save the selected component before updating regrade discussion
+      let component_selected = $('.btn-selected');
+      let component_id = component_selected.length ? component_selected.data('component_id') : 0;
+      localStorage.setItem('selected_tab','.component-'+component_id);
+
+      // TA (access grading)
+      if ($('#regradeBoxSection').length == 0){
+        $('#regrade_inner_info').children().html(discussion).hide().fadeIn('slow');
+      }
+      // student
+      else $('#regradeBoxSection').html(discussion).hide().fadeIn("slow");
     }
   });
 }

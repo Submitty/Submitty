@@ -214,7 +214,7 @@ class GradeInquiryController extends AbstractController {
             }
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'toggle_status'])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -227,6 +227,29 @@ class GradeInquiryController extends AbstractController {
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }
+    }
+
+    /**
+     * @param $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function getGradeInquiryDiscussion($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'];
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['submission', 'Homework'],
+                'showRegradeDiscussion',
+                $graded_gradeable,
+                true
+            )
+        );
     }
 
     /**
