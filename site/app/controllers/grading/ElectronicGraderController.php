@@ -761,7 +761,10 @@ class ElectronicGraderController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/getCustomMarksAccess", methods={"GET"})
      */
     public function getCustomMarksAccess($gradeable_id) {
-        return JsonResponse::getSuccessResponse($this->core->getAccess()->canI("grading.electronic.silent_edit"));
+        if($this->core->getUser()->getGroup() < User::GROUP_STUDENT){
+            return true;
+        }
+        return false;
     }
 
     /**
