@@ -1,5 +1,6 @@
 public/js/admin-gradeable-updates.js
 public/js/autosave-utils.js
+public/js/code-mirror-utils.js
 public/js/collapsible-panels.js
 public/js/confetti.js
 public/js/configuration.js
