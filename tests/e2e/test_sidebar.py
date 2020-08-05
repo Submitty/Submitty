@@ -3,6 +3,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from .base_testcase import BaseTestCase
+import os
+import unittest
 
 
 class TestSidebar(BaseTestCase):
@@ -95,6 +97,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'instructor', 'Quinn')
 
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
+                         "cannot run in Travis-CI, blank course does not exist")
     def test_click_sidebar_links_instructor_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -130,7 +134,8 @@ class TestSidebar(BaseTestCase):
             [base_url + '/notifications', 'Notifications'],
             [base_url + '/gradeable', 'New Gradeable'],
             [base_url + '/config', 'Course Settings'],
-            [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            # the office hours queue is not initially enabled in the sample course
+            # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/users', 'Manage Students'],
@@ -163,6 +168,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'ta', 'Jill')
 
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
+                         "cannot run in Travis-CI, blank course does not exist")
     def test_click_sidebar_links_ta_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -183,7 +190,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
-            [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            # the office hours queue is not initially enabled in the sample course
+            # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             # sample course has no course materials to start, so this link will not appear
             # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
@@ -207,6 +215,8 @@ class TestSidebar(BaseTestCase):
 
         self.sidebar_test_helper('', expected, 'student', 'Joe')
 
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None,
+                         "cannot run in Travis-CI, blank course does not exist")
     def test_click_sidebar_links_student_blank(self):
         base_url = self.test_url + '/courses/' + self.semester + '/blank'
         expected = [
@@ -226,7 +236,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
-            [base_url + '/office_hours_queue', 'Office Hours Queue'],
+            # the office hours queue is not initially enabled in the sample course
+            # [base_url + '/office_hours_queue', 'Office Hours Queue'],
             # sample course has no course materials in start, so this link will not appear
             # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
