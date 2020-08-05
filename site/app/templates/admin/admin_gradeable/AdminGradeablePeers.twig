@@ -48,7 +48,7 @@
     }
 
     function removeStudent(i, $grader_to_edit) {
-        var form = $("#admin-gradeable-peers-form");
+        var form = $("#admin-gradeable-edit-peers-form");
         $('#edit_user_id_'+i+'', form).remove();
     }
 
@@ -83,9 +83,9 @@
     function adminGradeablePeerForm(icon_clicked) {
         //make admin peers popup appear
         $('.popup-form').css('display', 'none');
-        let form = $("#admin-gradeable-peers-form");
+        let form = $("#admin-gradeable-edit-peers-form");
         form.css("display", "block");
-        captureTabInModal("admin-gradeable-peers-form");
+        captureTabInModal("admin-gradeable-edit-peers-form");
         $('#admin-gradeable-peers-submit').prop('disabled', false);
         $('#submit-error').text("");
         //set the title for popup
@@ -116,7 +116,7 @@
             source: student_autofill
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
-        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-peers-form\',\'#students-to-add\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');  
+        add_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-edit-peers-form\',\'#students-to-add\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');  
     }
 
     function checkNewStudentsValid(grader_id, user_input, valid_students, new_grader) {
@@ -143,7 +143,7 @@
 
     function submitFormAjax() {
         let url = $('#peers-submit-url').val();
-        let form = $("#admin-gradeable-peers-form");
+        let form = $("#admin-gradeable-edit-peers-form");
         let grader_id = $("#admin-gradeable-peers-title").text().substr(18);
         let fd = new FormData();
         fd.append('csrf_token', $("#csrf-token").val());
@@ -185,11 +185,11 @@
     function addGraderPeerForm() {
         // make add grader popup appear
         $('.popup-form').css('display', 'none');
-        let form = $("#admin-gradeable-peers-form2");
+        let form = $("#admin-gradeable-edit-peers-form2");
         form.css("display", "block");
         $('#admin-gradeable-peers2-submit').prop('disabled', true);
-        $('#submit-error2').text("Please enter a valid new grader that is not already in the matrix.");
-        captureTabInModal("admin-gradeable-peers-form2");
+        $('#submit-error2').text("Please enter a valid new grader that is in the course and not already in the matrix.");
+        captureTabInModal("admin-gradeable-edit-peers-form2");
         // set the left panel to allow a new grader to be added
         let peer_grader_pairs = JSON.parse($('#peer-grader-pairs').val());
         let add_grader_div = $("#new-grader");
@@ -210,7 +210,7 @@
             source: student_autofill
         });
         $('[name="add_user_id_0"]').autocomplete( "option", "appendTo", form );
-        grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-peers-form2\',\'#new-grader-students\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
+        grader_students_div.append('<p id="add_student_button" style="cursor: pointer;" onclick="addStudentTextbox(\'#admin-gradeable-edit-peers-form2\',\'#new-grader-students\');" aria-label="Add More Users"><i class="fas fa-plus-square"></i>Add More Users<br></p>');
     }
 
     function checkNewGraderValid(user_input) {
@@ -248,9 +248,9 @@
         } else {
             $(error_div_id).empty();
             if (!valid_grader) {
-                $(error_div_id).text("Please enter a valid new grader that is not already in the matrix.");
+                $(error_div_id).text("Please enter a valid new grader that is in the course and not already in the matrix.");
             } else if (valid_students.includes(false)) {
-                $(error_div_id).text("Please make sure all new students are valid students in the course.");
+                $(error_div_id).text("Please enter valid new students that are in the course and not already assigned to the grader.");
             } else if (new_grader && !valid_students.includes(true)) {
                 $(error_div_id).text("Please enter at least one student for the new grader.");
             }
@@ -261,7 +261,7 @@
 
     function submitFormAjax2() {
         let url = $('#peer-grader-submit-url').val();
-        let form = $("#admin-gradeable-peers-form2");
+        let form = $("#admin-gradeable-edit-peers-form2");
         let fd = new FormData();
         let csrf_token = $("#csrf-token2", form).val();
         fd.append('csrf_token', csrf_token);
@@ -299,12 +299,12 @@
             valid_grader = true;
             valid_students = [];
         });
-        $('#admin-gradeable-peers-form').on('blur', ":text.add_user_ids", function() {
+        $('#admin-gradeable-edit-peers-form').on('blur', ":text.add_user_ids", function() {
             let grader_id = $("#admin-gradeable-peers-title").text().substr(18);
             checkNewStudentsValid(grader_id, $(this), valid_students, false);
             updateSubmitButton(valid_grader, valid_students, false, false, "#admin-gradeable-peers-submit", "#submit-error");
         });
-        $('#admin-gradeable-peers-form').on('focus blur', '#remove_grader', function() {
+        $('#admin-gradeable-edit-peers-form').on('focus blur', '#remove_grader', function() {
             updateSubmitButton(valid_grader, valid_students, false, true, "#admin-gradeable-peers-submit", "#submit-error");
         })
         $('#add-grader-btn-container').on("click", ".btn", function() {
@@ -312,11 +312,11 @@
             valid_grader = false;
             valid_students = [];
         });
-        $('#admin-gradeable-peers-form2').on('blur', ':text#new_peer_grader', function() {
+        $('#admin-gradeable-edit-peers-form2').on('blur', ':text#new_peer_grader', function() {
             valid_grader = checkNewGraderValid($(this));
             updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-peers2-submit", "#submit-error2");
         });
-        $('#admin-gradeable-peers-form2').on('blur', ':text.add_user_ids', function() {
+        $('#admin-gradeable-edit-peers-form2').on('blur', ':text.add_user_ids', function() {
             let grader_id = $(":text#new_peer_grader").val();
             checkNewStudentsValid(grader_id, $(this), valid_students, true);
             updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-peers2-submit", "#submit-error2");

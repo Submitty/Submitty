@@ -1,5 +1,5 @@
 {% extends 'generic/Popup.twig' %}
-{% block popup_id %}admin-gradeable-peers-form{% endblock %}
+{% block popup_id %}admin-gradeable-edit-peers-form{% endblock %}
 {% block title_tag %}<h1 id="admin-gradeable-peers-title">Edit Students For Unknown</h1>{% endblock %}
 {% block body %}
 	<input type="hidden" id="peer-grader-pairs" value='{{ pair_grader_pairs }}'/>
@@ -11,7 +11,7 @@
 	<div id="removed-all"></div>
 {% endblock %}
 {% block buttons %}
-	<span id="submit-error" style="float:left;color:red;display:none;"></span>
     {{ block('close_button') }}
+    <div id="submit-error" class="left-panel" style="width:70%; display:inline-block; text-align:left; float:left; color:red;"></div>
     <input onclick="submitFormAjax();" class="btn btn-primary" type="submit" value="Submit" id="admin-gradeable-peers-submit" />
 {% endblock %}
