@@ -2763,7 +2763,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
 
     /**
-     * Add ($g_id,$user_id, $message) pair to table seeking_team
+     * Add ($g_id,$user_id, $message) to table seeking_team
      *
      * @param string $g_id
      * @param string $user_id
@@ -2795,11 +2795,10 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * Edit the user's message from table seeking_team
+     * Get the user's message from table seeking_team
      *
      * @param string $g_id
      * @param string $user_id
-     * @return string $user_message
      */
     public function getSeekMessageByUserId($g_id, $user_id) {
         $this->course_db->query(

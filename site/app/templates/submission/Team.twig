@@ -112,17 +112,30 @@
         {% endif %}
 
         {# Set Seeking Message #}
-        {% if config.isSeekMessageEnabled() %}
+        {% if seeking_enabled %}
             {% if seeking_partner %}
                 <br /> 
                 <br /> 
-                <p> {{ config.getSeekMessageInstructions() }}  </p>
+                <p> {{ seeking_instructions }}  </p>
                 <br />
-                <form action="{{ set_message_url }}" method="post">
-                    <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                    <input type="submit" value = "Set Message" class="btn btn-primary" />
-                </form>
+                {% if user.getSeekMessage(gradeable.getId()) != "N/A" %}
+                    <form action="{{ set_message_url }}" method="post">
+                        <textarea id="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message">{{ user.getSeekMessage(gradeable.getId()) }}</textarea>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                        <input type="submit" value = "Edit Message" class="btn btn-primary" />
+                        <input type="button" onclick="location.href='{{ remove_message_url }}'" value = "Remove Message" class="btn btn-danger" />
+                    </form>
+                    <script>
+                        var textarea = document.getElementById('seek_message');
+                        textarea.style.height = textarea.scrollHeight + 'px';
+                    </script>
+                {% else %}
+                    <form action="{{ set_message_url }}" method="post">
+                        <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message"></textarea>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                        <input type="submit" value = "Set Message" class="btn btn-primary" />
+                    </form>
+                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -144,7 +157,7 @@
                     <th style="width:9%">Last Name</th>
                     <th style="width:8%">User ID</th>
                     <th style="width:30%">Email</th>
-                    {% if config.isSeekMessageEnabled() %}
+                    {% if seeking_enabled %}
                         <th style="width:40%">Message</th>
                     {% endif %}
                     
@@ -158,7 +171,7 @@
                         <td>{{ user_details.getDisplayedLastName() }}</td>
                         <td>{{ user_details.getId() }}</td>
                         <td>{{ user_details.getEmail() }}</td>
-                        {% if config.isSeekMessageEnabled() %}
+                        {% if seeking_enabled %}
                             <td>{{ user_details.getSeekMessage(gradeable.getId()) }}</td>
                         {% endif %}
                     </tr>
