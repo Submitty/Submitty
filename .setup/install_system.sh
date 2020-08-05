@@ -726,9 +726,6 @@ if [ ${WORKER} == 0 ]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
         echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
 
-        DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-        VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
-
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
