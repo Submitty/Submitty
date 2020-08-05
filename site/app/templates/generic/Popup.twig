@@ -21,6 +21,21 @@
                                     {% block buttons %}
                                         {% block close_button %}
                                             <a onclick="closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
+                                            <script>
+                                              //This scrip is only included if the default close_button is included
+                                              //If the default close_button is overwritten then the functionality of pressing the escape key must be as well
+
+                                              //Detects if the escape key is pressed and if the popup is open. If so, close the popup
+                                              $(document).on(
+                                                'keydown',
+                                                function(event) {
+                                                  console.log($("#{{ block('popup_id') }}").is(":visible"))
+                                                    if (event.key == "Escape" && $("#{{ block('popup_id') }}").is(":visible")) {
+                                                      console.log("close")
+                                                      closePopup('{{ block('popup_id') }}');
+                                                    }
+                                              });
+                                            </script>
                                         {% endblock %}
                                     {% endblock %}
                                 </div>
@@ -39,15 +54,4 @@
     function closePopup(id) {
         $('#' + id).hide();
     }
-
-    //Detects escape key pressed and if the popup is open then close the popup
-    $(document).on(
-      'keydown',
-      function(event) {
-          if (event.key == "Escape") {
-              if ($('.popup-form:visible').length != 0) {
-                  closePopup($('.popup-form:visible')[0].id)
-              }
-          }
-    });
 </script>
