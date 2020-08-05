@@ -290,6 +290,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(self.countAlertSuccess(success_text), success)
         self.assertEqual(self.countAlertError(error_text), error)
 
+
 def enableQueue(self):
     self.log_in(user_id='instructor')
     self.get(f"/courses/{self.semester}/sample/config")
@@ -304,10 +305,10 @@ def enableQueue(self):
 
 
 def disableQueue(self):
+    self.log_out()
     self.log_in(user_id='instructor')
     self.get(f"/courses/{self.semester}/sample/config")
     self.wait_for_element((By.ID, 'queue-enabled'))
     if(self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
         self.driver.find_element(By.ID, 'queue-enabled').click()
-
     self.assertEqual(False, self.driver.find_element(By.ID, 'queue-enabled').is_selected())
