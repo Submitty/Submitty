@@ -255,7 +255,7 @@ class AdminGradeableController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function adminGradeablePeerSubmit($gradeable_id) {
+    public function editGraderPeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
         //if entire grader row is removed, just remove grader and their students
         if (!empty($_POST['remove_grader'])) {

@@ -80,7 +80,7 @@
     * @param {Object} icon_clicked the <i> element in peer matrix table 
     *     containing the clicked pencil icon
     */
-    function adminGradeablePeerForm(icon_clicked) {
+    function editGraderPeerForm(icon_clicked) {
         //make admin peers popup appear
         $('.popup-form').css('display', 'none');
         let form = $("#admin-gradeable-edit-peers-form");
@@ -295,7 +295,7 @@
         let valid_grader = false;
         let valid_students = [];
         $("#peer-table").on("click", ".fa-pencil-alt", function() {
-            adminGradeablePeerForm($(this));
+            editGraderPeerForm($(this));
             valid_grader = true;
             valid_students = [];
         });
