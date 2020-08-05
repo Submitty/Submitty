@@ -2,6 +2,7 @@
 
 namespace app\views\submission;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedTestcase;
@@ -406,23 +407,11 @@ class HomeworkView extends AbstractView {
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
-        // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
-
-        // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
-
-        // Import autosave utility functions
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
-
         $this->core->getOutput()->addInternalCss('submitbox.css');
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         $numberUtils = new NumberUtils();
 
