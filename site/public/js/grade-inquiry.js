@@ -131,7 +131,7 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
     data: {submitter_id: submitter_id, post_id: post_id, csrf_token: window.csrfToken},
     success: function(new_post){
       // if grading inquiry per component is allowed
-      if (gc_id){
+      if (gc_id != 0){
         // add new post to all tab
         let all_inquiries = $(".grade-inquiries").children("[data-component_id='0']");
         let last_post = all_inquiries.children('.post_box').last();
@@ -140,6 +140,8 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
         // add to grading component
         let component_grade_inquiry = $(".grade-inquiries").children("[data-component_id='" + gc_id + "']");
         last_post = component_grade_inquiry.children('.post_box').last();
+        if (last_post.length == 0) // if no posts
+          last_post = component_grade_inquiry.children('.grade-inquiry-header-div').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
         component_grade_inquiry.find("[data-post_id=" + post_id + "]").children('div').first().remove();
       }
