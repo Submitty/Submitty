@@ -7,7 +7,12 @@
 {% endif %}
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
-                <span class="col grading_label">Peer Grading</span>
+                <span class="col grading_label">Peer Grading
+                    <a class="key_to_click" tabindex="0" title="Edit Peer Marks" aria-label="edit peer marks" onclick = "newEditPeerComponentsForm()">
+                        <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;">
+                        </i>
+                    </a>
+                </span>
                 <div class="inner-container" id="peer-grading-box">
                     {% if has_active_version %}
                         <script>

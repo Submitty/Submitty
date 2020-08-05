@@ -317,6 +317,33 @@ WHERE status = 1"
     }
 
     /**
+     * @return string[]
+     */
+    public function getAllTerms() {
+        $this->submitty_db->query(
+            "SELECT term_id FROM terms ORDER BY start_date DESC"
+        );
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['term_id'];
+        }
+        return $return;
+    }
+
+    /**
+     * @param string $term_id
+     * @param string $term_name
+     * @param \DateTime $start_date
+     * @param \DateTime $end_date
+     */
+    public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
+        $this->submitty_db->query(
+            "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
+            [$term_id, $term_name, $start_date, $end_date]
+        );
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {
@@ -3249,10 +3276,28 @@ SQL;
     }
 
     /**
-     * Bulk Uploads Peer Grading Assignments
+     * Adds an assignment for someone to grade another person for peer grading
      *
-     * @param string $values
+     * @param string $grader
+     * @param string $student
+     * @param string $gradeable_id
+     * @param string $feedback
      */
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
+        if (count($this->course_db->rows()) > 0) {
+            $this->course_db->query("UPDATE peer_feedback SET feedback = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback, $grader, $student, $gradeable_id]);
+        }
+        else {
+            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
+        }
+    }
+  
+  /**
+   * Bulk Uploads Peer Grading Assignments
+   *
+   * @param string $values
+   */
     public function insertBulkPeerGradingAssignment($values) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
     }
@@ -3280,6 +3325,42 @@ SQL;
                 $return[$id['grader_id']] = [];
             }
             array_push($return[$id['grader_id']], $id['user_id']);
+        }
+        return $return;
+    }
+    
+    /**
+     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getAllPeerFeedback($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[$id['grader_id']][$id['user_id']]['feedback'] = $id['feedback'];
+        }
+        return $return;
+    }
+    
+    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
+        $results = $this->course_db->rows();
+        if (count($results) > 0) {
+            return $results[0]['feedback'];
+        }
+        return null;
+    }
+    /**
+     * Get all peers assigned to grade a specific student
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerGradingAssignmentForSubmitter($gradeable_id, $submitter_id) {
+        $this->course_db->query("SELECT grader_id FROM peer_assign WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $submitter_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[] = $id['grader_id'];
         }
         return $return;
     }
@@ -3686,7 +3767,8 @@ AND gc_id IN (
 
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id] ??
+                null;
     }
 
     // NOTIFICATION/EMAIL QUERIES
@@ -5165,6 +5247,16 @@ AND gc_id IN (
 
         $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
         $this->course_db->query($query, $params);
+    }
+    
+    public function deleteOverallComment($gradeable_id, $grader_id, $is_team) {
+        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+        if ($is_team) {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_team_id=?", [$gradeable_id, $grader_id]);
+        }
+        else {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_user_id=?", [$gradeable_id, $grader_id]);
+        }
     }
 
     /**
