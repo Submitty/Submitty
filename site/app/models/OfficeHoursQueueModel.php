@@ -62,6 +62,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getUser()->accessGrading();
     }
 
+    public function accessFullGrading() {
+        return $this->core->getUser()->accessFullGrading();
+    }
+
     public function getUserId() {
         return $this->core->getUser()->getId();
     }
@@ -233,7 +237,11 @@ class OfficeHoursQueueModel extends AbstractModel {
        return $this->core->getQueries()->getAllQueuesEver();
    }
 
-   public function getQueueStudentData() {
+    public function getQueueStudentData() {
       return $this->core->getQueries()->getQueueStudentData();
-  }
+    }
+
+    public function getQueueData($group_by_queue) {
+       return $this->core->getQueries()->getQueueData($group_by_queue);
+    }
 }

@@ -2,33 +2,71 @@
   <h1>
     Office Hours/Lab Queue Statistics
   </h1>
-  <!-- <select id="queue_code" class="form-control" name="queue_code" aria-label="Queue Code" required="required">
-    <option value="all">All Queues</option>
-    {% for queue in viewer.getAllQueuesEver() %}
-      <option value="queue {{queue['queue_code']}}">{{queue['queue_code']}}</option>
-    {% endfor %}
-  </select> -->
+  <!-- <select id="queue_code" class="form-control" name="queue_code" aria-label="Queue Code" required="required"> <option value="all">All Queues</option> {% for queue in viewer.getAllQueuesEver() %} <option value="queue
+  {{queue['queue_code']}}">{{queue['queue_code']}}</option> {% endfor %} </select> -->
 
+  <h2>Overall Data:</h2>
   <table class="table">
-  <thead>
-    <tr>
-      {% for key, item in viewer.getQueueStudentData()[0] %}
-        {% if key != 'user_id' %}
-            <th style="padding:.4rem">{{key}}</th>
-        {% endif %}
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for student in viewer.getQueueStudentData() %}
+    <thead>
       <tr>
-        {% for key, item in student %}
-          {% if key != 'user_id' %}
+        {% for key, item in viewer.getQueueData(false)[0] %}
+          <th style="padding:.4rem">{{key}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in viewer.getQueueData(false) %}
+        <tr>
+          {% for key, item in queue %}
             <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Queue Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in viewer.getQueueData(true)[0] %}
+          <th style="padding:.4rem">{{key}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in viewer.getQueueData(true) %}
+        <tr>
+          {% for key, item in queue %}
+            <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Student Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in viewer.getQueueStudentData()[0] %}
+          {% if key != 'user_id' %}
+            <th style="padding:.4rem">{{key}}</th>
           {% endif %}
         {% endfor %}
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {% for student in viewer.getQueueStudentData() %}
+        <tr>
+          {% for key, item in student %}
+            {% if key != 'user_id' %}
+              <td>{{item}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>

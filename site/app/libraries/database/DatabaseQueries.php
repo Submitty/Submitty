@@ -5858,6 +5858,40 @@ AND gc_id IN (
      return $this->course_db->rows();
    }
 
+   public function getQueueData($group_by_queue){
+     //This function does concatinate a string that is then used as a sql comamnd
+     //For future editors, make sure you dont allow this function to ever accept
+     //User input, everything should be hard coded to avoid sql injection
+     $query = "";
+     $query .= "SELECT ";
+     if($group_by_queue){
+       $query .= "queue_code, ";
+     }
+     $query .= " COUNT(*) AS queue_interactions,
+                 COUNT(DISTINCT user_id) AS number_distinct_students,
+                 AVG(time_out - time_in) AS avg_turnaround_time,
+                 MIN(time_out - time_in) AS min_turnaround_time,
+                 MAX(time_out - time_in) AS max_turnaround_time,
+                 AVG(time_help_start - time_in) AS avg_wait_time,
+                 MIN(time_help_start - time_in) AS min_wait_time,
+                 MAX(time_help_start - time_in) AS max_wait_time,
+                 SUM(CASE
+                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                   ELSE 0
+                 END) AS help_count,
+                 SUM(CASE
+                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                   ELSE 0
+                 END) AS not_helped_count
+               FROM queue ";
+      if($group_by_queue){
+        $query .= " GROUP BY queue_code
+                    ORDER BY queue_code ";
+      }
+     $this->course_db->query($query);
+     return $this->course_db->rows();
+   }
+
 
 /////////////////END Office Hours Queue queries//////////////////////////////////
 
