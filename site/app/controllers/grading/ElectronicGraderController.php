@@ -1402,8 +1402,6 @@ class ElectronicGraderController extends AbstractController {
                 $response_data['auto_grading_earned'] = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
             }
         }
-        //$grading_user_name = $this->core->getQueries()->getGraderForPeerAssignment($gradeable_id,'bitdiddle');
-        $grading_user = $this->core->getQueries()->getSubmittyUser("aphacker");
         // If it is graded at all, then send ta score information
         $response_data['ta_grading_total'] = $gradeable->getTaPoints();
         if ($ta_graded_gradeable->getPercentGraded() !== 0.0) {
