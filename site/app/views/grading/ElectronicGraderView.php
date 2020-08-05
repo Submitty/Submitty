@@ -63,6 +63,7 @@ class ElectronicGraderView extends AbstractView {
         $graded_total = 0;
         $submitted_total = 0;
         $submitted_percentage = 0;
+        $submitted_percentage_peer = 0;
         $peer_total = 0;
         $peer_graded = 0;
         $peer_percentage = 0;
@@ -119,10 +120,11 @@ class ElectronicGraderView extends AbstractView {
                 $num_non_peer_components = count($gradeable->getNonPeerComponents());
                 $num_components = $num_peer_components + $num_non_peer_components;
                 $graded_total = $num_non_peer_components > 0 ? round($graded / $num_non_peer_components, 2) : 0;
-                $submitted_total = $num_components > 0 ? $total : 0;
+                $submitted_total = $num_components > 0 ? $total / $num_peer_components : 0;
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round((($submitted_total) / $total_submissions) * 100, 1);
+               
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = [];
@@ -148,6 +150,7 @@ class ElectronicGraderView extends AbstractView {
                 if ($peer_count > 0 && array_key_exists("peer_stu_grad", $sections)) {
                     if ($num_peer_components > 0) {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));
+                        $submitted_percentage_peer = round((($total_students_submitted) / $total_submissions) * 100, 1);
                         $total_grading_percentage =  number_format(($graded_total / $total_students_submitted ) * 100, 1);
                         $entire_peer_total =  floor(($sections['peer_stu_grad']['total_who_submitted']));
                         $entire_peer_graded =  $sections['peer_stu_grad']['view_peer_graded_components'] / $num_peer_components;
@@ -260,6 +263,7 @@ class ElectronicGraderView extends AbstractView {
             "no_team_total"   => $no_team_total,
             "submitted_total" => $submitted_total,
             "submitted_percentage" => $submitted_percentage,
+            "submitted_percentage_peer" => $submitted_percentage_peer,
             "graded_total" => $graded_total,
             "graded_percentage" => $graded_percentage,
             "peer_total" => $peer_total,
