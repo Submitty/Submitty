@@ -249,7 +249,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with 
+     * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with
      *  the grader's new students.
      * @param String $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
@@ -281,7 +281,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the 
+     * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the
      * database with the grader's new students.
      * @param String $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
