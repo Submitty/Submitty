@@ -228,4 +228,12 @@ class OfficeHoursQueueModel extends AbstractModel {
         }
         return $this->core->getQueries()->getNumberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);
     }
+
+    public function getAllQueuesEver() {
+       return $this->core->getQueries()->getAllQueuesEver();
+   }
+
+   public function getQueueStudentData() {
+      return $this->core->getQueries()->getQueueStudentData();
+  }
 }

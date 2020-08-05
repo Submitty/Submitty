@@ -485,4 +485,26 @@ class OfficeHoursQueueController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
     }
+
+
+    /**
+    * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function showQueueStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
+
+        return MultiResponse::WebOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'showQueueStats',
+                new OfficeHoursQueueModel($this->core)
+            )
+        );
+    }
 }
