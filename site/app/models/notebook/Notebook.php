@@ -142,7 +142,7 @@ class Notebook extends AbstractModel {
     }
 
 
-     /**
+    /**
      * Gets a new 'notebook' which contains information about most recent submissions
      *
      * @return array An updated 'notebook' which has the most recent submission data entered into the
