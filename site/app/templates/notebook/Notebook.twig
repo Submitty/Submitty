@@ -50,7 +50,8 @@
                     {% endif %}
                 </div>
 
-                <i class="accessibility-msg">Press TAB to indent. Press ESC to advance from answer area.</i>
+                {{ _self.render_testcase_messages(cell, testcase_messages) }}
+
                 <div id="codebox_{{ num_codeboxes }}"
                      name="codebox_{{ num_codeboxes }}"
                      autocapitalization="off"
@@ -88,9 +89,8 @@
 
                     config_{{ num_codeboxes }}.theme = 'eclipse';
 
-                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
+                    var editor_{{ num_codeboxes }} = getSubmittyCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
                     editor_{{ num_codeboxes }}.setSize(width_{{ num_codeboxes }}, height_{{ num_codeboxes }});
-                    makeCodeMirrorAccessible(editor_{{ num_codeboxes }});
 
                     {# Populate codebox and set state of buttons initially #}
                     {% if highest_version == 0 %}
