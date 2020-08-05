@@ -1151,15 +1151,14 @@ class HomeworkView extends AbstractView {
                 }
                 $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
             }
-        }
-        // sort by most recent posts
-        if (!empty($grade_inquiries_twig_array)) {
-            usort($grade_inquiries_twig_array[0]['posts'], function ($a, $b) {
-                return strtotime($a['date']) - strtotime($b['date']);
+            // sort "all" tab posts chronologically
+            usort($grade_inquiries_twig_array[0]['posts'], function ($post1, $post2) {
+                if ($post1['date_sort'] == $post2['date_sort']) {
+                    return 0;
+                }
+                return ($post1['date_sort'] < $post2['date_sort']) ? -1 : 1;
             });
         }
-
-
 
         // construct components array for tabs
         $components_twig_array = [];
