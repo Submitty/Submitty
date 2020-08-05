@@ -237,10 +237,60 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllUnarchivedSemester(),
+                $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken()
             )
+        );
+    }
+
+    /**
+     * @Route("/term/new", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function addNewTerm() {
+        $response = new MultiResponse();
+        if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
+            $term_id = $_POST['term_id'];
+            $term_name = $_POST['term_name'];
+            $start_date = $_POST['start_date'];
+            $end_date = $_POST['end_date'];
+
+            $terms = $this->core->getQueries()->getAllTerms();
+            if (in_array($term_id, $terms)) {
+                $this->core->addErrorMessage("Term id already exists.");
+            }
+            elseif ($end_date < $start_date) {
+                $this->core->addErrorMessage("End date should be after Start date.");
+            }
+            else {
+                $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
+                $this->core->addSuccessMessage("Term added successfully.");
+            }
+            $url = $this->core->buildUrl(['home', 'courses', 'new']);
+            $response = $response->RedirectOnlyResponse(new RedirectResponse($url));
+        }
+        return $response;
+    }
+    
+    /**
+     * @Route("/update", methods={"GET"})
+     * @return MultiResponse|WebResponse
+     */
+    public function systemUpdatePage() {
+        $user = $this->core->getUser();
+        if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+
+        $this->core->getOutput()->addInternalJs('system-update.js');
+        return new WebResponse(
+            'HomePage',
+            'showSystemUpdatePage',
+            $this->core->getCsrfToken()
         );
     }
 }

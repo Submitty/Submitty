@@ -1,7 +1,6 @@
 // Attach notebook_builder object to the window
 window.addEventListener('DOMContentLoaded', (event) => {
     window.notebook_builder = new NotebookBuilder();
-    notebook_builder.render();
 });
 
 class NotebookBuilder {
@@ -16,24 +15,8 @@ class NotebookBuilder {
         main_div.appendChild(this.selector.render());
         main_div.appendChild(this.form_options.render());
 
-        // Load reorderable notebook widgets
+        // Load and render reorderable notebook widgets
         this.load();
-    }
-
-    /**
-     * Re-render reorderable widgets
-     */
-    render() {
-        // Get a handle on the widgets div
-        const widgets_div = document.getElementById('reorderable-widgets');
-
-        // Clear
-        widgets_div.innerHTML = '';
-
-        // Draw widgets
-        this.reorderable_widgets.forEach(widget => {
-            widgets_div.appendChild(widget.render());
-        });
     }
 
     /**
@@ -68,6 +51,9 @@ class NotebookBuilder {
                 case 'short_answer':
                     widget = new ShortAnswerWidget();
                     break;
+                case 'image':
+                    widget = new ImageWidget();
+                    break;
                 default:
                     break;
             }
@@ -86,7 +72,15 @@ class NotebookBuilder {
      */
     widgetAdd(widget) {
         this.reorderable_widgets.push(widget);
-        this.render();
+
+        const widgets_div = document.getElementById('reorderable-widgets');
+        widgets_div.appendChild(widget.render());
+
+        // Codemirror boxes inside the ShortAnswerWidget require special handling
+        // Codeboxes won't render correctly unless refreshed AFTER appended to the dom
+        if (widget.constructor.name === 'ShortAnswerWidget') {
+            widget.codeMirrorRefresh();
+        }
     }
 
     /**
@@ -95,9 +89,10 @@ class NotebookBuilder {
      * @param {Widget} widget
      */
     widgetRemove(widget) {
+        widget.dom_pointer.remove();
+
         const index = this.reorderable_widgets.indexOf(widget);
         this.reorderable_widgets.splice(index, 1);
-        this.render();
     }
 
     /**
@@ -115,7 +110,9 @@ class NotebookBuilder {
 
         this.reorderable_widgets.splice(index, 1);
         this.reorderable_widgets.splice(index - 1, 0, widget);
-        this.render();
+
+        const elem = widget.dom_pointer;
+        elem.parentElement.insertBefore(elem, elem.previousElementSibling);
     }
 
     /**
@@ -133,6 +130,8 @@ class NotebookBuilder {
 
         this.reorderable_widgets.splice(index, 1);
         this.reorderable_widgets.splice(index + 1, 0, widget);
-        this.render();
+
+        const elem = widget.dom_pointer;
+        elem.parentElement.insertBefore(elem, elem.nextElementSibling.nextElementSibling);
     }
 }

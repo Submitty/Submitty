@@ -10,9 +10,10 @@ class Testcase():
     A Testcase contains a secure_execution_environment, which it uses to
     perform the various phases of autograding in a secure manner.
     """
-    def __init__(self, number, queue_obj, complete_config_obj, testcase_info, untrusted_user,
-                 is_vcs, is_batch_job, job_id, autograding_directory, previous_testcases,
-                 submission_string, log_path, stack_trace_log_path, is_test_environment):
+    def __init__(self, config, number, queue_obj, complete_config_obj, testcase_info,
+                 untrusted_user, is_vcs, is_batch_job, job_id, autograding_directory,
+                 previous_testcases, submission_string, log_path, stack_trace_log_path,
+                 is_test_environment):
         self.number = number
         self.queue_obj = queue_obj
         self.untrusted_user = untrusted_user
@@ -26,6 +27,7 @@ class Testcase():
         # Create either a container network or a jailed sandbox based on autograding method.
         if complete_config_obj.get("autograding_method", "") == "docker":
             self.secure_environment = container_network.ContainerNetwork(
+                config,
                 job_id,
                 untrusted_user,
                 self.testcase_directory,
@@ -40,6 +42,7 @@ class Testcase():
             )
         else:
             self.secure_environment = jailed_sandbox.JailedSandbox(
+                config,
                 job_id,
                 untrusted_user,
                 self.testcase_directory,
