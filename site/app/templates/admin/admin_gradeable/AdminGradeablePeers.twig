@@ -87,6 +87,7 @@
         form.css("display", "block");
         captureTabInModal("admin-gradeable-peers-form");
         $('#admin-gradeable-peers-submit').prop('disabled', false);
+        $('#submit-error').text("");
         //set the title for popup
         let grader_to_edit = icon_clicked.parents('tr').find('.peer-table-grader').text();
         let title_div = $("#admin-gradeable-peers-title");
@@ -106,7 +107,7 @@
         let add_students_div = $("#students-to-add");
         add_students_div.empty();
         add_students_div.append("Remove Grader:<br />");
-        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\''+grader_to_edit+'\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br><br>');
+        add_students_div.append('<input class="readonly peerstudents" type="text" readonly="readonly" value="' + grader_to_edit + '" /> <input id="remove_grader" class="btn btn-danger" value="Remove" readonly="readonly" onclick="removeGraderAlert(\''+grader_to_edit+'\')" style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true" /> <br><br>');
         //set the right panel to allow adding new students
         add_students_div.append("Add New Students:<br />")
         let student_autofill = JSON.parse($('#student-autofill').val());
@@ -187,6 +188,7 @@
         let form = $("#admin-gradeable-peers-form2");
         form.css("display", "block");
         $('#admin-gradeable-peers2-submit').prop('disabled', true);
+        $('#submit-error2').text("Please enter a valid new grader that is not already in the matrix.");
         captureTabInModal("admin-gradeable-peers-form2");
         // set the left panel to allow a new grader to be added
         let peer_grader_pairs = JSON.parse($('#peer-grader-pairs').val());
@@ -235,13 +237,12 @@
     *   to be added is valid by autofill
     * @param {boolean} new_grader true if the submit button is for a new grader popup, false if it's for
     *   editing an existing grader popup
+    * @param {boolean} grader_removed true if existing grader was removed
     * @param {String} button_id the ID of the submit button to be enabled / disabled
     * @param (String) error_div_id the ID of the error message to be displayed if submit is disabled
     */
-    function updateSubmitButton(valid_grader, valid_students, new_grader, button_id, error_div_id) {
-        // check that the grader is valid, all new students entered are valid, and 
-        // that there's at least one new student added if adding new grader
-        if (valid_grader && !valid_students.includes(false) && (!new_grader || valid_students.includes(true))) {
+    function updateSubmitButton(valid_grader, valid_students, new_grader, grader_removed, button_id, error_div_id) {
+        if (grader_removed || (valid_grader && !valid_students.includes(false) && (!new_grader || valid_students.includes(true)))) {
             $(error_div_id).hide();
             $(button_id).prop('disabled', false);
         } else {
@@ -298,24 +299,27 @@
             valid_grader = true;
             valid_students = [];
         });
-        $('#admin-gradeable-peers-form').on('blur change', ":text.add_user_ids", function() {
+        $('#admin-gradeable-peers-form').on('blur', ":text.add_user_ids", function() {
             let grader_id = $("#admin-gradeable-peers-title").text().substr(18);
             checkNewStudentsValid(grader_id, $(this), valid_students, false);
-            updateSubmitButton(valid_grader, valid_students, false, "#admin-gradeable-peers-submit", "#submit-error");
+            updateSubmitButton(valid_grader, valid_students, false, false, "#admin-gradeable-peers-submit", "#submit-error");
         });
+        $('#admin-gradeable-peers-form').on('focus blur', '#remove_grader', function() {
+            updateSubmitButton(valid_grader, valid_students, false, true, "#admin-gradeable-peers-submit", "#submit-error");
+        })
         $('#add-grader-btn-container').on("click", ".btn", function() {
             addGraderPeerForm();
             valid_grader = false;
             valid_students = [];
         });
-        $('#admin-gradeable-peers-form2').on('blur change', ':text#new_peer_grader', function() {
+        $('#admin-gradeable-peers-form2').on('blur', ':text#new_peer_grader', function() {
             valid_grader = checkNewGraderValid($(this));
-            updateSubmitButton(valid_grader, valid_students, true, "#admin-gradeable-peers2-submit", "#submit-error2");
+            updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-peers2-submit", "#submit-error2");
         });
-        $('#admin-gradeable-peers-form2').on('blur change', ':text.add_user_ids', function() {
+        $('#admin-gradeable-peers-form2').on('blur', ':text.add_user_ids', function() {
             let grader_id = $(":text#new_peer_grader").val();
             checkNewStudentsValid(grader_id, $(this), valid_students, true);
-            updateSubmitButton(valid_grader, valid_students, true, "#admin-gradeable-peers2-submit", "#submit-error2");
+            updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-peers2-submit", "#submit-error2");
         });
     });
 </script>
