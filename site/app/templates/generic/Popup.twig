@@ -39,4 +39,15 @@
     function closePopup(id) {
         $('#' + id).hide();
     }
+
+    //Detects escape key pressed and if the popup is open then close the popup
+    $(document).on(
+      'keydown',
+      function(event) {
+          if (event.key == "Escape") {
+              if ($('.popup-form:visible').length != 0) {
+                  closePopup($('.popup-form:visible')[0].id)
+              }
+          }
+    });
 </script>
