@@ -8,6 +8,7 @@
 	<div id="new-grader-students" class="right-panel"></div>
 {% endblock %}
 {% block buttons %}
+	<span type="hidden" id="submit-error2" style="float:left;color:red;">Please enter a valid new grader that is not already in the matrix.</span>
     {{ block('close_button') }}
     <input onclick="submitFormAjax2();" class="btn btn-primary" type="submit" value="Submit" id="admin-gradeable-peers2-submit" />
 {% endblock %}
