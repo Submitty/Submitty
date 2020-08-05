@@ -27,9 +27,9 @@ class MiscController extends AbstractController {
     }
     
     /**
-    * 
-    */
-    public function decodeAnonPath($path){
+     * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
+     */
+    public function decodeAnonPath($path) {
         $anon_id = explode("/", $path)[9];
         $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         if ($correct_user_id !== null) {
