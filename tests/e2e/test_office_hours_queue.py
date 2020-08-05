@@ -108,6 +108,9 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(True, self.verifyElementMissing('class', ['help_btn','finish_helping_btn','remove_from_queue_btn','queue_restore_btn','close_queue_btn','empty_queue_btn']))
         self.assertEqual(True, self.verifyElementMissing('id', ['toggle_filter_settings', 'new_queue_code', 'new_queue_token', 'new_queue_rand_token', 'open_new_queue_btn']))
 
+        # Turn the queue off
+        disableQueue(self)
+
     def goToQueuePage(self):
         queue_url = f"courses/{self.semester}/sample/office_hours_queue"
         self.get(queue_url)
@@ -287,6 +290,7 @@ class TestOfficeHoursQueue(BaseTestCase):
         self.assertEqual(self.countAlertSuccess(success_text), success)
         self.assertEqual(self.countAlertError(error_text), error)
 
+
 def enableQueue(self):
     self.log_in(user_id='instructor')
     self.get(f"/courses/{self.semester}/sample/config")
@@ -298,3 +302,13 @@ def enableQueue(self):
 
     self.assertEqual(True, self.driver.find_element(By.ID, 'queue-enabled').is_selected())
     self.assertEqual(False, self.driver.find_element(By.ID, 'queue-contact-info').is_selected())
+
+
+def disableQueue(self):
+    self.log_out()
+    self.log_in(user_id='instructor')
+    self.get(f"/courses/{self.semester}/sample/config")
+    self.wait_for_element((By.ID, 'queue-enabled'))
+    if(self.driver.find_element(By.ID, 'queue-enabled').is_selected()):
+        self.driver.find_element(By.ID, 'queue-enabled').click()
+    self.assertEqual(False, self.driver.find_element(By.ID, 'queue-enabled').is_selected())

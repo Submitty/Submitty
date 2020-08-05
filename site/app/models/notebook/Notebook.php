@@ -79,7 +79,8 @@ class Notebook extends AbstractModel {
                 }
             }
             elseif (
-                $notebook_cell['type'] === 'short_answer'
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'short_answer'
             ) {
                 $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language'] ?? null);
             }
@@ -90,7 +91,7 @@ class Notebook extends AbstractModel {
             }
 
             // If cell is a type of input add it to the $actual_inputs array
-            if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
+            if (isset($notebook_cell['type']) && in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
             }
 
