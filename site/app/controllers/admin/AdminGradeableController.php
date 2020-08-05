@@ -10,6 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -248,6 +249,9 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
+     * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with 
+     *  the grader's new students.
+     * @param String $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
@@ -273,10 +277,13 @@ class AdminGradeableController extends AbstractController {
         }
         // return new peer assignments to AJAX success
         $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
-        $this->core->getOutput()->renderJsonSuccess($new_peers);
+        return JsonResponse::getSuccessResponse($new_peers);
     }
 
     /**
+     * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the 
+     * database with the grader's new students.
+     * @param String $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
@@ -288,7 +295,7 @@ class AdminGradeableController extends AbstractController {
         }
         // return new peer assignments to AJAX success
         $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
-        $this->core->getOutput()->renderJsonSuccess($new_peers);
+        return JsonResponse::getSuccessResponse($new_peers);
     }
 
     /* Http request methods (i.e. ajax) */
