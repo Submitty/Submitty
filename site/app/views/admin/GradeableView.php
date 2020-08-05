@@ -36,8 +36,8 @@ class GradeableView extends AbstractView {
         ]);
     }
 
-    public function AdminGradeableEditPeersForm2($gradeable) {
-        return $this->core->getOutput()->renderTwigTemplate("admin/admin_gradeable/AdminGradeableEditPeersForm2.twig", [
+    public function AdminGradeableAddPeersForm($gradeable) {
+        return $this->core->getOutput()->renderTwigTemplate("admin/admin_gradeable/AdminGradeableAddPeersForm.twig", [
             'pair_grader_pairs' => json_encode($this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())),
             'student_autofill' => Utils::getAutoFillData($this->core->getQueries()->getAllUsers()),
             'peer_grader_submit_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'new_peer_grader']),
