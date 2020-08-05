@@ -20,19 +20,22 @@
                                 <div class="form-button-container">
                                     {% block buttons %}
                                         {% block close_button %}
-                                            <a onclick="closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
+                                            <a
+                                              {% block close_button_id %}{% endblock %}
+                                              onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'){% endblock %}"
+                                              class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
+                                              tabindex="0"
+                                            >
+                                              {% block close_button_text %}Close{% endblock %}
+                                            </a>
                                             <script>
-                                              //This scrip is only included if the default close_button is included
-                                              //If the default close_button is overwritten then the functionality of pressing the escape key must be as well
-
                                               //Detects if the escape key is pressed and if the popup is open. If so, close the popup
                                               $(document).on(
                                                 'keydown',
                                                 function(event) {
                                                   console.log($("#{{ block('popup_id') }}").is(":visible"))
                                                     if (event.key == "Escape" && $("#{{ block('popup_id') }}").is(":visible")) {
-                                                      console.log("close")
-                                                      closePopup('{{ block('popup_id') }}');
+                                                      {{ block('close_click_action') }}
                                                     }
                                               });
                                             </script>
