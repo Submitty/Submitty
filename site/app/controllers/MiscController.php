@@ -25,6 +25,18 @@ class MiscController extends AbstractController {
     public function getServerTime(): JsonResponse {
         return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
     }
+    
+    /**
+    * 
+    */
+    public function decodeAnonPath($path){
+        $anon_id = explode("/", $path)[9];
+        $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        if ($correct_user_id !== null) {
+            $path = str_replace($anon_id, $correct_user_id, $path);
+        }
+        return $path;
+    }
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
@@ -38,7 +50,7 @@ class MiscController extends AbstractController {
         $submitter = $this->core->getQueries()->getSubmitterById($id);
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $file_path = ($_POST['file_path']);
+        $file_path = $this->decodeAnonPath($_POST['file_path']);
         $directory = 'invalid';
         if (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
@@ -78,7 +90,7 @@ class MiscController extends AbstractController {
      */
     public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
         //Is this per-gradeable?
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
+        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path))));
 
         if (!is_null($gradeable_id)) {
             $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -142,6 +154,7 @@ class MiscController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
+        $path = $this->decodeAnonPath($path);
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
@@ -179,7 +192,7 @@ class MiscController extends AbstractController {
      */
     public function downloadCourseFile($dir, $path) {
         // security check
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
+        $path = $this->decodeAnonPath($this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path))));
 
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
