@@ -784,23 +784,62 @@
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 {%  if team_assignment %}
-                    <a class="btn btn-primary"
-                       href="{{ download_zip_url }}">
-                        Download Zip of Assigned Teams
-                    </a>
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Teams
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
                 {% else %}
-                    <a class="btn btn-primary"
-                       href="{{ download_zip_url }}">
-                        Download Zip of Assigned Students
-                    </a>
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"  
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Students
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
                 {% endif %}
 
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
-                <a class="btn btn-default"
-                   href="{{ download_zip_url }}?type=all">
-                    Download Zip of All Students
-                </a>
+                <details class="btn btn-default" id="details_button">
+                    <summary float="left">
+                        <a id="zip_link_full"
+                            href="{{ download_zip_url }}?type=all">
+                            Download Zip of All Students
+                        </a>
+                    </summary>
+                   
+                    <div>
+                        <form class="dropdown">
+                            <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="results_folder"> Include Results Folder</label><br>
+                            <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="active_version"> Only Current Active Version</label><br>
+                        </form>
+                    </div>
+                </details>
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-default"
@@ -841,5 +880,35 @@
     let defaultOpen = document.getElementById('defaultOpen');
     if (defaultOpen) {
         defaultOpen.click();
+    }
+
+    function editZipDownload(download_zip_url, limited) {
+        var results = document.getElementById("results_folder");
+        var active = document.getElementById("active_version");
+
+        if (results.checked == true && active.checked == true){
+            download_option = "both";
+        }
+        else if (results.checked == true) {
+            download_option = "results";
+        }
+        else if (active.checked == true) {
+            download_option = "active";
+        }
+        else {
+            download_option = "all";
+        }
+
+        if (limited) {
+            if (download_option == "all") {
+                $("#zip_link").attr("href", download_zip_url);
+            }
+            else {
+                $("#zip_link").attr("href", download_zip_url + "?type=limited_" + download_option);
+            }
+        }
+        else {
+            $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
+        }
     }
 </script>
