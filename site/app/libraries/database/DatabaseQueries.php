@@ -1056,7 +1056,7 @@ WHERE semester=? AND course=? AND user_id=?",
     public function addSolutionForQuestionId($g_id, $que_part_id, $g_type, $solution_text, $author_id) {
         $this->course_db->query("
             INSERT INTO solution_ta_notes (g_id, que_part_id, g_type, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, ?, current_timestamp)",
-            [$g_id, $que_part_id + 2, $g_type, $solution_text, $author_id]);
+            [$g_id, $que_part_id, $g_type, $solution_text, $author_id]);
     }
     
     public function getSolutionForQuestionId($g_id, $que_part_id) {
