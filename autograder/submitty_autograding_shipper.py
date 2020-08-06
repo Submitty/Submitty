@@ -62,11 +62,11 @@ class GradingStatus(Enum):
     FAILURE = 3
 
 
-def move_files(
+def put_files(
     address: str,
     files: List[Tuple[PathLike, PathLike]]
 ):
-    """Move files around, both locally and remotely.
+    """Put files into some place, both locally and remotely.
 
     Parameters
     ----------
@@ -182,7 +182,7 @@ def update_worker_json(name, entry):
     with open(tmp_json_path, 'w') as outfile:
         json.dump(autograding_worker_to_ship, outfile, sort_keys=True, indent=4)
 
-    # Set the address for the move_files call.
+    # Set the address for the put_files call.
     if host == "localhost":
         address = host
     else:
@@ -190,7 +190,7 @@ def update_worker_json(name, entry):
 
     success = False
     try:
-        move_files(address, [
+        put_files(address, [
             (tmp_json_path, foreign_json)
         ])
         success = True
@@ -315,7 +315,7 @@ def prepare_job(
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
-        move_files(which_machine, [
+        put_files(which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
             (todo_queue_file, todo_queue_file)
