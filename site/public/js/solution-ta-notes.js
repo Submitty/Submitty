@@ -1,7 +1,7 @@
-function updateSolutionTaNotes(gradeable_id) {
+function updateSolutionTaNotes(gradeable_id, que_part_id) {
   let data = {
-    solution_text: $("#solution-ta-notes-textbox").val().trim(),
-    que_part_id : 1,    // TODO update this
+    solution_text: $(`#solution-${que_part_id}`).val().trim(),
+    que_part_id,    // TODO update this
     csrf_token: csrfToken,
   };
   console.log(csrfToken);
@@ -13,9 +13,9 @@ function updateSolutionTaNotes(gradeable_id) {
       console.log(res);
       res = JSON.parse(res);
       if (res.status === "success") {
-
+          displaySuccessMessage("Solution has been updated successfully...")
       } else {
-
+        displayErrorMessage("Something went wrong while upating the solution...")
       }
       console.log(res);
     },
@@ -25,16 +25,11 @@ function updateSolutionTaNotes(gradeable_id) {
   })
 }
 
-$(document).ready(function () {
-  //DOM selectors
-  let showSolBtn = $(".show-sol-btn");
-  let solTextBoxCont = $("#sol-textbox-cont");
+function showSolutionTextboxCont(solTextboxCont, noSolutionCont) {
   // Show the textbox to start writing out the solutions
-  showSolBtn.click(function() {
-    if (solTextBoxCont.hasClass("hide")) {
-      solTextBoxCont.removeClass("hide");
-      showSolBtn.addClass("hide");
-    }
-  });
+  if ($(solTextboxCont).hasClass("hide")) {
+    $(solTextboxCont).removeClass("hide");
+    $(noSolutionCont).addClass("hide");
+  }
+}
 
-});
