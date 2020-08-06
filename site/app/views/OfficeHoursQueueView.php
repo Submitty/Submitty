@@ -48,5 +48,4 @@ class OfficeHoursQueueView extends AbstractView {
 
         return $this->renderPart($viewer, "officeHoursQueue/QueueStats.twig");
     }
-
 }

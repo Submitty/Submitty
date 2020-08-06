@@ -5812,14 +5812,14 @@ AND gc_id IN (
     }
 
     public function getAllQueuesEver() {
-       $this->course_db->query("SELECT DISTINCT queue_code FROM queue
+        $this->course_db->query("SELECT DISTINCT queue_code FROM queue
                                 UNION
                                 SELECT DISTINCT code as queue_code FROM queue_settings");
-       return $this->course_db->rows();
-   }
+        return $this->course_db->rows();
+    }
 
-   public function getQueueStudentData(){
-     $this->course_db->query("SELECT
+    public function getQueueStudentData() {
+        $this->course_db->query("SELECT
                                 *
                               FROM (SELECT
                                 user_id AS id,
@@ -5855,19 +5855,19 @@ AND gc_id IN (
                               GROUP BY user_id) AS queue_data
                                 ON queue_data.user_id = user_data.id
                               ORDER BY queue_data.user_id");
-     return $this->course_db->rows();
-   }
+        return $this->course_db->rows();
+    }
 
-   public function getQueueData($group_by_queue){
-     //This function does concatinate a string that is then used as a sql comamnd
-     //For future editors, make sure you dont allow this function to ever accept
-     //User input, everything should be hard coded to avoid sql injection
-     $query = "";
-     $query .= "SELECT ";
-     if($group_by_queue){
-       $query .= "queue_code, ";
-     }
-     $query .= " COUNT(*) AS queue_interactions,
+    public function getQueueData($group_by_queue) {
+      //This function does concatinate a string that is then used as a sql comamnd
+      //For future editors, make sure you dont allow this function to ever accept
+      //User input, everything should be hard coded to avoid sql injection
+        $query = "";
+        $query .= "SELECT ";
+        if ($group_by_queue) {
+            $query .= "queue_code, ";
+        }
+        $query .= " COUNT(*) AS queue_interactions,
                  COUNT(DISTINCT user_id) AS number_distinct_students,
                  AVG(time_out - time_in) AS avg_turnaround_time,
                  MIN(time_out - time_in) AS min_turnaround_time,
@@ -5884,13 +5884,13 @@ AND gc_id IN (
                    ELSE 0
                  END) AS not_helped_count
                FROM queue ";
-      if($group_by_queue){
-        $query .= " GROUP BY queue_code
+        if ($group_by_queue) {
+            $query .= " GROUP BY queue_code
                     ORDER BY queue_code ";
-      }
-     $this->course_db->query($query);
-     return $this->course_db->rows();
-   }
+        }
+        $this->course_db->query($query);
+        return $this->course_db->rows();
+    }
 
 
 /////////////////END Office Hours Queue queries//////////////////////////////////

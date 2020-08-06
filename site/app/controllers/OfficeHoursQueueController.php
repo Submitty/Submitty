@@ -488,10 +488,10 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-    * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
-    * @AccessControl(role="LIMITED_ACCESS_GRADER")
-    * @return Response
-    */
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     * @return MultiResponse
+     */
     public function showQueueStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
             return MultiResponse::RedirectOnlyResponse(

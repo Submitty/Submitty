@@ -234,14 +234,14 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getAllQueuesEver() {
-       return $this->core->getQueries()->getAllQueuesEver();
-   }
+        return $this->core->getQueries()->getAllQueuesEver();
+    }
 
     public function getQueueStudentData() {
-      return $this->core->getQueries()->getQueueStudentData();
+        return $this->core->getQueries()->getQueueStudentData();
     }
 
     public function getQueueData($group_by_queue) {
-       return $this->core->getQueries()->getQueueData($group_by_queue);
+        return $this->core->getQueries()->getQueueData($group_by_queue);
     }
 }
