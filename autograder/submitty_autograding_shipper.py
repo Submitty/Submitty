@@ -314,9 +314,9 @@ def prepare_job(
         )
 
     if which_machine == 'localhost':
-        address = which_machine
+        host = which_machine
     else:
-        address = which_machine.split('@')[1]
+        host = which_machine.split('@')[1]
 
     # prepare the zip files
     try:
@@ -329,7 +329,7 @@ def prepare_job(
         autograding_zip_tmp, submission_zip_tmp = zips
 
         fully_qualified_domain_name = socket.getfqdn()
-        servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
+        servername_workername = "{0}_{1}".format(fully_qualified_domain_name, host)
         autograding_zip = os.path.join(
             SUBMITTY_DATA_DIR, "autograding_TODO",
             f"{servername_workername}_{which_untrusted}_autograding.zip"
@@ -366,7 +366,7 @@ def prepare_job(
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
-        move_files(address, [
+        move_files(which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
             (todo_queue_file, todo_queue_file)
@@ -385,7 +385,7 @@ def prepare_job(
     finally:
         os.remove(autograding_zip_tmp)
         os.remove(submission_zip_tmp)
-        if address != 'localhost':
+        if host != 'localhost':
             os.remove(todo_queue_file)
 
     # log completion of job preparation
