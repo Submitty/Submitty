@@ -181,84 +181,33 @@ def update_worker_json(name, entry):
     # create a new temporary json with only the entry for the current machine.
     with open(tmp_json_path, 'w') as outfile:
         json.dump(autograding_worker_to_ship, outfile, sort_keys=True, indent=4)
-    # if we are updating the current machine, we can just move the new json to the appropriate spot
-    # (no ssh needed)
+
+    # Set the address for the move_files call.
     if host == "localhost":
-        try:
-            shutil.move(tmp_json_path, foreign_json)
-            print("Successfully updated local autograding_TODO/autograding_worker.json")
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message="Successfully updated local autograding_TODO/autograding_worker.json"
-            )
-            return True
-        except Exception as e:
-            autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-                trace=traceback.format_exc()
-            )
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message="ERROR: could not mv to local autograding_TODO/autograding_worker.json "
-                        f"due to the following error: {e}"
-            )
-            print(
-                "ERROR: could not mv to local autograding_worker.json due to the following"
-                f" error: {e}"
-            )
-            return False
-        finally:
-            os.close(fd)
-    # if we are updating a foreign machine, we must connect via ssh and use sftp to update it.
+        address = host
     else:
-        # try to establish an ssh connection to the host
-        try:
-            ssh = establish_ssh_connection(None, user, host, only_try_once=True)
-        except Exception as e:
-            autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-                trace=traceback.format_exc()
-            )
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: could not ssh to {user}@{host} due to following error: {e}"
-            )
-            print(f"ERROR: could not ssh to {user}@{host} due to following error: {e}")
-            return False
-        # try to copy the files over to the host
-        try:
-            sftp = ssh.open_sftp()
+        address = f'{user}@{host}'
 
-            sftp.put(tmp_json_path, foreign_json)
-
-            sftp.close()
-            print("Successfully forwarded autograding_worker.json to {0}".format(name))
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message="Successfully forwarded autograding_worker.json to {0}".format(name)
-            )
-            success = True
-        except Exception as e:
-            autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-                trace=traceback.format_exc()
-            )
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message="ERROR: could not sftp to foreign autograding_TODO/autograding_worker.json "
-                        f"due to the following error: {e}"
-            )
-            print(
-                "ERROR: could sftp to foreign autograding_TODO/autograding_worker.json due "
-                f"to the following error: {e}"
-            )
-            success = False
-        finally:
-            os.close(fd)
+    success = False
+    try:
+        move_files(address, [
+            (tmp_json_path, foreign_json)
+        ])
+        success = True
+    except Exception as e:
+        autograding_utils.log_stack_trace(
+            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            trace=traceback.format_exc()
+        )
+        autograding_utils.log_message(
+            AUTOGRADING_LOG_PATH, job_id=JOB_ID,
+            message="ERROR: Could not move autograding_TODO/autograding_worker.json to "
+                    f"{address}: {e}"
+        )
+    finally:
+        if host != "localhost":
             os.remove(tmp_json_path)
-            sftp.close()
-            ssh.close()
-        return success
+    return success
 
 
 def establish_ssh_connection(my_name, user, host, only_try_once=False) -> paramiko.SSHClient:
