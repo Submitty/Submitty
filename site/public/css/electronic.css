@@ -506,6 +506,15 @@ progress::-webkit-progress-value {
     height: 100%;
     opacity: 0.95;
 }
+#sol-textbox-cont {
+    height: calc(100% - 120px);
+    width: 100%;
+}
+
+#solution-ta-notes-textbox {
+    width: 100%;
+    height: 90%;
+}
 
 .grading_label {
     display: inline-block;
@@ -517,7 +526,7 @@ progress::-webkit-progress-value {
 .banner {
     border: solid 6px var(--important-post);
     position:relative;
-    display: block;
+    display: none;
     float: left;
     width: 400px;
     height: 25px;
