@@ -78,7 +78,8 @@ def move_files(
     """
     if address == 'localhost':
         for src, dest in files:
-            shutil.copy(src, dest)
+            if src != dest:
+                shutil.copy(src, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
