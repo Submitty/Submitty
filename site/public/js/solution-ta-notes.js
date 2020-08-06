@@ -1,7 +1,7 @@
 function updateSolutionTaNotes(gradeable_id) {
   let data = {
     solution_text: $("#solution-ta-notes-textbox").val().trim(),
-    question_id : 1,    // TODO update this
+    que_part_id : 1,    // TODO update this
     csrf_token: csrfToken,
   };
   console.log(csrfToken);

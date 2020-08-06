@@ -1053,6 +1053,20 @@ WHERE semester=? AND course=? AND user_id=?",
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
+    public function addSolutionForQuestionId($g_id, $que_part_id, $g_type, $solution_text, $author_id) {
+        $this->course_db->query("
+            INSERT INTO solution_ta_notes (g_id, que_part_id, g_type, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, ?, current_timestamp)",
+            [$g_id, $que_part_id, $g_type, $solution_text, $author_id]);
+    }
+    
+    public function getSolutionForQuestionId($g_id, $que_part_id) {
+        $this->course_db->query("
+            SELECT * FROM solution_ta_notes
+                WHERE g_id = ? AND que_part_id = ? ORDER BY edited_at DESC LIMIT 1",
+            [$g_id, $que_part_id]);
+        return $this->course_db->rows();
+    }
+
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if ($user_id != null) {
