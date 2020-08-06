@@ -1256,6 +1256,7 @@ HTML;
         if (!$showNewInterface) {
             return '';
         }
+        $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
         // Temporary template values are given
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),

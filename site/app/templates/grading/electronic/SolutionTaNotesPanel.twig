@@ -1,9 +1,29 @@
 {% import _self as self %}
+{#
+    Required Params:
+        - gradeable_id
+        - has_solution: to show initial btn stating to start writing solutions
+        -
+
+
+#}
 <div id="solution_ta_notes" class="rubric_panel">
     <div class="row">
         <span class="grading_label">Solution/TA Notes</span>
     </div>
     <div>
-        No Solutions or TA notes for  {{ gradeable_id }}
+        <span>
+            No Solutions or TA notes for  {{ gradeable_id }}
+        </span>
+        <button type="primary"
+                class="show-sol-btn"
+        >Start Now</button>
+    </div>
+    <div id="sol-textbox-cont" class="hide">
+        <label for="solution-ta-notes-textbox"></label>
+        <textarea id="solution-ta-notes-textbox">
+
+        </textarea>
+        <button type="primary" id="save-solution" onclick="updateSolutionTaNotes('{{ gradeable_id }}');">Save</button>
     </div>
 </div>

@@ -2492,6 +2492,31 @@ class ElectronicGraderController extends AbstractController {
     }
     
     /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/solution_ta_notes", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateSolutionTaNotes($gradeable_id) {
+        $solution_text = $_POST['solution_text'] ?? '';
+        $question_id = $_POST['question_id'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $author = $this->core->getUser();
+        $error = "";
+
+        if (!$gradeable) {
+            $error = "Invalid Gradeable ID given!";
+        }
+        elseif (empty($solution_text)) {
+            $error = "Please provide some non-empty solution";
+        }
+
+        return empty($error) ? JsonResponse::getSuccessResponse([
+            "author" => $author,
+            "solution_text" => $solution_text,
+            "question_id" => $question_id,
+        ]) : JsonResponse::getErrorResponse($error);
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
      */
     public function ajaxSetPeerFeedback($gradeable_id) {
@@ -2510,6 +2535,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
         return true;
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")
