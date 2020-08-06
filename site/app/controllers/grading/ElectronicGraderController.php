@@ -2,6 +2,7 @@
 
 namespace app\controllers\grading;
 
+use _HumbugBox69342eed62ce\Nette\Utils\Json;
 use app\libraries\DiffViewer;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\Component;
@@ -2497,10 +2498,12 @@ class ElectronicGraderController extends AbstractController {
      */
     public function updateSolutionTaNotes($gradeable_id) {
         $solution_text = $_POST['solution_text'] ?? '';
-        $question_id = $_POST['question_id'];
+        $que_part_id = $_POST['que_part_id'];
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        $author = $this->core->getUser();
+        $g_type = $POST['g_type'] ?? $gradeable->getType();
+        $author_id = $this->core->getUser()->getId();
         $error = "";
+        $ret = "";
 
         if (!$gradeable) {
             $error = "Invalid Gradeable ID given!";
@@ -2508,11 +2511,19 @@ class ElectronicGraderController extends AbstractController {
         elseif (empty($solution_text)) {
             $error = "Please provide some non-empty solution";
         }
+        else {
+            try {
+                $this->core->getQueries()->addSolutionForQuestionId($gradeable_id, $que_part_id, $g_type, $solution_text, $author_id);
+            }
+            catch (\Exception $exception) {
+                $error = $exception->getMessage();
+            }
+        }
 
         return empty($error) ? JsonResponse::getSuccessResponse([
-            "author" => $author,
+            "author" => $author_id,
             "solution_text" => $solution_text,
-            "question_id" => $question_id,
+            "question_id" => $que_part_id,
         ]) : JsonResponse::getErrorResponse($error);
     }
 
