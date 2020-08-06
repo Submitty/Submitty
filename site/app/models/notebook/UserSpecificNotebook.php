@@ -2,6 +2,7 @@
 
 namespace app\models\notebook;
 
+use app\exceptions\NotebookException;
 use app\models\notebook\Notebook;
 use app\libraries\Core;
 use app\libraries\Utils;
@@ -45,6 +46,13 @@ class UserSpecificNotebook extends Notebook {
 
         if ($json !== false && isset($json['item_pool'])) {
             $this->item_pool = $json['item_pool'];
+
+            // Verify that all items in the item pool have defined an 'item_name'
+            foreach ($this->item_pool as $item) {
+                if (!isset($item['item_name'])) {
+                    throw new NotebookException('An item pool item was found to be missing the required "item_name" field.  Please rebuild the gradeable.');
+                }
+            }
         }
 
         $this->gradeable_id = $gradeable_id;
