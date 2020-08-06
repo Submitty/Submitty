@@ -31,7 +31,7 @@ class MiscController extends AbstractController {
      */
     public function decodeAnonPath($path) {
         $exploded_path = explode("/", $path);
-        if (sizeof($exploded_path) < 10){
+        if (count($exploded_path) < 10) {
             return $path;
         }
         $anon_id = explode("/", $path)[9];
