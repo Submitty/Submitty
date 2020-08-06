@@ -2523,7 +2523,6 @@ class ElectronicGraderController extends AbstractController {
         $g_type = $POST['g_type'] ?? $gradeable->getType();
         $author_id = $this->core->getUser()->getId();
         $error = "";
-        $ret = "";
 
         if (!$gradeable) {
             $error = "Invalid Gradeable ID given!";

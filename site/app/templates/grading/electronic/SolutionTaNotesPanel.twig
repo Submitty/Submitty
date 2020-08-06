@@ -11,19 +11,38 @@
     <div class="row">
         <span class="grading_label">Solution/TA Notes</span>
     </div>
-    <div>
+    {% for key, que_part_id in que_part_ids %}
+        {{ self.renderSolutionTaNotesCont(
+            gradeable_id,
+            que_part_id,
+            solution_array[que_part_id][0]['author'],
+            solution_array[que_part_id][0]['solution_notes'],
+            solution_array[que_part_id][0]['edited_at']
+        ) }}
+    {% endfor %}
+</div>
+
+
+{% macro renderSolutionTaNotesCont(gradeable_id, que_part_id, author, current_solution, time) %}
+
+    <div id="no-solution-box-{{ que_part_id }}">
         <span>
-            No Solutions or TA notes for  {{ gradeable_id }}
+            No Solutions or TA notes for  {{ que_part_id }} of {{ gradeable_id }}
         </span>
         <button type="primary"
                 class="show-sol-btn"
+                onclick="showSolutionTextboxCont('#sol-textbox-cont-{{ que_part_id }}', '#no-solution-box-{{ que_part_id }}');"
         >Start Now</button>
     </div>
-    <div id="sol-textbox-cont" class="hide">
+    <div id="sol-textbox-cont-{{ que_part_id }}" class="sol-textbox-cont hide">
         <label for="solution-ta-notes-textbox"></label>
-        <textarea id="solution-ta-notes-textbox">
-
-        </textarea>
-        <button type="primary" id="save-solution" onclick="updateSolutionTaNotes('{{ gradeable_id }}');">Save</button>
+        <textarea id="solution-{{ que_part_id }}"
+                  class="solution-ta-notes-textbox"
+                  placeholder={% if not current_solution|length %} 'Start writing the solution for the question - {{ que_part_id }}' {% endif %}
+        >{{ current_solution }}</textarea>
+        {% if author %}
+            <span> Last edited by {{ author }} @ {{ time }}</span>
+        {% endif %}
+        <button type="primary" id="save-solution" onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ que_part_id }}');">Update</button>
     </div>
-</div>
+{% endmacro %}

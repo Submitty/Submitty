@@ -6,7 +6,9 @@ body {
     display: flex;
     background: var(--background-blue);
     color: var(--text-black);
-    overflow-x: hidden;
+    /*width: 160%;*/
+    overflow: auto;
+    /*background: #000 !important;*/
 }
 
 #submitty-body {
