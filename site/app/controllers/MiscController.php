@@ -30,6 +30,10 @@ class MiscController extends AbstractController {
      * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
      */
     public function decodeAnonPath($path) {
+        $exploded_path = explode("/", $path);
+        if (sizeof($exploded_path) < 10){
+            return $path;
+        }
         $anon_id = explode("/", $path)[9];
         $correct_user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         if ($correct_user_id !== null) {
@@ -154,7 +158,6 @@ class MiscController extends AbstractController {
      * @Route("/courses/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
-        $path = $this->decodeAnonPath($path);
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
