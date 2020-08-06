@@ -1209,6 +1209,8 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
+        $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable_id) ?? [];
+
         $this->core->getOutput()->addInternalCss('forum.css');
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalCss('electronic.css');
@@ -1220,7 +1222,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $showNewInterface);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $showNewInterface);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -2491,7 +2493,25 @@ class ElectronicGraderController extends AbstractController {
             $total_total += $value * $num_components;
         }
     }
-    
+
+    public function getSolutionTaNotesForGradeable($gradeable_id) {
+        $solutions = [];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+
+        try {
+            $res = $this->core->getQueries()->getSolutionForAllQuestionIds($gradeable_id);
+            foreach ($res as $key => $value) {
+
+            }
+            $solutions = $res;
+        }
+        catch (\Exception $exception) {
+            $error = $exception->getMessage();
+        }
+
+        return $solutions;
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/solution_ta_notes", methods={"POST"})
      * @return JsonResponse
