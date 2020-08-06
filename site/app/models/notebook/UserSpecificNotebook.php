@@ -38,8 +38,8 @@ class UserSpecificNotebook extends Notebook {
         $json = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $core->getConfig()->getCoursePath(),
-                "config/complete_config",
-                "complete_config_" . $gradeable_id . ".json"
+                "config/build",
+                "build_" . $gradeable_id . ".json"
             )
         );
 
