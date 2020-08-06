@@ -1,7 +1,7 @@
 from .base_testcase import BaseTestCase
 from selenium.webdriver.common.by import By
 import unittest
-
+import os
 class TestGradingNextPrev(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
@@ -14,7 +14,7 @@ class TestGradingNextPrev(BaseTestCase):
         self.driver.find_element_by_link_text("Grading Index").click()
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework/grading/grade?who_id=student&sort=id&direction=ASC")]').click()
         self.driver.find_element_by_id('prev-student').click()
-        self.assertIn("John Smith", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Nigel Leannon", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-student').click()
         self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('prev-ungraded-student').click()
@@ -31,7 +31,7 @@ class TestGradingNextPrev(BaseTestCase):
         self.driver.find_element_by_link_text("Grading Index").click()
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework/grading/grade?who_id=student&sort=id&direction=ASC")]').click()
         self.driver.find_element_by_id('prev-student').click()
-        self.assertIn("John Smith", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Nigel Leannon", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-student').click()
         self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('prev-ungraded-student').click()
@@ -46,34 +46,30 @@ class TestGradingNextPrev(BaseTestCase):
         self.click_class('sample')
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_team_homework/grading/status")]').click()
         self.driver.find_element_by_link_text("Grading Index").click()
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_team_homework/grading/grade?who_id=VLVlLCOOXoivBla&sort=id&direction=ASC")]').click()
+        proper_team_names_column = (self.driver.find_element_by_xpath("//tbody[@class='details-content panel-content-active']/tr[5]/td[7]").find_elements_by_tag_name("a")[0]).click()
         self.driver.find_element_by_id('prev-student').click()
         self.assertIn("John Smith", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-student').click()
-        self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Alex Brown", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('prev-ungraded-student').click()
-        self.assertIn("Serenity Kshlerin", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Alyssa P Hacker", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-ungraded-student').click()
-        self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
-        self.driver.find_element_by_id('next-ungraded-student').click()
-        self.assertIn("Reece Johnson", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Alex Brown", self.driver.find_element_by_id("student_info").text)
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_ta_team(self):
         self.log_in(user_id="ta", user_name="Jill")
         self.click_class('sample')
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_team_homework/grading/status")]').click()
         self.driver.find_element_by_link_text("Grading Index").click()
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_team_homework/grading/grade?who_id=VLVlLCOOXoivBla&sort=id&direction=ASC")]').click()
+        proper_team_names_column = (self.driver.find_element_by_xpath("//tbody[@class='details-content panel-content-active']/tr[5]/td[5]").find_elements_by_tag_name("a")[0]).click()
         self.driver.find_element_by_id('prev-student').click()
         self.assertIn("John Smith", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-student').click()
-        self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Alex Brown", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('prev-ungraded-student').click()
-        self.assertIn("Serenity Kshlerin", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Alyssa P Hacker", self.driver.find_element_by_id("student_info").text)
         self.driver.find_element_by_id('next-ungraded-student').click()
-        self.assertIn("Joe Student", self.driver.find_element_by_id("student_info").text)
-        self.driver.find_element_by_id('next-ungraded-student').click()
-        self.assertIn("Reece Johnson", self.driver.find_element_by_id("student_info").text)
+        self.assertIn("Alex Brown", self.driver.find_element_by_id("student_info").text)
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_instructor_navigate_away(self):
         self.log_in(user_id="instructor", user_name="Quinn")
@@ -83,9 +79,6 @@ class TestGradingNextPrev(BaseTestCase):
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework/grading/grade?who_id=aphacker&sort=id&direction=ASC")]').click()
         self.driver.find_element_by_id('prev-student').click()
         self.assertIn("No prev assigned ungraded student found!", self.driver.find_element_by_id("messages").text)
-        self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework/grading/grade?who_id=troompa&sort=id&direction=ASC")]').click()
-        self.driver.find_element_by_id('next-ungraded-student').click()
-        self.assertIn("No next assigned ungraded student found!", self.driver.find_element_by_id("messages").text)
 if __name__ == "__main__":
     import unittest
     unittest.main()
