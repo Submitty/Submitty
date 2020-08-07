@@ -151,7 +151,7 @@ function switch_feedback_modes() {
                         {% endif %}
                         
                         {% for file in uploaded_pdfs %}
-                            {% if file.name in annotated_file_names %}
+                            {% if file.encoded_name in annotated_file_names %}
                                 {% if loop.index != uploaded_pdfs|length %}
                                     <div style="margin-bottom: 1.28em">
                                         <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
@@ -328,7 +328,7 @@ function switch_feedback_modes() {
                 {% endif %}
             
             {% for file in uploaded_pdfs %}
-                {% if file.name in annotated_file_names and grader in file.graders%}
+                {% if file.encoded_name in annotated_file_names and grader in file.graders%}
                     </br>
                     <p>
                         {{file.name}} :
