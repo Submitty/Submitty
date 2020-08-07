@@ -1,7 +1,6 @@
 grading_registration_group: 1
 user_firstname: Tim
 user_id: grader
-anon_id: grader
 user_lastname: Grader
 user_numeric_id: 010306042
 courses:
