@@ -9,8 +9,7 @@
 }
 
 .gradeable-row {
-    margin: 0 -30px;
-    padding: 18px 30px;
+    padding: 18px 0;
     border-bottom: 1px solid var(--standard-light-gray);
 }
 
@@ -87,18 +86,17 @@
 
 @media (max-width: 950px) {
     .course-section-heading {
-        margin: 10px -25px;
+        margin: 10px 0;
         font-weight: 400;
-        background-color: var(--default-white);
+        background-color: var(--alert-background-blue);
         transition: 0.2s;
-        border: 1px solid var(--text-black);
+        border: none;
     }
 
     .course-section-heading:hover {
-        box-shadow: 1px 2px 3px var(--text-black);
-        background: var(--submitty-logo-blue);
+        background: var(--standard-medium-blue);
         color: white;
-        translate: 0 -3px;
+        transform: translate(0, -5px);
     }
 
     .course-section {
@@ -106,7 +104,6 @@
     }
 
     .panel-head-active {
-        box-shadow: 1px 2px 3px var(--text-black);
         background: var(--submitty-logo-blue);
         color: white;
     }
@@ -121,10 +118,6 @@
 
     .panel-active {
         display: block;
-    }
-
-    #gradeables-content h1 {
-        font-weight: 400;
     }
 }
 
@@ -142,7 +135,7 @@
     }
 
     .course-section {
-        display: table-row-group;
+        display: table-row-group!important;
     }
 
     .gradeable-row {

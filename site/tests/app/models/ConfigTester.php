@@ -37,7 +37,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($properties['debug']);
     }
 
-    private function createConfigFile($extra = array()) {
+    private function createConfigFile($extra = []) {
         $this->temp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         FileUtils::createDir($this->temp_dir);
         $this->config_path = FileUtils::joinPaths($this->temp_dir, 'config');
@@ -56,6 +56,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config = [
             "authentication_method" => "PamAuthentication",
             "database_host" => "/var/run/postgresql",
+            "database_port" => 5432,
             "database_user" => "submitty_dbuser",
             "database_password" => "submitty_dbpass",
             "debugging_enabled" => false,
@@ -92,11 +93,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "secrets_submitty_php.json"), $config);
 
         $this->course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
-        $config = array(
-            'database_details' => array(
+        $config = [
+            'database_details' => [
                 'dbname' => 'submitty_s17_csci0000'
-            ),
-            'course_details' => array(
+            ],
+            'course_details' => [
                 'course_name' => 'Test Course',
                 'course_home_url' => '',
                 'default_hw_late_days' => 0,
@@ -118,12 +119,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'auto_rainbow_grades' => false,
                 'queue_enabled' => true,
                 'queue_contact_info' => true,
-                'queue_message' => ''
-            ),
+                'queue_message' => '',
+                'queue_announcement_message' => '',
+                'polls_enabled'                  => false,
+                'polls_pts_for_correct'          => 1.0,
+                'polls_pts_for_incorrect'        => 0.0
+            ],
             'feature_flags' => [
 
             ]
-        );
+        ];
 
         $config = array_replace_recursive($config, $extra);
         foreach ($config as $key => $value) {
@@ -138,7 +143,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         FileUtils::writeJsonFile($this->course_json_path, $config);
 
         // Create psuedo email json
-        $config = array(
+        $config = [
             'email_enabled' => true,
             'email_user' => '',
             'email_password' => '',
@@ -146,16 +151,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_reply_to' => 'submitty_do_not_reply@myuniversity.edu',
             'email_server_hostname' => 'localhost',
             'email_server_port' => 25
-        );
+        ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
 
         // Create version json
-        $config = array(
+        $config = [
             "installed_commit" => "d150131c19e3e8084b25cddcc32e6c40a8e93a2b",
             "short_installed_commit" => "d150131c",
             "most_recent_git_tag" => "v19.07.00"
-        );
+        ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
     }
@@ -182,12 +187,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
-        $db_params = array(
+        $db_params = [
             'dbname' => 'submitty',
             'host' => '/var/run/postgresql',
+            'port' => 5432,
             'username' => 'submitty_dbuser',
             'password' => 'submitty_dbpass'
-        );
+        ];
 
         $this->assertEquals($db_params, $config->getSubmittyDatabaseParams());
         $this->assertEquals("PamAuthentication", $config->getAuthentication());
@@ -200,7 +206,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
-        $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')), $config->getCourseDatabaseParams());
+        $this->assertEquals(array_merge($db_params, ['dbname' => 'submitty_s17_csci0000']), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
         $this->assertEquals("", $config->getCourseHomeUrl());
         $this->assertEquals(0, $config->getDefaultHwLateDays());
@@ -219,7 +225,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
 
-        $expected = array(
+        $expected = [
             'debug' => false,
             'semester' => 's17',
             'course' => 'csci0000',
@@ -232,7 +238,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
             'submitty_database_params' => $db_params,
-            'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
+            'course_database_params' => array_merge($db_params, ['dbname' => 'submitty_s17_csci0000']),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
             'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
@@ -278,7 +284,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
                     'queue_contact_info' => true,
-                    'queue_message' => ''
+                    'queue_message' => '',
+                    'queue_announcement_message' => '',
+                    'polls_enabled'                  => false,
+                    'polls_pts_for_correct'          => 1.0,
+                    'polls_pts_for_incorrect'        => 0.0
                 ],
                 'feature_flags' => []
             ],
@@ -307,9 +317,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled' => true,
             'queue_contact_info' => true,
             'queue_message' => '',
+            'queue_announcement_message' => '',
+            'polls_enabled'                  => false,
+            'polls_pts_for_correct'          => 1.0,
+            'polls_pts_for_incorrect'        => 0.0,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
-        );
+            'date_time_format' => ['modified' => false]
+        ];
         $actual = $config->toArray();
 
         ksort($expected);
@@ -319,7 +334,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testHiddenCourseUrl() {
-        $extra = array('hidden_details' => array('course_url' => 'http://example.com/course'));
+        $extra = ['hidden_details' => ['course_url' => 'http://example.com/course']];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core);
@@ -447,10 +462,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function getRequiredSections() {
-        return array(
-            array('database_details'),
-            array('course_details')
-        );
+        return [
+            ['database_details'],
+            ['course_details']
+        ];
     }
 
     /**
@@ -460,7 +475,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
      */
     public function testMissingSections($section) {
         try {
-            $extra = array($section => null);
+            $extra = [$section => null];
             $this->createConfigFile($extra);
 
             $config = new Config($this->core);
@@ -483,10 +498,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
                 'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_contact_info',
-                'queue_message'
+                'queue_message', 'queue_announcement_message', 'polls_enabled', 'polls_pts_for_correct', 'polls_pts_for_incorrect'
             ],
         ];
-        $return = array();
+        $return = [];
         foreach ($settings as $key => $value) {
             foreach ($value as $vv) {
                 $return[] = [$key, $vv];

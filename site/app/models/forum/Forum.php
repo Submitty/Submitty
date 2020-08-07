@@ -65,7 +65,7 @@ class Forum extends AbstractModel {
         if ($this->checkPostEditAccess($post_id) && !empty($post_id)) {
             //This will return a Post obj also forum queries...
             $post = $this->core->getQueries()->getPost($post_id);
-            $output = array();
+            $output = [];
 
             //Will have to refer to submitty.org specs for json
             $output['post'] = $post->getContent();
@@ -93,12 +93,12 @@ class Forum extends AbstractModel {
             $user_group = $user['user_group'];
             $registration_section = $user['registration_section'];
 
-            $email_data = array(
+            $email_data = [
                 "subject" => $thread->getTitle(),
                 "body" => $formatted_body,
                 "recipient" => $user_email,
                 "user_id" => $user_id
-            );
+            ];
 
             $announcement_email = new Email($this->core, $email_data);
             $this->core->getQueries()->createEmail($announcement_email);

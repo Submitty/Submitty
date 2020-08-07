@@ -1,3 +1,4 @@
+
 if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
@@ -7,7 +8,7 @@ window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
 //Toolbar stuff
-(function () {
+function renderPDFToolbar() {
     let active_toolbar = true;
     const debounce = (fn, time, ...args) => {
         if (active_toolbar) {
@@ -18,6 +19,8 @@ window.onbeforeunload = function() {
             }, time);
         }
     }
+    document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
+    sessionStorage.setItem('toolbar_loaded', true);
     function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
         let clicked_button = $("a[value="+option+"]");
@@ -30,7 +33,7 @@ window.onbeforeunload = function() {
                 clicked_button.addClass('tool-selected');
                 switch($(selected[0]).attr('value')){
                     case 'pen':
-                        $('#file_content').css('overflow', 'auto');
+                        $('#file-content').css('overflow', 'auto');
                         $('#scroll_lock_mode').prop('checked', false);
                         PDFAnnotate.UI.disablePen();
                         break;
@@ -144,7 +147,7 @@ window.onbeforeunload = function() {
             localStorage.removeItem(`${RENDER_OPTIONS.documentId}/annotations`);
         }
     }
-
+    
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
         let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
@@ -159,9 +162,9 @@ window.onbeforeunload = function() {
             },
             success: function(data){
                 let response = JSON.parse(data);
-                if(response.status == "success"){
+                if(response.status === "success"){
                     $('#save_status').text("Saved");
-                    $('#save_status').css('color', 'black');
+                    $('#save_status').css('color', 'inherit');
                 }
                 else {
                     alert(data.message);
@@ -173,21 +176,17 @@ window.onbeforeunload = function() {
         });
     }
 
+
     function handleToolbarClick(e){
         setActiveToolbarItem(e.target.getAttribute('value'));
     }
-    if(!loaded){
-        document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-    }
-    sessionStorage.setItem('toolbar_loaded', true);
-})();
 
 // Color/size selection
-(function () {
-    let main_color;
     function initColors(){
-        let init_color = localStorage.getItem('main_color') || '#ff0000';
-        document.getElementById('color_selector').style.backgroundColor = init_color;
+        document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
+        document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
+        document.addEventListener('colorchange', changeColor);
+        let init_color = localStorage.getItem('main_color');
         setColor(init_color);
     }
 
@@ -208,28 +207,16 @@ window.onbeforeunload = function() {
     }
 
     function setColor(color){
-        if(main_color != color){
-            main_color = color;
-            localStorage.setItem('main_color', color);
-            document.getElementById('color_selector').style.backgroundColor = color;
-        }
+        localStorage.setItem('main_color', color);
+        document.getElementById('color_selector').style.backgroundColor = color;
     }
-    if(!loaded){
-        document.getElementById("color_selector").addEventListener('click', colorMenuToggle);
-        document.getElementById("size_selector").addEventListener('click', sizeMenuToggle);
-        document.addEventListener('colorchange', changeColor);
-    }
-    initColors();
-})();
-
 // Pen stuff
-(function () {
-    let penSize;
-    let penColor;
-    let scrollLock;
+    let penSize = 3;
+    let penColor = '#FF0000';
+    let scrollLock= false;
     function initPen() {
-        let init_size = localStorage.getItem('pen/size') || 3;
-        let init_color = localStorage.getItem('main_color') || '#FF0000';
+        let init_size = localStorage.getItem('pen/size');
+        let init_color = localStorage.getItem('main_color');
         document.getElementById('pen_size_selector').value = init_size;
         document.getElementById('pen_size_value').value = init_size;
         if($('#scroll_lock_mode').is(':checked')) {
@@ -237,77 +224,51 @@ window.onbeforeunload = function() {
         }
 
         setPen(init_size, init_color);
+        
+        document.getElementById('pen_size_selector').addEventListener('change', function(e){
+            setPen(e.target.value || e.srcElement.value, penColor);
+        });
+        document.addEventListener('colorchange', function(e){
+            setPen(penSize, e.srcElement.getAttribute('value'));
+        });
     }
 
-    function setPen(size, color) {
-        let modified = false;
-
-        if (penSize !== size) {
-            modified = true;
-            penSize = size;
-            localStorage.setItem('pen/size', penSize);
+    function setPen(pen_size, pen_color) {
+        penSize = pen_size;
+        penColor = pen_color;
+        
+        if (scrollLock) {
+            $('#file-content').css('overflow', 'hidden');
         }
-        if (penColor !== color) {
-            modified = true;
-            penColor = color;
-        }
-
-        if (modified && scrollLock) {
-            $('#file_content').css('overflow', 'hidden');
-        }
-
-        if (modified) {
-            PDFAnnotate.UI.setPen(penSize, penColor);
-        }
+        localStorage.setItem('pen/size', pen_size);
+        localStorage.setItem('main_color', pen_color);
+        PDFAnnotate.UI.setPen(pen_size, pen_color);
     }
-
-    document.getElementById('pen_size_selector').addEventListener('change', function(e){
-        let value = e.target.value ? e.target.value : e.srcElement.value;
-        setPen(value, penColor);
-    });
-    document.addEventListener('colorchange', function(e){
-        setPen(penSize, e.srcElement.getAttribute('value'));
-    });
-    initPen();
-})();
 
 // Text stuff
-(function () {
-    let textSize;
-    let textColor;
-
+    let textSize = 12;
+    let textColor = '#FF0000';
     function initText() {
-        let init_size = localStorage.getItem('text/size') || 12;
-        let init_color = localStorage.getItem('main_color') || '#FF0000';
+        let init_size = localStorage.getItem('text/size');
+        let init_color = localStorage.getItem('main_color');
         document.getElementById('text_size_selector').value = init_size;
         setText(init_size, init_color);
-    }
-
-    function setText(size, color) {
-        let modified = false;
-        if (textSize !== size) {
-            modified = true;
-            textSize = size;
-            localStorage.setItem('text/size', textSize);
-        }
-
-        if (textColor !== color) {
-            modified = true;
-            textColor = color;
-        }
-
-        if (modified) {
-            PDFAnnotate.UI.setText(textSize, textColor);
-        }
-    }
-    if(!loaded){
         document.addEventListener('colorchange', function(e){
             setText(textSize, e.srcElement.getAttribute('value'));
         });
         document.getElementById('text_size_selector').addEventListener('change', function(e) {
-            let value = e.target.value ? e.target.value : e.srcElement.value;
-            setText(value, textColor);
+            setText(e.target.value || e.srcElement.value, textColor);
         });
     }
+
+    function setText(text_size, text_color) {
+        textSize = text_size;
+        textColor = text_color;
+        localStorage.setItem('text/size', text_size);
+        localStorage.setItem('main_color', text_color);
+        PDFAnnotate.UI.setText(text_size, text_color);
+    }
+    initColors();
+    initPen();
     initText();
-})();
+}

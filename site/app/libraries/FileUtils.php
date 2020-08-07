@@ -213,7 +213,7 @@ class FileUtils {
      */
     public static function recursiveChmod($path, $mode) {
         $dir = new \FilesystemIterator($path);
-        $files = array();
+        $files = [];
         foreach ($dir as $item) {
             if ($item->isDir()) {
                 static::recursiveChmod($item->getPathname(), $mode);
@@ -237,8 +237,8 @@ class FileUtils {
      * @return array
      */
     public static function getAllDirs($path) {
-        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
-        $return = array();
+        $disallowed_folders = [".", "..", ".svn", ".git", ".idea", "__macosx"];
+        $return = [];
         if (is_dir($path)) {
             if ($handle = opendir($path)) {
                 while (false !== ($entry = readdir($handle))) {
@@ -390,7 +390,7 @@ class FileUtils {
      * @return string
      */
     public static function joinPaths() {
-        $paths = array();
+        $paths = [];
 
         foreach (func_get_args() as $arg) {
             if ($arg !== '') {
@@ -467,6 +467,27 @@ class FileUtils {
     }
 
     /**
+     * Encode the file contents as a data url.
+     * This function is meant to mimic javascript's FileReader::readAsDataURL() method.
+     *
+     * @param string $path Path to the file to be encoded.
+     * @throws FileReadException Unable to read file at the given path.
+     * @return string
+     */
+    public static function readAsDataURL(string $path): string {
+        if (!is_readable($path)) {
+            throw new FileReadException('Unable to read file at the given path.');
+        }
+
+        $data_url = 'data:';
+        $data_url .= self::getContentType($path);
+        $data_url .= ';base64,';
+        $data_url .= base64_encode(file_get_contents($path));
+
+        return $data_url;
+    }
+
+    /**
      * Search over a file to see if it contains specified words
      *
      * @param string $file Path to file to search through
@@ -511,7 +532,7 @@ class FileUtils {
     }
 
     /**
-     * Given an array of uploaded files, makes sure they are properlly uploaded
+     * Given an array of uploaded files, makes sure they are properly uploaded
      *
      * @param array $files - should be in the same format as the $_FILES[] variable
      * @return array representing the status of each file
@@ -521,10 +542,10 @@ class FileUtils {
      */
     public static function validateUploadedFiles($files) {
         if (empty($files)) {
-            return array("failed" => "No files sent to validate");
+            return ["failed" => "No files sent to validate"];
         }
 
-        $ret = array();
+        $ret = [];
         $num_files = count($files['name']);
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
 

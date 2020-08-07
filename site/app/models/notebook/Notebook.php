@@ -2,8 +2,8 @@
 
 namespace app\models\notebook;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\AbstractModel;
 use app\exceptions\NotImplementedException;
@@ -15,17 +15,20 @@ use app\exceptions\IOException;
  * @method array getInputs()
  * @method array getNotebook()
  * @method array getImagePaths()
+ * @method array getFileSubmissions()
  */
 
 class Notebook extends AbstractModel {
     /** @prop @var array parsed notebook from the config */
     protected $notebook;
     /** @prop @var array notebook elements that can hold user input */
-    protected $inputs;
+    protected $inputs = [];
     /** @prop @var string parsed notebook from the config */
     protected $gradeable_id;
     /** @prop @var array of image names and their locations */
     protected $image_paths;
+    /** @prop @var array of file_submission notebook cells */
+    protected $file_submissions = [];
 
 
     public function __construct(Core $core, array $details, string $gradeable_id) {
@@ -76,11 +79,12 @@ class Notebook extends AbstractModel {
                 }
             }
             elseif (
-                $notebook_cell['type'] === 'short_answer'
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'short_answer'
                 && !empty($notebook_cell['programming_language'])
                 && empty($notebook_cell['codemirror_mode'])
             ) {
-                $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language']);
             }
 
             // Add this cell $this->notebook
@@ -89,8 +93,17 @@ class Notebook extends AbstractModel {
             }
 
             // If cell is a type of input add it to the $actual_inputs array
-            if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
+            if (isset($notebook_cell['type']) && in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
+            }
+
+            if (
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'file_submission'
+                && !in_array($notebook_cell, $this->file_submissions)
+            ) {
+                $notebook_cell['label'] = $notebook_cell['label'] ?? "";
+                $this->file_submissions[] = $notebook_cell;
             }
         }
         
@@ -139,13 +152,13 @@ class Notebook extends AbstractModel {
 
 
       /**
-     * Gets a new 'notebook' which contains information about most recent submissions
-     *
-     * @return array An updated 'notebook' which has the most recent submission data entered into the
-     * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
-     * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
-     * blank.
-     */
+       * Gets a new 'notebook' which contains information about most recent submissions
+       *
+       * @return array An updated 'notebook' which has the most recent submission data entered into the
+       * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
+       * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
+       * blank.
+       */
     public function getMostRecentNotebookSubmissions(int $version, array $new_notebook): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
@@ -273,5 +286,10 @@ class Notebook extends AbstractModel {
             }
         }
         return $image_paths;
+    }
+
+
+    public function getNumParts(): int {
+        return count($this->file_submissions);
     }
 }

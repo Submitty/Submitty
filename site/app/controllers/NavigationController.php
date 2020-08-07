@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\exceptions\DatabaseException;
 use app\libraries\Core;
+use app\libraries\ExceptionHandler;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -16,17 +18,25 @@ class NavigationController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/no_access")
+     * @Route("/courses/{_semester}/{_course}/no_access")
      */
     public function noAccess() {
         $this->core->getOutput()->renderOutput('Error', 'noAccessCourse');
     }
 
     /**
-     * @Route("/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
+     * @Route("/courses/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
      */
     public function navigationPage() {
-        $gradeables_list = new GradeableList($this->core);
+        try {
+            $gradeables_list = new GradeableList($this->core);
+        }
+        catch (DatabaseException $e) {
+            ExceptionHandler::handleException($e);
+
+            $error_messages = ['A broken gradeable was detected when collecting gradeable information from the database.  Contact the system administrator for assistance.'];
+            return $this->core->getOutput()->renderOutput('Error', 'genericError', $error_messages);
+        }
 
         $future_gradeables_list = $gradeables_list->getFutureGradeables();
         $beta_gradeables_list = $gradeables_list->getBetaGradeables();
@@ -51,7 +61,7 @@ class NavigationController extends AbstractController {
 
         //Remove gradeables we are not allowed to view
         foreach ($sections_to_lists as $key => $value) {
-            $sections_to_lists[$key] = array_filter($value, array($this, "filterCanView"));
+            $sections_to_lists[$key] = array_filter($value, [$this, "filterCanView"]);
         }
 
         //Clear empty sections

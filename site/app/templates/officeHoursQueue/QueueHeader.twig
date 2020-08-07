@@ -3,18 +3,36 @@
     <p>{{viewer.getQueueMessage() | markdown}}</p>
   </div>
 {% endif %}
+
 <div class="content">
   <h1>
     Office Hours Queue
   </h1>
-  {% if not viewer.isGrader() %}
-    <p>
-      For more information:
+  <p>
+    For more information:
+    {% if not viewer.isGrader() %}
       <a target="_blank" href="https://submitty.org/student/queue">
         Getting Help through the Office Hours Queue
         <i style="font-style:normal;" class="fa-question-circle"></i>
       </a>
-    </p>
-    {% include 'officeHoursQueue/QueueStatus.twig' %}
+    {% else %}
+      <a target="_blank" href="https://submitty.org/grader/queue">
+        Managing the Office Hours Queue
+        <i style="font-style:normal;" class="fa-question-circle"></i>
+      </a>
+    {% endif %}
     <br>
+    <br>
+  </p>
+
+  {% include 'officeHoursQueue/AnnouncementMsg.twig' %}
+
+  {% if not viewer.isGrader() %}
+    {% include 'officeHoursQueue/QueueStatus.twig' %}
+  {% else %}
+    {% include 'officeHoursQueue/QueueButtonBar.twig' %}
+    {% include 'officeHoursQueue/CurrentQueue.twig' %}
   {% endif %}
+
+  {% include 'officeHoursQueue/QueueHistory.twig' %}
+  {% include 'officeHoursQueue/QueueFooter.twig' %}

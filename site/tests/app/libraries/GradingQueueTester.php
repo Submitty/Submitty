@@ -32,7 +32,7 @@ class GradingQueueTester extends BaseUnitTest {
      */
     private const DEFAULT_QUEUE = 0;
     /**
-     * The queue file should be placed in a subdirectory of the `grading`
+     * The queue file should be placed in a subdirectory of the `in_progress_grading`
      * directory, mirroring the situation where a queue file has been assigned
      * to a worker but the worker has not yet picked up the file. Which worker
      * directory the file should be placed in is determined by the second
@@ -45,7 +45,7 @@ class GradingQueueTester extends BaseUnitTest {
         FileUtils::createDir($this->path);
         $this->queue_path = FileUtils::joinPaths($this->path, 'to_be_graded_queue');
         FileUtils::createDir($this->queue_path);
-        $this->grading_path = FileUtils::joinPaths($this->path, 'grading');
+        $this->grading_path = FileUtils::joinPaths($this->path, 'in_progress_grading');
         FileUtils::createDir($this->grading_path);
     }
 

@@ -531,7 +531,7 @@ function copyToClipboard(code) {
 
 function downloadCSV(code) {
     var download_info = JSON.parse($('#download_info_json_id').val());
-    var csv_data = 'First Name,Last Name,User ID,Email,Registration Section,Rotation Section,Group\n';
+    var csv_data = 'First Name,Last Name,User ID,Email,UTC Offset,Time Zone,Registration Section,Rotation Section,Group\n';
     var required_user_id = [];
 
     $('#download-form input:checkbox').each(function() {
@@ -541,7 +541,7 @@ function downloadCSV(code) {
             if (thisVal === 'instructor') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Instructor') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -549,7 +549,7 @@ function downloadCSV(code) {
             else if (thisVal === 'full_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Full Access Grader (Grad TA)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -557,7 +557,7 @@ function downloadCSV(code) {
             else if (thisVal === 'limited_access_grader') {
                 for (var i = 0; i < download_info.length; ++i) {
                     if ((download_info[i].group === 'Limited Access Grader (Mentor)') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                        csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                         required_user_id.push(download_info[i].user_id);
                     }
                 }
@@ -566,17 +566,17 @@ function downloadCSV(code) {
                 for (var i = 0; i < download_info.length; ++i) {
                     if (code === 'user') {
                         if ((download_info[i].reg_section === thisVal) && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
                     else if (code === 'grader') {
                         if ((download_info[i].reg_section === 'All') && ($.inArray(download_info[i].user_id,required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                         if (($.inArray(thisVal, download_info[i].reg_section.split(',')) !== -1) && ($.inArray(download_info[i].user_id, required_user_id) === -1)) {
-                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
+                            csv_data += [download_info[i].first_name, download_info[i].last_name, download_info[i].user_id, download_info[i].email, download_info[i].utc_offset, download_info[i].time_zone, '"'+download_info[i].reg_section+'"', download_info[i].rot_section, download_info[i].group].join(',') + '\n';
                             required_user_id.push(download_info[i].user_id);
                         }
                     }
@@ -585,10 +585,15 @@ function downloadCSV(code) {
         }
     });
 
+    // Setup default name for the CSV file
+    let course = $('#download_info_json_id').data('course');
+    let semester = $('#download_info_json_id').data('semester');
+    let csv_name = [semester, course, 'users', 'data'].join('_') + '.csv'
+
     var temp_element = $('<a id="downloadlink"></a>');
     var address = "data:text/csv;charset=utf-8," + encodeURIComponent(csv_data);
     temp_element.attr('href', address);
-    temp_element.attr('download', 'submitty_user_emails.csv');
+    temp_element.attr('download', csv_name);
     temp_element.css('display', 'none');
     $(document.body).append(temp_element);
     $('#downloadlink')[0].click();
@@ -966,8 +971,13 @@ function downloadFile(path, dir) {
     window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
-    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
+function downloadStudentAnnotations(url, path, dir) {
+    window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
+    //window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
+}
+
+function downloadSubmissionZip(grade_id, user_id, version, origin = null, is_anon = false) {
+    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}&is_anon=${is_anon}`;
     return false;
 }
 
@@ -1215,7 +1225,7 @@ function displaySuccessMessage(message) {
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type
+ * @param {string} type either 'error' or 'success'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
@@ -1410,99 +1420,6 @@ function escapeHTML(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function handleTimeZones(timezone) {
-
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-
-            // Collect server time
-            var server_time = JSON.parse(data)['data'];
-            server_time = new Date(parseInt(server_time.year),
-                parseInt(server_time.month) - 1,
-                parseInt(server_time.day),
-                parseInt(server_time.hour),
-                parseInt(server_time.minute),
-                parseInt(server_time.second));
-
-            // Collect client time
-            var client_time = new Date();
-
-            // Calculate difference in minutes
-            var diff_in_minutes = Math.abs(server_time.valueOf() - client_time.valueOf());
-            diff_in_minutes = diff_in_minutes / 1000 / 60;
-
-            // If difference in minutes is greater than 10 minutes then append message to flatpickr
-            if(diff_in_minutes > 10) {
-                $('.flatpickr-calendar').append('<p>Enter all times relative to the server timezone</p>');
-                $('.flatpickr-calendar').append('<p>Server timezone: '+timezone+'</p>');
-            }
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-
-function setNewDateTime(id, path) {
-    // pass filename to server to record the new date and time of the file to be released
-    var me = $('#'+id);
-    var newDateTime = me.val();
-
-    var success = changeNewDateTime(path, newDateTime);
-    if(success === false){
-        return;
-    }
-
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-            var now = JSON.parse(data)['data'];
-            now = new Date(parseInt(now.year),
-                parseInt(now.month) - 1,
-                parseInt(now.day),
-                parseInt(now.hour),
-                parseInt(now.minute),
-                parseInt(now.second));
-
-            function pad(str){
-                return ('0'+str).slice(-2);
-            }
-
-            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
-            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-            var currentDT = date+' '+time;
-            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
-
-            //get the value in each file so the color can be assigned
-            //based on the time chosen
-            var fileDT = newDateTime;
-            fileDT = fileDT.replace(/\s/, 'T');
-            currentDT = currentDT.replace(/\s/, 'T');
-            neverDT = neverDT.replace(/\s/, 'T');
-            //also custom colors for this page for readability
-            if(new Date(fileDT).getTime() <= new Date(currentDT).getTime()){
-                $('#'+id).css("backgroundColor", green);
-                return green;
-             } else if(new Date(fileDT).getTime() >= new Date(neverDT).getTime()){
-                 $('#'+id).css("backgroundColor", red);
-                return red;
-             } else {
-                $('#'+id).css("backgroundColor", yellow);
-                return yellow;
-             }
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-
 function setChildNewDateTime(path, changeDate,handleData) {
     //change the date and time of the subfiles in the folder with the time chosen for the whole
     //folder (passed in)
@@ -1516,76 +1433,6 @@ function setChildNewDateTime(path, changeDate,handleData) {
             }
         }
     });
-}
-
-function updateToServerTime(fp) {
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-            var time = JSON.parse(data)['data'];
-            time = new Date(parseInt(time.year),
-                            parseInt(time.month) - 1,
-                            parseInt(time.day),
-                            parseInt(time.hour),
-                            parseInt(time.minute),
-                            parseInt(time.second));
-            fp.setDate(time,true);
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-function updateToTomorrowServerTime(fp) {
-    var url = buildUrl(['server_time']);
-
-    $.get({
-        url: url,
-        success: function(data) {
-            var time = JSON.parse(data)['data'];
-            time = new Date(parseInt(time.year),
-                parseInt(time.month) - 1,
-                parseInt(time.day),
-                parseInt(time.hour),
-                parseInt(time.minute),
-                parseInt(time.second));
-            nextDay = new Date(time);
-            nextDay.setDate(time.getDate()+1);
-            fp.setDate(nextDay,true);
-        },
-        error: function(e) {
-            console.log("Error getting server time.");
-        }
-    });
-}
-function changeNewDateTime(filename, newdatatime,handleData) {
-    // send to server to handle file date/time change
-    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
-    var tbr = false;
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {'fn':filename,csrf_token: csrfToken},
-        success: function(data) {
-            var jsondata = JSON.parse(data);
-            if (jsondata.status === 'fail') {
-                alert("ERROR: Invalid date.");
-                return false;
-            }
-
-            tbr=true;
-            if(handleData){
-                handleData(data);
-            }
-            return true;
-        },
-        error: function(e) {
-             alert("Encounter saving the NewDateTime.");
-             return false;
-        }
-    })
 }
 
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
@@ -1742,29 +1589,159 @@ function resizeNoScrollTextareas() {
     // Make sure textareas resize correctly
     $('textarea.noscroll').each(function() {
         auto_grow(this);
-    })
+    });
 }
 
 $(document).ready(function() {
   enableKeyToClick();
 });
 
-function enableKeyToClick(){
-  var key_to_click = document.getElementsByClassName("key_to_click");
-  for (var i = 0; i < key_to_click.length; i++) {
-    key_to_click[i].addEventListener('keydown', function(event) {
-      if (event.keyCode === 13) {//ENTER key
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).click();
-      }
-    });
-    key_to_click[i].addEventListener('keyup', function(event) {
-      if (event.keyCode === 32) { //SPACE key
-        event.preventDefault();
-        event.stopPropagation();
-        $(event.target).click();
-      }
-    });
+function keyToClickKeydown(event){
+  if (event.keyCode === 13) {//ENTER key
+    event.preventDefault();
+    event.stopPropagation();
+    $(event.target).click();
   }
+}
+
+function keyToClickKeyup(event){
+  if (event.keyCode === 32) { //SPACE key
+    event.preventDefault();
+    event.stopPropagation();
+    $(event.target).click();
+  }
+}
+
+function enableKeyToClick(){
+  const key_to_click = document.getElementsByClassName("key_to_click");
+  for (var i = 0; i < key_to_click.length; i++) {
+    //In case this function is run multiple times, we need to remove the old event listeners
+    key_to_click[i].removeEventListener('keyup', keyToClickKeyup);
+    key_to_click[i].removeEventListener('keydown', keyToClickKeydown);
+
+    key_to_click[i].addEventListener('keyup', keyToClickKeyup);
+    key_to_click[i].addEventListener('keydown', keyToClickKeydown);
+  }
+}
+
+function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
+    $('#save_status').html('Saving Feedback...');
+    var url = buildCourseUrl(['gradeable', g_id, 'feedback' , 'set']);
+    let formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('grader_id', grader_id);
+    formData.append('user_id', user_id);
+    formData.append('feedback', feedback);
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                $('#save_status').html('All Changes Saved');
+            } catch(err){
+                return;
+            }
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+            $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        }
+    })
+}
+
+/**
+ * Function for course staff to flag/unflag a user's preferred photo as inappropriate.
+ *
+ * @param user_id The user_id of the user who's preferred photo should be flagged
+ * @param flag A boolean indicating whether to flag or unflag the image.
+ *             True to flag
+ *             False to unflag
+ */
+function flagUserImage(user_id, flag) {
+    let confirm_message;
+    let success_message;
+
+    if (flag) {
+        confirm_message = `You are flagging ${user_id}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?`;
+        success_message = `${user_id}'s preferred image was successfully flagged.`;
+    }
+    else {
+        confirm_message = `${user_id}'s preferred image has be flagged as inappropriate.\nThis was done because the image is not a recognizable, passport style photo.\n\nYou are reverting to ${user_id}'s preferred image.\nDo you wish to proceed?`;
+        success_message = `${user_id}'s preferred image was successfully restored.`;
+    }
+
+    const confirmed = confirm(confirm_message);
+
+    if (confirmed) {
+        const url = buildCourseUrl(['flag_user_image']);
+
+        const form_data = new FormData();
+        form_data.append('user_id', user_id);
+        form_data.append('csrf_token', csrfToken);
+        form_data.append('flag', flag);
+
+        const makeRequest = async () => {
+            const image_container = document.querySelector(`.${user_id}-image-container`);
+
+            // Show working message
+            const working_message = document.createElement('i');
+            working_message.innerHTML = '<span style="color:var(--no-image-available)">Working...</span>';
+            image_container.removeChild(image_container.firstElementChild);
+            image_container.prepend(working_message);
+
+            const response = await fetch(url, {method: 'POST', body: form_data});
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                const data = result.data;
+
+                // Change image
+                let new_content;
+                if (data.image_data && data.image_mime_type) {
+                    new_content = document.createElement('img');
+                    new_content.setAttribute('alt', data.first_last_username);
+                    new_content.setAttribute('src', `data:${data.image_mime_type};base64,${data.image_data}`);
+                }
+                else {
+                    new_content = document.createElement('i');
+                    new_content.innerHTML = '<span style="color:var(--no-image-available)">No Image Available</span>';
+                }
+
+                image_container.removeChild(image_container.firstElementChild);
+                image_container.prepend(new_content);
+
+                // Change icon
+                const a = image_container.querySelector('a');
+                a.href = data.href;
+                a.innerHTML = data.icon_html;
+
+                displaySuccessMessage(success_message);
+            }
+            else {
+                displayErrorMessage(result.message);
+            }
+        };
+
+        try {
+            makeRequest();
+        }
+        catch (err) {
+            console.error(err);
+            displayErrorMessage('Something went wrong!');
+        }
+    }
+}
+
+/**
+ * Get an array of all focusable elements currently in the dom.
+ *
+ * @returns {Element[]}
+ */
+function getFocusableElements() {
+    let focusable_elements = $(':focusable:tabbable');
+    return Array.from(focusable_elements);
 }

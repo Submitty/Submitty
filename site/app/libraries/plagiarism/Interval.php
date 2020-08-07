@@ -3,27 +3,29 @@
 namespace app\libraries\plagiarism;
 
 class Interval {
-
-    private $start = 0;
-    private $end = 0;
+    /** @var int */
+    private $start;
+    /** @var int */
+    private $end;
+    /** @var Submission[] */
     private $user_matches = [];
 
-    public function __construct($s, $e) {
-        $this->start = $s;
-        $this->end = $e;
+    public function __construct(int $start, int $end) {
+        $this->start = $start;
+        $this->end = $end;
     }
 
-    public function getEnd() {
+    public function getEnd(): int {
         return $this->end;
     }
 
-    public function getStart() {
+    public function getStart(): int {
         return $this->start;
     }
 
-    public function addUser($sub) {
+    public function addUser(Submission $sub): void {
         foreach ($this->user_matches as $s) {
-            if ($sub->getUid() == $s->getUid() && $sub->getVid() == $s->getVid()) {
+            if ($sub->getUserId() == $s->getUserId() && $sub->getVersion() == $s->getVersion()) {
                 $s->mergeMatchingPositions($sub->getMatchingPositions());
                 return;
             }
@@ -31,15 +33,18 @@ class Interval {
         $this->user_matches[] = $sub;
     }
 
-    public function updateStart($newS) {
-        $this->start = $newS;
+    public function updateStart(int $new_start): void {
+        $this->start = $new_start;
     }
 
-    public function updateEnd($newE) {
-        $this->end = $newE;
+    public function updateEnd(int $new_end): void {
+        $this->end = $new_end;
     }
 
-    public function getUsers() {
+    /**
+     * @return Submission[]
+     */
+    public function getUsers(): array {
         return $this->user_matches;
     }
 }

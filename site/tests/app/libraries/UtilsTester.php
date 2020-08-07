@@ -40,14 +40,14 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function stringStarts() {
-        return array(
-            array("test", "test", true),
-            array("test", "tes", true),
-            array("test", "te", true),
-            array("test", "t", true),
-            array("test", "", true),
-            array("test", "st", false)
-        );
+        return [
+            ["test", "test", true],
+            ["test", "tes", true],
+            ["test", "te", true],
+            ["test", "t", true],
+            ["test", "", true],
+            ["test", "st", false]
+        ];
     }
 
     /**
@@ -62,14 +62,14 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function stringEnds() {
-        return array(
-            array("test", "test", true),
-            array("test", "est", true),
-            array("test", "st", true),
-            array("test", "t", true),
-            array("test", "", true),
-            array("test", "te", false)
-        );
+        return [
+            ["test", "test", true],
+            ["test", "est", true],
+            ["test", "st", true],
+            ["test", "t", true],
+            ["test", "", true],
+            ["test", "te", false]
+        ];
     }
 
     /**
@@ -89,21 +89,21 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testStripStringFromArray() {
-        $array = array(
+        $array = [
             "test/aa",
-            array(
+            [
                 "test/test2/aa",
                 "bb"
-            )
-        );
-        $expected = array("/aa", array("/2/aa", "bb"));
+            ]
+        ];
+        $expected = ["/aa", ["/2/aa", "bb"]];
         $this->assertEquals($expected, Utils::stripStringFromArray("test", $array));
     }
 
     public function testStripStringFromArrayNull() {
         $this->assertNull(Utils::stripStringFromArray("test", null));
-        $this->assertNull(Utils::stripStringFromArray(null, array()));
-        $this->assertNull(Utils::stripStringFromArray(1, array()));
+        $this->assertNull(Utils::stripStringFromArray(null, []));
+        $this->assertNull(Utils::stripStringFromArray(1, []));
     }
 
     public function elementDataProvider() {
@@ -357,7 +357,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -374,7 +374,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -403,7 +403,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -420,7 +420,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -437,7 +437,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -454,7 +454,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -483,7 +483,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -500,7 +500,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -533,7 +533,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -550,7 +550,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -567,7 +567,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => null,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $details[] = [
@@ -584,7 +584,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
-            'grading_registration_sections' => array(1, 2)
+            'grading_registration_sections' => [1, 2]
         ];
 
         $core = new Core();
@@ -642,6 +642,26 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::formatBytes($format, $bytes));
     }
 
+    public function formatBytesRoundingProvider() {
+        return [
+            ['b', 0, '0B'],
+            ['b', 1000, '1000B'],
+            ['kb', 999, '1KB'],
+            ['kb', 1023, '1KB'],
+            ['kb', 500, '0KB'],
+            ['kb', 1049999, '1025KB'],
+            ['mb', 1, '0MB'],
+            ['mb', 5000123, '5MB'],
+        ];
+    }
+
+    /**
+     * @dataProvider formatBytesRoundingProvider
+     */
+    public function testFormatBytesRounding($format, $bytes, $expected) {
+        $this->assertEquals($expected, Utils::formatBytes($format, $bytes, true));
+    }
+
     public function testMbStrSplitRegularString() {
         $this->assertEquals(str_split('abcdef'), Utils::mb_str_split('abcdef'));
     }
@@ -658,45 +678,5 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             ["αβ", "γδ", "εf", "g"],
             Utils::mb_str_split("αβγδεfg", 2)
         );
-    }
-
-    /**
-     * @dataProvider codeMirrorModeDataProvider
-     */
-    public function testGetCodeMirrorMode(?string $type, string $expected): void {
-        $this->assertSame($expected, Utils::getCodeMirrorMode($type));
-    }
-
-    public function codeMirrorModeDataProvider(): array {
-        return [
-            ['c', 'text/x-csrc'],
-            ['c++', 'text/x-c++src'],
-            ['cpp', 'text/x-c++src'],
-            ['h', 'text/x-c++src'],
-            ['hpp', 'text/x-c++src'],
-            ['c#', 'text/x-csharp'],
-            ['objective-c', 'text/x-objectivec'],
-            ['java', 'text/x-java'],
-            ['scala', 'text/scala'],
-            ['node', 'text/javascript'],
-            ['nodejs', 'text/javascript'],
-            ['javascript', 'text/javascript'],
-            ['js', 'text/javascript'],
-            ['typescript', 'text/typescript'],
-            ['json', 'application/json'],
-            ['python', 'text/x-python'],
-            ['oz', 'text/x-oz'],
-            ['sql', 'text/x-sql'],
-            ['mysql', 'text/x-mysql'],
-            ['pgsql', 'text/x-pgsql'],
-            ['postgres', 'text/x-pgsql'],
-            ['postgresql', 'text/x-pgsql'],
-            ['scheme', 'text/x-scheme'],
-            ['sh', 'text/x-sh'],
-            ['bash', 'text/x-sh'],
-            ['txt', 'text/plain'],
-            ['invalid', 'text/plain'],
-            [null, 'text/plain']
-        ];
     }
 }

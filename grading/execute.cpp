@@ -63,6 +63,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
+    { "awk",                     "/usr/bin/awk" },
     { "pwd",                     "/bin/pwd" },
     { "env",                     "/usr/bin/env" },
     { "pdftotext",               "/usr/bin/pdftotext" },
@@ -71,6 +72,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "head",                    "/usr/bin/head" },
     { "tail",                    "/usr/bin/tail" },
     { "uniq",                    "/usr/bin/uniq" },
+    { "echo",                    "/bin/echo" },
 
     // Submitty Analysis Tools
     { "submitty_count",          SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count" },
@@ -1123,6 +1125,10 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
   std::cout << "thread function " << getpid() << std::endl;
   std::string my_string;
 
+  std::ofstream dispatched_actions_file;
+
+  dispatched_actions_file.open ("dispatched_actions.txt", std::ofstream::app);
+
   try
   {
     struct pollfd fds;
@@ -1140,6 +1146,7 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
         lock->lock();
         input_queue->push(my_string);
         lock->unlock();
+        dispatched_actions_file << getTimestamp() << my_string  << std::endl;
       }
     }
   }
@@ -1161,7 +1168,7 @@ std::string getTimestamp() {
       now.time_since_epoch()) % 1000;
   std::stringstream nowSs;
   nowSs
-      << std::put_time(std::localtime(&nowAsTimeT), "%m/%d/%y %T")
+      << std::put_time(std::localtime(&nowAsTimeT), "%Y/%m/%d %T")
       << '.' << std::setfill('0') << std::setw(3) << nowMs.count() << " ";
   return nowSs.str();
 }
