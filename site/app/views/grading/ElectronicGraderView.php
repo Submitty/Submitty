@@ -1258,7 +1258,7 @@ HTML;
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
 //        var_dump($solution_array);
-        $que_part_ids = [1, 3, 5]; // TODO update this
+        $que_part_ids = [1,2,3,4,5]; // TODO update this
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),
             'que_part_ids' => $que_part_ids,

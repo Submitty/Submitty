@@ -513,7 +513,13 @@ progress::-webkit-progress-value {
 
 .solution-ta-notes-textbox {
     width: 100%;
-    height: 90%;
+    height: 80%;
+}
+
+.no-sol-box-cont {
+    padding: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .grading_label {

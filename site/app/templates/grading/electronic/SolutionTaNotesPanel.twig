@@ -25,16 +25,17 @@
 
 {% macro renderSolutionTaNotesCont(gradeable_id, que_part_id, author, current_solution, time) %}
 
-    <div id="no-solution-box-{{ que_part_id }}">
+    <div id="no-solution-box-{{ que_part_id }}" class="no-sol-box-cont {% if author|length %} hide {% endif %}">
         <span>
             No Solutions or TA notes for  {{ que_part_id }} of {{ gradeable_id }}
         </span>
+        <br>
         <button type="primary"
-                class="show-sol-btn"
+                class="show-sol-btn btn btn-primary"
                 onclick="showSolutionTextboxCont('#sol-textbox-cont-{{ que_part_id }}', '#no-solution-box-{{ que_part_id }}');"
         >Start Now</button>
     </div>
-    <div id="sol-textbox-cont-{{ que_part_id }}" class="sol-textbox-cont hide">
+    <div id="sol-textbox-cont-{{ que_part_id }}" class="sol-textbox-cont {% if not author|length %} hide {% endif %}">
         <label for="solution-ta-notes-textbox"></label>
         <textarea id="solution-{{ que_part_id }}"
                   class="solution-ta-notes-textbox"
@@ -43,6 +44,11 @@
         {% if author %}
             <span> Last edited by {{ author }} @ {{ time }}</span>
         {% endif %}
-        <button type="primary" id="save-solution" onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ que_part_id }}');">Update</button>
+        <br>
+        <button type="primary"
+                id="save-solution"
+                class="btn btn-primary"
+                onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ que_part_id }}');"
+        >Update</button>
     </div>
 {% endmacro %}
