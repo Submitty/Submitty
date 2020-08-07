@@ -521,49 +521,49 @@ class ElectronicGraderController extends AbstractController {
                     $sections['all']['total_components'] -= $num_components;
                     $sections['all']['graded_components'] -= $my_grading;
                 }
-        }
-        else {
-            foreach ($total_users as $key => $value) {
-                if (array_key_exists($key, $num_submitted)) {
-                    $sections[$key] = [
+            }
+            else {
+                foreach ($total_users as $key => $value) {
+                    if (array_key_exists($key, $num_submitted)) {
+                        $sections[$key] = [
                         'total_components' => $num_submitted[$key],
                         'graded_components' => 0,
                         'ta_graded_components' => 0,
                         'graders' => []
-                    ];
-                }
-                else {
-                    $sections[$key] = [
+                        ];
+                    }
+                    else {
+                        $sections[$key] = [
                         'total_components' => 0,
                         'graded_components' => 0,
                         'graders' => []
-                    ];
-                }
-                if ($gradeable->isTeamAssignment()) {
-                    $sections[$key]['no_team'] = $no_team_users[$key];
-                    $sections[$key]['team'] = $team_users[$key];
-                }
-                if (isset($graded_components[$key])) {
-                    // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                    $sections[$key]['graded_components'] = $graded_components[$key];
-                    $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                }
-                if (isset($graders[$key])) {
-                    $sections[$key]['graders'] = $graders[$key];
+                        ];
+                    }
+                    if ($gradeable->isTeamAssignment()) {
+                        $sections[$key]['no_team'] = $no_team_users[$key];
+                        $sections[$key]['team'] = $team_users[$key];
+                    }
+                    if (isset($graded_components[$key])) {
+                        // Clamp to total components if unsubmitted assigment is graded for whatever reason
+                        $sections[$key]['graded_components'] = $graded_components[$key];
+                        $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
+                    }
+                    if (isset($graders[$key])) {
+                        $sections[$key]['graders'] = $graders[$key];
 
-                    if ($key !== "NULL") {
-                        $valid_graders = [];
-                        foreach ($graders[$key] as $valid_grader) {
-                            /* @var User $valid_grader */
-                            if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
-                                $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                        if ($key !== "NULL") {
+                            $valid_graders = [];
+                            foreach ($graders[$key] as $valid_grader) {
+                                /* @var User $valid_grader */
+                                if ($this->core->getAccess()->canUser($valid_grader, "grading.electronic.grade", ["gradeable" => $gradeable])) {
+                                    $valid_graders[] = $valid_grader->getDisplayedFirstName();
+                                }
                             }
+                            $sections[$key]["valid_graders"] = $valid_graders;
                         }
-                        $sections[$key]["valid_graders"] = $valid_graders;
                     }
                 }
             }
-        }
         }
         $registered_but_not_rotating = count($this->core->getQueries()->getRegisteredUsersWithNoRotatingSection());
         $rotating_but_not_registered = count($this->core->getQueries()->getUnregisteredStudentsWithRotatingSection());
