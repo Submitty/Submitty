@@ -779,7 +779,8 @@ class Gradeable extends AbstractModel {
     }
 
     public function getStringThreadIds() {
-        return $this->isDiscussionBased() ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
+        return $this->isDiscussionBased() && is_array(json_decode($this->getDiscussionThreadId()))
+            ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
     }
 
     /**
