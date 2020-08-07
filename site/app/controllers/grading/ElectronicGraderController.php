@@ -762,9 +762,9 @@ class ElectronicGraderController extends AbstractController {
      */
     public function getCustomMarksAccess($gradeable_id) {
         if ($this->core->getUser()->getGroup() < User::GROUP_STUDENT) {
-            return true;
+            return JsonResponse::getSuccessResponse(true);
         }
-        return false;
+        return JsonResponse::getSuccessResponse(false);
     }
 
     /**
