@@ -12,7 +12,6 @@
 #         for the sample user being created, see more_autograding_examples/bulk_upload_pdfs/submissions/04_numeric_ids.txt
 #         for a list of ids to use
 #
-#   anon_id: string representing an alternate anonymous id for the user that can be used when anonymity is required
 #
 #   user_firstname: string for the user's first name
 #
