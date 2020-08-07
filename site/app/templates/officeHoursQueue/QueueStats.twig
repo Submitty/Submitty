@@ -9,13 +9,13 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueData(false)[0] %}
+        {% for key, item in viewer.getQueueDataOverall()[0] %}
           <th style="padding:.4rem">{{key}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueData(false) %}
+      {% for queue in viewer.getQueueDataOverall() %}
         <tr>
           {% for key, item in queue %}
             <td>{{item}}</td>
@@ -25,20 +25,120 @@
     </tbody>
   </table>
 
-  <h2>Queue Data:</h2>
+  <h2>Today's Data:</h2>
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueData(true)[0] %}
+        {% for key, item in viewer.getQueueDataToday()[0] %}
           <th style="padding:.4rem">{{key}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueData(true) %}
+      {% for queue in viewer.getQueueDataToday() %}
         <tr>
           {% for key, item in queue %}
             <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>This Week's Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in viewer.getQueueDataByWeekDayThisWeek()[0] %}
+          <th style="padding:.4rem">{{key}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in viewer.getQueueDataByWeekDayThisWeek() %}
+        <tr>
+          {% for key, item in queue %}
+            {% if key == "dow" %}
+              <td>{{viewer.dayNumToDay(item)}}</td>
+            {% else %}
+              <td>{{item}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Week Day Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in viewer.getQueueDataByWeekDay()[0] %}
+          <th style="padding:.4rem">{{key}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in viewer.getQueueDataByWeekDay() %}
+        <tr>
+          {% for key, item in queue %}
+            {% if key == "dow" %}
+              <td>{{viewer.dayNumToDay(item)}}</td>
+            {% else %}
+              <td>{{item}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Queue Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in viewer.getQueueDataByQueue()[0] %}
+          <th style="padding:.4rem">{{key}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in viewer.getQueueDataByQueue() %}
+        <tr>
+          {% for key, item in queue %}
+            <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Week specific Data: (Week starts on Monday)</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in viewer.getQueueDataByWeekNumber()[0] %}
+          {% if key == "yearnum" %}
+          {% else %}
+            <th style="padding:.4rem">{{key}}</th>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for weekdata in viewer.getQueueDataByWeekNumber() %}
+        <tr>
+          {% for key, item in weekdata %}
+            {% if key == "yearnum" %}
+            {% elseif key == "weeknum" %}
+              <td>{{viewer.weekNumToDate(item, weekdata["yearnum"])}}</td>
+            {% else %}
+              <td>{{item}}</td>
+            {% endif %}
           {% endfor %}
         </tr>
       {% endfor %}
@@ -50,7 +150,7 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueStudentData()[0] %}
+        {% for key, item in viewer.getQueueDataStudent()[0] %}
           {% if key != 'user_id' %}
             <th style="padding:.4rem">{{key}}</th>
           {% endif %}
@@ -58,7 +158,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for student in viewer.getQueueStudentData() %}
+      {% for student in viewer.getQueueDataStudent() %}
         <tr>
           {% for key, item in student %}
             {% if key != 'user_id' %}

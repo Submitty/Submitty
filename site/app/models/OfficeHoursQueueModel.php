@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use DateTime;
 
 class OfficeHoursQueueModel extends AbstractModel {
 
@@ -237,11 +238,50 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getAllQueuesEver();
     }
 
-    public function getQueueStudentData() {
-        return $this->core->getQueries()->getQueueStudentData();
+    public function getQueueDataStudent() {
+        return $this->core->getQueries()->getQueueDataStudent();
     }
 
-    public function getQueueData($group_by_queue) {
-        return $this->core->getQueries()->getQueueData($group_by_queue);
+    public function getQueueDataOverall() {
+        return $this->core->getQueries()->getQueueDataOverall();
+    }
+
+    public function getQueueDataToday() {
+        return $this->core->getQueries()->getQueueDataToday();
+    }
+
+    public function getQueueDataByQueue() {
+        return $this->core->getQueries()->getQueueDataByQueue();
+    }
+
+    public function getQueueDataByWeekDay() {
+        return $this->core->getQueries()->getQueueDataByWeekDay();
+    }
+
+    public function getQueueDataByWeekDayThisWeek() {
+        return $this->core->getQueries()->getQueueDataByWeekDayThisWeek();
+    }
+
+    public function dayNumToDay($daynum){
+      $days = [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday'
+      ];
+      return $days[$daynum];
+    }
+
+    public function getQueueDataByWeekNumber() {
+        return $this->core->getQueries()->getQueueDataByWeekNumber();
+    }
+
+    public function weekNumToDate($weeknum, $yearnum){
+      $week_start = new DateTime();
+      $week_start->setISODate($yearnum,$weeknum);
+      return $week_start->format('Y-M-d');
     }
 }

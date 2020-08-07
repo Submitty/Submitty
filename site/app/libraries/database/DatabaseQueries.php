@@ -5818,60 +5818,53 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getQueueStudentData() {
+    public function getQueueDataStudent() {
         $this->course_db->query("SELECT
-                                *
-                              FROM (SELECT
-                                user_id AS id,
-                                CASE
-                                  WHEN user_preferred_firstname IS NULL THEN user_firstname
-                                  ELSE user_preferred_firstname
-                                END AS first_name,
-                                CASE
-                                  WHEN user_preferred_lastname IS NULL THEN user_lastname
-                                  ELSE user_preferred_lastname
-                                END AS lastname
-                              FROM users
-                              WHERE user_group = 4) AS user_data
-                              LEFT JOIN (SELECT
-                                user_id,
-                                COUNT(*) AS queue_interactions,
-                                COUNT(DISTINCT name) AS number_names_used,
-                                AVG(time_out - time_in) AS avg_turnaround_time,
-                                MIN(time_out - time_in) AS min_turnaround_time,
-                                MAX(time_out - time_in) AS max_turnaround_time,
-                                AVG(time_help_start - time_in) AS avg_wait_time,
-                                MIN(time_help_start - time_in) AS min_wait_time,
-                                MAX(time_help_start - time_in) AS max_wait_time,
-                                SUM(CASE
-                                  WHEN removal_type IN ('helped', 'self_helped') THEN 1
-                                  ELSE 0
-                                END) AS help_count,
-                                SUM(CASE
-                                  WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
-                                  ELSE 0
-                                END) AS not_helped_count
-                              FROM queue
-                              GROUP BY user_id) AS queue_data
-                                ON queue_data.user_id = user_data.id
-                              ORDER BY queue_data.user_id");
+                *
+              FROM (SELECT
+                user_id AS id,
+                CASE
+                  WHEN user_preferred_firstname IS NULL THEN user_firstname
+                  ELSE user_preferred_firstname
+                END AS first_name,
+                CASE
+                  WHEN user_preferred_lastname IS NULL THEN user_lastname
+                  ELSE user_preferred_lastname
+                END AS lastname
+              FROM users
+              WHERE user_group = 4) AS user_data
+              LEFT JOIN (SELECT
+                user_id,
+                COUNT(*) AS queue_interactions,
+                COUNT(DISTINCT name) AS number_names_used,
+                AVG(time_out - time_help_start) AS avg_help_time,
+                MIN(time_out - time_help_start) AS min_help_time,
+                MAX(time_out - time_help_start) AS max_help_time,
+                AVG(time_help_start - time_in) AS avg_wait_time,
+                MIN(time_help_start - time_in) AS min_wait_time,
+                MAX(time_help_start - time_in) AS max_wait_time,
+                SUM(CASE
+                  WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                  ELSE 0
+                END) AS help_count,
+                SUM(CASE
+                  WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                  ELSE 0
+                END) AS not_helped_count
+              FROM queue
+              GROUP BY user_id) AS queue_data
+                ON queue_data.user_id = user_data.id
+              ORDER BY queue_data.user_id");
         return $this->course_db->rows();
     }
 
-    public function getQueueData($group_by_queue) {
-      //This function does concatinate a string that is then used as a sql comamnd
-      //For future editors, make sure you dont allow this function to ever accept
-      //User input, everything should be hard coded to avoid sql injection
-        $query = "";
-        $query .= "SELECT ";
-        if ($group_by_queue) {
-            $query .= "queue_code, ";
-        }
-        $query .= " COUNT(*) AS queue_interactions,
+    public function getQueueDataOverall() {
+        $this->course_db->query("SELECT
+                 COUNT(*) AS queue_interactions,
                  COUNT(DISTINCT user_id) AS number_distinct_students,
-                 AVG(time_out - time_in) AS avg_turnaround_time,
-                 MIN(time_out - time_in) AS min_turnaround_time,
-                 MAX(time_out - time_in) AS max_turnaround_time,
+                 AVG(time_out - time_help_start) AS avg_help_time,
+                 MIN(time_out - time_help_start) AS min_help_time,
+                 MAX(time_out - time_help_start) AS max_help_time,
                  AVG(time_help_start - time_in) AS avg_wait_time,
                  MIN(time_help_start - time_in) AS min_wait_time,
                  MAX(time_help_start - time_in) AS max_wait_time,
@@ -5883,12 +5876,154 @@ AND gc_id IN (
                    WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                    ELSE 0
                  END) AS not_helped_count
-               FROM queue ";
-        if ($group_by_queue) {
-            $query .= " GROUP BY queue_code
-                    ORDER BY queue_code ";
-        }
-        $this->course_db->query($query);
+               FROM queue"
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataToday() {
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $this->course_db->query("SELECT
+                 COUNT(*) AS queue_interactions,
+                 COUNT(DISTINCT user_id) AS number_distinct_students,
+                 AVG(time_out - time_help_start) AS avg_help_time,
+                 MIN(time_out - time_help_start) AS min_help_time,
+                 MAX(time_out - time_help_start) AS max_help_time,
+                 AVG(time_help_start - time_in) AS avg_wait_time,
+                 MIN(time_help_start - time_in) AS min_wait_time,
+                 MAX(time_help_start - time_in) AS max_wait_time,
+                 SUM(CASE
+                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                   ELSE 0
+                 END) AS help_count,
+                 SUM(CASE
+                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                   ELSE 0
+                 END) AS not_helped_count
+               FROM queue
+               WHERE time_in > ?",
+               [$current_date]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByQueue() {
+        $this->course_db->query("SELECT
+                 queue_code,
+                 COUNT(*) AS queue_interactions,
+                 COUNT(DISTINCT user_id) AS number_distinct_students,
+                 AVG(time_out - time_help_start) AS avg_help_time,
+                 MIN(time_out - time_help_start) AS min_help_time,
+                 MAX(time_out - time_help_start) AS max_help_time,
+                 AVG(time_help_start - time_in) AS avg_wait_time,
+                 MIN(time_help_start - time_in) AS min_wait_time,
+                 MAX(time_help_start - time_in) AS max_wait_time,
+                 SUM(CASE
+                   WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                   ELSE 0
+                 END) AS help_count,
+                 SUM(CASE
+                   WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                   ELSE 0
+                 END) AS not_helped_count
+               FROM queue
+               GROUP BY queue_code
+               ORDER BY queue_code"
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByWeekDay() {
+        $this->course_db->query("SELECT
+              dow,
+              COUNT(*) AS queue_interactions,
+              COUNT(DISTINCT user_id) AS number_distinct_students,
+              AVG(time_out - time_help_start) AS avg_help_time,
+              MIN(time_out - time_help_start) AS min_help_time,
+              MAX(time_out - time_help_start) AS max_help_time,
+              AVG(time_help_start - time_in) AS avg_wait_time,
+              MIN(time_help_start - time_in) AS min_wait_time,
+              MAX(time_help_start - time_in) AS max_wait_time,
+              SUM(CASE
+                WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                ELSE 0
+              END) AS help_count,
+              SUM(CASE
+                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                ELSE 0
+              END) AS not_helped_count
+            FROM (SELECT
+              *,
+              extract(dow from time_in) AS dow
+            FROM queue) AS dow_queue
+            GROUP BY dow
+            ORDER BY dow"
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByWeekDayThisWeek() {
+        $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
+        $this->course_db->query("SELECT
+              dow,
+              COUNT(*) AS queue_interactions,
+              COUNT(DISTINCT user_id) AS number_distinct_students,
+              AVG(time_out - time_help_start) AS avg_help_time,
+              MIN(time_out - time_help_start) AS min_help_time,
+              MAX(time_out - time_help_start) AS max_help_time,
+              AVG(time_help_start - time_in) AS avg_wait_time,
+              MIN(time_help_start - time_in) AS min_wait_time,
+              MAX(time_help_start - time_in) AS max_wait_time,
+              SUM(CASE
+                WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                ELSE 0
+              END) AS help_count,
+              SUM(CASE
+                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                ELSE 0
+              END) AS not_helped_count
+            FROM (SELECT
+                *,
+                extract(dow from time_in) AS dow
+                FROM queue
+                WHERE extract(WEEK from time_in) = extract(WEEK from ?::DATE)
+            )
+            AS dow_queue
+            GROUP BY dow
+            ORDER BY dow",
+            [$current_date]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getQueueDataByWeekNumber() {
+        $this->course_db->query("SELECT
+              weeknum,
+      			  min(yearnum) as yearnum,
+              COUNT(*) AS queue_interactions,
+              COUNT(DISTINCT user_id) AS number_distinct_students,
+              AVG(time_out - time_help_start) AS avg_help_time,
+              MIN(time_out - time_help_start) AS min_help_time,
+              MAX(time_out - time_help_start) AS max_help_time,
+              AVG(time_help_start - time_in) AS avg_wait_time,
+              MIN(time_help_start - time_in) AS min_wait_time,
+              MAX(time_help_start - time_in) AS max_wait_time,
+              SUM(CASE
+                WHEN removal_type IN ('helped', 'self_helped') THEN 1
+                ELSE 0
+              END) AS help_count,
+              SUM(CASE
+                WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
+                ELSE 0
+              END) AS not_helped_count
+            FROM (SELECT
+              *,
+              extract(WEEK from time_in) AS weeknum,
+			        extract(YEAR from time_in) AS yearnum
+            FROM queue) AS weeknum_queue
+            GROUP BY weeknum
+            ORDER BY weeknum"
+        );
         return $this->course_db->rows();
     }
 

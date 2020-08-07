@@ -38,7 +38,7 @@ class OfficeHoursQueueView extends AbstractView {
     }
 
     public function showQueueStats($viewer) {
-        $this->core->getOutput()->addBreadcrumb("Office Hours/Lab Queue");
+        $this->core->getOutput()->addBreadcrumb("Office Hours/Lab Queue", $this->core->buildCourseUrl(["office_hours_queue"]));
         $this->core->getOutput()->addBreadcrumb("Statistics");
         $this->core->getOutput()->enableMobileViewport();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
