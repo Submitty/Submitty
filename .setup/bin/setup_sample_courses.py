@@ -553,6 +553,7 @@ class User(object):
     def __init__(self, user):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
+        self.anon_id = generate_random_user_id(15)
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -784,7 +785,7 @@ class Course(object):
                 users_table.c.anon_id: bindparam('anon_id')
             }).where(users_table.c.user_id == bindparam('b_user_id'))
 
-            self.conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
+            self.conn.execute(update, rotating_section=rot_section, anon_id=user.anon_id, b_user_id=user.id)
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(user.get_detail(self.code,"grading_registration_section"))
