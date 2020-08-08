@@ -1,6 +1,13 @@
 class SelectorWidget extends Widget {
-    constructor() {
+    /**
+     * A widget which facilitates the adding of other widgets to the form
+     *
+     * @param {NotebookBuilder} instantiator
+     */
+    constructor(instantiator) {
         super();
+        
+        this.instantiator = instantiator;
 
         this.options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
     }
@@ -15,16 +22,16 @@ class SelectorWidget extends Widget {
         interactive_container.addEventListener('click', event => {
             switch (event.target.value) {
                 case 'Multiple Choice':
-                    notebook_builder.widgetAdd(new MultipleChoiceWidget());
+                    this.instantiator.widgetAdd(new MultipleChoiceWidget());
                     break;
                 case 'Markdown':
-                    notebook_builder.widgetAdd(new MarkdownWidget());
+                    this.instantiator.widgetAdd(new MarkdownWidget());
                     break;
                 case 'Short Answer':
-                    notebook_builder.widgetAdd(new ShortAnswerWidget());
+                    this.instantiator.widgetAdd(new ShortAnswerWidget());
                     break;
                 case 'Image':
-                    notebook_builder.widgetAdd(new ImageWidget());
+                    this.instantiator.widgetAdd(new ImageWidget());
                     break;
                 default:
                     break;

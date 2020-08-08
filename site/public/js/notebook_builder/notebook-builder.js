@@ -1,19 +1,25 @@
-// Attach notebook_builder object to the window
-window.addEventListener('DOMContentLoaded', (event) => {
-    window.notebook_builder = new NotebookBuilder();
-});
-
 class NotebookBuilder {
-    constructor() {
+    /**
+     * Create a notebook builder object.  These objects are used at the root of the notebook builder form, but also
+     * useful inside inside itempool widgets as itempools are similar to a notebook inside a notebook.
+     *
+     * @param {HTMLDivElement} attachment_div Notebook builder widgets will be attached to this div.
+     * @param {Boolean} is_itempool Indicates if this object is being used as part of an itempool widget.
+     */
+    constructor(attachment_div, is_itempool) {
         // Setup object properties
         this.reorderable_widgets = [];
-        this.selector = new SelectorWidget();
-        this.form_options = new FormOptionsWidget();
+        this.reorderable_widgets_div = document.createElement('div');
 
-        // Setup fixed position widgets
-        const main_div = document.getElementById('notebook-builder');
-        main_div.appendChild(this.selector.render());
-        main_div.appendChild(this.form_options.render());
+        this.selector = new SelectorWidget(this);
+
+        attachment_div.appendChild(this.reorderable_widgets_div);
+        attachment_div.appendChild(this.selector.render());
+
+        if (!is_itempool) {
+            this.form_options = new FormOptionsWidget();
+            attachment_div.appendChild(this.form_options.render());
+        }
 
         // Load and render reorderable notebook widgets
         this.load();
@@ -73,8 +79,7 @@ class NotebookBuilder {
     widgetAdd(widget) {
         this.reorderable_widgets.push(widget);
 
-        const widgets_div = document.getElementById('reorderable-widgets');
-        widgets_div.appendChild(widget.render());
+        this.reorderable_widgets_div.appendChild(widget.render());
 
         // Codemirror boxes inside the ShortAnswerWidget require special handling
         // Codeboxes won't render correctly unless refreshed AFTER appended to the dom
