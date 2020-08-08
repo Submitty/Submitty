@@ -62,7 +62,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
- * @method bool isPeerGrading()
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet($grade_set)
@@ -168,8 +167,6 @@ class Gradeable extends AbstractModel {
     protected $student_view_after_grades = false;
     /** @prop @var bool If students can make submissions */
     protected $student_submit = false;
-    /** @prop @var bool If the gradeable uses peer grading */
-    protected $peer_grading = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
     /** @prop @var bool If submission after student's max deadline
@@ -253,8 +250,6 @@ class Gradeable extends AbstractModel {
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
-            $this->setPeerGrading($details['peer_grading']);
-            $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
@@ -787,7 +782,8 @@ class Gradeable extends AbstractModel {
     }
 
     public function getStringThreadIds() {
-        return $this->isDiscussionBased() ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
+        return $this->isDiscussionBased() && is_array(json_decode($this->getDiscussionThreadId()))
+            ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
     }
 
     /**
@@ -1083,11 +1079,6 @@ class Gradeable extends AbstractModel {
         ]);
         $this->components[] = $component;
 
-        // If we added a peer component, we are now guaranteed to be a peer gradeable.
-        if ($component->isPeer()) {
-            $this->setPeerGrading(true);
-        }
-
         return $component;
     }
 
@@ -1128,16 +1119,6 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
-
-        //Check if we have any peer components remaining
-        $still_peer = false;
-        foreach ($this->components as $c) {
-            if ($c->isPeer()) {
-                $still_peer = true;
-                break;
-            }
-        }
-        $this->setPeerGrading($still_peer);
     }
 
     /**
@@ -1636,6 +1617,15 @@ class Gradeable extends AbstractModel {
             }
         }
         return $total;
+    }
+    
+    public function isPeerGrading() {
+        foreach ($this->getComponents() as $component) {
+            if ($component->isPeer()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
