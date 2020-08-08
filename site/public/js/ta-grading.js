@@ -359,6 +359,28 @@ function updateCookies(){
 
 //-----------------------------------------------------------------------------
 // Student navigation
+function gotoMainPage() {
+
+  let selector;
+  let window_location;
+
+  selector = "#main-page";
+  window_location = $(selector)[0].dataset.href
+
+  if (getGradeableId() !== '') {
+    closeAllComponents(true).then(function () {
+      window.location = window_location;
+    }).catch(function () {
+      if (confirm("Could not save open component, go to main page anyway?")) {
+        window.location = window_location;
+      }
+    });
+  }
+  else {
+    window.location = window_location;
+  }
+}
+
 function gotoPrevStudent(to_ungraded = false) {
 
     var selector;
