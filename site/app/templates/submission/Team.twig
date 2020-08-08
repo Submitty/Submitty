@@ -120,13 +120,13 @@
                 <br />
                 {% if user.getSeekMessage(gradeable.getId()) != "N/A" %}
                     <form action="{{ set_message_url }}" method="post">
-                        <textarea id="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message">{{ user.getSeekMessage(gradeable.getId()) }}</textarea>
+                        <textarea name="seek_message" class="autoExpand" style="overflow:hidden;" rows='2' cols='30' placeholder="Seeking Message">{{ user.getSeekMessage(gradeable.getId()) }}</textarea>
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                         <input type="submit" value = "Edit Message" class="btn btn-primary" />
                         <input type="button" onclick="location.href='{{ remove_message_url }}'" value = "Remove Message" class="btn btn-danger" />
                     </form>
                     <script>
-                        var textarea = document.getElementById('seek_message');
+                        var textarea = document.getElementsByName('seek_message')[0];
                         textarea.style.height = textarea.scrollHeight + 'px';
                     </script>
                 {% else %}
