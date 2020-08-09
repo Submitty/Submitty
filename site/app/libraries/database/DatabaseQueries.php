@@ -3468,11 +3468,6 @@ SQL;
         return $return;
     }
 
-    public function getPeerGradingAssignNumber($g_id) {
-        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", [$g_id]);
-        return $this->course_db->rows()[0]['eg_peer_grade_set'];
-    }
-
     public function getNumPeerComponents($g_id) {
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE gc_is_peer='t' and g_id=?", [$g_id]);
         return intval($this->course_db->rows()[0]['cnt']);
@@ -4241,8 +4236,6 @@ AND gc_id IN (
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
-                  eg_peer_grading AS peer_grading,
-                  eg_peer_grade_set AS peer_grade_set,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
@@ -4898,8 +4891,6 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
-                $gradeable->isPeerGrading(),
-                $gradeable->getPeerGradeSet(),
                 DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                 $gradeable->isRegradeAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
@@ -4928,15 +4919,13 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
-                  eg_peer_grading,
-                  eg_peer_grade_set,
                   eg_regrade_request_date,
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5046,8 +5035,6 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    $gradeable->isPeerGrading(),
-                    $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     $gradeable->isRegradeAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
@@ -5076,8 +5063,6 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
-                      eg_peer_grading=?,
-                      eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
@@ -5823,10 +5808,6 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", [$token, $queue_code]);
     }
 
-    public function getLastQueueUpdate() {
-        $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
-        return $this->course_db->rows()[0]['change_count'];
-    }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');
