@@ -36,7 +36,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             const attachment_div = document.getElementById('notebook-builder');
             attachment_div.innerHTML = '';
-            window.notebook_builder = new NotebookBuilder(attachment_div, false);
+            window.notebook_builder = new RootBuilder(attachment_div);
         });
     </script>
 

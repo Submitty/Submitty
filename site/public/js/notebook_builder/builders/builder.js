@@ -1,12 +1,5 @@
-class NotebookBuilder {
-    /**
-     * Create a notebook builder object.  These objects are used at the root of the notebook builder form, but also
-     * useful inside inside itempool widgets as itempools are similar to a notebook inside a notebook.
-     *
-     * @param {HTMLDivElement} attachment_div Notebook builder widgets will be attached to this div.
-     * @param {Boolean} is_itempool Indicates if this object is being used as part of an itempool widget.
-     */
-    constructor(attachment_div, is_itempool) {
+class Builder {
+    constructor(attachment_div) {
         // Setup object properties
         this.reorderable_widgets = [];
         this.reorderable_widgets_div = document.createElement('div');
@@ -15,14 +8,6 @@ class NotebookBuilder {
 
         attachment_div.appendChild(this.reorderable_widgets_div);
         attachment_div.appendChild(this.selector.render());
-
-        if (!is_itempool) {
-            this.form_options = new FormOptionsWidget();
-            attachment_div.appendChild(this.form_options.render());
-        }
-
-        // Load and render reorderable notebook widgets
-        this.load();
     }
 
     /**
