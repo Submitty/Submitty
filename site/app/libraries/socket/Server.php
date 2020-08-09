@@ -231,7 +231,7 @@ class Server implements MessageComponentInterface {
             $from->close();
         }
         else {
-            $this->broadcast($from, $msgString, $msg['page']);
+            $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
         }
     }
 
