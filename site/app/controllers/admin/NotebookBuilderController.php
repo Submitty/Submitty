@@ -121,7 +121,7 @@ class NotebookBuilderController extends AbstractController {
      */
     private function loadDependencies(): void {
         // Builders
-        $this->core->getOutput()->addInternalJs('notebook_builder/builders/builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/builders/abstract-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/builders/root-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/builders/itempool-builder.js');
 

@@ -2,7 +2,7 @@ class SelectorWidget extends Widget {
     /**
      * A widget which facilitates the adding of other widgets to the form
      *
-     * @param {NotebookBuilder} instantiator
+     * @param {RootBuilder|ItempoolBuilder} instantiator
      */
     constructor(instantiator) {
         super();
@@ -10,6 +10,10 @@ class SelectorWidget extends Widget {
         this.instantiator = instantiator;
 
         this.options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
+
+        if (instantiator.constructor.name === 'RootBuilder') {
+            this.options.push('Itempool');
+        }
     }
 
     render() {

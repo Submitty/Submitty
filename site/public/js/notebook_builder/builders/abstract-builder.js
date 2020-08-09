@@ -1,6 +1,5 @@
-class Builder {
+class AbstractBuilder {
     constructor(attachment_div) {
-        // Setup object properties
         this.reorderable_widgets = [];
         this.reorderable_widgets_div = document.createElement('div');
 
