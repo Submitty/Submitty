@@ -212,3 +212,31 @@
     display: flex;
     margin-bottom: 15px;
 }
+
+/**
+ * Itempool widget styles
+ */
+.itempool-widget {
+    border: 3px solid black;
+}
+
+.itempool-widget .selector-widget,
+.itempool-widget .multiple-choice-widget,
+.itempool-widget .image-widget,
+.itempool-widget .markdown-widget,
+.itempool-widget .short-answer-widget {
+    background-color: darkgray;
+}
+
+.itempool-widget .interactive-container {
+    flex-direction: column;
+}
+
+.itempool-widget .selector-widget .interactive-container {
+    flex-direction: row;
+}
+
+.itempool-widget .multiple-choice-widget .interactive-container {
+    flex-direction: row;
+}
+

@@ -3,6 +3,8 @@ class ItempoolWidget extends Widget {
         super();
 
         this.dom_pointer;
+
+        this.itempool_builder;
     }
 
     render() {
@@ -12,6 +14,7 @@ class ItempoolWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
+        this.itempool_builder = new ItempoolBuilder(interactive_area);
 
         this.dom_pointer = container;
         return container;

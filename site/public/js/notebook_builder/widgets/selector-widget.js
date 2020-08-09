@@ -37,12 +37,23 @@ class SelectorWidget extends Widget {
                 case 'Image':
                     this.instantiator.widgetAdd(new ImageWidget());
                     break;
+                case 'Itempool':
+                    this.instantiator.widgetAdd(new ItempoolWidget());
+                    break;
                 default:
                     break;
             }
         });
 
-        const heading_container = this.getHeadingContainer('Add New Notebook Cell');
+        let heading_text;
+        if (this.instantiator.constructor.name === 'RootBuilder') {
+            heading_text = 'Add New Notebook Cell';
+        }
+        else if (this.instantiator.constructor.name === 'ItempoolBuilder') {
+            heading_text = 'Add Itempool Item';
+        }
+
+        const heading_container = this.getHeadingContainer(heading_text);
 
         const container = document.createElement('div');
         container.classList.add('notebook-builder-widget');
