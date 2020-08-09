@@ -332,11 +332,9 @@ function updateCookies(){
 // Student navigation
 function gotoMainPage() {
 
-  let selector;
   let window_location;
 
-  selector = "#main-page";
-  window_location = $(selector)[0].dataset.href
+  window_location = $("#main-page")[0].dataset.href
 
   console.log(window_location);
   if (getGradeableId() !== '') {
