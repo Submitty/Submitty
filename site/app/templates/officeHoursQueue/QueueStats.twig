@@ -2,15 +2,25 @@
   <h1>
     Office Hours/Lab Queue Statistics
   </h1>
-  <!-- <select id="queue_code" class="form-control" name="queue_code" aria-label="Queue Code" required="required"> <option value="all">All Queues</option> {% for queue in viewer.getAllQueuesEver() %} <option value="queue
-  {{queue['queue_code']}}">{{queue['queue_code']}}</option> {% endfor %} </select> -->
+
+  <a id="view_stats" class="btn btn-primary filter_btn" type="button" href="{{base_url}}">
+    Back to Queue
+  </a>
+
+  {% if viewer.accessFullGrading() %}
+    <a id="view_stats" class="btn btn-default filter_btn" type="button" href="{{base_url}}/student_stats">
+      View Student Specific Stats
+    </a>
+    <br>
+    <br>
+  {% endif %}
 
   <h2>Overall Data:</h2>
   <table class="table">
     <thead>
       <tr>
         {% for key, item in viewer.getQueueDataOverall()[0] %}
-          <th style="padding:.4rem">{{key}}</th>
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -30,7 +40,7 @@
     <thead>
       <tr>
         {% for key, item in viewer.getQueueDataToday()[0] %}
-          <th style="padding:.4rem">{{key}}</th>
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -51,7 +61,7 @@
     <thead>
       <tr>
         {% for key, item in viewer.getQueueDataByWeekDayThisWeek()[0] %}
-          <th style="padding:.4rem">{{key}}</th>
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -76,7 +86,7 @@
     <thead>
       <tr>
         {% for key, item in viewer.getQueueDataByWeekDay()[0] %}
-          <th style="padding:.4rem">{{key}}</th>
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -101,7 +111,7 @@
     <thead>
       <tr>
         {% for key, item in viewer.getQueueDataByQueue()[0] %}
-          <th style="padding:.4rem">{{key}}</th>
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -124,7 +134,7 @@
         {% for key, item in viewer.getQueueDataByWeekNumber()[0] %}
           {% if key == "yearnum" %}
           {% else %}
-            <th style="padding:.4rem">{{key}}</th>
+            <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
           {% endif %}
         {% endfor %}
       </tr>
@@ -137,31 +147,6 @@
             {% elseif key == "weeknum" %}
               <td>{{viewer.weekNumToDate(item, weekdata["yearnum"])}}</td>
             {% else %}
-              <td>{{item}}</td>
-            {% endif %}
-          {% endfor %}
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <br>
-  <h2>Student Data:</h2>
-  <table class="table">
-    <thead>
-      <tr>
-        {% for key, item in viewer.getQueueDataStudent()[0] %}
-          {% if key != 'user_id' %}
-            <th style="padding:.4rem">{{key}}</th>
-          {% endif %}
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for student in viewer.getQueueDataStudent() %}
-        <tr>
-          {% for key, item in student %}
-            {% if key != 'user_id' %}
               <td>{{item}}</td>
             {% endif %}
           {% endfor %}

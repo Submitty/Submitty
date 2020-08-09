@@ -28,6 +28,31 @@ class OfficeHoursQueueModel extends AbstractModel {
     private $full_history;
     private $current_queue_state;
     private $colors = ['#c98ee4','#9fcc55','#ea79a1','#4ed78e','#ef7568','#38b3eb','#e09965','#8499e3','#83cc88','#d9ab39','#4ddcc0','#b9c673','#658bfb','#76cc6c','#dc8b3d','#c9bf5d','#5499f0','#9a89f0','#e57fcf','#c0c246'];
+    private $days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ];
+    private $niceNames = [
+      'dow' => 'Day',
+      'queue_interactions' => 'Total Interactions',
+      'number_distinct_students' => 'Distinct Students',
+      'avg_help_time' => 'Avg Help Time',
+      'min_help_time' => 'Min Help Time',
+      'max_help_time' => 'Max Help Time',
+      'avg_wait_time' => 'Avg Wait Time',
+      'min_wait_time' => 'Min Wait Time',
+      'max_wait_time' => 'Max Wait Time',
+      'help_count' => 'Helps',
+      'not_helped_count' => 'Unhelped Students',
+      'queue_code' => 'Queue',
+      'weeknum' => 'Week',
+    ];
+
 
     /**
      * OfficeHoursQueueModel constructor.
@@ -263,16 +288,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function dayNumToDay($daynum){
-      $days = [
-          'Sunday',
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday'
-      ];
-      return $days[$daynum];
+      return $this->days[$daynum];
     }
 
     public function getQueueDataByWeekNumber() {
@@ -283,5 +299,12 @@ class OfficeHoursQueueModel extends AbstractModel {
       $week_start = new DateTime();
       $week_start->setISODate($yearnum,$weeknum);
       return $week_start->format('Y-M-d');
+    }
+
+    public function statNiceName($name){
+      if (array_key_exists($name, $this->niceNames)) {
+        return $this->niceNames[$name];
+      }
+      return $name;
     }
 }
