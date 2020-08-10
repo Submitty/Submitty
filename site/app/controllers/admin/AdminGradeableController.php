@@ -873,8 +873,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'limited_access_blind' === false,
-                'peer_blind' === 2
+                'limited_access_blind' => 1,
+                'peer_blind' => 3
             ]);
         }
         else {
