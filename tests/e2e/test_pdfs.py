@@ -17,8 +17,8 @@ class TestPDFs(BaseTestCase):
     def test_pdf_team_access(self):
         self.switch_settings("Limited Access Grader")
         self.pdf_access("instructor", "1", "8", "grading_homework_team_pdf", "words_881.pdf", "1")
-        self.pdf_access("ta", "1", "8", "grading_homework_team_pdf", "words_881.pdf", "1")
-        self.pdf_access("grader","1", "8", "grading_homework_team_pdf", "words_881.pdf", "1")
+        self.pdf_access("ta", "1", "6", "grading_homework_team_pdf", "words_881.pdf", "1")
+        self.pdf_access("grader","1", "6", "grading_homework_team_pdf", "words_881.pdf", "1")
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")    
     def test_pdf_peer_access(self):
         self.switch_settings("Limited Access Grader")
@@ -30,9 +30,9 @@ class TestPDFs(BaseTestCase):
     def test_pdf_peer_team_access(self):
         self.switch_settings("Limited Access Grader")
         self.pdf_access("instructor", "2", "8", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
-        self.pdf_access("ta", "2", "8", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
-        self.pdf_access("grader", "2", "8", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
-        self.pdf_access("bauchg", "0", "5", "grading_pdf_peer_team_homework", "words_881.pdf", "1")
+        self.pdf_access("ta", "2", "6", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
+        self.pdf_access("grader", "2", "6", "grading_pdf_peer_team_homework", "words_1463.pdf", "1")
+        self.pdf_access("bauchg", "1", "5", "grading_pdf_peer_team_homework", "words_881.pdf", "1")
     def pdf_access(self, user_id, tr_number, td_number, gradeable_id, pdf_name, version):
         self.log_out()
         self.log_in(user_id=user_id)
