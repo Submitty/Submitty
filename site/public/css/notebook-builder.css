@@ -225,7 +225,11 @@
 .itempool-widget .image-widget,
 .itempool-widget .markdown-widget,
 .itempool-widget .short-answer-widget {
-    background-color: darkgray;
+}
+
+.itempool-widget .group-buttons {
+    display: flex;
+    justify-content: space-around;
 }
 
 .itempool-widget .interactive-container {

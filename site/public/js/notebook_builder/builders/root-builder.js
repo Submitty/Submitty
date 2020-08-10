@@ -3,8 +3,8 @@
  * time.
  */
 class RootBuilder extends AbstractBuilder {
-    constructor(attachment_div) {
-        super(attachment_div);
+    constructor(attachment_div, selector_heading) {
+        super(attachment_div, selector_heading);
 
         this.form_options = new FormOptionsWidget();
         attachment_div.appendChild(this.form_options.render());

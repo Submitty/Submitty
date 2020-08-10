@@ -1,9 +1,9 @@
 class AbstractBuilder {
-    constructor(attachment_div) {
+    constructor(attachment_div, selector_heading) {
         this.reorderable_widgets = [];
         this.reorderable_widgets_div = document.createElement('div');
 
-        this.selector = new SelectorWidget(this);
+        this.selector = new SelectorWidget(this, selector_heading);
 
         attachment_div.appendChild(this.reorderable_widgets_div);
         attachment_div.appendChild(this.selector.render());

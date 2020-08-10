@@ -3,11 +3,14 @@ class SelectorWidget extends Widget {
      * A widget which facilitates the adding of other widgets to the form
      *
      * @param {RootBuilder|ItempoolBuilder} instantiator
+     * @param {String} heading_text Heading text to show in the selector widget
      */
-    constructor(instantiator) {
+    constructor(instantiator, heading_text) {
         super();
         
         this.instantiator = instantiator;
+
+        this.heading_text = heading_text;
 
         this.options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
 
@@ -45,15 +48,7 @@ class SelectorWidget extends Widget {
             }
         });
 
-        let heading_text;
-        if (this.instantiator.constructor.name === 'RootBuilder') {
-            heading_text = 'Add New Notebook Cell';
-        }
-        else if (this.instantiator.constructor.name === 'ItempoolBuilder') {
-            heading_text = 'Add Itempool Item';
-        }
-
-        const heading_container = this.getHeadingContainer(heading_text);
+        const heading_container = this.getHeadingContainer(this.heading_text);
 
         const container = document.createElement('div');
         container.classList.add('notebook-builder-widget');
