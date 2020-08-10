@@ -239,7 +239,7 @@ class GradedComponentContainer extends AbstractModel {
         foreach ($this->graded_components as $graded_component) {
             // If there is a grader, we are only computing their total score rather than the total score for all peers.
             if ($graded_component->getGrader()->getGroup() < User::GROUP_STUDENT) {
-                if($graded_component->isPeer()){
+                if ($graded_component->isPeer()) {
                 }
                 else {
                     $points_earned += $graded_component->getTotalScore();
@@ -249,7 +249,6 @@ class GradedComponentContainer extends AbstractModel {
                 $points_earned = 0;
                 $number_of_graders = 0;
             }
-            
         }
         // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
         // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
