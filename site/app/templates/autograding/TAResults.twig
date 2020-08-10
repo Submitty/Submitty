@@ -96,8 +96,8 @@ $( document ).ready(function() {
                         <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
                             <b>Annotated Feedback</b>
                             </br>
-                            {% for file in files %}
-                                {% if file.name in annotated_file_names %}
+                            {% for file in uploaded_pdfs %}
+                                {% if file.encoded_name in annotated_file_names %}
                                     {% if loop.index != uploaded_pdfs|length %}
                                         <div style="margin-bottom: 2em">
                                             {{ file.relative_name }}
@@ -110,13 +110,9 @@ $( document ).ready(function() {
                         </div>
                         <div class="no-border-box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
                             {% for file in uploaded_pdfs %}
-                                {% if file.name in annotated_file_names %}
+                                {% if file.encoded_name in annotated_file_names %}
                                     <p style="text-align:center; vertical-align: middle;">
-                                        {% if loop.index != uploaded_pdfs|length %}
-                                            <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        {% else %}
-                                            <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        {% endif %}
+                                        <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
                                         {% if can_download %}
                                             <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
                                             <i class="fas fa-download" title="Download the file"></i></button>
