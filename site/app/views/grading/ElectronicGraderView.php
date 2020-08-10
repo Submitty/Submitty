@@ -1257,12 +1257,27 @@ HTML;
             return '';
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
-//        var_dump($solution_array);
-        $que_part_ids = [1,2,3,4,5]; // TODO update this
+        $rubric_components_1 = [1];
+        $components = [];
+        $r_components = $gradeable->getComponents();
+
+        foreach ($r_components as $key => $value) {
+            $id = $value->getId();
+            $solution_components[] = [
+                'id' => $id,
+                'title' => $value->getTitle(),
+                'is_first_edit' => !isset($solution_array[$id]),
+                'author' => isset($solution_array[$id]) ? $solution_array[$id][0]['author'] : '',
+                'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id][0]['solution_notes'] : '',
+                'edited_at' => isset($solution_array[$id]) ? $solution_array[$id][0]['edited_at'] : null,
+                'max_points' => $value->getUpperClamp(),
+                'min_points' => $value->getLowerClamp(),
+            ];
+        }
+//        var_dump(count($r_components));
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),
-            'que_part_ids' => $que_part_ids,
-            'solution_array' => $solution_array,
+            'solution_components' => $solution_components,
         ]);
     }
 
