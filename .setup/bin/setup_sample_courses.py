@@ -553,7 +553,7 @@ class User(object):
     def __init__(self, user):
         self.id = user['user_id']
         self.numeric_id = user['user_numeric_id']
-        self.anon_id = generate_random_user_id(15)
+        self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
         self.lastname = user['user_lastname']
@@ -1088,7 +1088,7 @@ class Course(object):
             gradeable_teams_table.c['team_id'] == unique_team_id)
             res = self.conn.execute(team_in_other_gradeable)
             num = res.rowcount
-            while num != 0:
+            while num is not 0:
                 ucounter+=1
                 unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
                 team_in_other_gradeable = select([gradeable_teams_table]).where(
@@ -1452,7 +1452,7 @@ class Gradeable(object):
             self.title = self.id.replace("_", " ").title()
 
         if 'g_grader_assignment_method' in gradeable:
-            self.grade_by_registration = gradeable['g_grader_assignment_method'] == 1
+            self.grade_by_registration = gradeable['g_grader_assignment_method'] is 1
             self.grader_assignment_method = gradeable['g_grader_assignment_method']
 
         if 'grading_rotating' in gradeable:
