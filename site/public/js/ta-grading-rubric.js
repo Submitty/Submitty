@@ -1364,7 +1364,7 @@ function getTaGradingTotal() {
     return total;
 }
 /**
- * Gets the number of ta grading points that can be earned
+ * Gets the number of Peer grading points that can be earned
  * @return {number}
  */
 function getPeerGradingTotal() {

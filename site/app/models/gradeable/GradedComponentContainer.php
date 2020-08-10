@@ -240,7 +240,6 @@ class GradedComponentContainer extends AbstractModel {
             // If there is a grader, we are only computing their total score rather than the total score for all peers.
             if ($graded_component->getGrader()->getGroup() < User::GROUP_STUDENT) {
                 if($graded_component->isPeer()){
-                    continue;
                 }
                 else {
                     $points_earned += $graded_component->getTotalScore();
