@@ -287,24 +287,24 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueDataByWeekDayThisWeek();
     }
 
-    public function dayNumToDay($daynum){
-      return $this->days[$daynum];
+    public function dayNumToDay($daynum) {
+        return $this->days[$daynum];
     }
 
     public function getQueueDataByWeekNumber() {
         return $this->core->getQueries()->getQueueDataByWeekNumber();
     }
 
-    public function weekNumToDate($weeknum, $yearnum){
-      $week_start = new DateTime();
-      $week_start->setISODate($yearnum,$weeknum);
-      return $week_start->format('Y-M-d');
+    public function weekNumToDate($weeknum, $yearnum) {
+        $week_start = new DateTime();
+        $week_start->setISODate($yearnum, $weeknum);
+        return $week_start->format('Y-M-d');
     }
 
-    public function statNiceName($name){
-      if (array_key_exists($name, $this->niceNames)) {
-        return $this->niceNames[$name];
-      }
-      return $name;
+    public function statNiceName($name) {
+        if (array_key_exists($name, $this->niceNames)) {
+            return $this->niceNames[$name];
+        }
+        return $name;
     }
 }

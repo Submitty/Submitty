@@ -5876,14 +5876,14 @@ AND gc_id IN (
                    WHEN removal_type IN ('removed', 'emptied', 'self') THEN 1
                    ELSE 0
                  END) AS not_helped_count
-               FROM queue"
-        );
+               FROM queue");
         return $this->course_db->rows();
     }
 
     public function getQueueDataToday() {
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
-        $this->course_db->query("SELECT
+        $this->course_db->query(
+            "SELECT
                  COUNT(*) AS queue_interactions,
                  COUNT(DISTINCT user_id) AS number_distinct_students,
                  AVG(time_out - time_help_start) AS avg_help_time,
@@ -5902,7 +5902,7 @@ AND gc_id IN (
                  END) AS not_helped_count
                FROM queue
                WHERE time_in > ?",
-               [$current_date]
+            [$current_date]
         );
         return $this->course_db->rows();
     }
@@ -5928,8 +5928,7 @@ AND gc_id IN (
                  END) AS not_helped_count
                FROM queue
                GROUP BY queue_code
-               ORDER BY queue_code"
-        );
+               ORDER BY queue_code");
         return $this->course_db->rows();
     }
 
@@ -5957,14 +5956,14 @@ AND gc_id IN (
               extract(dow from time_in) AS dow
             FROM queue) AS dow_queue
             GROUP BY dow
-            ORDER BY dow"
-        );
+            ORDER BY dow");
         return $this->course_db->rows();
     }
 
     public function getQueueDataByWeekDayThisWeek() {
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d 00:00:00O');
-        $this->course_db->query("SELECT
+        $this->course_db->query(
+            "SELECT
               dow,
               COUNT(*) AS queue_interactions,
               COUNT(DISTINCT user_id) AS number_distinct_students,
@@ -6022,8 +6021,7 @@ AND gc_id IN (
 			        extract(YEAR from time_in) AS yearnum
             FROM queue) AS weeknum_queue
             GROUP BY weeknum
-            ORDER BY weeknum"
-        );
+            ORDER BY weeknum");
         return $this->course_db->rows();
     }
 
