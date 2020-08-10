@@ -493,18 +493,18 @@ class OfficeHoursQueueController extends AbstractController {
      * @return MultiResponse
      */
     public function showQueueStats() {
-      if (!$this->core->getConfig()->isQueueEnabled()) {
-          return MultiResponse::RedirectOnlyResponse(
-              new RedirectResponse($this->core->buildCourseUrl(['home']))
-          );
-      }
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['home']))
+            );
+        }
 
-      return MultiResponse::WebOnlyResponse(
-          new WebResponse(
-              'OfficeHoursQueue',
-              'showQueueStats',
-              new OfficeHoursQueueModel($this->core)
-          )
+        return MultiResponse::WebOnlyResponse(
+            new WebResponse(
+                'OfficeHoursQueue',
+                'showQueueStats',
+                new OfficeHoursQueueModel($this->core)
+            )
         );
     }
 
