@@ -2,6 +2,7 @@
 
 namespace app\views\submission;
 
+use app\exceptions\NotebookException;
 use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
@@ -56,18 +57,24 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
 
-        // showing submission if user is full grader or student can submit
-        if ($this->core->getUser()->accessFullGrading()) {
-            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-        }
-        elseif ($gradeable->isStudentSubmit()) {
-            if ($gradeable->canStudentSubmit()) {
+        try {
+            // showing submission if user is full grader or student can submit
+            if ($this->core->getUser()->accessFullGrading()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             }
-            else {
-                $return .= $this->renderSubmitNotAllowedBox();
+            elseif ($gradeable->isStudentSubmit()) {
+                if ($gradeable->canStudentSubmit()) {
+                    $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+                }
+                else {
+                    $return .= $this->renderSubmitNotAllowedBox();
+                }
             }
         }
+        catch (NotebookException $e) {
+            return $this->core->getOutput()->renderTwigTemplate('error/GenericError.twig', ['error_messages' => [$e->getMessage()]]);
+        }
+
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessFullGrading() && count($all_directories) > 0) {
             $return .= $this->renderBulkUploadBox($gradeable);

@@ -12,6 +12,7 @@ class OfficeHoursQueueView extends AbstractView {
     public function showTheQueue($viewer) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
@@ -41,6 +42,10 @@ class OfficeHoursQueueView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Statistics");
         $this->core->getOutput()->enableMobileViewport();
         return $this->renderPart($viewer, "officeHoursQueue/QueueStatsStudents.twig");
+    }
+
+    public function renderNewAnnouncement($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/AnnouncementMsg.twig");
     }
 
     private function renderPart($viewer, $twig_location) {

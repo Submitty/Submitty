@@ -23,7 +23,7 @@ class NumberUtils {
         }
 
         $value = floatval($value);
-        $qtnt_f = $value / $precision;
+        $qtnt_f = round($value / $precision, 2);
         $qtnt_i = (int) ($value / $precision);
 
         if ($qtnt_i == $qtnt_f) {
@@ -42,7 +42,7 @@ class NumberUtils {
             $shift = $mod > 0 ? 1 : -1;
         }
 
-        return ($qtnt_i + $shift) * $precision;
+        return round(($qtnt_i + $shift) * $precision, 3);
     }
 
     /**
