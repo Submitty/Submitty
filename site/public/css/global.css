@@ -7,7 +7,7 @@ body {
     background: var(--background-blue);
     color: var(--text-black);
     /*width: 160%;*/
-    overflow: auto;
+    /*overflow: auto;*/
     /*background: #000 !important;*/
 }
 

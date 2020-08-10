@@ -11,44 +11,46 @@
     <div class="row">
         <span class="grading_label">Solution/TA Notes</span>
     </div>
-    {% for key, que_part_id in que_part_ids %}
+    {% for component in solution_components %}
         {{ self.renderSolutionTaNotesCont(
             gradeable_id,
-            que_part_id,
-            solution_array[que_part_id][0]['author'],
-            solution_array[que_part_id][0]['solution_notes'],
-            solution_array[que_part_id][0]['edited_at']
+            component.id,
+            component.is_first_edit,
+            component.title,
+            component.author,
+            component.solution_notes,
+            component.edited_at
         ) }}
     {% endfor %}
 </div>
 
 
-{% macro renderSolutionTaNotesCont(gradeable_id, que_part_id, author, current_solution, time) %}
+{% macro renderSolutionTaNotesCont(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit) %}
 
-    <div id="no-solution-box-{{ que_part_id }}" class="no-sol-box-cont {% if author|length %} hide {% endif %}">
+    <div id="no-solution-box-{{ component_id }}" class="no-sol-box-cont {% if not is_first_edit %} hide {% endif %}">
         <span>
-            No Solutions or TA notes for  {{ que_part_id }} of {{ gradeable_id }}
+            No Solutions or TA notes for  "{{ component_title}}" Component
         </span>
         <br>
         <button type="primary"
                 class="show-sol-btn btn btn-primary"
-                onclick="showSolutionTextboxCont('#sol-textbox-cont-{{ que_part_id }}', '#no-solution-box-{{ que_part_id }}');"
+                onclick="showSolutionTextboxCont('#sol-textbox-cont-{{ component_id }}', '#no-solution-box-{{ component_id }}');"
         >Start Now</button>
     </div>
-    <div id="sol-textbox-cont-{{ que_part_id }}" class="sol-textbox-cont {% if not author|length %} hide {% endif %}">
+    <div id="sol-textbox-cont-{{ component_id }}" class="sol-textbox-cont {% if is_first_edit %} hide {% endif %}">
         <label for="solution-ta-notes-textbox"></label>
-        <textarea id="solution-{{ que_part_id }}"
+        <textarea id="solution-{{ component_id }}"
                   class="solution-ta-notes-textbox"
-                  placeholder={% if not current_solution|length %} 'Start writing the solution for the question - {{ que_part_id }}' {% endif %}
-        >{{ current_solution }}</textarea>
-        {% if author %}
-            <span> Last edited by {{ author }} @ {{ time }}</span>
+                  placeholder='Start writing the solution for "{{ component_title }}" component.'
+        >{{ solution_notes }}</textarea>
+        {% if not is_first_edit %}
+            <span> Last edited by {{ author }} @ {{ last_edit }}</span>
         {% endif %}
         <br>
         <button type="primary"
                 id="save-solution"
                 class="btn btn-primary"
-                onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ que_part_id }}');"
+                onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}');"
         >Update</button>
     </div>
 {% endmacro %}
