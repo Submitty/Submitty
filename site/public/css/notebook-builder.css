@@ -236,6 +236,10 @@
     flex-direction: column;
 }
 
+.itempool-widget .selector-widget {
+    padding: 5px 20px;
+}
+
 .itempool-widget .selector-widget .interactive-container {
     flex-direction: row;
 }

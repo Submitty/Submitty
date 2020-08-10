@@ -33,16 +33,16 @@ class AbstractBuilder {
 
             switch (cell.type) {
                 case 'multiple_choice':
-                    widget = new MultipleChoiceWidget();
+                    widget = new MultipleChoiceWidget(this);
                     break;
                 case 'markdown':
-                    widget = new MarkdownWidget();
+                    widget = new MarkdownWidget(this);
                     break;
                 case 'short_answer':
-                    widget = new ShortAnswerWidget();
+                    widget = new ShortAnswerWidget(this);
                     break;
                 case 'image':
-                    widget = new ImageWidget();
+                    widget = new ImageWidget(this);
                     break;
                 default:
                     break;

@@ -1,10 +1,10 @@
 class ItempoolWidget extends Widget {
-    constructor() {
-        super();
+    constructor(builder) {
+        super(builder);
 
         this.dom_pointer;
 
-        this.builders = [];
+        this.builder;
     }
 
     render() {
@@ -14,15 +14,7 @@ class ItempoolWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
-        interactive_area.innerHTML = this.getTemplate();
-
-        const new_group_btn = interactive_area.querySelector('.new-group-btn');
-        new_group_btn.onclick = () => {
-            const div = document.createElement('div');
-            interactive_area.prepend(div);
-            const builder = new ItempoolBuilder(div, 'Add Itempool Item');
-            this.builders.push(builder);
-        }
+        this.builder = new ItempoolBuilder(interactive_area, 'Add Item to Itempool');
 
         this.dom_pointer = container;
         return container;
@@ -41,15 +33,5 @@ class ItempoolWidget extends Widget {
 
     load(data) {
         this.state = data;
-    }
-
-    getTemplate() {
-        return `
-        <hr />
-        <div class="group-buttons">
-            <button class="new-group-btn">Create New Group</button>
-            <button class="duplicate-group-btn">Duplicate Previous Group</button>
-        </div>
-        `;
     }
 }

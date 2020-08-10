@@ -1,4 +1,8 @@
 class Widget {
+    constructor(builder) {
+        this.builder = builder;
+    }
+
     /**
      * Get the html representation of the widget.
      */
@@ -91,21 +95,21 @@ class Widget {
         // Setup move up button
         const up_button = this.getButton('Up');
         up_button.addEventListener('click', () => {
-            notebook_builder.widgetUp(this);
+            this.builder.widgetUp(this);
         });
         container.appendChild(up_button);
 
         // Setup down button
         const down_button = this.getButton('Down');
         down_button.addEventListener('click', () => {
-            notebook_builder.widgetDown(this);
+            this.builder.widgetDown(this);
         });
         container.appendChild(down_button);
 
         // Setup remove button
         const remove_button = this.getButton('Remove');
         remove_button.addEventListener('click', () => {
-            notebook_builder.widgetRemove(this);
+            this.builder.widgetRemove(this);
         })
         container.appendChild(remove_button);
 

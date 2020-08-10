@@ -1,21 +1,22 @@
 class SelectorWidget extends Widget {
     /**
-     * A widget which facilitates the adding of other widgets to the form
+     * A widget which facilitates the adding of other widgets to the form.
      *
-     * @param {RootBuilder|ItempoolBuilder} instantiator
-     * @param {String} heading_text Heading text to show in the selector widget
+     * @param {RootBuilder|ItempoolBuilder} builder The builder which is instantiating this widget.
+     * @param {String} heading_text Heading text to show in the selector widget.
      */
-    constructor(instantiator, heading_text) {
-        super();
+    constructor(builder, heading_text) {
+        super(builder);
         
-        this.instantiator = instantiator;
+        this.builder = builder;
 
         this.heading_text = heading_text;
 
         this.options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
 
-        if (instantiator.constructor.name === 'RootBuilder') {
+        if (builder.constructor.name === 'RootBuilder') {
             this.options.push('Itempool');
+            this.options.push('Item');
         }
     }
 
@@ -26,27 +27,29 @@ class SelectorWidget extends Widget {
             interactive_container.appendChild(button);
         });
 
-        interactive_container.addEventListener('click', event => {
+        interactive_container.onclick = event => {
             switch (event.target.value) {
                 case 'Multiple Choice':
-                    this.instantiator.widgetAdd(new MultipleChoiceWidget());
+                    this.builder.widgetAdd(new MultipleChoiceWidget(this.builder));
                     break;
                 case 'Markdown':
-                    this.instantiator.widgetAdd(new MarkdownWidget());
+                    this.builder.widgetAdd(new MarkdownWidget(this.builder));
                     break;
                 case 'Short Answer':
-                    this.instantiator.widgetAdd(new ShortAnswerWidget());
+                    this.builder.widgetAdd(new ShortAnswerWidget(this.builder));
                     break;
                 case 'Image':
-                    this.instantiator.widgetAdd(new ImageWidget());
+                    this.builder.widgetAdd(new ImageWidget(this.builder));
                     break;
                 case 'Itempool':
-                    this.instantiator.widgetAdd(new ItempoolWidget());
+                    this.builder.widgetAdd(new ItempoolWidget(this.builder));
+                    break;
+                case 'Item':
                     break;
                 default:
                     break;
             }
-        });
+        };
 
         const heading_container = this.getHeadingContainer(this.heading_text);
 

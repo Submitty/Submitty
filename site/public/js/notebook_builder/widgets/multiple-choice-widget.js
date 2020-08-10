@@ -1,6 +1,6 @@
 class MultipleChoiceWidget extends Widget {
-    constructor() {
-        super();
+    constructor(builder) {
+        super(builder);
 
         this.dom_pointer;
 
