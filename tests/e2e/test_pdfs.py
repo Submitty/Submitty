@@ -48,9 +48,6 @@ class TestPDFs(BaseTestCase):
         self.driver.find_element_by_id('open_file_'+pdf_name).click()
         new_window = self.driver.window_handles[1]
         self.driver.switch_to.window(new_window)
-        #self.wait_for_element((By.ID, "content"))
-        #text = self.driver.find_element_by_id("content")
-        #self.assertFalse("You don't have access to this page." in text)
         self.driver.close()
         self.driver.switch_to.window(current_window)
         self.driver.find_element_by_xpath('//a[contains(@file-url,"'+pdf_name+'")]').click()
@@ -63,7 +60,7 @@ class TestPDFs(BaseTestCase):
         self.driver.find_element_by_xpath('//a[contains(@href,"/sample/gradeable/grading_homework_pdf/update")]').click()
         self.driver.find_element_by_id('page_3_nav').click()
         select_element = Select(self.driver.find_element_by_id("minimum_grading_group"))
-        select_element.select_by_visible_text(setting);
+        select_element.select_by_visible_text(setting)
         self.log_out()
         self.driver.implicitly_wait(20)
 
