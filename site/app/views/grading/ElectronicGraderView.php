@@ -15,6 +15,7 @@ use app\models\Team;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\NumberUtils;
+use app\libraries\CodeMirrorUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -866,10 +867,8 @@ HTML;
                 $old_files
             );
         }
-
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+    
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         if ($isStudentInfoPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
