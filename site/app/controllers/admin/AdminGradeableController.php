@@ -294,40 +294,40 @@ class AdminGradeableController extends AbstractController {
      */
     private function shufflePeerGrading(Gradeable $gradeable) {
         if ($gradeable->isPeerGrading()) {
-            $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
-            $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
-            if ($make_peer_assignments) {
-                $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
+            //$old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
+            //$make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
+            //if ($make_peer_assignments) {
+            $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
 
-                $users = $this->core->getQueries()->getAllUsers();
-                $user_ids = [];
-                $grading = [];
-                $peer_grade_set = $gradeable->getPeerGradeSet();
-                foreach ($users as $key => $user) {
-                    // Need to remove non-student users, or users in the NULL section
-                    if ($user->getRegistrationSection() == null) {
-                        unset($users[$key]);
-                    }
-                    else {
-                        $user_ids[] = $user->getId();
-                        $grading[$user->getId()] = [];
-                    }
+            $users = $this->core->getQueries()->getAllUsers();
+            $user_ids = [];
+            $grading = [];
+            $peer_grade_set = $gradeable->getPeerGradeSet();
+            foreach ($users as $key => $user) {
+                // Need to remove non-student users, or users in the NULL section
+                if ($user->getRegistrationSection() == null) {
+                    unset($users[$key]);
                 }
-                $user_number = count($user_ids);
-                shuffle($user_ids);
-                for ($i = 0; $i < $user_number; $i++) {
-                    for ($j = 1; $j <= $peer_grade_set; $j++) {
-                        $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
-                    }
+                else {
+                    $user_ids[] = $user->getId();
+                    $grading[$user->getId()] = [];
                 }
+            }
+            $user_number = count($user_ids);
+            shuffle($user_ids);
+            for ($i = 0; $i < $user_number; $i++) {
+                for ($j = 1; $j <= $peer_grade_set; $j++) {
+                    $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
+                }
+            }
 
-                foreach ($grading as $grader => $assignment) {
-                    foreach ($assignment as $student) {
-                        $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
-                    }
+            foreach ($grading as $grader => $assignment) {
+                foreach ($assignment as $student) {
+                    $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
                 }
             }
         }
+        //}
     }
 
     private function newComponent(Gradeable $gradeable) {

@@ -646,7 +646,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container span.mark-points {
-    width: 60px;
+    width: 80px;
     justify-content: flex-end;
 }
 
@@ -746,7 +746,7 @@ tr.is_publish {
     align-items: center;
     padding-left: 5px;
     padding-right: 5px;
-    width: 30px;
+    width: 40px;
 }
 
 .gradeable .received-marks-list.container .row .col-no-gutters.point-value {
