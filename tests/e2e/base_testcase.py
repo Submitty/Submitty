@@ -3,17 +3,24 @@ import tempfile
 from datetime import date
 import os
 import unittest
+import json
 
 from urllib.parse import urlencode
 
 from selenium import webdriver
+from websocket import create_connection
 
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+import sys
+# explicitly add this import path, so we can run it on a local host
+sys.path.append('../python_submitty_utils/')
+
 from submitty_utils import dateutils
+
 
 
 # noinspection PyPep8Naming
@@ -32,7 +39,7 @@ class BaseTestCase(unittest.TestCase):
 
     WAIT_TIME = 20
 
-    def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True):
+    def __init__(self, testname, user_id=None, user_password=None, user_name=None, log_in=True, use_websockets=False, socket_page=''):
         super().__init__(testname)
         if "TEST_URL" in os.environ and os.environ['TEST_URL'] is not None:
             self.test_url = os.environ['TEST_URL']
@@ -66,6 +73,8 @@ class BaseTestCase(unittest.TestCase):
         self.full_semester = BaseTestCase.get_display_semester(self.semester)
         self.logged_in = False
         self.use_log_in = log_in
+        self.use_websockets = use_websockets
+        self.socket_page = socket_page
 
     def setUp(self):
         # attempt to set-up the connection to Chrome. Repeat a handful of times
@@ -83,10 +92,14 @@ class BaseTestCase(unittest.TestCase):
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
+        if self.use_websockets:
+            self.enable_websockets()
 
     def tearDown(self):
         self.driver.quit()
         shutil.rmtree(self.download_dir)
+        if self.use_websockets:
+            self.ws.close()
 
     def get(self, url=None, parts=None):
         if url is None:
@@ -208,3 +221,15 @@ class BaseTestCase(unittest.TestCase):
 
         params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_dir}}
         self.driver.execute("send_command", params)
+
+    def enable_websockets(self):
+        submitty_session_cookie = self.driver.get_cookie('submitty_session')
+        self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'], header={"User-Agent": "python-socket-client"})
+        new_connection_msg = json.dumps({'type': 'new_connection', 'page': 'sample-' + self.socket_page})
+        self.ws.send(new_connection_msg)
+
+    def check_socket_message(self, message):
+        ws_msg = json.loads(self.ws.recv())
+        self.assertIn('type', ws_msg.keys())
+        self.assertEqual(ws_msg['type'], message)
+

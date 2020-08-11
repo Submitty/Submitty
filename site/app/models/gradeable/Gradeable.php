@@ -61,7 +61,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
- * @method bool isPeerGrading()
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
  * @method void setPeerGradeSet($grade_set)
@@ -137,7 +136,7 @@ class Gradeable extends AbstractModel {
     
     /** @prop @var array */
     protected $peer_grading_pairs = [];
-
+    
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
     /** @prop @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
@@ -167,8 +166,6 @@ class Gradeable extends AbstractModel {
     protected $student_view_after_grades = false;
     /** @prop @var bool If students can make submissions */
     protected $student_submit = false;
-    /** @prop @var bool If the gradeable uses peer grading */
-    protected $peer_grading = false;
     /** @prop @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
     /** @prop @var bool If submission after student's max deadline
@@ -250,8 +247,6 @@ class Gradeable extends AbstractModel {
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
-            $this->setPeerGrading($details['peer_grading']);
-            $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
@@ -513,10 +508,10 @@ class Gradeable extends AbstractModel {
     public function setPeerGradersList($input) {
         $bad_rows = [];
         foreach ($input as $row_num => $vals) {
-            if ($this->core->getQueries()->getUserById($vals["student"]) == null) {
+            if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
                 array_push($bad_rows, ($vals["student"]));
             }
-            if ($this->core->getQueries()->getUserById($vals["grader"]) == null) {
+            if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
                 array_push($bad_rows, ($vals["grader"]));
             }
         }
@@ -535,6 +530,44 @@ class Gradeable extends AbstractModel {
                 $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
             }
         }
+    }
+    
+    public function setPeerFeedback($grader_id, $student_id, $feedback) {
+        $bad_input = [];
+        if ($this->core->getQueries()->getUserById($grader_id) === null) {
+            array_push($bad_input, ($grader_id));
+        }
+        if ($this->core->getQueries()->getUserById($student_id) === null) {
+            array_push($bad_input, ($student_id));
+        }
+        if (!empty($bad_input)) {
+            $msg = "The given user id is not valid: ";
+            array_walk($bad_input, function ($val) use (&$msg) {
+                $msg .= " {$val}";
+            });
+            $this->core->addErrorMessage($msg);
+        }
+        else {
+            $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
+        }
+    }
+    
+    public function getPeerFeedback($grader_id, $anon_id) {
+        $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
+        $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
+        if ($feedback == 'thanks') {
+            return 'Thank you!';
+        }
+        elseif ($feedback == 'helpful') {
+            return 'This feedback was helpful to me!';
+        }
+        elseif ($feedback == 'detailed') {
+            return 'This feedback was detailed, specific, and/or technical';
+        }
+        elseif ($feedback == 'inappropriate') {
+            return 'This feedback was inaccurate and/or inappropriate';
+        }
+        return 'No response';
     }
 
     /**
@@ -741,7 +774,8 @@ class Gradeable extends AbstractModel {
     }
 
     public function getStringThreadIds() {
-        return $this->isDiscussionBased() ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
+        return $this->isDiscussionBased() && is_array(json_decode($this->getDiscussionThreadId()))
+            ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
     }
 
     /**
@@ -1037,11 +1071,6 @@ class Gradeable extends AbstractModel {
         ]);
         $this->components[] = $component;
 
-        // If we added a peer component, we are now guaranteed to be a peer gradeable.
-        if ($component->isPeer()) {
-            $this->setPeerGrading(true);
-        }
-
         return $component;
     }
 
@@ -1082,16 +1111,6 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
-
-        //Check if we have any peer components remaining
-        $still_peer = false;
-        foreach ($this->components as $c) {
-            if ($c->isPeer()) {
-                $still_peer = true;
-                break;
-            }
-        }
-        $this->setPeerGrading($still_peer);
     }
 
     /**
@@ -1259,7 +1278,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function anyActiveRegradeRequests() {
-        return $this->active_regrade_request_count > 0;
+        return $this->active_regrade_request_count > 0 && $this->core->getUser()->getGroup() < User::GROUP_STUDENT;
     }
 
     /**
@@ -1662,6 +1681,15 @@ class Gradeable extends AbstractModel {
         }
         return $total;
     }
+    
+    public function isPeerGrading() {
+        foreach ($this->getComponents() as $component) {
+            if ($component->isPeer()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Get a list of all grading sections assigned to a given user
@@ -1962,5 +1990,50 @@ class Gradeable extends AbstractModel {
      */
     public function getWouldBeDaysLate() {
         return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
+    }
+
+    /**
+     * Gets a multidimensional array containing data for all possible default configuration paths
+     *
+     * @return array
+     */
+    public function getDefaultConfigPaths(): array {
+        $install_dir = $this->core->getConfig()->getSubmittyInstallPath();
+        return [
+            ['PROVIDED: upload_only (1 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only/config')],
+            ['PROVIDED: upload_only (10 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_10mb/config')],
+            ['PROVIDED: upload_only (20 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_20mb/config')],
+            ['PROVIDED: upload_only (50 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_50mb/config')],
+            ['PROVIDED: upload_only (100 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/upload_only_100mb/config')],
+            ['PROVIDED: bulk scanned pdf exam (100 mb maximum total student file submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/pdf_exam/config')],
+            ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/iclicker_upload/config')],
+            ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/left_right_exam_seating/config')],
+            ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload/config')],
+            ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
+                FileUtils::joinPaths($install_dir, 'more_autograding_examples/test_notes_upload_3page/config')]
+        ];
+    }
+
+    /**
+     * Determine if $this gradeable is using a configuration that was user uploaded or created by notebook builder.
+     *
+     * @return bool True if using an uploaded configuration, false otherwise.
+     */
+    public function isUsingUploadedConfig(): bool {
+        $config_upload_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'config_upload'
+        );
+
+        return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
     }
 }
