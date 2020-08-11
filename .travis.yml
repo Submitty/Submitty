@@ -242,7 +242,13 @@ jobs:
         - sudo mv dist/vnu.jar /usr/bin/
       before_script:
         # Remove Travis' built in docker-ce
+        - sudo apt-get update
+        - sudo apt-get upgrade -y
         - sudo apt-get purge docker-ce -y
+        - sudo apt-get autoremove -y
+        - curl -fsSL https://raw.githubusercontent.com/darkwizard242/devopsubuntu1804/v1.0/packer-build/mods/10-docker.sh | sudo bash -s -- install
+        - sudo usermod -aG docker $USER
+        - curl -fsSL https://raw.githubusercontent.com/darkwizard242/devopsubuntu1804/v1.0/packer-build/mods/10-docker.sh | sudo bash -s -- restart
         # Need to make this a full repo so that we can get the tag information
         # when we're installing
         - git fetch --unshallow
