@@ -71,7 +71,7 @@
     --standard-deep-dark-gray: #2e2e2e;
 
     --standard-gray-black: #111111;
-
+    --solution-text-background: #ccc;
     --standard-pale-blue: #d8eef6;
     --standard-focus-cornflowe-blue: #6495ed;
     --standard-medium-blue: #337ab7;
@@ -245,6 +245,7 @@
       --dark-badge-background-red: #ad3937;
       --error-alert-dark-red: #FF7A7A;
       --gray-red: #b94a48;
+      --solution-text-background: dimgrey;
 
       --alert-background-bronze: #fcf8e3;
       --alert-border-bronze: #514123;
