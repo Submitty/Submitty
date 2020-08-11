@@ -899,8 +899,7 @@ CREATE TABLE public.sessions (
 
 CREATE TABLE public.solution_ta_notes (
     g_id character varying(255) NOT NULL,
-    g_type integer NOT NULL,
-    que_part_id integer NOT NULL,
+    component_id integer NOT NULL,
     solution_notes text NOT NULL,
     author character varying NOT NULL,
     edited_at timestamp with time zone NOT NULL

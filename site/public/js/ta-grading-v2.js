@@ -118,7 +118,6 @@ $(function () {
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
 
-  //
   document.querySelectorAll('[id^=solution-]').forEach( textarea => {
     textarea.addEventListener('keydown', function () {
       setTimeout(function() {

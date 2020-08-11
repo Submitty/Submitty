@@ -2,7 +2,6 @@
 
 namespace app\controllers\grading;
 
-use _HumbugBox69342eed62ce\Nette\Utils\Json;
 use app\libraries\DiffViewer;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\Component;
@@ -2518,9 +2517,8 @@ class ElectronicGraderController extends AbstractController {
      */
     public function updateSolutionTaNotes($gradeable_id) {
         $solution_text = $_POST['solution_text'] ?? '';
-        $que_part_id = $_POST['que_part_id'];
+        $component_id = $_POST['component_id'];
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        $g_type = $POST['g_type'] ?? $gradeable->getType();
         $author_id = $this->core->getUser()->getId();
         $error = "";
 
@@ -2532,7 +2530,7 @@ class ElectronicGraderController extends AbstractController {
         }
         else {
             try {
-                $this->core->getQueries()->addSolutionForQuestionId($gradeable_id, $que_part_id, $g_type, $solution_text, $author_id);
+                $this->core->getQueries()->addSolutionForQuestionId($gradeable_id, $component_id, $solution_text, $author_id);
             }
             catch (\Exception $exception) {
                 $error = $exception->getMessage();
@@ -2542,7 +2540,7 @@ class ElectronicGraderController extends AbstractController {
         return empty($error) ? JsonResponse::getSuccessResponse([
             "author" => $author_id,
             "solution_text" => $solution_text,
-            "question_id" => $que_part_id,
+            "component_id" => $component_id,
         ]) : JsonResponse::getErrorResponse($error);
     }
 
