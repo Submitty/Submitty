@@ -15,11 +15,7 @@
 
 .heading-container {
     display: flex;
-    align-items: center;
-}
-
-.heading-container h3 {
-    margin-right: 5px;
+    justify-content: space-between;
 }
 
 .widget-main {

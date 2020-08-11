@@ -9,23 +9,7 @@ class AbstractBuilder {
         attachment_div.appendChild(this.selector.render());
     }
 
-    /**
-     * From the list of widgets compile and return a 'notebook' json.
-     */
-    getJSON() {
-        const notebook_array = [];
-
-        this.reorderable_widgets.forEach(widget => {
-            // Ensure we got something back before adding to the notebook_array
-            const widget_json = widget.getJSON();
-            if (widget_json) {
-                notebook_array.push(widget_json);
-            }
-        });
-
-        builder_data.config.notebook = notebook_array;
-        return builder_data.config;
-    }
+    getJSON()  { throw 'Implement this method in the child class.'; }
 
     load() {
         builder_data.config.notebook.forEach(cell => {

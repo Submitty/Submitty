@@ -11,4 +11,26 @@ class RootBuilder extends AbstractBuilder {
 
         this.load();
     }
+
+    getJSON() {
+        const notebook_array = [];
+        const itempool_array = [];
+
+        this.reorderable_widgets.forEach(widget => {
+            // Ensure we got something back before adding to the notebook_array
+            const widget_json = widget.getJSON();
+            if (Object.keys(widget_json).length > 0 && widget.constructor.name === 'ItempoolWidget') {
+                itempool_array.push(widget_json);
+            }
+            else if (Object.keys(widget_json).length > 0) {
+                notebook_array.push(widget_json);
+            }
+        });
+
+        builder_data.config.notebook = notebook_array;
+
+        itempool_array.length > 0 ? builder_data.config.item_pool = itempool_array : delete builder_data.config.item_pool;
+
+        return builder_data.config;
+    }
 }
