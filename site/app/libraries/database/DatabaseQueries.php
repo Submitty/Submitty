@@ -1053,13 +1053,13 @@ WHERE semester=? AND course=? AND user_id=?",
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
-    public function addSolutionForQuestionId($g_id, $component_id, $solution_text, $author_id) {
+    public function addSolutionForComponentId($g_id, $component_id, $solution_text, $author_id) {
         $this->course_db->query("
             INSERT INTO solution_ta_notes (g_id, component_id, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, current_timestamp)",
             [$g_id, $component_id, $solution_text, $author_id]);
     }
     
-    public function getSolutionForQuestionId($g_id, $component_id) {
+    public function getSolutionForComponentId($g_id, $component_id) {
         $this->course_db->query("
             SELECT * FROM solution_ta_notes
                 WHERE g_id = ? AND component_id = ? ORDER BY edited_at DESC LIMIT 1",
@@ -1067,7 +1067,7 @@ WHERE semester=? AND course=? AND user_id=?",
         return $this->course_db->rows();
     }
 
-    public function getSolutionForAllQuestionIds($g_id) {
+    public function getSolutionForAllComponentIds($g_id) {
         $solution_array = [];
         $this->course_db->query("
             SELECT DISTINCT component_id FROM solution_ta_notes
@@ -1075,7 +1075,7 @@ WHERE semester=? AND course=? AND user_id=?",
             [$g_id]);
         $component_ids = $this->course_db->rows();
         foreach ($component_ids as $row) {
-            $solution_array[$row['component_id']] = $this->getSolutionForQuestionId($g_id, $row['component_id']);
+            $solution_array[$row['component_id']] = $this->getSolutionForComponentId($g_id, $row['component_id']);
         }
         return $solution_array;
     }

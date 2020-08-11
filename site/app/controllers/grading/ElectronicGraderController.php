@@ -2,6 +2,7 @@
 
 namespace app\controllers\grading;
 
+use app\libraries\DateUtils;
 use app\libraries\DiffViewer;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\Component;
@@ -2493,21 +2494,16 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function getSolutionTaNotesForGradeable($gradeable_id) {
+    public function getSolutionTaNotesForGradeable($gradeable_id):array {
         $solutions = [];
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-
         try {
-            $res = $this->core->getQueries()->getSolutionForAllQuestionIds($gradeable_id);
-            foreach ($res as $key => $value) {
-
-            }
+            $res = $this->core->getQueries()->getSolutionForAllComponentIds($gradeable_id);
             $solutions = $res;
         }
         catch (\Exception $exception) {
             $error = $exception->getMessage();
+            $this->core->getOutput()->renderResultMessage("Something went wrong while fetching solutions " . $error, false);
         }
-
         return $solutions;
     }
 
@@ -2521,7 +2517,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $author_id = $this->core->getUser()->getId();
         $error = "";
-
+        $solution_row=[];
         if (!$gradeable) {
             $error = "Invalid Gradeable ID given!";
         }
@@ -2530,7 +2526,8 @@ class ElectronicGraderController extends AbstractController {
         }
         else {
             try {
-                $this->core->getQueries()->addSolutionForQuestionId($gradeable_id, $component_id, $solution_text, $author_id);
+                $this->core->getQueries()->addSolutionForComponentId($gradeable_id, $component_id, $solution_text, $author_id);
+                $solution_row = $this->core->getQueries()->getSolutionForComponentId($gradeable_id, $component_id);
             }
             catch (\Exception $exception) {
                 $error = $exception->getMessage();
@@ -2539,6 +2536,11 @@ class ElectronicGraderController extends AbstractController {
 
         return empty($error) ? JsonResponse::getSuccessResponse([
             "author" => $author_id,
+            "edited_at" => DateUtils::convertTimeStamp(
+                $this->core->getUser(),
+                $solution_row[0]['edited_at'],
+                $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
+            ),
             "solution_text" => $solution_text,
             "component_id" => $component_id,
         ]) : JsonResponse::getErrorResponse($error);
