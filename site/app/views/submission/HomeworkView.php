@@ -2,6 +2,8 @@
 
 namespace app\views\submission;
 
+use app\exceptions\NotebookException;
+use app\libraries\CodeMirrorUtils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
 use app\models\gradeable\AutoGradedTestcase;
@@ -55,18 +57,24 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderLateDayMessage($late_days, $gradeable, $graded_gradeable);
         }
 
-        // showing submission if user is full grader or student can submit
-        if ($this->core->getUser()->accessFullGrading()) {
-            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-        }
-        elseif ($gradeable->isStudentSubmit()) {
-            if ($gradeable->canStudentSubmit()) {
+        try {
+            // showing submission if user is full grader or student can submit
+            if ($this->core->getUser()->accessFullGrading()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             }
-            else {
-                $return .= $this->renderSubmitNotAllowedBox();
+            elseif ($gradeable->isStudentSubmit()) {
+                if ($gradeable->canStudentSubmit()) {
+                    $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+                }
+                else {
+                    $return .= $this->renderSubmitNotAllowedBox();
+                }
             }
         }
+        catch (NotebookException $e) {
+            return $this->core->getOutput()->renderTwigTemplate('error/GenericError.twig', ['error_messages' => [$e->getMessage()]]);
+        }
+
         $all_directories = $gradeable->getSplitPdfFiles();
         if ($this->core->getUser()->accessFullGrading() && count($all_directories) > 0) {
             $return .= $this->renderBulkUploadBox($gradeable);
@@ -406,23 +414,11 @@ class HomeworkView extends AbstractView {
 
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
-        // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
-
-        // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
-
-        // Import autosave utility functions
         $this->core->getOutput()->addInternalJs('autosave-utils.js');
-
         $this->core->getOutput()->addInternalCss('submitbox.css');
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         $numberUtils = new NumberUtils();
 
@@ -830,7 +826,7 @@ class HomeworkView extends AbstractView {
 
             $param = array_merge($param, [
                 'in_queue' => $version_instance->isQueued(),
-                'grading' => $version_instance->isGrading(),
+                'in_progress_grading' => $version_instance->isGrading(),
                 'result_text' => $this->core->getOutput()->renderTemplate('AutoGrading', 'showResults', $version_instance, $show_hidden)
             ]);
 

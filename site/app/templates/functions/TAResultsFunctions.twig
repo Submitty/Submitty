@@ -1,7 +1,8 @@
 {# Render a component #}
 {# @var obj component     A component object #}
 {# @var bool anonymous    Whether the component should be rendered without grader info #}
-{% macro renderComponent(component, anonymous) %}
+{# @var int num_decimals  The number of decimals places the score should contain #}
+{% macro renderComponent(component, anonymous, num_decimals) %}
     {% import 'functions/Badge.twig' as Badge %}
     <div class="box grade-results">
         <div class="box-badge">
@@ -28,7 +29,7 @@
                                 {% endif %}
                             </td>
                             <td class="mark-score">
-                                {{ mark.points|number_format(num_decimals) }}
+                                {{ mark.points|round(num_decimals) }}
                             </td>
                             <td>
                                 {{ mark.title|nl2br }}
@@ -41,7 +42,7 @@
                                 <i class="far fa-check-square fa-1g"></i>
                             </td>
                             <td class="mark-score">
-                                {{ component.custom_mark_score|number_format(num_decimals) }}
+                                {{ component.custom_mark_score|round(num_decimals) }}
                             </td>
                             <td>
                                 {{ component.comment|nl2br }}

@@ -123,6 +123,59 @@
     }
 </script>
 <body onload="document.getElementById('defaultOpen').click();">
+
+{% set double_blind = false %}
+{% set single_blind = false %}
+
+<!-- If grader is limited access or full access grader -->
+{% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Grader</h1>
+    <p>
+        You will be reviewing materials submitted by students and these materials are considered confidential.<br>
+        The author of this material is entitled to copyright protection. As such,
+    <ul>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material.<br>
+            You must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+{% if double_blind == true %}            
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be <em>blinded</em>.<br>
+            You should not attempt to discover the identities of the students.<br>
+            However, their identities may be unintentionally or unavoidably revealed.<br>
+            Please respect the students' privacy.</li>
+{% endif %}
+    </ul>
+    </p><p>
+        Please communicate with the instructor if you realize you have a conflict of interest with a student that you have been assigned to grade.
+    </p>
+</div>
+<!-- Else if grader is a student peer grader -->
+{% elseif core.getUser().getGroup() == 4 %}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Peer Grader</h1>
+    <p>
+        You will be reviewing materials submitted by your classmates and these materials are considered confidential.<br>
+        Your classmate, the author of this material, is entitled to copyright protection. As such,
+    <ul>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+{% if double_blind == true %}            
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be double-blind.<br>
+            You should not attempt to discover the identities of your classmates.<br>
+            However, the identities of the classmates may be unintentionally or unavoidably revealed.<br>
+            Please respect your classmates' privacy.</li>
+{% elseif single_blind == true %}
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be single-blind.</li>
+{% else %}
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be unblinded.</li>
+{% endif %}
+    </ul>
+    </p><p>
+        Please communicate with your instructor if you realize you have a conflict of interest with a peer that you have been assigned to grade.
+    </p>
+</div>
+{% endif %}
+
 <div class = "content">
     <h1>Status of {{ gradeable_title }}</h1>
 
@@ -891,23 +944,62 @@
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 {%  if team_assignment %}
-                    <a class="btn btn-primary"
-                       href="{{ download_zip_url }}">
-                        Download Zip of Assigned Teams
-                    </a>
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Teams
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
                 {% else %}
-                    <a class="btn btn-primary"
-                       href="{{ download_zip_url }}">
-                        Download Zip of Assigned Students
-                    </a>
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"  
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Students
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
                 {% endif %}
 
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
-                <a class="btn btn-default"
-                   href="{{ download_zip_url }}?type=all">
-                    Download Zip of All Students
-                </a>
+                <details class="btn btn-default" id="details_button">
+                    <summary float="left">
+                        <a id="zip_link_full"
+                            href="{{ download_zip_url }}?type=all">
+                            Download Zip of All Students
+                        </a>
+                    </summary>
+                   
+                    <div>
+                        <form class="dropdown">
+                            <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="results_folder"> Include Results Folder</label><br>
+                            <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="active_version"> Only Current Active Version</label><br>
+                        </form>
+                    </div>
+                </details>
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-default"
@@ -960,5 +1052,35 @@
     let defaultOpen = document.getElementById('defaultOpen');
     if (defaultOpen) {
         defaultOpen.click();
+    }
+
+    function editZipDownload(download_zip_url, limited) {
+        var results = document.getElementById("results_folder");
+        var active = document.getElementById("active_version");
+
+        if (results.checked == true && active.checked == true){
+            download_option = "both";
+        }
+        else if (results.checked == true) {
+            download_option = "results";
+        }
+        else if (active.checked == true) {
+            download_option = "active";
+        }
+        else {
+            download_option = "all";
+        }
+
+        if (limited) {
+            if (download_option == "all") {
+                $("#zip_link").attr("href", download_zip_url);
+            }
+            else {
+                $("#zip_link").attr("href", download_zip_url + "?type=limited_" + download_option);
+            }
+        }
+        else {
+            $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
+        }
     }
 </script>
