@@ -16,6 +16,7 @@ class DateTimeFormat extends AbstractModel {
         'gradeable_with_seconds',
         'forum',
         'notification',
+        'solution_ta_notes',
         'office_hours_queue',
         'date_time_picker',
         'late_days_allowed'
@@ -28,6 +29,7 @@ class DateTimeFormat extends AbstractModel {
             'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
             'forum' => 'n/j g:i A',
             'notification' => 'n/j g:i A',
+            'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
             'late_days_allowed' => 'm/d/Y h:i:s A T'
@@ -37,6 +39,7 @@ class DateTimeFormat extends AbstractModel {
             'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
             'forum' => 'j/n g:i A',
             'notification' => 'j/n g:i A',
+            'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
             'late_days_allowed' => 'm/d/Y h:i:s A T'
