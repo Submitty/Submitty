@@ -2,7 +2,7 @@
  * The number of decimal places to show to the user
  * @type {int}
  */
-DECIMAL_PRECISION = 2;
+DECIMAL_PRECISION = 3;
 
 /**
  * Asynchronously load all of the templates
