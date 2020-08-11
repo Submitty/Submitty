@@ -241,6 +241,8 @@ jobs:
         - unzip vnu.jar_20.3.16.zip
         - sudo mv dist/vnu.jar /usr/bin/
       before_script:
+        # Remove Travis' built in docker-ce
+        - sudo apt-get purge docker-ce -y
         # Need to make this a full repo so that we can get the tag information
         # when we're installing
         - git fetch --unshallow
