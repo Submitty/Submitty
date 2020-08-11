@@ -3,6 +3,7 @@
 namespace app\views\grading;
 
 use app\controllers\student\LateDaysTableController;
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
@@ -1257,8 +1258,6 @@ HTML;
             return '';
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
-        $rubric_components_1 = [1];
-        $components = [];
         $r_components = $gradeable->getComponents();
 
         foreach ($r_components as $key => $value) {
@@ -1269,12 +1268,16 @@ HTML;
                 'is_first_edit' => !isset($solution_array[$id]),
                 'author' => isset($solution_array[$id]) ? $solution_array[$id][0]['author'] : '',
                 'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id][0]['solution_notes'] : '',
-                'edited_at' => isset($solution_array[$id]) ? $solution_array[$id][0]['edited_at'] : null,
+                'edited_at' => isset($solution_array[$id])
+                    ? DateUtils::convertTimeStamp(
+                        $this->core->getUser(),
+                        $solution_array[$id][0]['edited_at'],
+                        $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
+                    ) : null,
                 'max_points' => $value->getUpperClamp(),
                 'min_points' => $value->getLowerClamp(),
             ];
         }
-//        var_dump(count($r_components));
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),
             'solution_components' => $solution_components,
