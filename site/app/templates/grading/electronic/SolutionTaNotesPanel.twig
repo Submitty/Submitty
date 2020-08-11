@@ -27,30 +27,51 @@
 
 {% macro renderSolutionTaNotesCont(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit) %}
 
-    <div id="no-solution-box-{{ component_id }}" class="no-sol-box-cont {% if not is_first_edit %} hide {% endif %}">
-        <span>
-            No Solutions or TA notes for  "{{ component_title}}" Component
-        </span>
-        <br>
-        <button type="primary"
-                class="show-sol-btn btn btn-primary"
-                onclick="showSolutionTextboxCont('#sol-textbox-cont-{{ component_id }}', '#no-solution-box-{{ component_id }}');"
-        >Start Now</button>
-    </div>
-    <div id="sol-textbox-cont-{{ component_id }}" class="sol-textbox-cont {% if is_first_edit %} hide {% endif %}">
-        <label for="solution-ta-notes-textbox"></label>
-        <textarea id="solution-{{ component_id }}"
-                  class="solution-ta-notes-textbox"
-                  placeholder='Start writing the solution for "{{ component_title }}" component.'
-        >{{ solution_notes }}</textarea>
-        {% if not is_first_edit %}
-            <span> Last edited by {{ author }} @ {{ last_edit }}</span>
-        {% endif %}
-        <br>
-        <button type="primary"
-                id="save-solution"
-                class="btn btn-primary"
-                onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}');"
-        >Update</button>
+    <div class="solution-box box">
+        <div class="solution-header">
+            <div class="component-title">
+                Solution for {{ component_title }}
+            </div>
+            {% if is_first_edit %}
+                <button type="primary"
+                        class="show-sol-btn btn btn-primary"
+                        onclick="showSolutionTextboxCont('#sol-textbox-cont-{{ component_id }}', '#no-solution-box-{{ component_id }}');"
+                >Start Now</button>
+            {% else %}
+                <div class="last-edit">
+                    <span class="last-edit-time">Last edit @ {{ last_edit }} by {{ author }}</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="row divider"></div>
+        <div class="solution-cont">
+            {% if is_first_edit %}
+                <span class="solution-notes-text">
+                    No Solutions or TA notes for  "{{ component_title}}" Component
+                </span>
+            {% else %}
+                <div class="solution-saved">
+                    <span class="solution-notes-text">
+                        {{ solution_notes }}
+                    </span>
+                    <button type="primary"
+                            id="save-solution"
+                            class="btn btn-primary"
+                            onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}');"
+                    >Edit</button>
+                </div>
+                <div class="solution-edit hide">
+                    <textarea id="solution-{{ component_id }}"
+                              class="solution-ta-notes-textbox"
+                              placeholder='Start writing the solution for "{{ component_title }}" component.'
+                    >{{ solution_notes }}</textarea>
+                    <button type="primary"
+                            id="save-solution"
+                            class="btn btn-primary"
+                            onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}');"
+                    >Update</button>
+                </div>
+            {% endif %}
+        </div>
     </div>
 {% endmacro %}
