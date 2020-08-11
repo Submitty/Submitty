@@ -330,6 +330,24 @@ function updateCookies(){
 
 //-----------------------------------------------------------------------------
 // Student navigation
+function gotoMainPage() {
+
+  let window_location = $("#main-page")[0].dataset.href
+
+  if (getGradeableId() !== '') {
+    closeAllComponents(true).then(function () {
+      window.location = window_location;
+    }).catch(function () {
+      if (confirm("Could not save open component, go to main page anyway?")) {
+        window.location = window_location;
+      }
+    });
+  }
+  else {
+    window.location = window_location;
+  }
+}
+
 function gotoPrevStudent(to_ungraded = false) {
 
   let selector;
@@ -931,4 +949,54 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
   });
 
   return stored_paths;
+}
+
+// Returns Non anonymized path for the submitted files by student
+function getNonAnonPath(path, anon_submitter_id, user_ids){
+  let nonAnonPath = "";
+  let pathPieces = path.split("/");
+  for (i = 1; i < pathPieces.length; i++) {
+    // for non-anonymized-file-path, get the user-name from anon_submitter_id (if anonymized)
+    if(i === 9){
+      nonAnonPath += "/" + user_ids[anon_submitter_id];
+    }
+    else{
+      nonAnonPath += "/" + pathPieces[i];
+    }
+  }
+  return nonAnonPath;
+}
+
+function changeCurrentPeer(){
+  let peer = $('#edit-peer-select').val();
+  $('.edit-peer-components-block').hide();
+  $('#edit-peer-components-form-'+peer).show();
+}
+
+function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
+  let peer_id = $("#edit-peer-select").val();
+  let url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
+  $.ajax({
+    url,
+    data: {
+      csrf_token,
+      peer_id,
+      submitter_id
+    },
+    type: "POST",
+    success: function(data) {
+      console.log("Successfully deleted peer marks");
+      window.location.reload(true);
+    },
+    error: function(e) {
+      console.log("Failed to delete");
+    }
+  });
+}
+
+function newEditPeerComponentsForm() {
+  $('.popup-form').css('display', 'none');
+  let form = $("#edit-peer-components-form");
+  form.css("display", "block");
+  captureTabInModal("edit-peer-components-form");
 }
