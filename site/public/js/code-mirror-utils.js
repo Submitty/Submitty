@@ -46,7 +46,7 @@ function getSmallCodeMirror(attachment_elem, codemirror_config) {
 
 /**
  * Make codemirror boxes more accessible.  This function binds some extra key listeners to the passed in codemirror
- * object.  If the codemirror has focus, pressing escape will advance to the next focusable element outside the
+ * object.  If the codemirror has focus, pressing the advance_key will advance to the next focusable element outside the
  * codemirror, pressing 'Shift-Tab' will move to the previous.
  *
  * @param {CodeMirror} cm A codemirror object
