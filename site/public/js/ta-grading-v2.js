@@ -117,6 +117,17 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  //
+  document.querySelectorAll('[id^=solution-]').forEach( textarea => {
+    textarea.addEventListener('keydown', function () {
+      setTimeout(function() {
+        console.log(textarea);
+        textarea.style.height = textarea.scrollHeight + 'px';
+      },0);
+    });
+  });
+
 });
 
 // returns taLayoutDet object from LS, and if its not present returns empty object
