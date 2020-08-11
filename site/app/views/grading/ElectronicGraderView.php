@@ -86,7 +86,6 @@ class ElectronicGraderView extends AbstractView {
             if ($key === "NULL") {
                 continue;
             }
-            // var_dump($section);
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             $non_late_total += $section['non_late_components'];
@@ -130,7 +129,7 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($total_submissions != 0) {
                 $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
-                $non_late_submitted_percentage = round(($non_late_submitted_total / $submitted_total) * 100, 1);
+                $non_late_submitted_percentage = $non_late_submitted_total > 0 ? round(($non_late_submitted_total / $submitted_total) * 100, 1) : 0;
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = [];
