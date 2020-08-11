@@ -1281,6 +1281,7 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),
             'solution_components' => $solution_components,
+            'current_user_id' => $this->core->getUser()->getId(),
         ]);
     }
 

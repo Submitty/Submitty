@@ -9,7 +9,6 @@ function updateSolutionTaNotes(gradeable_id, component_id) {
     type: "POST",
     data,
     success: function (res) {
-      console.log(res);
       res = JSON.parse(res);
       if (res.status === "success") {
         displaySuccessMessage("Solution has been updated successfully...");
@@ -22,13 +21,14 @@ function updateSolutionTaNotes(gradeable_id, component_id) {
         // Updating the last edit info
         $(`#solution-box-${component_id} .last-edit`).removeClass('hide');
         $(`#solution-box-${component_id} .last-edit i.last-edit-time`).text(res.data.edited_at);
-        $(`#solution-box-${component_id} .last-edit i.last-edit-author`).text(res.data.author);
+        $(`#solution-box-${component_id} .last-edit i.last-edit-author`).text(
+          res.data.current_user_id === res.data.author ? `${res.data.author} (You)` : res.data.author
+        );
         // Updating the saved notes with the latest solution
         $(`#sol-textbox-cont-${component_id}-saved .solution-notes-text`).text(res.data.solution_text);
       } else {
         displayErrorMessage("Something went wrong while upating the solution...")
       }
-      console.log(res);
     },
     error: function(err) {
       console.log(err);

@@ -2536,6 +2536,7 @@ class ElectronicGraderController extends AbstractController {
 
         return empty($error) ? JsonResponse::getSuccessResponse([
             "author" => $author_id,
+            "current_user_id" => $this->core->getUser()->getId(),
             "edited_at" => DateUtils::convertTimeStamp(
                 $this->core->getUser(),
                 $solution_row[0]['edited_at'],
