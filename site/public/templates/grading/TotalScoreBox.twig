@@ -10,7 +10,7 @@ Required Parameters:
 l
 #}
 {% if user_group < 4 %}
-    {% set show_total = auto_grading_total is defined and ta_grading_total is defined %}
+    {% set show_total = true %}
     {% if auto_grading_total is defined %}
         <div class="box-title badge-container">
             <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total, auto_grading_complete) }}">
