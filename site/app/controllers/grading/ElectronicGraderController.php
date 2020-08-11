@@ -269,7 +269,7 @@ class ElectronicGraderController extends AbstractController {
         try {
             if ($verify_all === 'true') {
                 foreach ($gradeable->getComponents() as $comp) {
-                    if(!$comp->isPeer()){
+                    if (!$comp->isPeer()) {
                         $graded_component = $ta_graded_gradeable->getGradedComponent($comp);
                         if ($graded_component !== null && $graded_component->getGraderId() != $grader->getId()) {
                             $graded_component->setVerifier($grader);
