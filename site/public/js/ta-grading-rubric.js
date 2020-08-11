@@ -81,7 +81,6 @@ var custom_mark_req = $.ajax({
                 global: false,
                 async:false,
                 success: function(res) {
-                    console.log(res);
                     return res.data;
                 }
             }).responseText;
