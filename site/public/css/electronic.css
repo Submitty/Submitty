@@ -1277,6 +1277,7 @@ tr.is_publish {
 
 .solution-box {
     font-size: 16px;
+    padding-bottom: 20px;
 }
 
 .solution-header {
@@ -1307,6 +1308,16 @@ tr.is_publish {
 
 .solution-box button {
     max-width: 90px;
+}
+
+.solution-box button.hide {
+    display: none!important;
+}
+
+[id^=textbox-solution-] {
+    min-height: 120px;
+    max-height: 400px;
+    margin-bottom: 10px;
 }
 
 /* Media queries */

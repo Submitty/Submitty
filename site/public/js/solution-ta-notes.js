@@ -25,7 +25,8 @@ function updateSolutionTaNotes(gradeable_id, que_part_id) {
   })
 }
 
-function showSolutionTextboxCont(solTextboxCont, noSolutionCont) {
+function showSolutionTextboxCont(currentEle, solTextboxCont, noSolutionCont) {
+  $(currentEle).addClass('hide');
   // Show the textbox to start writing out the solutions
   if ($(solTextboxCont).hasClass("hide")) {
     $(solTextboxCont).removeClass("hide");
@@ -33,3 +34,19 @@ function showSolutionTextboxCont(solTextboxCont, noSolutionCont) {
   }
 }
 
+function cancelEditingSolution(componentId) {
+  let isFirstEdit = $(`#solution-box-${componentId}`).attr('data-first-edit');
+
+  if (+isFirstEdit) {
+    console.log("true");
+    $(`#show-sol-btn-${componentId}`).removeClass('hide');
+    $(`.solution-notes-text-${componentId}`).removeClass('hide');
+    $(`#sol-textbox-cont-${componentId}-edit`).addClass('hide');
+  }
+  else {
+    console.log("false");
+    $(`#edit-solution-btn-${componentId}`).removeClass('hide');
+    $(`#sol-textbox-cont-${componentId}-saved`).removeClass('hide');
+    $(`#sol-textbox-cont-${componentId}-edit`).addClass('hide');
+  }
+}
