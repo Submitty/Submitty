@@ -342,6 +342,9 @@ jobs:
         # Create symlink so that it's in expected location for whitelist
         - sudo ln -s $(which clang) /usr/bin/clang
         - sudo ln -s $(which clang++) /usr/bin/clang++
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get install docker-ce docker-ce-cli
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
