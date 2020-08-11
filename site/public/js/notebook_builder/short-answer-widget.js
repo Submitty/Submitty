@@ -105,7 +105,7 @@ class ShortAnswerWidget extends Widget {
                 this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
                 this.codebox_pointer.setSize(null, height);
 
-                makeCodeMirrorAccessible(this.codebox_pointer);
+                makeCodeMirrorAccessible(this.codebox_pointer, 'Esc');
             }
         }
 
