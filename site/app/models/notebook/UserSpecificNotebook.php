@@ -2,6 +2,7 @@
 
 namespace app\models\notebook;
 
+use app\exceptions\NotebookException;
 use app\models\notebook\Notebook;
 use app\libraries\Core;
 use app\libraries\Utils;
@@ -38,13 +39,20 @@ class UserSpecificNotebook extends Notebook {
         $json = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $core->getConfig()->getCoursePath(),
-                "config/complete_config",
-                "complete_config_" . $gradeable_id . ".json"
+                "config/build",
+                "build_" . $gradeable_id . ".json"
             )
         );
 
         if ($json !== false && isset($json['item_pool'])) {
             $this->item_pool = $json['item_pool'];
+
+            // Verify that all items in the item pool have defined an 'item_name'
+            foreach ($this->item_pool as $item) {
+                if (!isset($item['item_name'])) {
+                    throw new NotebookException('An item pool item was found to be missing the required "item_name" field.  Please rebuild the gradeable.');
+                }
+            }
         }
 
         $this->gradeable_id = $gradeable_id;
@@ -109,7 +117,11 @@ class UserSpecificNotebook extends Notebook {
      */
     private function getItemFromPool(array $item): string {
         $item_label = $item['item_label'];
-        $selected = $this->getNotebookHash($item_label, count($item['from_pool']));
+        //if user-mapping is available use the mentioned index
+        $selected = $item["user_item_map"][$this->user_id] ?? null;
+        // else get the index by hashing
+        $selected = $selected ?? $this->getNotebookHash($item_label, count($item['from_pool']));
+
         $item_from_pool = $item['from_pool'][$selected];
         $this->selected_questions[] = $item_from_pool;
 
@@ -142,6 +154,7 @@ class UserSpecificNotebook extends Notebook {
     /**
      * Given an item_pool name return all associated notebook values and their testcases
      * @param string $tgt_name the name of the item_pool to search for
+     * @return array
      */
     private function searchForItemPool(string $tgt_name): array {
         $ret = ["notebook" => [], "testcases" => []];
