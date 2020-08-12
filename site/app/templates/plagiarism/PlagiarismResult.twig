@@ -1,0 +1,54 @@
+<script>
+    $(document).ready(function() {
+        setUpPlagView("{{ gradeable_id }}");
+    });
+</script>
+<div class="content plagiarism-result-cont">
+    <div class="plag-flex">
+        <span>
+            Gradeable: <b>{{ gradeable_title }}</b>
+        </span>
+        <a class="btn btn-primary"
+           title="View Key"
+           onclick="showPlagiarismHighKey()"
+        >
+            View Key
+        </a>
+    </div>
+    <hr />
+    <form id="users_with_plagiarism" class="plag-flex">
+        <span class="plag-flex-item">User 1 (sorted by %match):
+            <select name="user_id_1">
+                <option value="">None</option>
+
+                {% for ranking in rankings %}
+                    <option value="{{ ranking[1] }}">{{ ranking[3] }} {{ ranking[4] }} &lt;{{ ranking[1] }}&gt; ({{ ranking[1] }})</option>
+                {% endfor %}
+
+            </select>
+        </span>
+        <span class="plag-flex-item">Version:
+            <select name="version_user_1">
+                <option value="">None</option>
+            </select>
+        </span>
+        <span class="plag-flex-item">User 2:
+            <select name="user_id_2">
+                <option value="">None</option>
+            </select>
+        </span>
+        <a class="btn btn-primary plag-flex-item toggle" onclick="toggle();">Toggle</a>
+    </form>
+    <div class="code-cont">
+        <div class="sub">
+            <div class="sub-item">
+                <textarea id="code_box_1" name="code_box_1"></textarea>
+            </div>
+            <div class="sub-item">
+                <textarea id="code_box_2" name="code_box_2"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include("admin/PlagiarismHighlightingKey.twig") %}
