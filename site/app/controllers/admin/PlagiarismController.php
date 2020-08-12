@@ -119,7 +119,6 @@ class PlagiarismController extends AbstractController {
 
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismMainPage', $semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info);
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'deletePlagiarismResultAndConfigForm');
     }
 
     /**
@@ -150,7 +149,6 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'showPlagiarismResult', $semester, $course, $gradeable_id, $gradeable_title, $rankings);
-        $this->core->getOutput()->renderOutput(['admin', 'Plagiarism'], 'plagiarismPopUpToShowMatches');
     }
 
     /**
