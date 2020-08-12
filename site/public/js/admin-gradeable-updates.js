@@ -91,7 +91,7 @@ $(document).ready(function () {
     };
 
     ajaxCheckBuildStatus();
-    $('input:not(#random_peer_graders_list,#number_to_peer_grade),select,textarea').change(function () {
+    $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }
@@ -150,7 +150,7 @@ $(document).ready(function () {
             }, updateGradeableErrorCallback);
     });
 
-    $('#random_peer_graders_list').click(
+    $('#random-peer-graders-list').click(
         function () {
             if ( confirm("This will update peer matrix. Are you sure?")) {
                 let data = {'csrf_token': csrfToken};
