@@ -617,6 +617,7 @@ gradeables:
   g_title: Open PDF Peer Team Homework
   gradeable_config: pdf_word_count
   g_bucket: homework
+  g_grader_assignment_method: 1
 
 - g_id: grading_pdf_peer_homework
   eg_peer_grading: true
@@ -687,6 +688,7 @@ gradeables:
   g_title: Released Peer PDF Homework
   gradeable_config: pdf_word_count
   g_bucket: homework
+  g_grader_assignment_method: 2
 
 - g_id: closed_team_homework
   eg_peer_grading: true
@@ -1482,6 +1484,7 @@ gradeables:
   g_title: Grading Homework Team PDF
   gradeable_config: pdf_word_count
   g_bucket: homework
+  g_grader_assignment_method: 0
 
 - g_id: grades_released_homework_onlytaEC
   components:
