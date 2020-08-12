@@ -52,9 +52,14 @@
     <br />
 
     <div class="electronic_file electronic_file_dates">
-        <div class="regrade_request_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
-            <input name="regrade_request_date" id="date_regrade_request" class="date_picker" type="text" value="{{ gradeable.getRegradeRequestDate()|date(date_format, timezone_string) }}">
-            <label for="date_regrade_request">Grade Inquiry Due Date (Grade Inquiries must be initiated by this date)</label>
+        <div class="grade_inquiry_date" {{ regrade_allowed != true or regrade_enabled != true ? 'hidden' : '' }}>
+            <input name="grade_inquiry_start_date" id="date_grade_inquiry_start" class="date_picker grade_inquiry_start_date" type="text" value="{{ gradeable.getGradeInquiryStartDate()|date(date_format, timezone_string) }}">
+            <label for="date_grade_inquiry_start">Grade Inquiry Start Date (Grade Inquiries may begin)</label>
+
+            <br />
+
+            <input name="grade_inquiry_due_date" id="date_grade_inquiry_due" class="date_picker grade_inquiry_due_date" type="text" value="{{ gradeable.getGradeInquiryDueDate()|date(date_format, timezone_string) }}">
+            <label for="date_grade_inquiry_due">Grade Inquiry Due Date (Grade Inquiries must be initiated by this date)</label>
         </div>
 
         <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>

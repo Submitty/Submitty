@@ -91,7 +91,7 @@ $(document).ready(function () {
     };
 
     ajaxCheckBuildStatus();
-    $('input:not(#random_peer_graders_list,#number_to_peer_grade),select,textarea').change(function () {
+    $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
         }

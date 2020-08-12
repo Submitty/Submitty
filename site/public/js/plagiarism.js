@@ -108,6 +108,10 @@ function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     // TODO: Discuss location for matches popup
 }
 
+function showPlagiarismHighKey() {
+  $('#Plagiarism-Highlighting-Key').css('display', 'block');
+}
+
 function setUpPlagView(gradeable_id) {
 
     gradeableId = gradeable_id;

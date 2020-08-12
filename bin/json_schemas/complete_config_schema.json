@@ -12,6 +12,10 @@
         "description" : "Hide any file submissions from students.",
         "type" : "boolean"
       },
+      "hide_version_and_test_details" : {
+        "description" : "Hide submission version and autograding test details from students.",
+        "type" : "boolean"
+      },
       "publish_actions" : {
         "description" : "Display a list of the actions taken for a testcase via the web UI",
         "type" : "boolean"
@@ -1548,6 +1552,10 @@
               "items" : {
                 "type" : "string"
               }
+            },
+            "user_item_map" : {
+              "type" : "object",
+              "description" : "Mapping of username to index of 'from_pool' array. Users in this mapping, will only be shown item corresponding to the mentioned index next to their username and no hash-based randomization will be done for them."
             },
             "points" : {
               "type" : "number",
