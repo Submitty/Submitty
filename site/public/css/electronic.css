@@ -1261,7 +1261,8 @@ tr.is_publish {
 }
 
 .panels-selector-window {
-    width: 90%;
+    width: 85%;
+    max-width: 85%;
     height: 90%;
 }
 
@@ -1271,19 +1272,17 @@ tr.is_publish {
 
 .layout-option-cont {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 270px);
-    width: 78vw;
+    grid-template-columns: repeat(auto-fill, 250px);
+    width: 83vw;
     grid-column-gap: 5px;
     grid-row-gap: 5px;
 }
 
 .layout-option-item {
     height: 220px;
-    width: 270px;
+    width: 250px;
     background: #494f54;
-    border: 2px solid var(--text-black);
     padding: 5px;
-
 }
 
 .layout-option-item button {
