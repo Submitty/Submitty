@@ -844,7 +844,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-01 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grades Released Homework
@@ -1077,7 +1078,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Grade Only Homework (Upload Only)
@@ -1143,7 +1145,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde Only Homework (Simple Python)
@@ -1209,7 +1212,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde and TA Homework (C System Calls)
@@ -1274,7 +1278,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   eg_lichen_sample_path: /usr/local/submitty/more_autograding_examples/cpp_cats/submissions
   eg_plagiarized_users:
@@ -1416,7 +1421,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Only w/ Extra Credit (Upload Only)
@@ -1481,7 +1487,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Only w/ Penalty (Upload Only)
