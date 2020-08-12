@@ -441,12 +441,15 @@ class AutoGradingView extends AbstractView {
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'overall_comments' => $overall_comments,
             'ta_components' => $ta_component_data,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
+            'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate(),
+            'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'ta_score' => $ta_grading_earned,
             'ta_max' => $ta_max,
             'active_same_as_graded' => $active_same_as_graded,
+            'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
+            'is_grade_inquiry_ended' => $gradeable->isGradeInquiryEnded(),
             'regrade_available' => $regrade_available,
             'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
             'num_decimals' => $num_decimals,
@@ -660,7 +663,9 @@ class AutoGradingView extends AbstractView {
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
+
         $gradeable_id = $gradeable->getId();
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -670,7 +675,6 @@ class AutoGradingView extends AbstractView {
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,
             'ordered_graders' => $ordered_graders,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,
