@@ -48,6 +48,9 @@ class TestPDFs(BaseTestCase):
         self.driver.find_element_by_id('open_file_'+pdf_name).click()
         new_window = self.driver.window_handles[1]
         self.driver.switch_to.window(new_window)
+        self.wait_for_element((By.ID, "content"))  
+        #text = self.driver.find_element_by_id("content")   
+        #self.assertFalse("You don't have access to this page." in text)
         self.driver.close()
         self.driver.switch_to.window(current_window)
         self.driver.find_element_by_xpath('//a[contains(@file-url,"'+pdf_name+'")]').click()
