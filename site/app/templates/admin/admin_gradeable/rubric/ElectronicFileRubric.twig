@@ -43,11 +43,11 @@
                 $('body').on('DOMSubtreeModified', '.component-container', function() {
                     let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
                     if (yesPeer) {
-                        $('#page_5_nav').show();
-                        $('#page_5_nav').removeClass("hidden_no_peers");
+                        $('#page_4_nav').show();
+                        $('#page_4_nav').removeClass("hidden-no-peers");
                     } else {
-                        $('#page_5_nav').hide();
-                        $('#page_5_nav').addClass("hidden_no_peers");
+                        $('#page_4_nav').hide();
+                        $('#page_4_nav').addClass("hidden-no-peers");
                     }
                 });
             });
