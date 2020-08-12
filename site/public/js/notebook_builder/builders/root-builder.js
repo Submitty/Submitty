@@ -15,7 +15,7 @@ class RootBuilder extends AbstractBuilder {
         attachment_div.appendChild(this.selector.render());
         attachment_div.appendChild(this.form_options.render());
 
-        this.load();
+        this.load(builder_data.config);
     }
 
     getJSON() {

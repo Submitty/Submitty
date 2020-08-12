@@ -45,8 +45,16 @@ class AbstractBuilder {
 
     getJSON()  { throw 'Implement this method in the child class.'; }
 
-    load() {
-        builder_data.config.notebook.forEach(cell => {
+    load(data) {
+        if (data.item_pool) {
+            data.item_pool.forEach(item => {
+                let widget = new ItempoolWidget();
+                widget.load(item);
+                this.widgetAdd(widget);
+            });
+        }
+
+        data.notebook.forEach(cell => {
             let widget;
 
             switch (cell.type) {

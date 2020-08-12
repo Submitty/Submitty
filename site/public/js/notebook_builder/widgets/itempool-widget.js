@@ -5,6 +5,8 @@ class ItempoolWidget extends Widget {
         this.dom_pointer;
 
         this.builder;
+
+        this.state = {}
     }
 
     render() {
@@ -22,6 +24,11 @@ class ItempoolWidget extends Widget {
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
         this.builder = new ItempoolBuilder(interactive_area, 'Add Cell to Itempool Notebook');
+
+        if (Object.keys(this.state).length > 0) {
+            item_name_div.querySelector('.item-name-input').value = this.state.item_name;
+            this.builder.load(this.state);
+        }
 
         this.dom_pointer = container;
         return container;
