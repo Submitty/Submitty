@@ -347,10 +347,15 @@ Here's a short list of instructions:\n  \
             "markdown_string": "#Let's do Math!"
         },
         {
-            "type" : "item",
-            "item_label" : "Math Problem",
-            "from_pool" : ["math_1", "math_2", "math_3"],
-            "points" : 3
+              "type" : "item",
+              "item_label" : "Math Problem",
+              "from_pool" : ["math_1", "math_2", "math_3"],
+              "user_item_map": {
+                "instructor" : 0,
+                "student" : 1,
+                "aphacker" : 2
+              },
+              "points" : 3
         },
         {
             "type" : "item",
@@ -366,6 +371,11 @@ Here's a short list of instructions:\n  \
             "type" : "item",
             "item_label" : "Animal FIRST",
             "from_pool" : ["animal_1", "animal_2", "animal_3"],
+            "user_item_map": {
+              "instructor" : 0,
+              "student" : 1,
+              "aphacker" : 2
+            },
             "points" : 2
         },
         {
@@ -397,6 +407,11 @@ Here's a short list of instructions:\n  \
             "type" : "item",
             "item_label" : "JUST CODE",
             "from_pool" : ["cpp_code", "python_code"],
+            "user_item_map": {
+              "instructor" : 0,
+              "student" : 1,
+              "aphacker" : 0
+            },
             "points" : 5
         }
         // ===================================================
