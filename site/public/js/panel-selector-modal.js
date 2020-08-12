@@ -1,4 +1,6 @@
 $(function () {
+  // Draggable Popup box
+  $("#panels-selector-modal").draggable();
   console.log('panels-selector-modal.js file linked');
 
   // Single Panel mode
@@ -89,3 +91,11 @@ $(function () {
   tallLeftTwoInRightPanelCanvasCTX.fillRect(153, 82, 140, 58);
 
 });
+
+function togglePanelSelectorModal(show) {
+  if (show) {
+    $("#panels-selector-modal").removeClass('hide');
+  } else {
+    $("#panels-selector-modal").addClass('hide');
+  }
+}

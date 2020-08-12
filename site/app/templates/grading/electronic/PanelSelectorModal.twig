@@ -1,6 +1,6 @@
 {% import _self as self %}
 {# This is the control shown/hidden #}
-<div class="popup-form" id="panels-selector-modal">
+<div class="popup-form hide" id="panels-selector-modal">
     {# This lets us center the window #}
     <div class="popup-box">
         {# Actual displayed window #}
@@ -112,7 +112,7 @@
                 </div>
             </div>
             {# Cancel Button #}
-            <div class="cancel-button">
+            <div class="cancel-button" onclick="togglePanelSelectorModal(false)">
                 <span>
                      <i class="fas fa-times"></i>
                 </span>
@@ -120,11 +120,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    $(".popup-window").draggable();
-
-    function closePopup(id) {
-        $('#' + id).hide();
-    }
-</script>
