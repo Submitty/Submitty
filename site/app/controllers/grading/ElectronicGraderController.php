@@ -2494,7 +2494,7 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function getSolutionTaNotesForGradeable($gradeable_id):array {
+    public function getSolutionTaNotesForGradeable($gradeable_id): array {
         $solutions = [];
         try {
             $res = $this->core->getQueries()->getSolutionForAllComponentIds($gradeable_id);
@@ -2517,7 +2517,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $author_id = $this->core->getUser()->getId();
         $error = "";
-        $solution_row=[];
+        $solution_row = [];
         if (!$gradeable) {
             $error = "Invalid Gradeable ID given!";
         }

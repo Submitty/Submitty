@@ -1250,16 +1250,17 @@ HTML;
 
     /**
      * @param $gradeable
+     * @param $solution_array
      * @param $showNewInterface
      * @return string
      */
-    function renderSolutionTaNotesPanel($gradeable, $solution_array, $showNewInterface) {
+    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $showNewInterface) {
         if (!$showNewInterface) {
             return '';
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
         $r_components = $gradeable->getComponents();
-
+        $solution_components = [];
         foreach ($r_components as $key => $value) {
             $id = $value->getId();
             $solution_components[] = [
