@@ -6,7 +6,9 @@
 {% if not has_submission %}
     <span class="yellow-message">No Submission</span>
 {% endif %}
-{% if not is_inquiry_open %}
+{% if is_inquiry_yet_to_start %}
+    <span class="yellow-message">Grade inquiries are not yet started. No new grade inquiries can be made.</span>
+{% elseif not is_inquiry_open %}
     <span class="yellow-message">It is currently after grade inquiry deadline. No new grade inquiries can be made.</span>
 {% endif %}
 {% if can_inquiry and has_submission %}
