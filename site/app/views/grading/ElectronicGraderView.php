@@ -864,7 +864,8 @@ HTML;
                 $image_data,
                 $gradeable->getId(),
                 $highest_version,
-                $old_files
+                $old_files,
+                $graded_gradeable->getSubmitter()->getId()
             );
         }
     
@@ -1434,7 +1435,7 @@ HTML;
     }
 
 
-    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files): string {
+    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id): string {
         return $this->core->getOutput()->renderTwigTemplate(
             "grading/electronic/NotebookPanel.twig",
             [
@@ -1447,7 +1448,7 @@ HTML;
                     return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
                 }
             },
-            "student_id" => $this->core->getUser()->getId(),
+            "student_id" => $student_id,
             "gradeable_id" => $gradeable_id,
             "highest_version" => $highest_version,
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
