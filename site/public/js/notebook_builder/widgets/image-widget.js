@@ -1,6 +1,6 @@
 class ImageWidget extends Widget {
-    constructor(builder) {
-        super(builder);
+    constructor() {
+        super();
 
         this.dom_pointer;
 

@@ -3,10 +3,16 @@
  * time.
  */
 class RootBuilder extends AbstractBuilder {
-    constructor(attachment_div, selector_heading) {
-        super(attachment_div, selector_heading);
+    constructor(attachment_div) {
+        super(attachment_div);
+
+        const all_options = this.selector_options.concat(['Itempool', 'Item']);
+        this.selector = new SelectorWidget(all_options,  'Add New Notebook Cell');
 
         this.form_options = new FormOptionsWidget();
+
+        attachment_div.appendChild(this.reorderable_widgets_div);
+        attachment_div.appendChild(this.selector.render());
         attachment_div.appendChild(this.form_options.render());
 
         this.load();

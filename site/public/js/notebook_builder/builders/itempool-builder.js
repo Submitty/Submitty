@@ -1,6 +1,11 @@
 class ItempoolBuilder extends AbstractBuilder {
-    constructor(attachment_div, selector_heading) {
-        super(attachment_div, selector_heading);
+    constructor(attachment_div) {
+        super(attachment_div);
+
+        this.selector = new SelectorWidget(this.selector_options, 'Add Cell To Itempool Notebook');
+
+        attachment_div.appendChild(this.reorderable_widgets_div);
+        attachment_div.appendChild(this.selector.render());
     }
 
     getJSON() {

@@ -1,8 +1,4 @@
 class Widget {
-    constructor(builder) {
-        this.builder = builder;
-    }
-
     /**
      * Get the html representation of the widget.
      */
@@ -92,26 +88,11 @@ class Widget {
         const container = document.createElement('div');
         container.classList.add('widget-controls');
 
-        // Setup move up button
-        const up_button = this.getButton('Up');
-        up_button.addEventListener('click', () => {
-            this.builder.widgetUp(this);
+        ['Up', 'Down', 'Remove'].forEach(label => {
+            const btn = this.getButton(label);
+            btn.widget = this;
+            container.appendChild(btn);
         });
-        container.appendChild(up_button);
-
-        // Setup down button
-        const down_button = this.getButton('Down');
-        down_button.addEventListener('click', () => {
-            this.builder.widgetDown(this);
-        });
-        container.appendChild(down_button);
-
-        // Setup remove button
-        const remove_button = this.getButton('Remove');
-        remove_button.addEventListener('click', () => {
-            this.builder.widgetRemove(this);
-        })
-        container.appendChild(remove_button);
 
         return container;
     }

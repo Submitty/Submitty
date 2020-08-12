@@ -1,12 +1,46 @@
 class AbstractBuilder {
-    constructor(attachment_div, selector_heading) {
+    constructor(attachment_div) {
         this.reorderable_widgets = [];
         this.reorderable_widgets_div = document.createElement('div');
 
-        this.selector = new SelectorWidget(this, selector_heading);
+        this.selector_options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
 
-        attachment_div.appendChild(this.reorderable_widgets_div);
-        attachment_div.appendChild(this.selector.render());
+        attachment_div.onclick = event => {
+            if (event.target.getAttribute('type') === 'button') {
+                switch (event.target.value) {
+                    case 'Multiple Choice':
+                        this.widgetAdd(new MultipleChoiceWidget());
+                        break;
+                    case 'Markdown':
+                        this.widgetAdd(new MarkdownWidget());
+                        break;
+                    case 'Short Answer':
+                        this.widgetAdd(new ShortAnswerWidget());
+                        break;
+                    case 'Image':
+                        this.widgetAdd(new ImageWidget());
+                        break;
+                    case 'Itempool':
+                        this.widgetAdd(new ItempoolWidget());
+                        break;
+                    case 'Item':
+                        break;
+                    case 'Up':
+                        this.widgetUp(event.target.widget)
+                        break;
+                    case 'Down':
+                        this.widgetDown(event.target.widget)
+                        break;
+                    case 'Remove':
+                        this.widgetRemove(event.target.widget)
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            event.stopPropagation();
+        }
     }
 
     getJSON()  { throw 'Implement this method in the child class.'; }
@@ -17,16 +51,16 @@ class AbstractBuilder {
 
             switch (cell.type) {
                 case 'multiple_choice':
-                    widget = new MultipleChoiceWidget(this);
+                    widget = new MultipleChoiceWidget();
                     break;
                 case 'markdown':
-                    widget = new MarkdownWidget(this);
+                    widget = new MarkdownWidget();
                     break;
                 case 'short_answer':
-                    widget = new ShortAnswerWidget(this);
+                    widget = new ShortAnswerWidget();
                     break;
                 case 'image':
-                    widget = new ImageWidget(this);
+                    widget = new ImageWidget();
                     break;
                 default:
                     break;
