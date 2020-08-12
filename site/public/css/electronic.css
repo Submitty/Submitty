@@ -1254,6 +1254,46 @@ tr.is_publish {
     display:inline-block;
 }
 
+/* Panels Selector */
+
+#panels-selector-modal {
+
+}
+
+.panels-selector-window {
+    width: 90%;
+    height: 90%;
+}
+
+#panels-selector-modal .form-title h1 {
+    margin-bottom: 0;
+}
+
+.layout-option-cont {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 270px);
+    width: 78vw;
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+}
+
+.layout-option-item {
+    height: 220px;
+    width: 270px;
+    background: #494f54;
+    border: 2px solid var(--text-black);
+    padding: 5px;
+
+}
+
+.layout-option-item button {
+    margin-top: 2px;
+}
+
+.layout-option-item canvas {
+    height: 70%;
+    width: 100%;
+}
 /* Media queries */
 @media (max-width: 540px) {
     #electronic-gradeable-container {

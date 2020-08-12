@@ -1,0 +1,45 @@
+{% import _self as self %}
+{# This is the control shown/hidden #}
+<div class="popup-form" id="panels-selector-modal">
+    {# This lets us center the window #}
+    <div class="popup-box">
+        {# Actual displayed window #}
+        <div class="popup-window panels-selector-window">
+            <div class="form-title">
+                <h1>Panel Selector</h1>
+            </div>
+            <div class="layouts-cont">
+                <div class="layout-option" id="layout-option-2">
+                    <div class="layout-option-title">
+                        Two panel mode options
+                    </div>
+                    <hr/>
+                    <div class="layout-option-cont">
+                        <div class="layout-option-item">
+                            <canvas id="equal-height"></canvas>
+                            <div class="flex-col">
+                                <span>Equal Heights</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick=""
+                                >Apply</button>
+                            </div>
+                        </div>
+                        <div class="layout-option-item"></div>
+                        <div class="layout-option-item"></div>
+                        <div class="layout-option-item"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(".popup-window").draggable();
+
+    function closePopup(id) {
+        $('#' + id).hide();
+    }
+</script>
