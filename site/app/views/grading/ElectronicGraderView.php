@@ -1249,9 +1249,9 @@ HTML;
     }
 
     /**
-     * @param $gradeable
-     * @param $solution_array
-     * @param $showNewInterface
+     * @param Gradeable $gradeable
+     * @param array $solution_array
+     * @param bool $showNewInterface
      * @return string
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $showNewInterface) {
