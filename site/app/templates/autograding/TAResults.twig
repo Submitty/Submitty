@@ -65,7 +65,6 @@ $( document ).ready(function() {
                             {% else %}
                                 {{ file.relative_name }}
                             {% endif %}
-
                         {% endfor %}
                     </div>
                     <div class="no-border-box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
@@ -82,35 +81,53 @@ $( document ).ready(function() {
                                 <br />
                             {% endif %}
                         {% endfor %}
-                        {% for file in uploaded_pdfs %}
-                            {% if file.encoded_name in annotated_file_names %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 1.28em">
-                                        <p> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                                            <a class="btn btn-success key_to_click" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
-                                    </div>
-                                {% else %}
-                                    <p> {#<a class="btn btn-primary key_to_click" tabindex="0" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                                        <a class="btn btn-success key_to_click" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
-                                {% endif %}
-                                {% if can_download %}
-                                    <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
-                                        <i class="fas fa-download" title="Download the file"></i></button>
-                                {% endif %}
-                            {% endif %}
-
-                        {% endfor %}
                     </div>
-                        <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
-                        {% if can_download %}
-                            <p style="text-align:center; vertical-align: middle;">
-                                Download all files: <button class = "btn btn-default key_to_click" tabindex="0" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
-                                    <i class="fas fa-download" title="Download zip of all files"></i></button>
-                            </p>
-                        {% endif %}
-                        </div>
+                    <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
+                    {% if can_download %}
+                        <p style="text-align:center; vertical-align: middle;">
+                            Download all files: <button class = "btn btn-default key_to_click" tabindex="0" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
+                                <i class="fas fa-download" title="Download zip of all files"></i></button>
+                        </p>
+                    {% endif %}
+                    </div>
                 </div>
 
+                {% if annotated_file_names|length > 0 %}
+                    <div class="row">
+                        <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
+                            <b>Annotated Feedback</b>
+                            </br>
+                            {% for file in uploaded_pdfs %}
+                                {% if file.encoded_name in annotated_file_names %}
+                                    {% if loop.index != uploaded_pdfs|length %}
+                                        <div style="margin-bottom: 2em">
+                                            {{ file.relative_name }}
+                                        </div>
+                                    {% else %}
+                                        {{ file.relative_name }}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="no-border-box col-sm-5" style="float: center; padding: 40px; width: 40%; word-break: break-word; display: inline-block">
+                            {% for file in uploaded_pdfs %}
+                                {% if file.encoded_name in annotated_file_names %}
+                                    <p style="text-align:center; vertical-align: middle;">
+                                        <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                                        {% if can_download %}
+                                            <button class = 'btn btn-default key_to_click' onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download
+                                            <i class="fas fa-download" title="Download the file"></i></button>
+                                        {% endif %}
+                                    </p>
+                                    {% if loop.index != files|length %}
+                                        <br />
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {##}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         {% endif %}
         {# /Overview #}
