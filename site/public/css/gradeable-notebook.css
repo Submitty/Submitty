@@ -105,3 +105,8 @@ textarea.sa-box {
     margin-top: 0;
     margin-bottom: 0;
 }
+
+/* Fixes Safari spacing issue */
+.notebook fieldset legend {
+    -webkit-margin-top-collapse: separate;
+}
