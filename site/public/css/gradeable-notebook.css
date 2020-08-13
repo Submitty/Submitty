@@ -108,3 +108,8 @@ img {
     border-radius: 4px !important;
     vertical-align: middle !important;
 }
+
+/* Fixes Safari spacing issue */
+.notebook fieldset legend {
+    -webkit-margin-top-collapse: separate;
+}
