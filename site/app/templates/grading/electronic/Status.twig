@@ -709,7 +709,7 @@
                                 <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
 								<b>Number of students who have viewed their grade:</b>
 									{{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
-                            {% elseif not peer%}
+                            {% elseif not team_assignment %}
                                 <br/>
                                 <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% endif %}
