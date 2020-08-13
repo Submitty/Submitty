@@ -2,8 +2,8 @@
 
 namespace app\models\notebook;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\AbstractModel;
 use app\exceptions\NotImplementedException;
@@ -79,11 +79,12 @@ class Notebook extends AbstractModel {
                 }
             }
             elseif (
-                $notebook_cell['type'] === 'short_answer'
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'short_answer'
                 && !empty($notebook_cell['programming_language'])
                 && empty($notebook_cell['codemirror_mode'])
             ) {
-                $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language']);
             }
 
             // Add this cell $this->notebook
@@ -92,7 +93,7 @@ class Notebook extends AbstractModel {
             }
 
             // If cell is a type of input add it to the $actual_inputs array
-            if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
+            if (isset($notebook_cell['type']) && in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
             }
 

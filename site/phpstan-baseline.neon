@@ -171,11 +171,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Variable \\$order_all_sections might not be defined\\.$#"
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Variable \\$goToStudent might not be defined\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -218,11 +213,6 @@ parameters:
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
 			count: 3
-			path: app/controllers/student/GradeInquiryController.php
-
-		-
-			message: "#^Variable \\$component_string might not be defined\\.$#"
-			count: 8
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
