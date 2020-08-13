@@ -4866,7 +4866,6 @@ AND gc_id IN (
                 $gradeable->getPrecision(),
                 $gradeable->getLimitedAccessBlind(),
                 $gradeable->getPeerBlind(),
-                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isRegradeAllowed(),
@@ -4898,7 +4897,6 @@ AND gc_id IN (
                   eg_precision,
                   eg_limited_access_blind,
                   eg_peer_blind,
-                  eg_regrade_request_date,
                   eg_grade_inquiry_start_date,
                   eg_grade_inquiry_due_date,
                   eg_regrade_allowed,
@@ -4906,7 +4904,7 @@ AND gc_id IN (
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5018,7 +5016,6 @@ AND gc_id IN (
                     $gradeable->getPrecision(),
                     $gradeable->getLimitedAccessBlind(),
                     $gradeable->getPeerBlind(),
-                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isRegradeAllowed(),
@@ -5050,7 +5047,6 @@ AND gc_id IN (
                       eg_precision=?,
                       eg_limited_access_blind=?,
                       eg_peer_blind=?,
-                      eg_regrade_request_date=?,
                       eg_grade_inquiry_start_date=?,
                       eg_grade_inquiry_due_date=?,
                       eg_regrade_allowed=?,
