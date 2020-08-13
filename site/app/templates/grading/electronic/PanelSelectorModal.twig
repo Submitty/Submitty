@@ -52,7 +52,7 @@
                                 <button
                                         type="button"
                                         class="btn btn-primary"
-                                        onclick="changePanelsLayout(3, true)"
+                                        onclick="changePanelsLayout(2, true)"
                                 >Apply</button>
                             </div>
                         </div>
@@ -110,12 +110,12 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            {# Cancel Button #}
-            <div class="cancel-button" onclick="togglePanelSelectorModal(false)">
-                <span>
-                     <i class="fas fa-times"></i>
-                </span>
+                {# Cancel Button #}
+                <div class="form-buttons">
+                    <div class="form-button-container">
+                        <a onclick="togglePanelSelectorModal(false)" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

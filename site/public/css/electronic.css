@@ -1255,11 +1255,6 @@ tr.is_publish {
 }
 
 /* Panels Selector */
-
-#panels-selector-modal {
-
-}
-
 .panels-selector-window {
     width: 85%;
     max-width: 85%;
@@ -1308,23 +1303,6 @@ tr.is_publish {
     width: 100%;
 }
 
-.cancel-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background: dimgray;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.cancel-button span {
-    top: 50%;
-    left: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
-}
 /* Media queries */
 @media (max-width: 540px) {
     #electronic-gradeable-container {
