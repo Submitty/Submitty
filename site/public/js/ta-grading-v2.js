@@ -592,8 +592,26 @@ function toggleFullLeftColumnMode (forceVal = false) {
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   panelsContSelector = newPanelsContSelector;
-  // update the dragging event for two panels
-  initializeVerticalTwoPanelDrag();
+}
+
+/**
+ *
+ * @param panelsCount
+ * @param isLeftTaller
+ * @param twoOnRight
+ */
+function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
+  debugger;
+  taLayoutDet.numOfPanelsEnabled = +panelsCount;
+  taLayoutDet.isFullLeftColumnMode = isLeftTaller;
+
+  if (taLayoutDet.numOfPanelsEnabled === 3) {
+    taLayoutDet.dividedColName = twoOnRight ? "RIGHT" : "LEFT"
+  }
+
+  togglePanelLayoutModes(true);
+  toggleFullLeftColumnMode(true);
+  togglePanelSelectorModal(false);
 }
 
 function togglePanelLayoutModes(forceVal = false) {
@@ -634,9 +652,11 @@ function togglePanelLayoutModes(forceVal = false) {
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
     if (taLayoutDet.dividedColName === "RIGHT") {
+      $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
     }
     else {
+      $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").removeClass("active");
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
     }
     // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
@@ -651,8 +671,15 @@ function togglePanelLayoutModes(forceVal = false) {
               // If yes update the nextIdx
               nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
             }
-            taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
-            return false;
+            if (taLayoutDet.dividedColName === "RIGHT") {
+              taLayoutDet.currentTwoPanels.leftBottom = null;
+              taLayoutDet.currentTwoPanels.rightBottom = panelElements[nextIdx].str;
+            }
+            else {
+              taLayoutDet.currentTwoPanels.rightBottom = null;
+              taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
+            }
+            return false; // Break the loop
         }
         return true;
       })
