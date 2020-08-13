@@ -10,7 +10,6 @@ from selenium.webdriver.common.by import By
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-
 class TestMyProfile(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
@@ -33,7 +32,7 @@ class TestMyProfile(BaseTestCase):
         self.assertEqual(self.student_id, student_id)
         self.assertEqual(self.student_first_name, student_first_name)
         self.assertEqual(self.student_last_name, student_last_name)
-#         self.assertEqual(self.user_time_zone, user_time_zone)
+        # self.assertEqual(self.user_time_zone, user_time_zone)
         print(time_zone_selector.first_selected_option.get_attribute('value'))
 
     def test_time_zone_selection(self):
@@ -127,11 +126,22 @@ class TestMyProfile(BaseTestCase):
         self.assertEqual("{} {}".format(self.student_first_name, self.student_last_name), alt_tag_val)
 
     def test_flagged_profile_photo(self):
-        pass
+        # Login as instructor and go to student photos page
+        self.login(user_id='instructor', user_name='Quinn')
+        self.click_class("sample", "SAMPLE")
+        self.driver.find_element(By.ID, "nav-sidebar-photos").click()
 
+        # find Joe(Student) image to flag
 
+        # login as student and go to my-profile page
+        self.setup_test_start()
 
+        # No image element and just an empty span element stating photo is 'N/A'
+        self.assertFalse()
+        self.assertEquals('N/A', self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/span[@class='center-img-tag']").text)
 
+        # look for flagged image message
+        self.assertEquals('Your preferred image was flagged as inappropriate.', self.driver.find_element(By.ID, "flagged-message").text)
 
 if __name__ == "__main__":
     import unittest
