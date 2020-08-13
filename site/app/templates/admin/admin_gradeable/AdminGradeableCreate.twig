@@ -332,10 +332,13 @@
             $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
             {# Use this 'each' trick since 'no_regrade_allowed' may not be defined if grade inquiries are not enabled #}
-            let regradeReqDate = $('#date_regrade_request');
-            regradeReqDate.prop('disabled', true);
+            const [gradeInqOpenDate, gradeInqDueDate] = [$('#date_grade_inquiry_start'), $('#date_grade_inquiry_due')];
+
+            gradeInqOpenDate.prop('disabled', true);
+            gradeInqDueDate.prop('disabled', true);
             $('#no_regrade_allowed').each(function () {
-                regradeReqDate.prop('disabled', $(this).is(':checked'));
+                gradeInqOpenDate.prop('disabled', $(this).is(':checked'));
+                gradeInqDueDate.prop('disabled', $(this).is(':checked'));
             });
         }
         $('#hide_dates').hide();
@@ -448,13 +451,11 @@
 
     function onIsRegradeAllowedChange() {
         if ($('#yes_regrade_allowed').is(':checked')) {
-            //   $('.regrade_request_date').hide();
-            disableElementChildren('.regrade_request_date', false);
+            disableElementChildren('.grade_inquiry_date', false);
             disableElementChildren('.grade_inquiry_per_component_allowed', false);
         }
         else {
-            //   $('.regrade_request_date').show();
-            disableElementChildren('.regrade_request_date', true);
+            disableElementChildren('.grade_inquiry_date', true);
             $('#no_grade_inquiry_per_component_allowed').prop('checked',true);
             disableElementChildren('.grade_inquiry_per_component_allowed', true);
         }
