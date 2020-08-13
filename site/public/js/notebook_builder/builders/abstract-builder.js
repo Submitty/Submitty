@@ -1,7 +1,10 @@
 class AbstractBuilder {
     constructor(attachment_div) {
         this.reorderable_widgets = [];
+        this.itempool_widgets = [];
+
         this.reorderable_widgets_div = document.createElement('div');
+        this.itempool_div = document.createElement('div');
 
         this.selector_options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
 
@@ -20,10 +23,11 @@ class AbstractBuilder {
                     case 'Image':
                         this.widgetAdd(new ImageWidget());
                         break;
-                    case 'Itempool':
+                    case 'Itempool Item':
                         this.widgetAdd(new ItempoolWidget());
                         break;
                     case 'Item':
+                        this.widgetAdd(new ItemWidget());
                         break;
                     case 'Up':
                         this.widgetUp(event.target.widget)
@@ -81,15 +85,36 @@ class AbstractBuilder {
         });
     }
 
+    collectValidJsons(widgets, valid_jsons) {
+        widgets.forEach(widget => {
+            const widget_json = widget.getJSON();
+
+            if (Object.keys(widget_json).length > 0) {
+                valid_jsons.push(widget_json);
+            }
+        });
+    }
+
     /**
      * Add a widget to the notebook builder form.
      *
      * @param {Widget} widget
      */
     widgetAdd(widget) {
-        this.reorderable_widgets.push(widget);
+        let widgets_array;
+        let widgets_div;
 
-        this.reorderable_widgets_div.appendChild(widget.render());
+        if (widget.constructor.name === 'ItempoolWidget') {
+            widgets_array = this.itempool_widgets;
+            widgets_div = this.itempool_div;
+        }
+        else {
+            widgets_array = this.reorderable_widgets;
+            widgets_div = this.reorderable_widgets_div;
+        }
+
+        widgets_array.push(widget);
+        widgets_div.appendChild(widget.render());
 
         // Codemirror boxes inside the ShortAnswerWidget require special handling
         // Codeboxes won't render correctly unless refreshed AFTER appended to the dom
@@ -104,10 +129,12 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetRemove(widget) {
+        const widgets_array = widget.constructor.name === 'ItempoolWidget' ? this.itempool_widgets : this.reorderable_widgets;
+
         widget.dom_pointer.remove();
 
-        const index = this.reorderable_widgets.indexOf(widget);
-        this.reorderable_widgets.splice(index, 1);
+        const index = widgets_array.indexOf(widget);
+        widgets_array.splice(index, 1);
     }
 
     /**
@@ -116,15 +143,17 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetUp(widget) {
-        const index = this.reorderable_widgets.indexOf(widget);
+        const widgets_array = widget.constructor.name === 'ItempoolWidget' ? this.itempool_widgets : this.reorderable_widgets;
+
+        const index = widgets_array.indexOf(widget);
 
         // If index is 0 then do nothing
         if (index === 0) {
             return;
         }
 
-        this.reorderable_widgets.splice(index, 1);
-        this.reorderable_widgets.splice(index - 1, 0, widget);
+        widgets_array.splice(index, 1);
+        widgets_array.splice(index - 1, 0, widget);
 
         const elem = widget.dom_pointer;
         elem.parentElement.insertBefore(elem, elem.previousElementSibling);
@@ -136,15 +165,17 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetDown(widget) {
-        const index = this.reorderable_widgets.indexOf(widget);
+        const widgets_array = widget.constructor.name === 'ItempoolWidget' ? this.itempool_widgets : this.reorderable_widgets;
+
+        const index = widgets_array.indexOf(widget);
 
         // If widget is already at the end of the form then do nothing
-        if (index === this.reorderable_widgets.length - 1) {
+        if (index === widgets_array - 1) {
             return;
         }
 
-        this.reorderable_widgets.splice(index, 1);
-        this.reorderable_widgets.splice(index + 1, 0, widget);
+        widgets_array.splice(index, 1);
+        widgets_array.splice(index + 1, 0, widget);
 
         const elem = widget.dom_pointer;
         elem.parentElement.insertBefore(elem, elem.nextElementSibling.nextElementSibling);

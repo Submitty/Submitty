@@ -11,7 +11,7 @@ class ItempoolWidget extends Widget {
 
     render() {
         // Setup container
-        const container = this.getContainer('Itempool Notebook');
+        const container = this.getContainer('Itempool Item');
         container.classList.add('itempool-widget');
 
         // Add item_name field input field to heading area
@@ -23,7 +23,7 @@ class ItempoolWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
-        this.builder = new ItempoolBuilder(interactive_area, 'Add Cell to Itempool Notebook');
+        this.builder = new ItempoolBuilder(interactive_area);
 
         if (Object.keys(this.state).length > 0) {
             item_name_div.querySelector('.item-name-input').value = this.state.item_name;
