@@ -69,7 +69,8 @@ gradeables:
   g_grade_start_date: 9997-12-31 23:59:59
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_bucket: homework
 
 - g_id: future_tas_homework
@@ -132,7 +133,8 @@ gradeables:
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_title: Future (TAs) Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
@@ -197,7 +199,8 @@ gradeables:
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_title: Open Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
@@ -261,7 +264,8 @@ gradeables:
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -328,7 +332,8 @@ gradeables:
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -394,7 +399,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
@@ -461,7 +467,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Closed Homework
@@ -526,7 +533,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Homework
@@ -550,7 +558,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-01 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grades Released Homework
@@ -783,7 +792,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Grade Only Homework (Upload Only)
@@ -849,7 +859,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde Only Homework (Simple Python)
@@ -915,7 +926,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Autograde and TA Homework (C System Calls)
@@ -980,7 +992,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   eg_lichen_sample_path: /usr/local/submitty/more_autograding_examples/cpp_cats/submissions
   eg_plagiarized_users:
@@ -1056,7 +1069,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Grading Homework PDF
@@ -1121,7 +1135,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Only w/ Extra Credit (Upload Only)
@@ -1186,7 +1201,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_regrade_request_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: TA Only w/ Penalty (Upload Only)

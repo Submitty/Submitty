@@ -194,11 +194,13 @@ CREATE TABLE public.electronic_gradeable (
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
-    eg_regrade_request_date timestamp(6) with time zone NOT NULL,
+    eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
+    eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
+    CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
+    CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
-    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone))
@@ -594,6 +596,18 @@ CREATE TABLE public.peer_assign (
     g_id character varying NOT NULL,
     grader_id character varying NOT NULL,
     user_id character varying NOT NULL
+);
+
+
+--
+-- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_feedback (
+    grader_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    feedback character varying(255)
 );
 
 
@@ -1289,17 +1303,6 @@ ALTER TABLE ONLY public.late_day_exceptions
 ALTER TABLE ONLY public.late_days
     ADD CONSTRAINT late_days_pkey PRIMARY KEY (user_id, since_timestamp);
 
---
--- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE peer_feedback (
-    grader_id character varying(255) NOT NULL,
-    user_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL,
-    feedback character varying(255)
-);
-
 
 --
 -- Name: migrations_course migrations_course_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -1331,6 +1334,14 @@ ALTER TABLE ONLY public.notifications
 
 ALTER TABLE ONLY public.peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: peer_feedback peer_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
 
 
 --
@@ -1864,6 +1875,30 @@ ALTER TABLE ONLY public.peer_assign
 
 
 --
+-- Name: peer_feedback peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_feedback peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_feedback peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: poll_options poll_options_poll_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1942,32 +1977,6 @@ ALTER TABLE ONLY public.queue
 ALTER TABLE ONLY public.regrade_discussion
     ADD CONSTRAINT regrade_discussion_fk0 FOREIGN KEY (regrade_id) REFERENCES public.regrade_requests(id);
 
---
--- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
---
--- Name: peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
-
---
--- Name: peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE;
-            
---
--- Name: peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY peer_feedback
-            ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
 
 --
 -- Name: regrade_discussion regrade_discussion_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
