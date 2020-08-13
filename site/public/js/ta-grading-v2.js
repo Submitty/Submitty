@@ -330,6 +330,24 @@ function updateCookies(){
 
 //-----------------------------------------------------------------------------
 // Student navigation
+function gotoMainPage() {
+
+  let window_location = $("#main-page")[0].dataset.href
+
+  if (getGradeableId() !== '') {
+    closeAllComponents(true).then(function () {
+      window.location = window_location;
+    }).catch(function () {
+      if (confirm("Could not save open component, go to main page anyway?")) {
+        window.location = window_location;
+      }
+    });
+  }
+  else {
+    window.location = window_location;
+  }
+}
+
 function gotoPrevStudent(to_ungraded = false) {
 
   let selector;
@@ -933,11 +951,13 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
   return stored_paths;
 }
 
+// Returns Non anonymized path for the submitted files by student
 function getNonAnonPath(path, anon_submitter_id, user_ids){
-  nonAnonPath = "";
-  pathPieces = path.split("/");
+  let nonAnonPath = "";
+  let pathPieces = path.split("/");
   for (i = 1; i < pathPieces.length; i++) {
-    if(i == 9){
+    // for non-anonymized-file-path, get the user-name from anon_submitter_id (if anonymized)
+    if(i === 9){
       nonAnonPath += "/" + user_ids[anon_submitter_id];
     }
     else{
@@ -954,14 +974,14 @@ function changeCurrentPeer(){
 }
 
 function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
-  var peer_id = $("#edit-peer-select").val();
-  var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
+  let peer_id = $("#edit-peer-select").val();
+  let url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
   $.ajax({
-    url: url,
+    url,
     data: {
-      csrf_token: csrf_token,
-      peer_id: peer_id,
-      submitter_id: submitter_id
+      csrf_token,
+      peer_id,
+      submitter_id
     },
     type: "POST",
     success: function(data) {

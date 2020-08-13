@@ -4,6 +4,7 @@
 
 <script>
 {# When the user clicks on a peer tab in peer feedback mode, hide all other peer feedback panels, set all other tabs to unselected, set the clicked peer tab to selected and show the corresponding peer feedback panel #}
+
 function open_peer_feedback_tab(user, ordered_graders) {
     $('.page-content').hide();
     $('#peer-feedback-'+user).show();
@@ -61,9 +62,7 @@ function switch_feedback_modes() {
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
-        
         <button class = 'btn btn-default' id = "switch_feedback_button" onclick='switch_feedback_modes()'>Switch to Feedback Mode</button>
-        
         {# /Overview #}
 
         {% if (peer_score >= peer_max) %}
@@ -94,7 +93,7 @@ function switch_feedback_modes() {
             {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback)  }}
             {# /Peer Component boxes #}
         {% endif %}
-        
+
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
             {% for user in ordered_graders if overall_comments[user] is not empty %}
@@ -106,13 +105,13 @@ function switch_feedback_modes() {
                         <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
                     </p>
                 </div>
-   
+
             {% endfor %}
         </div>
-        
+
         {% if uploaded_pdfs|length >= 1 %}
             <div class = "no-border-box">
-    
+
                 <div class="row">
                     <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
                         {% for file in files %}
@@ -142,16 +141,16 @@ function switch_feedback_modes() {
                         {% endfor %}
                     </div>
                     <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 30%; word-break: break-word; display: inline-block">
-                        
+
                         {% if can_download %}
-                            <p style="text-align:center; vertical-align: middle;">    
+                            <p style="text-align:center; vertical-align: middle;">
                                 Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
                                     <i class="fas fa-download" title="Download zip of all files"></i></button>
                             </p>
                         {% endif %}
-                        
+
                         {% for file in uploaded_pdfs %}
-                            {% if file.name in annotated_file_names %}
+                            {% if file.encoded_name in annotated_file_names %}
                                 {% if loop.index != uploaded_pdfs|length %}
                                     <div style="margin-bottom: 1.28em">
                                         <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
@@ -326,9 +325,9 @@ function switch_feedback_modes() {
                         </p>
                     </div>
                 {% endif %}
-            
+
             {% for file in uploaded_pdfs %}
-                {% if file.name in annotated_file_names and grader in file.graders%}
+                {% if file.encoded_name in annotated_file_names and grader in file.graders%}
                     </br>
                     <p>
                         {{file.name}} :

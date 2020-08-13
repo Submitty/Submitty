@@ -141,6 +141,7 @@ class ElectronicGraderController extends AbstractController {
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
         }
         $gradeable->setRandomPeerGradersList($final_grading_info);
+        $gradeable->setPeerGradingSet($number_to_grade);
         return JsonResponse::getSuccessResponse($final_grading_info);
     }
     /**
@@ -981,6 +982,7 @@ class ElectronicGraderController extends AbstractController {
         $team = $gradeable->isTeamAssignment();
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
+        $order_all_sections = null;
         if ($who_id === '') {
             $order_grading_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser());
             $order_grading_sections->sort($sort, $direction);
@@ -994,8 +996,9 @@ class ElectronicGraderController extends AbstractController {
 
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = false;
-            if ($peer) {
-                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getQueries()->getSubmitterIdFromAnonId($from), false);
+            $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from);
+            if ($id_from_anon !== null) {
+                $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
             else {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
@@ -1024,8 +1027,14 @@ class ElectronicGraderController extends AbstractController {
             elseif ($to === 'next' && $to_ungraded === 'false') {
                 $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
             }
+            elseif ($to === 'prev' && $to_ungraded === 'true' && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getPrevUngradedSubmitter($from_id, $component_id);
+            }
             elseif ($to === 'prev' && $to_ungraded === 'true') {
                 $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
+            }
+            elseif ($to === 'next' && $to_ungraded === 'true' && $this->core->getUser()->accessFullGrading()) {
+                $goToStudent = $order_all_sections->getNextUngradedSubmitter($from_id, $component_id);
             }
             elseif ($to === 'next' && $to_ungraded === 'true') {
                 $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
@@ -1062,7 +1071,6 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb('Grading Interface ' . GradingOrder::getGradingOrderMessage($sort, $direction));
-
         $graded = 0;
         $total = 0;
         $total_submitted = 0;
