@@ -17,7 +17,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  02_simple_cpp
@@ -36,7 +37,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
   
   - gradeable_config:  03_multipart
@@ -55,7 +57,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
   
   - gradeable_config:  04_python_static_analysis
@@ -74,7 +77,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
   
   - gradeable_config:  05_cpp_static_analysis
@@ -93,7 +97,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  06_loop_types
@@ -112,7 +117,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  07_loop_depth
@@ -131,7 +137,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  08_memory_debugging
@@ -150,7 +157,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  09_java_testing
@@ -169,7 +177,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  10_java_coverage
@@ -188,7 +197,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  11_resources
@@ -207,7 +217,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  12_system_calls
@@ -226,7 +237,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  13_cmake_compilation
@@ -245,7 +257,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  14_tkinter
@@ -264,7 +277,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  15_GLFW
@@ -283,7 +297,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  16_docker_network_python
@@ -302,7 +317,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
 
   - gradeable_config:  17_dispatched_actions_and_standard_input
@@ -321,7 +337,8 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
   
   - gradeable_config:  18_postgres_database
@@ -340,5 +357,6 @@ gradeables:
     g_grade_start_date: +7 days
     g_grade_due_date: +9 days
     g_grade_released_date: +9 days
-    eg_regrade_request_date: +16 days
+    eg_grade_inquiry_start_date: +10 days
+    eg_grade_inquiry_due_date: +16 days
     eg_max_random_submissions: 0
