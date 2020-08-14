@@ -29,7 +29,7 @@
                                 {% endif %}
                             </td>
                             <td class="mark-score">
-                                {{ mark.points|number_format(num_decimals) }}
+                                {{ mark.points|round(num_decimals) }}
                             </td>
                             <td>
                                 {{ mark.title|nl2br }}
@@ -42,7 +42,7 @@
                                 <i class="far fa-check-square fa-1g"></i>
                             </td>
                             <td class="mark-score">
-                                {{ component.custom_mark_score|number_format(num_decimals) }}
+                                {{ component.custom_mark_score|round(num_decimals) }}
                             </td>
                             <td>
                                 {{ component.comment|nl2br }}

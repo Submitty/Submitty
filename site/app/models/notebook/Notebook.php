@@ -2,8 +2,8 @@
 
 namespace app\models\notebook;
 
+use app\libraries\CodeMirrorUtils;
 use app\libraries\Core;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\AbstractModel;
 use app\exceptions\NotImplementedException;
@@ -79,11 +79,10 @@ class Notebook extends AbstractModel {
                 }
             }
             elseif (
-                $notebook_cell['type'] === 'short_answer'
-                && !empty($notebook_cell['programming_language'])
-                && empty($notebook_cell['codemirror_mode'])
+                isset($notebook_cell['type'])
+                && $notebook_cell['type'] === 'short_answer'
             ) {
-                $notebook_cell['codemirror_mode'] = Utils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language'] ?? null);
             }
 
             // Add this cell $this->notebook
@@ -92,7 +91,7 @@ class Notebook extends AbstractModel {
             }
 
             // If cell is a type of input add it to the $actual_inputs array
-            if (in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
+            if (isset($notebook_cell['type']) && in_array($notebook_cell['type'], ['short_answer', 'multiple_choice'])) {
                 $actual_input[] = $notebook_cell;
             }
 
@@ -111,13 +110,7 @@ class Notebook extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-                // If programming language is set then this is a codebox, else regular textbox
-                if (isset($actual_input[$i]['programming_language'])) {
                     $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-                }
-                else {
-                    $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-                }
             }
             elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $actual_input[$i]['allow_multiple'] = $actual_input[$i]['allow_multiple'] ?? false;
@@ -150,14 +143,14 @@ class Notebook extends AbstractModel {
     }
 
 
-      /**
-       * Gets a new 'notebook' which contains information about most recent submissions
-       *
-       * @return array An updated 'notebook' which has the most recent submission data entered into the
-       * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
-       * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
-       * blank.
-       */
+    /**
+     * Gets a new 'notebook' which contains information about most recent submissions
+     *
+     * @return array An updated 'notebook' which has the most recent submission data entered into the
+     * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
+     * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
+     * blank.
+     */
     public function getMostRecentNotebookSubmissions(int $version, array $new_notebook): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
