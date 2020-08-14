@@ -1,5 +1,7 @@
 class AbstractBuilder {
     constructor(attachment_div) {
+        this.attachment_div = attachment_div;
+
         this.reorderable_widgets = [];
         this.itempool_widgets = [];
 
@@ -8,7 +10,18 @@ class AbstractBuilder {
 
         this.selector_options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
 
-        attachment_div.onclick = event => {
+        const itempoolItemChangeAction = () => {
+            const operation = this.allValidItemNames() ? 'update' : 'block';
+
+            this.reorderable_widgets.forEach(widget => {
+                if (widget.constructor.name === 'ItemWidget') {
+                    operation === 'update' ? widget.update() : widget.block();
+                }
+            });
+        }
+
+        // Handle many of the different button clicks that might occur within the notebook builder
+        this.attachment_div.onclick = event => {
             if (event.target.getAttribute('type') === 'button') {
                 switch (event.target.value) {
                     case 'Multiple Choice':
@@ -25,6 +38,7 @@ class AbstractBuilder {
                         break;
                     case 'Itempool Item':
                         this.widgetAdd(new ItempoolWidget());
+                        itempoolItemChangeAction();
                         break;
                     case 'Item':
                         this.widgetAdd(new ItemWidget());
@@ -41,10 +55,17 @@ class AbstractBuilder {
                     default:
                         break;
                 }
-            }
 
-            event.stopPropagation();
+                event.stopPropagation();
+            }
         }
+
+        // Handle updating notebook item widgets when itempool item widgets might have changed
+        this.attachment_div.addEventListener('focusout', event => {
+            if (event.target.classList.contains('item-name-input')) {
+                itempoolItemChangeAction();
+            }
+        });
     }
 
     getJSON()  { throw 'Implement this method in the child class.'; }
@@ -85,6 +106,33 @@ class AbstractBuilder {
         });
     }
 
+    /**
+     * Determine if all itempool item widgets contain a non-blank and unique 'item_name'.
+     *
+     * @returns {Boolean} True if all are valid, false otherwise.
+     */
+    allValidItemNames() {
+        const used_item_names = new Set();
+        let all_valid = true;
+
+        const item_name_inputs = this.attachment_div.querySelectorAll('.item-name-input');
+        item_name_inputs.forEach(item_name_input => {
+            if (item_name_input.value === '' || used_item_names.has(item_name_input.value)) {
+                all_valid = false;
+            }
+
+            used_item_names.add(item_name_input.value);
+        });
+
+        return all_valid;
+    }
+
+    /**
+     * From the array of passed in widgets, get their json object, and if valid add it to the array of valid_jsons.
+     *
+     * @param {Widget[]} widgets An array of widgets, probably either this.reorderable_widgets or this.itempool_widgets.
+     * @param {Object[]} valid_jsons An array which will be filled and data returned by reference.
+     */
     collectValidJsons(widgets, valid_jsons) {
         widgets.forEach(widget => {
             const widget_json = widget.getJSON();

@@ -32,4 +32,12 @@ class ItemWidget extends Widget {
     load(data) {
         this.state = data;
     }
+
+    update() {
+        console.log('Update method called!');
+    }
+
+    block() {
+        console.log('Block method called!');
+    }
 }
