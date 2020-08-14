@@ -188,12 +188,9 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             cancelDeferredSave(autosaveKeyFor(form));
             clearReplyBoxAutosave(form);
 
-            let course = $('.breadcrumb').eq(1).text().trim();
-            let page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
-
             var thread_id = json['data']['thread_id'];
             if (is_thread){
-              window.socketClient.send({'page': course+'-'+page, 'type': "new_thread", 'thread_id': thread_id});
+              window.socketClient.send({'type': "new_thread", 'thread_id': thread_id});
             }
             else {
               var post_id = json['data']['post_id'];
@@ -203,7 +200,7 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 return $(this).data('post_box_id');
               }).get();
               var max_post_box_id = Math.max.apply(Math, post_box_ids);
-              window.socketClient.send({'page': course+'-'+page, 'type': "new_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': max_post_box_id});
+              window.socketClient.send({'type': "new_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': max_post_box_id});
             }
 
             window.location.href = json['data']['next_page'];
@@ -637,7 +634,7 @@ function initSocketClient() {
       thread_post_handler();
       loadThreadHandler();
   };
-  window.socketClient.open();
+  window.socketClient.open('discussion_forum');
 }
 
 function changeThreadStatus(thread_id) {
@@ -662,10 +659,8 @@ function changeThreadStatus(thread_id) {
                 $('#messages').append(message);
                 return;
             }
-            let course = $('.breadcrumb').eq(1).text().trim();
-            let page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
 
-            window.socketClient.send({'page': course+'-'+page, 'type': "resolve_thread", 'thread_id': thread_id});
+            window.socketClient.send({'type': "resolve_thread", 'thread_id': thread_id});
             window.location.reload();
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
             $('#messages').append(message);
@@ -703,9 +698,6 @@ function modifyOrSplitPost(e) {
         return;
       }
 
-      let course = $('.breadcrumb').eq(1).text().trim();
-      let page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
-
       // modify
       if (form.attr('id') == 'thread_form'){
         var thread_id = form.find('#edit_thread_id').val();
@@ -713,7 +705,7 @@ function modifyOrSplitPost(e) {
         var reply_level = $('#' + post_id).attr('data-reply_level');
         var post_box_id = $('#' + post_id + '-reply .thread-post-form').data('post_box_id') -1;
         var msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
-        window.socketClient.send({'page': course+'-'+page, 'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id});
+        window.socketClient.send({'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id});
         window.location.reload();
       }
       // split
@@ -721,7 +713,7 @@ function modifyOrSplitPost(e) {
         var post_id = form.find('#split_post_id').val();
         var new_thread_id = json['data']['new_thread_id'];
         var old_thread_id = json['data']['old_thread_id'];
-        window.socketClient.send({'page': course+'-'+page, 'type': 'split_post', 'new_thread_id': new_thread_id, 'thread_id': old_thread_id, 'post_id': post_id});
+        window.socketClient.send({'type': 'split_post', 'new_thread_id': new_thread_id, 'thread_id': old_thread_id, 'post_id': post_id});
         window.location.replace(json['data']['next']);
       }
     }
@@ -1543,15 +1535,13 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                     return;
                 }
                 var new_url = "";
-                let course = $('.breadcrumb').eq(1).text().trim();
-                let page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
                 switch(json['data']['type']){
                     case "thread":
-                      window.socketClient.send({'page': course+'-'+page, 'type': "delete_thread", 'thread_id': thread_id});
+                      window.socketClient.send({'type': "delete_thread", 'thread_id': thread_id});
                       new_url = buildCourseUrl(['forum', 'threads']);
                       break;
                     case "post":
-                      window.socketClient.send({'page': course+'-'+page, 'type': "delete_post", 'thread_id': thread_id, 'post_id': post_id});
+                      window.socketClient.send({'type': "delete_post", 'thread_id': thread_id, 'post_id': post_id});
                       new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                       break;
                     default:
@@ -1580,12 +1570,9 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 
             },
             success: function(data){
-                let course = $('.breadcrumb').eq(1).text().trim();
-                let page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
-
                 if (type)
-                  window.socketClient.send({'page': course+'-'+page, 'type': "announce_thread", 'thread_id': thread_id});
-                else window.socketClient.send({'page': course+'-'+page, 'type': "unpin_thread", 'thread_id': thread_id});
+                  window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
                 window.location.reload();
             },
             error: function(){

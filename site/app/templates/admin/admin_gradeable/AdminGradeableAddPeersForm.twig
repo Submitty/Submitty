@@ -1,0 +1,14 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}admin-gradeable-add-peers-form{% endblock %}
+{% block title_tag %}<h1 id="admin-gradeable-add-peers-title">Add New Grader to Matrix</h1>{% endblock %}
+{% block body %}
+	<input type="hidden" id="peer-grader-submit-url" value='{{ peer_grader_submit_url }}'/>
+	<input type="hidden" id="csrf-token2" value='{{ csrf_token }}'/>
+	<div id="new-grader" class="left-panel"></div>
+	<div id="new-grader-students" class="right-panel"></div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <div id="submit-error2" style="width:70%; display:inline-block; text-align:left; float:left; color:red;">Please enter a valid new grader that is in the course and not already in the matrix.</div>
+    <input onclick="submitFormAjax2();" class="btn btn-primary" type="submit" value="Submit" id="admin-gradeable-add-peers-submit" />
+{% endblock %}

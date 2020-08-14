@@ -81,10 +81,8 @@ class Notebook extends AbstractModel {
             elseif (
                 isset($notebook_cell['type'])
                 && $notebook_cell['type'] === 'short_answer'
-                && !empty($notebook_cell['programming_language'])
-                && empty($notebook_cell['codemirror_mode'])
             ) {
-                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language']);
+                $notebook_cell['codemirror_mode'] = CodeMirrorUtils::getCodeMirrorMode($notebook_cell['programming_language'] ?? null);
             }
 
             // Add this cell $this->notebook
@@ -112,13 +110,7 @@ class Notebook extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-                // If programming language is set then this is a codebox, else regular textbox
-                if (isset($actual_input[$i]['programming_language'])) {
                     $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
-                }
-                else {
-                    $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-                }
             }
             elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $actual_input[$i]['allow_multiple'] = $actual_input[$i]['allow_multiple'] ?? false;
@@ -151,14 +143,14 @@ class Notebook extends AbstractModel {
     }
 
 
-      /**
-       * Gets a new 'notebook' which contains information about most recent submissions
-       *
-       * @return array An updated 'notebook' which has the most recent submission data entered into the
-       * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
-       * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
-       * blank.
-       */
+   /**
+    * Gets a new 'notebook' which contains information about most recent submissions
+    *
+    * @return array An updated 'notebook' which has the most recent submission data entered into the
+    * @param array $new_notebook a notebook config to parse
+    * @param int $version which version to get notebook submission values from
+    * @param string $student_id which student's notebook to pull data from
+    */
     public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {
