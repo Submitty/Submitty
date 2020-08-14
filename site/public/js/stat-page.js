@@ -1,3 +1,4 @@
+/* global sortTable, escapeSpecialChars, buildCourseUrl */
 $('td').click(function () {
     let table_id = 0;
     switch ($(this).attr('id')) {
