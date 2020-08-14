@@ -195,7 +195,7 @@ class ElectronicGraderView extends AbstractView {
 
             if ($gradeable->isTaGradeReleased()) {
                 if ($peer) {
-                    $viewed_total = $total / $num_components;
+                    $viewed_total = $entire_peer_total;
                 }
                 else {
                     $viewed_total = $total;
