@@ -26,7 +26,7 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
 
 /**
  * Generate a small codemirror.  This codemirror has been setup to look and behave like a default html
- * <input type="text">.
+ * <input type="text">.  This input is only appropriate for one or two word plain text inputs.
  *
  * @param {HTMLElement} attachment_elem The element the codemirror will be appended to.
  * @param {Object} codemirror_config A javascript object which defines the configuration the codemirror should be
@@ -35,6 +35,7 @@ function getLargeCodeMirror(attachment_elem, codemirror_config) {
  */
 function getSmallCodeMirror(attachment_elem, codemirror_config) {
     codemirror_config.scrollbarStyle = null;
+    codemirror_config.lineNumbers = false;
     codemirror_config.mode = null;
 
     const cm = CodeMirror(attachment_elem, codemirror_config);
