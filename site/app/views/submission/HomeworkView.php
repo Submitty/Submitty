@@ -21,7 +21,6 @@ use app\libraries\Utils;
 use app\models\notebook\AbstractNotebookInput;
 use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\SubmissionMultipleChoice;
-use app\models\notebook\SubmissionTextBox;
 
 class HomeworkView extends AbstractView {
 

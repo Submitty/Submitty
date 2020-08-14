@@ -5439,6 +5439,20 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
+     /**
+      * Gets if the provied submitter has a submission for a particular gradeable
+      *
+      * @param  \app\models\gradeable\Gradeable $gradeable
+      * @param  String                     $userid
+      * @return bool
+      */
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
+         
+        return $this->course_db->query(
+            'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
+            [$gradeable->getId(), $userid]
+        );
+    }
 
     /**
      * Get the active version for all given submitter ids. If they do not have an active version,
