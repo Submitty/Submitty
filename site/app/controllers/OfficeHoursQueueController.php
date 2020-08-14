@@ -201,14 +201,14 @@ class OfficeHoursQueueController extends AbstractController {
      */
     public function setQueuePauseState() {
         if (empty($_POST['pause_state'])) {
-            $this->core->addErrorMessage("Missing pause state");
+            $this->core->addErrorMessage("Missing queue position pause state");
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
 
         $this->core->getQueries()->setQueuePauseState($_POST['pause_state'] === 'true');
-        $this->core->addSuccessMessage($_POST['pause_state'] === 'true' ? "Place paused" : "Place unpaused");
+        $this->core->addSuccessMessage($_POST['pause_state'] === 'true' ? "Position in queue paused" : "Position in queue unpaused");
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
