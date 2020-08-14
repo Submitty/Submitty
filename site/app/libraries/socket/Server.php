@@ -222,7 +222,7 @@ class Server implements MessageComponentInterface {
 
             if ($this->core->getConfig()->isDebug()) {
                 $course_page = explode('-', $this->getSocketClientPage($from));
-                echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
+                echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2] . "'\n";
             }
         }
         elseif (isset($msg['user_id'])) {

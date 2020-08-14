@@ -511,7 +511,7 @@ class OfficeHoursQueueController extends AbstractController {
 
     private function sendSocketMessage($msg_array) {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getCourse() . "-office_hours_queue";
+        $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
         $client = new Client($this->core);
         $client->send($msg_array);
     }
