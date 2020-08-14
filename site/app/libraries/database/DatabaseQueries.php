@@ -317,6 +317,33 @@ WHERE status = 1"
     }
 
     /**
+     * @return string[]
+     */
+    public function getAllTerms() {
+        $this->submitty_db->query(
+            "SELECT term_id FROM terms ORDER BY start_date DESC"
+        );
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['term_id'];
+        }
+        return $return;
+    }
+
+    /**
+     * @param string $term_id
+     * @param string $term_name
+     * @param \DateTime $start_date
+     * @param \DateTime $end_date
+     */
+    public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
+        $this->submitty_db->query(
+            "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
+            [$term_id, $term_name, $start_date, $end_date]
+        );
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {
@@ -3249,10 +3276,28 @@ SQL;
     }
 
     /**
-     * Bulk Uploads Peer Grading Assignments
+     * Adds an assignment for someone to grade another person for peer grading
      *
-     * @param string $values
+     * @param string $grader
+     * @param string $student
+     * @param string $gradeable_id
+     * @param string $feedback
      */
+    public function insertPeerGradingFeedback($grader, $student, $gradeable_id, $feedback) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$grader, $student, $gradeable_id]);
+        if (count($this->course_db->rows()) > 0) {
+            $this->course_db->query("UPDATE peer_feedback SET feedback = ? WHERE grader_id = ? AND user_id = ? AND g_id = ?", [$feedback, $grader, $student, $gradeable_id]);
+        }
+        else {
+            $this->course_db->query("INSERT INTO peer_feedback(grader_id, user_id, g_id, feedback) VALUES (?,?,?,?)", [$grader, $student, $gradeable_id, $feedback]);
+        }
+    }
+  
+  /**
+   * Bulk Uploads Peer Grading Assignments
+   *
+   * @param string $values
+   */
     public function insertBulkPeerGradingAssignment($values) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
     }
@@ -3280,6 +3325,42 @@ SQL;
                 $return[$id['grader_id']] = [];
             }
             array_push($return[$id['grader_id']], $id['user_id']);
+        }
+        return $return;
+    }
+    
+    /**
+     * Adds an assignment for someone to get all the peer feedback for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getAllPeerFeedback($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id, feedback FROM peer_feedback WHERE g_id = ? ORDER BY grader_id", [$gradeable_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[$id['grader_id']][$id['user_id']]['feedback'] = $id['feedback'];
+        }
+        return $return;
+    }
+    
+    public function getPeerFeedbackInstance($gradeable_id, $grader_id, $user_id) {
+        $this->course_db->query("SELECT feedback FROM peer_feedback WHERE g_id = ? AND grader_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $grader_id, $user_id]);
+        $results = $this->course_db->rows();
+        if (count($results) > 0) {
+            return $results[0]['feedback'];
+        }
+        return null;
+    }
+    /**
+     * Get all peers assigned to grade a specific student
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerGradingAssignmentForSubmitter($gradeable_id, $submitter_id) {
+        $this->course_db->query("SELECT grader_id FROM peer_assign WHERE g_id = ? AND user_id = ? ORDER BY grader_id", [$gradeable_id, $submitter_id]);
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[] = $id['grader_id'];
         }
         return $return;
     }
@@ -3355,11 +3436,6 @@ SQL;
             $return[] = $id['user_id'];
         }
         return $return;
-    }
-
-    public function getPeerGradingAssignNumber($g_id) {
-        $this->course_db->query("SELECT eg_peer_grade_set FROM electronic_gradeable WHERE g_id=?", [$g_id]);
-        return $this->course_db->rows()[0]['eg_peer_grade_set'];
     }
 
     public function getNumPeerComponents($g_id) {
@@ -3691,7 +3767,8 @@ AND gc_id IN (
 
     public function getSubmitterIdFromAnonId(string $anon_id) {
         return $this->getUserFromAnon($anon_id)[$anon_id] ??
-            $this->getTeamIdFromAnonId($anon_id)[$anon_id];
+            $this->getTeamIdFromAnonId($anon_id)[$anon_id] ??
+                null;
     }
 
     // NOTIFICATION/EMAIL QUERIES
@@ -4119,7 +4196,8 @@ AND gc_id IN (
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,
-                  eg_regrade_request_date AS regrade_request_date,
+                  eg_grade_inquiry_start_date AS grade_inquiry_start_date,
+                  eg_grade_inquiry_due_date AS grade_inquiry_due_date,
                   eg_regrade_allowed AS regrade_allowed,
                   eg_grade_inquiry_per_component_allowed AS grade_inquiry_per_component_allowed,
                   eg_thread_ids AS discussion_thread_ids,
@@ -4129,8 +4207,6 @@ AND gc_id IN (
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
                   eg_student_submit AS student_submit,
-                  eg_peer_grading AS peer_grading,
-                  eg_peer_grade_set AS peer_grade_set,
                   eg_submission_open_date AS submission_open_date,
                   eg_submission_due_date AS submission_due_date,
                   eg_has_due_date AS has_due_date,
@@ -4786,9 +4862,8 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
-                $gradeable->isPeerGrading(),
-                $gradeable->getPeerGradeSet(),
-                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isRegradeAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
@@ -4816,15 +4891,14 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
-                  eg_peer_grading,
-                  eg_peer_grade_set,
-                  eg_regrade_request_date,
+                  eg_grade_inquiry_start_date,
+                  eg_grade_inquiry_due_date,
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -4934,9 +5008,8 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    $gradeable->isPeerGrading(),
-                    $gradeable->getPeerGradeSet(),
-                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
+                    DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isRegradeAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
@@ -4964,9 +5037,8 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
-                      eg_peer_grading=?,
-                      eg_peer_grade_set=?,
-                      eg_regrade_request_date=?,
+                      eg_grade_inquiry_start_date=?,
+                      eg_grade_inquiry_due_date=?,
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
@@ -5180,6 +5252,16 @@ AND gc_id IN (
 
         $params = [$g_id, $user_id, $team_id, $grader_id, $comment, $comment];
         $this->course_db->query($query, $params);
+    }
+    
+    public function deleteOverallComment($gradeable_id, $grader_id, $is_team) {
+        $this->course_db->query("DELETE FROM gradeable_data_overall_comment WHERE g_id=? AND goc_grader_id=?", [$gradeable_id, $grader_id]);
+        if ($is_team) {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_team_id=?", [$gradeable_id, $grader_id]);
+        }
+        else {
+            $this->course_db->query("DELETE FROM gradeable_data WHERE g_id=? AND gd_user_id=?", [$gradeable_id, $grader_id]);
+        }
     }
 
     /**
@@ -5705,10 +5787,6 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET token = ? WHERE code = ?", [$token, $queue_code]);
     }
 
-    public function getLastQueueUpdate() {
-        $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
-        return $this->course_db->rows()[0]['change_count'];
-    }
 
     public function getNumberAheadInQueueThisWeek($queue_code, $time_in) {
         $day_threshold = $this->core->getDateTimeNow()->modify('-4 day')->format('Y-m-d 00:00:00O');

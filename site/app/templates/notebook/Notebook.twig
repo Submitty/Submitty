@@ -54,7 +54,7 @@
                             {% if cell.label %}
                                 {{ cell.label | markdown }}
                             {% else %}
-                                Write your {{ cell.programming_language | title }} below:
+                                Write your {{ cell.programming_language | title }} below.  Press TAB to indent. Press ESC to advance from answer area.
                             {% endif %}
                         </div>
 
@@ -79,6 +79,13 @@
                                     "theme": "eclipse"
                                 }
                             );
+
+                            makeCodeMirrorAccessible(editor_{{ num_codeboxes }});
+
+                            {% if cell.rows is defined and cell.rows > 0 %}
+                                const height_{{ num_codeboxes }} = rowsToPixels({{ cell.rows }});
+                                editor_{{ num_codeboxes }}.setSize(null, height_{{ num_codeboxes }});
+                            {% endif %}
 
                             {# Populate codebox and set state of buttons initially #}
                             {% if highest_version == 0 %}
@@ -294,7 +301,7 @@
                     {% if short_answer.label %}
                         {{ short_answer.label | markdown }}
                     {% else %}
-                        Write your answer below:
+                        Write your answer below.
                     {% endif %}
                     Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
                 </div>

@@ -181,10 +181,6 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueId($str);
     }
 
-    public function getLastQueueUpdate() {
-        return $this->core->getQueries()->getLastQueueUpdate();
-    }
-
     public function getFullHistory() {
         return $this->full_history;
     }

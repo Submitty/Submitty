@@ -24,6 +24,12 @@
     {% endif %}
     <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
   </form>
+    <script>
+        $('#queue_code').change(function(){
+        document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';
+        });
+    </script>
+
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
   <div id="queue_status">
     <p>

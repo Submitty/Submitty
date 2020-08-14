@@ -70,19 +70,46 @@
 .markdown-widget textarea {
     width: 100%;
     margin-right: 10px;
-    height: 100px;
+    min-height: 75px;
 }
 
 /**
  * Short answer widget styles
  */
 .short-answer-widget .interactive-container {
-    align-items: center;
+    flex-direction: column;
 }
 
-.short-answer-widget .rows-input {
-    width: 60px;
-    text-align: right;
+.short-answer-widget .basic-options {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.short-answer-widget .type-options {
+    display:flex;
+}
+
+.short-answer-widget .type-options :first-child {
+    margin-right: 15px;
+}
+
+.short-answer-widget .accessibility-msg {
+    margin-bottom: 5px;
+}
+
+.short-answer-widget hr {
+    width: 90%;
+    align-self: center;
+}
+
+.short-answer-widget .initial-value-div textarea {
+    width: 100%;
+    min-height: 75px;
+}
+
+.short-answer-widget i {
+    font-size: 80%;
 }
 
 /**
@@ -135,6 +162,42 @@
     display: flex;
     flex-direction: column;
     text-align: right;
+}
+
+/**
+ * Image widget styles
+ */
+.image-widget .interactive-container {
+    flex-direction: column;
+}
+
+.image-widget .image-container {
+    text-align: center;
+}
+
+.image-widget img {
+    max-width: 50%;
+}
+
+.image-widget .image-options {
+    display: flex;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.image-widget .image-col-small {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.image-widget .image-col-large {
+    flex: 7
+}
+
+.image-widget .image-options input,
+.image-widget .image-options textarea {
+    display: block;
+    width: 100%;
 }
 
 /**

@@ -123,7 +123,7 @@
             </div>
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
-                <div id="nav-links" style="position:relative; height:80px">
+                <div id="nav-links">
                     <a id="home-button"
                        class="black-btn"
                        href="{{ base_url }}"
@@ -132,8 +132,7 @@
                         <img id="submitty-mascot-home-btn"
                              src="{{ base_url }}/img/{{ duck_img }}"
                              alt="Moorthy - Submitty's Duck Mascot!"
-                             height="80"
-                             style="position:absolute; top:0px;"
+                             height="60"
                          />
                     </a>
                     <div id="breadcrumbs">
@@ -156,7 +155,8 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div id="duckdiv" style="position:relative;">
+                <div style="display: flex">
+                    <span id="duckdiv" style="position: relative">
                     {% if not enable_banner %}
                     <a id="duck-desktop"
                        href="http://submitty.org/developer/rcos_moorthy"
@@ -168,7 +168,6 @@
                              src="{{ base_url }}/img/{{ duck_img }}"
                              alt="Moorthy - Submitty's Duck Mascot!"
                              height="80"
-                             style="position:absolute; top:-40px; right: 10px;"
                              {% if enable_banner %}
                                 class="key_to_click"
                                 onclick="ducky();"
@@ -184,15 +183,17 @@
                          src="{{ base_url }}/img/submitty-banner.png"
                          alt="Happy Submitty Week!"
                          height="70"
-                         style="position:absolute;right: -380px; top:-34px;display:none;"
+                         style="position:absolute;right: -380px; top:6px;display:none;"
                     />
                     {% endif %}
+                    </span>
+                    <span>
+                        <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
+                            <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
+                            <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
+                        </a>
+                    </span>
                 </div>
-
-                <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
-                    <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
-                    <img id="logo-submitty-light" src="{{ base_url }}/img/submitty_logo_white.png" alt="Submitty Logo">
-                </a>
                 {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
                 {% if sidebar_buttons|length > 2 %}
                     <button id="menu-button" class="black-btn">

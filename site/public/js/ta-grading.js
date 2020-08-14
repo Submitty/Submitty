@@ -52,7 +52,7 @@ $(function() {
         snap: false,
         grid: [2, 2],
         stack: ".draggable",
-        cancel: "input,textarea,button,select,option,div#file_content,div#size_selector_menu"
+        cancel: "input,textarea,button,select,option,div#file-content,div#size_selector_menu"
     }).resizable();
 
 
@@ -359,6 +359,24 @@ function updateCookies(){
 
 //-----------------------------------------------------------------------------
 // Student navigation
+function gotoMainPage() {
+
+  let window_location = $("#main-page")[0].dataset.href
+
+  if (getGradeableId() !== '') {
+    closeAllComponents(true).then(function () {
+      window.location = window_location;
+    }).catch(function () {
+      if (confirm("Could not save open component, go to main page anyway?")) {
+        window.location = window_location;
+      }
+    });
+  }
+  else {
+    window.location = window_location;
+  }
+}
+
 function gotoPrevStudent(to_ungraded = false) {
 
     var selector;
@@ -909,4 +927,38 @@ function getNonAnonPath(path, anon_submitter_id, user_ids){
         }
     }
     return nonAnonPath;
+}
+
+function changeCurrentPeer(){
+    let peer = $('#edit-peer-select').val();
+    $('.edit-peer-components-block').hide();
+    $('#edit-peer-components-form-'+peer).show();
+}
+
+function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
+    var peer_id = $("#edit-peer-select").val();
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
+    $.ajax({
+        url: url,
+        data: {
+            csrf_token: csrf_token,
+            peer_id: peer_id,
+            submitter_id: submitter_id
+        },
+        type: "POST",
+        success: function(data) {
+            console.log("Successfully deleted peer marks");
+            window.location.reload(true);
+        },
+        error: function(e) {
+            console.log("Failed to delete");
+        }
+    });
+}
+
+function newEditPeerComponentsForm() {
+    $('.popup-form').css('display', 'none');
+    let form = $("#edit-peer-components-form");
+    form.css("display", "block");
+    captureTabInModal("edit-peer-components-form");
 }

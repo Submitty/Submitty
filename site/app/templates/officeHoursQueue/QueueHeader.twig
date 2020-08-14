@@ -24,13 +24,8 @@
     <br>
     <br>
   </p>
-  {% if viewer.getQueueAnnouncementMessage() | length > 0 %}
-    <div id="announcement">
-      <h2>Office Hours Queue Announcements:</h2>
-      <p>{{viewer.getQueueAnnouncementMessage() | markdown}}</p>
-    </div>
-    <br>
-  {% endif %}
+
+  {% include 'officeHoursQueue/AnnouncementMsg.twig' %}
 
   {% if not viewer.isGrader() %}
     {% include 'officeHoursQueue/QueueStatus.twig' %}

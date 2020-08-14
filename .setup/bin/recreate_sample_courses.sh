@@ -35,7 +35,7 @@ fi
 # GIT_CHECKOUT/Submitty/.setup/bin -> GIT_CHECKOUT/Submitty
 cd ../../
 
-# python3 ./.setup/bin/partial_reset.py
+python3 ./.setup/bin/partial_reset.py
 python3 ./.setup/bin/setup_sample_courses.py ${EXTRA}
 
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')

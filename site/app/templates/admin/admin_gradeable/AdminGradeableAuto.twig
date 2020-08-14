@@ -159,7 +159,7 @@
 
                 // Update visibility of notebook builder edit button
                 const edit_button_div = document.querySelector('.notebook-builder-edit-button-div');
-                const visibility = data[0][i].split(':')[0] === 'PROVIDED' ? 'hidden' : 'visible';
+                const visibility = data[0][i].split(':')[0] !== 'UPLOADED' ? 'hidden' : 'visible';
                 edit_button_div.style.visibility = visibility;
 
                 return;
