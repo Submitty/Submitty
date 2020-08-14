@@ -44,12 +44,6 @@ class TestPDFs(BaseTestCase):
         (self.driver.find_element_by_xpath("//tbody[@class='details-content panel-content-active']/tr["+tr_number+"]/td["+td_number+"]").find_elements_by_tag_name("a")[0]).click()
         self.wait_for_element((By.ID, "submission_browser"))
         self.driver.find_element_by_id('submissions').click()
-        current_window = self.driver.window_handles[0]
-        self.driver.find_element_by_id('open_file_'+pdf_name).click()
-        new_window = self.driver.window_handles[1]
-        self.driver.switch_to.window(new_window)
-        self.driver.close()
-        self.driver.switch_to.window(current_window)
         self.driver.find_element_by_xpath('//a[contains(@file-url,"'+pdf_name+'")]').click()
         self.driver.implicitly_wait(20)
         self.driver.find_element_by_id('pageContainer1')
