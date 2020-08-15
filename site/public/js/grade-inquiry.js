@@ -83,20 +83,18 @@ function onGradeInquirySubmitClicked(button) {
         let json = JSON.parse(response);
         if (json['status'] === 'success') {
           let data = json['data'];
-          let course = document.body.dataset.courseUrl.split('/').pop();
           let submitter_id = form.children('#submitter_id').val();
           if (data.type === 'new_post') {
             let gc_id = form.children('#gc_id').val();
             window.socketClient.send({
               'type': data.type,
               'post_id': data.post_id,
-              'course': course,
               'submitter_id': submitter_id,
               'gc_id': gc_id
             });
           }
           else if (data.type === 'toggle_status')
-            window.socketClient.send({'type': data.type, 'course': course, 'submitter_id': submitter_id});
+            window.socketClient.send({'type': data.type, 'submitter_id': submitter_id});
         }
       }
       catch (e) {
@@ -121,7 +119,8 @@ function initGradingInquirySocketClient() {
         console.log("Undefined message recieved.");
     }
   };
-  window.socketClient.open();
+  let page = window.location.pathname.split("gradeable/")[1].split('/')[0] + '_' + $('#submitter_id').val();
+  window.socketClient.open(page);
 }
 
 function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
