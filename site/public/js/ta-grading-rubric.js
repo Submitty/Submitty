@@ -938,6 +938,33 @@ function getOverallCommentJQuery() {
 }
 
 /**
+ * Returns whether the current is of type notebook
+ * @return {string}
+ */
+function isNoteBookGradeable() {
+  return $('#gradeable_rubric.electronic_file').attr('data-notebook');
+}
+
+/**
+ * Returns the itempool options
+ * @return array|string
+ */
+function getItempoolOptions(parsed = false) {
+  if (parsed) {
+    try {
+      return isNoteBookGradeable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')) : [];
+    }
+    catch (e) {
+      displayErrorMessage('Something went wrong retrieving itempool options');
+      return [];
+    }
+  }
+  else {
+    return $('#gradeable_rubric.electronic_file').attr('data-itempool-options');
+  }
+}
+
+/**
  * Shows the 'in progress' indicator for a component
  * @param {int} component_id
  * @param {boolean} show
@@ -1676,7 +1703,7 @@ function onDeleteComponent(me) {
             alert('Failed to delete component! ' + err.message);
         })
         .then(function () {
-            return reloadInstructorEditRubric(getGradeableId());
+          return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
         })
         .catch(function (err) {
             alert('Failed to reload rubric! ' + err.message);
@@ -1696,7 +1723,7 @@ function onAddComponent(peer) {
             return closeAllComponents(true);
         })
         .then(function () {
-            return reloadInstructorEditRubric(getGradeableId());
+          return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
         })
         .then(function () {
             return openComponent(getComponentIdByOrder(getComponentCount() - 1));
@@ -2159,7 +2186,7 @@ function setPdfPageAssignment(page) {
         })
         .then(function () {
             // Reload the gradeable to refresh all the component's display
-            return reloadInstructorEditRubric(getGradeableId());
+          return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
         });
 }
 
@@ -2249,18 +2276,21 @@ function reloadPeerRubric(gradeable_id, anon_id) {
 /**
  * Call this once on page load to load the rubric instructor editing
  * @param {string} gradeable_id
+ * @param {bool} is_notebook_gradeable
+ * @param {array} itempool_options
  * @return {Promise}
  */
-function reloadInstructorEditRubric(gradeable_id) {
+function reloadInstructorEditRubric(gradeable_id, is_notebook_gradeable, itempool_options) {
     return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
         })
         .then(function (gradeable) {
-            return renderInstructorEditGradeable(gradeable);
+            return renderInstructorEditGradeable(gradeable, is_notebook_gradeable, itempool_options);
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
+            addItempoolOptions();
             return refreshRubricTotalBox();
         })
         .then(function () {
@@ -3055,7 +3085,9 @@ function injectInstructorEditComponent(component, showMarkList) {
         })
         .then(function () {
             return refreshRubricTotalBox();
-        });
+        }).then(function() {
+          addItempoolOptions();
+      });
 }
 
 /**
@@ -3131,4 +3163,20 @@ function injectRubricTotalBox(scores) {
         .then(function(elements) {
             setRubricTotalBoxContents(elements);
         });
+}
+
+function addItempoolOptions() {
+  // create option elements for the itempool options
+  let itempools = getItempoolOptions(true);
+  let itempool_options = ['<option value="NONE">NONE</option>'];
+  console.log("INSIDE THE READY FUNCTION", itempools, $('[name="component-itempool"]'));
+
+  for (let key in itempools) {
+    itempool_options.push(`<option value='${key}'>${key} (${itempools[key].join(', ')})</option>`)
+  }
+
+  $('[name="component-itempool"]').each(function() {
+    $(this).html(itempool_options);
+  });
+
 }

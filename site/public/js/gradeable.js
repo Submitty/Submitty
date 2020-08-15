@@ -251,10 +251,12 @@ function renderGradingComponentHeader(grader_id, component, graded_component, gr
  * @param gradeable
  * @returns {Promise<string>} the html for the gradeable
  */
-function renderInstructorEditGradeable(gradeable) {
+function renderInstructorEditGradeable(gradeable, is_notebook_gradeable, itempool_options) {
     return Twig.twig({ref: "EditGradeable"}).render({
         'gradeable': gradeable,
         'edit_marks_enabled': true,
+        'is_notebook_gradeable': is_notebook_gradeable,
+        'itempool_options': itempool_options,
         'decimal_precision': DECIMAL_PRECISION,
         'export_components_url': buildCourseUrl(['gradeable', gradeable.id, 'components', 'export'])
     });
@@ -268,6 +270,8 @@ function renderInstructorEditGradeable(gradeable) {
  * @returns {Promise} the html for the component
  */
 function renderEditComponent(component, precision, showMarkList) {
+    let is_notebook_gradeable = isNoteBookGradeable();
+    let itempool_options = getItempoolOptions();
     return new Promise(function (resolve, reject) {
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "EditComponent"}).render({
@@ -275,6 +279,8 @@ function renderEditComponent(component, precision, showMarkList) {
             'precision': precision,
             'show_mark_list': showMarkList,
             'edit_marks_enabled': true,
+            'is_notebook_gradeable': is_notebook_gradeable,
+            'itempool_options': itempool_options,
             'decimal_precision': DECIMAL_PRECISION,
             'peer_component' : component.peer,
         }));

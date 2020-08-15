@@ -54,6 +54,29 @@
                 <textarea id="student-comment-{{component.id}}" class="student-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
             </div>
         </div>
+        {# Choose if this component should be linke with itempool questions or not #}
+        {% if is_notebook_gradeable %}
+            <fieldset id="link-item-pool-fieldset">
+                <legend>
+                    Link this component with the item-pool?<br>
+                </legend>
+                <input data-component-id="{{ component.id }}" type="radio" id="yes-link-item-pool-{{ component.id }}" name="link-item-pool" value="true" onchange="onItemPoolOptionChange({{ component.id }})"
+                        {{ component.linked_itempool|length ? 'checked' : '' }} /> <label for="yes-link-item-pool-{{ component.id }}">Yes</label>
+                <input data-component-id="{{ component.id }}" type="radio" id="no-link-item-pool-{{ component.id }}" name="link-item-pool" value="false" onchange="onItemPoolOptionChange({{ component.id }})"
+                        {{ not component.linked_itempool|length ? 'checked' : '' }} /> <label for="no-link-item-pool-{{ component.id }}">No</label>
+            </fieldset>
+        {% endif %}
+        {# Itempool question selector #}
+        <div class="row {{ component.linked_itempool|length ? "" : "hide" }}" id="component-itempool-{{component.id}}-cont"> {# TODO add condition over hide class #}
+            <div class="col-label-fixed">
+                <label for="component-itempool-{{component.id}}">Select the item-pool question</label>
+            </div>
+            <div class="col tight-right">
+                <select name="component-itempool" id="component-itempool-{{component.id}}">
+                    {# options loaded from JS file #}
+                </select>
+            </div>
+        </div>
 
         {# Point Inputs #}
         <div class="row point-input-row">

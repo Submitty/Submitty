@@ -184,6 +184,28 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // Get the list of itempool questions in this gradeable which are multi-valued (and hence randomized)
+        $itempool_options = [];
+        // read config file
+        $gradeable_config = $gradeable->getAutogradingConfig();
+        $notebook_config = $gradeable_config->getNotebookConfig();
+
+        // loop through the notebook key, and find from_pool key in each object (or question)
+        foreach($notebook_config as $key => $item) {
+            // store those question which are having count(from_pool array) > 1
+            if (isset($item['from_pool']) && count($item['from_pool']) >1) {
+                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item" ;
+                if (!isset($itempool_options[$item_id])) {
+                    $itempool_options[$item_id] = $item['from_pool'];
+                }
+                else {
+                    $itempool_options[$item_id . '_' . $key] = $item['from_pool'];
+                }
+            }
+        }
+
+        // pass it down the line :)
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -199,6 +221,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -222,6 +245,9 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
+            'is_notebook_gradeable' => $gradeable_config->isNotebookGradeable(),
+            'config_object' => $gradeable_config,
+            'itempool_options' => json_encode($itempool_options),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
             'type_string' => $type_string,

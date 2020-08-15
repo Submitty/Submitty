@@ -9,7 +9,7 @@
   <option value="5" {{ gradeable.getPrecision() == 5 ? 'selected' : '' }}>5</option>
   <option value="10" {{ gradeable.getPrecision() == 10 ? 'selected' : '' }}>10</option>
 </select>
-<div class="electronic_file ignore" id="gradeable_rubric">
+<div class="electronic_file ignore" id="gradeable_rubric" data-notebook="{{ is_notebook_gradeable ? true : false }}" data-itempool-options="{{ itempool_options }}">
     <fieldset>
         <legend>
             Are student submissions/uploads a single file PDF with a fixed/prescribed format?<br>
@@ -28,6 +28,19 @@
         <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"
                 {{ is_pdf_page_student ? 'checked' : '' }} /> <label for="yes_pdf_page_student">Student (student will be asked for page numbers at submission time)</label>
     </fieldset>
+    {# Option to link itempool items with the components #}
+   {% if is_notebook_gradeable %}
+       {{ dump(itempool_options) }}
+       <fieldset>
+           <legend>
+               Will some of the components be linked with itempool items ?<br>
+           </legend>
+           <input type="radio" id="yes-link-item-pool" name="link-item-pool" value="true" onchange="updatePdfPageSettings()"
+                   {{ is_link_item_pool ? 'checked' : '' }} /> <label for="yes-link-item-pool">Yes</label>
+           <input type="radio" id="no-link-item-pool" name="link-item-pool" value="false" onchange="updatePdfPageSettings()"
+                   {{ not is_link_item_pool ? 'checked' : '' }} /> <label for="no-link-item-pool">No</label>
+       </fieldset>
+   {% endif %}
     <div>
         <div id="rubric-total-container">
         </div>
@@ -39,7 +52,7 @@
 <script>
     $(document).ready(function() {
         loadTemplates().then(function() {
-            reloadInstructorEditRubric($('#g_id').val()).then( function() {
+            reloadInstructorEditRubric($('#g_id').val(), $('#gradeable_rubric').attr('data-notebook'), JSON.parse($('#gradeable_rubric').attr('data-itempool-options'))).then( function() {
                 $('body').on('DOMSubtreeModified', '.component-container', function() {
                     let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
                     if (yesPeer) {

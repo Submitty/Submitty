@@ -6,12 +6,16 @@
 {% endblock %}
 
 {% block components_block %}
+{#    {{ dump(itempool_options) }}#}
     {% for component in gradeable.components %}
         <div class="component-container edit-component-container{{ (component.peer) ? ' peer-component-container' : '' }}">
             {% include "EditComponent.twig" with {
                 'precision': gradeable.precision,
                 'show_mark_list': false,
                 'peer_component' : component.peer,
+                'is_notebook_gradeable' : is_note_gradeable,
+                'itempool_options': itempool_options,
+                'gradeable': gradeable
             } %}
         </div>
     {% endfor %}
