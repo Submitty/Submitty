@@ -1603,6 +1603,8 @@ class ElectronicGraderController extends AbstractController {
         $default = $_POST['default'] ?? null;
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
+        $is_itempool_linked = $_POST['is_itempool_linked'] ?? false;
+        $itempool_option = $_POST['itempool_option'] ?? null;
 
         // Use 'page_number' since 'page' is used in the router
         $page = $_POST['page_number'] ?? '';
@@ -1665,6 +1667,17 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        $is_notebook_gradeable = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+
+        if ($is_notebook_gradeable) {
+            if ($is_itempool_linked === 'true') {
+                if (!$itempool_option) {
+                    $this->core->getOutput()->renderJsonFail('Missing itempool_option parameter');
+                    return;
+                }
+            }
+        }
+
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $component->setTitle($title);
@@ -1677,6 +1690,16 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
                 ]);
             $component->setPage($page);
+            if ($is_notebook_gradeable) {
+                if ($is_itempool_linked === 'true') {
+                    $component->setIsItempoolLinked(true);
+                    $component->setItempool($itempool_option);
+                }
+                else {
+                    $component->setIsItempoolLinked(false);
+                    $component->setItempool('');
+                }
+            }
 
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();

@@ -123,9 +123,11 @@ function ajaxGetGradeableRubric(gradeable_id) {
  * @param {number} default_value
  * @param {number} max_value
  * @param {number} upper_clamp
+ * @param {boolean} is_itempool_linked
+ * @param {string} itempool_option
  * @returns {Promise}
  */
-function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp) {
+function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp, is_itempool_linked, itempool_option) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -142,6 +144,8 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
                 'default': default_value,
                 'max_value': max_value,
                 'upper_clamp': upper_clamp,
+                'is_itempool_linked': is_itempool_linked,
+                'itempool_option': itempool_option === "null" ? undefined : itempool_option,
                 'peer': false
             },
             success: function (response) {
@@ -1132,6 +1136,8 @@ function getComponentFromDOM(component_id) {
             max_value: maxValue,
             upper_clamp: maxValue + extraCreditPoints,
             marks: getMarkListFromDOM(component_id),
+            is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
+            itempool_option: domElement.find('select[name="component-itempool"]').val(),
             peer: (domElement.attr('data-peer') === 'true')
         };
     }
@@ -1146,6 +1152,8 @@ function getComponentFromDOM(component_id) {
         max_value: parseFloat(domElement.attr('data-max_value')),
         upper_clamp: parseFloat(domElement.attr('data-upper_clamp')),
         marks: getMarkListFromDOM(component_id),
+        is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
+        itempool_option: domElement.find('select[name="component-itempool"]').val(),
         peer: (domElement.attr('data-peer') === 'true')
     };
 }
@@ -2589,7 +2597,7 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
                 // Save the component title and comments
                 return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
                     component.student_comment, component.page, component.lower_clamp,
-                    component.default, component.max_value, component.upper_clamp);
+                    component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
             });
     }
     return sequence
@@ -3170,7 +3178,7 @@ function injectRubricTotalBox(scores) {
 function addItempoolOptions(componentId) {
   // create option elements for the itempool options
   let itempools = getItempoolOptions(true);
-  let itempool_options = ['<option value="NONE">NONE</option>'];
+  let itempool_options = ['<option value="null">NONE</option>'];
 
   for (let key in itempools) {
     itempool_options.push(`<option value='${key}'>${key} (${itempools[key].join(', ')})</option>`)
