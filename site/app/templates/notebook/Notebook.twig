@@ -1,6 +1,3 @@
-
-
-{% macro renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version, max_file_uploads, old_files) %}
 <div class="notebook">
 
     {# Render content #}
@@ -196,6 +193,8 @@
 
     {% endfor %}
 
+
+
 </div>
 
 <script>
@@ -220,6 +219,32 @@
 
 
     $(function(){
+
+        {% if is_grader_view | default(null) %}
+            //disable inputs if we're viewing from the grader's view
+            let nb = document.getElementsByClassName("notebook")[0];
+            let tgts = nb.querySelectorAll('input');
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('button');
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('textarea');
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('.CodeMirror');
+            for(let x of tgts){
+                x.CodeMirror.refresh();
+            }
+
+        {% endif %}
+
         createArray({{ num_file_submissions }});
 
         {% for file in old_files %}
@@ -236,8 +261,6 @@
         {% endif %}
     });
 </script>
-
-{% endmacro %}
 
 
 {% macro render_testcase_messages(cell, testcase_messages) %}

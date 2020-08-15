@@ -318,8 +318,11 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-            $h = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($h, $notebook);
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                $notebook,
+                $this->core->getUser()->getId()
+            );
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();

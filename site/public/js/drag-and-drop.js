@@ -1221,3 +1221,13 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
         }
     });
 }
+
+
+function initializeDropZone(id){
+    var dropzone = document.getElementById(id);
+    dropzone.addEventListener("click", clicked_on_box, false);
+    dropzone.addEventListener("dragenter", draghandle, false);
+    dropzone.addEventListener("dragover", draghandle, false);
+    dropzone.addEventListener("dragleave", draghandle, false);
+    dropzone.addEventListener("drop", drop, false);
+}
