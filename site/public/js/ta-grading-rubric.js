@@ -941,8 +941,8 @@ function getOverallCommentJQuery() {
  * Returns whether the current is of type notebook
  * @return {string}
  */
-function isNoteBookGradeable() {
-  return $('#gradeable_rubric.electronic_file').attr('data-notebook');
+function isItempoolAvailable() {
+  return $('#gradeable_rubric.electronic_file').attr('data-itempool-available');
 }
 
 /**
@@ -952,7 +952,7 @@ function isNoteBookGradeable() {
 function getItempoolOptions(parsed = false) {
   if (parsed) {
     try {
-      return isNoteBookGradeable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')) : [];
+      return isItempoolAvailable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')) : [];
     }
     catch (e) {
       displayErrorMessage('Something went wrong retrieving itempool options');
@@ -1703,7 +1703,7 @@ function onDeleteComponent(me) {
             alert('Failed to delete component! ' + err.message);
         })
         .then(function () {
-          return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
+          return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
         })
         .catch(function (err) {
             alert('Failed to reload rubric! ' + err.message);
@@ -1723,7 +1723,7 @@ function onAddComponent(peer) {
             return closeAllComponents(true);
         })
         .then(function () {
-          return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
+          return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
         })
         .then(function () {
             return openComponent(getComponentIdByOrder(getComponentCount() - 1));
@@ -2186,7 +2186,7 @@ function setPdfPageAssignment(page) {
         })
         .then(function () {
             // Reload the gradeable to refresh all the component's display
-          return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
+          return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
         });
 }
 
@@ -2276,17 +2276,17 @@ function reloadPeerRubric(gradeable_id, anon_id) {
 /**
  * Call this once on page load to load the rubric instructor editing
  * @param {string} gradeable_id
- * @param {bool} is_notebook_gradeable
+ * @param {bool} itempool_available
  * @param {array} itempool_options
  * @return {Promise}
  */
-function reloadInstructorEditRubric(gradeable_id, is_notebook_gradeable, itempool_options) {
+function reloadInstructorEditRubric(gradeable_id, itempool_available, itempool_options) {
     return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
         })
         .then(function (gradeable) {
-            return renderInstructorEditGradeable(gradeable, is_notebook_gradeable, itempool_options);
+            return renderInstructorEditGradeable(gradeable, itempool_available, itempool_options);
         })
         .then(function (elements) {
             setRubricDOMElements(elements);

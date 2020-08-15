@@ -245,7 +245,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
-            'is_notebook_gradeable' => $gradeable_config->isNotebookGradeable(),
+            'itempool_available' => $gradeable_config->isNotebookGradeable() && count($itempool_options),
             'config_object' => $gradeable_config,
             'itempool_options' => json_encode($itempool_options),
             'num_numeric' => $gradeable->getNumNumeric(),

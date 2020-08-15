@@ -55,7 +55,7 @@
             </div>
         </div>
         {# Choose if this component should be linke with itempool questions or not #}
-        {% if is_notebook_gradeable %}
+        {% if itempool_available %}
             <fieldset id="link-item-pool-fieldset">
                 <legend>
                     Link this component with the item-pool?<br>
@@ -65,19 +65,18 @@
                 <input data-component-id="{{ component.id }}" type="radio" id="no-link-item-pool-{{ component.id }}" name="link-item-pool" value="false" onchange="onItemPoolOptionChange({{ component.id }})"
                         {{ not component.linked_itempool|length ? 'checked' : '' }} /> <label for="no-link-item-pool-{{ component.id }}">No</label>
             </fieldset>
+            {# Itempool question selector #}
+            <div class="row {{ component.linked_itempool|length ? "" : "hide" }}" id="component-itempool-{{component.id}}-cont"> {# TODO add condition over hide class #}
+                <div class="col-label-fixed">
+                    <label for="component-itempool-{{component.id}}">Select the item-pool question</label>
+                </div>
+                <div class="col tight-right">
+                    <select name="component-itempool" id="component-itempool-{{component.id}}">
+                        {# options loaded from JS file #}
+                    </select>
+                </div>
+            </div>
         {% endif %}
-        {# Itempool question selector #}
-        <div class="row {{ component.linked_itempool|length ? "" : "hide" }}" id="component-itempool-{{component.id}}-cont"> {# TODO add condition over hide class #}
-            <div class="col-label-fixed">
-                <label for="component-itempool-{{component.id}}">Select the item-pool question</label>
-            </div>
-            <div class="col tight-right">
-                <select name="component-itempool" id="component-itempool-{{component.id}}">
-                    {# options loaded from JS file #}
-                </select>
-            </div>
-        </div>
-
         {# Point Inputs #}
         <div class="row point-input-row">
             <label for="max-points-{{component.id}}" class="col-label-fixed">Points</label>

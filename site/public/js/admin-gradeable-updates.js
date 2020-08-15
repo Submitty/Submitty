@@ -79,7 +79,7 @@ function onPrecisionChange() {
 
         closeAllComponents(true)
             .then(function () {
-                return reloadInstructorEditRubric(getGradeableId(), isNoteBookGradeable(), getItempoolOptions());
+                return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
             })
             .catch(function (err) {
                 alert('Failed to reload the gradeable rubric! ' + err.message);
