@@ -4082,8 +4082,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return array_key_exists('is_instructor',$this->submitty_db->row())
-            && $this->submitty_db->row()['is_instructor'];
+        return count($this->submitty_db->rows()) >= 1 &&
+            $this->submitty_db->row()['is_instructor'];
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
