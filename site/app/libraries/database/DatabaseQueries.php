@@ -4254,6 +4254,8 @@ AND gc_id IN (
                   json_agg(gc_is_peer) AS array_peer,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
+                  json_agg(gc_is_itempool_linked) AS array_is_itempool_linked,
+                  json_agg(gc_itempool) AS array_itempool,
                     json_agg(EXISTS(
                       SELECT gc_id
                       FROM gradeable_component_data
@@ -4307,6 +4309,8 @@ AND gc_id IN (
                 'peer',
                 'order',
                 'page',
+                'is_itempool_linked',
+                'itempool',
                 'any_grades'
             ];
             $mark_properties = [

@@ -183,6 +183,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
                     reject(new Error(response.message));
                 }
                 else {
+                    console.log("ajaxGetComponentRubric", response.data);
                     resolve(response.data)
                 }
             },
@@ -3178,10 +3179,13 @@ function injectRubricTotalBox(scores) {
 function addItempoolOptions(componentId) {
   // create option elements for the itempool options
   let itempools = getItempoolOptions(true);
-  let itempool_options = ['<option value="null">NONE</option>'];
+  let select_ele = $(`#component-itempool-select-${componentId}`);
+  let selected_value = select_ele.attr('data-selected') ? select_ele.attr('data-selected') : "null";
+  const itempool_options = ['<option value="null">NONE</option>'];
 
   for (let key in itempools) {
     itempool_options.push(`<option value='${key}'>${key} (${itempools[key].join(', ')})</option>`)
   }
-  $(`#component-itempool-select-${componentId}`).html(itempool_options);
+  select_ele.html(itempool_options);
+  select_ele.val(selected_value).change();
 }

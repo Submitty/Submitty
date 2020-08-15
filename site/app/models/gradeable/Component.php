@@ -106,8 +106,8 @@ class Component extends AbstractModel {
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
-//        $this->setIsItempoolLinked($details['is_itempool_linked']);
-//        $this->setItempool($details['itempool']);
+        $this->setIsItempoolLinked($details['is_itempool_linked'] ?? false);
+        $this->setItempool($details['itempool'] ?? "");
         $this->any_grades = ($details['any_grades'] ?? false) === true;
         $this->modified = false;
     }

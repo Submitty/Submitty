@@ -243,7 +243,6 @@ class AdminGradeableController extends AbstractController {
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
             'itempool_available' => $gradeable_config->isNotebookGradeable() && count($itempool_options),
-            'config_object' => $gradeable_config,
             'itempool_options' => json_encode($itempool_options),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
@@ -377,7 +376,9 @@ class AdminGradeableController extends AbstractController {
             'text' => false,
             'peer' => false,
             'order' => -1,
-            'page' => Component::PDF_PAGE_NONE
+            'page' => Component::PDF_PAGE_NONE,
+            'is_itempool_linked' => false,
+            'itempool' => ""
         ]);
     }
 

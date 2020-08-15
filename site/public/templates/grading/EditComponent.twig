@@ -61,17 +61,17 @@
                     Link this component with the item-pool?<br>
                 </legend>
                 <input data-component-id="{{ component.id }}" type="radio" id="yes-link-item-pool-{{ component.id }}" name="link-item-pool" value="true" onchange="onItemPoolOptionChange({{ component.id }})"
-                        {{ component.linked_itempool|length ? 'checked' : '' }} /> <label for="yes-link-item-pool-{{ component.id }}">Yes</label>
+                        {% if component.is_itempool_linked %} checked {% endif %} /> <label for="yes-link-item-pool-{{ component.id }}">Yes</label>
                 <input data-component-id="{{ component.id }}" type="radio" id="no-link-item-pool-{{ component.id }}" name="link-item-pool" value="false" onchange="onItemPoolOptionChange({{ component.id }})"
-                        {{ not component.linked_itempool|length ? 'checked' : '' }} /> <label for="no-link-item-pool-{{ component.id }}">No</label>
+                        {% if not component.is_itempool_linked %} checked {% endif %} /> <label for="no-link-item-pool-{{ component.id }}">No</label>
             </fieldset>
             {# Itempool question selector #}
-            <div class="row {{ component.linked_itempool|length ? "" : "hide" }}" id="component-itempool-{{component.id}}-cont">
+            <div class="row {% if component.itempool is not defined or not component.itempool|length %} hide {% endif %}" id="component-itempool-{{component.id}}-cont">
                 <div class="col-label-fixed col-6 select-label-itempool">
                     <label for="component-itempool-{{component.id}}">Select the item-pool question</label>
                 </div>
                 <div class="col tight-right col-6">
-                    <select name="component-itempool" id="component-itempool-select-{{component.id}}">
+                    <select name="component-itempool" id="component-itempool-select-{{component.id}}" data-selected="{{ component.itempool }}">
                         {# options loaded from JS file #}
                     </select>
                 </div>
