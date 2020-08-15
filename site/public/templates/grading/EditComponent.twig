@@ -66,11 +66,11 @@
                         {{ not component.linked_itempool|length ? 'checked' : '' }} /> <label for="no-link-item-pool-{{ component.id }}">No</label>
             </fieldset>
             {# Itempool question selector #}
-            <div class="row {{ component.linked_itempool|length ? "" : "hide" }}" id="component-itempool-{{component.id}}-cont"> {# TODO add condition over hide class #}
-                <div class="col-label-fixed">
+            <div class="row {{ component.linked_itempool|length ? "" : "hide" }}" id="component-itempool-{{component.id}}-cont">
+                <div class="col-label-fixed col-6 select-label-itempool">
                     <label for="component-itempool-{{component.id}}">Select the item-pool question</label>
                 </div>
-                <div class="col tight-right">
+                <div class="col tight-right col-6">
                     <select name="component-itempool" id="component-itempool-select-{{component.id}}">
                         {# options loaded from JS file #}
                     </select>

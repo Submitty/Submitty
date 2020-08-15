@@ -203,9 +203,6 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
-
-        // pass it down the line :)
-
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
