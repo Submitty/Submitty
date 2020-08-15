@@ -33,6 +33,10 @@ use app\libraries\NumberUtils;
  * @method int getOrder()
  * @method void setOrder($order)
  * @method int getPage()
+ * @method void setIsItempoolLinked($is_linked)
+ * @method bool getIsItempoolLinked()
+ * @method void setItempool($itempool_name)
+ * @method string getItempool()
  * @method Mark[] getMarks()
  */
 class Component extends AbstractModel {
@@ -62,6 +66,11 @@ class Component extends AbstractModel {
     protected $order = -1;
     /** @prop @var int The pdf page this component will reside in */
     protected $page = -1;
+
+    /** @prop @var bool Whether this component is linked to some itempool or not */
+    protected $is_itempool_linked = false;
+    /** @prop @var string Name of the itempool item if it is linked to itempool else empty string */
+    protected $itempool = "";
 
     /** @prop @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = [];
@@ -97,6 +106,8 @@ class Component extends AbstractModel {
         $this->setPeer($details['peer']);
         $this->setOrder($details['order']);
         $this->setPage($details['page']);
+//        $this->setIsItempoolLinked($details['is_itempool_linked']);
+//        $this->setItempool($details['itempool']);
         $this->any_grades = ($details['any_grades'] ?? false) === true;
         $this->modified = false;
     }

@@ -4675,7 +4675,9 @@ AND gc_id IN (
             $component->isText(),
             $component->getOrder(),
             $component->isPeer(),
-            $component->getPage()
+            $component->getPage(),
+            $component->getIsItempoolLinked(),
+            $component->getItempool()
         ];
         $this->course_db->query(
             "
@@ -4691,8 +4693,10 @@ AND gc_id IN (
               gc_is_text,
               gc_order,
               gc_is_peer,
-              gc_page)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              gc_page,
+              gc_is_itempool_linked,
+              gc_itempool)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
 
@@ -4758,6 +4762,8 @@ AND gc_id IN (
                 $component->getOrder(),
                 $component->isPeer(),
                 $component->getPage(),
+                $component->getIsItempoolLinked(),
+                $component->getItempool(),
                 $component->getId()
             ];
             $this->course_db->query(
@@ -4773,7 +4779,9 @@ AND gc_id IN (
                   gc_is_text=?,
                   gc_order=?,
                   gc_is_peer=?,
-                  gc_page=?
+                  gc_page=?,
+                  gc_is_itempool_linked=?,
+                  gc_itempool=?
                 WHERE gc_id=?",
                 $params
             );
