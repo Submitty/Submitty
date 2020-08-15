@@ -2290,7 +2290,6 @@ function reloadInstructorEditRubric(gradeable_id, itempool_available, itempool_o
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
-            addItempoolOptions();
             return refreshRubricTotalBox();
         })
         .then(function () {
@@ -2488,7 +2487,7 @@ function openComponentInstructorEdit(component_id) {
 
             // Render the component in instructor edit mode
             //  and 'true' to show the mark list
-            return injectInstructorEditComponent(component, true);
+            return injectInstructorEditComponent(component, true, true);
         });
 }
 
@@ -3076,18 +3075,21 @@ function refreshRubricTotalBox() {
  * Renders the provided component object for instructor edit mode
  * @param {Object} component
  * @param {boolean} showMarkList Whether the mark list should be visible
+ * @param {boolean} loadItempoolOptions whether to load the itempool options or not
  * @return {Promise}
  */
-function injectInstructorEditComponent(component, showMarkList) {
-    return renderEditComponent(component, getPointPrecision(), showMarkList)
-        .then(function (elements) {
-            setComponentContents(component.id, elements);
-        })
-        .then(function () {
-            return refreshRubricTotalBox();
-        }).then(function() {
-          addItempoolOptions();
-      });
+function injectInstructorEditComponent(component, showMarkList, loadItempoolOptions = false) {
+  return renderEditComponent(component, getPointPrecision(), showMarkList)
+    .then(function (elements) {
+      setComponentContents(component.id, elements);
+    })
+    .then(function () {
+      return refreshRubricTotalBox();
+    }).then(function() {
+      if (isItempoolAvailable() && loadItempoolOptions) {
+        addItempoolOptions(component.id);
+      }
+    });
 }
 
 /**
@@ -3165,18 +3167,13 @@ function injectRubricTotalBox(scores) {
         });
 }
 
-function addItempoolOptions() {
+function addItempoolOptions(componentId) {
   // create option elements for the itempool options
   let itempools = getItempoolOptions(true);
   let itempool_options = ['<option value="NONE">NONE</option>'];
-  console.log("INSIDE THE READY FUNCTION", itempools, $('[name="component-itempool"]'));
 
   for (let key in itempools) {
     itempool_options.push(`<option value='${key}'>${key} (${itempools[key].join(', ')})</option>`)
   }
-
-  $('[name="component-itempool"]').each(function() {
-    $(this).html(itempool_options);
-  });
-
+  $(`#component-itempool-select-${componentId}`).html(itempool_options);
 }
