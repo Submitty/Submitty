@@ -100,5 +100,13 @@ function disableEnterKey(cm) {
  * @returns {number} A pixel value which can be used to control the height of the codemirror box.
  */
 function rowsToPixels(rows) {
-    return rows * 16;
+
+    // Originally was 16 (set to look good on Linux ?)
+    // return rows * 16;
+
+    // 15 looks good on Mac Firefox
+    // return rows * 15;
+
+    // 17 looks good on Mac Chrome & Mac Safari
+    return rows * 17;
 }

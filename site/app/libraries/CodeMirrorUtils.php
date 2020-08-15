@@ -34,6 +34,7 @@ class CodeMirrorUtils {
     const MIME_TYPE_MAP = [
         'bash' => 'text/x-sh',
         'c' => 'text/x-csrc',
+        'clike' => 'text/x-csrc',
         'c++' => 'text/x-c++src',
         'c#' => 'text/x-csharp',
         'cpp' => 'text/x-c++src',
