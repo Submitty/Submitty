@@ -1261,7 +1261,7 @@ HTML;
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
         // Get the list of itempool questions in this gradeable which are multi-valued (and hence randomized)
-        $itempool_options = [];
+        $user_item_map = [];
         // read config file
         $gradeable_config = $gradeable->getAutogradingConfig();
 
@@ -1276,33 +1276,16 @@ HTML;
             // store those question which are having count(from_pool array) > 1
             if (isset($item['type']) && $item['type'] === 'item') {
                 $item_id = !empty($item['item_label']) ? $item["item_label"] : "item" ;
-                if (!isset($itempool_options[$item_id])) {
-                    $selected_idx = $item["user_item_map"][$who_id] ?? null;
-                    if (is_null($selected_idx)) {
-                        $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
-                        $que_idx++;
-                    }
-                    $itempool_options[$item_id] = $item['from_pool'][$selected_idx];
-
+                $item_id = isset($user_item_map[$item_id]) ? $item_id . '_' . $key : $item_id;
+                $selected_idx = $item["user_item_map"][$who_id] ?? null;
+                if (is_null($selected_idx)) {
+                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    $que_idx++;
                 }
-                else {
-                    $selected_idx = $item["user_item_map"][$who_id] ?? null;
-                    if (is_null($selected_idx)) {
-                        $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
-                        $que_idx++;
-                    }
-                    $itempool_options[$item_id . '_' . $key] = $item['from_pool'][$selected_idx];
-                }
+                $user_item_map[$item_id] = $item['from_pool'][$selected_idx];
             }
         }
-        var_dump($que_idx);
-        var_dump($who_id);
-        var_dump($hashes);
-        var_dump($gradeable_config->getUserSpecificNotebook(
-            $who_id,
-            $gradeable->getId()
-        )->getSelectedQuestions());
-        var_dump($itempool_options);
+
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
@@ -1319,11 +1302,8 @@ HTML;
                         $solution_array[$id][0]['edited_at'],
                         $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
                     ) : null,
-                'max_points' => $value->getUpperClamp(),
-                'min_points' => $value->getLowerClamp(),
                 'is_itempool_linked' => $value->getIsItempoolLinked(),
-                'from_pool' => $value->getItempool() === "" ? "" : $itempool_options[$value->getItempool()],
-                '$gradeable_config' => $gradeable_config
+                'from_pool' => $value->getItempool() === "" ? "" : $user_item_map[$value->getItempool()]
             ];
 
         }

@@ -3,7 +3,6 @@
     <div class="row">
         <span class="grading_label">Solution/TA Notes</span>
     </div>
-    {{ dump(gradeable_config) }}
     {% for component in solution_components %}
         {{ self.renderSolutionTaNotesCont(
             gradeable_id,
