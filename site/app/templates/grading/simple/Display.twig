@@ -9,11 +9,11 @@
             </a>
         {% endif %}
     </h1>
-    <p>
-        {% if gradeable.getTaInstructions()|trim != "" %}
+    {% if gradeable.getTaInstructions()|trim != "" %}
+        <p>
             Overall TA Instructions: <a class="external" href="{{  gradeable.getTaInstructions() }}" target="_blank" aria-label="Overall TA Instructions for {{ gradeable.getTitle() }}"><i>{{  gradeable.getTaInstructions()  }}</i></a>
-        {% endif %}
-    </p>
+        </p>
+    {% endif %}
 
     <div class="column-wrapper" style="margin: 1em 0;">
         <div id="checkpoint-sticky" class="column-wrapper">

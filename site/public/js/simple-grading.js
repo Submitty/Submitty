@@ -229,6 +229,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem.animate({"border-right-width": "0px"}, 400); // animate the box
                     elem.attr("data-score", elem.data("score"));      // update the score
                 });
+                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id"), 'score':elems.data('score')});
             } else {
                 console.log("Save error: returned data:", returned_vals, "does not match expected new data:", expected_vals);
                 elems.each(function(idx, elem) {
@@ -827,6 +828,35 @@ function setupSimpleGrading(action) {
             sticky.addClass("sticky-top");
         }
     });
-
     // search bar code ends here
+  initSocketClient();
+}
+
+function initSocketClient() {
+  window.socketClient = new WebSocketClient();
+  window.socketClient.onmessage = (msg) => {
+    switch (msg.type) {
+      case "update_checkpoint":
+        let elem = $('#' + msg.elem);
+        elem.data('score', msg.score);
+        elem.attr("data-score", msg.score);
+        switch (msg.score) {
+          case 1.0:
+            elem.css("background-color", "#149bdf");
+            break;
+          case 0.5:
+            elem.css("background-color", "#88d0f4")
+            break;
+          default:
+            elem.css("background-color", "")
+        }
+        elem.css("border-right", "60px solid #ddd");
+        elem.animate({"border-right-width": "0px"}, 400);
+        break;
+      default:
+        console.log('Undefined message received');
+    }
+  };
+  let gradeable_id = window.location.pathname.split("gradeable/")[1].split('/')[0];
+  window.socketClient.open(gradeable_id);
 }

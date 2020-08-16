@@ -75,6 +75,7 @@ class SimpleGraderView extends AbstractView {
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('simple-grading.js');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
