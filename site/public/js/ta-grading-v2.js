@@ -16,6 +16,7 @@ let panelElements = [
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
   { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "notebook-view", icon: ".grading_toolbar .fas fa-book-open"}
 ];
 
 // Tracks the layout of TA grading page
@@ -59,6 +60,7 @@ function updateThePanelsElements(panelsAvailabilityObj) {
   panelElements = panelElements.filter((panel) => {
     return !!panelsAvailabilityObj[panel.str];
   });
+
 }
 
 $(function () {
@@ -84,15 +86,17 @@ $(function () {
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
     let panelSpanId = btnCont.attr('id');
-    const panelId = panelSpanId.split('_btn')[0];
+
+    if (!panelSpanId) {
+      return;
+    }
+
+    const panelId = panelSpanId.split(/(_|-)btn/)[0];
     const selectEle =  $('select#' + panelId + '_select');
 
     // Hide all select dropdown except the current one
     $('select.panel-position-cont').not(selectEle).hide();
 
-    if (!panelSpanId) {
-      return;
-    }
     const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
     // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it
@@ -110,7 +114,7 @@ $(function () {
     let panelSpanId = $(this).parent().attr('id');
     let position = $(this).val();
     if (panelSpanId) {
-      const panelId = panelSpanId.split('_btn')[0];
+      const panelId = panelSpanId.split(/(_|-)btn/)[0];
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
     }
@@ -522,6 +526,8 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities () {
     panelElements.forEach((panel) => {
+      let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
+
       if (taLayoutDet.currentTwoPanels.leftTop === panel.str
           || taLayoutDet.currentTwoPanels.leftBottom === panel.str
           || taLayoutDet.currentTwoPanels.rightTop === panel.str
@@ -529,22 +535,24 @@ function setMultiPanelModeVisiblities () {
       ) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
-        $("#" + panel.str + "_btn").toggleClass('active', true);
+        $(id_str).toggleClass('active', true);
       } else {
         $("#" + panel.str).toggle(false);
         $(panel.icon).toggleClass('icon-selected', false);
-        $("#" + panel.str + "_btn").toggleClass('active', false);
+        $(id_str).toggleClass('active', false);
       }
     });
 }
 
 function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
+    let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
+
     if (panel.str === ele) {
       const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
-      $("#" + panel.str + "_btn").toggleClass('active', eleVisibility);
+      $(id_str).toggleClass('active', eleVisibility);
 
       if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
@@ -559,7 +567,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
-      $("#" + panel.str + "_btn").removeClass('active');
+      $(id_str).removeClass('active');
     }
   });
   // update the two-panels-layout if it's enabled

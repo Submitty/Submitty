@@ -254,6 +254,17 @@ progress::-webkit-progress-value {
     color: white;
 }
 
+/* Default Btn CSS (background + hover + active)*/
+.grade-panel {
+    border: 2px solid #1c83b7;
+}
+.grade-panel:hover,
+.grade-panel.active,
+.grade-panel .panel-position-cont option:hover,
+.grade-panel .panel-position-cont option:focus {
+    background: #286888;
+}
+
 #autograding_results_btn {
     border: 2px solid #bc0a33;
 }
