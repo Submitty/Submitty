@@ -800,7 +800,7 @@ HTML;
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $showNewInterface);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $showNewInterface);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $showNewInterface);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $graded_gradeable->getSubmitter()->getId(), $showNewInterface);
 
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version, $showNewInterface);
@@ -1251,14 +1251,51 @@ HTML;
     /**
      * @param Gradeable $gradeable
      * @param array $solution_array
+     * @param string $who_id
      * @param bool $showNewInterface
      * @return string
      */
-    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $showNewInterface) {
+    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $who_id, $showNewInterface) {
         if (!$showNewInterface) {
             return '';
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
+        // Get the list of itempool questions in this gradeable which are multi-valued (and hence randomized)
+        $itempool_options = [];
+        // read config file
+        $gradeable_config = $gradeable->getAutogradingConfig();
+
+        $notebook_config = $gradeable_config->getNotebookConfig();
+        $hashes = $gradeable_config->getUserSpecificNotebook(
+            $who_id,
+            $gradeable->getId()
+        )->getHashes();
+        $que_idx = 0;
+        // loop through the notebook key, and find from_pool key in each object (or question)
+        foreach($notebook_config as $key => $item) {
+            // store those question which are having count(from_pool array) > 1
+            if (isset($item['from_pool']) && count($item['from_pool']) >1) {
+                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item" ;
+                if (!isset($itempool_options[$item_id])) {
+                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    $itempool_options[$item_id] = $item['from_pool'][$selected_idx];
+                    $que_idx++;
+                }
+                else {
+                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    $itempool_options[$item_id . '_' . $key] = $item['from_pool'][$selected_idx];
+                    $que_idx++;
+                }
+            }
+        }
+        var_dump($que_idx);
+        var_dump($who_id);
+        var_dump($hashes);
+        var_dump($gradeable_config->getUserSpecificNotebook(
+            $who_id,
+            $gradeable->getId()
+        )->getSelectedQuestions());
+        var_dump($itempool_options);
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
@@ -1277,7 +1314,11 @@ HTML;
                     ) : null,
                 'max_points' => $value->getUpperClamp(),
                 'min_points' => $value->getLowerClamp(),
+                'is_itempool_linked' => $value->getIsItempoolLinked(),
+                'from_pool' => $value->getItempool() === "" ? "" : $itempool_options[$value->getItempool()],
+                '$gradeable_config' => $gradeable_config
             ];
+
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),
