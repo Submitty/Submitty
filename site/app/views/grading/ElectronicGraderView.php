@@ -115,7 +115,12 @@ class ElectronicGraderView extends AbstractView {
             $num_components = $num_peer_components + $num_non_peer_components;
             $submitted_total = $num_components > 0 ? $total : 0;
             $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
-            $total_grading_percentage =  number_format(($graded_total / $submitted_total ) * 100, 1);
+            if ($submitted_total > 0) {
+                $total_grading_percentage =  number_format(($graded_total / $submitted_total ) * 100, 1);
+            }
+            else {
+                $total_grading_percentage = 0;
+            }
             if ($peer) {
                 $num_peer_components = count($gradeable->getPeerComponents());
                 $num_non_peer_components = count($gradeable->getNonPeerComponents());
