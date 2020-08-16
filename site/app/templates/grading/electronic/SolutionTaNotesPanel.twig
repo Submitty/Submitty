@@ -13,18 +13,18 @@
             component.solution_notes,
             component.edited_at,
             component.is_itempool_linked,
-            component.from_pool,
+            component.itempool_item,
             current_user_id
         ) }}
     {% endfor %}
 </div>
 
-{% macro renderSolutionTaNotesCont(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, from_pool_item, current_user_id) %}
+{% macro renderSolutionTaNotesCont(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, itempool_item, current_user_id) %}
 
     <div class="solution-box box" id="solution-box-{{ component_id }}" data-first-edit="{% if is_first_edit %} 1 {% else %} 0 {% endif %}">
         <div class="solution-header">
             <div class="component-title">
-                Solution for {{ component_title }} {% if is_itempool_linked %} (student having {{ from_pool_item }}) {% endif %}
+                Solution for {{ component_title }} {% if is_itempool_linked %} (student having {{ itempool_item }}) {% endif %}
             </div>
             <button type="primary"
                     id="show-sol-btn-{{ component_id }}"
@@ -38,7 +38,7 @@
         <div class="row divider"></div>
         <div class="solution-cont">
             <span class="solution-notes-text solution-notes-text-{{ component_id }} {% if not is_first_edit %} hide {% endif %}">
-                No Solutions or TA notes for  "{{ component_title}}" Component  {% if is_itempool_linked %} (student having {{ from_pool_item }}) {% endif %}
+                No Solutions or TA notes for  "{{ component_title}}" Component  {% if is_itempool_linked %} (student having {{ itempool_item }}) {% endif %}
             </span>
             <div class="solution-saved {% if is_first_edit %} hide {% endif %}" id="sol-textbox-cont-{{ component_id }}-saved">
                 <span class="solution-notes-text">
@@ -64,7 +64,7 @@
                     <button type="primary"
                             id="save-solution"
                             class="btn btn-primary"
-                            onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}');"
+                            onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}', '{{ itempool_item }}');"
                     >Update</button>
                 </div>
             </div>
