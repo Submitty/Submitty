@@ -1274,17 +1274,24 @@ HTML;
         // loop through the notebook key, and find from_pool key in each object (or question)
         foreach($notebook_config as $key => $item) {
             // store those question which are having count(from_pool array) > 1
-            if (isset($item['from_pool']) && count($item['from_pool']) >1) {
+            if (isset($item['type']) && $item['type'] === 'item') {
                 $item_id = !empty($item['item_label']) ? $item["item_label"] : "item" ;
                 if (!isset($itempool_options[$item_id])) {
-                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    $selected_idx = $item["user_item_map"][$who_id] ?? null;
+                    if (is_null($selected_idx)) {
+                        $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                        $que_idx++;
+                    }
                     $itempool_options[$item_id] = $item['from_pool'][$selected_idx];
-                    $que_idx++;
+
                 }
                 else {
-                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    $selected_idx = $item["user_item_map"][$who_id] ?? null;
+                    if (is_null($selected_idx)) {
+                        $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                        $que_idx++;
+                    }
                     $itempool_options[$item_id . '_' . $key] = $item['from_pool'][$selected_idx];
-                    $que_idx++;
                 }
             }
         }

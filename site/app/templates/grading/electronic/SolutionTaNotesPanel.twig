@@ -20,19 +20,6 @@
     {% endfor %}
 </div>
 
-{#{% macro renderSolutionTaNotesForComponent(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, from_pool, current_user_id) %}
-    {% if is_itempool_linked %}
-        {% for from_pool_item in from_pool %}
-            {{ self.renderSolutionTaNotes(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, from_pool_item, current_user_id) }}
-        {% endfor %}
-    {% else %}
-        {{ self.renderSolutionTaNotes(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, "", current_user_id) }}
-    {% endif %}
-{% endmacro %}
-
-{% macro renderSolutionTaNotes(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, from_pool_item, current_user_id) %}
-#}
-
 {% macro renderSolutionTaNotesCont(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, is_itempool_linked, from_pool_item, current_user_id) %}
 
     <div class="solution-box box" id="solution-box-{{ component_id }}" data-first-edit="{% if is_first_edit %} 1 {% else %} 0 {% endif %}">
