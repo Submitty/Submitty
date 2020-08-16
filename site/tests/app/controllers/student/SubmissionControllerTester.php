@@ -180,7 +180,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'grade_released_date' => new \DateTime("9994-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
             'grade_locked_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
             'late_days' => 2,
-            'regrade_request_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone())
+            'grade_inquiry_start_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
+            'grade_inquiry_due_date' => new \DateTime("9995-01-06 01:01:01", $this->core->getConfig()->getTimezone()),
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {

@@ -23,3 +23,4 @@ QUEUE_DIR = Path(DATA_DIR, 'daemon_job_queue')
 with open(str(Path(CONFIG_PATH, 'submitty_users.json'))) as open_file:
     JSON_FILE = json.load(open_file)
 DAEMON_USER = JSON_FILE['daemon_user']
+VERIFIED_ADMIN_USER = JSON_FILE['verified_submitty_admin_user']
