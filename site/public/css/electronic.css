@@ -74,7 +74,6 @@ aside {
 .navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #two-panel-exchange-btn,
-.navigation-box.mobile-view #full-left-column-btn,
 .navigation-box.mobile-view #two-panel-mode-btn,
 .navigation-box.smaller-navbar #prev-ungraded-student-navlink,
 .navigation-box.smaller-navbar #next-ungraded-student-navlink {
@@ -169,22 +168,6 @@ button > i.fas:hover {
 
 #grade-inquiry-navlink {
     background: #36e08e;
-}
-
-#full-left-column-btn {
-    display: none;
-}
-
-#full-left-column-btn.visible {
-    display: inline-block;
-}
-
-#full-left-column-btn.active i {
-    transform: rotate(140deg);
-}
-
-#full-left-column-btn i {
-    transform: rotate(-40deg);
 }
 
 .progressbar {
