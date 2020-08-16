@@ -3,10 +3,10 @@
     Office Hours/Lab Queue Sutdent Statistics
   </h1>
 
-  <a id="view_stats" class="btn btn-primary filter_btn" type="button" href="{{base_url}}">
+  <a id="view-stats" class="btn btn-primary filter_btn" type="button" href="{{base_url}}">
     Back to Queue
   </a>
-  <a id="view_stats" class="btn btn-default filter_btn" type="button" href="{{base_url}}/stats">
+  <a id="view-stats" class="btn btn-default filter_btn" type="button" href="{{base_url}}/stats">
     View Queue Stats
   </a>
   <br>
@@ -16,7 +16,7 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataStudent()[0] %}
+        {% for key, item in student_data[0] %}
           {% if key != 'user_id' %}
             <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
           {% endif %}
@@ -24,7 +24,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for student in viewer.getQueueDataStudent() %}
+      {% for student in student_data %}
         <tr>
           {% for key, item in student %}
             {% if key != 'user_id' %}

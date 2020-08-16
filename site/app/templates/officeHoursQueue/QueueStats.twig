@@ -3,12 +3,12 @@
     Office Hours/Lab Queue Statistics
   </h1>
 
-  <a id="view_stats" class="btn btn-primary filter_btn" type="button" href="{{base_url}}">
+  <a id="view-stats" class="btn btn-primary filter_btn" type="button" href="{{base_url}}">
     Back to Queue
   </a>
 
-  {% if viewer.accessFullGrading() %}
-    <a id="view_stats" class="btn btn-default filter_btn" type="button" href="{{base_url}}/student_stats">
+  {% if access_full_grading %}
+    <a id="view-stats" class="btn btn-default filter_btn" type="button" href="{{base_url}}/student_stats">
       View Student Specific Stats
     </a>
     <br>
@@ -19,13 +19,13 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataOverall()[0] %}
+        {% for key, item in overall_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueDataOverall() %}
+      {% for queue in overall_data %}
         <tr>
           {% for key, item in queue %}
             <td>{{item}}</td>
@@ -39,13 +39,13 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataToday()[0] %}
+        {% for key, item in today_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueDataToday() %}
+      {% for queue in today_data %}
         <tr>
           {% for key, item in queue %}
             <td>{{item}}</td>
@@ -60,13 +60,13 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataByWeekDayThisWeek()[0] %}
+        {% for key, item in week_day_this_week_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueDataByWeekDayThisWeek() %}
+      {% for queue in week_day_this_week_data %}
         <tr>
           {% for key, item in queue %}
             {% if key == "dow" %}
@@ -85,13 +85,13 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataByWeekDay()[0] %}
+        {% for key, item in week_day_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueDataByWeekDay() %}
+      {% for queue in week_day_data %}
         <tr>
           {% for key, item in queue %}
             {% if key == "dow" %}
@@ -110,13 +110,13 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataByQueue()[0] %}
+        {% for key, item in queue_data[0] %}
           <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for queue in viewer.getQueueDataByQueue() %}
+      {% for queue in queue_data %}
         <tr>
           {% for key, item in queue %}
             <td>{{item}}</td>
@@ -131,7 +131,7 @@
   <table class="table">
     <thead>
       <tr>
-        {% for key, item in viewer.getQueueDataByWeekNumber()[0] %}
+        {% for key, item in week_number_data[0] %}
           {% if key == "yearnum" %}
           {% else %}
             <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
@@ -140,7 +140,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for weekdata in viewer.getQueueDataByWeekNumber() %}
+      {% for weekdata in week_number_data %}
         <tr>
           {% for key, item in weekdata %}
             {% if key == "yearnum" %}

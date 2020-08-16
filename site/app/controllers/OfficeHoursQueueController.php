@@ -494,17 +494,20 @@ class OfficeHoursQueueController extends AbstractController {
      */
     public function showQueueStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
+            $this->core->addErrorMessage("Office hours queue disabled");
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
         }
 
-        return MultiResponse::WebOnlyResponse(
-            new WebResponse(
-                'OfficeHoursQueue',
-                'showQueueStats',
-                new OfficeHoursQueueModel($this->core)
-            )
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStats',
+            $viewer->getQueueDataOverall(),
+            $viewer->getQueueDataToday(),
+            $viewer->getQueueDataByWeekDayThisWeek(),
+            $viewer->getQueueDataByWeekDay(),
+            $viewer->getQueueDataByQueue(),
+            $viewer->getQueueDataByWeekNumber()
         );
     }
 
@@ -538,17 +541,14 @@ class OfficeHoursQueueController extends AbstractController {
      */
     public function showQueueStudentStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['home']))
-            );
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
         }
 
-        return MultiResponse::WebOnlyResponse(
-            new WebResponse(
-                'OfficeHoursQueue',
-                'showQueueStudentStats',
-                new OfficeHoursQueueModel($this->core)
-            )
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStudentStats',
+            $viewer->getQueueDataStudent()
         );
     }
 

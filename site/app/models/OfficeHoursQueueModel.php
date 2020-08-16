@@ -51,6 +51,7 @@ class OfficeHoursQueueModel extends AbstractModel {
       'not_helped_count' => 'Unhelped Students',
       'queue_code' => 'Queue',
       'weeknum' => 'Week',
+      'number_names_used' => 'Unique Names',
     ];
 
 
@@ -86,10 +87,6 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function isGrader() {
         return $this->core->getUser()->accessGrading();
-    }
-
-    public function accessFullGrading() {
-        return $this->core->getUser()->accessFullGrading();
     }
 
     public function getUserId() {
@@ -283,7 +280,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueDataByWeekDayThisWeek();
     }
 
-    public function dayNumToDay($daynum) {
+    public function dayNumToDay($daynum): string {
         return $this->days[$daynum];
     }
 
@@ -291,16 +288,13 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getQueries()->getQueueDataByWeekNumber();
     }
 
-    public function weekNumToDate($weeknum, $yearnum) {
+    public function weekNumToDate($weeknum, $yearnum): string {
         $week_start = new DateTime();
         $week_start->setISODate($yearnum, $weeknum);
         return $week_start->format('Y-M-d');
     }
 
-    public function statNiceName($name) {
-        if (array_key_exists($name, $this->niceNames)) {
-            return $this->niceNames[$name];
-        }
-        return $name;
+    public function statNiceName($name): string {
+        return $this->niceNames[$name] ?? $name;
     }
 }
