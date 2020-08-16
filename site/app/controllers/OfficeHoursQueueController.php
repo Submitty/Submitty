@@ -209,6 +209,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         $this->core->getQueries()->setQueuePauseState($_POST['pause_state'] === 'true');
         $this->core->addSuccessMessage($_POST['pause_state'] === 'true' ? "Position in queue paused" : "Position in queue unpaused");
+        $this->sendSocketMessage(['type' => 'queue_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
