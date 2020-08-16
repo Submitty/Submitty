@@ -431,11 +431,10 @@ function setupNumericTextCells() {
             elem.attr('data-origval', elem.val());
         });
 
-        row_el.find(".cell-total").each(function() {
-            this.value = total;
-        });
+      let id = this.id;
+      let value = this.value;
 
-        submitAJAX(
+      submitAJAX(
             buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
@@ -444,13 +443,10 @@ function setupNumericTextCells() {
                 'scores': scores
             },
             function() {
-                elem.css("background-color", "#ffffff");                                     // change the color
-                elem.attr("value", this.value);                                              // Stores the new input value
-                row_el.children("td.option-small-output").each(function() {
-                    $(this).children(".option-small-box").each(function() {
-                        $(this).attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
-                    });
-                });
+              // Finds the element that stores the total and updates it to reflect increase
+              if (row_el.find(".cell-total").text() != total)
+                row_el.find(".cell-total").text(total).hide().fadeIn("slow");
+              window.socketClient.send({'type': "update_numeric", 'elem': id, 'value': value, 'total': total});
             },
             function() {
                 elem.css("background-color", "#ff7777");
@@ -835,9 +831,9 @@ function setupSimpleGrading(action) {
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
+    let elem = $('#' + msg.elem);
     switch (msg.type) {
       case "update_checkpoint":
-        let elem = $('#' + msg.elem);
         elem.data('score', msg.score);
         elem.attr("data-score", msg.score);
         switch (msg.score) {
@@ -852,6 +848,20 @@ function initSocketClient() {
         }
         elem.css("border-right", "60px solid #ddd");
         elem.animate({"border-right-width": "0px"}, 400);
+        break;
+      case "update_numeric":
+        elem.data('origval', msg.value);
+        elem.attr('data-origval', msg.value);
+        elem.val(msg.value);
+        elem.css("background-color", "white");
+        if(msg.value == 0) {
+          elem.css("color", "#bbbbbb");
+        }
+        else{
+          elem.css("color", "");
+        }
+        if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != msg.total)
+          elem.parent().siblings('.option-small-output').children('.cell-total').text(msg.total).hide().fadeIn("slow");
         break;
       default:
         console.log('Undefined message received');
