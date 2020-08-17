@@ -237,21 +237,29 @@
         }
     }
 
-    //if the user presses 'enter' try and make a submission as if hitting the submit button
-    function uploadOnEnter(index, e = null){
-        key = window.event ? window.event.keyCode : e.keyCode;
-        if(key === 13){
+    /**
+    * if the user presses 'enter' try and make a submission as if hitting the submit button
+    * @param {Number} index
+    * @param {KeyboardEvent} e
+    */
+    function uploadOnEnter(index, e){
+        if(e.code === "Enter"){
             uploadSplit(index);
         }
     }
 
-    //on enter move focus on the next submission box in a given row
-    function focusNextOnEnter(table_row, input_index, e = null ){
-        var key = window.event ? window.event.keyCode : e.keyCode;
-        if(key !== 13){
+
+    /**
+    * on enter move focus on the next submission box in a given row
+    * @param {String} table_row
+    * @param {Number} input_index
+    * @param {KeyboardEvent} e
+    */
+    function focusNextOnEnter(table_row, input_index, e){
+        if(e.code !== "Enter"){
             return;
         }
-        var input_box  = document.getElementById("bulk_user_id_" + String(table_row) + "[" + String(input_index + 1) + "]" );
+        let input_box  = document.getElementById("bulk_user_id_" + String(table_row) + "[" + String(input_index + 1) + "]" );
         if(!input_box){
             return;
         }

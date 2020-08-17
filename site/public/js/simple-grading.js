@@ -623,7 +623,7 @@ function setupSimpleGrading(action) {
 
     // refocus on the input field by pressing enter
     $(document).on("keyup", function(event) {
-        if(event.keyCode == 13 && !dont_hotkey_focus) {
+        if(event.code === "Enter" && !dont_hotkey_focus) {
             $("#student-search-input").focus();
         }
     });
@@ -663,24 +663,24 @@ function setupSimpleGrading(action) {
         var input_cell = $("input.cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
-        if(event.keyCode == 37 && (!input_cell.length || (
+        if(event.code === "ArrowLeft" && (!input_cell.length || (
                 input_cell[0].selectionStart == 0 &&
                 input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
             event.preventDefault();
             movement("left");
         }
-        else if(event.keyCode == 38) {
+        else if(event.code === "ArrowUp") {
             event.preventDefault();
             movement("up");
         }
         // if there is no selection OR there is a selection to the far right with 0 length
-        else if(event.keyCode == 39 && (!input_cell.length || (
+        else if(event.code === "ArrowRight" && (!input_cell.length || (
                 input_cell[0].selectionEnd == input_cell[0].value.length &&
                 input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
             event.preventDefault();
             movement("right");
         }
-        else if(event.keyCode == 40) {
+        else if(event.cpde === "ArrowDown") {
             event.preventDefault();
             movement("down");
         }
@@ -745,7 +745,7 @@ function setupSimpleGrading(action) {
 
     // when pressing enter in the search bar, go to the corresponding element
     $("#student-search-input").on("keyup", function(event) {
-        if(event.keyCode == 13) { // Enter
+        if(event.code == "Enter") { // Enter
             this.blur();
             var value = $(this).val();
             if(value != "") {
