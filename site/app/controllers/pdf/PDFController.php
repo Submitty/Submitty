@@ -48,8 +48,8 @@ class PDFController extends AbstractController {
                 }
             }
         }
-        
-        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $annotation_jsons, true, 1);
+
+        $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $annotation_jsons, true, 1, true);
     }
 
     /**

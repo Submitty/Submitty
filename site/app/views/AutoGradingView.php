@@ -456,7 +456,7 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$display_name] = $comment;
             }
         }
-        
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -617,7 +617,6 @@ class AutoGradingView extends AbstractView {
                 }
                 $file['graders'] = $graders;
                 $uploaded_pdfs[] = $file;
-                
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
