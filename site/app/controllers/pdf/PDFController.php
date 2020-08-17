@@ -55,9 +55,9 @@ class PDFController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")
      */
-    public function downloadStudentPDF(string $gradeable_id, string $filename, string $path): void {
+    public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path): void {
         $filename = html_entity_decode($filename);
-        $path = urldecode($path);
+        $anon_path = urldecode($anon_path);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable->isTeamAssignment()) {
@@ -71,7 +71,7 @@ class PDFController extends AbstractController {
         $annotation_jsons = [];
 
         $latest_timestamp = filemtime($path);
-        $md5_path = md5($path);
+        $md5_path = md5($anon_path);
         if (is_dir($annotation_path)) {
             $dir_iter = new \FilesystemIterator($annotation_path);
             foreach ($dir_iter as $file_info) {
