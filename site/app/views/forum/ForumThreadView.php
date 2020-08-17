@@ -223,7 +223,7 @@ class ForumThreadView extends AbstractView {
             $currentThreadArrValues = array_values($currentThreadArr);
             $currentThreadFavorite = !empty($currentThreadArrValues) ? $currentThreadArrValues[0]['favorite'] : false;
             $generatePostContent = $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite, false);
-         }
+        }
 
         if (!empty($activeThread['id'])) {
             $this->core->getQueries()->visitThread($user, $activeThread['id']);
@@ -244,7 +244,7 @@ class ForumThreadView extends AbstractView {
             if ($currentThreadArrValues) {
                 $max_length = 25;
                 $fullTitle = $currentThreadArrValues[0]["title"];
-                $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0,  $max_length - 3) . "..." : $fullTitle;
+                $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0, $max_length - 3) . "..." : $fullTitle;
                 $this->core->getOutput()->addBreadcrumb("(" . $currentThreadArrValues[0]["id"] . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
             }
 
