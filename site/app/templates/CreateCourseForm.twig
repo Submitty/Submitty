@@ -22,6 +22,9 @@
                         </option>
                     {% endfor %}
                 </select>
+                {% if is_superuser %}
+                    <button class="btn btn-secondary" type="button" style="margin-left:10px;" onclick="addNewTerm()">Other</button>
+                {% endif %}
             </div>
         </div>
 
@@ -92,7 +95,17 @@
     </form>
 </div>
 
+{% include 'AddTerm.twig' %}
+
 <script>
+    function addNewTerm() {
+        $('.popup-form').css('display', 'none');
+        var form = $("#add-new-term");
+        form.css("display", "block");
+        form.find('.form-body').scrollTop(0);
+        $("#term-id").focus();
+    }
+
     function onHeadInstructorChange() {
         let headInstructor = $('#head_instructor').val();
         $.ajax({

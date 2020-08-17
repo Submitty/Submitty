@@ -7,8 +7,6 @@ use app\models\AbstractModel;
 
 /**
  * @method string getFileName()
- * @method array[] getImages()
- * @method string getLabel()
  */
 class AbstractNotebookInput extends AbstractModel {
 

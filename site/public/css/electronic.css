@@ -296,6 +296,17 @@ progress::-webkit-progress-value {
     color: white;
 }
 
+/* Default Btn CSS (background + hover + active)*/
+.grade-panel {
+    border: 2px solid #1c83b7;
+}
+.grade-panel:hover,
+.grade-panel.active,
+.grade-panel .panel-position-cont option:hover,
+.grade-panel .panel-position-cont option:focus {
+    background: #286888;
+}
+
 #autograding_results_btn {
     border: 2px solid #bc0a33;
 }
@@ -1066,7 +1077,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container span.mark-points {
-    width: 60px;
+    width: 80px;
     justify-content: flex-end;
 }
 
@@ -1222,6 +1233,24 @@ tr.is_publish {
     position:relative;
     float:left;
     width:100%;
+}
+
+#file-view {
+    height: 100%;
+    width: 100%;
+}
+
+.sticky-file-info {
+    position: sticky;
+    top: 0;
+    background-color: var(--standard-pale-blue-gray);
+    padding: 10px 15px 0;
+    z-index: 30;
+}
+
+#file-content {
+    height:90%;
+    width: 100%;
 }
 
 #changeCodeStyle {

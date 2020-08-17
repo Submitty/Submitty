@@ -10,6 +10,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -243,14 +244,18 @@ class AdminGradeableController extends AbstractController {
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
-        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeablePeersForm', $gradeable);
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableEditPeersForm', $gradeable);
+        $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableAddPeersForm', $gradeable);
     }
 
     /**
+     * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with
+     *  the grader's new students.
+     * @param String $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function adminGradeablePeerSubmit($gradeable_id) {
+    public function editGraderPeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
         //if entire grader row is removed, just remove grader and their students
         if (!empty($_POST['remove_grader'])) {
@@ -262,29 +267,35 @@ class AdminGradeableController extends AbstractController {
             $grading_assignment_for_grader = $tmp[$gradeable_id];
             foreach ($grading_assignment_for_grader as $i => $student_id) {
                 if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
-                    if ($this->core->getQueries()->getUserById($student_id) == null) {
-                        $this->core->addErrorMessage("{$student_id} is not a valid student");
-                    }
-                    else {
-                        $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
-                    }
+                    $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                 }
             }
-            //then, add new students
+            // then, add new students
             foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
-                if (in_array($student_id, $grading_assignment_for_grader)) {
-                    $this->core->addErrorMessage("{$student_id} is already a student for {$grader_id}");
-                }
-                elseif ($this->core->getQueries()->getUserById($student_id) == null) {
-                    $this->core->addErrorMessage("{$student_id} is not a valid student");
-                }
-                else {
-                    $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
-                }
+                $this->core->getQueries()->insertPeerGradingAssignment($grader_id, $student_id, $gradeable_id);
             }
         }
+        // return new peer assignments to AJAX success
         $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
-        $this->core->getOutput()->renderJsonSuccess($new_peers);
+        return JsonResponse::getSuccessResponse($new_peers);
+    }
+
+    /**
+     * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the
+     * database with the grader's new students.
+     * @param String $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function newGraderPeerSubmit($gradeable_id) {
+        $new_grader_id = $_POST['new_grader_id'];
+        // add the new grader and all their students
+        foreach (json_decode($_POST['add_student_ids']) as $i => $student_id) {
+            $this->core->getQueries()->insertPeerGradingAssignment($new_grader_id, $student_id, $gradeable_id);
+        }
+        // return new peer assignments to AJAX success
+        $new_peers = $this->core->getQueries()->getPeerGradingAssignment($gradeable_id);
+        return JsonResponse::getSuccessResponse($new_peers);
     }
 
     /* Http request methods (i.e. ajax) */
@@ -294,40 +305,40 @@ class AdminGradeableController extends AbstractController {
      */
     private function shufflePeerGrading(Gradeable $gradeable) {
         if ($gradeable->isPeerGrading()) {
-            $old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
-            $make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
-            if ($make_peer_assignments) {
-                $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
+            //$old_peer_grading_assignments = $this->core->getQueries()->getPeerGradingAssignNumber($gradeable->getId());
+            //$make_peer_assignments = ($old_peer_grading_assignments !== $gradeable->getPeerGradeSet());
+            //if ($make_peer_assignments) {
+            $this->core->getQueries()->clearPeerGradingAssignment($gradeable->getId());
 
-                $users = $this->core->getQueries()->getAllUsers();
-                $user_ids = [];
-                $grading = [];
-                $peer_grade_set = $gradeable->getPeerGradeSet();
-                foreach ($users as $key => $user) {
-                    // Need to remove non-student users, or users in the NULL section
-                    if ($user->getRegistrationSection() == null) {
-                        unset($users[$key]);
-                    }
-                    else {
-                        $user_ids[] = $user->getId();
-                        $grading[$user->getId()] = [];
-                    }
+            $users = $this->core->getQueries()->getAllUsers();
+            $user_ids = [];
+            $grading = [];
+            $peer_grade_set = $gradeable->getPeerGradeSet();
+            foreach ($users as $key => $user) {
+                // Need to remove non-student users, or users in the NULL section
+                if ($user->getRegistrationSection() == null) {
+                    unset($users[$key]);
                 }
-                $user_number = count($user_ids);
-                shuffle($user_ids);
-                for ($i = 0; $i < $user_number; $i++) {
-                    for ($j = 1; $j <= $peer_grade_set; $j++) {
-                        $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
-                    }
+                else {
+                    $user_ids[] = $user->getId();
+                    $grading[$user->getId()] = [];
                 }
+            }
+            $user_number = count($user_ids);
+            shuffle($user_ids);
+            for ($i = 0; $i < $user_number; $i++) {
+                for ($j = 1; $j <= $peer_grade_set; $j++) {
+                    $grading[$user_ids[$i]][] = $user_ids[($i + $j) % $user_number];
+                }
+            }
 
-                foreach ($grading as $grader => $assignment) {
-                    foreach ($assignment as $student) {
-                        $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
-                    }
+            foreach ($grading as $grader => $assignment) {
+                foreach ($assignment as $student) {
+                    $this->core->getQueries()->insertPeerGradingAssignment($grader, $student, $gradeable->getId());
                 }
             }
         }
+        //}
     }
 
     private function newComponent(Gradeable $gradeable) {
@@ -794,17 +805,24 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        $repo_name = '';
+
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
+            $subdir = '';
 
-            // Find which radio button is pressed and what host type to use
             $host_type = -1;
+            // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
+                $repo_name = $details['id'];
+                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
+                $repo_name = $details['vcs_url'];
+                $subdir = $details['vcs_url'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -813,15 +831,6 @@ class AdminGradeableController extends AbstractController {
                 $host_type = 3;
             }
 
-            $subdir = '';
-            // Submitty hosted -> this gradeable subdirectory
-            if ($host_type === 0) {
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
-            }
-            // Submitty hosted -> custom url
-            if ($host_type === 1) {
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
-            }
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
@@ -904,7 +913,8 @@ class AdminGradeableController extends AbstractController {
             'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
             'submission_open_date' => (clone $tonight),
             'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
+            'grade_inquiry_start_date' => (clone $tonight)->add(new \DateInterval('P15D')),
+            'grade_inquiry_due_date' => (clone $tonight)->add(new \DateInterval('P21D'))
         ]);
 
         // Finally, construct the gradeable
@@ -930,9 +940,17 @@ class AdminGradeableController extends AbstractController {
         // start the build
         $build_status = $this->enqueueBuild($gradeable);
 
-        $config = $this->core->getConfig();
-        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+        if (
+            $build_status == null
+            && $gradeable->isVcs()
+            && ($gradeable->getVcsHostType() === 0 || $gradeable->getVcsHostType() === 1)
+            && !$gradeable->isTeamAssignment()
+        ) {
+            $this->enqueueGenerateRepos(
+                $this->core->getConfig()->getSemester(),
+                $this->core->getConfig()->getCourse(),
+                $repo_name
+            );
         }
 
         return $build_status;

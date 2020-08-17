@@ -1,0 +1,58 @@
+{% import 'functions/Badge.twig' as Badge %}
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-peer-components-form{% endblock %}
+{% block title %}Edit Peer Components Form{% endblock %}
+{% block body %}
+	<span>
+		Select the student whose marks you want to clear 
+		</br> WARNING this will remove all of the peer grading done by this student:
+		</br>
+		** WIP: Editting and deletion of individual components**
+	</span>
+	<select id = "edit-peer-select" onChange = "changeCurrentPeer()">
+		{% for peer in peers %}
+			<option value = {{peer}}>{{peer}}</option>
+		{% endfor %}
+	</select>
+	{% set first_peer = true %}
+	{% for peer in peers %}
+		{% if first_peer == true %}
+		    <div id="edit-peer-components-form-{{peer}}" class = "edit-peer-components-block">
+		    {% set first_peer = false %}
+		{% else %}
+			<div id="edit-peer-components-form-{{peer}}" class = "edit-peer-components-block" style="display: none;">
+		{% endif %}
+	    	<button type="button" class="btn" onclick="clearPeerMarks('{{submitter_id}}', '{{gradeable_id}}', '{{csrf_token}}')">Clear All Grading</button>
+	    	</br>
+	    	{% for component in components %}
+	    		<div class="box-badge">
+	        		{{ Badge.render(component_scores[component.id][peer], component.max, false) }}
+	        	</div>
+	        	<span class="component-title col-no-gutters">
+    				<b>{{ component.title|escape }}</b>
+				</span>
+				<div class="received-marks-list container">
+			        {% for mark in component.marks %}
+		                <div class="row">
+		                    <div class="col-no-gutters indicator">
+		                    	{% if mark in peer_details.marks_assigned[component.id][peer] %}
+		                        	<i class="far fa-check-square fa-1g"></i>
+		                        {% else %}
+		                        	<i class="far fa-square fa-1g"></i>
+		            			{% endif %}
+		                    </div>
+		                    <div class="col-no-gutters point-value">
+		                        <span>{{ marks[mark].points }}</span>
+		                    </div>
+		                    <div class="col">
+		                        <span>{{ marks[mark].title|nl2br }}</span>
+		                    </div>
+		                </div>
+			        {% endfor %}
+			    </div>
+	        {% endfor %}
+	    </div>
+    {% endfor %}
+    </br> 
+ 
+{% endblock %}

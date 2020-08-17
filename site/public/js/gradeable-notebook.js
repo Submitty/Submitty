@@ -73,11 +73,10 @@ const NOTEBOOK_AUTOSAVE_KEY = `${window.location.pathname}-notebook-autosave`;
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
-    if (autosaveEnabled) {
+    if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
         localStorage.setItem(NOTEBOOK_AUTOSAVE_KEY, JSON.stringify({
             timestamp: Date.now(),
             multiple_choice: gatherInputAnswersByType("multiple_choice"),
-            short_answer: gatherInputAnswersByType("short_answer"),
             codebox: gatherInputAnswersByType("codebox")
         }));
     }
@@ -88,7 +87,7 @@ function saveNotebookToLocal() {
  * autosave data exists yet, then this function does nothing.
  */
 function restoreNotebookFromLocal() {
-    if (autosaveEnabled) {
+    if (typeof autosaveEnabled !== "undefined" && autosaveEnabled) {
         const state = JSON.parse(localStorage.getItem(NOTEBOOK_AUTOSAVE_KEY));
         
         if (state === null) {
@@ -324,5 +323,7 @@ $(document).ready(function () {
 
     restoreNotebookFromLocal();
 
-    cleanupAutosaveHistory("-notebook-autosave");
+    if(typeof cleanupAutosaveHistory === "function"){
+        cleanupAutosaveHistory("-notebook-autosave");
+    }
 });

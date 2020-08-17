@@ -87,7 +87,7 @@ def log_message(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", 
         elapsed_time = -1
     elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time < 0 else "sec"
-    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}", 
+    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
              f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
     write_to_log(autograding_log_file, parts)
 
@@ -105,7 +105,7 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
         elapsed_time = -1
     elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time < 0 else "sec"
-    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}", 
+    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
              f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}\n", trace)
     write_to_log(autograding_log_file, parts)
 
@@ -139,7 +139,7 @@ def write_to_log(log_path, message):
 
 def setup_for_validation(working_directory, complete_config, is_vcs, testcases, job_id, log_path, stack_trace_log_path):
     """ Prepare a directory for validation by copying in and permissioning the required files. """
-    
+
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
     tmp_work = os.path.join(working_directory,"TMP_WORK")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
@@ -161,14 +161,14 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     add_permissions_recursive(tmp_work,
                               stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
+                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # Copy required submission/checkout files
     pattern_copy("submission_to_validation", patterns['submission_to_validation'], submission_path, tmp_work, tmp_logs)
     if is_vcs:
         checkout_subdir_path = os.path.join(tmp_submission, 'checkout', checkout_subdirectory)
         pattern_copy("checkout_to_validation", patterns['submission_to_validation'],checkout_subdir_path,tmp_work,tmp_logs)
-    
+
     for c in testcases:
         if c.type == 'Compilation':
             pattern_copy("compilation_to_validation", patterns['compilation_to_validation'], c.secure_environment.directory, tmp_work, tmp_logs)
@@ -187,12 +187,12 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
     copy_contents_into(job_id, custom_validation_code_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
 
-    
+
 
     # Copy the validation script into this directory.
     bin_runner = os.path.join(tmp_autograding, "bin","validate.out")
     my_runner  = os.path.join(tmp_work, "my_validator.out")
-    
+
     shutil.copy(bin_runner, my_runner)
 
     add_permissions_recursive(tmp_work,
@@ -219,16 +219,16 @@ def add_all_permissions(path):
 
 
 def lock_down_folder_permissions(top_dir):
-    # Chmod a directory to take away group and other rwx. 
+    # Chmod a directory to take away group and other rwx.
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
-   
+
 
 def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment, log_path, stack_trace_log_path, SUBMITTY_INSTALL_DIR):
-    """ 
-    Given a working directory, set up that directory for autograding by creating the required subdirectories
-    and configuring permissions. 
     """
-    
+    Given a working directory, set up that directory for autograding by creating the required subdirectories
+    and configuring permissions.
+    """
+
     # If an old (stale) version of the working directory exists, we need to remove it.
     if os.path.exists(working_directory):
         # Make certain we can remove old instances of the working directory.
@@ -236,7 +236,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
             untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, user_id_of_runner, working_directory)
         add_all_permissions(working_directory)
         shutil.rmtree(working_directory,ignore_errors=True)
-    
+
     # Create the working directory
     os.mkdir(working_directory)
 
@@ -292,7 +292,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     lock_down_folder_permissions(tmp_submission)
 
 
-def archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj, 
+def archive_autograding_results(config, working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
                                 gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
     """ After grading is finished, archive the results. """
 
@@ -315,7 +315,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
 
     # Copy work to details
     pattern_copy("work_to_details", patterns['work_to_details'], tmp_work, results_details_dir, tmp_logs)
-    
+
     # Copy work to public
     if 'work_to_public' in patterns:
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
@@ -340,16 +340,10 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
     if os.path.isfile(history_file_tmp) and not is_test_environment:
-
-        from . import CONFIG_PATH
-        with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
-            OPEN_JSON = json.load(open_file)
-        DAEMON_UID = OPEN_JSON['daemon_uid']
-
         shutil.move(history_file_tmp, history_file)
         # fix permissions
         ta_group_id = os.stat(tmp_results).st_gid
-        os.chown(history_file, int(DAEMON_UID),ta_group_id)
+        os.chown(history_file, int(config.submitty_users['daemon_uid']),ta_group_id)
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
@@ -386,7 +380,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
         #    keeping it as is because we are mid-semester with this
         #    new feature and I don't want to break things.
         first_access_string = dateutils.normalize_submitty_date(first_access_string)
-        
+
         submission_datetime = dateutils.read_submitty_date(submission_string)
         gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
         gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
@@ -452,7 +446,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
 
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             f.write("FINISHED GRADING!\n")
-        
+
         log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
@@ -568,7 +562,7 @@ def copy_contents_into(job_id,source,target,tmp_logs, log_path, stack_trace_log_
 
 
 # copy files that match one of the patterns from the source directory
-# to the target directory.  
+# to the target directory.
 def pattern_copy(what, patterns, source, target, tmp_logs):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
@@ -645,7 +639,7 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
     # If the source is a directory, we copy the entire thing into the
     # target.
     if os.path.isdir(source):
-        # We must copy from directory to directory 
+        # We must copy from directory to directory
         copy_contents_into(job_id, source, target, tmp_logs, log_path, stack_trace_log_path)
 
     # Separate ** and * for simplicity.
@@ -664,7 +658,7 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
                 traceback.print_exc()
                 log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
     else:
-        # Everything after the first **. 
+        # Everything after the first **.
         source_base = source[:source.find('**')]
         # The full target must exist (we must be moving to a directory.)
         if not os.path.isdir(target):

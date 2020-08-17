@@ -304,6 +304,7 @@ int main() {\n\
               {
                   "testcase_ref" : "python_prime",
                   "type": "short_answer",
+                  "rows": 10,
                   "programming_language": "python",
                   "filename": "python_codebox.py",
                   "initial_value": "\
