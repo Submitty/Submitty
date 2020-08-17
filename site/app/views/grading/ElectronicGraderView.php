@@ -14,6 +14,8 @@ use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
 use app\views\AbstractView;
+use app\libraries\NumberUtils;
+use app\libraries\CodeMirrorUtils;
 
 class ElectronicGraderView extends AbstractView {
     /**
@@ -821,6 +823,7 @@ HTML;
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
 
         $return = "";
+        $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
         if ($showNewInterface) {
             $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
@@ -831,7 +834,15 @@ HTML;
                     <div class="content-item content-item-right">
 HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderGradingPanelHeader', $isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel);
+            $return .= $this->core->getOutput()->renderTemplate(
+                ['grading', 'ElectronicGrader'],
+                'renderGradingPanelHeader',
+                $isPeerPanel,
+                $isStudentInfoPanel,
+                $isDiscussionPanel,
+                $isRegradePanel,
+                $gradeable->getAutogradingConfig()->isNotebookGradeable()
+            );
 
             $return .= <<<HTML
                 <div class="panels-container">
@@ -861,9 +872,57 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment(), $showNewInterface);
         }
 
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        if ($is_notebook) {
+            $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
+            $this->core->getOutput()->addInternalCss('submitbox.css');
+            /*Prevents notebook from throwing errors since it depends
+            * on file upload to be initialized but might not be good
+            * to import the entire drag-and-drop js file into grading
+            */
+            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+
+            $notebook_model = $gradeable->getAutogradingConfig()->getUserSpecificNotebook(
+                $graded_gradeable->getSubmitter()->getId(),
+                $gradeable->getId()
+            );
+
+            $notebook = $notebook_model->getNotebook();
+            $image_data = $notebook_model->getImagePaths();
+            $testcase_messages = $display_version_instance !== null ? $display_version_instance->getTestcaseMessages() : [];
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $highest_version,
+                $notebook,
+                $graded_gradeable->getSubmitter()->getId()
+            );
+
+            $old_files = [];
+            for ($i = 1; $i <= $notebook_model->getNumParts(); $i++) {
+                foreach ($display_version_instance->getPartFiles($i)['submissions'] as $file) {
+                    $old_files[] = [
+                        'name' => str_replace('\'', '\\\'', $file['name']),
+                        'size' => number_format($file['size'] / 1024, 2),
+                        'part' => $i
+                    ];
+                }
+            }
+
+            $return .= $this->core->getOutput()->renderTemplate(
+                ['grading', 'ElectronicGrader'],
+                'renderNotebookPanel',
+                $notebook_data,
+                $testcase_messages,
+                $image_data,
+                $gradeable->getId(),
+                $highest_version,
+                $old_files,
+                $graded_gradeable->getSubmitter()->getId()
+            );
+        }
+    
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         if ($isStudentInfoPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance, $showNewInterface);
@@ -985,12 +1044,13 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader($isPeerPanel, $isStudentInfoPanel, $isDiscussionPanel, $isRegradePanel) {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isRegradePanel, bool $is_notebook): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
-            'isRegradePanel' => $isRegradePanel
+            'isRegradePanel' => $isRegradePanel,
+            'is_notebook' => $is_notebook
         ]);
     }
 
@@ -1425,5 +1485,29 @@ HTML;
 
     public function popupSettings() {
         return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
+    }
+
+
+    public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id): string {
+        return $this->core->getOutput()->renderTwigTemplate(
+            "grading/electronic/NotebookPanel.twig",
+            [
+            "notebook" => $notebook,
+            "testcase_messages" => $testcase_messages,
+            "image_data" => $image_data,
+            'numberUtils' => new class () {
+                //needed to show student multiple choices in random order
+                public function getRandomIndices(int $array_length, string $student_id, string $gradeable_id): array {
+                    return NumberUtils::getRandomIndices($array_length, '' . $student_id . $gradeable_id);
+                }
+            },
+            "student_id" => $student_id,
+            "gradeable_id" => $gradeable_id,
+            "highest_version" => $highest_version,
+            'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            "old_files" => $old_files,
+            "is_grader_view" => true
+            ]
+        );
     }
 }
