@@ -1069,7 +1069,6 @@ function openAllDivForCourseMaterials() {
 
 function openUrl(url) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
-    return false;
 }
 
 function changeName(element, user, visible_username, anon){

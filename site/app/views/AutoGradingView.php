@@ -279,6 +279,26 @@ class AutoGradingView extends AbstractView {
         }
         return ''; // ?
     }
+    
+    /**
+     * @param string $file_path
+     * @return string
+     */
+    private function convertToAnonPath($file_path) {
+        $file_path_parts = explode("/", $file_path);
+        $anon_path = "";
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index == 9) {
+                $user_id = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getAnonId($user_id)[$user_id];
+                $anon_path = $anon_path . "/" . $anon_id;
+            }
+            else {
+                $anon_path = $anon_path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $anon_path;
+    }
 
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
@@ -363,13 +383,15 @@ class AutoGradingView extends AbstractView {
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($file['path']);
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
-                $file["encoded_name"] = md5($file['path']);
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -434,7 +456,7 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$display_name] = $comment;
             }
         }
-
+        
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -595,6 +617,7 @@ class AutoGradingView extends AbstractView {
                 }
                 $file['graders'] = $graders;
                 $uploaded_pdfs[] = $file;
+                
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
