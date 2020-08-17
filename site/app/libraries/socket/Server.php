@@ -213,7 +213,7 @@ class Server implements MessageComponentInterface {
 
         $msg = json_decode($msgString, true);
 
-        if ($msg["type"] === "new_connection") {
+        if ($msg["type"] === "new_connection" && isset($msg['page'])) {
             if (!array_key_exists($msg['page'], $this->clients)) {
                 $this->clients[$msg['page']] = new \SplObjectStorage();
             }
