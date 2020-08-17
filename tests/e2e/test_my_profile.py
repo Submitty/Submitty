@@ -28,12 +28,12 @@ class TestMyProfile(BaseTestCase):
         student_id = self.driver.find_element(By.XPATH, "//div[@id='username-row']/span[@class='value']").text
         student_first_name = self.driver.find_element(By.XPATH, "//div[@id='firstname-row']/span[@class='value']").text
         student_last_name = self.driver.find_element(By.XPATH, "//div[@id='lastname-row']/span[@class='value']").text
-        time_zone_selector = Select(self.driver.find_element(By.ID, "theme_change_select"))
+        user_time_zone = self.driver.find_element(By.ID, "time_zone_selector_label").get_attribute('data-user_time_zone')
+        time_zone_selector = Select(self.driver.find_element(By.ID, "time_zone_drop_down"))
         self.assertEqual(self.student_id, student_id)
         self.assertEqual(self.student_first_name, student_first_name)
         self.assertEqual(self.student_last_name, student_last_name)
-        # self.assertEqual(self.user_time_zone, user_time_zone)
-        print(time_zone_selector.first_selected_option.get_attribute('value'))
+        self.assertEqual(user_time_zone, time_zone_selector.first_selected_option.get_attribute('value'))
 
     def test_time_zone_selection(self):
         self.setup_test_start()
@@ -92,6 +92,7 @@ class TestMyProfile(BaseTestCase):
         self.driver.find_element(By.ID, "user-lastname-change").clear()
         self.driver.find_element(By.ID, "user-firstname-change").send_keys(self.student_first_name)
         self.driver.find_element(By.ID, "user-lastname-change").send_keys(self.student_last_name)
+        self.driver.find_element(By.XPATH, "//div[@id='edit-username-form']/form/div/div/div[2]/div[2]/div/input").click()
 
 
     def test_upload_profile_photo(self):
@@ -117,31 +118,43 @@ class TestMyProfile(BaseTestCase):
         # Look for success message
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "success-js-1")))
 
-        # edit form should be out-of-the screen
+        # edit-profile-photo form should be out-of-the screen
         self.assertFalse(self.driver.find_element(By.ID, "edit-profile-photo-form").is_displayed())
 
-        # Assert that names are updated
+        # Assert that image is added and alt-tag value is updated correctly
         alt_tag_val = self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img").get_attribute('alt')
         self.assertTrue(self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img").is_displayed())
         self.assertEqual("{} {}".format(self.student_first_name, self.student_last_name), alt_tag_val)
 
     def test_flagged_profile_photo(self):
         # Login as instructor and go to student photos page
-        self.login(user_id='instructor', user_name='Quinn')
+        self.log_in(user_id='instructor', user_name='Quinn')
         self.click_class("sample", "SAMPLE")
         self.driver.find_element(By.ID, "nav-sidebar-photos").click()
 
-        # find Joe(Student) image to flag
+        # find Joe(Student) image and flag it
+        self.driver.find_element(By.XPATH, "//td[@class='{}-image-container']/div[@class='name']/a".format(self.student_id)).click()
+        WebDriverWait(self.driver, 2).until(EC.alert_is_present(), "You are flagging {}'s preferred image as inappropriate.\nThis should be done if the image is not a recognizable passport style photo.\n\nDo you wish to proceed?".format(self.student_id))
+        # accept the popup
+        self.driver.switch_to.alert.accept()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "success-js-0")))
+        # logout from the submitty
+        self.log_out()
 
         # login as student and go to my-profile page
         self.setup_test_start()
 
         # No image element and just an empty span element stating photo is 'N/A'
-        self.assertFalse()
-        self.assertEquals('N/A', self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/span[@class='center-img-tag']").text)
+        try:
+           self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/img")
+           not_found = False
+        except NoSuchElementException:
+           not_found = True
+        self.assertTrue(not_found)
+        self.assertEqual('N/A', self.driver.find_element(By.XPATH, "//div[@id='user-card-img']/div/span[@class='center-img-tag']").text)
 
         # look for flagged image message
-        self.assertEquals('Your preferred image was flagged as inappropriate.', self.driver.find_element(By.ID, "flagged-message").text)
+        self.assertEqual('Your preferred image was flagged as inappropriate.', self.driver.find_element(By.ID, "flagged-message").text)
 
 if __name__ == "__main__":
     import unittest

@@ -150,7 +150,6 @@ $(document).ready(function() {
                 time_zone
             },
             success: function (response) {
-                console.log(response);
                 // Update page elements if the data was successfully saved server-side
                 if (response.status === 'success') {
                     $('#user_utc_offset').text(response.data.utc_offset);
