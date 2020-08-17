@@ -4,7 +4,10 @@ class ItemWidget extends Widget {
 
         this.dom_pointer;
 
-        this.state = {}
+        this.state = {
+            'type': 'item',
+            'from_pool': []
+        }
     }
 
     render() {
@@ -34,10 +37,18 @@ class ItemWidget extends Widget {
     }
 
     update() {
+        this.commitState();
+        this.dom_pointer.querySelector('.interactive-container').innerHTML = `<p>Updated</p>`;
         console.log('Update method called!');
     }
 
     block() {
+        this.commitState();
+        this.dom_pointer.querySelector('.interactive-container').innerHTML = this.getBlockedTemplate();
         console.log('Block method called!');
+    }
+
+    getBlockedTemplate() {
+        return `<p>All itempool items <i>must</i> have unique, non-blank item names</p>`;
     }
 }
