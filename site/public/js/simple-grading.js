@@ -680,7 +680,7 @@ function setupSimpleGrading(action) {
             event.preventDefault();
             movement("right");
         }
-        else if(event.cpde === "ArrowDown") {
+        else if(event.code === "ArrowDown") {
             event.preventDefault();
             movement("down");
         }
