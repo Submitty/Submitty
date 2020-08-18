@@ -618,6 +618,8 @@ function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
 
   togglePanelLayoutModes(true);
   toggleFullLeftColumnMode(true);
+  initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
+  initializeHorizontalTwoPanelDrag();
   togglePanelSelectorModal(false);
 }
 
@@ -656,7 +658,6 @@ function togglePanelLayoutModes(forceVal = false) {
     updatePanelLayoutModes();
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
-    console.log(taLayoutDet.currentTwoPanels);
     twoPanelCont.addClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
     let topPanel = taLayoutDet.currentTwoPanels.leftTop;
@@ -713,6 +714,7 @@ function togglePanelLayoutModes(forceVal = false) {
           rightBottom: panelElements[2].str,
       };;
     }
+    initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
   }
   else {
