@@ -95,6 +95,14 @@ function toggle() {
     $('[name="version_user_1"]', form).val(data['version_user_2']);
 }
 
+function toggleFullScreenMode() {
+  $('main#main').toggleClass("full-screen-mode");
+}
+
+$(document).ready(() => {
+  initializeResizablePanels('.left-sub-item', '.plag-drag-bar');
+});
+
 function getMatchesListForClick(user_id_1, user_1_version, user_1_match_start) {
     var user_matches = window.si[`${user_1_match_start.line}_${user_1_match_start.ch}`];
     var to_append = '';

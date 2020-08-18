@@ -500,6 +500,10 @@ class Gradeable extends AbstractModel {
                 array_push($bad_rows, ($grading_list[0]));
             }
         }
+        if (count($input) == 0) {
+            $this->core->addErrorMessage("Changes Failed, Not Enough Submissions");
+            return;
+        }
         if (!empty($bad_rows)) {
             $msg = "The given user id is not valid: ";
             array_walk(
