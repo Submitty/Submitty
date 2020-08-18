@@ -1476,7 +1476,7 @@ class Gradeable(object):
             if self.is_repository and 'eg_subdirectory' in gradeable:
                 self.subdirectory = gradeable['eg_subdirectory']
             if 'eg_peer_grading' in gradeable:
-                self.peer_grading = gradeable['eg_peer_grading'] is True
+                self.peer_grading = gradeable['eg_peer_grading']
             if 'eg_peer_grade_set' in gradeable:
                 self.peer_grade_set = gradeable['eg_peer_grade_set']
             if 'eg_peer_grading_pairs' in gradeable:

@@ -354,6 +354,7 @@ class TeamController extends AbstractController {
      */
     public function seekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
+        $message = $this->core->getUser()->getSeekMessage($gradeable_id);
 
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -375,8 +376,62 @@ class TeamController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $this->core->getQueries()->addToSeekingTeam($gradeable_id, $user_id);
+        $this->core->getQueries()->addToSeekingTeam($gradeable_id, $user_id, $message);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
+        $this->core->redirect($return_url);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/message", methods={"POST"})
+     */
+    public function editSeekMessage($gradeable_id) {
+        $user_id = $this->core->getUser()->getId();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
+
+        if (!isset($_POST['seek_message']) || ($_POST['seek_message'] === '')) {
+            $this->core->addErrorMessage("No message specified");
+            $this->core->redirect($return_url);
+        }
+        $message = $_POST['seek_message'];
+
+        $this->core->getQueries()->updateSeekingTeamMessageById($gradeable_id, $user_id, $message);
+        $this->core->addSuccessMessage("Edited seeking team/partner message");
+        $this->core->redirect($return_url);
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/message/remove")
+     */
+    public function removeSeekMessage($gradeable_id) {
+        $user_id = $this->core->getUser()->getId();
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            $this->core->addErrorMessage('Invalid or missing gradeable id!');
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        if (!$gradeable->isTeamAssignment()) {
+            $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
+
+        $this->core->getQueries()->updateSeekingTeamMessageById($gradeable_id, $user_id, null);
+        $this->core->addSuccessMessage("Removed seeking team/partner message");
         $this->core->redirect($return_url);
     }
 

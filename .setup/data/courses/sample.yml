@@ -73,7 +73,9 @@ gradeables:
   g_grade_start_date: 9997-12-31 23:59:59
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
+  
   g_bucket: homework
 
 - g_id: future_no_tas_homework
@@ -272,7 +274,8 @@ gradeables:
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 9997-12-31 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   g_title: Open Peer Homework
   gradeable_config: python_simple_homework
   g_bucket: homework
@@ -543,7 +546,8 @@ gradeables:
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -615,7 +619,8 @@ gradeables:
   g_grade_due_date: 9998-12-31 23:59:59
   g_grade_released_date: 9998-12-31 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
-  eg_regrade_request_date: 9999-01-06 23:59:59
+  eg_grade_inquiry_start_date: 9999-01-01 23:59:59
+  eg_grade_inquiry_due_date: 9999-01-06 23:59:59
   eg_team_assignment: true
   eg_max_team_size: 3
   g_ta_view_start_date: 1970-01-01 23:59:59
@@ -694,6 +699,7 @@ gradeables:
   gradeable_config: pdf_word_count
   g_bucket: homework
   g_grader_assignment_method: 2
+
 
 - g_id: closed_team_homework
   eg_peer_grading: true
