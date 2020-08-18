@@ -121,10 +121,11 @@ $(function () {
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
 
-  document.querySelectorAll('[id^=solution-]').forEach( textarea => {
-    textarea.addEventListener('keydown', function () {
+  // Dynamically resize the textarea height as per the provided content
+  document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
+    textarea.addEventListener('keyup', function () {
       setTimeout(function() {
-        console.log(textarea);
+        textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
       },0);
     });

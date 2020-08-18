@@ -4,7 +4,7 @@
         <span class="grading_label">Solution/TA Notes</span>
     </div>
     {% for component in solution_components %}
-        {{ self.renderSolutionTaNotesCont(
+        {{ self.renderSolutionTaNotesBox(
             gradeable_id,
             component.id,
             component.is_first_edit,
@@ -18,7 +18,7 @@
 </div>
 
 
-{% macro renderSolutionTaNotesCont(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, current_user_id) %}
+{% macro renderSolutionTaNotesBox(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, current_user_id) %}
 
     <div class="solution-box box" id="solution-box-{{ component_id }}" data-first-edit="{% if is_first_edit %} 1 {% else %} 0 {% endif %}">
         <div class="solution-header">

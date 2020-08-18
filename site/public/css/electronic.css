@@ -1329,6 +1329,7 @@ tr.is_publish {
     min-height: 120px;
     max-height: 400px;
     margin-bottom: 10px;
+    resize: none;
 }
 
 /* Media queries */
