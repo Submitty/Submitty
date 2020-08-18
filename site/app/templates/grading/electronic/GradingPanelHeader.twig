@@ -5,6 +5,7 @@
     let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
     let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
 
+    let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
     updateThePanelsElements({
         autograding_results: true,
         grading_rubric: true,
@@ -13,6 +14,7 @@
         regrade_info,
         discussion_browser,
         peer_info,
+        "notebook-view": is_notebook
     });
 </script>
 
@@ -90,6 +92,19 @@
             {{ self.renderPanelPositionSelector('regrade_info') }}
             </span>
         {% endif %}
+        {% if is_notebook %}
+            <span class="grade-panel" id="notebook-view-btn">
+                <button title="Open student's view of their notebook gradeable"
+                        class="invisible-btn"
+                        tabindex="0"
+                >
+                   <i class="fas fa-book-open"></i>
+                   <span>Notebook</span>
+                </button>
+            {{ self.renderPanelPositionSelector('notebook-view') }}
+            </span>
+        {% endif %}
+
     </div>
 </div>
 
