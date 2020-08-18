@@ -141,6 +141,7 @@ class ElectronicGraderController extends AbstractController {
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
         }
         $gradeable->setRandomPeerGradersList($final_grading_info);
+        $gradeable->setPeerGradingSet($number_to_grade);
         return JsonResponse::getSuccessResponse($final_grading_info);
     }
     /**

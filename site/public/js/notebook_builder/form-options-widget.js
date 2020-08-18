@@ -135,25 +135,70 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean} True if validation was successful, false otherwise
      */
     validateFileNames() {
+        // Duplicated filename check
         const duplicated_filenames = this.getDuplicatedFileNames();
-
         duplicated_filenames.forEach(filename => {
             this.appendStatusMessage(`Filename: '${filename}' was found to be duplicated.  All filenames must be unique.`);
-
-            document.querySelectorAll(`.filename-input`).forEach(elem => {
-                if (elem.value === filename) {
-                    elem.style.backgroundColor = this.failed_validation_color;
-                }
-            });
         });
 
-        return duplicated_filenames.size === 0;
+        // Invalid substrings check
+        const illegal_substrings = {
+            '..': '..',
+            '/': '/',
+            ' ': 'spaces',
+        };
+
+        const illegal_filenames = this.getFileNamesWithIllegalSubstrings(Object.keys(illegal_substrings));
+        illegal_filenames.forEach(filename => {
+            this.appendStatusMessage(`Filename: '${filename}' was found to contain illegal substrings. Filenames may not contain ${Object.values(illegal_substrings).join(' or ')}.`);
+        });
+
+        this.colorFailedFileNames(duplicated_filenames.concat(illegal_filenames));
+
+        return duplicated_filenames.length === 0 && illegal_filenames.length === 0;
+    }
+
+    /**
+     * Locate the set of inputs that contain filenames which failed validation and color their background red.
+     *
+     * @param {Array<string>} failed_filenames
+     */
+    colorFailedFileNames(failed_filenames) {
+        document.querySelectorAll(`.filename-input`).forEach(elem => {
+            if (failed_filenames.includes(elem.value)) {
+                elem.style.backgroundColor = this.failed_validation_color;
+            }
+        });
+    }
+
+    /**
+     * Determine if any of the form's filenames contain illegal substrings.
+     *
+     * @param {Array<string>} illegal_substrings An array of substrings filenames must not contain.
+     * @returns {Array<string>} An array of filenames that do contain illegal substrings.
+     */
+    getFileNamesWithIllegalSubstrings(illegal_substrings) {
+        const json = notebook_builder.getJSON();
+
+        const illegal_filenames = new Set();
+
+        json.notebook.forEach(cell => {
+            if (cell.filename) {
+                illegal_substrings.forEach(substring => {
+                    if (cell.filename.includes(substring)) {
+                        illegal_filenames.add(cell.filename);
+                    }
+                });
+            }
+        });
+
+        return Array.from(illegal_filenames);
     }
 
     /**
      * Collects and returns the set of strings which were found to be duplicated in more than one filename input box.
      *
-     * @returns {Set<string>}
+     * @returns {Array<string>}
      */
     getDuplicatedFileNames() {
         const json = notebook_builder.getJSON();
@@ -172,6 +217,6 @@ class FormOptionsWidget extends Widget {
             }
         });
 
-        return duplicated_filenames;
+        return Array.from(duplicated_filenames);
     }
 }

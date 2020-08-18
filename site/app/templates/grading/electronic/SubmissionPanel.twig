@@ -80,7 +80,7 @@
             let directory = "";
             if (url_file.includes("submissions")) {
                 directory = "submissions";
-                url_file = getNonAnonPath(url_file, "{{anon_submitter_id}}", {{user_ids|json_encode|raw}});
+                url_file = url_file;
             }
             else if (url_file.includes("results_public")) {
                 directory = "results_public";
@@ -124,7 +124,7 @@
         var directory = "";
         if (url_file.includes("submissions")) {
             directory = "submissions";
-            url_file = getNonAnonPath(url_file, "{{anon_submitter_id}}", {{user_ids|json_encode|raw}});
+            url_file = url_file;
         }
         else if (url_file.includes("results_public")) {
             directory = "results_public";

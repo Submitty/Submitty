@@ -1066,7 +1066,7 @@ tr.is_publish {
 }
 
 .gradeable .mark-container span.mark-points {
-    width: 60px;
+    width: 80px;
     justify-content: flex-end;
 }
 
