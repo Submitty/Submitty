@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
 use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * Class OfficeHoursQueueController
@@ -516,7 +517,7 @@ class OfficeHoursQueueController extends AbstractController {
             $client = new Client($this->core);
             $client->send($msg_array);
         }
-        catch (\Websocket\ConnectionException $e) {
+        catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, Page won't load dynamically.");
         }
     }
