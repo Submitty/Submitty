@@ -210,7 +210,7 @@ class GradeInquiryController extends AbstractController {
             $grade_inquiry->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
             if ($content != "") {
-                $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
+                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return MultiResponse::JsonOnlyResponse(

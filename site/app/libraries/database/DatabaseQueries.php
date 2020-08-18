@@ -4096,7 +4096,7 @@ AND gc_id IN (
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $regrade_post_id = $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
+            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {

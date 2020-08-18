@@ -139,8 +139,10 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
         // add to grading component
         let component_grade_inquiry = $(".grade-inquiries").children("[data-component_id='" + gc_id + "']");
         last_post = component_grade_inquiry.children('.post_box').last();
-        if (last_post.length == 0) // if no posts
+        if (last_post.length == 0) {
+          // if no posts
           last_post = component_grade_inquiry.children('.grade-inquiry-header-div').last();
+        }
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
         component_grade_inquiry.find("[data-post_id=" + post_id + "]").children('div').first().remove();
       }
