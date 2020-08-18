@@ -196,6 +196,26 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/togglePause", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function setQueuePauseState() {
+        if (empty($_POST['pause_state'])) {
+            $this->core->addErrorMessage("Missing queue position pause state");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->setQueuePauseState($_POST['pause_state'] === 'true');
+        $this->core->addSuccessMessage($_POST['pause_state'] === 'true' ? "Position in queue paused" : "Position in queue unpaused");
+        $this->sendSocketMessage(['type' => 'queue_update']);
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
