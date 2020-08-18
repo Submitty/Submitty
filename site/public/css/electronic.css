@@ -485,7 +485,8 @@ progress::-webkit-progress-value {
     transition: all 0.5s;
 }
 
-.two-panel-drag-bar:hover:after {
+.two-panel-drag-bar:hover:after,
+.panel-item-section-drag-bar:hover:after {
     filter: blur(3px);
 }
 
