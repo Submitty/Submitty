@@ -877,7 +877,8 @@ CREATE TABLE public.sections_rotating (
 
 CREATE TABLE public.seeking_team (
     g_id character varying(255) NOT NULL,
-    user_id character varying NOT NULL
+    user_id character varying NOT NULL,
+    message character varying
 );
 
 
