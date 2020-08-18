@@ -490,7 +490,6 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
-     * @return MultiResponse
      */
     public function showQueueStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
@@ -514,7 +513,6 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods={"GET"})
-     * @return MultiResponse
      */
     public function showNewAnnouncement() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
@@ -537,7 +535,6 @@ class OfficeHoursQueueController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
-     * @return MultiResponse
      */
     public function showQueueStudentStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
