@@ -197,25 +197,29 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  */
 function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict) {
     let gradeable_id = getGradeableId();
-    var custom_mark_req = $.ajax({
-        // Get the TA grading scores	        
-            type: 'GET',       
-            url: buildCourseUrl(['gradeable',gradeable_id, 'getCustomMarksAccess']),
-            dataType: 'html',
-            context: document.body,
-            global: false,
-            async:false,
-            success: function(res) {
-                console.log(res);
-                return res.data;
+    var custom_mark_enabled;
+    var custom_mark_req = new Promise(function (resolve, reject) {
+        $.ajax({url: buildCourseUrl(['gradeable',gradeable_id, 'getCustomMarksAccess']),
+            dataType: "html",
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (err) {
+                reject(err);
             }
-        }).responseText;
-    var custom_mark_obj=JSON.parse(custom_mark_req);
-    var custom_mark_enabled = custom_mark_obj.data;
+        });
+    });
+    custom_mark_req.then(function(res_data){
+        var custom_mark_obj = JSON.parse(res_data);
+        var custom_mark_access = custom_mark_obj.data;
+        custom_mark_enabled = custom_mark_access;
+    },function(err){
+        console.log("An error ocurred");
+        console.log(err);
+    });
     return new Promise(function (resolve, reject) {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
-        
         // TODO: i don't think this is async
         resolve(Twig.twig({ref: "GradingComponent"}).render({
             'component': component,

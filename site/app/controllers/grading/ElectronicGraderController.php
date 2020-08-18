@@ -1945,6 +1945,12 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        // get the user
+        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT){
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions for custom marks');
+            return;
+        }
+        
         // get the mark
         $mark = $this->tryGetMark($component, $mark_id);
         if ($mark === false) {

@@ -73,19 +73,25 @@ AJAX_USE_ASYNC = true;
  *
  */
 let gradeable_id = getGradeableId();
-var custom_mark_req = $.ajax({	        
-                type: 'GET',       
-                url: buildCourseUrl(['gradeable',gradeable_id, 'getCustomMarksAccess']),
-                dataType: 'html',
-                context: document.body,
-                global: false,
-                async:false,
-                success: function(res) {
-                    return res.data;
-                }
-            }).responseText;
-var custom_mark_obj=JSON.parse(custom_mark_req);
-var custom_mark_enabled = custom_mark_obj.data;
+var custom_mark_enabled;
+    var custom_mark_req = new Promise(function (resolve, reject) {
+        $.ajax({url: buildCourseUrl(['gradeable',gradeable_id, 'getCustomMarksAccess']),
+            dataType: "html",
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (err) {
+                reject(err);
+            }
+        });
+    });
+    custom_mark_req.then(function(res_data){
+        var custom_mark_obj = JSON.parse(res_data);
+        var custom_mark_access = custom_mark_obj.data;
+        custom_mark_enabled = custom_mark_access;
+    },function(err){
+        console.log(err);
+    });
 /**
  * Called internally when an ajax function irrecoverably fails before rejecting
  * @param err
