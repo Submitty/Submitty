@@ -12,7 +12,7 @@ class TestNavigationPageStudent(BaseTestCase):
                                 .find_element(By.ID, 'open-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("closed", elements[1].get_attribute('id'))
-        self.assertEqual(3, len(self.driver
+        self.assertEqual(2, len(self.driver
                                 .find_element(By.ID, 'closed-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("items_being_graded", elements[2].get_attribute('id'))
