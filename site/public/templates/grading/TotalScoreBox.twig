@@ -47,7 +47,7 @@ l
                 {% endif %}
             {% else %}
                 {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) %}
-                {% set max_total = ta_grading_total + auto_grading_total %}
+                {% set max_total = ta_grading_total|default(0) + auto_grading_total|default(0) %}
             {% endif %}
         {% endif %}
         <div class="box-title badge-container">
