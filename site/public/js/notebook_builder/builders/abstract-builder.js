@@ -10,16 +10,6 @@ class AbstractBuilder {
 
         this.selector_options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
 
-        const itempoolItemChangeAction = () => {
-            const operation = this.allValidItemNames() ? 'update' : 'block';
-
-            this.reorderable_widgets.forEach(widget => {
-                if (widget.constructor.name === 'ItemWidget') {
-                    operation === 'update' ? widget.update() : widget.block();
-                }
-            });
-        }
-
         // Handle many of the different button clicks that might occur within the notebook builder
         this.attachment_div.onclick = event => {
             if (event.target.getAttribute('type') === 'button') {
@@ -38,7 +28,7 @@ class AbstractBuilder {
                         break;
                     case 'Itempool Item':
                         this.widgetAdd(new ItempoolWidget());
-                        itempoolItemChangeAction();
+                        this.itempoolItemChangeAction();
                         break;
                     case 'Item':
                         this.widgetAdd(new ItemWidget());
@@ -63,7 +53,7 @@ class AbstractBuilder {
         // Handle updating notebook item widgets when itempool item widgets might have changed
         this.attachment_div.addEventListener('focusout', event => {
             if (event.target.classList.contains('item-name-input')) {
-                itempoolItemChangeAction();
+                this.itempoolItemChangeAction();
             }
         });
     }
@@ -95,6 +85,9 @@ class AbstractBuilder {
                 case 'image':
                     widget = new ImageWidget();
                     break;
+                case 'item':
+                    widget = new ItemWidget();
+                    break;
                 default:
                     break;
             }
@@ -102,6 +95,22 @@ class AbstractBuilder {
             if (widget) {
                 widget.load(cell);
                 this.widgetAdd(widget);
+            }
+        });
+    }
+
+    itempoolItemChangeAction() {
+        const operation = this.allValidItemNames() ? 'update' : 'block';
+
+        this.reorderable_widgets.forEach(widget => {
+            if (widget.constructor.name === 'ItemWidget') {
+                if (operation === 'update') {
+                    const interactive_area = widget.dom_pointer.querySelector('.interactive-container');
+                    widget.update(interactive_area);
+                }
+                else {
+                    widget.block();
+                }
             }
         });
     }
@@ -177,12 +186,17 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetRemove(widget) {
-        const widgets_array = widget.constructor.name === 'ItempoolWidget' ? this.itempool_widgets : this.reorderable_widgets;
+        const is_itempool_widget = widget.constructor.name === 'ItempoolWidget';
+        const widgets_array = is_itempool_widget ? this.itempool_widgets : this.reorderable_widgets;
 
         widget.dom_pointer.remove();
 
         const index = widgets_array.indexOf(widget);
         widgets_array.splice(index, 1);
+
+        if (is_itempool_widget) {
+            this.itempoolItemChangeAction();
+        }
     }
 
     /**
@@ -191,7 +205,8 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetUp(widget) {
-        const widgets_array = widget.constructor.name === 'ItempoolWidget' ? this.itempool_widgets : this.reorderable_widgets;
+        const is_itempool_widget = widget.constructor.name === 'ItempoolWidget';
+        const widgets_array = is_itempool_widget ? this.itempool_widgets : this.reorderable_widgets;
 
         const index = widgets_array.indexOf(widget);
 
@@ -205,6 +220,10 @@ class AbstractBuilder {
 
         const elem = widget.dom_pointer;
         elem.parentElement.insertBefore(elem, elem.previousElementSibling);
+
+        if (is_itempool_widget) {
+            this.itempoolItemChangeAction();
+        }
     }
 
     /**
@@ -213,7 +232,8 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetDown(widget) {
-        const widgets_array = widget.constructor.name === 'ItempoolWidget' ? this.itempool_widgets : this.reorderable_widgets;
+        const is_itempool_widget = widget.constructor.name === 'ItempoolWidget';
+        const widgets_array = is_itempool_widget ? this.itempool_widgets : this.reorderable_widgets;
 
         const index = widgets_array.indexOf(widget);
 
@@ -227,5 +247,9 @@ class AbstractBuilder {
 
         const elem = widget.dom_pointer;
         elem.parentElement.insertBefore(elem, elem.nextElementSibling.nextElementSibling);
+
+        if (is_itempool_widget) {
+            this.itempoolItemChangeAction();
+        }
     }
 }

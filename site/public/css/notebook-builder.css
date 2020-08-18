@@ -215,7 +215,7 @@
 }
 
 /**
- * Itempool widget styles
+ * Itempool item widget styles
  */
 .itempool-widget,
 .itempool-selector {
@@ -253,3 +253,23 @@
     flex-direction: row;
 }
 
+/**
+ * Notebook item widget styles
+ */
+.item-widget .interactive-container {
+    flex-direction: column;
+}
+
+.item-widget .item-options {
+    display: flex;
+    justify-content: space-between;
+}
+
+.item-widget p {
+    margin: 10px 0;
+}
+
+.item-widget .from-pool-div label {
+    float: left;
+    clear: both;
+}

@@ -135,8 +135,11 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean} True if validation was successful, false otherwise
      */
     validateFileNames() {
+        const filename_inputs = Array.from(document.querySelectorAll('.filename-input'));
+        const filenames = filename_inputs.map(input => input.value);
+
         // Duplicated filename check
-        const duplicated_filenames = this.getDuplicatedFileNames();
+        const duplicated_filenames = this.getDuplicatedFileNames(filenames);
         duplicated_filenames.forEach(filename => {
             this.appendStatusMessage(`Filename: '${filename}' was found to be duplicated.  All filenames must be unique.`);
         });
@@ -148,7 +151,7 @@ class FormOptionsWidget extends Widget {
             ' ': 'spaces',
         };
 
-        const illegal_filenames = this.getFileNamesWithIllegalSubstrings(Object.keys(illegal_substrings));
+        const illegal_filenames = this.getFileNamesWithIllegalSubstrings(filenames, Object.keys(illegal_substrings));
         illegal_filenames.forEach(filename => {
             this.appendStatusMessage(`Filename: '${filename}' was found to contain illegal substrings. Filenames may not contain ${Object.values(illegal_substrings).join(' or ')}.`);
         });
@@ -174,22 +177,19 @@ class FormOptionsWidget extends Widget {
     /**
      * Determine if any of the form's filenames contain illegal substrings.
      *
-     * @param {Array<string>} illegal_substrings An array of substrings filenames must not contain.
-     * @returns {Array<string>} An array of filenames that do contain illegal substrings.
+     * @param {String[]} filenames Array of all the filenames found in filename inputs
+     * @param {String[]} illegal_substrings An array of substrings filenames must not contain.
+     * @returns {String[]} An array of filenames that do contain illegal substrings.
      */
-    getFileNamesWithIllegalSubstrings(illegal_substrings) {
-        const json = notebook_builder.getJSON();
-
+    getFileNamesWithIllegalSubstrings(filenames, illegal_substrings) {
         const illegal_filenames = new Set();
 
-        json.notebook.forEach(cell => {
-            if (cell.filename) {
-                illegal_substrings.forEach(substring => {
-                    if (cell.filename.includes(substring)) {
-                        illegal_filenames.add(cell.filename);
-                    }
-                });
-            }
+        filenames.forEach(filename => {
+            illegal_substrings.forEach(substring => {
+                if (filename.includes(substring)) {
+                    illegal_filenames.add(filename);
+                }
+            });
         });
 
         return Array.from(illegal_filenames);
@@ -198,23 +198,15 @@ class FormOptionsWidget extends Widget {
     /**
      * Collects and returns the set of strings which were found to be duplicated in more than one filename input box.
      *
-     * @returns {Array<string>}
+     * @param {String[]} filenames Array of all the filenames found in filename inputs
+     * @returns {String[]}
      */
-    getDuplicatedFileNames() {
-        const json = notebook_builder.getJSON();
-
-        const filenames = [];
+    getDuplicatedFileNames(filenames) {
+        const used_filenames = new Set();
         const duplicated_filenames = new Set();
 
-        json.notebook.forEach(cell => {
-            if (cell.filename) {
-                if (filenames.includes(cell.filename)) {
-                    duplicated_filenames.add(cell.filename);
-                }
-                else {
-                    filenames.push(cell.filename);
-                }
-            }
+        filenames.forEach(filename => {
+            !used_filenames.has(filename) ? used_filenames.add(filename) : duplicated_filenames.add(filename);
         });
 
         return Array.from(duplicated_filenames);

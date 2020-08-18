@@ -19,6 +19,7 @@ class ItempoolWidget extends Widget {
         item_name_div.innerHTML = this.getTemplate();
 
         const heading_area = container.querySelector('.heading-container');
+        heading_area.innerHTML = '';
         heading_area.appendChild(item_name_div)
 
         // Setup interactive area
@@ -44,11 +45,10 @@ class ItempoolWidget extends Widget {
         const cell = {};
 
         const item_name = this.dom_pointer.querySelector('.item-name-input').value;
-        const notebook = this.builder.getJSON();
 
-        if (item_name && notebook.length > 0) {
+        if (item_name) {
             cell.item_name = item_name;
-            cell.notebook = notebook;
+            cell.notebook = this.builder.getJSON();
         }
 
         return cell;
