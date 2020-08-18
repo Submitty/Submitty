@@ -21,7 +21,6 @@ use app\libraries\Utils;
 use app\models\notebook\AbstractNotebookInput;
 use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\SubmissionMultipleChoice;
-use app\models\notebook\SubmissionTextBox;
 
 class HomeworkView extends AbstractView {
 
@@ -319,8 +318,11 @@ class HomeworkView extends AbstractView {
                     ]
                 );
             }
-            $h = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
-            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions($h, $notebook);
+            $notebook_data = $notebook_model->getMostRecentNotebookSubmissions(
+                $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                $notebook,
+                $this->core->getUser()->getId()
+            );
             $notebook_inputs = $notebook_model->getInputs();
             $image_data = $notebook_model->getImagePaths();
             $notebook_file_submissions = $notebook_model->getFileSubmissions();
@@ -1178,6 +1180,7 @@ class HomeworkView extends AbstractView {
             'g_id' => $graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
+            'is_inquiry_yet_to_start' => $graded_gradeable->getGradeable()->isGradeInquiryYetToStart(),
             'is_inquiry_open' => $is_inquiry_open,
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
