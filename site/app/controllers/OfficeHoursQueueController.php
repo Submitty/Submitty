@@ -510,6 +510,10 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array $msg_array
+     */
     private function sendSocketMessage($msg_array) {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $msg_array['page'] = $this->core->getConfig()->getCourse() . "-office_hours_queue";
@@ -518,7 +522,7 @@ class OfficeHoursQueueController extends AbstractController {
             $client->send($msg_array);
         }
         catch (WebSocket\ConnectionException $e) {
-            $this->core->addNoticeMessage("WebSocket Server is down, Page won't load dynamically.");
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
     }
 }
