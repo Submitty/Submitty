@@ -393,9 +393,14 @@ HTML;
         if ($peer || $anon_mode) {
             $columns[]         = ["width" => "5%",  "title" => "",                 "function" => "index"];
             if ($gradeable->isTeamAssignment()) {
-                $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
+                if ($gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+                    $columns[] = ["width" => "30%", "title" => "Team Members",     "function" => "team_members_anon"];
+                }
+                else {
+                    $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
+                }
             }
-            elseif ($gradeable->getPeerBlind() !== 3) {
+            elseif ($gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                 $columns[]         = ["width" => "30%", "title" => "Student",          "function" => "user_id"];
             }
             else {
@@ -406,7 +411,7 @@ HTML;
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
-                if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== 3) {
+                if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
                 }
                 else {
@@ -416,7 +421,7 @@ HTML;
                 $columns[]     = ["width" => "15%", "title" => "Active Version",   "function" => "active_version"];
             }
             else {
-                if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== 3) {
+                if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
                 }
                 else {

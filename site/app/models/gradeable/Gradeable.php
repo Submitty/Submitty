@@ -95,6 +95,15 @@ class Gradeable extends AbstractModel {
     const ROTATING_SECTION = 0;
     const REGISTRATION_SECTION = 1;
     const ALL_ACCESS = 2;
+    
+    /**
+     * Enum range for blind and unblind grading:
+     * 1 is unblind, 2 is single blind, 3 is double blind
+    */
+
+    const UNBLIND_GRADING = 1;
+    const SINGLE_BLIND_GRADING = 2;
+    const DOUBLE_BLIND_GRADING = 3;
 
     /* Properties for all types of gradeables */
 

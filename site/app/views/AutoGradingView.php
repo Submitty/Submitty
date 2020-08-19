@@ -566,7 +566,7 @@ class AutoGradingView extends AbstractView {
         foreach ($unique_graders as $grader_id) {
             $num_peers += 1;
             $alias = "Peer " . $num_peers;
-            if ($gradeable->getPeerBlind() == 1) {
+            if ($gradeable->getPeerBlind() == Gradeable::UNBLIND_GRADING) {
                 $peer_aliases[$grader_id] = $grader_id;
             }
             else {

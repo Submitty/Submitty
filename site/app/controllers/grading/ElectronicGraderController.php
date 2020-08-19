@@ -1065,6 +1065,23 @@ class ElectronicGraderController extends AbstractController {
 
         $this->core->redirect($return_url);
     }
+    
+    /**
+    * Given a gradeable, the logged in user, and if the logged in user is a peer
+    * determine if the user should be single, double, or unblind grading
+    */
+    
+    private function amIBlindGrading($gradeable, $user, $peer){
+        if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
+            return "double";
+        }
+        
+        if (($peer && $gradeable->getPeerBlind() === Gradeable::SINGLE_BLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER)) {
+            return "single";
+        }
+        
+        return "unblind";
+    }
 
     /**
      * Display the electronic grading page
@@ -1081,7 +1098,6 @@ class ElectronicGraderController extends AbstractController {
      */
     public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1", $anon_mode = false, $version = null) {
         $showNewInterface = isset($version);
-        $anon_mode = false;
         if (empty($this->core->getQueries()->getTeamsById([$who_id])) && $this->core->getQueries()->getUserById($who_id) == null) {
             $anon_mode = true;
         }
@@ -1098,16 +1114,8 @@ class ElectronicGraderController extends AbstractController {
             $peer = true;
         }
         
-        $peer_double_blind = false;
-        if ($peer && $gradeable->getPeerBlind() == 3) {
-            $peer_double_blind = true;
-        }
+        $blind_grading = $this->amIBlindGrading($gradeable, $this->core->getUser(), $peer);
         
-        $limited_access_blind = false;
-        
-        if ($gradeable->getLimitedAccessBlind() == 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER) {
-            $limited_access_blind = true;
-        }
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         $order_all_sections = null;
@@ -1125,7 +1133,7 @@ class ElectronicGraderController extends AbstractController {
             // Get the graded gradeable for the $from user
             $from_graded_gradeable = false;
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from);
-            if ($peer_double_blind || $limited_access_blind || $anon_mode) {
+            if ($blind_grading !== "unblind" || $anon_mode) {
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
             else {
@@ -1171,7 +1179,7 @@ class ElectronicGraderController extends AbstractController {
             // Reassign who_id
             if (!is_null($goToStudent)) {
                 $who_id = $goToStudent->getId();
-                if (($peer_double_blind || $limited_access_blind || $anon_mode)) {
+                if ($blind_grading || $anon_mode) {
                     $who_id = $goToStudent->getAnonId();
                 }
             }
@@ -1179,7 +1187,7 @@ class ElectronicGraderController extends AbstractController {
         // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = false;
         $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($who_id);
-        if (($peer_double_blind || $limited_access_blind || $anon_mode)) {
+        if ($blind_grading || $anon_mode) {
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
         }
         else {
