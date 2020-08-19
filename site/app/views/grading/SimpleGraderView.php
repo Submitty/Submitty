@@ -17,9 +17,10 @@ class SimpleGraderView extends AbstractView {
      * @param array $graders
      * @param string $section_type
      * @param bool $show_all_sections_button
+     * @param User $current_user
      * @return string
      */
-    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button, $sort) {
+    public function simpleDisplay($gradeable, $graded_gradeables, $student_full, $graders, $section_type, $show_all_sections_button, $sort, $current_user) {
         $action = ($gradeable->getType() === 1) ? 'lab' : 'numeric';
 
         // Default is viewing your sections sorted by id
@@ -94,7 +95,8 @@ class SimpleGraderView extends AbstractView {
             "component_ids" => $component_ids,
             "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
             "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']),
-            "gradeable_url" => $gradeable->getInstructionsUrl()
+            "gradeable_url" => $gradeable->getInstructionsUrl(),
+            "user_id" => $current_user->getId()
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [

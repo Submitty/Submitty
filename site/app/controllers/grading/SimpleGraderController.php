@@ -172,6 +172,8 @@ class SimpleGraderController extends AbstractController {
             $graders[$section->getName()] = $section->getGraders();
         }
 
+        $grader = $this->core->getUser();
+
         $rows = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids, null, [$section_key, $sort_key]);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -183,7 +185,8 @@ class SimpleGraderController extends AbstractController {
                 $graders,
                 $section_key,
                 $show_all_sections_button,
-                $sort
+                $sort,
+                $grader
             )
         );
     }

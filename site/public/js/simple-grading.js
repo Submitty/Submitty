@@ -196,6 +196,9 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
             else elem.css("background-color", "");
 
+            //set new grader data
+            elem.data("grader", $('#data-table').data('current-grader'));
+
             // create border we can animate to reflect ajax status
             elem.css("border-right", "60px solid #ddd");
         }
@@ -228,8 +231,10 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem = $(elem);
                     elem.animate({"border-right-width": "0px"}, 400); // animate the box
                     elem.attr("data-score", elem.data("score"));      // update the score
+                    elem.attr("data-grader", elem.data("grader"));    // update new grader
+                    elem.find('.simple-grade-grader').text(elem.data("grader"));
                 });
-                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id"), 'score':elems.data('score')});
+                window.socketClient.send({'type': "update_checkpoint", 'elem': elems.attr("id"), 'score':elems.data('score'), 'grader': elems.data('grader')});
             } else {
                 console.log("Save error: returned data:", returned_vals, "does not match expected new data:", expected_vals);
                 elems.each(function(idx, elem) {
@@ -831,37 +836,12 @@ function setupSimpleGrading(action) {
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
-    let elem = $('#' + msg.elem);
     switch (msg.type) {
       case "update_checkpoint":
-        elem.data('score', msg.score);
-        elem.attr("data-score", msg.score);
-        switch (msg.score) {
-          case 1.0:
-            elem.css("background-color", "#149bdf");
-            break;
-          case 0.5:
-            elem.css("background-color", "#88d0f4")
-            break;
-          default:
-            elem.css("background-color", "")
-        }
-        elem.css("border-right", "60px solid #ddd");
-        elem.animate({"border-right-width": "0px"}, 400);
+        checkpointSocketHandler(msg.elem, msg.score, msg.grader);
         break;
       case "update_numeric":
-        elem.data('origval', msg.value);
-        elem.attr('data-origval', msg.value);
-        elem.val(msg.value);
-        elem.css("background-color", "white");
-        if(msg.value == 0) {
-          elem.css("color", "#bbbbbb");
-        }
-        else{
-          elem.css("color", "");
-        }
-        if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != msg.total)
-          elem.parent().siblings('.option-small-output').children('.cell-total').text(msg.total).hide().fadeIn("slow");
+        numericSocketHandler(msg.elem, msg.value, msg.total)
         break;
       default:
         console.log('Undefined message received');
@@ -869,4 +849,41 @@ function initSocketClient() {
   };
   let gradeable_id = window.location.pathname.split("gradeable/")[1].split('/')[0];
   window.socketClient.open(gradeable_id);
+}
+
+function checkpointSocketHandler(elem_id, score, grader) {
+  let elem = $('#' + elem_id);
+  elem.data('score', score);
+  elem.attr("data-score", score);
+  elem.data('grader', grader);
+  elem.attr("data-grader", grader);
+  elem.find('.simple-grade-grader').text(grader);
+  switch (score) {
+    case 1.0:
+      elem.css("background-color", "#149bdf");
+      break;
+    case 0.5:
+      elem.css("background-color", "#88d0f4")
+      break;
+    default:
+      elem.css("background-color", "")
+  }
+  elem.css("border-right", "60px solid #ddd");
+  elem.animate({"border-right-width": "0px"}, 400);
+}
+
+function numericSocketHandler(elem_id, value, total) {
+  let elem = $('#' + elem_id);
+  elem.data('origval', value);
+  elem.attr('data-origval', value);
+  elem.val(value);
+  elem.css("background-color", "white");
+  if(value == 0) {
+    elem.css("color", "#bbbbbb");
+  }
+  else{
+    elem.css("color", "");
+  }
+  if (elem.parent().siblings('.option-small-output').children('.cell-total').text() != total)
+    elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn("slow");
 }
