@@ -193,7 +193,7 @@ class AdminGradeableController extends AbstractController {
         // loop through the notebook key, and find from_pool key in each object (or question)
         foreach ($notebook_config as $key => $item) {
             // store those question which are having count(from_pool array) > 1
-            if (isset($item['from_pool']) && count($item['from_pool'])) {
+            if (isset($item['from_pool']) && count($item['from_pool']) > 1) {
                 $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
                 if (!isset($itempool_options[$item_id])) {
                     $itempool_options[$item_id] = $item['from_pool'];

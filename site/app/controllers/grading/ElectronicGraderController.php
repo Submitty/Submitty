@@ -2563,7 +2563,7 @@ class ElectronicGraderController extends AbstractController {
             $result_rows = $this->core->getQueries()->getSolutionForAllComponentIds($gradeable->getId());
 
             foreach ($result_rows as $row) {
-                foreach( $row as $values) {
+                foreach ($row as $values) {
                     // itempool_name === '' indicates that the component is not linked with the itempool
                     if (empty($values['itempool_name']) || $submitter_itempool_map[$values['itempool_name']] === $values['itempool_item']) {
                         $solutions[$values['component_id']] = $values;
