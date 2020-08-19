@@ -1280,7 +1280,6 @@ HTML;
                 'is_itempool_linked' => $value->getIsItempoolLinked(),
                 'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
             ];
-
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
             'gradeable_id' => $gradeable->getId(),

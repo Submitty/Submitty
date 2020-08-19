@@ -2522,7 +2522,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * @param Gradeable $gradeable
      * @param string $who_id
-     * @param array
+     * @return array
      */
     protected function getItempoolMapForSubmitter($gradeable, $who_id) {
         $user_item_map = [];
@@ -2536,10 +2536,10 @@ class ElectronicGraderController extends AbstractController {
         )->getHashes();
         $que_idx = 0;
         // loop through the notebook key, and find from_pool key in each object (or question)
-        foreach($notebook_config as $key => $item) {
+        foreach ($notebook_config as $key => $item) {
             // store those question which are having count(from_pool array) > 1
             if (isset($item['type']) && $item['type'] === 'item') {
-                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item" ;
+                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
                 $item_id = isset($user_item_map[$item_id]) ? $item_id . '_' . $key : $item_id;
                 $selected_idx = $item["user_item_map"][$who_id] ?? null;
                 if (is_null($selected_idx)) {
@@ -2563,7 +2563,7 @@ class ElectronicGraderController extends AbstractController {
             $result_rows = $this->core->getQueries()->getSolutionForAllComponentIds($gradeable->getId());
 
             foreach ($result_rows as $row) {
-                foreach($row as $values) {
+                foreach( $row as $values) {
                     // itempool_name === '' indicates that the component is not linked with the itempool
                     if (empty($values['itempool_name']) || $submitter_itempool_map[$values['itempool_name']] === $values['itempool_item']) {
                         $solutions[$values['component_id']] = $values;
@@ -2598,11 +2598,12 @@ class ElectronicGraderController extends AbstractController {
         elseif (empty($solution_text)) {
             $error = "Please provide some non-empty solution";
         }
-        //Itempool must be non-empty when component is linked with the itempool
         elseif ($componentItempoolInfo['is_linked'] && empty($itempool_item)) {
+            //Itempool must be non-empty when component is linked with the itempool
             $error = 'This component expects only non-empty itempool-item!';
         }
-        elseif (!$componentItempoolInfo['is_linked'] && !empty($itempool_item)) { // Itempool item passed when the component is not linked with itempool
+        elseif (!$componentItempoolInfo['is_linked'] && !empty($itempool_item)) {
+            // Itempool item passed when the component is not linked with itempool
             $error = 'This Component expects only non-empty itempool-item!' . json_encode($componentItempoolInfo) . $itempool_item;
         }
         else {
