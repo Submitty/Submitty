@@ -5,7 +5,7 @@
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}">
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}">
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
