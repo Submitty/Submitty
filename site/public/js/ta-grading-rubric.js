@@ -183,7 +183,6 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
                     reject(new Error(response.message));
                 }
                 else {
-                    console.log("ajaxGetComponentRubric", response.data);
                     resolve(response.data)
                 }
             },
