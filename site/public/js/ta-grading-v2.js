@@ -16,6 +16,7 @@ let panelElements = [
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
   { str: "regrade_info", icon: ".grading_toolbar .grade_inquiry_icon"},
+  { str: "notebook-view", icon: ".grading_toolbar .fas fa-book-open"}
 ];
 
 // Tracks the layout of TA grading page
@@ -47,6 +48,7 @@ function updateThePanelsElements(panelsAvailabilityObj) {
   panelElements = panelElements.filter((panel) => {
     return !!panelsAvailabilityObj[panel.str];
   });
+
 }
 
 $(function () {
@@ -73,7 +75,7 @@ $(function () {
     let panelSpanId = $(this).parent().attr('id');
     let position = $(this).val();
     if (panelSpanId) {
-      const panelId = panelSpanId.split('_btn')[0];
+      const panelId = panelSpanId.split(/(_|-)btn/)[0]; 
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
     }
@@ -83,15 +85,16 @@ $(function () {
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
     let panelSpanId = btnCont.attr('id');
-    const panelId = panelSpanId.split('_btn')[0];
-    const selectEle =  $('select#' + panelId + '_select');
-
-    // Hide all select dropdown except the current one
-    $('select.panel-position-cont').not(selectEle).hide();
 
     if (!panelSpanId) {
       return;
     }
+
+    const panelId = panelSpanId.split(/(_|-)btn/)[0];
+    const selectEle =  $('select#' + panelId + '_select');
+    // Hide all select dropdown except the current one
+    $('select.panel-position-cont').not(selectEle).hide();
+
     const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
     // If panel is not in-view and two-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it
@@ -330,6 +333,24 @@ function updateCookies(){
 
 //-----------------------------------------------------------------------------
 // Student navigation
+function gotoMainPage() {
+
+  let window_location = $("#main-page")[0].dataset.href
+
+  if (getGradeableId() !== '') {
+    closeAllComponents(true).then(function () {
+      window.location = window_location;
+    }).catch(function () {
+      if (confirm("Could not save open component, go to main page anyway?")) {
+        window.location = window_location;
+      }
+    });
+  }
+  else {
+    window.location = window_location;
+  }
+}
+
 function gotoPrevStudent(to_ungraded = false) {
 
   let selector;
@@ -466,25 +487,29 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
 // Keep only those panels which are part of the two panel layout
 function setTwoPanelModeVisibilities () {
     panelElements.forEach((panel) => {
+      let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
+
       if (taLayoutDet.currentTwoPanels.left === panel.str || taLayoutDet.currentTwoPanels.right === panel.str) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
-        $("#" + panel.str + "_btn").toggleClass('active', true);
+        $(id_str).toggleClass('active', true);
       } else {
         $("#" + panel.str).toggle(false);
         $(panel.icon).toggleClass('icon-selected', false);
-        $("#" + panel.str + "_btn").toggleClass('active', false);
+        $(id_str).toggleClass('active', false);
       }
     });
 }
 
 function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
+    let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
+
     if (panel.str === ele) {
       const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
-      $("#" + panel.str + "_btn").toggleClass('active', eleVisibility);
+      $(id_str).toggleClass('active', eleVisibility);
 
       if (taLayoutDet.isTwoPanelsEnabled && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
@@ -498,7 +523,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
-      $("#" + panel.str + "_btn").removeClass('active');
+      $(id_str).removeClass('active');
     }
   });
   // update the two-panels-layout if it's enabled
@@ -931,4 +956,54 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
   });
 
   return stored_paths;
+}
+
+// Returns Non anonymized path for the submitted files by student
+function getNonAnonPath(path, anon_submitter_id, user_ids){
+  let nonAnonPath = "";
+  let pathPieces = path.split("/");
+  for (i = 1; i < pathPieces.length; i++) {
+    // for non-anonymized-file-path, get the user-name from anon_submitter_id (if anonymized)
+    if(i === 9){
+      nonAnonPath += "/" + user_ids[anon_submitter_id];
+    }
+    else{
+      nonAnonPath += "/" + pathPieces[i];
+    }
+  }
+  return nonAnonPath;
+}
+
+function changeCurrentPeer(){
+  let peer = $('#edit-peer-select').val();
+  $('.edit-peer-components-block').hide();
+  $('#edit-peer-components-form-'+peer).show();
+}
+
+function clearPeerMarks(submitter_id, gradeable_id, csrf_token){
+  let peer_id = $("#edit-peer-select").val();
+  let url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'clear_peer_marks']);
+  $.ajax({
+    url,
+    data: {
+      csrf_token,
+      peer_id,
+      submitter_id
+    },
+    type: "POST",
+    success: function(data) {
+      console.log("Successfully deleted peer marks");
+      window.location.reload(true);
+    },
+    error: function(e) {
+      console.log("Failed to delete");
+    }
+  });
+}
+
+function newEditPeerComponentsForm() {
+  $('.popup-form').css('display', 'none');
+  let form = $("#edit-peer-components-form");
+  form.css("display", "block");
+  captureTabInModal("edit-peer-components-form");
 }

@@ -75,6 +75,12 @@ class NotebookBuilder {
 
         const widgets_div = document.getElementById('reorderable-widgets');
         widgets_div.appendChild(widget.render());
+
+        // Codemirror boxes inside the ShortAnswerWidget require special handling
+        // Codeboxes won't render correctly unless refreshed AFTER appended to the dom
+        if (widget.constructor.name === 'ShortAnswerWidget') {
+            widget.codeMirrorRefresh();
+        }
     }
 
     /**

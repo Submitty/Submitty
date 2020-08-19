@@ -1,6 +1,14 @@
 <label for="point_precision_id">Point precision:</label>
-<input type="text" id="point_precision_id" name="precision" onchange="onPrecisionChange()" value="{{ gradeable.getPrecision() }}" class="ignore" />
-
+<select id = "point_precision_id" name="precision" onchange = "onPrecisionChange()">
+  <option value="0.01" {{ gradeable.getPrecision() == 0.01 ? 'selected' : '' }}>0.01</option>
+  <option value="0.05" {{ gradeable.getPrecision() == 0.05 ? 'selected' : '' }}>0.05</option>
+  <option value="0.1" {{ gradeable.getPrecision() == 0.1 ? 'selected' : '' }}>0.1</option>
+  <option value="0.25" {{ gradeable.getPrecision() == 0.25 ? 'selected' : '' }}>0.25</option>
+  <option value="0.5" {{ gradeable.getPrecision() == 0.5 ? 'selected' : '' }}>0.5</option>
+  <option value="1" {{ gradeable.getPrecision() == 1 ? 'selected' : '' }}>1</option>
+  <option value="5" {{ gradeable.getPrecision() == 5 ? 'selected' : '' }}>5</option>
+  <option value="10" {{ gradeable.getPrecision() == 10 ? 'selected' : '' }}>10</option>
+</select>
 <div class="electronic_file ignore" id="gradeable_rubric">
     <fieldset>
         <legend>
@@ -35,11 +43,11 @@
                 $('body').on('DOMSubtreeModified', '.component-container', function() {
                     let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
                     if (yesPeer) {
-                        $('#page_5_nav').show();
-                        $('#page_5_nav').removeClass("hidden_no_peers");
+                        $('#page_4_nav').show();
+                        $('#page_4_nav').removeClass("hidden-no-peers");
                     } else {
-                        $('#page_5_nav').hide();
-                        $('#page_5_nav').addClass("hidden_no_peers");
+                        $('#page_4_nav').hide();
+                        $('#page_4_nav').addClass("hidden-no-peers");
                     }
                 });
             });
