@@ -111,7 +111,7 @@ class GlobalController extends AbstractController {
             "title" => "Gradeables",
             "class" => "nav-row",
             "id" => "nav-sidebar-submitty",
-            "icon" => "fa-star"
+            "icon" => "fas fa-star"
          ]);
 
         if ($unread_notifications_count !== null) {
@@ -416,10 +416,10 @@ class GlobalController extends AbstractController {
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(['superuser', 'gradeables']),
-                "title" => "Gradeables",
+                "title" => "Pending Gradeables",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-submitty",
-                "icon" => "fa-star"
+                "icon" => "fas fa-clock"
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
