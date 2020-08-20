@@ -130,6 +130,6 @@ class ItemWidget extends Widget {
      * @returns {string}
      */
     getBlockedTemplate() {
-        return `<p>All itempool items <i>must</i> have unique, non-blank item names.</p>`;
+        return `<p>To setup this item, ensure there is at least one itempool item, and all itempool items have unique and non-blank item names.</p>`;
     }
 }

@@ -28,7 +28,6 @@ class AbstractBuilder {
                         break;
                     case 'Itempool Item':
                         this.widgetAdd(new ItempoolWidget());
-                        this.itempoolItemChangeAction();
                         break;
                     case 'Item':
                         this.widgetAdd(new ItemWidget());
@@ -105,7 +104,7 @@ class AbstractBuilder {
     itempoolItemChangeAction() {
         this.reorderable_widgets.forEach(widget => {
             if (widget.constructor.name === 'ItemWidget') {
-                if (getBadItemNames().length === 0) {
+                if (getBadItemNames().length === 0 && this.itempool_widgets.length > 0) {
                     const interactive_area = widget.dom_pointer.querySelector('.interactive-container');
                     widget.update(interactive_area);
                 }
@@ -138,10 +137,12 @@ class AbstractBuilder {
      * @param {Widget} widget
      */
     widgetAdd(widget) {
+        const widget_type = widget.constructor.name;
+
         let widgets_array;
         let widgets_div;
 
-        if (widget.constructor.name === 'ItempoolWidget') {
+        if (widget_type === 'ItempoolWidget') {
             widgets_array = this.itempool_widgets;
             widgets_div = this.itempool_div;
         }
@@ -159,7 +160,7 @@ class AbstractBuilder {
             codebox.CodeMirror.refresh();
         }
 
-        if (widget.constructor.name === 'ItemWidget') {
+        if (widget_type === 'ItemWidget' || widget_type === 'ItempoolWidget') {
             this.itempoolItemChangeAction();
         }
     }

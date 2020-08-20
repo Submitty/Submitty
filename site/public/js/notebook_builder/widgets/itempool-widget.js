@@ -14,7 +14,7 @@ class ItempoolWidget extends Widget {
         const container = this.getContainer('Itempool Item');
         container.classList.add('itempool-widget');
 
-        // Add item_name field input field to heading area
+        // Modify default heading area
         const item_name_div = document.createElement('div');
         item_name_div.innerHTML = this.getTemplate();
 
