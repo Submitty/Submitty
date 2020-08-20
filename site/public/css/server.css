@@ -2063,3 +2063,26 @@ header > * {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+  .custom-file-input::-webkit-file-upload-button {
+    visibility: hidden;
+  }
+  .custom-file-input::before {
+    content: 'Select CSV';
+    display: inline-block;
+    background:var(--actionable-blue);
+    border: 1px var(--actionable-blue);
+    border-radius: 3px;
+    color:white;
+    padding: 5px 8px;
+    outline: none;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    cursor: pointer;
+    font-size: 10pt;
+  }
+  .custom-file-input:hover::before {
+    border-color: white;
+  }
+  .custom-file-input:active::before {
+    background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+  }

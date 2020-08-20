@@ -1075,7 +1075,7 @@ WHERE semester=? AND course=? AND user_id=?",
         );
         return $this->course_db->row();
     }
-    
+
     public function getSolutionForComponentId($g_id, $component_id) {
         // check if the itempool is linked
         $itempool = $this->componentItempoolInfo($g_id, $component_id);
@@ -2820,13 +2820,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
 
     /**
-     * Add ($g_id,$user_id) pair to table seeking_team
+     * Add ($g_id,$user_id, $message) to table seeking_team
      *
      * @param string $g_id
      * @param string $user_id
+     * @param string $message
      */
-    public function addToSeekingTeam($g_id, $user_id) {
-        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id) VALUES (?,?)", [$g_id, $user_id]);
+    public function addToSeekingTeam($g_id, $user_id, $message) {
+        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id, message) VALUES (?,?,?)", [$g_id, $user_id, $message]);
     }
 
     /**
@@ -2837,6 +2838,35 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function removeFromSeekingTeam($g_id, $user_id) {
         $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", [$g_id, $user_id]);
+    }
+
+    /**
+     * Edit the user's message from table seeking_team
+     *
+     * @param string $g_id
+     * @param string $user_id
+     * @param string $message
+     */
+    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+        $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
+    }
+
+    /**
+     * Get the user's message from table seeking_team
+     *
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function getSeekMessageByUserId($g_id, $user_id) {
+        $this->course_db->query(
+            "SELECT message
+          FROM seeking_team
+          WHERE g_id=?
+          AND user_id=?",
+            [$g_id, $user_id]
+        );
+
+        return $this->course_db->rows()[0]['message'];
     }
 
     /**
@@ -4109,7 +4139,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return $this->submitty_db->row()['is_instructor'];
+        return count($this->submitty_db->rows()) >= 1 &&
+            $this->submitty_db->row()['is_instructor'];
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
@@ -4253,7 +4284,8 @@ AND gc_id IN (
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,
-                  eg_regrade_request_date AS regrade_request_date,
+                  eg_grade_inquiry_start_date AS grade_inquiry_start_date,
+                  eg_grade_inquiry_due_date AS grade_inquiry_due_date,
                   eg_regrade_allowed AS regrade_allowed,
                   eg_grade_inquiry_per_component_allowed AS grade_inquiry_per_component_allowed,
                   eg_thread_ids AS discussion_thread_ids,
@@ -4930,7 +4962,8 @@ AND gc_id IN (
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
                 $gradeable->getPrecision(),
-                DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
+                DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isRegradeAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
@@ -4958,13 +4991,14 @@ AND gc_id IN (
                   eg_late_days,
                   eg_allow_late_submission,
                   eg_precision,
-                  eg_regrade_request_date,
+                  eg_grade_inquiry_start_date,
+                  eg_grade_inquiry_due_date,
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
                   eg_has_discussion
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }
@@ -5074,7 +5108,8 @@ AND gc_id IN (
                     $gradeable->getLateDays(),
                     $gradeable->isLateSubmissionAllowed(),
                     $gradeable->getPrecision(),
-                    DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
+                    DateUtils::dateTimeToString($gradeable->getGradeInquiryStartDate()),
+                    DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isRegradeAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
@@ -5102,7 +5137,8 @@ AND gc_id IN (
                       eg_late_days=?,
                       eg_allow_late_submission=?,
                       eg_precision=?,
-                      eg_regrade_request_date=?,
+                      eg_grade_inquiry_start_date=?,
+                      eg_grade_inquiry_due_date=?,
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
@@ -5473,6 +5509,20 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
+     /**
+      * Gets if the provied submitter has a submission for a particular gradeable
+      *
+      * @param  \app\models\gradeable\Gradeable $gradeable
+      * @param  String                     $userid
+      * @return bool
+      */
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
+
+        return $this->course_db->query(
+            'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
+            [$gradeable->getId(), $userid]
+        );
+    }
 
     /**
      * Get the active version for all given submitter ids. If they do not have an active version,
@@ -5772,6 +5822,10 @@ AND gc_id IN (
         }
 
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+    }
+
+    public function setQueuePauseState($new_state) {
+        $this->course_db->query("UPDATE queue SET paused = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $this->core->getUser()->getId()]);
     }
 
     public function emptyQueue($queue_code) {
@@ -6516,6 +6570,16 @@ AND gc_id IN (
         ],
         'user_id' => []
     ];
+
+    /**
+     * Gets Total Number of Submissions on a Gradeable
+     *
+     * @param string $g_id the gradeable id to check for
+     */
+    public function getTotalSubmissions($g_id) {
+        $this->course_db->query('SELECT * FROM electronic_gradeable_data WHERE g_id= ?', [$g_id]);
+        return count($this->course_db->rows());
+    }
 
     /**
      * Generates the ORDER BY clause with the provided sorting keys.
