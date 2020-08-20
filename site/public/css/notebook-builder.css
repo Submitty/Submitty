@@ -70,19 +70,53 @@
 .markdown-widget textarea {
     width: 100%;
     margin-right: 10px;
-    height: 100px;
+    min-height: 75px;
 }
 
 /**
  * Short answer widget styles
  */
 .short-answer-widget .interactive-container {
-    align-items: center;
+    flex-direction: column;
 }
 
-.short-answer-widget .rows-input {
-    width: 60px;
-    text-align: right;
+.short-answer-widget .basic-options {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.short-answer-widget .type-options {
+    display:flex;
+}
+
+.short-answer-widget .type-options :first-child {
+    margin-right: 15px;
+}
+
+.short-answer-widget .initial-value-msg {
+    margin-bottom: 10px;
+}
+
+.short-answer-widget hr {
+    width: 90%;
+    align-self: center;
+}
+
+.short-answer-widget .initial-value-div textarea {
+    width: 100%;
+    min-height: 75px;
+}
+
+.short-answer-widget i {
+    font-size: 80%;
+}
+
+.CodeMirror {
+    background-color: var(--standard-input-background) !important;
+    border: 1px solid var(--standard-light-gray) !important;
+    border-radius: 4px !important;
+    vertical-align: middle !important;
 }
 
 /**

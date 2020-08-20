@@ -28,7 +28,8 @@
         window.builder_data = {
             g_id: '{{ gradeable.getId() }}',
             config: config,
-            images: JSON.parse('{{ images|raw }}')
+            images: JSON.parse('{{ images|raw }}'),
+            codemirror_langauges: JSON.parse('{{ codemirror_languages|raw }}')
         };
     </script>
 

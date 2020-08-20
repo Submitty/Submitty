@@ -201,6 +201,22 @@ class User extends AbstractModel {
     }
 
     /**
+     * Gets the message the user sets when seeking a team or a parter
+     * @param string $g_id the gradeable where the user is seeking for a team
+     * @return string, message if it exists or N/A if it doesnt
+     */
+    public function getSeekMessage($g_id): string {
+        $ret = $this->core->getQueries()->getSeekMessageByUserId($g_id, $this->id);
+
+        if (is_null($ret)) {
+            return "N/A";
+        }
+        else {
+            return $ret;
+        }
+    }
+
+    /**
      * Set $this->time_zone
      * @param string $time_zone Appropriate time zone string from DateUtils::getAvailableTimeZones()
      * @return bool True if time zone was able to be updated, False otherwise

@@ -161,6 +161,10 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue_state['queue_code'];
     }
 
+    public function isCurrentlyPaused() {
+        return $this->current_queue_state['paused'];
+    }
+
     public function getCurrentQueueStatus() {
         return $this->current_queue_state['current_state'];
     }
@@ -175,10 +179,6 @@ class OfficeHoursQueueModel extends AbstractModel {
 
     public function cleanForId($str) {
         return $this->core->getQueries()->getQueueId($str);
-    }
-
-    public function getLastQueueUpdate() {
-        return $this->core->getQueries()->getLastQueueUpdate();
     }
 
     public function getFullHistory() {
