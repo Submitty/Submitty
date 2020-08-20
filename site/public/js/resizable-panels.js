@@ -1,3 +1,5 @@
+/* exported initializeResizablePanels */
+
 /**
  * Initializes Resizables two panels mode
  * where width from one panel can be given out to another one i.e resizable widths

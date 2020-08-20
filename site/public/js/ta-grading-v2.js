@@ -12,6 +12,7 @@ let panelElements = [
   { str: "autograding_results", icon: ".grading_toolbar .fa-list"},
   { str: "grading_rubric", icon: ".grading_toolbar .fa-edit"},
   { str: "submission_browser", icon: "grading_toolbar .fa-folder-open.icon-header"},
+  { str: "solution_ta_notes", icon: "grading_toolbar .fa-check.icon-header"},
   { str: "student_info", icon: ".grading_toolbar .fa-user"},
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
@@ -119,6 +120,17 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  // Dynamically resize the textarea height as per the provided content
+  document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
+    textarea.addEventListener('keyup', function () {
+      setTimeout(function() {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      },0);
+    });
+  });
+
 });
 
 // returns taLayoutDet object from LS, and if its not present returns empty object

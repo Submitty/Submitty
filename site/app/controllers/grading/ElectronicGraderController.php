@@ -2,6 +2,7 @@
 
 namespace app\controllers\grading;
 
+use app\libraries\DateUtils;
 use app\libraries\DiffViewer;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\Component;
@@ -1394,6 +1395,8 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
+        $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable_id) ?? [];
+
         $this->core->getOutput()->addInternalCss('forum.css');
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalCss('electronic.css');
@@ -1405,7 +1408,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $showNewInterface);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $showNewInterface);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -2677,7 +2680,60 @@ class ElectronicGraderController extends AbstractController {
             $total_total += $value * $num_components;
         }
     }
-    
+
+    public function getSolutionTaNotesForGradeable($gradeable_id): array {
+        $solutions = [];
+        try {
+            $res = $this->core->getQueries()->getSolutionForAllComponentIds($gradeable_id);
+            $solutions = $res;
+        }
+        catch (\Exception $exception) {
+            $error = $exception->getMessage();
+            $this->core->getOutput()->renderResultMessage("Something went wrong while fetching solutions " . $error, false);
+        }
+        return $solutions;
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/solution_ta_notes", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateSolutionTaNotes($gradeable_id) {
+        $solution_text = $_POST['solution_text'] ?? '';
+        $component_id = $_POST['component_id'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $author_id = $this->core->getUser()->getId();
+        $error = "";
+        $solution_row = [];
+        if (!$gradeable) {
+            $error = "Invalid Gradeable ID given!";
+        }
+        elseif (empty($solution_text)) {
+            $error = "Please provide some non-empty solution";
+        }
+        else {
+            try {
+                $this->core->getQueries()->addSolutionForComponentId($gradeable_id, $component_id, $solution_text, $author_id);
+                $solution_row = $this->core->getQueries()->getSolutionForComponentId($gradeable_id, $component_id);
+            }
+            catch (\Exception $exception) {
+                $error = $exception->getMessage();
+            }
+        }
+
+        return empty($error) ? JsonResponse::getSuccessResponse([
+            "author" => $author_id,
+            "current_user_id" => $this->core->getUser()->getId(),
+            "edited_at" => DateUtils::convertTimeStamp(
+                $this->core->getUser(),
+                $solution_row[0]['edited_at'],
+                $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
+            ),
+            "solution_text" => $solution_text,
+            "component_id" => $component_id,
+        ]) : JsonResponse::getErrorResponse($error);
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
      */
@@ -2697,6 +2753,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
         return true;
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")
