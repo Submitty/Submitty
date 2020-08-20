@@ -82,17 +82,6 @@ $(function () {
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
 
-  // panel position selector change event
-  $(".grade-panel .panel-position-cont").change(function() {
-    let panelSpanId = $(this).parent().attr('id');
-    let position = $(this).val();
-    if (panelSpanId) {
-      const panelId = panelSpanId.split(/(_|-)btn/)[0];
-      setPanelsVisibilities(panelId, null, position);
-      $('select#' + panelId + '_select').hide();
-    }
-  });
-
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
@@ -108,7 +97,7 @@ $(function () {
     // Hide all select dropdown except the current one
     $('select.panel-position-cont').not(selectEle).hide();
 
-    const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
+    const isPanelOpen = $('#' + panelId).is(':visible');
     // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it
     if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
@@ -191,12 +180,12 @@ function initializeTaLayout() {
   }
   else if (taLayoutDet.numOfPanelsEnabled) {
     togglePanelLayoutModes(true);
-    // initialize the layout\
-    initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
-    initializeHorizontalTwoPanelDrag();
     if (taLayoutDet.isFullLeftColumnMode) {
       toggleFullLeftColumnMode(true);
     }
+    // initialize the layout\
+    initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
+    initializeHorizontalTwoPanelDrag();
   }
   else {
     setPanelsVisibilities(taLayoutDet.currentOpenPanel);
@@ -568,8 +557,7 @@ function setMultiPanelModeVisiblities () {
 
 function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
-    let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
-
+    let id_str = document.getElementById(panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
     if (panel.str === ele) {
       const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
@@ -584,6 +572,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
+      &&  taLayoutDet.currentTwoPanels.rightBottom !== panel.str
       && taLayoutDet.currentTwoPanels.leftTop !== panel.str
       &&  taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele ) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
