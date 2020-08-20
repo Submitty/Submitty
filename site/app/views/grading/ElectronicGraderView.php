@@ -826,12 +826,11 @@ HTML;
         $return = "";
         $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
         if ($showNewInterface) {
+            $this->core->getOutput()->addInternalJs("drag-and-resize-two-panels.js");
+
             $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
         		    <div class="content-items-container">
-                    <div class="content-item content-item-left"></div>
-                    <div class="content-drag-bar">
-                    </div>
                     <div class="content-item content-item-right">
 HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->isPeerGrading(), $sort, $direction, $from, $showNewInterface);
@@ -848,10 +847,17 @@ HTML;
             $return .= <<<HTML
                 <div class="panels-container">
                     <div class="two-panel-cont">
-                         <div class="two-panel-item two-panel-left active"></div>
+                         <div class="two-panel-item two-panel-left active">
+                            <div class="panel-item-section left-top"></div>
+                            <div class="panel-item-section-drag-bar panel-item-left-drag"></div>
+                            <div class="panel-item-section left-bottom"></div>
+                         </div>
                          <div class="two-panel-drag-bar active">
                          </div>
                          <div class="two-panel-item two-panel-right">
+                            <div class="panel-item-section right-top"></div>
+                            <div class="panel-item-section-drag-bar panel-item-right-drag"></div>
+                            <div class="panel-item-section right-bottom"></div>
                          </div>   
                     </div>
 HTML;

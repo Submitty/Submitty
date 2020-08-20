@@ -22,20 +22,19 @@ let panelElements = [
 
 // Tracks the layout of TA grading page
 const taLayoutDet = {
-  isTwoPanelsEnabled: false,
+  numOfPanelsEnabled: 1,
   isFullScreenMode: false,
   isFullLeftColumnMode: false,
   currentOpenPanel: panelElements[0].str,
   currentTwoPanels: {
-    left: null,
-    right: null,
+    leftTop: null,
+    leftBottom: null,
+    rightTop: null,
+    rightBottom: null,
   },
+  dividedColName: "LEFT",
   leftPanelWidth: "50%",
-  panelsBucket: {
-    leftSelector : ".two-panel-item.two-panel-left",
-      rightSelector : ".two-panel-item.two-panel-right",
-      dragBarSelector: ".two-panel-drag-bar",
-  },
+  bottomPanelHeight: "50%",
 };
 
 // Grading Panel header width
@@ -43,13 +42,25 @@ let maxHeaderWidth = 0;
 // Navigation Toolbar Panel header width
 let maxNavbarWidth = 0;
 
+// Various Ta-grading page selector for DOM manipulation
+let panelsContSelector = ".two-panel-cont";
+const leftSelector = ".two-panel-item.two-panel-left";
+const verticalDragBarSelector = ".two-panel-drag-bar";
+const leftHorizDragBarSelector = ".panel-item-section-drag-bar.panel-item-left-drag";
+const rightHorizDragBarSelector = ".panel-item-section-drag-bar.panel-item-right-drag";
+const panelsBucket = {
+  leftTopSelector : ".two-panel-item.two-panel-left .left-top",
+  leftBottomSelector : ".two-panel-item.two-panel-left .left-bottom",
+  rightTopSelector : ".two-panel-item.two-panel-right .right-top",
+  rightBottomSelector : ".two-panel-item.two-panel-right .right-bottom",
+};
+
 // Only keep those panels which are available
 function updateThePanelsElements(panelsAvailabilityObj) {
   // Attach the isAvailable to the panel elements to manage them
   panelElements = panelElements.filter((panel) => {
     return !!panelsAvailabilityObj[panel.str];
   });
-
 }
 
 $(function () {
@@ -76,7 +87,7 @@ $(function () {
     let panelSpanId = $(this).parent().attr('id');
     let position = $(this).val();
     if (panelSpanId) {
-      const panelId = panelSpanId.split(/(_|-)btn/)[0]; 
+      const panelId = panelSpanId.split(/(_|-)btn/)[0];
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
     }
@@ -97,9 +108,9 @@ $(function () {
     $('select.panel-position-cont').not(selectEle).hide();
 
     const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
-    // If panel is not in-view and two-panel-mode is enabled show the drop-down to select position,
+    // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it
-    if (isPanelOpen || !(taLayoutDet.isTwoPanelsEnabled && !isMobileView)) {
+    if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
       setPanelsVisibilities(panelId);
     } else {
       // removing previously selected option
@@ -107,6 +118,18 @@ $(function () {
       selectEle.is(':visible') ? selectEle.hide() : selectEle.show();
     }
   });
+
+  // panel position selector change event
+  $(".grade-panel .panel-position-cont").change(function() {
+    let panelSpanId = $(this).parent().attr('id');
+    let position = $(this).val();
+    if (panelSpanId) {
+      const panelId = panelSpanId.split('_btn')[0];
+      setPanelsVisibilities(panelId, null, position);
+      $('select#' + panelId + '_select').hide();
+    }
+  });
+
   // Remove the select options which are open
   function hidePanelPositionSelect() {
     $('select.panel-position-cont').hide();
@@ -143,72 +166,35 @@ function saveTaLayoutDetails() {
   localStorage.setItem("taLayoutDetails", JSON.stringify(taLayoutDet));
 }
 
-function initializeTwoPanelDrag () {
-  // Select all the DOM elements for dragging in two-panel-mode
-  const leftPanel = document.querySelector(taLayoutDet.panelsBucket.leftSelector);
-  const rightPanel = document.querySelector(taLayoutDet.panelsBucket.rightSelector);
-  const panelCont = leftPanel.parentElement;
-  const dragbar = document.querySelector(taLayoutDet.panelsBucket.dragBarSelector);
-
-  let xPos = 0, yPos = 0, leftPanelWidth = 0;
-
-  // Width of left side
-  const mouseDownHandler = function(e) {
-    // Get the current mouse position
-    xPos = e.clientX;
-    yPos = e.clientY;
-    leftPanelWidth = leftPanel.getBoundingClientRect().width;
-
-    // Attach the listeners to `document`
-    document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mouseup", mouseUpHandler);
-  };
-
-  const mouseUpHandler = () => {
-    // remove the dragging CSS props to go back to initial styling
-    dragbar.style.removeProperty("cursor");
-    document.body.style.removeProperty("cursor");
-    document.body.style.removeProperty("user-select");
-    document.body.style.removeProperty("pointer-events");
-    dragbar.style.removeProperty("filter");
-
-    // Remove the handlers of `mousemove` and `mouseup`
-    document.removeEventListener("mousemove", mouseMoveHandler);
-    document.removeEventListener("mouseup", mouseUpHandler);
-  };
-
-  const mouseMoveHandler = (e) => {
-    const dx = e.clientX - xPos;
-    const updateLeftPanelWidth = (leftPanelWidth + dx) * 100 / panelCont.getBoundingClientRect().width;
-    leftPanel.style.width = `${updateLeftPanelWidth}%`;
-    // save the updated width of left column
-    taLayoutDet.leftPanelWidth = `${updateLeftPanelWidth}%`;
-    saveTaLayoutDetails();
-
-    // consistent mouse pointer during dragging
-    document.body.style.cursor = "col-resize";
-    // Disable text selection when dragging
-    document.body.style.userSelect = "none";
-    document.body.style.pointerEvents = "none";
-    // Add blurry effect on drag-bar
-    dragbar.style.filter = "blur(5px)";
-  };
-  dragbar.addEventListener("mousedown", mouseDownHandler);
-  // update the width whenever left-cols are switched between normal and full-left-col
-  updateLeftColsWidth();
+function saveResizedColsDimensions(updateValue, isHorizontalResize) {
+  if (isHorizontalResize) {
+    taLayoutDet.bottomPanelHeight = updateValue;
+  }
+  else {
+    taLayoutDet.leftPanelWidth = updateValue;
+  }
   saveTaLayoutDetails();
+}
+
+function initializeHorizontalTwoPanelDrag () {
+  if (taLayoutDet.dividedColName === "RIGHT") {
+    initializeResizablePanels(panelsBucket.rightBottomSelector, rightHorizDragBarSelector, true, saveResizedColsDimensions)
+  } else {
+    initializeResizablePanels(panelsBucket.leftBottomSelector, leftHorizDragBarSelector, true, saveResizedColsDimensions)
+  }
 }
 
 function initializeTaLayout() {
   if (isMobileView) {
-    resetTwoPanelLayout();
+    resetSinglePanelLayout();
   }
-  else if (taLayoutDet.isTwoPanelsEnabled) {
-    toggleTwoPanelMode();
-    // initialize the layout
-    initializeTwoPanelDrag();
+  else if (taLayoutDet.numOfPanelsEnabled) {
+    togglePanelLayoutModes(true);
+    // initialize the layout\
+    initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
+    initializeHorizontalTwoPanelDrag();
     if (taLayoutDet.isFullLeftColumnMode) {
-      toggleFullLeftColumnMode();
+      toggleFullLeftColumnMode(true);
     }
   }
   else {
@@ -217,14 +203,61 @@ function initializeTaLayout() {
   if (taLayoutDet.isFullScreenMode) {
     toggleFullScreenMode();
   }
-  updateLeftColsWidth();
+  updateLayoutDimensions();
+  updatePanelOptions();
 }
 
-// updates width of left columns (normal + full-left-col) with the last saved layout width
-function updateLeftColsWidth() {
-  const leftColumns = $(".two-panel-item.two-panel-left, .content-item.content-item-left");
-  leftColumns.css({
+function updateLayoutDimensions() {
+  // updates width of left columns (normal + full-left-col) with the last saved layout width
+  $(".two-panel-item.two-panel-left").css({
     width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : "50%"
+  });
+  // updates width of left columns (normal + full-left-col) with the last saved layout width
+  const bottomRow = taLayoutDet.dividedColName === "RIGHT" ? $(".panel-item-section.right-bottom") : $(".panel-item-section.left-bottom");
+  bottomRow.css({
+    height: taLayoutDet.bottomPanelHeight ? taLayoutDet.bottomPanelHeight : "50%"
+  });
+}
+
+function updatePanelOptions() {
+  if (taLayoutDet.numOfPanelsEnabled === 1) {
+    return;
+  }
+  $(".grade-panel .panel-position-cont").attr("size", taLayoutDet.numOfPanelsEnabled);
+  const panelOptions = $(".grade-panel .panel-position-cont option");
+  panelOptions.each(idx => {
+    if (panelOptions[idx].value === "leftTop") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName === "RIGHT")) {
+        panelOptions[idx].text = "Open as left panel";
+      }
+      else {
+        panelOptions[idx].text = "Open as top left panel";
+      }
+    }
+    else if (panelOptions[idx].value === "leftBottom") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName === "RIGHT")) {
+        panelOptions[idx].classList.add("hide");
+      }
+      else {
+        panelOptions[idx].classList.remove("hide");
+      }
+    }
+    else if (panelOptions[idx].value === "rightTop") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName !== "RIGHT")) {
+        panelOptions[idx].text = "Open as right panel";
+      }
+      else {
+        panelOptions[idx].text = "Open as top right panel";
+      }
+    }
+    else if (panelOptions[idx].value === "rightBottom") {
+      if (taLayoutDet.numOfPanelsEnabled === 2 || (taLayoutDet.numOfPanelsEnabled === 3 && taLayoutDet.dividedColName !== "RIGHT")) {
+        panelOptions[idx].classList.add("hide");
+      }
+      else {
+        panelOptions[idx].classList.remove("hide");
+      }
+    }
   });
 }
 
@@ -445,38 +478,48 @@ registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, fu
 // Panel show/hide
 //
 
-function resetTwoPanelLayout() {
+function resetSinglePanelLayout() {
   // hide all the two-panel-mode related nodes
   $('.two-panel-cont').removeClass("active");
-  $("#two-panel-mode-btn").removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
-  $("#full-left-column-btn").removeClass("visible");
+  $("#full-left-column-btn").removeClass("visible active");
 
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
-  $(".content-item-left, .content-drag-bar, #full-left-column-btn").removeClass("active");
-  $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
-  // reset other variables
-  taLayoutDet.panelsBucket.leftSelector = ".two-panel-item.two-panel-left";
-  taLayoutDet.panelsBucket.dragBarSelector = ".two-panel-drag-bar";
+  $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
 
-  const leftPanelId = taLayoutDet.currentTwoPanels.left;
-  const rightPanelId = taLayoutDet.currentTwoPanels.right;
+  // remove the left bottom sectin and its drag bar
+  $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
+
+  const leftTopPanelId = taLayoutDet.currentTwoPanels.leftTop;
+  const leftBottomPanelId = taLayoutDet.currentTwoPanels.leftBottom;
+  const rightTopPanelId = taLayoutDet.currentTwoPanels.rightTop;
+  const rightBottomPanelId = taLayoutDet.currentTwoPanels.rightBottom;
   //Now Fetch the panels from DOM
-  const leftPanel = document.getElementById(leftPanelId);
-  const rightPanel = document.getElementById(rightPanelId);
+  const leftTopPanel = document.getElementById(leftTopPanelId);
+  const leftBottomPanel = document.getElementById(leftBottomPanelId);
+  const rightTopPanel = document.getElementById(rightTopPanelId);
+  const rightBottomPanel = document.getElementById(rightBottomPanelId);
 
-  if (rightPanel) {
-    document.querySelector('.panels-container').append(rightPanel);
-    taLayoutDet.currentOpenPanel = rightPanelId;
+  if (rightBottomPanel) {
+    document.querySelector('.panels-container').append(rightBottomPanel);
+    taLayoutDet.currentOpenPanel = rightBottomPanelId;
   }
-  if (leftPanel) {
-    document.querySelector('.panels-container').append(leftPanel);
-    taLayoutDet.currentOpenPanel = leftPanelId;
+  if (rightTopPanel) {
+    document.querySelector('.panels-container').append(rightTopPanel);
+    taLayoutDet.currentOpenPanel = rightTopPanelId;
+  }
+  if (leftBottomPanel) {
+    document.querySelector('.panels-container').append(leftBottomPanel);
+    taLayoutDet.currentOpenPanel = leftBottomPanelId;
+  }
+  if (leftTopPanel) {
+    document.querySelector('.panels-container').append(leftTopPanel);
+    taLayoutDet.currentOpenPanel = leftTopPanelId;
   }
   // current open panel will be either left or right panel from two-panel-mode
   // passing forceVisible = true, otherwise this method will just toggle it and it will get hidden
+  taLayoutDet.isFullLeftColumnMode = false;
   setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
-  initializeTwoPanelDrag();
 }
 
 function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPosition = null) {
@@ -486,22 +529,32 @@ function checkForTwoPanelLayoutChange (isPanelAdded, panelId = null, panelPositi
   } else {
     // panel is going to be removed from screen
     // check which one out of the left or right is going to be hidden
-    if (taLayoutDet.currentTwoPanels.left === panelId ) {
-      taLayoutDet.currentTwoPanels.left = null;
+    if (taLayoutDet.currentTwoPanels.leftTop === panelId ) {
+      taLayoutDet.currentTwoPanels.leftTop = null;
     }
-    if (taLayoutDet.currentTwoPanels.right === panelId ) {
-      taLayoutDet.currentTwoPanels.right = null;
+    else if (taLayoutDet.currentTwoPanels.leftBottom === panelId ) {
+      taLayoutDet.currentTwoPanels.leftBottom = null;
+    }
+    else if (taLayoutDet.currentTwoPanels.rightTop === panelId ) {
+      taLayoutDet.currentTwoPanels.rightTop = null;
+    }
+    else if (taLayoutDet.currentTwoPanels.rightBottom === panelId ) {
+      taLayoutDet.currentTwoPanels.rightBottom = null;
     }
   }
   saveTaLayoutDetails();
 }
 
 // Keep only those panels which are part of the two panel layout
-function setTwoPanelModeVisibilities () {
+function setMultiPanelModeVisiblities () {
     panelElements.forEach((panel) => {
       let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
 
-      if (taLayoutDet.currentTwoPanels.left === panel.str || taLayoutDet.currentTwoPanels.right === panel.str) {
+      if (taLayoutDet.currentTwoPanels.leftTop === panel.str
+          || taLayoutDet.currentTwoPanels.leftBottom === panel.str
+          || taLayoutDet.currentTwoPanels.rightTop === panel.str
+          || taLayoutDet.currentTwoPanels.rightBottom === panel.str
+      ) {
         $("#" + panel.str).toggle(true);
         $(panel.icon).toggleClass('icon-selected', true);
         $(id_str).toggleClass('active', true);
@@ -523,15 +576,16 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       $(panel.icon).toggleClass('icon-selected', eleVisibility);
       $(id_str).toggleClass('active', eleVisibility);
 
-      if (taLayoutDet.isTwoPanelsEnabled && !isMobileView) {
+      if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         checkForTwoPanelLayoutChange(eleVisibility, panel.str, position);
       } else {
         // update the global variable
         taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
       }
-    } else if ((taLayoutDet.isTwoPanelsEnabled && !isMobileView
-      && taLayoutDet.currentTwoPanels.right !== panel.str
-      && taLayoutDet.currentTwoPanels.left !== panel.str) || panel.str !== ele ) {
+    } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
+      && taLayoutDet.currentTwoPanels.rightTop !== panel.str
+      && taLayoutDet.currentTwoPanels.leftTop !== panel.str
+      &&  taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele ) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
       $("#" + panel.str).hide();
       $(panel.icon).removeClass('icon-selected');
@@ -539,8 +593,8 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
     }
   });
   // update the two-panels-layout if it's enabled
-  if (taLayoutDet.isTwoPanelsEnabled && !isMobileView) {
-    updateTwoPanelLayout();
+  if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
+    updatePanelLayoutModes();
   } else {
     saveTaLayoutDetails();
   }
@@ -553,48 +607,43 @@ function toggleFullScreenMode () {
   saveTaLayoutDetails();
 }
 
-function toggleFullLeftColumnMode () {
+function toggleFullLeftColumnMode (forceVal = false) {
   // toggle between the normal left and full left panel mode
-  $(".content-item-left, .content-drag-bar, .two-panel-item.two-panel-left, .two-panel-drag-bar, #full-left-column-btn")
-    .toggleClass("active");
+  $("#full-left-column-btn").toggleClass("active");
+  if (!forceVal) {
+    taLayoutDet.isFullLeftColumnMode = !taLayoutDet.isFullLeftColumnMode;
+  }
 
-  // Update the DOM selector for the left container
-  let newLeftPanelBucketSelector, newDragBarSelector;
-  if ($(".content-item-left").is(':visible')) {
-    newLeftPanelBucketSelector = ".content-item-left";
-    newDragBarSelector = ".content-drag-bar";
-    taLayoutDet.isFullLeftColumnMode = true;
-  } else {
-    newLeftPanelBucketSelector = ".two-panel-item.two-panel-left";
-    newDragBarSelector = ".two-panel-drag-bar";
-    taLayoutDet.isFullLeftColumnMode = false;
-  }
-  // Move the children from previous left column to new "full sized" left column bucket
-  const leftPanelBucket = document.querySelector(taLayoutDet.panelsBucket.leftSelector).childNodes;
-  for(let idx = 0; idx < leftPanelBucket.length; idx++) {
-    document.querySelector(newLeftPanelBucketSelector).append(leftPanelBucket[idx]);
-  }
-  taLayoutDet.panelsBucket.leftSelector = newLeftPanelBucketSelector;
-  taLayoutDet.panelsBucket.dragBarSelector = newDragBarSelector;
+  let newPanelsContSelector = taLayoutDet.isFullLeftColumnMode ? ".content-items-container" : ".two-panel-cont";
+
+  let leftPanelCont = document.querySelector(leftSelector);
+  let dragBar = document.querySelector(verticalDragBarSelector);
+  document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
+
+  panelsContSelector = newPanelsContSelector;
   // update the dragging event for two panels
-  initializeTwoPanelDrag();
+  initializeVerticalTwoPanelDrag();
 }
 
-function toggleTwoPanelMode() {
+function togglePanelLayoutModes(forceVal = false) {
   const twoPanelCont = $('.two-panel-cont');
-  taLayoutDet.isTwoPanelsEnabled = !twoPanelCont.is(":visible");
+  if (!forceVal) {
+    taLayoutDet.numOfPanelsEnabled = +taLayoutDet.numOfPanelsEnabled === 3 ? 1 : +taLayoutDet.numOfPanelsEnabled + 1;
+  }
 
-  if (taLayoutDet.isTwoPanelsEnabled && !isMobileView) {
+  if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
     twoPanelCont.addClass("active");
     $("#two-panel-exchange-btn").addClass("active");
     $("#full-left-column-btn").addClass("visible");
+    $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
+    $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
     // If there is any panel opened just use that and fetch the next one for left side...
-    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.left || taLayoutDet.currentOpenPanel.right)) {
-      taLayoutDet.currentTwoPanels.left = taLayoutDet.currentOpenPanel;
+    if (taLayoutDet.currentOpenPanel && !(taLayoutDet.currentTwoPanels.leftTop || taLayoutDet.currentOpenPanel.rightTop)) {
+      taLayoutDet.currentTwoPanels.leftTop = taLayoutDet.currentOpenPanel;
       panelElements.every((panel, idx) => {
-        if (taLayoutDet.currentTwoPanels.left === panel.str) {
+        if (taLayoutDet.currentTwoPanels.leftTop === panel.str) {
           let nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
-          taLayoutDet.currentTwoPanels.right = panelElements[nextIdx].str;
+          taLayoutDet.currentTwoPanels.rightTop = panelElements[nextIdx].str;
           return false;
         }
         return true;
@@ -603,56 +652,111 @@ function toggleTwoPanelMode() {
     } else if(!taLayoutDet.currentOpenPanel) {
       // if there is no currently opened panel fill the panels with the first two
       taLayoutDet.currentTwoPanels = {
-        left: panelElements[0].str,
-        right: panelElements[1].str
+        leftTop: panelElements[0].str,
+        leftBottom: null,
+        rightTop: panelElements[1].str,
+        rightBottom: null,
       };
     }
-    updateTwoPanelLayout();
-    $("#two-panel-mode-btn").addClass("active");
-  } else {
-    resetTwoPanelLayout();
+    updatePanelLayoutModes();
+  }
+  else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
+    twoPanelCont.addClass("active");
+    if (taLayoutDet.dividedColName === "RIGHT") {
+      $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
+    }
+    else {
+      $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
+    }
+    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
+    let prevPanel = taLayoutDet.currentTwoPanels.leftTop ? taLayoutDet.currentTwoPanels.leftTop : taLayoutDet.currentTwoPanels.rightTop;
+    let nextIdx = -1;
+    if (!taLayoutDet.currentTwoPanels.leftBottom) {
+      panelElements.every((panel, idx) => {
+        if (prevPanel === panel.str) {
+            nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
+            // Now check if panel indexed with nextIdx is already open in somewhere
+            if (taLayoutDet.currentTwoPanels.leftTop === panelElements[nextIdx].str || taLayoutDet.currentTwoPanels.rightTop === panelElements[nextIdx].str) {
+              // If yes update the nextIdx
+              nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
+            }
+            taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
+            return false;
+        }
+        return true;
+      })
+    }
+    updatePanelLayoutModes();
+  }
+  else {
+    resetSinglePanelLayout();
     taLayoutDet.currentTwoPanels = {
-      left: null,
-      right: null
+      leftTop: null,
+      leftBottom: null,
+      rightTop: null,
+      rightBottom: null,
     };
   }
+  updatePanelOptions();
 }
 
 // Handles the DOM manipulation to update the two panel layout
-function updateTwoPanelLayout () {
+function updatePanelLayoutModes () {
   // fetch the panels by their ids
-  const leftPanel = document.getElementById(taLayoutDet.currentTwoPanels.left);
-  const rightPanel = document.getElementById(taLayoutDet.currentTwoPanels.right);
+  const leftTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftTop);
+  const leftBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.leftBottom);
+  const rightTopPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightTop);
+  const rightBottomPanel = document.getElementById(taLayoutDet.currentTwoPanels.rightBottom);
 
-  setTwoPanelModeVisibilities();
-  for (const panelIdx in taLayoutDet.panelsBucket) {
-    const panelCont = document.querySelector(taLayoutDet.panelsBucket[panelIdx]).childNodes;
+  setMultiPanelModeVisiblities();
+  for (const panelIdx in panelsBucket) {
+    const panelCont = document.querySelector(panelsBucket[panelIdx]).childNodes;
     // Move all the panels from the left and right buckets to the main panels-container
     for (let idx = 0; idx < panelCont.length; idx++) {
       document.querySelector(".panels-container").append(panelCont[idx]);
     }
   }
   // finally append the latest panels to their respective buckets
-  if (leftPanel) {
-    document.querySelector(taLayoutDet.panelsBucket.leftSelector).append(leftPanel);
+  if (leftTopPanel) {
+    document.querySelector(panelsBucket.leftTopSelector).append(leftTopPanel);
   }
-  if (rightPanel) {
-    document.querySelector(taLayoutDet.panelsBucket.rightSelector).append(rightPanel);
+  if (leftBottomPanel) {
+    document.querySelector(panelsBucket.leftBottomSelector).append(leftBottomPanel);
+  }
+  if (rightTopPanel) {
+    document.querySelector(panelsBucket.rightTopSelector).append(rightTopPanel);
+  }
+  if (rightBottomPanel) {
+    document.querySelector(panelsBucket.rightBottomSelector).append(rightBottomPanel);
   }
   saveTaLayoutDetails();
 }
 
 // Exchanges positions of left and right panels
 function exchangeTwoPanels () {
-  if (taLayoutDet.currentTwoPanels.left && taLayoutDet.currentTwoPanels.right) {
-    const leftPanel = taLayoutDet.currentTwoPanels.left;
+  if (+taLayoutDet.numOfPanelsEnabled === 2) {
     taLayoutDet.currentTwoPanels = {
-      left: taLayoutDet.currentTwoPanels.right,
-      right: leftPanel
+      leftTop: taLayoutDet.currentTwoPanels.rightTop,
+      rightTop: taLayoutDet.currentTwoPanels.leftTop,
     };
-    updateTwoPanelLayout();
-  } else {
-      alert("Exchange works only when there are two panels...");
+    updatePanelLayoutModes();
+  }
+  else if (+taLayoutDet.numOfPanelsEnabled === 3) {
+    taLayoutDet.currentTwoPanels = {
+      leftTop: taLayoutDet.currentTwoPanels.rightTop,
+      leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
+      rightTop: taLayoutDet.currentTwoPanels.leftTop,
+      rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
+    };
+    $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").toggleClass("active");
+    taLayoutDet.dividedColName = $(".panel-item-section.right-bottom").is(":visible") ? "RIGHT" : "LEFT";
+    updatePanelOptions();
+    updatePanelLayoutModes();
+    initializeHorizontalTwoPanelDrag();
+  }
+  else {
+    // taLayoutDet.numOfPanelsEnabled is 1
+    alert("Exchange works only when there are two panels...");
   }
 }
 

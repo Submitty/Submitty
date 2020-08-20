@@ -119,12 +119,18 @@
 </div>
 
 {% macro renderPanelPositionSelector(panelId) %}
-    <select class="panel-position-cont" id="{{ panelId }}_select" size="2">
-        <option class="panel-position-left" value="left">
-            Open as left panel
+    <select class="panel-position-cont" id="{{ panelId }}_select" size="4">
+        <option class="panel-position-left" value="leftTop">
+            Open as top left panel
         </option>
-        <option class="panel-position-right" value="right">
-            Open as right panel
+        <option class="panel-position-left" value="leftBottom">
+            Open as bottom left panel
+        </option>
+        <option class="panel-position-left" value="rightTop">
+            Open as top right panel
+        </option>
+        <option class="panel-position-right" value="rightBottom">
+            Open as bottom right panel
         </option>
     </select>
 {% endmacro %}
