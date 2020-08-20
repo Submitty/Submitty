@@ -50,12 +50,12 @@
 
 {% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link) %}
     {# Files on top #}
-        {% for dir, path in files|filter((path,dir) => path is not iterable) %}
+        {% for dir, path in files|filter((path, dir) => path is not iterable) %}
             {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
         {% endfor %}
 
         {# Directories underneath #}
-        {% for dir, path in files if path is iterable %}
+        {% for dir, path in files|filter(path => path is iterable) %}
             {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
         {% endfor %}
 {% endmacro %}
