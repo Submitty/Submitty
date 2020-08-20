@@ -650,31 +650,40 @@ function exchangeTwoPanels () {
 
 // Key handler / shorthand for toggling in between panels
 registerKeyHandler({name: "Toggle Autograding Panel", code: "KeyA"}, function() {
-  toggleAutograding();
+  $('#autograding_results_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Rubric Panel", code: "KeyG"}, function() {
-  toggleRubric();
+  $('#grading_rubric_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Submissions Panel", code: "KeyO"}, function() {
-  toggleSubmissions();
+  $('#submission_browser_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Student Information Panel", code: "KeyS"}, function() {
-  toggleInfo();
+  $('#student_info_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Grade Inquiry Panel", code: "KeyX"}, function() {
-  toggleRegrade();
+  $('#regrade_info_btn button').trigger('click');
   updateCookies();
 });
 registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyD"}, function() {
-  toggleDiscussion();
+  $('#discussion_browser_btn button').trigger('click');
   updateCookies();
 });
-registerKeyHandler({name: "Toggle Discussion Panel", code: "KeyP"}, function() {
-  togglePeer();
+registerKeyHandler({name: "Toggle Peer Panel", code: "KeyP"}, function() {
+  $('#peer_info_btn button').trigger('click');
+  updateCookies();
+});
+
+registerKeyHandler({name: "Toggle Notebook Panel", code: "KeyN"}, function() {
+  $('#grading_rubric_btn button').trigger('click');
+  updateCookies();
+});
+registerKeyHandler({name: "Toggle Solution/TA-Notes Panel", code: "KeyT"}, function() {
+  $('#solution_ta_notes_btn button').trigger('click');
   updateCookies();
 });
 //-----------------------------------------------------------------------------
