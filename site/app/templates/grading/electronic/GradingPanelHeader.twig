@@ -10,6 +10,7 @@
         autograding_results: true,
         grading_rubric: true,
         submission_browser: true,
+        solution_ta_notes: true,
         student_info,
         regrade_info,
         discussion_browser,
@@ -58,6 +59,15 @@
             {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
+        <span class="grade-panel" id="solution_ta_notes_btn">
+            <button title="Show Solution and TA notes"
+                    class="invisible-btn"
+                    tabindex="0"
+            >
+                <i class="fas fa-check"></i><span>Solutions/Notes</span>
+            </button>
+            {{ self.renderPanelPositionSelector('solution_ta_notes') }}
+        </span>
         {% if isPeerPanel %}
             <span class="grade-panel" id="peer_info_btn">
                 <button title="Show/Hide Peer Information (Press P)"

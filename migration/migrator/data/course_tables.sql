@@ -895,6 +895,19 @@ CREATE TABLE public.sessions (
 
 
 --
+-- Name: solution_ta_notes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.solution_ta_notes (
+    g_id character varying(255) NOT NULL,
+    component_id integer NOT NULL,
+    solution_notes text NOT NULL,
+    author character varying NOT NULL,
+    edited_at timestamp with time zone NOT NULL
+);
+
+
+--
 -- Name: student_favorites; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2041,6 +2054,22 @@ ALTER TABLE ONLY public.seeking_team
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_author_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_author_fk FOREIGN KEY (author) REFERENCES public.users(user_id);
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_g_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_g_id_fk FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
 
 
 --

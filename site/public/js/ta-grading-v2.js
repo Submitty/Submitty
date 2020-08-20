@@ -12,6 +12,7 @@ let panelElements = [
   { str: "autograding_results", icon: ".grading_toolbar .fa-list"},
   { str: "grading_rubric", icon: ".grading_toolbar .fa-edit"},
   { str: "submission_browser", icon: "grading_toolbar .fa-folder-open.icon-header"},
+  { str: "solution_ta_notes", icon: "grading_toolbar .fa-check.icon-header"},
   { str: "student_info", icon: ".grading_toolbar .fa-user"},
   { str: "peer_info", icon: ".grading_toolbar .fa-users"},
   { str: "discussion_browser", icon: ".grading_toolbar .fa-comment-alt"},
@@ -60,7 +61,6 @@ function updateThePanelsElements(panelsAvailabilityObj) {
   panelElements = panelElements.filter((panel) => {
     return !!panelsAvailabilityObj[panel.str];
   });
-
 }
 
 $(function () {
@@ -81,6 +81,17 @@ $(function () {
   // Progress bar value
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
+
+  // panel position selector change event
+  $(".grade-panel .panel-position-cont").change(function() {
+    let panelSpanId = $(this).parent().attr('id');
+    let position = $(this).val();
+    if (panelSpanId) {
+      const panelId = panelSpanId.split(/(_|-)btn/)[0];
+      setPanelsVisibilities(panelId, null, position);
+      $('select#' + panelId + '_select').hide();
+    }
+  });
 
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
@@ -133,6 +144,17 @@ $(function () {
   // calling it for the first time i.e initializing
   adjustGradingPanelHeader();
   resizeObserver.observe(document.getElementById('grading-panel-header'));
+
+  // Dynamically resize the textarea height as per the provided content
+  document.querySelectorAll('[id^=textbox-solution-]').forEach( textarea => {
+    textarea.addEventListener('keyup', function () {
+      setTimeout(function() {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      },0);
+    });
+  });
+
 });
 
 // returns taLayoutDet object from LS, and if its not present returns empty object
