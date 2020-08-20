@@ -90,8 +90,8 @@
     margin-right: 15px;
 }
 
-.short-answer-widget .accessibility-msg {
-    margin-bottom: 5px;
+.short-answer-widget .initial-value-msg {
+    margin-bottom: 10px;
 }
 
 .short-answer-widget hr {
@@ -106,6 +106,13 @@
 
 .short-answer-widget i {
     font-size: 80%;
+}
+
+.CodeMirror {
+    background-color: var(--standard-input-background) !important;
+    border: 1px solid var(--standard-light-gray) !important;
+    border-radius: 4px !important;
+    vertical-align: middle !important;
 }
 
 /**

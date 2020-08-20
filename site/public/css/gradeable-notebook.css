@@ -107,6 +107,7 @@ img {
     border: 1px solid var(--standard-light-gray) !important;
     border-radius: 4px !important;
     vertical-align: middle !important;
+    resize: both;
 }
 
 /* Fixes Safari spacing issue */
