@@ -514,7 +514,7 @@ class OfficeHoursQueueController extends AbstractController {
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array $msg_array
      */
-    private function sendSocketMessage($msg_array) {
+    private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $msg_array['page'] = $this->core->getConfig()->getCourse() . "-office_hours_queue";
         try {
