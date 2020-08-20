@@ -107,9 +107,17 @@ img {
     border: 1px solid var(--standard-light-gray) !important;
     border-radius: 4px !important;
     vertical-align: middle !important;
+    resize: both;
 }
 
 /* Fixes Safari spacing issue */
 .notebook fieldset legend {
     -webkit-margin-top-collapse: separate;
+}
+
+/* Not set for images as we want to allow them to be wider than 700px */
+.notebook .multiple_choice,
+.notebook .short_answer,
+.notebook .markdown {
+    max-width: 700px;
 }

@@ -9,8 +9,6 @@ class ShortAnswerWidget extends Widget {
             filename: 'default.txt'
         };
 
-        this.place_holder_msg = 'You may set an initial value by entering it here.';
-
         this.codebox_pointer;
     }
 
@@ -41,17 +39,9 @@ class ShortAnswerWidget extends Widget {
 
         const answer_type_selector = this.dom_pointer.querySelector('.answer-type');
 
-        const text_area = this.dom_pointer.querySelector('.sa-textarea');
-
-        if (text_area) {
-            text_area.value ? this.state.initial_value = text_area.value : delete this.state.initial_value;
-            delete this.state.programming_language;
-        }
-        else  {
-            this.state.programming_language = answer_type_selector.value;
-            const codebox_value = this.codebox_pointer.getValue();
-            codebox_value ? this.state.initial_value = codebox_value : delete this.state.initial_value;
-        }
+        answer_type_selector.value !== 'Default' ? this.state.programming_language = answer_type_selector.value : delete this.state.programming_language;
+        const codebox_value = this.codebox_pointer.getValue();
+        codebox_value ? this.state.initial_value = codebox_value : delete this.state.initial_value;
     }
 
     getJSON() {
@@ -83,29 +73,29 @@ class ShortAnswerWidget extends Widget {
             this.commitState();
             initial_value_div.innerHTML = '';
 
-            if (answer_type_selector.value === 'Default') {
-                const text_area = document.createElement('textarea');
-                text_area.classList.add('sa-textarea');
-                text_area.placeholder = this.place_holder_msg;
-                text_area.value = this.state.initial_value ? this.state.initial_value : '';
-                enableTabsInTextArea(text_area);
-                initial_value_div.appendChild(text_area);
-            }
-            else  {
-                const codebox_config = {
-                    lineNumbers: true,
-                    mode: builder_data.codemirror_langauges[answer_type_selector.value],
-                    value: this.state.initial_value ? this.state.initial_value : '',
-                    theme: 'eclipse',
-                    placeholder: this.place_holder_msg
-                };
+            const msg = document.createElement('p');
+            msg.classList.add('initial-value-msg');
+            msg.innerText = 'The box below is what the submitter will see to enter their answer in.  You may specify an initial value for them by entering it in the box.';
+            initial_value_div.appendChild(msg);
 
+            const codebox_config = {
+                value: this.state.initial_value ? this.state.initial_value : '',
+                theme: 'eclipse'
+            };
+
+            if (answer_type_selector.value !== 'Default') {
+                codebox_config.mode = builder_data.codemirror_langauges[answer_type_selector.value];
+                codebox_config.lineNumbers = true;
+            }
+
+            if (this.state.rows) {
                 const height = this.state.rows ? rowsToPixels(this.state.rows) : null;
 
-                this.codebox_pointer = CodeMirror(initial_value_div, codebox_config);
+                this.codebox_pointer = getLargeCodeMirror(initial_value_div, codebox_config);
                 this.codebox_pointer.setSize(null, height);
-
-                makeCodeMirrorAccessible(this.codebox_pointer, 'Esc');
+            }
+            else {
+                this.codebox_pointer = getSmallCodeMirror(initial_value_div, codebox_config);
             }
         }
 
@@ -150,7 +140,6 @@ class ShortAnswerWidget extends Widget {
             </div>
         </div>
         <hr />
-        <p class="accessibility-msg">Press TAB to indent. Press ESC to advance from input area.</p>
         <div class="initial-value-div"></div>`;
     }
 
