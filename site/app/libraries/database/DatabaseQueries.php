@@ -1053,6 +1053,31 @@ WHERE semester=? AND course=? AND user_id=?",
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
+    public function addSolutionForComponentId($g_id, $component_id, $solution_text, $author_id) {
+        $this->course_db->query(
+            "INSERT INTO solution_ta_notes (g_id, component_id, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, current_timestamp)",
+            [$g_id, $component_id, $solution_text, $author_id]
+        );
+    }
+    
+    public function getSolutionForComponentId($g_id, $component_id) {
+        $this->course_db->query(
+            "SELECT * FROM solution_ta_notes WHERE g_id = ? AND component_id = ? ORDER BY edited_at DESC LIMIT 1",
+            [$g_id, $component_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getSolutionForAllComponentIds($g_id) {
+        $solution_array = [];
+        $this->course_db->query("SELECT DISTINCT component_id FROM solution_ta_notes WHERE g_id=?", [$g_id]);
+        $component_ids = $this->course_db->rows();
+        foreach ($component_ids as $row) {
+            $solution_array[$row['component_id']] = $this->getSolutionForComponentId($g_id, $row['component_id']);
+        }
+        return $solution_array;
+    }
+
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if ($user_id != null) {
@@ -6501,6 +6526,16 @@ AND gc_id IN (
         ],
         'user_id' => []
     ];
+    
+    /**
+     * Gets Total Number of Submissions on a Gradeable
+     *
+     * @param string $g_id the gradeable id to check for
+     */
+    public function getTotalSubmissions($g_id) {
+        $this->course_db->query('SELECT * FROM electronic_gradeable_data WHERE g_id= ?', [$g_id]);
+        return count($this->course_db->rows());
+    }
 
     /**
      * Generates the ORDER BY clause with the provided sorting keys.
