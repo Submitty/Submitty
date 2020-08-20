@@ -1,0 +1,72 @@
+{% import _self as self %}
+<div id="solution_ta_notes" class="rubric_panel">
+    <div class="row">
+        <span class="grading_label">Solution/TA Notes</span>
+    </div>
+    {% for component in solution_components %}
+        {{ self.renderSolutionTaNotesBox(
+            gradeable_id,
+            component.id,
+            component.is_first_edit,
+            component.title,
+            component.author,
+            component.solution_notes,
+            component.edited_at,
+            current_user_id
+        ) }}
+    {% endfor %}
+</div>
+
+
+{% macro renderSolutionTaNotesBox(gradeable_id, component_id, is_first_edit, component_title, author, solution_notes, last_edit, current_user_id) %}
+
+    <div class="solution-box box" id="solution-box-{{ component_id }}" data-first-edit="{% if is_first_edit %} 1 {% else %} 0 {% endif %}">
+        <div class="solution-header">
+            <div class="component-title">
+                Solution for {{ component_title }}
+            </div>
+            <button type="primary"
+                    id="show-sol-btn-{{ component_id }}"
+                    class="btn btn-primary {% if not is_first_edit %} hide {% endif %}"
+                    onclick="showSolutionTextboxCont('#show-sol-btn-{{ component_id }}.btn', '#sol-textbox-cont-{{ component_id }}-edit', '.solution-notes-text-{{ component_id }}');"
+            >Start Now</button>
+            <div class="last-edit {% if is_first_edit %} hide {% endif %}">
+              Last edit @ <i class="last-edit-time">{{ last_edit }}</i> by <i class="last-edit-author">{{ author }}{% if current_user_id == author %} (You) {% endif %}</i>
+            </div>
+        </div>
+        <div class="row divider"></div>
+        <div class="solution-cont">
+            <span class="solution-notes-text solution-notes-text-{{ component_id }} {% if not is_first_edit %} hide {% endif %}">
+                No Solutions or TA notes for  "{{ component_title}}" Component
+            </span>
+            <div class="solution-saved {% if is_first_edit %} hide {% endif %}" id="sol-textbox-cont-{{ component_id }}-saved">
+                <span class="solution-notes-text">
+                    {{ solution_notes }}
+                </span>
+                <button type="primary"
+                        id="edit-solution-btn-{{ component_id }}"
+                        class="btn btn-primary"
+                        onclick="showSolutionTextboxCont('#edit-sol-btn-{{ component_id }}.btn', '#sol-textbox-cont-{{ component_id }}-edit', '#sol-textbox-cont-{{ component_id }}-saved');"
+                >Edit</button>
+            </div>
+            <div class="solution-edit hide" id="sol-textbox-cont-{{ component_id }}-edit">
+                <textarea id="textbox-solution-{{ component_id }}"
+                          class="solution-ta-notes-textbox"
+                          placeholder='Start writing the solution for "{{ component_title }}" component.'
+                >{{ solution_notes }}</textarea>
+                <div>
+                    <button type="primary"
+                            id="cancel-solution"
+                            class="btn btn-default"
+                            onclick="cancelEditingSolution('{{ component_id }}');"
+                    >Cancel</button>
+                    <button type="primary"
+                            id="save-solution"
+                            class="btn btn-primary"
+                            onclick="updateSolutionTaNotes('{{ gradeable_id }}', '{{ component_id }}');"
+                    >Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
