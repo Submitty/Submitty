@@ -99,12 +99,13 @@ class AbstractBuilder {
         });
     }
 
+    /**
+     * Find all ItemWidgets in the form and tell them to either 'update' or 'block' appropriately.
+     */
     itempoolItemChangeAction() {
-        const operation = this.allValidItemNames() ? 'update' : 'block';
-
         this.reorderable_widgets.forEach(widget => {
             if (widget.constructor.name === 'ItemWidget') {
-                if (operation === 'update') {
+                if (getBadItemNames().length === 0) {
                     const interactive_area = widget.dom_pointer.querySelector('.interactive-container');
                     widget.update(interactive_area);
                 }
@@ -113,27 +114,6 @@ class AbstractBuilder {
                 }
             }
         });
-    }
-
-    /**
-     * Determine if all itempool item widgets contain a non-blank and unique 'item_name'.
-     *
-     * @returns {Boolean} True if all are valid, false otherwise.
-     */
-    allValidItemNames() {
-        const used_item_names = new Set();
-        let all_valid = true;
-
-        const item_name_inputs = this.attachment_div.querySelectorAll('.item-name-input');
-        item_name_inputs.forEach(item_name_input => {
-            if (item_name_input.value === '' || used_item_names.has(item_name_input.value)) {
-                all_valid = false;
-            }
-
-            used_item_names.add(item_name_input.value);
-        });
-
-        return all_valid;
     }
 
     /**
@@ -173,10 +153,14 @@ class AbstractBuilder {
         widgets_array.push(widget);
         widgets_div.appendChild(widget.render());
 
-        // Codemirror boxes inside the ShortAnswerWidget require special handling
         // Codeboxes won't render correctly unless refreshed AFTER appended to the dom
-        if (widget.constructor.name === 'ShortAnswerWidget') {
-            widget.codeMirrorRefresh();
+        const codebox = widget.dom_pointer.querySelector('.CodeMirror');
+        if (codebox) {
+            codebox.CodeMirror.refresh();
+        }
+
+        if (widget.constructor.name === 'ItemWidget') {
+            this.itempoolItemChangeAction();
         }
     }
 

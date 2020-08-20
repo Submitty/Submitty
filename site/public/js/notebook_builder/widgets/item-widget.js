@@ -17,7 +17,6 @@ class ItemWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
-        this.update(interactive_area);
 
         this.dom_pointer = container;
         return container;
@@ -54,6 +53,12 @@ class ItemWidget extends Widget {
         this.state = data;
     }
 
+    /**
+     * Show a usable item-widget.  When `update()` is called the widget will be refreshed to show the current set
+     * of item_names found in the main item pool.
+     *
+     * @param {HTMLDivElement} interactive_area
+     */
     update(interactive_area) {
         this.commitState();
 
@@ -91,6 +96,11 @@ class ItemWidget extends Widget {
         }
     }
 
+    /**
+     * Get the template used with the `update()` method.
+     *
+     * @returns {String}
+     */
     getUpdatedTemplate() {
         return `
         <div class="item-options">
@@ -101,16 +111,25 @@ class ItemWidget extends Widget {
                 Label: <input class="label-input" type="text" placeholder="None">
             </label>
         </div>
-        <p>Select the itempool items you would like as a possible option for this item:</p>
+        <p>Select the pool of items.  Students will be shown one at random:</p>
         <div class="from-pool-div"></div>`;
     }
 
+    /**
+     * Show a blocked widget.  When `block()` is called the widget will not be usable, and will instead display a
+     * message directing the user to fix item pool errors that are preventing use of the widget.
+     */
     block() {
         this.commitState();
         this.dom_pointer.querySelector('.interactive-container').innerHTML = this.getBlockedTemplate();
     }
 
+    /**
+     * Get the template used with the `block()` method.
+     *
+     * @returns {string}
+     */
     getBlockedTemplate() {
-        return `<p>All itempool items <i>must</i> have unique, non-blank item names</p>`;
+        return `<p>All itempool items <i>must</i> have unique, non-blank item names.</p>`;
     }
 }
