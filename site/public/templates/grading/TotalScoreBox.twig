@@ -19,7 +19,7 @@ l
             <strong>Autograding Total</strong>
         </div>
     {% endif %}
-    {% if ta_grading_total is defined %}
+    {% if ta_grading_earned is defined %}
         <div class="box-title badge-container">
             <strong id="grading_total" class="badge {{ functions.getBadgeStyle(ta_grading_earned, ta_grading_total, ta_grading_complete) }}">
                 {{ ta_grading_earned is defined ? ta_grading_earned|round(decimal_precision) : '&minus;' }} / {{ ta_grading_total|round(decimal_precision) }}
@@ -36,14 +36,14 @@ l
     </div>
     {% endif %}
     {% if show_total %}
-        {% set any_earned = ta_grading_earned is defined or auto_grading_earned is defined %}
+        {% set any_earned = peer_grade_earned is defined or ta_grading_earned is defined or auto_grading_earned is defined %}
         {% if any_earned %}
             {% if peer_grade_earned is defined %}
                 {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) + peer_grade_earned|default(0) %}
                 {% if peer_grade_earned == 0%}
-                    {% set max_total = ta_grading_total + auto_grading_total %}
+                    {% set max_total = ta_grading_total|default(0) + auto_grading_total|default(0) %}
                 {% else %}
-                    {% set max_total = ta_grading_total + auto_grading_total + peer_total %}
+                    {% set max_total = ta_grading_total|default(0) + auto_grading_total|default(0) + peer_total|default(0) %}
                 {% endif %}
             {% else %}
                 {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) %}
@@ -51,7 +51,7 @@ l
             {% endif %}
         {% endif %}
         <div class="box-title badge-container">
-            <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, (ta_grading_total + auto_grading_total), ta_grading_complete) }}">
+            <strong id="score_total" class="badge {{ functions.getBadgeStyle(total_earned, max_total, max_total) }}">
                 {{ total_earned is defined ? total_earned|round(decimal_precision) : '&minus;' }} / {{ (max_total)|round(decimal_precision) }}
             </strong>
             <strong>Total </strong>
