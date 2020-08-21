@@ -1561,7 +1561,14 @@ class ElectronicGraderController extends AbstractController {
             $graded_component->setGradedVersion($component_version);
         }
         $graded_component->setComment($custom_message);
-        $graded_component->setScore($custom_points);
+        
+        // Do not add custom marks if grader is student
+        if ($this->core->getUser()->getGroup() != User::GROUP_STUDENT) {
+            $graded_component->setScore($custom_points);
+        }
+        else {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions for custom marks');
+        }
         $graded_component->setGradeTime($this->core->getDateTimeNow());
 
         // Set the marks the submitter received
@@ -1945,12 +1952,6 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        // get the user
-        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions for custom marks');
-            return;
-        }
-        
         // get the mark
         $mark = $this->tryGetMark($component, $mark_id);
         if ($mark === false) {
