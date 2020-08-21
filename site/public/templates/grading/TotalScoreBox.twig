@@ -41,7 +41,7 @@ l
             {% if peer_grade_earned is defined %}
                 {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) + peer_grade_earned|default(0) %}
                 {% if peer_grade_earned == 0%}
-                    {% set max_total = ta_grading_total|default(0) + auto_grading_total|default(0) %}
+                    {% set max_total = peer_total|default(0) + ta_grading_total|default(0) + auto_grading_total|default(0) %}
                 {% else %}
                     {% set max_total = ta_grading_total|default(0) + auto_grading_total|default(0) + peer_total|default(0) %}
                 {% endif %}
