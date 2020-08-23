@@ -111,9 +111,12 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content, $gc_id);
+            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
+            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
+
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id])
+                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id, 'new_post' => $new_post])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -212,9 +215,11 @@ class GradeInquiryController extends AbstractController {
             if ($content != "") {
                 $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'toggle_status'])
+                JsonResponse::getSuccessResponse(['type' => 'toggle_status', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
