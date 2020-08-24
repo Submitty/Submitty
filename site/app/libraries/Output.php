@@ -151,6 +151,7 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
+        $this->addInternalJs('swRegistration.js');
         $this->addInternalJs('menu.js');
     }
 

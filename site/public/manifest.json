@@ -1,0 +1,28 @@
+{
+  "name": "Submitty",
+  "short_name": "Submitty",
+  "description": "Submitty PWA",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "English",
+  "background_color": "#DCC308",
+  "theme_color": "#DCC308",
+  "icons": [
+    {
+      "src": "/img/moorthy_duck.png",
+      "type": "image/png",
+      "sizes": "3000x3000"
+    },
+    {
+      "src": "/img/moorthy_duck_512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/img/moorthy_duck_192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}

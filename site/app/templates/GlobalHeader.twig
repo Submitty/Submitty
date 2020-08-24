@@ -4,6 +4,7 @@
 <head>
     <title>{{ page_title }}</title>
     <link rel="shortcut icon" href="{{ base_url }}img/favicon.ico" type="image/x-icon" />
+    <link rel="manifest" href="/manifest.json">
 
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
@@ -156,6 +157,9 @@
                     </div>
                 </div>
                 <div style="display: flex">
+                    <button onclick="install()">
+                        Install PWA
+                    </button>
                     <span id="duckdiv" style="position: relative">
                     {% if not enable_banner %}
                     <a id="duck-desktop"

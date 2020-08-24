@@ -21,14 +21,16 @@ set_permissions () {
     extension="${filename##*.}"
     # filename="${filename%.*}"
     case "${extension}" in
-        css|otf|jpg|png|ico|txt|twig|map)
+        css|otf|jpg|png|ico|txt|twig|map|json)
             chmod 444 ${fullpath}
             ;;
         bcmap|ttf|eot|svg|woff|woff2|js|cgi)
             chmod 445 ${fullpath}
             ;;
         html)
-            if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
+            if [ ${fullpath} == ${SUBMITTY_INSTALL_DIR}/site/public/offline.html ]; then
+                chmod 444 ${fullpath}
+            elif [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
                 chmod 440 ${fullpath}
             fi
             ;;
