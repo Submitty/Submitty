@@ -108,6 +108,8 @@ function onGradeInquirySubmitClicked(button) {
       }
     }
   });
+  // allow form resubmission
+  form.data("submitted",false);
 }
 
 function initGradingInquirySocketClient() {
