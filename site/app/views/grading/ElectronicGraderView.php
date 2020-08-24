@@ -190,7 +190,9 @@ class ElectronicGraderView extends AbstractView {
                 }
             }
             foreach ($sections as $key => &$section) {
-                $section['graded'] = round($section['graded_components'] / count($gradeable->getNonPeerComponents()), 1);
+                $non_peer_components_count = count($gradeable->getNonPeerComponents());
+                $non_zero_non_peer_components_count = $non_peer_components_count != 0 ? $non_peer_components_count : 1;
+                $section['graded'] = round($section['graded_components'] / $non_zero_non_peer_components_count, 1);
                 $section['total'] = $section['total_components'];
                 if ($section['total_components'] == 0) {
                     $section['percentage'] = 0;
