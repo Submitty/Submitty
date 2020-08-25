@@ -1567,7 +1567,7 @@ class Gradeable(object):
             with open(os.path.join(SETUP_DATA_PATH, 'random_users.txt')) as students:
                 students = students.read().strip().split()
                 random.shuffle(students)
-                no_to_grade = randint(1, len(students))
+                no_to_grade = random.randint(1, len(students))
                 max_offset = len(students)
                 final_grading_info = []
                 n_array_peers = []
