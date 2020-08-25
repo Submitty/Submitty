@@ -150,8 +150,30 @@ $(document).ready(function () {
             }, updateGradeableErrorCallback);
     });
 
-    $('#random-peer-graders-list').click(
+    $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
+            if($('#all_grade').is(':checked')){
+                if ( confirm("Each student grades every other student! Continue?")) {
+                    let data = {'csrf_token': csrfToken};
+                    data[this.name] = $(this).val();
+                    setRandomGraders($('#g_id').val(), data, function (response_data) {
+                        // Clear errors by setting new values
+                        for (let key in response_data) {
+                            if (response_data.hasOwnProperty(key)) {
+                                clearError(key, response_data[key]);
+                            }
+                        }
+                        // Clear errors by just removing red background
+                        for (let key in data) {
+                            if (data.hasOwnProperty(key)) {
+                                clearError(key);
+                            }
+                        }
+                        updateErrorMessage();
+                    }, updateGradeableErrorCallback, true);
+                    return;
+                }
+            }
             if ( confirm("This will update peer matrix. Are you sure?")) {
                 let data = {'csrf_token': csrfToken};
                 data[this.name] = $(this).val();
@@ -163,6 +185,7 @@ $(document).ready(function () {
                         $(val).val('0');
                     }
                     data[val.name] = $(val).val();
+                   
             };
             setRandomGraders($('#g_id').val(), data, function (response_data) {
                 // Clear errors by setting new values
@@ -178,12 +201,11 @@ $(document).ready(function () {
                     }
                 }
                 updateErrorMessage();
-            }, updateGradeableErrorCallback );
+            }, updateGradeableErrorCallback, false);
         }
         else {
             return false;
-        }
-            
+        }  
         });
     });
     
@@ -276,8 +298,14 @@ function ajaxCheckBuildStatus() {
         }
     });
 }
-function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback) {
-    var number_to_grade=$('#number_to_peer_grade').val();
+function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,all_grade_all) {
+    let number_to_grade=1;
+    if(all_grade_all===true){
+        number_to_grade=10000;
+    }
+    else {
+        number_to_grade=$('#number_to_peer_grade').val();
+    }
     if(number_to_grade<=0) {
         if (confirm("This will clear Peer Matrix. Continue?")) {
         }
@@ -286,11 +314,25 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback) {
       return false;} 
     }
     var gradeable_id=$('#g_id').val();
+    let restrict_to_registration="unchecked";
+    let submit_before_grading="unchecked";
     $('#peer_loader').removeClass("hide");
+    if($('#restrict-to-registration').is(':checked')){
+        restrict_to_registration="checked";
+    }
+    if($('#submit-before-grading').is(':checked')){
+        submit_before_grading="checked";
+    }
+        
     $.ajax({
         type: "POST", 
         url: buildCourseUrl(['gradeable', gradeable_id, 'RandomizePeers']),
-        data: {csrf_token:p_values['csrf_token'],number_to_grade:number_to_grade},
+        data: {
+            csrf_token:p_values['csrf_token'],
+            number_to_grade:number_to_grade,
+            restrict_to_registration:restrict_to_registration,
+            submit_before_grading:submit_before_grading,
+        },
         success: function(response){
             let res=JSON.parse(response);
             if (res.data === "Invalid Number of Students Entered") {
@@ -306,7 +348,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback) {
         
       /* To check for Server Error Messages */
         error: function (jqXHR, exception) {
-            var msg = '';
+            let msg = '';
             if (jqXHR.status === 0) {
                 msg = 'Not connect.\n Verify Network.';
             } 

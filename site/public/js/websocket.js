@@ -29,13 +29,10 @@ class WebSocketClient {
         this.autoReconnectInterval = 5 * 1000;
         this.onopen = null;
         this.onmessage = null;
+        this.url = `${document.body.dataset.baseUrl.replace('http', 'ws')}ws/`;
     }
 
-    open(url) {
-        if (!url) {
-            url = `${document.body.dataset.baseUrl.replace('http', 'ws')}ws/`;
-        }
-        this.url = url;
+    open(page) {
         console.log(`WebSocket: connecting to ${this.url}`);
         this.client = new WebSocket(this.url);
         this.client.onopen = () => {
@@ -43,8 +40,7 @@ class WebSocketClient {
             if (this.onopen) {
                 this.onopen();
             }
-            const course = $('.breadcrumb').eq(1).text().trim();
-            const page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
+            const course = document.body.dataset.courseUrl.split('/').pop();
             this.client.send(JSON.stringify({'type': 'new_connection', 'page': `${course}-${page}`}));
         };
 

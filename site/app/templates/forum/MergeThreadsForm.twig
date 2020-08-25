@@ -37,9 +37,7 @@
                     $("#merge-threads").children("form").submit(function () {
                         var child_thread_id = $('#merge_thread_child').val();
                         var parent_thread_id = $('#merge_thread_parent').val();
-                        var course = $('.breadcrumb').eq(1).text().trim();
-                        var page = $('.breadcrumb').eq(2).text().trim().toLowerCase().split(' ').join('_');
-                        window.socketClient.send({'page': course+'-'+page, 'type': "merge_thread", 'thread_id': child_thread_id, 'merge_thread_id': parent_thread_id});
+                        window.socketClient.send({'type': "merge_thread", 'thread_id': child_thread_id, 'merge_thread_id': parent_thread_id});
                         return;
                     });
                 });

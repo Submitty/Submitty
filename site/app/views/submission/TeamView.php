@@ -23,6 +23,8 @@ class TeamView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,
+            "seeking_enabled" => $this->core->getConfig()->isSeekMessageEnabled(),
+            "seeking_instructions" => $this->core->getConfig()->getSeekMessageInstructions(),
             "team" => $team,
             "user" => $this->core->getUser(),
             "lock" => $lock,
@@ -37,6 +39,8 @@ class TeamView extends AbstractView {
             "send_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'new']),
             "accept_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'accept']),
             "cancel_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'cancel']),
+            "set_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message']),
+            "remove_message_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'message', 'remove']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

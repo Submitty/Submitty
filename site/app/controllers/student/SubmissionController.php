@@ -16,7 +16,6 @@ use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\UserSpecificNotebook;
-use app\models\notebook\SubmissionTextBox;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 
@@ -192,6 +191,7 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->addInternalCss('grade-inquiry.css');
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
+                $this->core->getOutput()->addInternalJs('websocket.js');
                 $this->core->getOutput()->enableMobileViewport();
                 $this->core->getOutput()->renderOutput(
                     ['submission', 'Homework'],
@@ -1011,29 +1011,21 @@ class SubmissionController extends AbstractController {
 
             // save the contents of the text boxes to files
             $empty_inputs = true;
-            $num_short_answers = 0;
             $num_codeboxes = 0;
             $num_multiple_choice = 0;
 
-            $short_answer_objects    = $_POST['short_answer_answers'] ?? "";
             $codebox_objects         = $_POST['codebox_answers'] ?? "";
             $multiple_choice_objects = $_POST['multiple_choice_answers'] ?? "";
-            $short_answer_objects    = json_decode($short_answer_objects, true);
             $codebox_objects         = json_decode($codebox_objects, true);
             $multiple_choice_objects = json_decode($multiple_choice_objects, true);
 
             foreach ($this_config_inputs as $this_input) {
-                if ($this_input instanceof SubmissionTextBox) {
-                    $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? [];
-                    $num_short_answers += 1;
-                }
-                elseif ($this_input instanceof SubmissionCodeBox) {
+                if ($this_input instanceof SubmissionCodeBox) {
                     $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? [];
                     $num_codeboxes += 1;
                 }
                 elseif ($this_input instanceof SubmissionMultipleChoice) {
                     $answers = $multiple_choice_objects["multiple_choice_" . $num_multiple_choice] ?? [];
-
                     $num_multiple_choice += 1;
                 }
                 else {
