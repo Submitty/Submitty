@@ -1565,7 +1565,7 @@ class Gradeable(object):
 
 
         if self.peer_grading == True:
-            with open(os.path.join(SETUP_DATA_PATH, 'random', 'students.txt')) as students:
+            with open(os.path.join(SETUP_DATA_PATH, 'random', 'random_users.txt')) as students:
                 students = students.read().strip().split()
                 random.shuffle(students)
                 no_to_grade = randint(1, len(students))
