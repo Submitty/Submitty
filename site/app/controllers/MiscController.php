@@ -242,16 +242,21 @@ class MiscController extends AbstractController {
 
         $anon_id = $user_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         }
+        
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
-            $message = "You do not have access to that page.";
+            $message = "You do not have access to that page 1.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildCourseUrl());
         }
-
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, $gradeable->isTeamAssignment());
+        
+        if($gradeable->isTeamAssignment()) {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $user_id);
+        }
 
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
