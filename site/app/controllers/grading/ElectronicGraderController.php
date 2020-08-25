@@ -62,7 +62,7 @@ class ElectronicGraderController extends AbstractController {
      * @param int $number_to_grade
      * @return Array $final_grading_info
      */
-    public function setRandomizedGraders(Array $student_array, int $number_to_grade){
+    public function setRandomizedGraders(array $student_array, int $number_to_grade) {
         $final_grading_info = [];
         $graded_array = $student_array;
         /*n_array_peers : An Array of arrays that holds information on to be graded peers
@@ -79,36 +79,36 @@ class ElectronicGraderController extends AbstractController {
             $max_offset = count($student_array);
             $offset_array = [];
             $temp_offset = [];
-            for ($i = 1; $i < $max_offset; ++$i) {
-                array_push($temp_offset, $i);
-            }
+        for ($i = 1; $i < $max_offset; ++$i) {
+            array_push($temp_offset, $i);
+        }
         /* $offset_array contains randomly chosen offsets.
         $temp_offset helps to ensure no duplicate offsets exist (By removing already chosen offsets)
         Upon every random choice of an offset from $temp_offset, the value is removed from it.
         */
-            for ($i = 0; $i < $number_to_grade; ++$i) {
-                $random_offset = array_rand($temp_offset, 1);
-                array_push($offset_array, $temp_offset[$random_offset]);
-                unset($temp_offset[$random_offset]);
+        for ($i = 0; $i < $number_to_grade; ++$i) {
+            $random_offset = array_rand($temp_offset, 1);
+            array_push($offset_array, $temp_offset[$random_offset]);
+            unset($temp_offset[$random_offset]);
+        }
+        foreach ($offset_array as $element) {
+            $temp_array = $student_array;
+            for ($i = 0; $i < $element; $i++) {
+                array_push($temp_array, array_shift($temp_array));
             }
-            foreach ($offset_array as $element) {
-                $temp_array = $student_array;
-                for ($i = 0; $i < $element; $i++) {
-                    array_push($temp_array, array_shift($temp_array));
-                }
-                array_push($n_array_peers, $temp_array);
+            array_push($n_array_peers, $temp_array);
+        }
+        for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
+            $temp = [];
+            for ($j = 1; $j < count($n_array_peers); ++$j) {
+                array_push($temp, $n_array_peers[$j][$i]);
             }
-            for ($i = 0; $i < count($n_array_peers[0]); ++$i) {
-                $temp = [];
-                for ($j = 1; $j < count($n_array_peers); ++$j) {
-                    array_push($temp, $n_array_peers[$j][$i]);
-                }
-                array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
-            }
-            if ($number_to_grade < 1) {
-                $gradeable->setRandomPeerGradersList($final_grading_info);
-                return JsonResponse::getSuccessResponse("Clear Peer Matrix");
-            }
+            array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
+        }
+        if ($number_to_grade < 1) {
+            $gradeable->setRandomPeerGradersList($final_grading_info);
+            return JsonResponse::getSuccessResponse("Clear Peer Matrix");
+        }
             return $final_grading_info;
     }
     /**
@@ -175,7 +175,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                 }
                 else {
-                    $final_grading_info = $this->setRandomizedGraders($student_array,$number_to_grade);
+                    $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
                 }
             }
             $gradeable->setRandomPeerGradersList($final_grading_info);
@@ -221,7 +221,7 @@ class ElectronicGraderController extends AbstractController {
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse($final_grading_info);
         }
-        $final_grading_info = $this->setRandomizedGraders($student_array,$number_to_grade);
+        $final_grading_info = $this->setRandomizedGraders($student_array, $number_to_grade);
         if ($number_to_grade < 1) {
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse("Clear Peer Matrix");
