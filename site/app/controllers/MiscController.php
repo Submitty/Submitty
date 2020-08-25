@@ -254,7 +254,7 @@ class MiscController extends AbstractController {
         
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, $gradeable->isTeamAssignment());
         
-        if($gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment()) {
             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $user_id);
         }
 
