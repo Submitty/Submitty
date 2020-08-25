@@ -98,16 +98,12 @@ class ElectronicGraderController extends AbstractController {
             }
             array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
         }
-        if ($number_to_grade < 1) {
-            $gradeable->setRandomPeerGradersList($final_grading_info);
-            return JsonResponse::getSuccessResponse("Clear Peer Matrix");
-        }
             return $final_grading_info;
     }
 
     /**
      * Helper function for all grade all in randomized peer assignments
-     * @param Array $student_arraye
+     * @param Array $student_array
      * @return Array $final_grading_info
      */
     private function setAllGradAllGrading($student_array) {
