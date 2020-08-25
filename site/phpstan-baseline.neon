@@ -120,31 +120,20 @@ parameters:
 			count: 2
 			path: app/controllers/forum/ForumController.php
 
-		-
-			message: "#^Variable \\$graded_component might not be defined\\.$#"
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
+		-	
+			message: "#^Variable \\$graded_component might not be defined\\.$#"	
+			count: 2	
+			path: app/controllers/grading/ElectronicGraderController.php			
 
-		-
-			message: "#^Variable \\$num_components might not be defined\\.$#"
-			count: 4
-			path: app/controllers/grading/ElectronicGraderController.php
+		-	
+			message: "#^Variable \\$team_users might not be defined\\.$#"	
+			count: 1	
+			path: app/controllers/grading/ElectronicGraderController.php	
 
-		-
-			message: "#^Variable \\$my_grading might not be defined\\.$#"
-			count: 2
+		-	
+			message: "#^Variable \\$all_teams might not be defined\\.$#"	
+			count: 2	
 			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Variable \\$team_users might not be defined\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Variable \\$all_teams might not be defined\\.$#"
-			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
 		-
 			message: "#^Offset 0 does not exist on array\\(\\)\\.$#"
 			count: 1
@@ -212,7 +201,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 3
+			count: 5
 			path: app/controllers/student/GradeInquiryController.php
 
 		-

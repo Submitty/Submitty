@@ -1053,6 +1053,31 @@ WHERE semester=? AND course=? AND user_id=?",
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
+    public function addSolutionForComponentId($g_id, $component_id, $solution_text, $author_id) {
+        $this->course_db->query(
+            "INSERT INTO solution_ta_notes (g_id, component_id, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, current_timestamp)",
+            [$g_id, $component_id, $solution_text, $author_id]
+        );
+    }
+    
+    public function getSolutionForComponentId($g_id, $component_id) {
+        $this->course_db->query(
+            "SELECT * FROM solution_ta_notes WHERE g_id = ? AND component_id = ? ORDER BY edited_at DESC LIMIT 1",
+            [$g_id, $component_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getSolutionForAllComponentIds($g_id) {
+        $solution_array = [];
+        $this->course_db->query("SELECT DISTINCT component_id FROM solution_ta_notes WHERE g_id=?", [$g_id]);
+        $component_ids = $this->course_db->rows();
+        foreach ($component_ids as $row) {
+            $solution_array[$row['component_id']] = $this->getSolutionForComponentId($g_id, $row['component_id']);
+        }
+        return $solution_array;
+    }
+
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if ($user_id != null) {
@@ -2763,13 +2788,14 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
 
 
     /**
-     * Add ($g_id,$user_id) pair to table seeking_team
+     * Add ($g_id,$user_id, $message) to table seeking_team
      *
      * @param string $g_id
      * @param string $user_id
+     * @param string $message
      */
-    public function addToSeekingTeam($g_id, $user_id) {
-        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id) VALUES (?,?)", [$g_id, $user_id]);
+    public function addToSeekingTeam($g_id, $user_id, $message) {
+        $this->course_db->query("INSERT INTO seeking_team(g_id, user_id, message) VALUES (?,?,?)", [$g_id, $user_id, $message]);
     }
 
     /**
@@ -2780,6 +2806,35 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function removeFromSeekingTeam($g_id, $user_id) {
         $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", [$g_id, $user_id]);
+    }
+
+    /**
+     * Edit the user's message from table seeking_team
+     *
+     * @param string $g_id
+     * @param string $user_id
+     * @param string $message
+     */
+    public function updateSeekingTeamMessageById($g_id, $user_id, $message) {
+        $this->course_db->query("UPDATE seeking_team SET message=? WHERE g_id=? AND user_id=?", [$message, $g_id, $user_id]);
+    }
+
+    /**
+     * Get the user's message from table seeking_team
+     *
+     * @param string $g_id
+     * @param string $user_id
+     */
+    public function getSeekMessageByUserId($g_id, $user_id) {
+        $this->course_db->query(
+            "SELECT message
+          FROM seeking_team
+          WHERE g_id=?
+          AND user_id=?",
+            [$g_id, $user_id]
+        );
+
+        return $this->course_db->rows()[0]['message'];
     }
 
     /**
@@ -4052,7 +4107,8 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?",
             [$user_id, $course, $semester]
         );
-        return $this->submitty_db->row()['is_instructor'];
+        return count($this->submitty_db->rows()) >= 1 &&
+            $this->submitty_db->row()['is_instructor'];
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
@@ -4066,7 +4122,7 @@ AND gc_id IN (
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
+            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
         }
         catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
@@ -4106,9 +4162,15 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradePost($regrade_id, $user_id, $content) {
-        $params = [$regrade_id, $user_id, $content];
-        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
+    public function insertNewRegradePost($regrade_id, $user_id, $content, $gc_id) {
+        $params = [$regrade_id, $user_id, $content, $gc_id];
+        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
+        return $this->course_db->getLastInsertId();
+    }
+
+    public function getRegradePost($post_id) {
+        $this->course_db->query("SELECT * FROM regrade_discussion WHERE id = ?", [$post_id]);
+        return $this->course_db->row();
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
@@ -5409,6 +5471,20 @@ AND gc_id IN (
         );
         return $this->course_db->row()['exists'] ?? false;
     }
+     /**
+      * Gets if the provied submitter has a submission for a particular gradeable
+      *
+      * @param  \app\models\gradeable\Gradeable $gradeable
+      * @param  String                     $userid
+      * @return bool
+      */
+    public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
+         
+        return $this->course_db->query(
+            'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
+            [$gradeable->getId(), $userid]
+        );
+    }
 
     /**
      * Get the active version for all given submitter ids. If they do not have an active version,
@@ -5708,6 +5784,10 @@ AND gc_id IN (
         }
 
         $this->course_db->query("UPDATE queue SET current_state = 'done', removal_type = ?, time_out = ?, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and current_state IN ('being_helped')", [$remove_type,$this->core->getDateTimeNow(),$this->core->getUser()->getId(), $user_id, $queue_code]);
+    }
+
+    public function setQueuePauseState($new_state) {
+        $this->course_db->query("UPDATE queue SET paused = ? WHERE current_state = 'waiting' AND user_id = ?", [$new_state, $this->core->getUser()->getId()]);
     }
 
     public function emptyQueue($queue_code) {
@@ -6452,6 +6532,16 @@ AND gc_id IN (
         ],
         'user_id' => []
     ];
+    
+    /**
+     * Gets Total Number of Submissions on a Gradeable
+     *
+     * @param string $g_id the gradeable id to check for
+     */
+    public function getTotalSubmissions($g_id) {
+        $this->course_db->query('SELECT * FROM electronic_gradeable_data WHERE g_id= ?', [$g_id]);
+        return count($this->course_db->rows());
+    }
 
     /**
      * Generates the ORDER BY clause with the provided sorting keys.

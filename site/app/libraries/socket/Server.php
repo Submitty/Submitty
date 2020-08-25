@@ -11,17 +11,16 @@ use app\libraries\TokenManager;
 
 class Server implements MessageComponentInterface {
 
-    // Holds the connection objects array stored per course, used directly by the class functions
+    // Holds the mapping between pages that have open socket clients and those clients
     private $clients;
 
-    // Holds the mapping between Connection Objects (key) and User_ID (value)
-    private $sessions;
-
-    // Holds the mapping between Connection Objects IDs (key) and user current course/page (value)
+    // Holds the mapping between Connection Objects IDs (key) and user current course&page (value)
     private $pages;
 
-    // Holds the mapping between User_ID (key) and Connection object (value)
-    /** @var array<string, ConnectionInterface> */
+    // Holds the mapping between Connection Objects IDs (key) and User_ID (value)
+    private $sessions;
+
+    // Holds the mapping between User_ID (key) and Connection objects (value)
     private $users;
 
     /** @var Core */
@@ -80,7 +79,7 @@ class Server implements MessageComponentInterface {
     }
 
     /**
-     * Push a given message to all or all-but-sender connections
+     * Push a given message to all-but-sender connections on the same course&page
      * @param ConnectionInterface $from
      * @param string $content
      * @param string $page_name
@@ -103,11 +102,11 @@ class Server implements MessageComponentInterface {
      */
 
     /**
-     * Fetches Connection object of a given User_ID
+     * Fetches Connection object/s of a given User_ID
      * @param string $user_id
      * @return bool|ConnectionInterface
      */
-    private function getSocketClient(string $user_id) {
+    private function getSocketClients(string $user_id) {
         if (isset($this->users[$user_id])) {
             return $this->users[$user_id];
         }
@@ -138,7 +137,12 @@ class Server implements MessageComponentInterface {
      */
     private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
         $this->sessions[$conn->resourceId] = $user_id;
-        $this->users[$user_id] = $conn;
+        if (array_key_exists($user_id, $this->users)) {
+            $this->users[$user_id][] = $conn;
+        }
+        else {
+            $this->users[$user_id] = [$conn];
+        }
     }
 
     /**
@@ -150,6 +154,12 @@ class Server implements MessageComponentInterface {
         $user_id = $this->getSocketUserID($conn);
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
+            foreach ($this->users[$user_id] as $client) {
+                if ($client === $conn) {
+                    unset($client);
+                    break;
+                }
+            }
             unset($this->users[$user_id]);
             unset($this->pages[$conn->resourceId]);
         }
@@ -204,26 +214,32 @@ class Server implements MessageComponentInterface {
         $msg = json_decode($msgString, true);
 
         if ($msg["type"] === "new_connection") {
-            if (!array_key_exists($msg['page'], $this->clients)) {
-                $this->clients[$msg['page']] = new \SplObjectStorage();
-            }
-            $this->clients[$msg['page']]->attach($from);
-            $this->setSocketClientPage($msg['page'], $from);
+            if (isset($msg['page'])) {
+                if (!array_key_exists($msg['page'], $this->clients)) {
+                    $this->clients[$msg['page']] = new \SplObjectStorage();
+                }
+                $this->clients[$msg['page']]->attach($from);
+                $this->setSocketClientPage($msg['page'], $from);
 
-            if ($this->core->getConfig()->isDebug()) {
-                $course_page = explode('-', $this->getSocketClientPage($from));
-                echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
+                if ($this->core->getConfig()->isDebug()) {
+                    $course_page = explode('-', $this->getSocketClientPage($from));
+                    echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
+                }
+            }
+            else {
+                $from->close();
             }
         }
         elseif (isset($msg['user_id'])) {
-            if ($this->core->getConfig()->isDebug()) {
-                $course_page = explode('-', $msg['page']);
-                echo "New message --> user_id: '" . $msg['user_id'] . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
-            }
-
-            $original_from = $this->getSocketClient($msg['user_id']);
-            if ($original_from) {
-                $original_from->close();
+            // user_id is only sent with socket clients open from a php user_agent
+            $user_open_clients = $this->getSocketClients($msg['user_id']);
+            if (is_array($user_open_clients)) {
+                foreach ($user_open_clients as $original_client) {
+                    if ($this->getSocketClientPage($original_client) === $msg['page']) {
+                        $original_client->close();
+                        break;
+                    }
+                }
             }
             unset($msg['user_id']);
             $new_msg_string = json_encode($msg);
@@ -231,7 +247,7 @@ class Server implements MessageComponentInterface {
             $from->close();
         }
         else {
-            $this->broadcast($from, $msgString, $msg['page']);
+            $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
         }
     }
 
