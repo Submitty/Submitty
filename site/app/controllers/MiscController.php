@@ -247,7 +247,7 @@ class MiscController extends AbstractController {
         
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
-            $message = "You do not have access to that page 1.";
+            $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildCourseUrl());
         }
