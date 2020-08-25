@@ -9,11 +9,13 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
+use app\models\Gradeable;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
+use app\models\gradeable\Gradeable;
 
 class AutoGradingView extends AbstractView {
 
