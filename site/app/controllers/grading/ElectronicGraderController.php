@@ -1067,11 +1067,11 @@ class ElectronicGraderController extends AbstractController {
     }
     
     /**
-    * Given a gradeable, the logged in user, and if the logged in user is a peer
-    * determine if the user should be single, double, or unblind grading
-    */
+     * Given a gradeable, the logged in user, and if the logged in user is a peer
+     * determine if the user should be single, double, or unblind grading
+     */
     
-    private function amIBlindGrading($gradeable, $user, $peer){
+    private function amIBlindGrading($gradeable, $user, $peer) {
         if ($peer && $gradeable->getPeerBlind() === Gradeable::DOUBLE_BLIND_GRADING) {
             return "double";
         }
