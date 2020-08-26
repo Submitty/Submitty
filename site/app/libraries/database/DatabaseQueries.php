@@ -1053,19 +1053,51 @@ WHERE semester=? AND course=? AND user_id=?",
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
-    public function addSolutionForComponentId($g_id, $component_id, $solution_text, $author_id) {
+    public function componentItempoolInfo($g_id, $component_id) {
         $this->course_db->query(
-            "INSERT INTO solution_ta_notes (g_id, component_id, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, current_timestamp)",
-            [$g_id, $component_id, $solution_text, $author_id]
-        );
-    }
-    
-    public function getSolutionForComponentId($g_id, $component_id) {
-        $this->course_db->query(
-            "SELECT * FROM solution_ta_notes WHERE g_id = ? AND component_id = ? ORDER BY edited_at DESC LIMIT 1",
+            "SELECT gc_is_itempool_linked as is_linked, gc_itempool as name FROM gradeable_component WHERE g_id = ? AND gc_id = ?",
             [$g_id, $component_id]
         );
-        return $this->course_db->rows();
+        return $this->course_db->row();
+    }
+
+    public function addSolutionForComponentId($g_id, $component_id, $itempool_item, $solution_text, $author_id) {
+        $this->course_db->query(
+            "INSERT INTO solution_ta_notes (g_id, component_id, itempool_item, solution_notes, author, edited_at) VALUES (?, ?, ?, ?, ?, current_timestamp)",
+            [$g_id, $component_id, $itempool_item, $solution_text, $author_id]
+        );
+    }
+
+    public function getSolutionForComponentItempoolItem($g_id, $component_id, $itempool_item) {
+        $this->course_db->query(
+            "SELECT * FROM solution_ta_notes WHERE g_id = ? AND component_id = ? AND itempool_item = ? ORDER BY edited_at DESC LIMIT 1",
+            [$g_id, $component_id, $itempool_item]
+        );
+        return $this->course_db->row();
+    }
+
+    public function getSolutionForComponentId($g_id, $component_id) {
+        // check if the itempool is linked
+        $itempool = $this->componentItempoolInfo($g_id, $component_id);
+        $itempool_items = [
+            ["itempool_item" => ""],
+        ];
+        $result_rows = [];
+
+        if ($itempool['is_linked']) {
+            $this->course_db->query(
+                "SELECT DISTINCT itempool_item FROM solution_ta_notes WHERE g_id = ? AND component_id = ?",
+                [$g_id, $component_id]
+            );
+            $itempool_items = $this->course_db->rows();
+        }
+
+        foreach ($itempool_items as $itempool_item) {
+            $values = $this->getSolutionForComponentItempoolItem($g_id, $component_id, $itempool_item['itempool_item']);
+            $result_rows[] = array_merge(['itempool_name' => $itempool['name']], $values);
+        }
+
+        return $result_rows;
     }
 
     public function getSolutionForAllComponentIds($g_id) {
@@ -4292,6 +4324,8 @@ AND gc_id IN (
                   json_agg(gc_is_peer) AS array_peer,
                   json_agg(gc_order) AS array_order,
                   json_agg(gc_page) AS array_page,
+                  json_agg(gc_is_itempool_linked) AS array_is_itempool_linked,
+                  json_agg(gc_itempool) AS array_itempool,
                     json_agg(EXISTS(
                       SELECT gc_id
                       FROM gradeable_component_data
@@ -4345,6 +4379,8 @@ AND gc_id IN (
                 'peer',
                 'order',
                 'page',
+                'is_itempool_linked',
+                'itempool',
                 'any_grades'
             ];
             $mark_properties = [
@@ -4713,7 +4749,9 @@ AND gc_id IN (
             $component->isText(),
             $component->getOrder(),
             $component->isPeer(),
-            $component->getPage()
+            $component->getPage(),
+            $component->getIsItempoolLinked(),
+            $component->getItempool()
         ];
         $this->course_db->query(
             "
@@ -4729,8 +4767,10 @@ AND gc_id IN (
               gc_is_text,
               gc_order,
               gc_is_peer,
-              gc_page)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              gc_page,
+              gc_is_itempool_linked,
+              gc_itempool)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
 
@@ -4796,6 +4836,8 @@ AND gc_id IN (
                 $component->getOrder(),
                 $component->isPeer(),
                 $component->getPage(),
+                $component->getIsItempoolLinked(),
+                $component->getItempool(),
                 $component->getId()
             ];
             $this->course_db->query(
@@ -4811,7 +4853,9 @@ AND gc_id IN (
                   gc_is_text=?,
                   gc_order=?,
                   gc_is_peer=?,
-                  gc_page=?
+                  gc_page=?,
+                  gc_is_itempool_linked=?,
+                  gc_itempool=?
                 WHERE gc_id=?",
                 $params
             );
@@ -5479,7 +5523,7 @@ AND gc_id IN (
       * @return bool
       */
     public function getUserHasSubmission(Gradeable $gradeable, string $userid) {
-         
+
         return $this->course_db->query(
             'SELECT user_id FROM electronic_gradeable_data WHERE g_id=? AND (user_id=?)',
             [$gradeable->getId(), $userid]
@@ -6532,7 +6576,7 @@ AND gc_id IN (
         ],
         'user_id' => []
     ];
-    
+
     /**
      * Gets Total Number of Submissions on a Gradeable
      *

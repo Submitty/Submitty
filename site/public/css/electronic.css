@@ -556,7 +556,7 @@ progress::-webkit-progress-value {
 .banner {
     border: solid 6px var(--important-post);
     position:relative;
-    display: none;
+    display: block;
     float: left;
     width: 400px;
     height: 25px;

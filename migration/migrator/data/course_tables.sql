@@ -306,7 +306,9 @@ CREATE TABLE public.gradeable_component (
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
-    gc_page integer NOT NULL
+    gc_page integer NOT NULL,
+    gc_is_itempool_linked boolean DEFAULT false NOT NULL,
+    gc_itempool character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -903,7 +905,8 @@ CREATE TABLE public.solution_ta_notes (
     component_id integer NOT NULL,
     solution_notes text NOT NULL,
     author character varying NOT NULL,
-    edited_at timestamp with time zone NOT NULL
+    edited_at timestamp with time zone NOT NULL,
+    itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 

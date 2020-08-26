@@ -795,7 +795,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, $solution_ta_notes, $showNewInterface) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $showNewInterface) {
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
@@ -872,7 +872,7 @@ HTML;
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $showNewInterface);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $showNewInterface);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $showNewInterface);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map, $showNewInterface);
 
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version, $showNewInterface);
@@ -931,7 +931,7 @@ HTML;
                 $graded_gradeable->getSubmitter()->getId()
             );
         }
-    
+
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         if ($isStudentInfoPanel) {
@@ -1372,14 +1372,16 @@ HTML;
     /**
      * @param Gradeable $gradeable
      * @param array $solution_array
+     * @param array $submitter_itempool_map
      * @param bool $showNewInterface
      * @return string
      */
-    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $showNewInterface) {
+    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map, $showNewInterface) {
         if (!$showNewInterface) {
             return '';
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
+
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
@@ -1388,16 +1390,16 @@ HTML;
                 'id' => $id,
                 'title' => $value->getTitle(),
                 'is_first_edit' => !isset($solution_array[$id]),
-                'author' => isset($solution_array[$id]) ? $solution_array[$id][0]['author'] : '',
-                'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id][0]['solution_notes'] : '',
+                'author' => isset($solution_array[$id]) ? $solution_array[$id]['author'] : '',
+                'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
                 'edited_at' => isset($solution_array[$id])
                     ? DateUtils::convertTimeStamp(
                         $this->core->getUser(),
-                        $solution_array[$id][0]['edited_at'],
+                        $solution_array[$id]['edited_at'],
                         $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
                     ) : null,
-                'max_points' => $value->getUpperClamp(),
-                'min_points' => $value->getLowerClamp(),
+                'is_itempool_linked' => $value->getIsItempoolLinked(),
+                'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
             ];
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
