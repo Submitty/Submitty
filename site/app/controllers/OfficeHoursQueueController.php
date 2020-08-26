@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
 use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * Class OfficeHoursQueueController
@@ -190,6 +191,26 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $remove_type, $queue_code);
         $this->sendSocketMessage(['type' => 'full_update']);
         $this->core->addSuccessMessage("Removed from queue");
+        return MultiResponse::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/togglePause", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function setQueuePauseState() {
+        if (empty($_POST['pause_state'])) {
+            $this->core->addErrorMessage("Missing queue position pause state");
+            return MultiResponse::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->setQueuePauseState($_POST['pause_state'] === 'true');
+        $this->core->addSuccessMessage($_POST['pause_state'] === 'true' ? "Position in queue paused" : "Position in queue unpaused");
+        $this->sendSocketMessage(['type' => 'queue_update']);
         return MultiResponse::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -509,10 +530,20 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
-    private function sendSocketMessage($msg_array) {
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
-        $client = new Client($this->core);
-        $client->send($msg_array);
+        $client = new Client($this->core);        
+        try {
+            $client = new Client($this->core);
+            $client->send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }

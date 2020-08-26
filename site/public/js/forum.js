@@ -2045,8 +2045,10 @@ function clearCreateThreadAutosave() {
 }
 
 $(() => {
+  if(typeof cleanupAutosaveHistory === "function"){
     cleanupAutosaveHistory('-forum-autosave');
     setupForumAutosave();
+  }
 });
 
 //When the user uses tab navigation on the thread list, this function
