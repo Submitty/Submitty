@@ -4,8 +4,8 @@
     let regrade_info = {% if isRegradePanel %} true {% else %} false {% endif %};
     let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
     let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
-
     let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
+
     updateThePanelsElements({
         autograding_results: true,
         grading_rubric: true,
@@ -61,7 +61,7 @@
         {% endif %}
         <span class="grade-panel" id="solution_ta_notes_btn">
             <button title="Show Solution and TA notes"
-                    class="invisible-btn"
+                    class="invisible-btn key_to_click"
                     tabindex="0"
             >
                 <i class="fas fa-check"></i><span>Solutions/Notes</span>
