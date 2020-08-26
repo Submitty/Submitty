@@ -225,7 +225,7 @@ class BaseTestCase(unittest.TestCase):
     def enable_websockets(self):
         submitty_session_cookie = self.driver.get_cookie('submitty_session')
         self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'], header={"User-Agent": "python-socket-client"})
-        new_connection_msg = json.dumps({'type': 'new_connection', 'page': 'f20-sample-' + self.socket_page})
+        new_connection_msg = json.dumps({'type': 'new_connection', 'page': self.semester + '-sample-' + self.socket_page})
         self.ws.send(new_connection_msg)
 
     def check_socket_message(self, message):
