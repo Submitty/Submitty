@@ -201,7 +201,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected type at offset 18$#"
-			count: 3
+			count: 5
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
