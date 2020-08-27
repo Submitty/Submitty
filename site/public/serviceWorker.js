@@ -3,7 +3,7 @@
 //This code was made with the help of https://www.pwabuilder.com/serviceworker
 const CACHE = "offline-page-chache";
 
-// TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
+const contentToCache = [ 'offline.html', '/img/moorthy_duck/00-original.svg']
 const offlineFallbackPage = "offline.html";
 
 // Install stage sets up the offline page in the cache and opens a new cache
@@ -13,7 +13,7 @@ self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
       console.log("[PWA] Cached offline page during install");
-      return cache.add(offlineFallbackPage);
+      return cache.addAll(contentToCache);
     })
   );
 });
