@@ -31,7 +31,7 @@
 // ================================================================================================
 // ================================================================================================
 // read master file with categorization of system calls into groups
-// that are whitelisted, restricted, or forbidden
+// that are safelisted, restricted, or forbidden
 
 void parse_system_calls(std::ifstream& system_call_categories_file, 
                         std::map<std::string,std::string>& all_system_calls, 
@@ -97,7 +97,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       // comments
       if (token == "//") {
         ss >> type;
-        if (type != "WHITELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
+        if (type != "SAFELIST" && type != "RESTRICTED" && type != "FORBIDDEN") {
           // ignore other comments
           continue;
         };
@@ -113,8 +113,8 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
         // make sure nothing else is on that line!
         assert (ss.rdbuf()->in_avail() == 0);
         restriction = type;
-        assert (type == "WHITELIST" || type == "RESTRICTED" || type == "FORBIDDEN");
-        actual_restriction = "WHITELIST";
+        assert (type == "SAFELIST" || type == "RESTRICTED" || type == "FORBIDDEN");
+        actual_restriction = "SAFELIST";
       } 
 
       // if's are used to enforce the restriction & forbidden categories
@@ -262,7 +262,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
   for (std::map<std::string,std::map<std::string,int> >::const_iterator itr = USED_CATEGORIES.begin(); 
        itr != USED_CATEGORIES.end(); itr++) {
 
-    // skip categories that don't match the current type (whitelist,restricted,forbidden)
+    // skip categories that don't match the current type (safelist,restricted,forbidden)
     std::map<std::string,std::string>::const_iterator cat_itr = categories.find(itr->first);
     assert (cat_itr != categories.end());
     if (cat_itr->second != type) continue;
@@ -270,8 +270,8 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
     // the first category (if any) prints a little information blurb
     if (first == true) {
       first = false;
-      if (cat_itr->second == "WHITELIST") {
-        std::cout << "\n*** These system call categories are whitelisted ***\n" << std::endl;
+      if (cat_itr->second == "SAFELIST") {
+        std::cout << "\n*** These system call categories are safelisted ***\n" << std::endl;
       } else if (cat_itr->second == "RESTRICTED") {
         std::cout << "\n*** WARNING!  These system calls are restricted.  To allow use of these ***\n";
         std::cout <<   "***    system calls add the indicated #define to your config.h file.    ***\n" << std::endl;
@@ -360,8 +360,8 @@ int main(int argc, char* argv[]) {
 
 
   // =======================================================
-  // print the categories & whitelist, restricted, or forbidden status
-  print_system_call_categories(categories,USED_CATEGORIES,"WHITELIST");
+  // print the categories & safelist, restricted, or forbidden status
+  print_system_call_categories(categories,USED_CATEGORIES,"SAFELIST");
   print_system_call_categories(categories,USED_CATEGORIES,"RESTRICTED");
   print_system_call_categories(categories,USED_CATEGORIES,"FORBIDDEN");
 
