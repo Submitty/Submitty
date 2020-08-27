@@ -1304,7 +1304,7 @@ tr.is_publish {
 .layout-option-item {
     height: 220px;
     width: 250px;
-    background: #494f54;
+    background: var(--subtle-grey-background);
     padding: 5px;
 }
 
