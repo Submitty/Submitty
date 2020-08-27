@@ -40,8 +40,10 @@ class WebSocketClient {
             if (this.onopen) {
                 this.onopen();
             }
-            const course = document.body.dataset.courseUrl.split('/').pop();
-            this.client.send(JSON.stringify({'type': 'new_connection', 'page': `${course}-${page}`}));
+            const term_course_arr = document.body.dataset.courseUrl.split('/');
+            const course = term_course_arr.pop();
+            const term = term_course_arr.pop();
+            this.client.send(JSON.stringify({'type': 'new_connection', 'page': `${term}-${course}-${page}`}));
         };
 
         this.client.onmessage = (event) => {
