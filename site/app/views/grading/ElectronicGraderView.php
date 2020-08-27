@@ -828,7 +828,7 @@ HTML;
         $return = "";
         $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
         if ($showNewInterface) {
-            $this->core->getOutput()->addInternalJs("drag-and-resize-two-panels.js");
+            $this->core->getOutput()->addInternalJs("resizable-panels.js");
 
             $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
@@ -1344,6 +1344,7 @@ HTML;
 
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
+            $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
         }
         else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
@@ -1436,6 +1437,7 @@ HTML;
 
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
+            $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
         }
         else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');

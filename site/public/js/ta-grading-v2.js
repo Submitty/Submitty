@@ -82,17 +82,6 @@ $(function () {
   let value = $(".progressbar").val() ? $(".progressbar").val() : 0;
   $(".progress-value").html("<b>" + value + '%</b>');
 
-  // panel position selector change event
-  $(".grade-panel .panel-position-cont").change(function() {
-    let panelSpanId = $(this).parent().attr('id');
-    let position = $(this).val();
-    if (panelSpanId) {
-      const panelId = panelSpanId.split(/(_|-)btn/)[0];
-      setPanelsVisibilities(panelId, null, position);
-      $('select#' + panelId + '_select').hide();
-    }
-  });
-
   // Grading panel toggle buttons
   $(".grade-panel button").click(function () {
     const btnCont = $(this).parent();
@@ -108,7 +97,7 @@ $(function () {
     // Hide all select dropdown except the current one
     $('select.panel-position-cont').not(selectEle).hide();
 
-    const isPanelOpen = $('#' + panelId).is(':visible') && btnCont.hasClass('active');
+    const isPanelOpen = $('#' + panelId).is(':visible');
     // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
     // otherwise just toggle it
     if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
@@ -125,7 +114,7 @@ $(function () {
     let panelSpanId = $(this).parent().attr('id');
     let position = $(this).val();
     if (panelSpanId) {
-      const panelId = panelSpanId.split('_btn')[0];
+      const panelId = panelSpanId.split(/(_|-)btn/)[0];
       setPanelsVisibilities(panelId, null, position);
       $('select#' + panelId + '_select').hide();
     }
@@ -191,12 +180,12 @@ function initializeTaLayout() {
   }
   else if (taLayoutDet.numOfPanelsEnabled) {
     togglePanelLayoutModes(true);
-    // initialize the layout\
-    initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
-    initializeHorizontalTwoPanelDrag();
     if (taLayoutDet.isFullLeftColumnMode) {
       toggleFullLeftColumnMode(true);
     }
+    // initialize the layout\
+    initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
+    initializeHorizontalTwoPanelDrag();
   }
   else {
     setPanelsVisibilities(taLayoutDet.currentOpenPanel);
@@ -483,7 +472,6 @@ function resetSinglePanelLayout() {
   // hide all the two-panel-mode related nodes
   $('.two-panel-cont').removeClass("active");
   $("#two-panel-exchange-btn").removeClass("active");
-  $("#full-left-column-btn").removeClass("visible active");
 
   // Remove the full-left-column view (if it's currently present or is in-view) as it's meant for two-panel-mode only
   $(".two-panel-item.two-panel-left, .two-panel-drag-bar").removeClass("active");
@@ -569,8 +557,7 @@ function setMultiPanelModeVisiblities () {
 
 function setPanelsVisibilities (ele, forceVisible=null, position=null) {
   panelElements.forEach((panel) => {
-    let id_str = document.getElementById("#" + panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
-
+    let id_str = document.getElementById(panel.str + "_btn") ? "#" + panel.str + "_btn" : "#" + panel.str + "-btn";
     if (panel.str === ele) {
       const eleVisibility = forceVisible !== null ? forceVisible : !$("#" + panel.str).is(":visible");
       $("#" + panel.str).toggle(eleVisibility);
@@ -585,6 +572,7 @@ function setPanelsVisibilities (ele, forceVisible=null, position=null) {
       }
     } else if ((taLayoutDet.numOfPanelsEnabled && !isMobileView
       && taLayoutDet.currentTwoPanels.rightTop !== panel.str
+      &&  taLayoutDet.currentTwoPanels.rightBottom !== panel.str
       && taLayoutDet.currentTwoPanels.leftTop !== panel.str
       &&  taLayoutDet.currentTwoPanels.leftBottom !== panel.str) || panel.str !== ele ) {
       //only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
@@ -605,12 +593,15 @@ function toggleFullScreenMode () {
   $("main#main").toggleClass('full-screen-mode');
   $("#fullscreen-btn-cont").toggleClass('active');
   taLayoutDet.isFullScreenMode = $("main#main").hasClass('full-screen-mode');
+
+  // update the dragging event for two panels
+  initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
+  //Save the taLayoutDetails in LS
   saveTaLayoutDetails();
 }
 
 function toggleFullLeftColumnMode (forceVal = false) {
   // toggle between the normal left and full left panel mode
-  $("#full-left-column-btn").toggleClass("active");
   if (!forceVal) {
     taLayoutDet.isFullLeftColumnMode = !taLayoutDet.isFullLeftColumnMode;
   }
@@ -622,8 +613,25 @@ function toggleFullLeftColumnMode (forceVal = false) {
   document.querySelector(newPanelsContSelector).prepend(leftPanelCont, dragBar);
 
   panelsContSelector = newPanelsContSelector;
-  // update the dragging event for two panels
-  initializeVerticalTwoPanelDrag();
+}
+
+/**
+ *
+ * @param panelsCount
+ * @param isLeftTaller
+ * @param twoOnRight
+ */
+function changePanelsLayout(panelsCount, isLeftTaller, twoOnRight = false) {
+  taLayoutDet.numOfPanelsEnabled = +panelsCount;
+  taLayoutDet.isFullLeftColumnMode = isLeftTaller;
+
+  taLayoutDet.dividedColName = twoOnRight ? "RIGHT" : "LEFT";
+
+  togglePanelLayoutModes(true);
+  toggleFullLeftColumnMode(true);
+  initializeResizablePanels(leftSelector, verticalDragBarSelector, false, saveResizedColsDimensions);
+  initializeHorizontalTwoPanelDrag();
+  togglePanelSelectorModal(false);
 }
 
 function togglePanelLayoutModes(forceVal = false) {
@@ -635,7 +643,6 @@ function togglePanelLayoutModes(forceVal = false) {
   if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
     twoPanelCont.addClass("active");
     $("#two-panel-exchange-btn").addClass("active");
-    $("#full-left-column-btn").addClass("visible");
     $(".panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar").removeClass("active");
     $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
     // If there is any panel opened just use that and fetch the next one for left side...
@@ -663,16 +670,29 @@ function togglePanelLayoutModes(forceVal = false) {
   }
   else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
     twoPanelCont.addClass("active");
+    $(".two-panel-item.two-panel-left, .two-panel-drag-bar").addClass("active");
+    let topPanel = taLayoutDet.currentTwoPanels.leftTop;
+    let bottomPanel = taLayoutDet.currentTwoPanels.leftBottom;
+
+    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
+    let prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.rightTop;
+
     if (taLayoutDet.dividedColName === "RIGHT") {
+      $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").removeClass("active");
       $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").addClass("active");
+      topPanel = taLayoutDet.currentTwoPanels.rightTop;
+      bottomPanel = taLayoutDet.currentTwoPanels.rightBottom;
+      taLayoutDet.currentTwoPanels.leftBottom = null;
+      prevPanel = topPanel ? topPanel : taLayoutDet.currentTwoPanels.leftTop;
     }
     else {
+      $(".panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag").removeClass("active");
       $(".panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag").addClass("active");
+      taLayoutDet.currentTwoPanels.rightBottom = null;
     }
-    // If currentOpenPanels does not contain selector for leftBottom, calculate which panel to open
-    let prevPanel = taLayoutDet.currentTwoPanels.leftTop ? taLayoutDet.currentTwoPanels.leftTop : taLayoutDet.currentTwoPanels.rightTop;
+
     let nextIdx = -1;
-    if (!taLayoutDet.currentTwoPanels.leftBottom) {
+    if (!bottomPanel) {
       panelElements.every((panel, idx) => {
         if (prevPanel === panel.str) {
             nextIdx = (idx + 1) === panelElements.length ? 0 : idx + 1;
@@ -681,12 +701,31 @@ function togglePanelLayoutModes(forceVal = false) {
               // If yes update the nextIdx
               nextIdx =  (nextIdx + 1) === panelElements.length ? 0 : nextIdx + 1;
             }
-            taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
-            return false;
+            if (taLayoutDet.dividedColName === "RIGHT") {
+              taLayoutDet.currentTwoPanels.rightBottom = panelElements[nextIdx].str;
+            }
+            else {
+              taLayoutDet.currentTwoPanels.leftBottom = panelElements[nextIdx].str;
+            }
+            return false; // Break the loop
         }
         return true;
       })
     }
+    if (nextIdx === -1) {
+      taLayoutDet.currentTwoPanels = taLayoutDet.dividedColName === "LEFT" ? {
+        leftTop: panelElements[0].str,
+        leftBottom: panelElements[1].str,
+        rightTop: panelElements[2].str,
+        rightBottom: null,
+      } : {
+        leftTop: panelElements[0].str,
+          leftBottom: null,
+          rightTop: panelElements[1].str,
+          rightBottom: panelElements[2].str,
+      };;
+    }
+    initializeHorizontalTwoPanelDrag();
     updatePanelLayoutModes();
   }
   else {
