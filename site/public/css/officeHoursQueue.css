@@ -32,7 +32,6 @@ th{
     }
 
     .filter_settings_btn{
-      white-space: normal;
       width: 4rem;
     }
 
@@ -50,4 +49,16 @@ th{
 
 .current_queue_row, a > i.fas{
   color: var(--btn-text-black);
+}
+
+.announcement-setting {
+    min-height: 7em;
+    flex: 1 0 auto;
+    margin: 0 0 1em;
+    width: 100%;
+}
+
+#announcement {
+  background: var(--standard-light-gray);
+  padding: .75rem;
 }

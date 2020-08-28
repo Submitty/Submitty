@@ -6,6 +6,7 @@ import os
 import traceback
 import numpy
 from . import write_to_log as logger
+from . import submitty_ocr as scanner
 
 # try importing required modules
 try:
@@ -26,6 +27,7 @@ def main(args):
     qr_prefix = args[2]
     qr_suffix = args[3]
     log_file_path = args[4]
+    use_ocr = args[5]
 
     buff = "Process " + str(os.getpid()) + ": "
 
@@ -36,8 +38,9 @@ def main(args):
         i = id_index = 0
         page_count = 1
         prev_file = data = "BLANK"
-        output = {"filename": filename, "is_qr": True}
+        output = {"filename": filename, "is_qr": True, "use_ocr": use_ocr}
         json_file = os.path.join(split_path, "decoded.json")
+
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning
             page = convert_from_bytes(
@@ -53,12 +56,16 @@ def main(args):
 
             # decode img - only look for QR codes
             val = pyzbar.decode(thresh, symbols=[ZBarSymbol.QRCODE])
+
             if val != []:
                 # found a new qr code, split here
                 # convert byte literal to string
                 data = val[0][0].decode("utf-8")
-                buff += "Found a QR code with value \'" + data + "\' on"
-                buff += " page " + str(page_number) + ", "
+
+                if not use_ocr:
+                    buff += "Found a QR code with value \'" + data + "\' on"
+                    buff += " page " + str(page_number) + ", "
+
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
                 else:
@@ -76,8 +83,16 @@ def main(args):
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
                                                           prepended_index)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
-
                 output[output_filename] = {}
+
+                # if we're looking for a student's ID, use that as the value instead
+                if use_ocr:
+                    data, confidences = scanner.getDigits(thresh, val)
+                    buff += "Found student ID number of \'" + data + "\' on"
+                    buff += " page " + str(page_number) + ", "
+                    buff += "Confidences: " + str(confidences) + " "
+                    output[output_filename]["confidences"] = str(confidences)
+
                 output[output_filename]['id'] = data
                 # save pdf
                 if i != 0 and prev_file != '':
@@ -151,6 +166,9 @@ def main(args):
         output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
         output[prev_file]['id'] = data
         output[prev_file]['page_count'] = page_count
+        if use_ocr:
+            output[prev_file]['confidences'] = str(confidences)
+
         logger.write_to_json(json_file, output)
 
         with open(prev_file, 'wb') as out:

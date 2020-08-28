@@ -1,0 +1,253 @@
+<div class="content">
+    {% if not poll is defined %}
+        <h1> Add a New Poll </h1>
+
+        <form method="post" action="{{base_url}}/newPoll">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="response_count" id="response-count" value="0"/>
+
+            <label for="poll-name">
+                Poll Name:
+                <input type="text" name="name" id="poll-name" placeholder="Enter name here..."/>
+            </label>
+            <br/> <br/>
+
+            <label for="poll-question">
+                Question:
+                <textarea
+                    id="poll-question"
+                    name="question"
+                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
+                    rows="10" cols="30"
+                    placeholder="Enter question here..."
+                    maxlength="5000"></textarea>
+            </label>
+            <br/><br/>
+
+            <label for="poll-date">
+                Expected release date:
+                <input id="poll-date" class="poll-date"  name="release_date" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            </label>
+            <br/>
+
+            <hr>
+            <h2> Responses: </h2>
+            <div id="responses">
+
+            </div>
+            <br/>
+            <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
+            <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
+            <br/> <br/>
+
+
+
+            <button type="submit" class="btn btn-primary">Add Poll</button>
+        </form>
+    {% else %}
+        <h1> Edit Poll </h1>
+
+        <form method="post" action="{{base_url}}/editPoll/submitEdits">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+            <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
+
+            <label for="poll-name">
+                Poll Name:
+                <input type="text" name="name" id="poll-name" value="{{ poll.getName() }}"/>
+            </label>
+            <br/> <br/>
+
+            <label for="poll-question">
+                Question:
+                <textarea
+                    id="poll-question"
+                    name="question"
+                    style="resize: none; min-height: 100px; max-height: 300px; height: 98px; width: -webkit-fill-available;"
+                    rows="10" cols="30"
+                    maxlength="5000">{{ poll.getQuestion() }}</textarea>
+            </label>
+            <br/><br/>
+
+            <label for="poll-date">
+                Expected release date:
+                <input id="poll-date" class="poll-date" name="release_date" type="text" size="10" value="{{ poll.getReleaseDate() }}"/>
+            </label>
+            <br/>
+            <hr>
+            <h2> Responses: </h2>
+            <div id="responses">
+                {% set index = 0%}
+                {% for response in poll.getResponses() %}
+                    <div id="response_{{response}}_wrapper">
+                        <input type="hidden" class="order order-{{index}}" name="order_{{response}}" value="{{index}}"/>
+                        <input type="hidden" class="option_id" name="option_id_{{response}}" value="{{response}}"/>
+                        <input aria-label="Is correct" type=checkbox name="is_correct_{{response}}" {{ poll.isCorrect(response) ? "checked": "" }}>
+                        <textarea aria-label="Reponse text" class="poll_response" name="response_{{response}}"style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                        rows="10" cols="30">{{poll.getResponseString(response)}}</textarea>
+                        <div class="move-btn up-btn">
+                            <i class="move-arrow up"></i>
+                        </div>
+                        <div class="move-btn down-btn">
+                            <i class="move-arrow down"></i>
+                        </div>
+                        <div class="move-btn delete-btn">
+                            <i class="fa fa-lg fa-trash delete"></i>
+                        </div>
+                        <br/>
+                    </div>
+                    {% set index = index + 1%}
+                {% endfor %}
+            </div>
+            <br/>
+            <button type="button" class="btn btn-primary" onclick="addResponse()">+</button>
+            <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
+            <br/> <br/>
+
+            <button type="submit" class="btn btn-primary">Submit Changes</button>
+        </form>
+    {% endif %}
+</div>
+
+
+<script>
+    flatpickr('.poll-date', {
+        allowInput: true,
+        dateFormat: "Y-m-d",
+        onReady: (a, b, fp) => {
+          fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+        }
+    });
+
+    function addResponse() {
+        let count = $(".poll_response").length
+        let first_free_id = 0
+        while($(`.option_id[value="${first_free_id}"]`).length != 0){
+            first_free_id++;
+        }
+        $("#responses").append(`
+            <div id="response_${count}_wrapper">
+                <input type="hidden" class="order order-${count}" name="order_${count}" value="${count}"/>
+                <input type="hidden" class="option_id" name="option_id_${count}" value="${first_free_id}"/>
+                <input aria-label="Is correct" type=checkbox name="is_correct_${count}">
+                <textarea aria-label="Response text" class="poll_response" name="response_${count}" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: 80%;"
+                rows="10" cols="30"></textarea>
+                <div class="move-btn up-btn">
+                    <i class="move-arrow up"></i>
+                </div>
+                <div class="move-btn down-btn">
+                    <i class="move-arrow down"></i>
+                </div>
+                <div class="move-btn delete-btn">
+                    <i class="fa fa-lg fa-trash delete"></i>
+                </div>
+                <br/>
+            </div>
+        `);
+        $(`#response_${count}_wrapper`).children(".up-btn").on("click", function() {
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == 0) {
+                return;
+            }
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(`#response_${count}_wrapper`).children(".down-btn").on("click", function() {
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == $(".poll_response").length - 1) {
+                return;
+            }
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(`#response_${count}_wrapper`).children(".delete-btn").on("click", function() {
+            let count = $(".poll_response").length
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            for(let i=curr_pos + 1; i < count; i++) {
+                $(".order-" + i).attr("value", i - 1)
+                $(".order-" + i).addClass("order-" + (i - 1));
+                $(".order-" + i).removeClass("order-" + i);
+            }
+            for(let i=wrapper_id + 1; i < count; i++) {
+                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
+                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+            }
+            $(this).parent().remove()
+            count -= 1
+            $("#response-count").val("" + count)
+        })
+        count += 1
+        $("#response-count").val("" + count)
+    }
+
+    function removeResponse() {
+        let count = $(".poll_response").length
+        count -= 1
+        $(`#response_${count}_wrapper`).remove()
+        $("#response-count").val("" + count)
+    }
+
+    $(document).ready(function() {
+        $(".up-btn").on("click", function() {
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == 0) {
+                return;
+            }
+            $(".order-" + (curr_pos - 1)).parent().insertAfter($(this).parent())
+            $(".order-" + (curr_pos - 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos - 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos - 1)).removeClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos - 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos - 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(".down-btn").on("click", function() {
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            if (curr_pos == $(".poll_response").length - 1) {
+                return;
+            }
+            $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent())
+            $(".order-" + (curr_pos + 1)).attr("value", curr_pos)
+            $(".order-" + (curr_pos + 1)).addClass("order-" + curr_pos);
+            $(".order-" + (curr_pos + 1)).removeClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).attr("value", curr_pos + 1)
+            $($(this).siblings(".order")[0]).addClass("order-" + (curr_pos + 1));
+            $($(this).siblings(".order")[0]).removeClass("order-" + (curr_pos));
+        })
+        $(".delete-btn").on("click", function() {
+            let count = $(".poll_response").length
+            let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
+            let wrapper_id = parseInt($(this).parent().attr("id").match("response_(.*)?_wrapper")[1])
+            for(let i=curr_pos + 1; i < count; i++) {
+                $(".order-" + i).attr("value", i - 1)
+                $(".order-" + i).addClass("order-" + (i - 1));
+                $(".order-" + i).removeClass("order-" + i);
+            }
+            for(let i=wrapper_id + 1; i < count; i++) {
+                $("#response_" + i + "_wrapper").children('[name="is_correct_' + i + '"]').attr("name", "is_correct_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="order_' + i + '"]').attr("name", "order_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="response_' + i + '"]').attr("name", "response_" + (i - 1))
+                $("#response_" + i + "_wrapper").children('[name="option_id_' + i + '"]').attr("name", "option_id_" + (i - 1))
+                $("#response_" + i + "_wrapper").attr("id", "response_" + (i - 1) + "_wrapper")
+            }
+            $(this).parent().remove()
+            count -= 1
+            $("#response-count").val("" + count)
+        })
+    });
+
+</script>

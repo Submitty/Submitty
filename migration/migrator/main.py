@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 from typing import Set
+import subprocess
 
 from sqlalchemy.exc import OperationalError
 
@@ -207,8 +208,10 @@ def handle_migration(args):
             try:
                 database = db.Database(loop_args.config.database, environment)
             except OperationalError:
-                print('Database does not exist for {}'.format(environment))
-                continue
+                raise SystemExit(
+                    'Submitty Database Migration Error:  '
+                    'Database does not exist for {}'.format(environment)
+                )
             migrate_environment(
                 database,
                 environment,
@@ -220,8 +223,9 @@ def handle_migration(args):
         if environment == 'course':
             course_dir = Path(args.config.submitty['submitty_data_dir'], 'courses')
             if not course_dir.exists():
-                print("Could not find courses directory: {}".format(course_dir))
-                continue
+                raise SystemExit(
+                    f"Migrator Error:  Could not find courses directory: {course_dir}"
+                )
             for semester in sorted(os.listdir(str(course_dir))):
                 courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
                 for course in courses:
@@ -246,9 +250,17 @@ def handle_migration(args):
                         )
                         database.close()
                     except OperationalError:
-                        print("Submitty Database Migration Warning:  "
-                              "Database does not exist for "
-                              "semester={} course={}".format(semester, course))
+                        # NOTE: Do not fail on missing database.
+                        # Older archived courses may not have a valid
+                        # or active database associated with their
+                        # filesystem.  (Old course submission files
+                        # are useful for plagiarism detection.)
+                        print(
+                            "Submitty Database Migration WARNING:  "
+                            "Database does not exist for "
+                            "semester={} course={}".format(semester, course)
+                        )
+                        continue
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()
@@ -420,3 +432,45 @@ def run_migration(database, migration, environment, args):
                 database.migration_table(id=migration['id'], status=status)
             )
         database.session.commit()
+
+
+def dump(args):
+    if args.config.database['database_driver'] != 'psql':
+        raise SystemExit('Cannot dump schema for non-postgresql database')
+
+    data_dir = Path(args.path) if 'path' in args else Path(__file__).resolve().parent
+    data_dir /= 'data'
+
+    if 'master' in args.environments:
+        out_file = data_dir / 'submitty_db.sql'
+        print(f'Dumping master environment to {str(out_file)}... ', end='')
+        out = subprocess.check_output([
+            'su',
+            '-',
+            'postgres',
+            '-c',
+            'pg_dump -d submitty --schema-only --no-privileges --no-owner'
+        ], universal_newlines=True)
+
+        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
+        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
+        out_file.write_text(out)
+        print('DONE')
+
+    if 'course' in args.environments:
+        out_file = data_dir / 'course_tables.sql'
+        print(f'Dumping course environment to {str(out_file)}... ', end='')
+        today = datetime.today()
+        semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
+
+        out = subprocess.check_output([
+            'su',
+            '-',
+            'postgres',
+            '-c',
+            f'pg_dump -d submitty_{semester}_sample --schema-only --no-privileges --no-owner'
+        ], universal_newlines=True)
+        out = out.replace("SELECT pg_catalog.set_config(\'search_path\', \'\', false);\n", "")
+        out = re.sub(r"\-\- Dumped (from|by)[^\n]*\n", '', out, flags=re.IGNORECASE)
+        out_file.write_text(out)
+        print('DONE')

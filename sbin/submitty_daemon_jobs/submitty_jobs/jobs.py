@@ -15,7 +15,7 @@ from . import bulk_qr_split
 from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
-
+from . import VERIFIED_ADMIN_USER
 
 class AbstractJob(ABC):
     """
@@ -149,7 +149,14 @@ class RunGenerateRepos(CourseGradeableJob):
             with open(log_file_path, "a") as output_file:
                 print ("At time: "+current_time, file=output_file)
                 output_file.flush()
-                subprocess.run(["sudo", gen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+                subprocess.run([
+                    "sudo",
+                    gen_script,
+                    "--non-interactive",
+                    semester,
+                    course,
+                    gradeable
+                ], stdout=output_file, stderr=output_file)
         except PermissionError:
             print("error, could not open " + output_file + " for writing")
 
@@ -229,9 +236,11 @@ class BulkUpload(CourseJob):
             print(msg)
             return
 
+        use_ocr = False
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
             qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+            use_ocr = self.job_details['use_ocr']
         else:
             if 'num' not in self.job_details:
                 msg = "Did not pass in the number to divide " + filename + " by"
@@ -297,7 +306,7 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr])
             else:
                 bulk_upload_split.main([filename, split_path, num, log_file_path])
         except Exception:
@@ -345,3 +354,5 @@ class CreateCourse(AbstractJob):
         with log_file_path.open("w") as output_file:
             subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
+            if VERIFIED_ADMIN_USER != "":
+                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)

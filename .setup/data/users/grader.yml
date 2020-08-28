@@ -1,9 +1,9 @@
 grading_registration_group: 1
 user_firstname: Tim
 user_id: grader
-anon_id: grader
+anon_id: GFJ45AER76NJU89
 user_lastname: Grader
-user_numeric_id: 281149139
+user_numeric_id: 010306042
 courses:
   sample:
     user_group: 3

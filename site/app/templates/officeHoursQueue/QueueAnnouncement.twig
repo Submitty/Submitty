@@ -1,0 +1,28 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}announcement-settings{% endblock %}
+{% block title %}Announcement{% endblock %}
+{% block body %}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+  <label for="queue-announcement-message" class="announcement-setting">
+    <span class="option-title">Edit Office Hours Queue Announcements</span>
+    <br>
+    <span class="option-alt">
+      Messages typed here will appear to all students.<br>
+      Leave it empty to hide the announcement.<br>
+      <a target="_blank" href="https://submitty.org/student/communication/markdown">
+        Supports Markdown
+        <i style="font-style:normal;" class="fa-question-circle"></i>
+      </a>
+    </span>
+  </label>
+  <textarea class="announcement-setting" name="queue_announcement_message" id="queue-announcement-message">{{viewer.getQueueAnnouncementMessage()}}</textarea>
+{% endblock %}
+{% block form %}
+  <form method="post" id="announcement_form" action="{{base_url}}/update_announcement">
+    {{ parent() }}
+  </form>
+{% endblock %}
+{% block buttons %}
+  {{ block('close_button') }}
+  <button id="save_announcement" type="submit" class="btn btn-primary">Save</button>
+{% endblock %}

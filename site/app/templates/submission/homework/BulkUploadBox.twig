@@ -56,6 +56,22 @@
                                     onkeydown="focusNextOnEnter({{ loop.index }}, 0)"
                                 {% endif %}
                             />
+
+
+                            {# Display any similar matches if using OCR #}
+                            {% if use_ocr %}
+                                {% if file["matches"] | length  > 1 %}
+                                <br>
+                                <p> Similar Matches </p>
+                                </br>
+                                {% endif %}
+                                {% for match in file["matches"] %}
+                                    {% if match != file["id"] %}
+                                    <p> {{ match }} </p> 
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+
                             {% if team_assignment %}
                                 {# (size - 1) because twig loops are range inclusive #}
                                 {% set outer_loop = loop %}

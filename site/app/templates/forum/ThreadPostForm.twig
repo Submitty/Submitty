@@ -133,25 +133,7 @@
             {# To be executed at last attachment box #}
             <script>
                 $(function() {
-                    $('div.upload_attachment_box').on('DOMNodeInserted',function(e){
-                        var part = get_part_number(e);
-                        if(isNaN(parseInt(part))) {
-                            return;
-                        }
-                        var target = $(e.target);
-                        var file_object = null;
-                        var filename = target.attr("fname");
-                        for (var j = 0; j < file_array[part-1].length; j++){
-                            if (file_array[part-1][j].name == filename) {
-                                file_object = file_array[part-1][j];
-                                break;
-                            }
-                        }
-                        var image = document.createElement('div');
-                        $(image).addClass("thumbnail");
-                        $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
-                        target.prepend(image);
-                    });
+                    uploadImageAttachments('div.upload_attachment_box');
 
                     // Attachments on Create Thread
                     var part = "{{ post_box_id }}";

@@ -719,6 +719,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     }
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
+    formData.append('use_ocr', use_ocr && use_qr_codes);
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
@@ -940,10 +941,8 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         $(".loading-bar-wrapper").fadeIn(100);
     }
 
-    var short_answer_object    = gatherInputAnswersByType("short_answer");
     var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
     var codebox_object         = gatherInputAnswersByType("codebox");
-    formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
@@ -1093,47 +1092,59 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (target_path[target_path.length-1] == '/')
         target_path = target_path.slice(0, -1); // remove slash
 
-	var filesToBeAdded = false;
-    // Files selected
-    for (var i = 0; i < file_array.length; i++) {
-        for (var j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") != -1 ||
-                file_array[i][j].name.indexOf("\"") != -1) {
-                alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
-                return;
-            }
-            else if (file_array[i][j].name.indexOf("\\") != -1 ||
-                file_array[i][j].name.indexOf("/") != -1) {
-                alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
-                return;
-            }
-            else if (file_array[i][j].name.indexOf("<") != -1 ||
-                file_array[i][j].name.indexOf(">") != -1) {
-                alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
-                return;
-            }
+	  var filesToBeAdded = false;
+    
+    if($('#file_selection').is(":visible")){
+      // Files selected
+      for (var i = 0; i < file_array.length; i++) {
+          for (var j = 0; j < file_array[i].length; j++) {
+              if (file_array[i][j].name.indexOf("'") != -1 ||
+                  file_array[i][j].name.indexOf("\"") != -1) {
+                  alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                  return;
+              }
+              else if (file_array[i][j].name.indexOf("\\") != -1 ||
+                  file_array[i][j].name.indexOf("/") != -1) {
+                  alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                  return;
+              }
+              else if (file_array[i][j].name.indexOf("<") != -1 ||
+                  file_array[i][j].name.indexOf(">") != -1) {
+                  alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                  return;
+              }
 
-            var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
-            // Check conflict here
-            if ( k[0] == 1 )
-            {
-                var skip_confirmation = false;
-                if (expand_zip == 'on') {
-                    var extension = getFileExtension(file_array[i][j].name);
-                    if (extension.toLowerCase() == "zip") {
-                        skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
-                    }
-                }
-                if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
-                    continue;
-                }
-            }
+              var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
+              // Check conflict here
+              if ( k[0] == 1 )
+              {
+                  var skip_confirmation = false;
+                  if (expand_zip == 'on') {
+                      var extension = getFileExtension(file_array[i][j].name);
+                      if (extension.toLowerCase() == "zip") {
+                          skip_confirmation = true; // skip the zip if there is conflict when in expand zip choice.
+                      }
+                  }
+                  if(!skip_confirmation && !confirm("Note: " + file_array[i][j].name + " already exists. Do you want to replace it?")){
+                      continue;
+                  }
+              }
 
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
-            filesToBeAdded = true;
-        }
+              formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+              filesToBeAdded = true;
+          }
+      }
     }
-    if (filesToBeAdded == false){
+    
+    if($('#url_selection').is(":visible")){
+      if($("#url_title").val() !== "" && $("#url_url").val() !== "" ){
+        linkToBeAdded = true;
+        formData.append('url_title', $("#url_title").val());
+        formData.append('url_url', $("#url_url").val());
+      }
+    }
+
+    if (filesToBeAdded == false && linkToBeAdded == false){
         return;
     }
     $.ajax({
@@ -1209,4 +1220,14 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
             window.location.href = buildCourseUrl(['course_materials']);
         }
     });
+}
+
+
+function initializeDropZone(id){
+    var dropzone = document.getElementById(id);
+    dropzone.addEventListener("click", clicked_on_box, false);
+    dropzone.addEventListener("dragenter", draghandle, false);
+    dropzone.addEventListener("dragover", draghandle, false);
+    dropzone.addEventListener("dragleave", draghandle, false);
+    dropzone.addEventListener("drop", drop, false);
 }

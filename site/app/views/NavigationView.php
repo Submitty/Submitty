@@ -199,7 +199,7 @@ class NavigationView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss("navigation.css");
-        $this->core->getOutput()->addInternalJs("navigation.js");
+        $this->core->getOutput()->addInternalJs("collapsible-panels.js");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
@@ -298,14 +298,16 @@ class NavigationView extends AbstractView {
      * @return bool
      */
     private function hasGradeButton(Gradeable $gradeable): bool {
+        $now = $this->core->getDateTimeNow();
+        $date_limitation = $gradeable->getGradeStartDate() <= $now || $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER;
         // full access graders & instructors are allowed to view submissions of assignments with no manual grading
         $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->accessFullGrading();
 
         // limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
-        $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
+        $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup() && $date_limitation;
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $date_limitation && $gradeable->isPeerGrading() && !empty($this->core->getQueries()->getPeerAssignment($gradeable->getId(), $this->core->getUser()->getId()));
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;

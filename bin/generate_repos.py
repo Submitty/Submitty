@@ -13,6 +13,7 @@ import sys
 import shutil
 from sqlalchemy import create_engine, MetaData, Table, bindparam
 
+from submitty_utils import db_utils
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
@@ -22,6 +23,7 @@ DAEMONCGI_GROUP = JSON['daemoncgi_group']
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
     JSON = json.load(open_file)
 DATABASE_HOST = JSON['database_host']
+DATABASE_PORT = JSON['database_port']
 DATABASE_USER = JSON['database_user']
 DATABASE_PASS = JSON['database_password']
 
@@ -41,16 +43,19 @@ def create_folder(folder):
 
 
 parser = argparse.ArgumentParser(description="Generate git repositories for a specific course and homework")
+parser.add_argument("--non-interactive", action='store_true', default=False)
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
 parser.add_argument("repo_name", help="repository name")
 args = parser.parse_args()
 
-db = 'submitty'
-if os.path.isdir(DATABASE_HOST):
-    conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, db, DATABASE_HOST)
-else:
-    conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, db)
+conn_string = db_utils.generate_connect_string(
+    DATABASE_HOST,
+    DATABASE_PORT,
+    "submitty",
+    DATABASE_USER,
+    DATABASE_PASS,
+)
 
 engine = create_engine(conn_string)
 connection = engine.connect()
@@ -78,18 +83,19 @@ is_team = False
 # We will always pass in the name of the desired repository.
 #
 # If the repository name matches the name of an existing gradeable in
-# the course, we will check if it's a team gradeable and create 
+# the course, we will check if it's a team gradeable and create
 # individual or team repos as appropriate.
 #
 # If it's not an existing gradeable, we will ask the user for
 # confirmation, and make individual repos if requested.
 
-
-course_db = "submitty_{}_{}".format(args.semester, args.course)
-if os.path.isdir(DATABASE_HOST):
-    course_conn_string = "postgresql://{}:{}@/{}?host={}".format(DATABASE_USER, DATABASE_PASS, course_db, DATABASE_HOST)
-else:
-    course_conn_string = "postgresql://{}:{}@{}/{}".format(DATABASE_USER, DATABASE_PASS, DATABASE_HOST, course_db)
+course_conn_string = db_utils.generate_connect_string(
+    DATABASE_HOST,
+    DATABASE_PORT,
+    f"submitty_{args.semester}_{args.course}",
+    DATABASE_USER,
+    DATABASE_PASS,
+)
 
 course_engine = create_engine(course_conn_string)
 course_connection = course_engine.connect()
@@ -99,15 +105,15 @@ eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
 select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
 eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
 
-if eg is None:
+is_team = False
+if eg is not None:
+    is_team = eg.eg_team_assignment
+elif not args.non_interactive:
     print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
     response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
     if not response.lower() == 'y':
         print ("exiting");
         sys.exit()
-    is_team = False
-else:
-    is_team = eg.eg_team_assignment
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)

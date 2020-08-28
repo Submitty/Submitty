@@ -43,38 +43,47 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+        {{ self.display_files(self, submissions, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students) %}
+{% macro display_files(self, files, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, external_link) %}
     {# Files on top #}
-        {% for dir, path in files|filter((path,dir) => path is not iterable) %}
-            {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+        {% for dir, path in files|filter((path, dir) => path is not iterable) %}
+            {{ self.display_file(self, dir, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
         {% endfor %}
 
         {# Directories underneath #}
-        {% for dir, path in files if path is iterable %}
-            {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+        {% for dir, path in files|filter(path => path is iterable) %}
+            {{ self.display_dir(self, dir, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
         {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+{% macro display_file(self, dir, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) %}
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
+    {% set this_external_link = external_link[path] %}
+
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
     <div class="file-container">
         <div class="file-viewer">
 
-            <i class="fas fa-file" style='vertical-align:text-bottom;'></i>
-            {{ dir }}&nbsp;
+            {% if this_external_link %}
+                <i class="fas fa-link" style='vertical-align:text-bottom;'></i>
+                <a href="{{this_external_link[0]}}">{{this_external_link[1]}}</a>&nbsp;
+            {% else %}
+                <i class="fas fa-file" style='vertical-align:text-bottom;'></i>
+                {{ dir }}&nbsp;
+            {% endif %}
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
                  <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}" aria-label="Pop up {{ dir }} in a new window" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a class="key_to_click" onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            {% if not this_external_link %}
+              <a class="key_to_click" onclick='downloadFile("{{ path | url_encode }}", "course_materials")' aria-label="Download {{ dir }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            {% endif %}
             {% if userGroup == 1 %}
 
                <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsForm("{{ path }}", {{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
@@ -135,10 +144,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+{% macro display_dir(self, dir, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
-        ) }}
+        {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
     {% else %}
     <div class="folder-container">
 
@@ -166,7 +174,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+            {{ self.display_files(self, contents, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, external_link) }}
 
         </div>
     </div>

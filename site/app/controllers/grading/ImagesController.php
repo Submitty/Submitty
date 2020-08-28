@@ -4,9 +4,11 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\models\DisplayImage;
 use app\models\User;
+use app\views\grading\ImagesView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
@@ -18,12 +20,15 @@ class ImagesController extends AbstractController {
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function viewImagesPage() {
-        $user_group = $this->core->getUser()->getGroup();
-        $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
+        $view = 'sections';
+        if (isset($_GET['view']) && $_GET['view'] === 'all') {
+            $view = 'all';
+        }
 
-        $instructor_permission = ($user_group === User::GROUP_INSTRUCTOR);
+        $grader_sections = $this->core->getUser()->getGradingRegistrationSections();
+        $has_full_access = $this->core->getUser()->accessFullGrading();
         $students = $this->core->getQueries()->getAllUsers();
-        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $instructor_permission);
+        $this->core->getOutput()->renderOutput(['grading', 'Images'], 'listStudentImages', $students, $grader_sections, $has_full_access, $view);
     }
 
     /**
@@ -177,22 +182,44 @@ class ImagesController extends AbstractController {
 
     /**
      * @Route("/courses/{_semester}/{_course}/flag_user_image", methods={"POST"})
-     * @AccessControl(role="INSTRUCTOR")
+     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
-    public function flagUserImage() {
+    public function flagUserImage(): JsonResponse {
+        $user_id = $_POST['user_id'];
+
         if ($_POST['flag'] === 'true') {
             $new_state = 'flagged';
-            $success_msg = $_POST['user_id'] . '\'s image was successfully flagged.';
-            $fail_msg = 'Some error occurred flagging ' . $_POST['user_id'] . '\'s image.';
+            $icon_html = ImagesView::UNDO_ICON_HTML;
+            $href = "javascript:flagUserImage('$user_id', false)";
         }
         else {
             $new_state = 'preferred';
-            $success_msg = $_POST['user_id'] . '\'s image was successfully unflagged.';
-            $fail_msg = 'Some error occurred unflagging ' . $_POST['user_id'] . '\'s image.';
+            $icon_html = ImagesView::FLAG_ICON_HTML;
+            $href = "javascript:flagUserImage('$user_id', true)";
         }
 
-        $result = $this->core->getQueries()->updateUserDisplayImageState($_POST['user_id'], $new_state);
-        $result ? $this->core->addSuccessMessage($success_msg) : $this->core->addErrorMessage($fail_msg);
-        return new RedirectResponse($this->core->buildCourseUrl(['student_photos']));
+        $result = $this->core->getQueries()->updateUserDisplayImageState($user_id, $new_state);
+        $user = $this->core->getQueries()->getSubmittyUser($user_id);
+
+        $image_data = '';
+        $image_mime_type = '';
+
+        $display_image = $user->getDisplayImage();
+        if ($display_image) {
+            $image_data = $display_image->getImageBase64MaxDimension(ImagesView::IMG_MAX_DIMENSION);
+            $image_mime_type = $display_image->getMimeType();
+        }
+
+        if ($result) {
+            return JsonResponse::getSuccessResponse([
+                'first_last_username' => $user->getDisplayedFirstName() . ' ' . $user->getDisplayedLastName(),
+                'image_data' => $image_data,
+                'image_mime_type' => $image_mime_type,
+                'icon_html' => $icon_html,
+                'href' => $href
+            ]);
+        }
+
+        return JsonResponse::getErrorResponse("An error occurred attempting to set $user_id's preferred photo to $new_state.");
     }
 }

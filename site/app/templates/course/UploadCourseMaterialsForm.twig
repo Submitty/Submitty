@@ -58,17 +58,31 @@
             <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
         </label>
         <label>
-            <input id="expand-zip-checkbox" type="checkbox" value="off"/>
-            Unzip zip files (Note: If checked, will replace all folders/files)
-        </label>
-        <label>
             <input id="hide-materials-checkbox" type="checkbox" value="off"/>
             Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <div id="upload-boxes">
-            {# upload1 and input-file1 required for drag-and-drop.js #}
-            <div id="upload1" class="file-input">
+        <fieldset>
+            <legend class="black-message">
+                Type of course material?
+            </legend>
+            <label class = "radio" for="file_selection_radio">
+                <input id="file_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').show();$('#url_selection').hide();" checked>
+                File
+            </label>
+            <label class = "radio" for="url_selection_radio">
+                <input id="url_selection_radio" name="course_material_type" type="radio" onchange="$('#file_selection').hide();$('#url_selection').show();">
+                External URL
+            </label>
+        </fieldset>
+        <div id="file_selection">
+          <label>
+              <input id="expand-zip-checkbox" type="checkbox" value="off"/>
+              Unzip zip files (Note: If checked, will replace all folders/files)
+          </label>
+          <div id="upload-boxes">
+              {# upload1 and input-file1 required for drag-and-drop.js #}
+              <div id="upload1" class="file-input">
                 <label class="label key_to_click" for="input-file1" tabindex="0">"Drag your file(s) here or click to open file browser"</label>
                 <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
                 <table class="file-upload-table" id="file-upload-table-1">
@@ -78,8 +92,21 @@
                   </tr>
                 </table>
             </div>
+          </div>
+          <p>Total files cannot exceed 10 mb or 10240 kb.</p>
         </div>
-        <p>Total files cannot exceed 10 mb or 10240 kb.</p>
+        <div id="url_selection" style="display: none;">
+          <span>
+            <label>
+              Title for URL:
+              <input id="url_title" type="text" class="full-width"/>
+            </label>
+            <label>
+              URL:
+              <input id="url_url" type="url" class="full-width"/>
+            </label>
+          </span>
+        </div>
     </div>
     <script>
         function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {

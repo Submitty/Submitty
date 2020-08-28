@@ -1,4 +1,4 @@
-<div class="{{ classes|join(" ") }}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" data-reply_level="{{ reply_level }}">
+<div class="{{ classes|join(" ") }}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" data-reply_level="{{ reply_level }}" data-parent_id="{{ parent_id }}">
     {% if first == true %}
         <h2 class="create-post-head">
 
@@ -83,7 +83,7 @@
                 {#pass#}
             {% else %}
                 <a class="post_button delete-post-button key_to_click" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}"></i></a>
-                <a class="post_button edit-post-button key_to_click" tabindex = "0" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a>
+                <a class="post_button edit-post-button key_to_click" tabindex = "0" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit"></i></a>
             {% endif %}
         {% endif %}
 
@@ -110,7 +110,7 @@
 </div>
 
 {% if isThreadLocked != 1 or userAccessFullGrading %}
-    <form class="reply-box post_reply_from" id="{{ post_id }}-reply" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data">
+    <form class="reply-box post_reply_form" id="{{ post_id }}-reply" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data">
         <input type="hidden" name="thread_id" value="{{ thread_id }}" />
         <input type="hidden" name="parent_id" value="{{ post_id }}" />
         <br/>
@@ -120,6 +120,7 @@
             "post_content_placeholder" : "Enter your reply to " ~ visible_username ~ " here...",
             "show_merge_thread_button" : false,
             "post_box_id" : post_box_id,
+            "csrf_token" : csrf_token,
             "show_anon" : true,
             "thread_resolve_state": thread_resolve_state,
             "show_unresolve": show_unresolve,

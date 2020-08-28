@@ -769,8 +769,6 @@
             "max_submissions": 20,
             "penalty": -0.1,
             "points": -5,
-            "publish_actions": false,
-            "timestamped_stdout": false,
             "title": "Submission Limit",
             "type": "FileCheck"
         }

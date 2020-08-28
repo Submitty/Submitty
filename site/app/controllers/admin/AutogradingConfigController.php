@@ -9,6 +9,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\models\gradeable\Gradeable;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -52,36 +53,33 @@ class AutogradingConfigController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
      * @param string $g_id gradeable Id
-     * @return MultiResponse
      */
-    public function uploadConfig($g_id = '') {
+    public function uploadConfig($g_id = ''): MultiResponse {
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
 
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
-            $this->core->addErrorMessage("Upload failed: No file to upload");
-            return MultiResponse::RedirectOnlyResponse(
+            $msg = 'Upload failed: No file to upload';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
                 new RedirectResponse($redirect_url)
             );
         }
 
         $upload = $_FILES['config_upload'];
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
-            $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
-            return MultiResponse::RedirectOnlyResponse(
+            $msg = 'Upload failed: Empty tmp name for file';
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
                 new RedirectResponse($redirect_url)
             );
         }
 
-        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
-        $counter = count(scandir($target_dir)) - 1;
-        $try_dir = FileUtils::joinPaths($target_dir, $counter);
-        while (is_dir($try_dir)) {
-            $counter++;
-            $try_dir = FileUtils::joinPaths($target_dir, $counter);
-        }
-        $target_dir = $try_dir;
-        FileUtils::createDir($target_dir);
+        $target_dir = $this->createConfigDirectory();
 
         if (mime_content_type($upload["tmp_name"]) == "application/zip") {
             $zip = new \ZipArchive();
@@ -93,8 +91,11 @@ class AutogradingConfigController extends AbstractController {
             else {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                $this->core->addErrorMessage("Upload failed: {$error_message}");
-                return MultiResponse::RedirectOnlyResponse(
+                $msg = "Upload failed: {$error_message}";
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getErrorResponse($msg),
+                    null,
                     new RedirectResponse($redirect_url)
                 );
             }
@@ -102,16 +103,43 @@ class AutogradingConfigController extends AbstractController {
         else {
             if (!@copy($upload['tmp_name'], FileUtils::joinPaths($target_dir, $upload['name']))) {
                 FileUtils::recursiveRmdir($target_dir);
-                $this->core->addErrorMessage("Upload failed: Could not copy file");
-                return MultiResponse::RedirectOnlyResponse(
+                $msg = 'Upload failed: Could not copy file';
+                $this->core->addErrorMessage($msg);
+                return new MultiResponse(
+                    JsonResponse::getErrorResponse($msg),
+                    null,
                     new RedirectResponse($redirect_url)
                 );
             }
         }
-        $this->core->addSuccessMessage("Gradeable config uploaded");
-        return MultiResponse::RedirectOnlyResponse(
+        $msg = 'Gradeable config uploaded';
+        $this->core->addSuccessMessage($msg);
+        return new MultiResponse(
+            JsonResponse::getSuccessResponse([
+                'config_path' => $target_dir
+            ]),
+            null,
             new RedirectResponse($redirect_url)
         );
+    }
+
+    /**
+     * Generates a new configuration directory in the course's 'config_upload' directory.  The name for the new
+     * directory starts at '1' with additional created directories being named incrementally.
+     *
+     * @return string The absolute path to/including the new directory
+     */
+    public function createConfigDirectory(): string {
+        $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+        $counter = count(scandir($target_dir)) - 1;
+        $try_dir = FileUtils::joinPaths($target_dir, $counter);
+        while (is_dir($try_dir)) {
+            $counter++;
+            $try_dir = FileUtils::joinPaths($target_dir, $counter);
+        }
+        $target_dir = $try_dir;
+        FileUtils::createDir($target_dir);
+        return $target_dir;
     }
 
     /**
@@ -212,21 +240,5 @@ class AutogradingConfigController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getFailResponse("Config path can't be empty.")
         );
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder", methods={"GET"})
-     */
-    public function showNotebookBuilder() {
-        // Load JS and CSS dependencies
-        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
-        $this->core->getOutput()->addInternalCss('notebook-builder.css');
-
-        $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig');
     }
 }

@@ -1,6 +1,12 @@
 {% import _self as self %}
+
+{% if showNewInterface %}
+<div id="submission_browser" class="rubric_panel">
+    <div >
+{% else %}
 <div id="submission_browser" class="draggable rubric_panel">
     <div class="draggable_content">
+{% endif %}
         <div id="directory_view">
             <span class="grading_label">Submissions and Results Browser</span>
             <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
@@ -27,10 +33,7 @@
                     $('#' + currentCodeStyleRadio).prop('checked', true);
                 });
             </script>
-
-            {% if not peer %}
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
-            {% endif %}
+            <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
 
             <span style="padding-right: 10px"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             <br />
@@ -40,30 +43,30 @@
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ self.display_files(self, checkout, "c", 0, "checkout") }}
                 {% endif %}
-                {{ self.display_files(self, results, "r", 0, "results") }}
-                {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
+                {% if not student_grader %}
+                    {{ self.display_files(self, results, "r", 0, "results") }}
+                    {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
+                {% endif %}
             </div>
             {# /Files #}
-            <script>
-                // $(document).ready(function(){
-                //     $(".openAllDiv").on('click', function(){
-                //         if($(this).attr('id') == 'results' || $(this).attr('id') == 'submissions' || $(this).attr('id') =='checkout'){
-                //             var elem = $('[data-linked-type="' + $(this).attr('id') + '"]');
-                //             if(elem.data('clicked-state') == "wasntClicked"){
-                //                 updateValue(elem, "Open", "Close");
-                //             }
-                //         }
-                //     });
-                // });
-            </script>
         </div>
-        <div id="file_view" style="display: none; position: absolute; float: right; right: -100%; width:100%; height: 100%">
-            <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30; display: none">No changes</strong>
-            <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
-            <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
-            <a onclick='collapseFile()' aria-label="Collapse File" class="key_to_click" tabindex="0"><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
-            {% include "grading/electronic/PDFAnnotationBar.twig" %}
-            <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
+        <div id="file-view" class="hide">
+            <div class="sticky-file-info">
+                <div class="flex-row">
+                    <span>
+                        <span class="grading_label">Submissions and Results Browser ></span>
+                        <span class="grading_label" id="grading_file_name"></span>
+                        <a onclick='collapseFile()'
+                           aria-label="Collapse File"
+                           class="key_to_click"
+                           tabindex="0"
+                        ><i class="fas fa-reply" style="font-size:24px" title="Back"></i></a>
+                    </span>
+                    <strong id="save_status">No changes</strong>
+                </div>
+                {% include "grading/electronic/PDFAnnotationBar.twig" %}
+            </div>
+            <div id="file-content"></div>
         </div>
     </div>
 </div>
@@ -71,12 +74,13 @@
 {# todo: Move to ta-grading.js #}
 <script>
     function openFrame(html_file, url_file, num) {
-        var iframe = $('#file_viewer_' + num);
+        let iframe = $('#file_viewer_' + num);
         if (!iframe.hasClass('open') || iframe.hasClass('full_panel')) {
-            var iframeId = "file_viewer_" + num + "_iframe";
-            var directory = "";
+            let iframeId = "file_viewer_" + num + "_iframe";
+            let directory = "";
             if (url_file.includes("submissions")) {
                 directory = "submissions";
+                url_file = url_file;
             }
             else if (url_file.includes("results_public")) {
                 directory = "results_public";
@@ -120,6 +124,7 @@
         var directory = "";
         if (url_file.includes("submissions")) {
             directory = "submissions";
+            url_file = url_file;
         }
         else if (url_file.includes("results_public")) {
             directory = "results_public";
@@ -144,13 +149,13 @@
         }
 
         let promise = loadFile(name, path, page_num);
-        $('#file_view').show();
+        $('#file-view').show();
         $("#grading_file_name").html(name);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
         let offset = $("#submission_browser").width()-precision;
         $("#directory_view").animate({'left': '+=' + -offset + 'px'}, 200);
         $("#directory_view").hide();
-        $("#file_view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
+        $("#file-view").animate({'left': '+=' + -offset + 'px'}, 200).promise();
         return promise;
     }
 
@@ -163,20 +168,21 @@
                 type: 'POST',
                 url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
                 data: {
-                    'user_id': '{{ submitter_id  }}',
+                    'user_id': '{{ anon_submitter_id }}',
                     'filename': name,
                     'file_path': path,
                     'page_num': page_num,
+                    'is_anon': true,
                     'csrf_token': csrfToken
                 },
                 success: function(data){
-                    $('#file_content').append(data);
+                    $('#file-content').append(data);
                 }
             });
         }
         else {
             $('#save_status').hide();
-            $('#file_content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+            $('#file-content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
             $("#file_viewer_full_panel").empty();
             $("#file_viewer_full_panel").attr("data-file_name", "");
             $("#file_viewer_full_panel").attr("data-file_url", "");
@@ -198,9 +204,9 @@
         var offset1 = $("#directory_view").css('left');
         var offset2 = $("#directory_view").width();
         $("#directory_view").animate({'left': '-=' + offset1}, 200);
-        $("#file_view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
-            $('#file_view').css('left', "");
-            $('#file_view').hide();
+        $("#file-view").animate({'left': '+=' + offset2 + 'px'}, 200, function(){
+            $('#file-view').css('left', "");
+            $('#file-view').hide();
         });
     }
 
@@ -221,10 +227,10 @@
 {% macro display_file(self, dir, path, id, indent, title) %}
     <div>
         <div class="file-viewer">
-            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
+            <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}", true); updateCookies();'>
                 <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+            <a id = 'open_file_{{ dir }}' onclick='openFile("{{ dir }}", "{{ path }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             <a onclick='expandFile("{{ dir }}", "{{ path }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
             <a onclick='downloadFile("{{ path }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
         </div>

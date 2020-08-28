@@ -1,10 +1,17 @@
-input[readonly] {
+input[readonly]:not(.btn-danger) {
     background:var(--default-white);
     border:none;
 }
 
-input[disabled] {
+input[disabled]:not(#admin-gradeable-peers-submit) {
     background: var(--standard-medium-gray);
+}
+
+input.readonly.peerstudents {
+    border: 1px solid var(--standard-light-gray);
+    background-color: var(--standard-pale-gray);
+    cursor: not-allowed;
+    color: var(--btn-text-black);
 }
 
 #gradeable-dates input[type="text"] {
@@ -194,6 +201,17 @@ div.btn-container {
     border-radius: 5px;
 }
 
+.popup-form .left-panel {
+    width:50%;
+    display: inline-block;
+}
+
+.popup-form .right-panel {
+    width: calc(50% - 10px);
+    display: inline-block;
+    vertical-align: top;
+}
+
 #rebuild-gradeable-button {
     float: left;
     display: inline-block;
@@ -214,4 +232,46 @@ div.btn-container {
     position: relative;
     top: 5px;
     float: right;
+}
+
+#zip_link_limited {
+    text-decoration:none;
+    color:white;
+    padding:10px;
+    padding-left:0px;
+}
+
+#zip_link_full {
+    text-decoration:none;
+    color:black;
+    padding:10px;
+    padding-left:0px;
+}
+
+#details_button {
+    padding-right:0px;
+}
+
+form.dropdown {
+    text-align:left;
+    padding-top:8px;
+}
+
+.notebook-builder-info {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.notebook-builder-info div {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.select-label-itempool {
+    padding-left: 0;
+}
+
+select[name="component-itempool"] {
+    margin-bottom: 15px;
+    padding-right: 0;
 }

@@ -1,7 +1,5 @@
 {% import _self as self %}
 
-{% from 'notebook/Notebook.twig' import renderNotebook as renderNotebook %}
-
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
@@ -11,7 +9,7 @@
     <div class='content overridden_message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
 {% endif %}
 
-<div class="content">
+<div class="content" id="gradeable-submission-cont">
     <header id="gradeable-info">
         <h1>
             New submission for: {{ gradeable_name }}
@@ -77,12 +75,21 @@
                 <div class="sub">
                     <label for="use-qr">Split by QR code?</label>
                     <input type="checkbox" id="use-qr">
-                    <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
+
+                    {% if feature_flag_enabled('submitty_ocr') %}
+                    <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
+                    <input type="checkbox" id="use-ocr">
+                    {% endif %}
+
+
+                    <br>
+
                     <span id="prefix-prompt">QR code prefix/suffix:
-                    <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
-	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i>
-                    </a>
+                        <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_blank">
+	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
                     </span>
+
+                    <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
@@ -123,12 +130,17 @@
                     $('#num_pages').prop('hidden', true);
                     $('#use-qr').prop('checked',true);
                     $('#expected-num-box').prop('hidden', false);
+                    $('#use-ocr').prop('hidden', false);
+                    $('#use-ocr-id').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
                     }
                     if(sessionStorage.getItem('qr_suffix')){
                         $('#qr_suffix').val(sessionStorage.getItem('qr_suffix'));
+                    }
+                    if(sessionStorage.getItem('use-ocr')){
+                        $('#use-ocr').prop('checked', true);
                     }
                 }
                 if ($("#radio-student").is(":checked")) {
@@ -149,6 +161,14 @@
                     $('#qr_suffix').change(function(){
                         sessionStorage.setItem('qr_suffix', $('#qr_suffix').val());
                     });
+
+                    $('#use-ocr').prop('hidden', false);
+                    $('#use-ocr-id').prop('hidden', false);
+
+                    if(sessionStorage.getItem('use-ocr'))
+                        $('#use-ocr').prop('checked', true);
+                    else
+                        $('#use-ocr').prop('checked', false);
                 }
                 $('#radio-normal').click(function() {
                     sessionStorage.setItem('radio-normal', true);
@@ -185,6 +205,19 @@
                     $('#prefix-prompt').prop('hidden', !$('#prefix-prompt').is(':hidden'));
                     $('#pages-prompt').prop('hidden', !$('#pages-prompt').is(':hidden'));
                     $('#expected-num-box').prop('hidden',!$('#expected-num-box').is(':hidden'));
+
+                    if(!$('#use-qr').is(":checked")){
+                        $('#use-ocr').prop('checked', false);
+                    }
+                });
+                $('#use-ocr').click(function(){
+                    sessionStorage.getItem('use-ocr') ? sessionStorage.removeItem('use-ocr') :
+                        sessionStorage.setItem('use-ocr', true);
+
+                    if( $('#use-qr').is(":checked") !== $('#use-ocr').is(":checked") ){
+                        $('#use-qr').click();
+                    }
+
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -220,7 +253,17 @@
     {% else %}
 
     {% if is_notebook %}
-        {{ renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version,max_file_uploads, old_files) }}
+        {% include 'notebook/Notebook.twig' with {
+            "notebook": notebook,
+            "testcase_messages" : testcase_messages,
+            "image_data" : image_data,
+            "numberUtils" : numberUtils,
+            "student_id" : student_id,
+            "gradeable_id" : gradeable_id,
+            "highest_version" : highest_version,
+            "max_file_uploads" : max_file_uploads,
+            "old_files" : old_files
+        } %}
     {% endif %}
 
         {# File upload boxes #}
@@ -267,9 +310,11 @@
         {% endif %}
         {# /Page selector #}
 
-        <p>
-            {{ upload_message | markdown}}
-        </p>
+        <div class="upload-message">
+            <p>
+                {{ upload_message | markdown}}
+            </p>
+        </div>
 
         <button type="button" id="submit" class="btn btn-success">Submit</button>
 
@@ -305,16 +350,6 @@
             var highest_version = {{ highest_version }};
             for (var i = 1; i <= num_parts; i++ ){
                 initializeDropZone("upload" + String(i));
-            }
-
-
-            function initializeDropZone(id){
-                var dropzone = document.getElementById(id);
-                dropzone.addEventListener("click", clicked_on_box, false);
-                dropzone.addEventListener("dragenter", draghandle, false);
-                dropzone.addEventListener("dragover", draghandle, false);
-                dropzone.addEventListener("dragleave", draghandle, false);
-                dropzone.addEventListener("drop", drop, false);
             }
 
 
@@ -404,6 +439,7 @@
             if ($('#radio-bulk').is(':checked')) {
                 num_pages = $("#num_pages").val();
                 use_qr = $("#use-qr").is(":checked");
+                use_ocr = $('#use-ocr').is(":checked");
                 qr_prefix = $('#qr_prefix').val();
                 qr_suffix = $('#qr_suffix').val();
                 if($('#use-qr').is(':checked')){
@@ -425,7 +461,8 @@
                 handleBulk("{{ gradeable_id }}",
                             {{ max_post_size }},
                             {{ max_file_size }},
-                            num_pages, use_qr, qr_prefix, qr_suffix
+                            num_pages, use_qr,
+                            use_ocr, qr_prefix, qr_suffix
                           );
             }
             // no user id entered, upload for whoever is logged in

@@ -7,7 +7,17 @@
         Are you sure you want to continue? <br /><br />
     </p><br />
 {% endblock %}
+
+{% block close_button_classes %}randomize_cancel_btn{% endblock %}
+{% block close_click_action %}$('#{{ block('popup_id') }}').css('display', 'none'); event.stopPropagation();{% endblock %}
+{% block close_button_text %}Cancel{% endblock %}
 {% block buttons %}
-    <a style="float: left;" onclick="$('#{{ block('popup_id') }}').css('display', 'none'); event.stopPropagation();" class="btn btn-default close-button key_to_click" tabindex="0"> Cancel </a>
+    {{ block('close_button') }}
     <a style="float: right;" class="btn btn-primary" href="{{ randomize_team_rotating_sections_url }}"> Randomly Re-Assign Teams to Rotating Sections </a>
 {% endblock %}
+
+<style>
+  .randomize_cancel_btn{
+    float: left;
+  }
+</style>

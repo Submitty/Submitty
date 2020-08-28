@@ -1,5 +1,10 @@
+{% if showNewInterface %}
+<div id="student_info" class="rubric_panel">
+    <div>
+{% else %}
 <div id="student_info" class="draggable rubric_panel" style="right:15px; bottom:40px; width:48%; height:30%;">
     <div class="draggable_content">
+{% endif %}
         <span class="grading_label">Student Information</span>
         <div class="inner-container">
             <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>

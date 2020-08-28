@@ -27,12 +27,23 @@ set -e
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 CONF_DIR=${THIS_DIR}/../../../config
 
+VAGRANT=0
+if [ -d ${THIS_DIR}/../.vagrant ]; then
+    VAGRANT=1
+fi
+
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
 source ${THIS_DIR}/bin/versions.sh
 
-DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+if [ ${WORKER} == 0 ]; then
+    ALL_DAEMONS=( submitty_websocket_server submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
+    RESTART_DAEMONS=( submitty_websocket_server submitty_daemon_jobs_handler )
+else
+    ALL_DAEMONS=( submitty_autograding_worker )
+    RESTART_DAEMONS=( )
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -43,7 +54,8 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # check optional argument
-if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" && "$1" != "restart_web" ]]; then
+if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
+       && "$1" != "restart_web" && "$1" != "disable_shipper_worker" ]]; then
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
@@ -55,6 +67,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" 
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh restart_web"
+    echo -e "   ./INSTALL_SUBMITTY.sh disable_shipper_worker"
     exit 1
 fi
 
@@ -73,18 +86,6 @@ if [ $? -eq 1 ]; then
 fi
 set -e
 
-
-################################################################################################################
-################################################################################################################
-# REMEMBER IF THE ANY OF OUR DAEMONS ARE ACTIVE BEFORE INSTALLATION BEGINS
-# Note: We will stop & restart the daemons at the end of this script.
-#       But it may be necessary to stop the the daemons as part of the migration.
-set +e
-for i in "${DAEMONS[@]}"; do
-    systemctl is-active --quiet ${i}
-    declare is_${i}_active_before=$?
-done
-set -e
 
 ################################################################################################################
 ################################################################################################################
@@ -285,13 +286,10 @@ chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
-    # remove the old versions of the queues
-    rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
-    rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
     # if the to_be_graded directories do not exist, then make them
     mkdir -p $SUBMITTY_DATA_DIR/to_be_graded_queue
     mkdir -p $SUBMITTY_DATA_DIR/daemon_job_queue
-    mkdir -p $SUBMITTY_DATA_DIR/grading
+    mkdir -p $SUBMITTY_DATA_DIR/in_progress_grading
 
     # set the permissions of these directories
     # INTERACTIVE QUEUE: the PHP_USER will write items to this list, DAEMON_USER will remove them
@@ -300,8 +298,8 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                      $SUBMITTY_DATA_DIR/to_be_graded_queue
     chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/daemon_job_queue
     chmod  770                                      $SUBMITTY_DATA_DIR/daemon_job_queue
-    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/grading
-    chmod  750                                      $SUBMITTY_DATA_DIR/grading
+    chown  ${DAEMON_USER}:${DAEMONPHP_GROUP}        $SUBMITTY_DATA_DIR/in_progress_grading
+    chmod  750                                      $SUBMITTY_DATA_DIR/in_progress_grading
 fi
 
 
@@ -395,7 +393,7 @@ chown  root:root  TestRunner.java
 # everyone can read this file
 chmod  444 TestRunner.java
 
-# compile the executable using the javac we use in the execute.cpp whitelist
+# compile the executable using the javac we use in the execute.cpp safelist
 /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
 # everyone can read the compiled file
@@ -577,7 +575,6 @@ find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 #####################################
 # Obtain API auth token for submitty-admin user
 if [ "${WORKER}" == 0 ]; then
-
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 fi
 #####################################
@@ -617,8 +614,8 @@ chown root:root /etc/sudoers.d/submitty
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 #############################################################
-# stop the any of the submitty daemons (if they're running)
-for i in "${DAEMONS[@]}"; do
+# stop the submitty daemons (if they're running)
+for i in "${ALL_DAEMONS[@]}"; do
     set +e
     systemctl is-active --quiet ${i}
     is_active_now=$?
@@ -638,11 +635,26 @@ for i in "${DAEMONS[@]}"; do
 done
 
 if [ "${WORKER}" == 0 ]; then
-    # Stop all foreign worker daemons
-    echo -e -n "Stopping worker machine daemons..."
+    # Stop all workers on remote machines
+    echo -e -n "Stopping all remote machine workers...\n"
     sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "done"
 fi
+
+# force kill any other shipper processes that may be manually running on the primary machine
+if [ "${WORKER}" == 0 ]; then
+    for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
+        echo "ERROR: Also kill shipper pid $i";
+        kill $i || true;
+    done
+fi
+
+# force kill any other worker processes that may be manually running on the primary or remote machines
+for i in $(ps -ef | grep submitty_autograding_worker | grep -v grep | awk '{print $2}'); do
+    echo "ERROR: Also kill shipper pid $i";
+    kill $i || true;
+done
+
 
 #############################################################
 # cleanup the TODO and DONE folders
@@ -670,7 +682,7 @@ fi
 #############################################################
 # update the various daemons
 
-for i in "${DAEMONS[@]}"; do
+for i in "${ALL_DAEMONS[@]}"; do
     # update the autograding shipper & worker daemons
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/${i}.service  /etc/systemd/system/${i}.service
     chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/${i}.service
@@ -729,23 +741,17 @@ fi
 # If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload
 
-# start the shipper daemon (if it was running)
-
-for i in "${DAEMONS[@]}"; do
-    is_active=is_${i}_active_before
-    if [[ "${!is_active}" == "0" ]]; then
-        systemctl start ${i}
-        set +e
-        systemctl is-active --quiet ${i}
-        is_active_after=$?
-        set -e
-        if [[ "$is_active_after" != "0" ]]; then
-            echo -e "\nERROR!  Failed to restart ${i}\n"
-        fi
-        echo -e "Restarted ${i}"
+# restart the socket & jobs handler daemons
+for i in "${RESTART_DAEMONS[@]}"; do
+    systemctl start ${i}
+    set +e
+    systemctl is-active --quiet ${i}
+    is_active_after=$?
+    set -e
+    if [[ "$is_active_after" != "0" ]]; then
+        echo -e "\nERROR!  Failed to restart ${i}\n"
     else
-        echo -e "\nNOTE: ${i} is not currently running\n"
-        echo -e "To start the daemon, run:\n   sudo systemctl start ${i}\n"
+        echo -e "Restarted ${i}"
     fi
 done
 
@@ -816,18 +822,33 @@ fi
 ################################################################################################################
 ################################################################################################################
 # confirm permissions on the repository (to allow push updates from primary to worker)
-echo "Preparing to update Submitty installation on worker machines"
 if [ "${WORKER}" == 1 ]; then
     # the supervisor user/group must have write access on the worker machine
+    echo -e -n "Update/confirm worker repository permissions"
     chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}
 else
-    # in order to update the submitty source files on the worker machines
-    # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
-    chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
-    chmod -R g+r ${SUBMITTY_REPOSITORY}
+    if [ ${VAGRANT} == 0 ]; then
+        # in order to update the submitty source files on the worker machines
+        # the DAEMON_USER/DAEMON_GROUP must have read access to the repo on the primary machine
+        echo -e -n "Update/confirm primary repository permissions"
+        chgrp -R ${DAEMON_GID} ${SUBMITTY_REPOSITORY}
+        chmod -R g+r ${SUBMITTY_REPOSITORY}
+    fi
 
     # Update any foreign worker machines
-    echo -e -n "Updating worker machines\n\n"
-    sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    echo -e -n "Update worker machines software and install docker images on all machines\n\n"
+    # note: unbuffer the output (python3 -u), since installing docker images takes a while
+    #       and we'd like to watch the progress
+    sudo -H -u ${DAEMON_USER} python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
+    echo -e -n "Done updating workers and installing docker images\n\n"
+
+    if [[ "$#" -ge 1 && $1 == "disable_shipper_worker" ]]; then
+        echo -e -n "WARNING: Autograding shipper and worker are disabled\n\n"
+    else
+        # Restart the shipper & workers
+        echo -e -n "Restart shipper & workers\n\n"
+        python3 -u ${SUBMITTY_INSTALL_DIR}/sbin/restart_shipper_and_all_workers.py
+        echo -e -n "Done restarting shipper & workers\n\n"
+    fi
 fi

@@ -23,7 +23,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students) {
+        $add_files = function (Core $core, &$files, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$external_link) {
             $files[$start_dir_name] = [];
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
@@ -50,6 +50,10 @@ class CourseMaterialsView extends AbstractView {
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
+                        if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
+                            $contents = json_decode(file_get_contents($expected_file_path));
+                            $external_link[$expected_file_path] = [$contents->url, $contents->name];
+                        }
 
                         if ($release_date > $now_date_time) {
                             $isMaterialReleased = '0';
@@ -63,6 +67,10 @@ class CourseMaterialsView extends AbstractView {
                         $release_date = $json['release_time'];
                         if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
+                        }
+                        if (isset($json[$expected_file_path]['external_link']) && $json[$expected_file_path]['external_link'] === true) {
+                            $contents = json_decode(file_get_contents($expected_file_path));
+                            $external_link[$expected_file_path] = [$contents->url, $contents->name];
                         }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
                         if (isset($json[$expected_file_path]['sections'])) {
@@ -78,6 +86,7 @@ class CourseMaterialsView extends AbstractView {
                     $date = substr_replace($date, "9999", 0, 4);
                     $ex_file_path['release_datetime'] = $date;
                     $ex_file_path['hide_from_students'] = "on";
+                    $ex_file_path['external_link'] = false;
                     $releaseData = $ex_file_path['release_datetime'];
                     $no_json[$expected_file_path] = $ex_file_path;
                 }
@@ -122,6 +131,7 @@ class CourseMaterialsView extends AbstractView {
         $in_dir = [];
         $file_sections = [];
         $hide_from_students = [];
+        $external_link = [];
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
@@ -133,7 +143,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students);
+        $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
@@ -163,7 +173,8 @@ class CourseMaterialsView extends AbstractView {
             "user_section" => $user_section,
             "reg_sections" => $reg_sections,
             "file_sections" => $file_sections,
-            "hide_from_students" => $hide_from_students
+            "hide_from_students" => $hide_from_students,
+            "external_link" => $external_link
         ]);
     }
 }

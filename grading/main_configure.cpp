@@ -36,159 +36,14 @@ nlohmann::json printTestCase(TestCase test) {
   return j;
 }
 
-int main(int argc, char *argv[]) {
-
-  // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON("");  // don't know the username yet
-
-  nlohmann::json j;
-
-  if (argc != 2) {
-    std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
-    return 0;
-  }
-
-  std::cout << "FILENAME " << argv[0] << std::endl;
-  int total_nonec = 0;
-  int total_ec = 0;
-
-  int visible = 0;
-  std::cout << "config.json.size " << config_json.size() << std::endl;
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  
-  assert (tc != config_json.end());
-
-  int max_submissions = MAX_NUM_SUBMISSIONS;
-
-  nlohmann::json all;
-  int which_testcase = 0;
-
-  int total_time = 0;
-  //The base max time per testcase.
-  int base_time = default_limits.find(RLIMIT_CPU)->second;
-
-  int leeway = CPU_TO_WALLCLOCK_TIME_BUFFER;
-
-  nlohmann::json::iterator rl = config_json.find("resource_limits");
-  if (rl != config_json.end()){
-    base_time = rl->value("RLIMIT_CPU", base_time);
-  }
-  std::cerr << "BASE TIME " << base_time << std::endl;
-
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,which_testcase++) {
-    int points = itr->value("points",0);
-    bool extra_credit = itr->value("extra_credit",false);
-    bool hidden = itr->value("hidden",false);
-
-    //Add this textcases worst case time to the total worst case time.
-    int cpu_time = base_time;
-    nlohmann::json::iterator rl = itr->find("resource_limits");
-    if (rl != itr->end()){
-      cpu_time = rl->value("RLIMIT_CPU", base_time);
-    }
-    cpu_time += leeway;
-    total_time += cpu_time;
-
-    if (points > 0) {
-      if (!extra_credit)
-        total_nonec += points;
-      else
-        total_ec += points;
-      if (!hidden)
-        visible += points;
-    }
-    //container name only matters if we try to get the commands for this testcase.
-    std::string container_name = "";
-    TestCase tc(config_json,which_testcase,container_name);
-    if (tc.isSubmissionLimit()) {
-      max_submissions = tc.getMaxSubmissions();
-    }
-    all.push_back(printTestCase(tc)); 
-  }
-  std::cout << "processed " << all.size() << " test cases" << std::endl;
-  j["num_testcases"] = all.size();
-  j["testcases"] = all;
-  j["max_possible_grading_time"] = total_time;
-  std::string start_red_text = "\033[1;31m";
-  std::string end_red_text   = "\033[0m";
-
-  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
-  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",total_nonec);
-  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",total_ec);
-  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
-  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
-
-  if (total_nonec != AUTO_POINTS) {
-    std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec 
-        << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
-    return 1;
-  }
-
-  if (total_ec != EXTRA_CREDIT_POINTS) {
-    std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec 
-        << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
-    return 1;
-  }
-  if (total_nonec + TA_POINTS != TOTAL_POINTS) {
-    std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total." 
-        << end_red_text << "\n" << std::endl;
-    return 1;
-  }
-
-
-  std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
-  //std::vector<std::string> part_names = PART_NAMES;
-
-  
-  j["id"] = id;
-  if (config_json.find("assignment_message") != config_json.end()) {
-    j["gradeable_message"] = config_json.value("assignment_message",""); 
-  } else if (config_json.find("gradeable_message") != config_json.end()) {
-    j["gradeable_message"] = config_json.value("gradeable_message", "");
-  }
-  if (config_json.find("early_submission_incentive") != config_json.end()) {
-    nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());
-    nlohmann::json incentive;
-    incentive["message"] = early_submission_incentive.value("message","");
-    incentive["minimum_days_early"] = early_submission_incentive.value("minimum_days_early",0);
-    incentive["minimum_points"] = early_submission_incentive.value("minimum_points",0);
-    incentive["test_cases"] = early_submission_incentive.value("test_cases",std::vector<int>());
-    j["early_submission_incentive"] = incentive; 
-  }
-  j["max_submissions"] = max_submissions;
-  j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
-
-  j["required_capabilities"] = config_json.value("required_capabilities","default");
-  nlohmann::json::iterator parts = config_json.find("part_names");
-  if (parts != config_json.end()) {
-    j["part_names"] =  nlohmann::json::array();
-    for (int i = 0; i < parts->size(); i++) {
-      j["part_names"].push_back((*parts)[i]);
-    }
-  }
-
-  // Configure defaults for hide_submitted_files
-  j["hide_submitted_files"] = config_json.value("hide_submitted_files", false);
-
-  // Configure defaults for hide_version_and_test_details
-  j["hide_version_and_test_details"] = config_json.value("hide_version_and_test_details", false);
-
-    /******************************************
-
-    Validate and inflate notebook data
-
-    ******************************************/
-
-  nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
-  nlohmann::json::iterator itempool_definitions = config_json.find("item_pool");
-  if (in_notebook_cells != config_json.end()){
-
+nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann::json& config_json) {
     // Setup "notebook" items inside the 'j' json item that will be passed forward
-    j["notebook"] = nlohmann::json::array();
-
-    for (int i = 0; i < in_notebook_cells->size(); i++){
+    nlohmann::json complete = nlohmann::json::array();
+    nlohmann::json::const_iterator itempool_definitions = config_json.find("item_pool");
+    int i = 0;
+    for (nlohmann::json::const_iterator itr = notebook.begin(); itr != notebook.end(); itr++, i++){
+      const nlohmann::json in_notebook_cell = (*itr);
       nlohmann::json out_notebook_cell;
-      nlohmann::json in_notebook_cell = (*in_notebook_cells)[i];
 
       // Get type field
       std::string type = in_notebook_cell.value("type", "");
@@ -222,7 +77,6 @@ int main(int argc, char *argv[]) {
               out_notebook_cell["markdown_file"] = markdown_file;
           }
       }
-
       // Handle image data
       else if(type == "image"){
           // Get req image items
@@ -283,7 +137,6 @@ int main(int argc, char *argv[]) {
               out_notebook_cell["programming_language"] = programming_language;
           }
       }
-
       // Handle multiple choice data
       else if(type == "multiple_choice"){
           // Get req multiple choice items
@@ -325,9 +178,10 @@ int main(int argc, char *argv[]) {
       }
       else if(type == "item"){
         std::string item_label = in_notebook_cell.value("item_label", "");
+        nlohmann::json user_item_map = in_notebook_cell.value("user_item_map", nlohmann::json::object());
 
         // Update the complete_config if we had a blank label
-        config_json["notebook"][i]["item_label"] = "";
+        complete[i]["item_label"] = "";
 
         if(itempool_definitions == config_json.end()){
           std::cout << "ERROR: Found an \"item\" cell but no global item_pool was defined!" << std::endl;
@@ -367,25 +221,193 @@ int main(int argc, char *argv[]) {
                       << (item_label.empty() ? "[no label]" : item_label) << std::endl;
           }*/
         }
+        // Check if the indices mapped to users are in 'from_pool' array range
+        for (auto i=user_item_map.begin(); i!=user_item_map.end(); i++) {
+           int item_index = i.value();
+           if(item_index < 0 || item_index >= in_notebook_cell_from_pool.size()) {
+               std::cout << "ERROR: user (" << i.key() <<") mapped with index \"" << item_index;
+               std::cout << "\" which is out of 'from_pool' array range: 0 to " << user_item_map.size() << std::endl;
+               throw -1;
+           }
+        }
 
         // Write the empty string if no label provided, otherwise pass forward item_label
         out_notebook_cell["item_label"] = item_label;
+        
+        // Write the empty object if no 'mapping' provided, otherwise pass forward user_item_map
+        out_notebook_cell["user_item_map"] = user_item_map;
+                
         // Pass forward other items
         out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
         if(in_notebook_cell.find("points") != in_notebook_cell.end()){
           out_notebook_cell["points"] = in_notebook_cell["points"];
         }
       }
-
       // Else unknown type was passed in throw exception
       else{
-            throw "An unknown notebook cell 'type' was detected in the supplied config.json file. Build failed.";
+        std::cout << "An unknown notebook cell type was detected in the supplied config.json file: '" << type << "'. Build failed." << std::endl;
+        throw -1;
       }
 
       // Add this newly validated notebook cell to the one being sent forward
       assert(type != "item" || out_notebook_cell.find("item_label") != out_notebook_cell.end());
-      j["notebook"].push_back(out_notebook_cell);
+      complete.push_back(out_notebook_cell);
+    }
+    return complete;
+}
 
+int main(int argc, char *argv[]) {
+
+  // LOAD HW CONFIGURATION JSON
+  nlohmann::json config_json = LoadAndProcessConfigJSON("");  // don't know the username yet
+
+  nlohmann::json j;
+
+  if (argc != 2) {
+    std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
+    return 0;
+  }
+
+  std::cout << "FILENAME " << argv[0] << std::endl;
+  int total_nonec = 0;
+  int total_ec = 0;
+
+  int visible = 0;
+  std::cout << "config.json.size " << config_json.size() << std::endl;
+  nlohmann::json::iterator tc = config_json.find("testcases");
+
+  assert (tc != config_json.end());
+
+  int max_submissions = MAX_NUM_SUBMISSIONS;
+
+  nlohmann::json all;
+  int which_testcase = 0;
+
+  int total_time = 0;
+  //The base max time per testcase.
+  int base_time = default_limits.find(RLIMIT_CPU)->second;
+
+  int leeway = CPU_TO_WALLCLOCK_TIME_BUFFER;
+
+  nlohmann::json::iterator rl = config_json.find("resource_limits");
+  if (rl != config_json.end()){
+    base_time = rl->value("RLIMIT_CPU", base_time);
+  }
+  std::cerr << "BASE TIME " << base_time << std::endl;
+
+  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,which_testcase++) {
+    int points = itr->value("points",0);
+    bool extra_credit = itr->value("extra_credit",false);
+    bool hidden = itr->value("hidden",false);
+
+    //Add this textcases worst case time to the total worst case time.
+    int cpu_time = base_time;
+    nlohmann::json::iterator rl = itr->find("resource_limits");
+    if (rl != itr->end()){
+      cpu_time = rl->value("RLIMIT_CPU", base_time);
+    }
+    cpu_time += leeway;
+    total_time += cpu_time;
+
+    if (points > 0) {
+      if (!extra_credit)
+        total_nonec += points;
+      else
+        total_ec += points;
+      if (!hidden)
+        visible += points;
+    }
+    //container name only matters if we try to get the commands for this testcase.
+    std::string container_name = "";
+    TestCase tc(config_json,which_testcase,container_name);
+    if (tc.isSubmissionLimit()) {
+      max_submissions = tc.getMaxSubmissions();
+    }
+    all.push_back(printTestCase(tc));
+  }
+  std::cout << "processed " << all.size() << " test cases" << std::endl;
+  j["num_testcases"] = all.size();
+  j["testcases"] = all;
+  j["max_possible_grading_time"] = total_time;
+  std::string start_red_text = "\033[1;31m";
+  std::string end_red_text   = "\033[0m";
+
+  nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",total_nonec);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",total_ec);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+
+  if (total_nonec != AUTO_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec
+        << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
+    return 1;
+  }
+
+  if (total_ec != EXTRA_CREDIT_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec
+        << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
+    return 1;
+  }
+  if (total_nonec + TA_POINTS != TOTAL_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total."
+        << end_red_text << "\n" << std::endl;
+    return 1;
+  }
+
+
+  std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
+  //std::vector<std::string> part_names = PART_NAMES;
+
+
+  j["id"] = id;
+  if (config_json.find("assignment_message") != config_json.end()) {
+    j["gradeable_message"] = config_json.value("assignment_message","");
+  } else if (config_json.find("gradeable_message") != config_json.end()) {
+    j["gradeable_message"] = config_json.value("gradeable_message", "");
+  }
+  if (config_json.find("early_submission_incentive") != config_json.end()) {
+    nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());
+    nlohmann::json incentive;
+    incentive["message"] = early_submission_incentive.value("message","");
+    incentive["minimum_days_early"] = early_submission_incentive.value("minimum_days_early",0);
+    incentive["minimum_points"] = early_submission_incentive.value("minimum_points",0);
+    incentive["test_cases"] = early_submission_incentive.value("test_cases",std::vector<int>());
+    j["early_submission_incentive"] = incentive;
+  }
+  j["max_submissions"] = max_submissions;
+  j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
+
+  j["required_capabilities"] = config_json.value("required_capabilities","default");
+  nlohmann::json::iterator parts = config_json.find("part_names");
+  if (parts != config_json.end()) {
+    j["part_names"] =  nlohmann::json::array();
+    for (int i = 0; i < parts->size(); i++) {
+      j["part_names"].push_back((*parts)[i]);
+    }
+  }
+
+  // Configure defaults for hide_submitted_files
+  j["hide_submitted_files"] = config_json.value("hide_submitted_files", false);
+
+  // Configure defaults for hide_version_and_test_details
+  j["hide_version_and_test_details"] = config_json.value("hide_version_and_test_details", false);
+
+    /******************************************
+
+    Validate and inflate notebook data
+
+    ******************************************/
+
+  if (config_json.find("notebook") != config_json.end()){
+    j["notebook"] = validate_notebook(config_json["notebook"], config_json);
+  }
+
+  if(config_json.find("item_pool") != config_json.end()){
+    int i = 0;
+    for(nlohmann::json::iterator itr = config_json["item_pool"].begin(); itr != config_json["item_pool"].end(); itr++, i++) {
+      j["item_pool"][i]["item_name"] = (*itr)["item_name"];
+      j["item_pool"][i]["notebook"] = validate_notebook((*itr)["notebook"], config_json);
     }
   }
 
@@ -395,6 +417,7 @@ int main(int argc, char *argv[]) {
   // But, if there are input fields, but there are no explicit parts
   // (drag & drop zones / "bucket"s for file upload), set part_names
   // to an empty array (no zones for file drag & drop).
+  nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
   if (parts == config_json.end() &&
       in_notebook_cells != config_json.end()) {
     j["part_names"] =  nlohmann::json::array();
@@ -404,7 +427,7 @@ int main(int argc, char *argv[]) {
   j["points_visible"] = visible;
   j["ta_pts"] = TA_POINTS;
   j["total_pts"] = TOTAL_POINTS;
-  
+
 
   // =================================================================================
   // EXPORT THE JSON FILE
@@ -412,7 +435,7 @@ int main(int argc, char *argv[]) {
   std::ofstream init;
   init.open(argv[1], std::ios::out);
   if (!init.is_open()) {
-    std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting" 
+    std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting"
         << end_red_text << "\n" << std::endl;
     return 0;
   }

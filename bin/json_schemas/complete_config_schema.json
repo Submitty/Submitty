@@ -8,6 +8,14 @@
         "description" : "Timestamp student standard output files",
         "type" : "boolean"
       },
+      "hide_submitted_files" : {
+        "description" : "Hide any file submissions from students.",
+        "type" : "boolean"
+      },
+      "hide_version_and_test_details" : {
+        "description" : "Hide submission version and autograding test details from students.",
+        "type" : "boolean"
+      },
       "publish_actions" : {
         "description" : "Display a list of the actions taken for a testcase via the web UI",
         "type" : "boolean"
@@ -35,6 +43,9 @@
         "type" : "boolean"
       },
       "assignment_message" : {
+        "type" : "string"
+      },
+      "required_capabilities" : {
         "type" : "string"
       },
       "grading_parameters" : {
@@ -371,25 +382,65 @@
               "$ref" : "#/definitions/filecheck"
             }
           ]
-        },
-        "minItems" : 1
+        }
       },
       "notebook" : {
         "description" : "The definition of a notebook consisting of messages and inputs.",
         "type" : "array",
         "items" : {
-          "$ref" : "#/definitions/notebook_object"
+            "$ref" : "#/definitions/notebook_object"
         },
         "minItems" : 0
+      },
+      "item_pool" : {
+        "description" : "An array of objects containing a notebook element and an associated validator. Used for random notebook generation.",
+        "type" : "array",
+        "items" : {
+          "description" : "An object containing a notebook element and an associated validator. Used for random notebook generation.",
+          "additionalProperties" : false,
+          "required" : ["item_name", "notebook"],
+          "properties" : {
+            "item_name" : {
+              "description" : "The name by which this item will be referenced in the notebook.",
+              "type" : "string"
+            },
+            "notebook" : {
+              "description" : "The definition of a notebook section associated with this item.",
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/notebook_object"
+              },
+              "minItems" : 0
+            },
+            "testcases" : {
+              "description" : "The array of testcases associated with this item.",
+              "type" : "array",
+              "items" : {
+                "anyOf" : [
+                  {
+                    "$ref" : "#/definitions/testcase"
+                  },
+                  {
+                    "$ref" : "#/definitions/filecheck"
+                  }
+                ]
+              }
+            }
+          }
+        }
       }
   },
   "definitions" : {
     "submission_limit" : {
       "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
-      "required" : ["max_submissions", "penalty", "points", "title", "type", "timestamped_stdout"],
+      "required" : ["max_submissions", "penalty", "points", "title", "type"],
       "properties" : {
         "timestamped_stdout" : {
-          "description" : "Timestamp student standard output files",
+          "description" : "Add timestamps to student standard output files",
+          "type" : "boolean"
+        },
+        "copy_access_files" : {
+          "description" : "Copy files related to student assignment access into the autograding directory.",
           "type" : "boolean"
         },
         "max_submissions" : {
@@ -416,9 +467,13 @@
     "filecheck": {
       "description" : "A file existence check",
       "additionalProperties" : false,
-      "required" : ["type", "title", "actual_file", "points", "timestamped_stdout"],
+      "required" : ["type", "title", "actual_file"],
       "properties" : {
         "timestamped_stdout" : {
+          "type" : "boolean"
+        },
+        "copy_access_files" : {
+          "description" : "Copy files related to student assignment access into the autograding directory.",
           "type" : "boolean"
         },
         "actual_file" : {
@@ -426,7 +481,7 @@
           "type" : "string"
         },
         "points" : {
-          "type" : "number", 
+          "type" : "number",
           "description" : "The number of points the student receives if actual_file exists"
         },
         "title" : {
@@ -443,11 +498,15 @@
       "description" : "A testcase represents a single test run against student code.",
       "type": "object",
       "additionalProperties" : false,
-      "required" : ["containers", "solution_containers", "dispatcher_actions", "points",
-                    "pre_commands", "single_port_per_container", 
+      "required" : ["containers", "solution_containers", "dispatcher_actions",
+                    "pre_commands", "single_port_per_container",
                     "use_router", "title", "validation", "timestamped_stdout", "publish_actions"],
       "properties" : {
         "timestamped_stdout" : {
+          "type" : "boolean"
+        },
+        "copy_access_files" : {
+          "description" : "Copy files related to student assignment access into the autograding directory.",
           "type" : "boolean"
         },
         "publish_actions" : {
@@ -523,7 +582,65 @@
                     "description" : "The list of named containers to which this message should be delivered.",
                     "items" : {
                       "type" : "string"
-                    }
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Gracefully stop a container (ctrl-c).",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["stop"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Start a container which has been stopped or killed.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["start"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Kill a container (SIGKILL).",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["kill"]
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "minLength" : 1
                   }
                 }
               }
@@ -818,7 +935,7 @@
               }
             ]
           }
-        }, 
+        },
         "points" : {
           "description" : "The point value of this testcase",
           "type": "number"
@@ -844,7 +961,7 @@
                   },
                   "destination" : {
                     "type" : "string"
-                  }, 
+                  },
                   "option" : {
                     "type" : "string"
                   },
@@ -889,7 +1006,7 @@
                 "$ref" : "#/definitions/abstract_validation_object"
               }
             ]
-          } 
+          }
         }
       }
     },
@@ -1013,7 +1130,7 @@
               "type" : "string",
               "enum" : ["MultipleJUnitTestGrader"]
             }
-          }  
+          }
         },
         {
           "type" : "object",
@@ -1107,7 +1224,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["PacmanGrader"]
-            }, 
+            },
             "num_tests" : {
               "type" : "integer",
               "minimum" : 1
@@ -1121,7 +1238,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["searchToken"]
-            }, 
+            },
             "data" : {
               "type" : "array",
               "items" : {
@@ -1137,10 +1254,10 @@
             "method" : {
               "type" : "string",
               "enum" : ["intComparison"]
-            }, 
+            },
             "term" : {
               "type" : "number"
-            }, 
+            },
             "comparison" : {
               "type" : "string"
             },
@@ -1159,7 +1276,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["diff"]
-            }, 
+            },
             "comparison" : {
               "type" : "string"
             },
@@ -1181,7 +1298,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["fileExists"]
-            }, 
+            },
             "one_of" : {
               "type" : "boolean"
             },
@@ -1198,7 +1315,7 @@
             "method" : {
               "type" : "string",
               "enum" : ["warnIfNotEmpty"]
-            }, 
+            },
             "jvm_memory" : {
               "type" : "boolean"
             }
@@ -1282,7 +1399,7 @@
             }
           }
         }
-      ]       
+      ]
     },
     "notebook_object" : {
       "type": "object",
@@ -1400,6 +1517,51 @@
             },
             "testcase_ref" : {
               "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["file_submission"]
+            },
+            "label" : {
+              "type" : "string"
+            },
+            "directory" : {
+              "type" : "string",
+              "description" : "The subdirectory in this submission in which the dropped files will be stored."
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "from_pool"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["item"]
+            },
+            "from_pool" : {
+              "description" : "An array of item_names which reference this gradeables item pool. One of these items will be pulled from to populate this question in the notebook.",
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "user_item_map" : {
+              "type" : "object",
+              "description" : "Mapping of username to index of 'from_pool' array. Users in this mapping, will only be shown item corresponding to the mentioned index next to their username and no hash-based randomization will be done for them."
+            },
+            "points" : {
+              "type" : "number",
+              "description" : "The number of points that this item is worth."
+            },
+            "item_label" : {
               "type" : "string"
             }
           }

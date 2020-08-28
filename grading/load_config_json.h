@@ -3,17 +3,30 @@
 
 #include <set>
 
+void AddGlobalDefaults(nlohmann::json &whole_config);
+
 void AddAutogradingConfiguration(nlohmann::json &whole_config);
 
-void AddDockerConfiguration(nlohmann::json &whole_config);
+void PreserveCompiledFiles(nlohmann::json& testcases, nlohmann::json &whole_config);
 
-void FormatDispatcherActions(nlohmann::json &whole_config);
+void ArchiveValidatedFiles(nlohmann::json &testcases, nlohmann::json &whole_config);
 
-void formatPreActions(nlohmann::json &whole_config);
+void AddDockerConfiguration(nlohmann::json &testcases, nlohmann::json &whole_config);
 
-void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config);
+void FormatDispatcherActions(nlohmann::json &testcases, const nlohmann::json &whole_config);
 
-void InflateTestcases(nlohmann::json &single_testcase);
+void validate_mouse_button(nlohmann::json& action);
+void validate_integer(nlohmann::json& action, std::string field, bool populate_default, int min_val, int default_value);
+void validate_gif_or_screenshot_name(std::string filename);
+void FormatGraphicsActions(nlohmann::json &testcases, nlohmann::json &whole_config);
+
+void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config);
+
+void RewriteDeprecatedMyersDiff(nlohmann::json &testcases, nlohmann::json &whole_config);
+
+void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config);
+
+bool validShowValue(const nlohmann::json& v);
 
 void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config);
 

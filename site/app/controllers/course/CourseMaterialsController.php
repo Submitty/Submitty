@@ -123,6 +123,7 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files as $name => $file) {
             if (!$file->isDir()) {
                 $file_path = $file->getRealPath();
+
                 if (!$this->core->getUser()->accessGrading()) {
                     // only add the file if the section of student is allowed and course material is released!
                     if (CourseMaterial::isSectionAllowed($this->core, $file_path, $this->core->getUser()) && $json[$file_path]['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
@@ -162,6 +163,7 @@ class CourseMaterialsController extends AbstractController {
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
         $data = $_POST['fn'];
         $hide_from_students = null;
+        $external_link = false;
 
         if (!isset($newdatatime)) {
             $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -201,12 +203,15 @@ class CourseMaterialsController extends AbstractController {
                 if (isset($json[$file_name]['hide_from_students'])) {
                     $hide_from_students  = $json[$file_name]['hide_from_students'];
                 }
+                if (isset($json[$file_name]['external_link'])) {
+                    $external_link  = $json[$file_name]['external_link'];
+                }
             }
             if (!is_null($sections)) {
-                $json[$file_name] = ['release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students];
+                $json[$file_name] = ['release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
             }
             else {
-                $json[$file_name] = ['release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students];
+                $json[$file_name] = ['release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
             }
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
@@ -258,7 +263,9 @@ class CourseMaterialsController extends AbstractController {
         foreach ($files_to_modify as $file) {
             $file_path = $file['path'];
             $file_path_release_datetime = empty($release_time) ? $json[$file_path]['release_datetime'] : $release_time;
-            $json[$file_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students];
+            $external_link = isset($json[$file_path]['external_link']) ? $json[$file_path]['external_link'] : false;
+
+            $json[$file_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
         }
 
         FileUtils::writeJsonFile($fp, $json);
@@ -318,6 +325,40 @@ class CourseMaterialsController extends AbstractController {
             return $this->core->getOutput()->renderResultMessage("ERROR: .. is not supported in a course materials filepath.", false, false);
         }
 
+        $url_title = null;
+        if (isset($_POST['url_title'])) {
+            $url_title = $_POST['url_title'];
+        }
+
+        $url_url = null;
+        if (isset($_POST['url_url'])) {
+            if (!filter_var($_POST['url_url'], FILTER_VALIDATE_URL)) {
+                return $this->core->getOutput()->renderResultMessage("ERROR: Invalid url", false);
+            }
+            $url_url = $_POST['url_url'];
+        }
+
+        $external_link_file_name = "";
+        if (isset($url_title) && isset($url_url)) {
+            $external_link_file_name = "external-link-" . $this->core->getDateTimeNow()->format('Y-m-d-H-i-s') . ".json";
+
+            $external_link_json = json_encode(
+                [
+                    "name" => $url_title,
+                    "url" => $url_url,
+                ]
+            );
+
+            $temp_external_link_file = tmpfile();
+            fwrite($temp_external_link_file, $external_link_json);
+
+            $_FILES["files1"]["name"][] = $external_link_file_name;
+            $_FILES["files1"]["type"][] = "text/json";
+            $_FILES["files1"]["tmp_name"][] = stream_get_meta_data($temp_external_link_file)['uri'];
+            $_FILES["files1"]["error"][] = 0;
+            $_FILES["files1"]["size"][] = 10;//Size does not really matter because it is just a basic json file that holds a url
+        }
+
         $uploaded_files = [];
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
@@ -363,7 +404,8 @@ class CourseMaterialsController extends AbstractController {
         $count_item = count($status);
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
-                if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                $is_external_link_file = $uploaded_files[1]["name"][$j] == $external_link_file_name;
+                if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j]) || $is_external_link_file) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
                     $is_zip_file = false;
@@ -424,13 +466,15 @@ class CourseMaterialsController extends AbstractController {
                                 $json[$path] = [
                                     'release_datetime' => $release_time,
                                     'sections' => $sections_exploded,
-                                    'hide_from_students' => $hide_from_students
+                                    'hide_from_students' => $hide_from_students,
+                                    'external_link' => $is_external_link_file,
                                 ];
                             }
                             else {
                                 $json[$path] = [
                                     'release_datetime' => $release_time,
-                                    'hide_from_students' => $hide_from_students
+                                    'hide_from_students' => $hide_from_students,
+                                    'external_link' => $is_external_link_file,
                                 ];
                             }
                         }
@@ -445,10 +489,10 @@ class CourseMaterialsController extends AbstractController {
                                 if ($sections_exploded == null) {
                                     $sections_exploded = [];
                                 }
-                                $json[$dst] = ['release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students];
+                                $json[$dst] = ['release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $is_external_link_file];
                             }
                             else {
-                                $json[$dst] = ['release_datetime' => $release_time, 'hide_from_students' => $hide_from_students];
+                                $json[$dst] = ['release_datetime' => $release_time, 'hide_from_students' => $hide_from_students, 'external_link' => $is_external_link_file];
                             }
                         }
                     }

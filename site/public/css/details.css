@@ -2,14 +2,8 @@
     padding: 20px 10px;
 }
 
-.details-header-row h1 {
-    margin-bottom: 18px;
-    font-weight: 500;
-}
-
 #details-table tbody.details-info-header {
     font-size: 15px;
-    margin: 15px -10px;
 }
 
 #details-table tbody.details-info-header .info td {
@@ -57,6 +51,7 @@
     padding: 6px 6px 6px 0;
     justify-self: flex-end;
     border: 1px solid var(--standard-medium-gray);
+    border-radius: 4px;
 }
 
 #details-legend li i {
@@ -74,10 +69,8 @@
 }
 
 .action-btn-cont a {
-    border-radius: 0;
     padding: 12px;
     flex: 1;
-    height: unset;
     margin-right: 10px;
     border: 1px solid var(--standard-medium-gray);
 }
@@ -132,7 +125,6 @@
 
     #details-table tbody.panel-head-active {
         background: var(--submitty-logo-blue);
-        border: 1px solid var(--text-black);
         color: white;
     }
 
@@ -176,8 +168,8 @@
     #details-table .empty-info-header {
         padding: 10px 0;
         position: relative;
-        margin: 15px -25px;
-        background-color: var(--alert-border-blue);
+        margin: 15px 0;
+        background-color: var(--alert-background-blue);
         transition: 0.2s;
         cursor: pointer;
     }
@@ -188,12 +180,9 @@
     }
 
     #details-table tbody.details-info-header:hover {
-        padding: 10px 0;
-        border: 1px solid var(--text-black);
-        transform: translate(0, -5px);
-        margin-top: 15px;
-        color: white;
         background-color: var(--standard-medium-blue);
+        color: white;
+        transform: translate(0, -5px);
     }
 
     .details-info-header .info,
@@ -231,11 +220,6 @@
 }
 
 @media (min-width: 660px) {
-    .details-header-row h1 {
-        margin-bottom: auto;
-        font-weight: bold;
-    }
-
     .markers-container {
         width: unset;
     }
@@ -252,6 +236,7 @@
 
     .action-btn-cont a {
         margin-right: 0;
+        flex: unset;
     }
 
     .action-btn-cont a:first-child {

@@ -46,7 +46,7 @@
     <div class="settings">
         <input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
             autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
-        <a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();" class="key_to_click" tabindex="0">
+        <a class="fas fa-times key_to_click" id= "clear_search_button" onclick="clearButtonPress();" tabindex="0"></a>
         <datalist id="path_data" style="display:none" >
         {% for path in all_config_paths %}
             <option class="path_autofill_option" data-name="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
@@ -60,7 +60,18 @@
         <input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path'
             value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
-    <br><br>
+
+    <div class="notebook-builder-info">
+        <div class="option-title">Notebook Builder:</div>
+        <div>
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}">Start New</a>
+            <span>Start a new configuration with notebook builder.</span>
+        </div>
+        <div class="notebook-builder-edit-button-div">
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}">Edit Existing</a>
+            <span>Edit the currently selected configuration with notebook builder.</span>
+        </div>
+    </div>
 
     <div class="btn-container" id="rebuild-gradeable-button">
         <a class="btn btn-primary key_to_click" tabindex="0" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
@@ -145,6 +156,12 @@
         for (i=0; i<data[1].length; i++) {
             if (full_path_obj.val() == data[1][i]) {
                 $('#config_search').val(data[0][i]);
+
+                // Update visibility of notebook builder edit button
+                const edit_button_div = document.querySelector('.notebook-builder-edit-button-div');
+                const visibility = data[0][i].split(':')[0] !== 'UPLOADED' ? 'hidden' : 'visible';
+                edit_button_div.style.visibility = visibility;
+
                 return;
             }
         }

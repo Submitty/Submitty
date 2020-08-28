@@ -8,28 +8,29 @@
         {% endif %}
 
         {% if hide_version_and_test_details == false %}
-            <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
-            {% include 'grading/VersionChoice.twig' with({
-                'on_change': "versionChange('" ~ view_version_url ~ "', this)"
-            }) %}
+            <div id="version-cont">
+                <h3 class='label' id="submission_header">Select Submission Version:</h3>
+                {% include 'grading/VersionChoice.twig' with({
+                    'on_change': "versionChange('" ~ view_version_url ~ "', this)"
+                }) %}
 
-            {# If viewing the active version, show cancel button, otherwise so button to switch active #}
-            {% if display_version > 0 %}
-                {% if display_version == active_version %}
-                    <form style="display: inline;" method="post"
-                          action="{{ cancel_url }}">
-                        <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                        <input type="submit" id="do_not_grade" class="btn btn-default" style="float: right" value="Do Not Grade This Assignment">
-                    </form>
-                {% else %}
-                    <form style="display: inline;" method="post"
-                          onsubmit='return checkVersionChange({{ display_version_days_late }},{{ allowed_late_days }})'
-                          action="{{ change_version_url }}">
-                        <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                        <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
-                    </form>
+                {# If viewing the active version, show cancel button, otherwise so button to switch active #}
+                {% if display_version > 0 %}
+                    {% if display_version == active_version %}
+                        <form method="post" action="{{ cancel_url }}">
+                            <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
+                            <input type="submit" id="do_not_grade" class="btn btn-default" value="Do Not Grade This Assignment">
+                        </form>
+                    {% else %}
+                        <form method="post"
+                              onsubmit='return checkVersionChange({{ display_version_days_late }},{{ allowed_late_days }})'
+                              action="{{ change_version_url }}">
+                            <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
+                            <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
+                        </form>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
+            </div>
             {# /Switch version button #}
 
             {# disable changing submissions or cancelling assignment if student submit not allowed #}

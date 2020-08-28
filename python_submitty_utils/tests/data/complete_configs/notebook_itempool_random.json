@@ -3,11 +3,13 @@
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
-            "**/*.class"
+            "**/*.class",
+            "test01/cpp_prime.out"
         ],
         "compilation_to_validation": [
             "test*/STDOUT*.txt",
-            "test*/STDERR*.txt"
+            "test*/STDERR*.txt",
+            "test01/cpp_prime.out"
         ],
         "submission_to_compilation": [
             "*.txt",
@@ -28,7 +30,20 @@
             "*.txt",
             "*.png",
             "test*/*.txt",
-            "test*/*_diff.json"
+            "test*/*_diff.json",
+            "test01/math_1.txt",
+            "test01/math_2.txt",
+            "test01/math_3.txt",
+            "test01/math_4.txt",
+            "test01/animal_1.txt",
+            "test01/animal_2.txt",
+            "test01/animal_3.txt",
+            "test01/STDERR.txt",
+            "test01/STDOUT.txt",
+            "test02/STDOUT.txt",
+            "test02/STDERR.txt",
+            "test01/STDOUT.txt",
+            "test01/STDERR.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -77,16 +92,44 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "math_1",
+                    "timestamped_stdout": false,
                     "title": "Math 1",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "math_1.txt",
+                            "deduction": 1.0,
                             "expected_file": "math_1_answer.txt",
                             "failure_message": "Incorrect Answer",
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -129,16 +172,44 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "math_2",
+                    "timestamped_stdout": false,
                     "title": "Math 2",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "math_2.txt",
+                            "deduction": 1.0,
                             "expected_file": "math_2_answer.txt",
                             "failure_message": "Incorrect Answer",
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -178,16 +249,44 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "math_3",
+                    "timestamped_stdout": false,
                     "title": "Math 3",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "math_3.txt",
+                            "deduction": 1.0,
                             "expected_file": "math_3_answer.txt",
                             "failure_message": "Incorrect Answer",
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -236,17 +335,45 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "math_4",
+                    "timestamped_stdout": false,
                     "title": "Math 4",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "math_4.txt",
                             "comparison": "byLine",
+                            "deduction": 1.0,
                             "expected_file": "math_4_answer.txt",
                             "lineSwapOk": true,
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -274,16 +401,44 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "animal_1",
+                    "timestamped_stdout": false,
                     "title": "Animal 1",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "animal_1.txt",
+                            "deduction": 1.0,
                             "expected_file": "animal_1_answer.txt",
                             "failure_message": "Incorrect Answer (note: make sure your answer is lowercase)",
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -312,16 +467,44 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "animal_2",
+                    "timestamped_stdout": false,
                     "title": "Animal 2",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "animal_2.txt",
+                            "deduction": 1.0,
                             "expected_file": "animal_2_answer.txt",
                             "failure_message": "Incorrect Answer (note: make sure your answer is lowercase)",
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -349,16 +532,44 @@
             ],
             "testcases": [
                 {
+                    "containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "animal_3",
+                    "timestamped_stdout": false,
                     "title": "Animal 3",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "animal_3.txt",
+                            "deduction": 1.0,
                             "expected_file": "animal_3_answer.txt",
                             "failure_message": "Incorrect Answer (note: make sure your answer is lowercase)",
                             "method": "diff",
                             "show_actual": "never",
-                            "show_expected": "never"
+                            "show_expected": "never",
+                            "show_message": "always"
                         }
                     ]
                 }
@@ -413,18 +624,98 @@
             ],
             "testcases": [
                 {
-                    "command": "clang++ -Wall -o cpp_prime.out cpp_codebox.cpp",
+                    "containers": [
+                        {
+                            "commands": [
+                                "clang++ -Wall -o cpp_prime.out cpp_codebox.cpp"
+                            ],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
                     "executable_name": "cpp_prime.out",
                     "points": 1,
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "prime_cpp_compilation",
+                    "timestamped_stdout": false,
                     "title": "C++ Code for Primes -- Compilation",
-                    "type": "Compilation"
+                    "type": "Compilation",
+                    "use_router": false,
+                    "validation": [
+                        {
+                            "actual_file": "STDERR.txt",
+                            "deduction": 0.0,
+                            "description": "Compilation Errors and/or Warnings",
+                            "method": "errorIfNotEmpty",
+                            "show_actual": "on_failure",
+                            "show_message": "on_failure"
+                        },
+                        {
+                            "actual_file": "cpp_prime.out",
+                            "deduction": 1.0,
+                            "description": "Create Executable",
+                            "method": "fileExists",
+                            "show_actual": "on_failure",
+                            "show_message": "on_failure"
+                        },
+                        {
+                            "actual_file": "STDOUT.txt",
+                            "deduction": 0.0,
+                            "description": "Standard Output (STDOUT.txt)",
+                            "method": "warnIfNotEmpty",
+                            "show_actual": "on_failure",
+                            "show_message": "on_failure"
+                        }
+                    ]
                 },
                 {
-                    "command": "./cpp_prime.out",
+                    "containers": [
+                        {
+                            "commands": [
+                                "./cpp_prime.out"
+                            ],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
                     "points": 4,
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "prime_cpp_testing",
+                    "timestamped_stdout": false,
                     "title": "C++ Code for Primes -- Testing",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "STDOUT.txt",
@@ -432,13 +723,17 @@
                             "expected_file": "prime_answer.txt",
                             "failure_message": "Incorrect Answer/Output",
                             "method": "diff",
+                            "show_actual": "always",
+                            "show_expected": "always",
                             "show_message": "on_failure"
                         },
                         {
                             "actual_file": "STDERR.txt",
                             "deduction": 0.5,
                             "description": "Standard Error (STDERR.txt)",
-                            "method": "warnIfNotEmpty"
+                            "method": "warnIfNotEmpty",
+                            "show_actual": "on_failure",
+                            "show_message": "on_failure"
                         }
                     ]
                 }
@@ -461,9 +756,36 @@
             ],
             "testcases": [
                 {
-                    "command": "python3 ./python_codebox.py",
+                    "containers": [
+                        {
+                            "commands": [
+                                "python3 ./python_codebox.py"
+                            ],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
+                    "dispatcher_actions": [],
+                    "pre_commands": [],
+                    "publish_actions": false,
+                    "single_port_per_container": false,
+                    "solution_containers": [
+                        {
+                            "commands": [],
+                            "container_image": "submitty/autograding-default:latest",
+                            "container_name": "container0",
+                            "number_of_ports": 1,
+                            "outgoing_connections": [],
+                            "server": false
+                        }
+                    ],
                     "testcase_label": "prime_python",
+                    "timestamped_stdout": false,
                     "title": "Python Code for Primes",
+                    "use_router": false,
                     "validation": [
                         {
                             "actual_file": "STDOUT.txt",
@@ -471,13 +793,17 @@
                             "expected_file": "prime_answer.txt",
                             "failure_message": "Incorrect Answer/Output",
                             "method": "diff",
+                            "show_actual": "always",
+                            "show_expected": "always",
                             "show_message": "on_failure"
                         },
                         {
                             "actual_file": "STDERR.txt",
                             "deduction": 0,
                             "description": "Standard Error (STDERR.txt)",
-                            "method": "warnIfNotEmpty"
+                            "method": "warnIfNotEmpty",
+                            "show_actual": "on_failure",
+                            "show_message": "on_failure"
                         }
                     ]
                 }
@@ -499,7 +825,7 @@
                 "math_2",
                 "math_3"
             ],
-            "item_label": "",
+            "item_label": "Math Problem",
             "points": 3,
             "type": "item"
         },
@@ -507,7 +833,6 @@
             "from_pool": [
                 "math_4"
             ],
-            "item_label": "",
             "points": 5,
             "type": "item"
         },
@@ -521,7 +846,7 @@
                 "animal_2",
                 "animal_3"
             ],
-            "item_label": "",
+            "item_label": "Animal FIRST",
             "points": 2,
             "type": "item"
         },
@@ -531,7 +856,7 @@
                 "animal_2",
                 "animal_3"
             ],
-            "item_label": "",
+            "item_label": "Animal SECOND",
             "points": 2,
             "type": "item"
         },
@@ -543,14 +868,12 @@
             "from_pool": [
                 "author"
             ],
-            "item_label": "",
             "type": "item"
         },
         {
             "from_pool": [
                 "haiku"
             ],
-            "item_label": "",
             "type": "item"
         },
         {
@@ -562,7 +885,7 @@
                 "cpp_code",
                 "python_code"
             ],
-            "item_label": "",
+            "item_label": "JUST CODE",
             "points": 5,
             "type": "item"
         }
@@ -573,8 +896,6 @@
             "max_submissions": 20,
             "penalty": 0,
             "points": 0,
-            "publish_actions": false,
-            "timestamped_stdout": false,
             "title": "Submission Limit",
             "type": "FileCheck"
         }

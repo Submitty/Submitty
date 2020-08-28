@@ -6,6 +6,7 @@ body {
     display: flex;
     background: var(--background-blue);
     color: var(--text-black);
+    overflow-x: hidden;
 }
 
 #submitty-body {
@@ -41,12 +42,12 @@ nav a > i.f {
 #nav-links {
     display: flex;
     align-items: center;
-    padding: 15px;
+    padding: 5px;
     flex-grow: 1;
 }
 
 #home-button {
-    margin-right: 15px;
+    margin-right: 0;
 }
 
 #breadcrumbs {
@@ -54,6 +55,14 @@ nav a > i.f {
     width: 1px;
     flex: 1 1 auto;
     flex-wrap: wrap;
+    padding-left: 20px;
+    padding-right: 70px;
+}
+@media (max-width: 541px) {
+    #breadcrumbs {
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 
 #breadcrumbs > *:not(:last-child) {
@@ -101,7 +110,9 @@ nav a > i.f {
 
 main {
     width: 100%;
+    min-width: 0;
     position: relative;
+    min-width: 0;
 }
 
 footer {
@@ -116,6 +127,10 @@ footer a {
 
 footer .footer-separator {
     padding: 0 8px;
+}
+
+#moorthy-duck{
+    display: block;
 }
 
 @media (max-width: 541px) {

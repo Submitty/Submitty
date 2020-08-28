@@ -2,8 +2,6 @@
 
 namespace app\controllers;
 
-use app\authentication\DatabaseAuthentication;
-use app\libraries\DateUtils;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -27,93 +25,6 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
-    }
-
-    /**
-     * @Route("/current_user/change_time_zone", methods={"POST"})
-     * @return JsonResponse
-     *
-     * Handle ajax request to update the currently logged in user's time zone data.
-     *
-     * Will return a json success or failure response depending on the result of the operation.
-     */
-    public function changeTimeZone() {
-        if (isset($_POST['time_zone'])) {
-            $updated = $this->core->getUser()->setTimeZone($_POST['time_zone']);
-
-            // Updating went smoothly, so return success
-            if ($updated) {
-                $offset = DateUtils::getUTCOffset($_POST['time_zone']);
-                return JsonResponse::getSuccessResponse(['utc_offset' => $offset]);
-            }
-        }
-
-        // Some failure occurred
-        return JsonResponse::getFailResponse('Error encountered updating user time zone.');
-    }
-
-    /**
-     * @Route("/current_user/change_password", methods={"POST"})
-     * @return MultiResponse
-     */
-    public function changePassword() {
-        $user = $this->core->getUser();
-        if (
-            !empty($_POST['new_password'])
-            && !empty($_POST['confirm_new_password'])
-            && $_POST['new_password'] == $_POST['confirm_new_password']
-        ) {
-            $user->setPassword($_POST['new_password']);
-            $this->core->getQueries()->updateUser($user);
-            $this->core->addSuccessMessage("Updated password");
-        }
-        else {
-            $this->core->addErrorMessage("Must put same password in both boxes.");
-        }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['home']))
-        );
-    }
-
-    /**
-     * @Route("/current_user/change_username", methods={"POST"})
-     * @return MultiResponse
-     */
-    public function changeUserName() {
-        $user = $this->core->getUser();
-        if (isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
-            $newFirstName = trim($_POST['user_firstname_change']);
-            $newLastName = trim($_POST['user_lastname_change']);
-
-            // validateUserData() checks both for length (not to exceed 30) and for valid characters.
-            if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
-                $user->setPreferredFirstName($newFirstName);
-                $user->setPreferredLastName($newLastName);
-                //User updated flag tells auto feed to not clobber some of the user's data.
-                $user->setUserUpdated(true);
-                $this->core->getQueries()->updateUser($user);
-            }
-            else {
-                $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
-            }
-
-            // If we received an image file attempt to save it
-            if ($_FILES['user_image']['tmp_name'] !== '') {
-                $meta = explode('.', $_FILES['user_image']['name']);
-                $file_name = $meta[0];
-                $extension = $meta[1];
-
-                // Save image for user
-                $result = $user->setDisplayImage($extension, $_FILES['user_image']['tmp_name']);
-
-                if (!$result) {
-                    $this->core->addErrorMessage('Some error occurred saving your new user image.');
-                }
-            }
-        }
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildUrl(['home']))
-        );
     }
 
     /**
@@ -174,10 +85,7 @@ class HomePageController extends AbstractController {
                 'showHomePage',
                 $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
-                $courses["data"]["archived_courses"],
-                $this->core->getConfig()->getUsernameChangeText(),
-                $this->core->getAuthentication() instanceof DatabaseAuthentication,
-                $this->core->getCsrfToken()
+                $courses["data"]["archived_courses"]
             )
         );
     }
@@ -329,10 +237,60 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllUnarchivedSemester(),
+                $this->core->getQueries()->getAllTerms(),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken()
             )
+        );
+    }
+
+    /**
+     * @Route("/term/new", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function addNewTerm() {
+        $response = new MultiResponse();
+        if (isset($_POST['term_id']) && isset($_POST['term_name']) && isset($_POST['start_date']) && isset($_POST['end_date'])) {
+            $term_id = $_POST['term_id'];
+            $term_name = $_POST['term_name'];
+            $start_date = $_POST['start_date'];
+            $end_date = $_POST['end_date'];
+
+            $terms = $this->core->getQueries()->getAllTerms();
+            if (in_array($term_id, $terms)) {
+                $this->core->addErrorMessage("Term id already exists.");
+            }
+            elseif ($end_date < $start_date) {
+                $this->core->addErrorMessage("End date should be after Start date.");
+            }
+            else {
+                $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
+                $this->core->addSuccessMessage("Term added successfully.");
+            }
+            $url = $this->core->buildUrl(['home', 'courses', 'new']);
+            $response = $response->RedirectOnlyResponse(new RedirectResponse($url));
+        }
+        return $response;
+    }
+    
+    /**
+     * @Route("/update", methods={"GET"})
+     * @return MultiResponse|WebResponse
+     */
+    public function systemUpdatePage() {
+        $user = $this->core->getUser();
+        if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+            return new MultiResponse(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+
+        $this->core->getOutput()->addInternalJs('system-update.js');
+        return new WebResponse(
+            'HomePage',
+            'showSystemUpdatePage',
+            $this->core->getCsrfToken()
         );
     }
 }

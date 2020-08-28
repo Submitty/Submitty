@@ -81,7 +81,7 @@
               <span class="{{ type_class }}">{{ message['message'] | nl2br }}</span><br />
         {% endfor %}
 
-        <div id="container_{{ index }}_{{ check_index }}_{{ side }}">
+        <div id="container_{{ index }}_{{ check_index }}_{{ side }}" class="diff-container-box">
             {% if element.type == "image" %}
                 <img src="{{ element.src }}" style="border:2px solid black">
             {% elseif element.type == "text" %}

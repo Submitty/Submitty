@@ -123,6 +123,59 @@
     }
 </script>
 <body onload="document.getElementById('defaultOpen').click();">
+
+{% set double_blind = false %}
+{% set single_blind = false %}
+
+<!-- If grader is limited access or full access grader -->
+{% if core.getUser().getGroup() == 2 or core.getUser().getGroup() == 3 %}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Grader</h1>
+    <p>
+        You will be reviewing materials submitted by students and these materials are considered confidential.<br>
+        The author of this material is entitled to copyright protection. As such,
+    <ul>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material.<br>
+            You must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+{% if double_blind == true %}            
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be <em>blinded</em>.<br>
+            You should not attempt to discover the identities of the students.<br>
+            However, their identities may be unintentionally or unavoidably revealed.<br>
+            Please respect the students' privacy.</li>
+{% endif %}
+    </ul>
+    </p><p>
+        Please communicate with the instructor if you realize you have a conflict of interest with a student that you have been assigned to grade.
+    </p>
+</div>
+<!-- Else if grader is a student peer grader -->
+{% elseif core.getUser().getGroup() == 4 %}
+<div class="content gradeable_message">
+    <h1>Your Responsibility as a Peer Grader</h1>
+    <p>
+        You will be reviewing materials submitted by your classmates and these materials are considered confidential.<br>
+        Your classmate, the author of this material, is entitled to copyright protection. As such,
+    <ul>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not use or share any of these materials or ideas without explicit permission from the author.</li>
+        <li style="margin-left:30px;margin-bottom:10px;">You may not retain this material -- you must delete/destroy any copies of this material after your review and grading of the work is complete.</li>
+{% if double_blind == true %}            
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be double-blind.<br>
+            You should not attempt to discover the identities of your classmates.<br>
+            However, the identities of the classmates may be unintentionally or unavoidably revealed.<br>
+            Please respect your classmates' privacy.</li>
+{% elseif single_blind == true %}
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be single-blind.</li>
+{% else %}
+        <li style="margin-left:30px;margin-bottom:10px;">Your instructor has configured the grading for this assignment to be unblinded.</li>
+{% endif %}
+    </ul>
+    </p><p>
+        Please communicate with your instructor if you realize you have a conflict of interest with a peer that you have been assigned to grade.
+    </p>
+</div>
+{% endif %}
+
 <div class = "content">
     <h1>Status of {{ gradeable_title }}</h1>
 
@@ -596,53 +649,75 @@
                                 <br/>
                                 <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
                                 <br/>
-                                <br/>
+                                <b>Students not on a team:</b> {{ no_team_total }}
+                                <br>
                                 <b>Number of teams:</b> {{ total_submissions }}
                                 <br/>
                                 <br/>
                                 <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             {% else %}
-                                <br/>
-                                <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                                <br/>
-                                <br/>
-                                <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                                {% if peer and not team_assignment %}
+                                    <br/>
+                                    <b>Students who have submitted:</b>  {{ total_students_submitted }} / {{ total_submissions }} ({{ submitted_percentage_peer }}%)
+                                    <br/>
+                                    <br/>
+                                    <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
+                                {% else %}
+                                    <br/>
+                                    <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                    <br/>
+                                    <br/>
+                                    <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
+                                {% endif %}
                             {% endif %}
                         
                             <br/>
                             <br/>
                         {% endif %}
-                        {% if peer %}
-                            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
-                        {% else %}
-                            <b>By Grading Sections:</b>
+                        {% if peer and not team_assignment %}
+                            <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})
+                            <br>
+                        {% endif %}
+                            <b>TA Grading By Sections:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
-                                    Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                    {% if key != "peer_stu_grad"%}
+                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                             <br/>
                             <b>Graders:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
-                                    Section {{ key }}:
-                                    {% if section.valid_graders|length == 0 %}
-                                        Nobody
-                                    {% else %}
-                                        {{ section.valid_graders | join(", ") }}
+                                    {% if key != "peer_stu_grad"%}
+                                        Section {{ key }}:
+                                        {% if section.valid_graders|length == 0 %}
+                                            Nobody
+                                        {% else %}
+                                            {{ section.valid_graders | join(", ") }}
+                                        {% endif %}
+                                        <br/>
                                     {% endif %}
-                                    <br/>
                                 {% endfor %}
                             </div>
-                        {% endif %}
+                        
 
                         {% if ta_grades_released %}
                             {% if team_assignment %}
-                                <br/>
-                                <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-								<b>Number of students who have viewed their grade:</b>
-									{{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
-                            {% elseif not peer%}
+                                {% if peer %}
+                                    <br>
+                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ total_submissions }} ({{ viewed_percent }}%)
+                                    <br>
+                                    <b>Number of students who have viewed their grade:</b>{{ individual_viewed_grade }} / {{ total_submissions }} ({{ individual_viewed_percent }}%)
+                                {% else %}
+                                 <br/>
+                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ total_submissions }} ({{ viewed_percent }}%)
+                                    <br>
+                                    <b>Number of students who have viewed their grade:</b>
+                                        {{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
+                                {% endif %}
+                            {% elseif not team_assignment %}
                                 <br/>
                                 <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% endif %}
@@ -662,7 +737,7 @@
                     </div>
                     <div class = "box col-md-6">
                         {# RIGHT CHUNK#}
-                        {% if not peer %}
+                        {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                             <br>
                             <b>Statistics for Completely Graded Assignments: </b>
                             <br/>
@@ -715,7 +790,6 @@
                                     Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
                                 {% endif %}
                             </div>
-                        {% endif %}
                         {# RIGHT CHUNK #}
                     </div>
 
@@ -725,29 +799,77 @@
             </div>
         </div>
     {% else %}
-        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {# This needs to be updated after randomization works correctly for Teams #}
+        {% if team_assignment %}
+            {# Update this after Teams work fine with Randomized Peer Assignments <br>
+            <b>Total Teams assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+            #}
+        {% else %}
+            <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {% endif %}
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 {%  if team_assignment %}
-                    <a class="btn btn-primary"
-                       href="{{ download_zip_url }}">
-                        Download Zip of Assigned Teams
-                    </a>
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Teams
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
                 {% else %}
-                    <a class="btn btn-primary"
-                       href="{{ download_zip_url }}">
-                        Download Zip of Assigned Students
-                    </a>
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"  
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Students
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
                 {% endif %}
 
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
-                <a class="btn btn-default"
-                   href="{{ download_zip_url }}?type=all">
-                    Download Zip of All Students
-                </a>
+                <details class="btn btn-default" id="details_button">
+                    <summary float="left">
+                        <a id="zip_link_full"
+                            href="{{ download_zip_url }}?type=all">
+                            Download Zip of All Students
+                        </a>
+                    </summary>
+                   
+                    <div>
+                        <form class="dropdown">
+                            <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="results_folder"> Include Results Folder</label><br>
+                            <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="active_version"> Only Current Active Version</label><br>
+                        </form>
+                    </div>
+                </details>
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-default"
@@ -788,5 +910,35 @@
     let defaultOpen = document.getElementById('defaultOpen');
     if (defaultOpen) {
         defaultOpen.click();
+    }
+
+    function editZipDownload(download_zip_url, limited) {
+        var results = document.getElementById("results_folder");
+        var active = document.getElementById("active_version");
+
+        if (results.checked == true && active.checked == true){
+            download_option = "both";
+        }
+        else if (results.checked == true) {
+            download_option = "results";
+        }
+        else if (active.checked == true) {
+            download_option = "active";
+        }
+        else {
+            download_option = "all";
+        }
+
+        if (limited) {
+            if (download_option == "all") {
+                $("#zip_link").attr("href", download_zip_url);
+            }
+            else {
+                $("#zip_link").attr("href", download_zip_url + "?type=limited_" + download_option);
+            }
+        }
+        else {
+            $("#zip_link").attr("href", download_zip_url + "?type=" + download_option);
+        }
     }
 </script>

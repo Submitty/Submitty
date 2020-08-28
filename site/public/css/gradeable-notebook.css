@@ -4,8 +4,7 @@
 .notebook h4,
 .notebook h5,
 .notebook h6,
-.notebook h7
-{
+.notebook h7 {
     margin-top: 2rem;
     margin-bottom: .3rem;
     margin-left: 0;
@@ -20,8 +19,7 @@
 .notebook .sa-clear-reset,
 .notebook .codebox-clear-reset,
 .notebook .mc-recent,
-.notebook .mc-clear
-{
+.notebook .mc-clear {
     margin-top: 7px;
     padding: 3px 6px;
     font-size: 80%;
@@ -29,41 +27,30 @@
 
 /* Set default font for short_answer boxes */
 .notebook textarea,
-.notebook input[type="text"]
-{
+.notebook input[type="text"] {
     font-family: monospace;
-}
-
-fieldset.mc {
-    display: flex;
-    flex-direction: column;
 }
 
 /* Display notebook multiple choice descriptions on same line as radio button or checkbox */
 /* Input field is the first child */
-.mc > label > :nth-child(2)
-{
+.mc > label > :nth-child(2) {
     display: inline;
 }
 
 /* Style the color of notebook feedback messages */
-.notebook .feedback-msg-failure
-{
+.notebook .feedback-msg-failure {
     color: var(--badge-backgroud-red);
 }
 
-.notebook .feedback-msg-warning
-{
+.notebook .feedback-msg-warning {
     color: var(--standard-vibrant-orange);
 }
 
-.notebook .feedback-msg-info
-{
+.notebook .feedback-msg-info {
     color: var(--standard-deep-blue);
 }
 
-.notebook .feedback-msg-success
-{
+.notebook .feedback-msg-success {
     color: var(--standard-dark-green);
 }
 
@@ -82,8 +69,9 @@ textarea.sa-box {
 }
 
 .mc label {
+    float: left;
+    clear: both;
     display: flex;
-    flex-direction: row;
     align-items: center;
 }
 
@@ -108,4 +96,28 @@ textarea.sa-box {
 .notebook fieldset p {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+img {
+    margin-top: 10px;
+}
+
+.CodeMirror {
+    background-color: var(--standard-input-background) !important;
+    border: 1px solid var(--standard-light-gray) !important;
+    border-radius: 4px !important;
+    vertical-align: middle !important;
+    resize: both;
+}
+
+/* Fixes Safari spacing issue */
+.notebook fieldset legend {
+    -webkit-margin-top-collapse: separate;
+}
+
+/* Not set for images as we want to allow them to be wider than 700px */
+.notebook .multiple_choice,
+.notebook .short_answer,
+.notebook .markdown {
+    max-width: 700px;
 }

@@ -12,7 +12,7 @@ class TestDb(unittest.TestCase):
     def test_invalid_driver(self):
         with self.assertRaises(RuntimeError):
             migrator.db.Database({'database_driver': 'mysql'}, 'system')
-    
+
     def test_db(self):
         db = migrator.db.Database({'database_driver': 'sqlite'}, 'master')
         db.execute("""
@@ -44,14 +44,26 @@ class TestDb(unittest.TestCase):
         params = {
             'database_driver': 'psql',
             'database_host': 'localhost',
+            'database_port': 15432,
             'database_user': 'user',
             'database_password': 'password',
             'dbname': 'test'
         }
         string = migrator.db.Database.get_connection_string(params)
-        self.assertEqual('postgresql+psycopg2://user:password@localhost/test', string)
+        self.assertEqual('postgresql+psycopg2://user:password@localhost:15432/test', string)
 
-    def test_get_connection_string_postgresql_str_host(self):
+    def test_get_connection_string_postgresql_no_port(self):
+        params = {
+            'database_driver': 'psql',
+            'database_host': 'localhost',
+            'database_user': 'user',
+            'database_password': 'password',
+            'dbname': 'test'
+        }
+        string = migrator.db.Database.get_connection_string(params)
+        self.assertEqual('postgresql+psycopg2://user:password@localhost:5432/test', string)
+
+    def test_get_connection_string_postgresql_path_host(self):
         try:
             host = tempfile.mkdtemp()
             params = {

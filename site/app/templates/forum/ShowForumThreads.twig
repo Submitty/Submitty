@@ -9,7 +9,9 @@
             $(b[e]).tooltip('disable').attr('title', $(b[e]).attr('data-original-title'));
         });
 
-        $(".post_reply_from").submit(publishPost);
+        $(".post_reply_form").submit(publishPost);
+        $("#thread_form").submit(modifyOrSplitPost);
+        $("#split_form").submit(modifyOrSplitPost);
         $("form").areYouSure();
         loadThreadHandler();
         initSocketClient();

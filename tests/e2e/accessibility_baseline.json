@@ -34,6 +34,8 @@
     "/courses/{}/{}/office_hours_queue": [
         "Element “style” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)"
     ],
+    "/courses/s20/sample/polls": [],
+    "/courses/s20/sample/polls/newPoll": [],
     "/courses/{}/{}/course_materials": [],
     "/courses/{}/{}/forum": [
         "The element “input” must not appear as a descendant of the “a” element.",

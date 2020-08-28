@@ -44,7 +44,7 @@ function checkForumFileExtensions(post_box_id, files){
             files.splice(i, 1);
             i--;
         }
-    } 
+    }
     return count == files.length;
 }
 
@@ -72,6 +72,28 @@ function checkNumFilesForumUpload(input, post_id){
     }
 }
 
+function uploadImageAttachments(attachment_box) {
+  $(attachment_box).on('DOMNodeInserted',function(e){
+    var part = get_part_number(e);
+    if(isNaN(parseInt(part))) {
+      return;
+    }
+    var target = $(e.target);
+    var file_object = null;
+    var filename = target.attr("fname");
+    for (var j = 0; j < file_array[part-1].length; j++){
+      if (file_array[part-1][j].name == filename) {
+        file_object = file_array[part-1][j];
+        break;
+      }
+    }
+    var image = document.createElement('div');
+    $(image).addClass("thumbnail");
+    $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
+    target.prepend(image);
+  });
+}
+
 function testAndGetAttachments(post_box_id, dynamic_check) {
     var index = post_box_id - 1;
     var files = [];
@@ -93,7 +115,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
         }
         files.push(file_array[index][j]);
     }
-    
+
     var valid = true;
     if(!checkForumFileExtensions(post_box_id, files)){
         displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
@@ -162,12 +184,25 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
                 $('#messages').append(message);
                 return;
             }
+            // Now that we've successfully submitted the form, clear autosave data
+            cancelDeferredSave(autosaveKeyFor(form));
+            clearReplyBoxAutosave(form);
 
+            var thread_id = json['data']['thread_id'];
             if (is_thread){
-              var thread_id = json['data']['thread_id'];
-              var course = document.body.dataset.courseUrl.split('/').pop();
-              window.socketClient.send({'course': course, 'type': "new_thread", 'thread_id': thread_id});
+              window.socketClient.send({'type': "new_thread", 'thread_id': thread_id});
             }
+            else {
+              var post_id = json['data']['post_id'];
+              var reply_level = form[0].hasAttribute('id') ? parseInt(form.prev().attr('data-reply_level')) : 0;
+              reply_level = reply_level < 7 ? reply_level+1 : reply_level;
+              var post_box_ids = $('.post_reply_form .thread-post-form').map(function(){
+                return $(this).data('post_box_id');
+              }).get();
+              var max_post_box_id = Math.max.apply(Math, post_box_ids);
+              window.socketClient.send({'type': "new_post", 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': max_post_box_id});
+            }
+
             window.location.href = json['data']['next_page'];
         },
         error: function(){
@@ -203,7 +238,81 @@ function publishPost(e) {
     }
 }
 
-function socketNewThreadHandler(thread_id){
+function socketNewOrEditPostHandler(post_id, reply_level, post_box_id=null, edit=false) {
+  $.ajax({
+    type: 'POST',
+    url: buildCourseUrl(['forum', 'posts', 'single']),
+    data: {'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id, 'edit': edit, 'csrf_token': window.csrfToken},
+    success: function (response) {
+      try {
+        var new_post = JSON.parse(response).data;
+
+        if (!edit){
+          var parent_id = $($(new_post)[0]).attr('data-parent_id');
+          var parent_post = $("#" + parent_id);
+          if (parent_post.hasClass('first_post')) {
+            $(new_post).insertBefore('#post-hr').hide().fadeIn();
+          }
+          else {
+            var sibling_posts = $('[data-parent_id="' + parent_id + '"]');
+            if (sibling_posts.length != 0) {
+              var parent_sibling_posts = $('#' + parent_id + ' ~ .post_box').map(function() {
+                return $(this).attr('data-reply_level') <= $('#' + parent_id).attr('data-reply_level') ? this : null;
+              });
+              if (parent_sibling_posts.length != 0) {
+                $(new_post).insertBefore(parent_sibling_posts.first()).hide().fadeIn();
+              }
+              else {
+                $(new_post).insertBefore('#post-hr').hide().fadeIn();
+              }
+            }
+            else {
+              $(new_post).insertAfter(parent_post.next()).hide().fadeIn();
+            }
+          }
+        }
+        else {
+          var original_post = $('#' + post_id);
+          $(new_post).insertBefore(original_post);
+          original_post.next().remove();
+          original_post.remove();
+        }
+
+        $('#'+ post_id + '-reply').css("display","none");
+        $('#'+ post_id + '-reply').submit(publishPost);
+        previous_files[post_box_id] = [];
+        label_array[post_box_id] = [];
+        file_array[post_box_id] = [];
+        uploadImageAttachments('#'+ post_id + '-reply .upload_attachment_box')
+
+      } catch (error) {
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new post. Please refresh the page.</div>';
+        $('#messages').append(message);
+        return;
+      }
+    }
+  });
+}
+
+function socketDeletePostHandler(post_id) {
+  var main_post = $('#' + post_id);
+  var sibling_posts = $('#' + post_id + ' ~ .post_box').map(function() {
+    return $(this).attr('data-reply_level') <= $('#' + post_id).attr('data-reply_level') ? this : null;
+  });
+  if (sibling_posts.length != 0) {
+    var posts_to_delete = main_post.nextUntil(sibling_posts.first());
+  }
+  else {
+    var posts_to_delete = main_post.nextUntil('#post-hr');
+  }
+
+  posts_to_delete.filter('.reply-box').remove();
+  main_post.add(posts_to_delete).fadeOut(400, function () {
+    main_post.add(posts_to_delete).remove();
+  });
+}
+
+function socketNewOrEditThreadHandler(thread_id, edit=false){
   $.ajax({
     type: 'POST',
     url: buildCourseUrl(['forum', 'threads', 'single']),
@@ -212,27 +321,35 @@ function socketNewThreadHandler(thread_id){
       try {
         var new_thread = JSON.parse(response).data;
 
-        if ($(new_thread).find(".thread-announcement").length != 0) {
-          var last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
-          if (last_bookmarked_announcement.length != 0) {
-            $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn("slow");
-          } else {
-            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+        if (!edit){
+          if ($(new_thread).find(".thread-announcement").length != 0) {
+            var last_bookmarked_announcement = $('.thread-announcement').siblings('.thread-favorite').last().parent().parent();
+            if (last_bookmarked_announcement.length != 0) {
+              $(new_thread).insertAfter(last_bookmarked_announcement.next()).hide().fadeIn("slow");
+            } else {
+              $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+            }
+          }
+          else {
+            var last_announcement = $('.thread-announcement').last().parent().parent();
+            var last_bookmarked = $('.thread-favorite').last().parent().parent();
+            var last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
+
+            if (last.length == 0) {
+              $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
+            } else {
+              $(new_thread).insertAfter(last.next()).hide().fadeIn("slow");
+            }
           }
         }
         else {
-          var last_announcement = $('.thread-announcement').last().parent().parent();
-          var last_bookmarked = $('.thread-favorite').last().parent().parent();
-          var last = last_bookmarked.length == 0 ? last_announcement : last_bookmarked;
-
-          if (last.length == 0) {
-            $(new_thread).insertBefore($('.thread_box_link').first()).hide().fadeIn("slow");
-          } else {
-            $(new_thread).insertAfter(last.next()).hide().fadeIn("slow");
-          }
+          var original_thread = $('[data-thread_id="' + thread_id + '"]');
+          $(new_thread).insertBefore(original_thread);
+          original_thread.next().remove();
+          original_thread.remove();
         }
-
-        $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
+        if ($('data#current-thread').val() != thread_id)
+          $('[data-thread_id="' + thread_id + '"] .thread_box').removeClass("active");
       } catch(err) {
         var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing new thread. Please refresh the page.</div>';
         $('#messages').append(message);
@@ -470,10 +587,9 @@ function socketUnpinThreadHandler(thread_id) {
 function initSocketClient() {
   window.socketClient = new WebSocketClient();
   window.socketClient.onmessage = (msg) => {
-    if (msg.course === document.body.dataset.courseUrl.split('/').pop()) {
       switch (msg.type) {
         case "new_thread":
-          socketNewThreadHandler(msg.thread_id);
+          socketNewOrEditThreadHandler(msg.thread_id);
           break;
         case "delete_thread":
           socketDeleteOrMergeThreadHandler(msg.thread_id);
@@ -490,14 +606,35 @@ function initSocketClient() {
         case "merge_thread":
           socketDeleteOrMergeThreadHandler(msg.thread_id, true, msg.merge_thread_id);
           break;
+        case "new_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id);
+          break;
+        case "delete_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketDeletePostHandler(msg.post_id);
+          break;
+        case "edit_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id, true);
+          break;
+        case "edit_thread":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketNewOrEditPostHandler(msg.post_id, msg.reply_level, msg.post_box_id, true);
+          socketNewOrEditThreadHandler(msg.thread_id, true);
+          break;
+        case "split_post":
+          if ($('data#current-thread').val() == msg.thread_id)
+            socketDeletePostHandler(msg.post_id);
+          socketNewOrEditThreadHandler(msg.new_thread_id, false);
+          break;
         default:
           console.log("Undefined message recieved.");
       }
       thread_post_handler();
       loadThreadHandler();
-    }
   };
-  window.socketClient.open();
+  window.socketClient.open('discussion_forum');
 }
 
 function changeThreadStatus(thread_id) {
@@ -522,8 +659,8 @@ function changeThreadStatus(thread_id) {
                 $('#messages').append(message);
                 return;
             }
-            var course = document.body.dataset.courseUrl.split('/').pop();
-            window.socketClient.send({'course': course, 'type': "resolve_thread", 'thread_id': thread_id});
+
+            window.socketClient.send({'type': "resolve_thread", 'thread_id': thread_id});
             window.location.reload();
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
             $('#messages').append(message);
@@ -534,7 +671,56 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
+function modifyOrSplitPost(e) {
+  e.preventDefault();
+  var form = $(this);
+  var formData = new FormData(form[0]);
+  var submit_url = form.attr('action');
+
+  $.ajax({
+    url: submit_url,
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function (response) {
+      try {
+        var json = JSON.parse(response);
+      }
+      catch (e) {
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please refresh the page.</div>';
+        $('#messages').append(message);
+        return;
+      }
+      if(json['status'] === 'fail'){
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+        $('#messages').append(message);
+        return;
+      }
+
+      // modify
+      if (form.attr('id') == 'thread_form'){
+        var thread_id = form.find('#edit_thread_id').val();
+        var post_id = form.find('#edit_post_id').val();
+        var reply_level = $('#' + post_id).attr('data-reply_level');
+        var post_box_id = $('#' + post_id + '-reply .thread-post-form').data('post_box_id') -1;
+        var msg_type = json['data']['type'] === 'Post' ? 'edit_post' : 'edit_thread';
+        window.socketClient.send({'type': msg_type, 'thread_id': thread_id, 'post_id': post_id, 'reply_level': reply_level, 'post_box_id': post_box_id});
+        window.location.reload();
+      }
+      // split
+      else {
+        var post_id = form.find('#split_post_id').val();
+        var new_thread_id = json['data']['new_thread_id'];
+        var old_thread_id = json['data']['old_thread_id'];
+        window.socketClient.send({'type': 'split_post', 'new_thread_id': new_thread_id, 'thread_id': old_thread_id, 'post_id': post_id});
+        window.location.replace(json['data']['next']);
+      }
+    }
+  });
+}
+
+function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
     if(!checkAreYouSureForm()) {
         return;
     }
@@ -1324,7 +1510,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     var type = (isDeletion ? '0' : '2');
     var message = (isDeletion?"delete":"undelete");
 
-    var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you are " + message + " the first post in a thread this will " + message + " the entire thread.");
+    var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you " + message + " the first post in a thread this will " + message + " the entire thread.");
     if(confirm){
         var url = buildCourseUrl(['forum', 'posts', 'modify']) + `?modify_type=${type}`;
         $.ajax({
@@ -1351,11 +1537,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 var new_url = "";
                 switch(json['data']['type']){
                     case "thread":
-                      var course = document.body.dataset.courseUrl.split('/').pop();
-                      window.socketClient.send({'course': course, 'type': "delete_thread", 'thread_id': thread_id});
+                      window.socketClient.send({'type': "delete_thread", 'thread_id': thread_id});
                       new_url = buildCourseUrl(['forum', 'threads']);
                       break;
                     case "post":
+                      window.socketClient.send({'type': "delete_post", 'thread_id': thread_id, 'post_id': post_id});
                       new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                       break;
                     default:
@@ -1384,10 +1570,9 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token){
 
             },
             success: function(data){
-              var course = document.body.dataset.courseUrl.split('/').pop();
-              if (type)
-                  window.socketClient.send({'course': course, 'type': "announce_thread", 'thread_id': thread_id});
-                else window.socketClient.send({'course': course, 'type': "unpin_thread", 'thread_id': thread_id});
+                if (type)
+                  window.socketClient.send({'type': "announce_thread", 'thread_id': thread_id});
+                else window.socketClient.send({'type': "unpin_thread", 'thread_id': thread_id});
                 window.location.reload();
             },
             error: function(){
@@ -1530,10 +1715,10 @@ function loadThreadHandler(){
                 window.history.pushState({"pageTitle":document.title},"", url);
 
                 enableTabsInTextArea('.post_content_reply');
+                setupForumAutosave();
                 saveScrollLocationOnRefresh('posts_list');
 
-                $(".post_reply_from").submit(publishPost);
-
+                $(".post_reply_form").submit(publishPost);
             },
             error: function(){
                 window.alert("Something went wrong while trying to display thread details. Please try again.");
@@ -1732,6 +1917,139 @@ function updateSelectedThreadContent(selected_thread_first_post_id){
         }
     });
 }
+
+function autosaveKeyFor(replyBox) {
+    const parent = $(replyBox).children('[name=parent_id]').val();
+    // Having `reply-to-undefined` in the key is sorta gross and might cause
+    // false positive bug reports. Let's avoid that.
+    if (parent !== undefined) {
+        return `${window.location.pathname}-reply-to-${parent}-forum-autosave`;
+    } else {
+        return `${window.location.pathname}-create-thread-forum-autosave`;
+    }
+}
+
+function saveReplyBoxToLocal(replyBox) {
+    const inputBox = $(replyBox).find("textarea.thread_post_content");
+    if (autosaveEnabled && inputBox.val()) {
+        const anonCheckbox = $(replyBox).find("input.thread-anon-checkbox");
+        const post = inputBox.val();
+        const isAnonymous = anonCheckbox.prop("checked");
+        localStorage.setItem(autosaveKeyFor(replyBox), JSON.stringify({
+            timestamp: Date.now(),
+            post,
+            isAnonymous
+        }));
+    }
+}
+
+function restoreReplyBoxFromLocal(replyBox) {
+    if (autosaveEnabled) {
+        const json = localStorage.getItem(autosaveKeyFor(replyBox));
+        if (json) {
+            const { post, isAnonymous } = JSON.parse(json);
+            $(replyBox).find("textarea.thread_post_content").val(post);
+            $(replyBox).find("input.thread-anon-checkbox").prop("checked", isAnonymous);
+        }
+    }
+}
+
+function clearReplyBoxAutosave(replyBox) {
+    if (autosaveEnabled) {
+        localStorage.removeItem(autosaveKeyFor(replyBox));
+    }
+}
+
+function setupForumAutosave() {
+    // Include both regular reply boxes on the forum as well as the "reply" box
+    // on the create thread page.
+    $("form.reply-box, form.post_reply_form, #thread_form").each((_index, replyBox) => {
+        restoreReplyBoxFromLocal(replyBox);
+        $(replyBox).find("textarea.thread_post_content").on('input',
+            () => deferredSave(autosaveKeyFor(replyBox), () => saveReplyBoxToLocal(replyBox), 1)
+        );
+        $(replyBox).find("input.thread-anon-checkbox").change(() => saveReplyBoxToLocal(replyBox));
+    });
+}
+
+const CREATE_THREAD_DEFER_KEY = `create-thread`;
+const CREATE_THREAD_AUTOSAVE_KEY = `${window.location.pathname}-create-autosave`;
+
+function saveCreateThreadToLocal() {
+    if (autosaveEnabled) {
+        const title = $("#title").val();
+        const categories = $("div.cat-buttons.btn-selected").get().map(e => e.innerText);
+        const status = $("#thread_status").val();
+        const data = {
+            timestamp: Date.now(),
+            title,
+            categories,
+            status
+        };
+
+        // These fields don't always show up
+        const lockDate = $("#lock_thread_date").val();
+        if (lockDate !== undefined) {
+            data.lockDate = lockDate;
+        }
+        const isAnnouncement = $("#Announcement").prop("checked");
+        if (isAnnouncement !== undefined) {
+            data.isAnnouncement = isAnnouncement;
+        }
+        const pinThread = $("#pinThread").prop("checked");
+        if (pinThread !== undefined) {
+            data.pinThread = pinThread;
+        }
+
+        localStorage.setItem(CREATE_THREAD_AUTOSAVE_KEY, JSON.stringify(data));
+    }
+}
+
+function restoreCreateThreadFromLocal() {
+    if (autosaveEnabled) {
+        const json = localStorage.getItem(CREATE_THREAD_AUTOSAVE_KEY);
+        if (!json) {
+            return;
+        }
+
+        const data = JSON.parse(json);
+        const { title, categories, status } = data;
+        $("#title").val(title);
+        $("#thread_status").val(status);
+        $("div.cat-buttons").each((_i, e) => {
+            if (categories.includes(e.innerText)) {
+                e.classList.add("btn-selected");
+                $(e).find("input[type='checkbox']").prop("checked", true);
+            } else {
+                e.classList.remove("btn-selected");
+                $(e).find("input[type='checkbox']").prop("checked", false);
+            }
+            $(e).trigger("eventChangeCatClass");
+        });
+
+        // Optional fields
+        if (data.hasOwnProperty('lockDate')) {
+            $("#lock_thread_date").val(data.lockDate);
+        }
+        if (data.hasOwnProperty('isAnnouncement')) {
+            $("#Announcement").prop("checked", data.isAnnouncement);
+        }
+        if (data.hasOwnProperty('pinThread')) {
+            $("#pinThread").prop("checked", data.pinThread);
+        }
+    }
+}
+
+function clearCreateThreadAutosave() {
+    localStorage.removeItem(CREATE_THREAD_AUTOSAVE_KEY);
+}
+
+$(() => {
+  if(typeof cleanupAutosaveHistory === "function"){
+    cleanupAutosaveHistory('-forum-autosave');
+    setupForumAutosave();
+  }
+});
 
 //When the user uses tab navigation on the thread list, this function
 //helps to make sure the current thread is always visible on the page

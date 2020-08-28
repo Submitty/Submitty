@@ -1,5 +1,12 @@
 {% import _self as self %}
 
+<script>
+    $(document).ready(() => {
+        // Attach the collapsible panels on
+        attachCollapsiblePanel("#gradeables .course-section-heading", 951, "panel-head-active");
+    });
+</script>
+
 {% if display_custom_message %}
     <div class="content">
         {# This is a layout table #}
