@@ -106,6 +106,19 @@
             </div>
             <div class="user-info-cont">
                 <div class="user-info-title">
+                  <span>Push Notification</span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <input type="radio" id="disable_push" name="push_status" value="false"
+                                {{ not enabled ? 'checked' : '' }}/> <label for="disable_push">Disable Push</label>
+                        <input type="radio" id="enable_push" name="push_status" value="true"
+                                {{ enabled ? 'checked' : '' }}/> <label for="enable_push">Enable Push</label>
+                    </div>
+                </div>
+            </div>
+            <div class="user-info-cont">
+                <div class="user-info-title">
                     <span>Color Theme:</span>
                 </div>
                 <div class="user-info">
