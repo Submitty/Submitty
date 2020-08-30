@@ -121,6 +121,52 @@ function updateUserProfilePhoto () {
   return false;
 }
 
+function updateSubscription(subscription) {
+  console.log(subscription);
+  let data = new FormData();
+  data.append('csrf_token', $("#user-profile-photo-csrf").val());
+  data.append('user_image', $("#user-image-button").prop('files')[0]);
+  let url = buildUrl(['user_profile', 'change_profile_photo']);
+
+  $.ajax({
+    url,
+    type: "POST",
+    data,
+    processData: false,
+    contentType: false,
+    success: function(res) {
+      //display success message
+      console.log(res);
+      const response = JSON.parse(res);
+
+      if (response.status === "success") {
+        const { data } = response;
+        displaySuccessMessage(data.message);
+        let updated_element = '<span class="center-img-tag">N/A</span>';
+        // create a new image node
+        if (data.image_data && data.image_mime_type) {
+          updated_element = `<img src="data:${data.image_mime_type};base64,${data.image_data}" alt="${data.image_alt_data}"/>`;
+        }
+        // check whether the image flag status is updated
+        data.image_flagged_state === "flagged" ?
+          $("#flagged-message").addClass("show")
+          : $("#flagged-message").removeClass("show");
+        $(".user-img-cont").html(updated_element);
+      } else {
+        displayErrorMessage(response.message);
+      }
+    },
+    error: function() {
+      // display error message
+      displayErrorMessage("Some went wrong while updating profile photo!");
+    }
+  });
+  // hide the form from view
+  $('.popup-form').css('display', 'none');
+  $('#user-image-button').val(null);
+  return false;
+}
+
 $(document).ready(function() {
 
     $('#theme_change_select').change(function() {
@@ -172,4 +218,10 @@ $(document).ready(function() {
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
     let user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
     $('[value="' + user_time_zone + '"]').prop('selected', true);
+
+    // Push setting
+    $("input[name='push_status']").change(function () {
+      updatePushSubscription(this.value === "true");
+    });
+
 });

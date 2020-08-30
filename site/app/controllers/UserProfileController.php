@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\authentication\DatabaseAuthentication;
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\pushNotification\PushNotification;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\RedirectResponse;
@@ -141,6 +142,7 @@ class UserProfileController extends AbstractController {
         $user = $this->core->getUser();
         // No image uploaded
         if (empty($_FILES['user_image']) || empty($_FILES['user_image']['tmp_name'])) {
+            $pushObject = new PushNotification();
             return JsonResponse::getErrorResponse('No image uploaded to update the profile photo');
         }
         else {
