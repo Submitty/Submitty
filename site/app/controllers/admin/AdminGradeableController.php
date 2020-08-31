@@ -187,19 +187,23 @@ class AdminGradeableController extends AbstractController {
         // Get the list of itempool questions in this gradeable which are multi-valued (and hence randomized)
         $itempool_options = [];
         // read config file
-        $gradeable_config = $gradeable->getAutogradingConfig();
-        $notebook_config = $gradeable_config->getNotebookConfig();
 
-        // loop through the notebook key, and find from_pool key in each object (or question)
-        foreach ($notebook_config as $key => $item) {
-            // store those question which are having count(from_pool array) > 1
-            if (isset($item['from_pool']) && count($item['from_pool']) > 1) {
-                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
-                if (!isset($itempool_options[$item_id])) {
-                    $itempool_options[$item_id] = $item['from_pool'];
-                }
-                else {
-                    $itempool_options[$item_id . '_' . $key] = $item['from_pool'];
+        if($gradeable->hasAutogradingConfig()){
+            $gradeable_config = $gradeable->getAutogradingConfig();
+            $notebook_config = $gradeable_config->getNotebookConfig();
+
+
+            // loop through the notebook key, and find from_pool key in each object (or question)
+            foreach ($notebook_config as $key => $item) {
+                // store those question which are having count(from_pool array) > 1
+                if (isset($item['from_pool']) && count($item['from_pool']) > 1) {
+                    $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
+                    if (!isset($itempool_options[$item_id])) {
+                        $itempool_options[$item_id] = $item['from_pool'];
+                    }
+                    else {
+                        $itempool_options[$item_id . '_' . $key] = $item['from_pool'];
+                    }
                 }
             }
         }
@@ -242,7 +246,7 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
-            'itempool_available' => $gradeable_config->isNotebookGradeable() && count($itempool_options),
+            'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
             'itempool_options' => json_encode($itempool_options),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
