@@ -662,7 +662,7 @@ class AutoGradingView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->addInternalCss('ta-grading.css');
+        $this->core->getOutput()->addInternalCss('electronic.css');
 
         $gradeable_id = $gradeable->getId();
 
