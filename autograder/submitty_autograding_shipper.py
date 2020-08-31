@@ -98,6 +98,85 @@ def put_files(
                 ssh.close()
 
 
+def get_files(
+    address: str,
+    files: List[Tuple[PathLike, PathLike]]
+):
+    """Get files from some place, both locally and remotely.
+
+    Parameters
+    ----------
+    address : str
+        Address of the destination. May be either `localhost` for copying files locally, or some
+        `username@hostname` format for copying files from some remote location via SFTP.
+    files : list of tuple of paths
+        List of source and destination file paths.
+    """
+    if address == 'localhost':
+        for dest, src in files:
+            if src != dest:
+                shutil.copy(dest, src)
+    else:
+        user, host = address.split('@')
+        sftp = ssh = None
+
+        try:
+            # TODO: Figure out a proper strategy for `my_name` param.
+            ssh = establish_ssh_connection('', user, host)
+            sftp = ssh.open_sftp()
+
+            for local, remote in files:
+                sftp.get(remote, local)
+        finally:
+            if sftp is not None:
+                sftp.close()
+            if ssh is not None:
+                ssh.close()
+
+
+def delete_files(address: str, files: List[PathLike], *, ignore_not_found: bool = False):
+    """Remove files from some place.
+
+    Parameters
+    ----------
+    address : str
+        Address of the destination. May be either `localhost` for deleting files locally, or some
+        `username@hostname` format for deleting files from some remote location via SFTP.
+    files : list of paths
+        List of file paths to delete on the target machine.
+    ignore_not_found : bool
+        (default False) If True, then any `FileNotFoundError` raised from the deletion operation
+        will be ignored.
+    """
+    if address == 'localhost':
+        for file in files:
+            if not ignore_not_found:
+                os.remove(file)
+            else:
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(file)
+    else:
+        user, host = address.split('@')
+        sftp = ssh = None
+
+        try:
+            # TODO: Figure out a proper strategy for `my_name` param.
+            ssh = establish_ssh_connection('', user, host)
+            sftp = ssh.open_sftp()
+
+            for remote in files:
+                if not ignore_not_found:
+                    sftp.remove(remote)
+                else:
+                    with contextlib.suppress(FileNotFoundError):
+                        sftp.remove(remote)
+        finally:
+            if sftp is not None:
+                sftp.close()
+            if ssh is not None:
+                ssh.close()
+
+
 def worker_folder(worker_name):
     return os.path.join(IN_PROGRESS_PATH, worker_name)
 
@@ -399,85 +478,47 @@ def unpack_job(which_machine, which_untrusted, next_directory, next_to_grade, ra
     # status will be set to a GradingStatus.
     status = None
 
-    # If the worker we are retrieving from is local, then we can just cp files around.
-    # If it is remote, we use the library paramiko to ssh to the submitty user on the
-    # worker and scp the files to the primary machine.
-    if which_machine == "localhost":
-        # See if it has finished grading yet
-        if not os.path.exists(target_done_queue_file):
-            return GradingStatus.WAITING
-        else:
-            local_done_queue_file = target_done_queue_file
-            local_results_zip = target_results_zip
+    try:
+        # Try to pull in the finished files into temporary work files.
+        fd1, local_done_queue_file = tempfile.mkstemp()
+        fd2, local_results_zip = tempfile.mkstemp()
+        get_files(which_machine, [
+            (target_done_queue_file, local_done_queue_file),
+            (target_results_zip, local_results_zip)
+        ])
+    except (socket.timeout, TimeoutError, FileNotFoundError):
+        # These are expected error cases, so we clean up on our end and return a `WAITING` status.
+        status = GradingStatus.WAITING
+    except Exception as e:
+        # Unexpected error case, clean up, log some stuff and return a `FAILURE` status.
+        autograding_utils.log_stack_trace(
+            AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
+            trace=f'{traceback.format_exc()}\n'
+                  'Consider exception handling for the above error to the shipper.'
+        )
+        autograding_utils.log_message(
+            AUTOGRADING_LOG_PATH, JOB_ID,
+            message=f"ERROR: Could not retrieve the file from the foreign machine {e}"
+        )
+        print(f"ERROR: Could not retrieve the file from the foreign machine.\nERROR: {e}")
+        status = GradingStatus.FAILURE
     else:
-        ssh = sftp = fd1 = fd2 = local_done_queue_file = local_results_zip = None
-        try:
-            user, host = which_machine.split("@")
-            ssh = establish_ssh_connection(which_machine, user, host)
-            sftp = ssh.open_sftp()
-            # Make temporary local files for the queue file and the results zip
-            fd1, local_done_queue_file = tempfile.mkstemp()
-            fd2, local_results_zip = tempfile.mkstemp()
-            # Retrieve the target files from the worker and save them to primary
-            sftp.get(target_done_queue_file, local_done_queue_file)
-            sftp.get(target_results_zip, local_results_zip)
-            # Because get works like cp rather than mv, we have to clean up for the worker
-            sftp.remove(target_done_queue_file)
-            sftp.remove(target_results_zip)
-        # If the socket times out, that means an error occurred when we were establishing
-        # an ssh connection or opening sftp. The local files do not exist yet, so we can
-        # just return false, no further cleanup needed.
-        except (socket.timeout, TimeoutError):
-            # We don't return immediately, because we need to clean up after ourselves.
-            status = GradingStatus.WAITING
-        # If the a file is not found, that just means it doesn't exist yet.
-        # That is fine; it means the worker is still grading.
-        except FileNotFoundError:
-            # Remove results files
-            for var in [local_results_zip, local_done_queue_file]:
-                if var:
-                    with contextlib.suppress(FileNotFoundError):
-                        os.remove(var)
-            # We don't return immediately, because we need to clean up after ourselves.
-            status = GradingStatus.WAITING
-        # In this more general case, we do want to print what the error was.
-        # TODO catch other types of exception as we identify them.
-        except Exception as e:
-            autograding_utils.log_stack_trace(
-                AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID,
-                trace=f'{traceback.format_exc()}\n'
-                      'Consider exception handling for the above error to the shipper.'
-            )
-            autograding_utils.log_message(
-                AUTOGRADING_LOG_PATH, JOB_ID,
-                message=f"ERROR: Could not retrieve the file from the foreign machine {e}"
-            )
-            print(f"ERROR: Could not retrieve the file from the foreign machine.\nERROR: {e}")
+        delete_files(which_machine, [
+            target_done_queue_file,
+            target_results_zip,
+        ], ignore_not_found=True)
+    finally:
+        # Close the unused file descriptors
+        with contextlib.suppress(OSError):
+            os.close(fd1)
+            os.close(fd2)
 
-            # Remove results files if they exist
-            for var in [local_results_zip, local_done_queue_file]:
-                if var:
-                    with contextlib.suppress(FileNotFoundError):
-                        os.remove(var)
-            # Because we do not know what caused this failure, we will err on the side of
-            # keeping the server from hanging, and abandon the job.
-            status = GradingStatus.FAILURE
-        finally:
-            # Close SSH connections
-            for var in [sftp, ssh]:
-                if var:
-                    var.close()
-
-            # Close file descriptors
-            for var in [fd1, fd2]:
-                if var:
-                    with contextlib.suppress(OSError):
-                        os.close(var)
-
-        # If we are waiting, return so now. Otherwise, we can check if
-        # the job returned successfully
-        if status in [GradingStatus.WAITING, GradingStatus.FAILURE]:
-            return status
+    if status is not None:
+        # We've assigned a value to status, so return the status
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(local_done_queue_file)
+            os.remove(local_results_zip)
+        return status
 
     try:
         with open(local_done_queue_file, 'r') as infile:
