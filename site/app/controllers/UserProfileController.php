@@ -134,6 +134,27 @@ class UserProfileController extends AbstractController {
     }
 
     /**
+     * @Route("/user_profile/push_notification", methods={"POST"})
+     *  @return JsonResponse
+     */
+    public function pushNotification () {
+        $pushObject = new PushNotification();
+        $pushObject->sendSinglePushNotification([
+            "end" => $_POST['end'],
+            "auth" => $_POST['auth'],
+            "key" => $_POST['key'],
+            "enc" => $_POST['enc'],
+        ]);
+//        $pushObject->sendSinglePushNotification([
+//            "end" => $_POST['end'],
+//            "auth" => $_POST['auth'],
+//            "key" => $_POST['key'],
+//            "enc" => $_POST['enc'],
+//        ]);
+        return JsonResponse::getErrorResponse('No image uploaded to update the profile photo');
+    }
+
+    /**
      * @Route("/user_profile/change_profile_photo", methods={"POST"})
      * @return JsonResponse
      * @throws \ImagickException
@@ -143,6 +164,8 @@ class UserProfileController extends AbstractController {
         // No image uploaded
         if (empty($_FILES['user_image']) || empty($_FILES['user_image']['tmp_name'])) {
             $pushObject = new PushNotification();
+            $pushObject->sendSinglePushNotification("https://fcm.googleapis.com/fcm/send/fR7P4yaVA8w:AP%E2%80%A6GekctI7aydJxYCtpgRQFsPasxlLG3IWkEdkbTsQoVraMNCnwt");
+            $pushObject->sendSinglePushNotification('https://updates.push.services.mozilla.com/wpush/v2/gAAAAABfS2dsKpiTdKqZDmb47RrYBLR8R7gyyFOO-d6V2qNuE85cAKc_qSVqdkg0SgGgv2Hv-qEWKa1iFRyhlCaMjCY2YbN77ykBnZZfAGPWDb5PJa1L_s13IpWngy4Xbisd6T7zISUj0H1vo4aUieJEnTFvJ_WFsqeRs-AoXySL9NQmL8lhuZY');
             return JsonResponse::getErrorResponse('No image uploaded to update the profile photo');
         }
         else {

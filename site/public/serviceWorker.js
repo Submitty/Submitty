@@ -54,7 +54,7 @@ self.addEventListener("refreshOffline", function () {
 
 self.addEventListener('push', function(e) {
   const options = {
-    body: 'This notification was generated from a push!',
+    body:   e.data ? e.data.text() : 'no payload',
     icon: 'img/moorthy_duck_512.png',
     vibrate: [100, 50, 100],
     data: {

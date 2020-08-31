@@ -125,8 +125,11 @@ function updateSubscription(subscription) {
   console.log(subscription);
   let data = new FormData();
   data.append('csrf_token', $("#user-profile-photo-csrf").val());
-  data.append('user_image', $("#user-image-button").prop('files')[0]);
-  let url = buildUrl(['user_profile', 'change_profile_photo']);
+  data.append('end', subscription.endpoint);
+  data.append('key', subscription.publicKey);
+  data.append('auth', subscription.authToken);
+  data.append('enc', subscription.contentEncoding);
+  let url = buildUrl(['user_profile', 'push_notification']);
 
   $.ajax({
     url,
