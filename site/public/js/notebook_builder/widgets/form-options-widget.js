@@ -95,7 +95,7 @@ class FormOptionsWidget extends Widget {
      * @returns {boolean}
      */
     validate() {
-        return this.validateFileNames();
+        return this.validateFileNames() && this.validateItemNames();
     }
 
     /**
@@ -128,50 +128,110 @@ class FormOptionsWidget extends Widget {
     }
 
     /**
+     * Validates all itempool item_name inputs.  For any duplicated or blank inputs a failed validation message will be
+     * displayed and that input will have it's background colored red.
+     *
+     * @returns {Boolean} True if all item_name inputs are valid, false otherwise.
+     */
+    validateItemNames() {
+        const bad_item_names = getBadItemNames();
+        bad_item_names.forEach(bad_item_name => {
+            if (bad_item_name === '') {
+                this.appendStatusMessage(`An itempool item name was found to be blank.  Ensure all item names are non-blank.`);
+            }
+            else {
+                this.appendStatusMessage(`Itempool item name '${bad_item_name}' was found to be duplicated.  Ensure all item names are unique.`);
+            }
+        });
+
+        this.colorFailedInputs(bad_item_names, '.item-name-input');
+
+        return bad_item_names.length === 0;
+    }
+
+    /**
      * Validates to see if all filename boxes contain unique values.  If validation errors are found then a message
      * is added to the status div and the offending input boxes will have their background color changed to indicate
      * they are the ones that failed validation.
      *
-     * @returns {boolean} True if validation was successful, false otherwise
+     * @returns {Boolean} True if validation was successful, false otherwise
      */
     validateFileNames() {
-        const duplicated_filenames = this.getDuplicatedFileNames();
+        const filename_inputs = Array.from(document.querySelectorAll('.filename-input'));
+        const filenames = filename_inputs.map(input => input.value);
 
+        // Duplicated filename check
+        const duplicated_filenames = this.getDuplicatedFileNames(filenames);
         duplicated_filenames.forEach(filename => {
             this.appendStatusMessage(`Filename: '${filename}' was found to be duplicated.  All filenames must be unique.`);
+        });
 
-            document.querySelectorAll(`.filename-input`).forEach(elem => {
-                if (elem.value === filename) {
-                    elem.style.backgroundColor = this.failed_validation_color;
+        // Invalid substrings check
+        const illegal_substrings = {
+            '..': '..',
+            '/': '/',
+            ' ': 'spaces',
+        };
+
+        const illegal_filenames = this.getFileNamesWithIllegalSubstrings(filenames, Object.keys(illegal_substrings));
+        illegal_filenames.forEach(filename => {
+            this.appendStatusMessage(`Filename: '${filename}' was found to contain illegal substrings. Filenames may not contain ${Object.values(illegal_substrings).join(' or ')}.`);
+        });
+
+        this.colorFailedInputs(duplicated_filenames.concat(illegal_filenames), '.filename-input');
+
+        return duplicated_filenames.length === 0 && illegal_filenames.length === 0;
+    }
+
+    /**
+     * Color the selected input boxes red to indicate they failed validation.
+     *
+     * @param {String[]} failed_values The set of values that were found to have failed validation.
+     * @param {String} selector_string A CSS selector string used to select the inputs.
+     */
+    colorFailedInputs(failed_values, selector_string) {
+        document.querySelectorAll(selector_string).forEach(elem => {
+            if (failed_values.includes(elem.value)) {
+                elem.style.backgroundColor = this.failed_validation_color;
+            }
+        });
+    }
+
+    /**
+     * Determine if any of the form's filenames contain illegal substrings.
+     *
+     * @param {String[]} filenames Array of all the filenames found in filename inputs
+     * @param {String[]} illegal_substrings An array of substrings filenames must not contain.
+     * @returns {String[]} An array of filenames that do contain illegal substrings.
+     */
+    getFileNamesWithIllegalSubstrings(filenames, illegal_substrings) {
+        const illegal_filenames = new Set();
+
+        filenames.forEach(filename => {
+            illegal_substrings.forEach(substring => {
+                if (filename.includes(substring)) {
+                    illegal_filenames.add(filename);
                 }
             });
         });
 
-        return duplicated_filenames.size === 0;
+        return Array.from(illegal_filenames);
     }
 
     /**
      * Collects and returns the set of strings which were found to be duplicated in more than one filename input box.
      *
-     * @returns {Set<string>}
+     * @param {String[]} filenames Array of all the filenames found in filename inputs
+     * @returns {String[]}
      */
-    getDuplicatedFileNames() {
-        const json = notebook_builder.getJSON();
-
-        const filenames = [];
+    getDuplicatedFileNames(filenames) {
+        const used_filenames = new Set();
         const duplicated_filenames = new Set();
 
-        json.notebook.forEach(cell => {
-            if (cell.filename) {
-                if (filenames.includes(cell.filename)) {
-                    duplicated_filenames.add(cell.filename);
-                }
-                else {
-                    filenames.push(cell.filename);
-                }
-            }
+        filenames.forEach(filename => {
+            !used_filenames.has(filename) ? used_filenames.add(filename) : duplicated_filenames.add(filename);
         });
 
-        return duplicated_filenames;
+        return Array.from(duplicated_filenames);
     }
 }

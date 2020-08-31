@@ -406,6 +406,7 @@ int main(int argc, char *argv[]) {
   if(config_json.find("item_pool") != config_json.end()){
     int i = 0;
     for(nlohmann::json::iterator itr = config_json["item_pool"].begin(); itr != config_json["item_pool"].end(); itr++, i++) {
+      j["item_pool"][i]["item_name"] = (*itr)["item_name"];
       j["item_pool"][i]["notebook"] = validate_notebook((*itr)["notebook"], config_json);
     }
   }

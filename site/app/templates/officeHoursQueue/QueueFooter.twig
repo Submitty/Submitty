@@ -1,8 +1,4 @@
 <script>
-  $('#queue_code').change(function(){
-    document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';
-  })
-
   //Get the list of queue_codes
   var current_queues = [{% for queue in viewer.getAllQueues() %}
       "{{queue['id']}}",
@@ -103,89 +99,6 @@
     }
   }
 
-  {% if viewer.isGrader() %}
-
-    $('#old_queue_code').change(function(){
-      document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';
-    })
-
-    let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
-
-    if (!localStorage.getItem('office_hour_queue_auto_refresh')) {
-      localStorage.setItem('office_hour_queue_auto_refresh', "false");
-    }
-    let auto_refresh = localStorage.getItem('office_hour_queue_auto_refresh') === "true";
-    if (auto_refresh) {
-      $('#auto_refresh_btn').html("Turn Off Auto Refresh");
-    }
-
-    var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
-    if ("Notification" in window && Notification.permission === "granted" && notifications_enabled) {
-      setNotificationState(true);
-    }else{
-      setNotificationState(false);
-    }
-
-    let refreshSpeed = 1000 * 30;
-    setInterval(refreshQueue, refreshSpeed);
-    function refreshQueue() {
-      if (!auto_refresh) {
-        return;
-      }
-      $.get("{{base_url}}/check_updates", function(data) {
-        if (lastQueueEdit < JSON.parse(data)['data']) {
-          var queueEmpty = $( ".help_btn:visible" ).length === 0;
-          $.get("{{base_url}}/current_queue", function(newQueue) {
-            $("#current_queue").replaceWith(newQueue);
-            filterQueues();
-            if(notifications_enabled && queueEmpty && $( ".help_btn:visible" ).length > 0){
-              if($('.btn-success.finish_helping_btn').length === 0){
-                new Notification("A student has joined the queue");
-              }
-            }
-          });
-          $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {
-            $("#queue_history").replaceWith(newStatus);
-          });
-        }
-      });
-    }
-
-    function toggleAutoRefresh() {
-      setAutoRefresh(!auto_refresh);
-    }
-
-    function setAutoRefresh(turnOn){
-      auto_refresh = turnOn;
-      localStorage.setItem('office_hour_queue_auto_refresh', auto_refresh);
-      if (auto_refresh) {
-        $('#auto_refresh_btn').html("Turn Off Auto Refresh");
-      } else {
-        $('#auto_refresh_btn').html("Turn On Auto Refresh");
-        setNotificationState(false);
-      }
-    }
-  {% else %}
-    let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
-    let refreshSpeed = 1000 * 30;
-    setInterval(refreshQueue, refreshSpeed);
-    function refreshQueue() {
-      if(!$("#queue_status").length){
-        return;
-      }
-      $.get("{{base_url}}/check_updates", function(data) {
-        if (lastQueueEdit < JSON.parse(data)['data']) {
-          $.get("{{base_url}}/new_status", function(newStatus) {
-            $("#queue_status").replaceWith(newStatus);
-          });
-          $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newStatus) {
-            $("#queue_history").replaceWith(newStatus);
-          });
-        }
-      });
-    }
-  {% endif %}
-
   function genRandCode(id) {
     var result = '';
     var characters = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -196,10 +109,22 @@
     $('#' + id).val(result);
   }
 
+
+  {% if viewer.isGrader() %}
+
+      $('#old_queue_code').change(function(){
+          document.getElementById('change_queue_token').action = '{{base_url}}/'+this.value+'/change_token';
+      });
+
+      var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
+      if ("Notification" in window && Notification.permission === "granted" && notifications_enabled) {
+          setNotificationState(true);
+      }else{
+          setNotificationState(false);
+      }
+  {% endif %}
+
   function setNotificationState(turnOn){
-    if(turnOn){
-      setAutoRefresh(true);
-    }
     notifications_enabled = turnOn;
     localStorage.setItem('office_hour_queue_notifications', turnOn ? "true":"false");
     $('#notification_btn').html(turnOn ? "Disable Notifications":"Enable Notifications");
@@ -214,12 +139,10 @@
     if (!("Notification" in window)) {
       alert("This browser does not support desktop notification");
     }
-
     else if (Notification.permission === "granted") {
       new Notification("Notifications have been enabled. You will be notified only when somebody joins the queue and there was nobody previously waiting for help.");
       setNotificationState(true);
     }
-
     else if (Notification.permission !== "denied") {
       Notification.requestPermission().then(function (permission) {
         if (permission === "granted") {
@@ -231,5 +154,79 @@
       });
     }
   }
+
+  initSocketClient();
+
+  function initSocketClient() {
+      window.socketClient = new WebSocketClient();
+      window.socketClient.onmessage = (msg)=>{
+          switch (msg.type) {
+            case "queue_update":
+                {% if viewer.isGrader() %}
+                    updateCurrentQueue();
+                {% endif %}
+                break;
+            case "toggle_queue":
+                {% if not viewer.isGrader() %}
+                    updateQueueStatus();
+                {% endif %}
+                break;
+            case "queue_status_update":
+                {% if viewer.isGrader() %}
+                    updateCurrentQueue();
+                {% else %}
+                    updateQueueStatus();
+                {% endif %}
+                break;
+            case "full_update":
+                {% if viewer.isGrader() %}
+                    updateCurrentQueue();
+                {% else %}
+                    updateQueueStatus();
+                {% endif %}
+                updateHistory();
+                break;
+            case "announcement_update":
+                updateAnnouncement();
+                break;
+            default:
+                console.log("Unknown message received.");
+                break;
+          }
+      };
+      window.socketClient.open('office_hours_queue');
+  }
+
+  function updateCurrentQueue() {
+      $.get("{{base_url}}/current_queue", function(newQueue) {
+          $("#current_queue").replaceWith(newQueue);
+          filterQueues();
+      });
+  }
+
+  function updateQueueStatus() {
+      $.get("{{base_url}}/new_status", function(newStatus) {
+          if ($('#queue_status').length !== 0)
+              $("#queue_status").replaceWith(newStatus);
+          else $("#add_to_queue").replaceWith(newStatus);
+      });
+  }
+
+  function updateHistory() {
+      $.get("{{base_url}}/queue_history?full_history={{viewer.getFullHistory() ? 'true' : 'false'}}", function(newHistory) {
+          $("#queue_history").replaceWith(newHistory);
+      });
+  }
+
+  function updateAnnouncement() {
+      $.get("{{base_url}}/new_announcement", function(newAnnouncement) {
+          if ($('#announcement').length > 0){
+              $('#announcement').next().remove();
+              $('#announcement').replaceWith(newAnnouncement);
+          }
+          else $(newAnnouncement).insertAfter($('h1').next());
+      });
+  }
+
 </script>
 </div>

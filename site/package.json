@@ -31,7 +31,7 @@
     "eslint": "^7.5.0"
   },
   "scripts": {
-    "lint": "eslint 'public/js/**/*.js'",
-    "lint:fix": "eslint 'public/js/**/*.js'"
+    "lint": "eslint \"public/js/**/*.js\"",
+    "lint:fix": "eslint \"public/js/**/*.js\" --fix"
   }
 }

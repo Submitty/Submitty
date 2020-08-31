@@ -9,7 +9,7 @@ fi
 SOURCE="${BASH_SOURCE[0]}"
 CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
+VERSION=$(lsb_release -sr | tr '[:upper:]' '[:lower:]')
 
 if [ ! -d ${CURRENT_DIR}/${DISTRO}/${VERSION} ]; then
     (>&2 echo "Unknown distro: ${DISTRO} ${VERSION}")
