@@ -188,7 +188,7 @@ class AdminGradeableController extends AbstractController {
         $itempool_options = [];
         // read config file
 
-        if($gradeable->hasAutogradingConfig()){
+        if ($gradeable->hasAutogradingConfig()) {
             $gradeable_config = $gradeable->getAutogradingConfig();
             $notebook_config = $gradeable_config->getNotebookConfig();
 
