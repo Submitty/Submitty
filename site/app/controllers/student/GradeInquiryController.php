@@ -15,7 +15,6 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
-     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';

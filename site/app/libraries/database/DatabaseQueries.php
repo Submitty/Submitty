@@ -4151,7 +4151,7 @@ AND gc_id IN (
 
     /**
      * insert a new grade inquiry for a submitter
-     * @return the id of the first new post inserted of the new grade inquiry
+     * @return string the id of the first new post inserted of the new grade inquiry
      */
     public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, $gc_id): string {
         $params = [$graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE, $gc_id];
