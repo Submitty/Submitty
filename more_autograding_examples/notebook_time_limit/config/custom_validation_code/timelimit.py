@@ -11,6 +11,7 @@ import json
 import traceback
 import re
 import tzlocal
+import math
 from datetime import datetime, timedelta
 
 
@@ -59,11 +60,16 @@ def do_the_grading():
 
   # get the timestamp of first gradeable access/load
   first_access_timestamp_string = ""
-  my_access_file = os.path.join(prefix, ".user_assignment_access.json")
+  my_access_file = os.path.join(".user_assignment_access.json")
+
   if os.path.exists(my_access_file):
     with open(my_access_file) as access_file:
       access = json.load(access_file)
       first_access_timestamp_string = access[0]["timestamp"]
+  else:
+    return_result(score=0,
+                  message="ERROR!  access file does not exist",
+                  status='failure')
 
   first_access_timestamp = datetime.strptime(first_access_timestamp_string, '%Y-%m-%d %H:%M:%S%z')
 
@@ -99,10 +105,18 @@ def do_the_grading():
   if penalty_minutes < 0:
     penalty_minutes = 0
 
+  if penalty_per_minute >= 0:
+    return_result(score=1,
+                  message="ERROR:  penalty_per_minute should be negative",
+                  status='failure')
+
+  my_points_deducted = penalty_minutes*penalty_per_minute
+  my_points_deducted_rounded = int(math.floor(my_points_deducted))
+
   # compute the score (0 is full credit, positive numbers will apply a penalty)
   my_score = 0
   if penalty_minutes > 0:
-    my_score = float(penalty_minutes) / (-1 * max_penalty)
+    my_score = float(my_points_deducted_rounded) / (1 * max_penalty)
   if my_score > 1:
     my_score = 1
 
@@ -112,7 +126,9 @@ def do_the_grading():
     "\nallowed minutes: " + str(allowed_minutes) +\
     "\nduration: " + duration_string +\
     "\npenalty minutes: " + str(penalty_minutes) +\
-    "\npenalty score: " + str(my_score)
+    "\npenalty per minute: " + str(penalty_per_minute) +\
+    "\ndeduction (before rounding): " + str(my_points_deducted) +\
+    "\ndeduction (after rounding): " + str(my_score * max_penalty)
 
   if my_score > 0:
     # red message when there is a penalty

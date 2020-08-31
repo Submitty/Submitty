@@ -11,7 +11,7 @@ Here's a short list of instructions:  \n\
     "autograding" : {
         "submission_to_compilation" : [ "*.txt", "*.cpp", "*.py" ],
         "submission_to_runner" : [ "*.txt", "*.out", "*.py" ],
-        "submission_to_validation" : [ "*.txt", "*.png" ],
+        "submission_to_validation" : [ "*.txt", "*.png", ".user_assignment_access.json" ],
         "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
     },
     "notebook" : [
@@ -96,7 +96,7 @@ Here's a short list of instructions:  \n\
                 {
                     "actual_file" : ".user_assignment_access.json",
                     "method" : "custom_validator",
-                    "command" : "python3 timelimit.py --minutes 10 --penalty_per_minute -1",
+                    "command" : "python3 timelimit.py",
                     "allowed_minutes" : 10,
                     "penalty_per_minute" : -1,
                     "max_penalty" : -30, // must match above
