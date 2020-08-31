@@ -339,7 +339,7 @@ jobs:
         - mkdir ${HOME}/clang+llvm
         - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
         - export PATH=${HOME}/clang+llvm/bin:${PATH}
-        # Create symlink so that it's in expected location for whitelist
+        # Create symlink so that it's in expected location for safelist
         - sudo ln -s $(which clang) /usr/bin/clang
         - sudo ln -s $(which clang++) /usr/bin/clang++
         - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -

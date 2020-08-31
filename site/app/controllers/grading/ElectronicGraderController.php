@@ -2,8 +2,10 @@
 
 namespace app\controllers\grading;
 
+use app\libraries\DateUtils;
 use app\libraries\DiffViewer;
 use app\libraries\routers\AccessControl;
+use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
@@ -96,7 +98,7 @@ class ElectronicGraderController extends AbstractController {
                         array_push($student_array, $student->getId());
                     }
                 }
-                
+
                 $number_of_students = count($student_array);
                 /* If number of students entered is more than number of students in registration section,
                    then for each registration section with less number of students, everyone will grade everyone */
@@ -162,7 +164,7 @@ class ElectronicGraderController extends AbstractController {
             $gradeable->setRandomPeerGradersList($final_grading_info);
             return JsonResponse::getSuccessResponse($final_grading_info);
         }
-        
+
         $all_grade_all = false;
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
         $student_array = [];
@@ -1394,6 +1396,9 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
+        $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $graded_gradeable->getSubmitter()->getId());
+        $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
+
         $this->core->getOutput()->addInternalCss('forum.css');
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalCss('electronic.css');
@@ -1404,8 +1409,9 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $showNewInterface);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollbackSubmission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $showNewInterface);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -1786,6 +1792,8 @@ class ElectronicGraderController extends AbstractController {
         $default = $_POST['default'] ?? null;
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
+        $is_itempool_linked = $_POST['is_itempool_linked'] ?? false;
+        $itempool_option = $_POST['itempool_option'] ?? null;
 
         // Use 'page_number' since 'page' is used in the router
         $page = $_POST['page_number'] ?? '';
@@ -1848,6 +1856,17 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
+        $is_notebook_gradeable = $gradeable->getAutogradingConfig()->isNotebookGradeable();
+
+        if ($is_notebook_gradeable) {
+            if ($is_itempool_linked === 'true') {
+                if (!$itempool_option) {
+                    $this->core->getOutput()->renderJsonFail('Missing itempool_option parameter');
+                    return;
+                }
+            }
+        }
+
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $component->setTitle($title);
@@ -1860,6 +1879,16 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
                 ]);
             $component->setPage($page);
+            if ($is_notebook_gradeable) {
+                if ($is_itempool_linked === 'true') {
+                    $component->setIsItempoolLinked(true);
+                    $component->setItempool($itempool_option);
+                }
+                else {
+                    $component->setIsItempoolLinked(false);
+                    $component->setItempool('');
+                }
+            }
 
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
@@ -2677,7 +2706,118 @@ class ElectronicGraderController extends AbstractController {
             $total_total += $value * $num_components;
         }
     }
-    
+
+    /**
+     * @param Gradeable $gradeable
+     * @param string $who_id
+     * @return array
+     */
+    protected function getItempoolMapForSubmitter($gradeable, $who_id) {
+        $user_item_map = [];
+        // read config file
+        $gradeable_config = $gradeable->getAutogradingConfig();
+
+        $notebook_config = $gradeable_config->getNotebookConfig();
+        $hashes = $gradeable_config->getUserSpecificNotebook(
+            $who_id,
+            $gradeable->getId()
+        )->getHashes();
+        $que_idx = 0;
+        // loop through the notebook key, and find from_pool key in each object (or question)
+        foreach ($notebook_config as $key => $item) {
+            // store those question which are having count(from_pool array) > 1
+            if (isset($item['type']) && $item['type'] === 'item') {
+                $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
+                $item_id = isset($user_item_map[$item_id]) ? $item_id . '_' . $key : $item_id;
+                $selected_idx = $item["user_item_map"][$who_id] ?? null;
+                if (is_null($selected_idx)) {
+                    $selected_idx = $hashes[$que_idx] % count($item['from_pool']);
+                    $que_idx++;
+                }
+                $user_item_map[$item_id] = $item['from_pool'][$selected_idx];
+            }
+        }
+        return $user_item_map;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array $submitter_itempool_map
+     * @return array
+     */
+    public function getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) {
+        $solutions = [];
+        try {
+            $result_rows = $this->core->getQueries()->getSolutionForAllComponentIds($gradeable->getId());
+
+            foreach ($result_rows as $row) {
+                foreach ($row as $values) {
+                    // itempool_name === '' indicates that the component is not linked with the itempool
+                    if (empty($values['itempool_name']) || $submitter_itempool_map[$values['itempool_name']] === $values['itempool_item']) {
+                        $solutions[$values['component_id']] = $values;
+                        break;
+                    }
+                }
+            }
+        }
+        catch (\Exception $exception) {
+            $error = $exception->getMessage();
+            $this->core->getOutput()->renderResultMessage("Something went wrong while fetching solutions " . $error, false);
+        }
+        return $solutions;
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/solution_ta_notes", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function updateSolutionTaNotes($gradeable_id) {
+        $solution_text = $_POST['solution_text'] ?? '';
+        $component_id = $_POST['component_id'];
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $author_id = $this->core->getUser()->getId();
+        $itempool_item = $_POST['itempool_item'] ?? '';
+        $error = "";
+        $solution_row = [];
+        $componentItempoolInfo = $this->core->getQueries()->componentItempoolInfo($gradeable_id, $component_id);
+        if (!$gradeable) {
+            $error = "Invalid Gradeable ID given!";
+        }
+        elseif (empty($solution_text)) {
+            $error = "Please provide some non-empty solution";
+        }
+        elseif ($componentItempoolInfo['is_linked'] && empty($itempool_item)) {
+            //Itempool must be non-empty when component is linked with the itempool
+            $error = 'This component expects only non-empty itempool-item!';
+        }
+        elseif (!$componentItempoolInfo['is_linked'] && !empty($itempool_item)) {
+            // Itempool item passed when the component is not linked with itempool
+            $error = 'This Component expects only non-empty itempool-item!' . json_encode($componentItempoolInfo) . $itempool_item;
+        }
+        else {
+            try {
+                $this->core->getQueries()->addSolutionForComponentId($gradeable_id, $component_id, $itempool_item, $solution_text, $author_id);
+                $solution_row = $this->core->getQueries()->getSolutionForComponentItempoolItem($gradeable_id, $component_id, $itempool_item);
+            }
+            catch (\Exception $exception) {
+                $error = $exception->getMessage();
+            }
+        }
+
+        return empty($error) ? JsonResponse::getSuccessResponse([
+            "author" => $author_id,
+            "current_user_id" => $this->core->getUser()->getId(),
+            "edited_at" => DateUtils::convertTimeStamp(
+                $this->core->getUser(),
+                $solution_row['edited_at'],
+                $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
+            ),
+            "solution_text" => $solution_text,
+            "component_id" => $component_id,
+            "itempool_item" => $solution_row['itempool_item'],
+        ]) : JsonResponse::getErrorResponse($error);
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/feedback/set", methods={"POST"})
      */
@@ -2697,6 +2837,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess("Feedback successfully uploaded");
         return true;
     }
+
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods={"POST"})
      * @AccessControl(role="FULL_ACCESS_GRADER")

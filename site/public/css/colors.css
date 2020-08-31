@@ -71,7 +71,7 @@
     --standard-deep-dark-gray: #2e2e2e;
 
     --standard-gray-black: #111111;
-
+    --solution-text-background: #ccc;
     --standard-pale-blue: #d8eef6;
     --standard-focus-cornflowe-blue: #6495ed;
     --standard-medium-blue: #337ab7;
@@ -132,7 +132,8 @@
     --background-blue: #f6fbfe;
     --main-body-white: #ffffff;
     --subheading-underscore-grey: #888888;
-
+    --subtle-grey-background: #cccccc;
+    
     /*dropdown buttons*/
     --hover-dropdown: #f5f5f5;
     --disabled-dropdown: #888888;
@@ -245,6 +246,7 @@
       --dark-badge-background-red: #ad3937;
       --error-alert-dark-red: #FF7A7A;
       --gray-red: #b94a48;
+      --solution-text-background: dimgrey;
 
       --alert-background-bronze: #fcf8e3;
       --alert-border-bronze: #514123;
@@ -337,6 +339,7 @@
       --background-blue: #202225;
       --main-body-white: #ffffff;
       --subheading-underscore-grey: #888888;
+      --subtle-grey-background: #555555;
 
       /*dropdown buttons*/
       --hover-dropdown: #f5f5f5;
