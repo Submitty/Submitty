@@ -113,9 +113,9 @@ def get_files(
         List of source and destination file paths.
     """
     if address == 'localhost':
-        for dest, src in files:
+        for src, dest in files:
             if src != dest:
-                shutil.copy(dest, src)
+                shutil.copy(src, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -125,7 +125,7 @@ def get_files(
             ssh = establish_ssh_connection('', user, host)
             sftp = ssh.open_sftp()
 
-            for local, remote in files:
+            for remote, local in files:
                 sftp.get(remote, local)
         finally:
             if sftp is not None:
