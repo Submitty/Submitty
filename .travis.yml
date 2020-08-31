@@ -142,6 +142,8 @@ jobs:
         - pip3 install jsonref
         - pip3 install docker
         - pip3 install coverage
+        - pip3 install paramiko
+        - pip3 install
       script:
         - pushd python_submitty_utils
         - coverage run -m unittest discover

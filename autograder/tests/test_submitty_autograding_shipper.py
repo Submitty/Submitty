@@ -6,9 +6,6 @@ import unittest
 import contextlib
 import copy
 
-# Done to avoid making the base autograder directory a module.
-# This import must be done inside of the class for the mock to take affect
-sys.path.append("..")
 import autograder
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -27,7 +24,7 @@ SUBMITTY_DATA_DIR = os.path.join(TEST_ENVIRONMENT, 'autograding')
 TODO_DIR = os.path.join(SUBMITTY_DATA_DIR, 'autograding_TODO')
 DONE_DIR = os.path.join(SUBMITTY_DATA_DIR, 'autograding_DONE')
 TO_BE_GRADED = os.path.join(SUBMITTY_DATA_DIR, 'to_be_graded_queue')
-GRADING = os.path.join(SUBMITTY_DATA_DIR, "grading")
+GRADING = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
 
 # Log directorories
 LOG_PATH = os.path.join(TEST_ENVIRONMENT, 'logs')
