@@ -120,25 +120,19 @@ class NotebookBuilderController extends AbstractController {
      * Helper function which handles loading all the js / css dependencies notebook builder needs
      */
     private function loadDependencies(): void {
-        // Builders
-        $this->core->getOutput()->addInternalJs('notebook_builder/builders/abstract-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/builders/root-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/builders/itempool-builder.js');
-
-        // Widgets
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/selector-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/form-options-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/markdown-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/multiple-choice-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/short-answer-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/image-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/itempool-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/item-widget.js');
-
-        // Others
+        // Code mirror dependencies
         CodeMirrorUtils::loadDefaultDependencies($this->core);
+
+        // Notebook builder dependencies
+        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
         $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder-utils.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/form-options-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/image-widget.js');
         $this->core->getOutput()->addInternalCss('notebook-builder.css');
     }
 
