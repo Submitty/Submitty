@@ -14,7 +14,6 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\DateUtils;
 use app\libraries\NumberUtils;
-use app\models\gradeable\Gradeable;
 
 class AutoGradingView extends AbstractView {
 
