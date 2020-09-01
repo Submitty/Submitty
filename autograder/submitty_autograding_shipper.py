@@ -63,6 +63,9 @@ def put_files(
 ):
     """Put files into some place, both locally and remotely.
 
+    Note that this function does *not* handle exceptions, so potential exceptions should be handled
+    by the caller.
+
     Parameters
     ----------
     address : str
@@ -82,8 +85,15 @@ def put_files(
         try:
             # TODO: Figure out a proper strategy for `my_name` param.
             ssh = establish_ssh_connection('', user, host)
-            sftp = ssh.open_sftp()
+        except Exception as e:
+            raise RuntimeError(f"SSH to {address} failed") from e
 
+        try:
+            sftp = ssh.open_sftp()
+        except Exception as e:
+            raise RuntimeError(f"SFTP to {address} failed") from e
+
+        try:
             for local, remote in files:
                 sftp.put(local, remote)
         finally:
@@ -118,8 +128,15 @@ def get_files(
         try:
             # TODO: Figure out a proper strategy for `my_name` param.
             ssh = establish_ssh_connection('', user, host)
-            sftp = ssh.open_sftp()
+        except Exception as e:
+            raise RuntimeError(f"SSH to {address} failed") from e
 
+        try:
+            sftp = ssh.open_sftp()
+        except Exception as e:
+            raise RuntimeError(f"SFTP to {address} failed") from e
+
+        try:
             for remote, local in files:
                 sftp.get(remote, local)
         finally:
@@ -157,8 +174,15 @@ def delete_files(address: str, files: List[PathLike], *, ignore_not_found: bool 
         try:
             # TODO: Figure out a proper strategy for `my_name` param.
             ssh = establish_ssh_connection('', user, host)
-            sftp = ssh.open_sftp()
+        except Exception as e:
+            raise RuntimeError(f"SSH to {address} failed") from e
 
+        try:
+            sftp = ssh.open_sftp()
+        except Exception as e:
+            raise RuntimeError(f"SFTP to {address} failed") from e
+
+        try:
             for remote in files:
                 if not ignore_not_found:
                     sftp.remove(remote)
