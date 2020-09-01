@@ -186,21 +186,21 @@ CREATE TABLE public.electronic_gradeable (
     eg_student_view boolean NOT NULL,
     eg_student_view_after_grades boolean DEFAULT false NOT NULL,
     eg_student_submit boolean NOT NULL,
-    eg_peer_grading boolean NOT NULL,
     eg_submission_open_date timestamp(6) with time zone NOT NULL,
     eg_submission_due_date timestamp(6) with time zone NOT NULL,
     eg_has_due_date boolean DEFAULT true NOT NULL,
     eg_late_days integer DEFAULT '-1'::integer NOT NULL,
     eg_allow_late_submission boolean DEFAULT true NOT NULL,
-    eg_peer_grade_set integer DEFAULT 0 NOT NULL,
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
     eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
-    eg_regrade_request_date timestamp(6) with time zone NOT NULL,
+    eg_grade_inquiry_due_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
+    eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
+    CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
+    CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
-    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone))
@@ -306,7 +306,9 @@ CREATE TABLE public.gradeable_component (
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
-    gc_page integer NOT NULL
+    gc_page integer NOT NULL,
+    gc_is_itempool_linked boolean DEFAULT false NOT NULL,
+    gc_itempool character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -600,6 +602,18 @@ CREATE TABLE public.peer_assign (
 
 
 --
+-- Name: peer_feedback; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_feedback (
+    grader_id character varying(255) NOT NULL,
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    feedback character varying(255)
+);
+
+
+--
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -714,7 +728,8 @@ CREATE TABLE public.queue (
     removed_by text,
     contact_info text,
     last_time_in_queue timestamp with time zone,
-    time_help_start timestamp with time zone
+    time_help_start timestamp with time zone,
+    paused boolean DEFAULT false NOT NULL
 );
 
 
@@ -864,7 +879,8 @@ CREATE TABLE public.sections_rotating (
 
 CREATE TABLE public.seeking_team (
     g_id character varying(255) NOT NULL,
-    user_id character varying NOT NULL
+    user_id character varying NOT NULL,
+    message character varying
 );
 
 
@@ -877,6 +893,20 @@ CREATE TABLE public.sessions (
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
     session_expires timestamp(6) with time zone NOT NULL
+);
+
+
+--
+-- Name: solution_ta_notes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.solution_ta_notes (
+    g_id character varying(255) NOT NULL,
+    component_id integer NOT NULL,
+    solution_notes text NOT NULL,
+    author character varying NOT NULL,
+    edited_at timestamp with time zone NOT NULL,
+    itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -1321,6 +1351,14 @@ ALTER TABLE ONLY public.notifications
 
 ALTER TABLE ONLY public.peer_assign
     ADD CONSTRAINT peer_assign_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: peer_feedback peer_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
 
 
 --
@@ -1854,6 +1892,30 @@ ALTER TABLE ONLY public.peer_assign
 
 
 --
+-- Name: peer_feedback peer_feedback_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_feedback peer_feedback_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_feedback peer_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_feedback
+    ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: poll_options poll_options_poll_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1995,6 +2057,22 @@ ALTER TABLE ONLY public.seeking_team
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_author_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_author_fk FOREIGN KEY (author) REFERENCES public.users(user_id);
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_g_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_g_id_fk FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
 
 
 --

@@ -1,0 +1,6 @@
+{% if viewer.getQueueAnnouncementMessage() | length > 0 %}
+    <div id="announcement">
+        <h2>Office Hours Queue Announcements:</h2>
+        <p>{{viewer.getQueueAnnouncementMessage() | markdown}}</p>
+    </div>
+{% endif %}

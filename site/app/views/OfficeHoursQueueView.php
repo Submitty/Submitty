@@ -10,15 +10,10 @@ class OfficeHoursQueueView extends AbstractView {
     public function showTheQueue($viewer) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->enableMobileViewport();
 
-        $output = $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/FilterQueues.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/CurrentQueue.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/QueueHistory.twig");
-        $output .= $this->renderPart($viewer, "officeHoursQueue/QueueFooter.twig");
-
-        return $output;
+        return $this->renderPart($viewer, "officeHoursQueue/QueueHeader.twig");
     }
 
     public function renderCurrentQueue($viewer) {
@@ -31,6 +26,10 @@ class OfficeHoursQueueView extends AbstractView {
 
     public function renderNewStatus($viewer) {
         return $this->renderPart($viewer, "officeHoursQueue/QueueStatus.twig");
+    }
+
+    public function renderNewAnnouncement($viewer) {
+        return $this->renderPart($viewer, "officeHoursQueue/AnnouncementMsg.twig");
     }
 
     private function renderPart($viewer, $twig_location) {

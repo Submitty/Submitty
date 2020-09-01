@@ -1,6 +1,6 @@
 <div id="queue_history">
   <br><br>
-  <h1>Today's History
+  <h2>Today's History
     {% if viewer.getFullHistory() %}
       <a id="view_history_button" role="button" class="btn btn-default" href="{{base_url}}?full_history=false">
         View Limited History
@@ -10,7 +10,7 @@
         View Full History
       </a>
     {% endif %}
-  </h1>
+  </h2>
   <table class="table table-striped" style="width:100%;">
     <thead>
       <tr>
@@ -30,8 +30,8 @@
     </thead>
     <tbody>
       {% set history_count = 0 %}
-      {% for entry in viewer.getPastQueue()if history_count < 25 or viewer.getFullHistory() %}
-        {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
+      {% for entry in viewer.getPastQueue() %}
+        {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
             <th scope="row">{{history_count}}</th>

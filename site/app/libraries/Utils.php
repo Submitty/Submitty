@@ -342,53 +342,26 @@ class Utils {
     }
 
     /**
-     * Converts a plain text string to the appropriate CodeMirror mime type mode.
+     * Remove comments from the given string.
+     * This function will remove any comments that are considered valid comments in the c programming language including
+     * single line, end of line, or multi-line comments.
+     *
+     * It will not work for html, python, etc comments.
+     *
+     * @param string $str
+     * @return string|null Original string with comments removed, or null on failure.
      */
-    public static function getCodeMirrorMode(?string $type): string {
-        switch (strtolower($type)) {
-            case 'c':
-                return 'text/x-csrc';
-            case 'c++':
-            case 'cpp':
-            case 'h':
-            case 'hpp':
-                return 'text/x-c++src';
-            case 'c#':
-                return 'text/x-csharp';
-            case 'objective-c':
-                return 'text/x-objectivec';
-            case 'java':
-                return 'text/x-java';
-            case 'scala':
-                return 'text/scala';
-            case 'node':
-            case 'nodejs':
-            case 'javascript':
-            case 'js':
-                return 'text/javascript';
-            case 'typescript':
-                return 'text/typescript';
-            case 'json':
-                return 'application/json';
-            case 'python':
-                return 'text/x-python';
-            case 'oz':
-                return 'text/x-oz';
-            case 'sql':
-                return 'text/x-sql';
-            case 'mysql':
-                return 'text/x-mysql';
-            case 'pgsql':
-            case 'postgres':
-            case 'postgresql':
-                return 'text/x-pgsql';
-            case 'scheme':
-                return 'text/x-scheme';
-            case 'bash':
-            case 'sh':
-                return 'text/x-sh';
-            default:
-                return 'text/plain';
-        }
+    public static function stripComments(string $str): ?string {
+        return preg_replace('/\/\*[\s\S]*?\*\/|\/\/.*/', '', $str);
+    }
+
+    /**
+     * Escape double quotes in the given string.
+     *
+     * @param string $str
+     * @return string|null Original string with double quotes escaped, or null on failure.
+     */
+    public static function escapeDoubleQuotes(string $str): ?string {
+        return preg_replace('["]', '\"', $str);
     }
 }

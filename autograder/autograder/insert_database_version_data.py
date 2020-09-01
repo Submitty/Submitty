@@ -11,32 +11,25 @@ import os
 from submitty_utils import dateutils
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
 
-from . import CONFIG_PATH
-
-with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DB_HOST = OPEN_JSON['database_host']
-DB_USER = OPEN_JSON['database_user']
-DB_PASSWORD = OPEN_JSON['database_password']
-
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-DATA_DIR = OPEN_JSON['submitty_data_dir']
-
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
 
 
-def insert_to_database(semester, course, gradeable_id, user_id, team_id, who_id, is_team, version):
+def insert_into_database(config, semester, course, gradeable_id, user_id, team_id, who_id, is_team,
+                         version):
+    db_user = config.database['database_user']
+    db_host = config.database['database_host']
+    db_pass = config.database['database_password']
+    data_dir = config.submitty['submitty_data_dir']
 
     non_hidden_non_ec = 0
     non_hidden_ec = 0
     hidden_non_ec = 0
     hidden_ec = 0
 
-    testcases = get_testcases(semester, course, gradeable_id)
-    results = get_result_details(semester, course, gradeable_id, who_id, version)
+    testcases = get_testcases(config, semester, course, gradeable_id)
+    results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
     for i in range(len(testcases)):
@@ -53,10 +46,10 @@ def insert_to_database(semester, course, gradeable_id, user_id, team_id, who_id,
     db_name = f"submitty_{semester}_{course}"
 
     # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(DB_HOST):
-        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@/{db_name}?host={DB_HOST}"
+    if os.path.isdir(db_host):
+        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
     else:
-        conn_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{db_name}"
+        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
 
     engine = create_engine(conn_string)
     db = engine.connect()
@@ -154,7 +147,7 @@ def insert_to_database(semester, course, gradeable_id, user_id, team_id, who_id,
     engine.dispose()
 
 
-def get_testcases(semester, course, g_id):
+def get_testcases(config, semester, course, g_id):
     """
     Get all the testcases for a homework from its build json file. This should have a 1-to-1
     correspondance with the testcases that come from the results.json file.
@@ -165,8 +158,15 @@ def get_testcases(semester, course, g_id):
     :return:
     """
     testcases = []
-    build_file = os.path.join(DATA_DIR, "courses", semester, course, "config", "build",
-                              "build_" + g_id + ".json")
+    build_file = os.path.join(
+        config.submitty['submitty_data_dir'],
+        "courses",
+        semester,
+        course,
+        "config",
+        "build",
+        f"build_{g_id}.json"
+    )
     if os.path.isfile(build_file):
         with open(build_file) as build_file:
             build_json = json.load(build_file)
@@ -178,7 +178,7 @@ def get_testcases(semester, course, g_id):
     return testcases
 
 
-def get_result_details(semester, course, g_id, who_id, version):
+def get_result_details(data_dir, semester, course, g_id, who_id, version):
     """
     Gets the result details for a particular version of a gradeable for the who (user or team).
     It returns a dictionary that contains a list of the testcases (that should have a 1-to-1
@@ -193,7 +193,7 @@ def get_result_details(semester, course, g_id, who_id, version):
     :return:
     """
     result_details = {'testcases': [], 'submission_time': None}
-    result_dir = os.path.join(DATA_DIR, "courses", semester, course, "results", g_id, who_id,
+    result_dir = os.path.join(data_dir, "courses", semester, course, "results", g_id, who_id,
                               str(version))
     if os.path.isfile(os.path.join(result_dir, "results.json")):
         with open(os.path.join(result_dir, "results.json")) as result_file:

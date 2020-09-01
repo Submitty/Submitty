@@ -384,17 +384,17 @@ function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
 }
 
 function addMorePriorTermGradeable(prior_term_gradeables) {
-    var form = $("#save-configuration-form");
-    var prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
-    var to_append = '<br /><select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
+    const form = $("#save-configuration-form");
+    const prior_term_gradeables_number = $('[name="prior_term_gradeables_number"]', form).val();
+    let to_append = '<select name="prev_sem_'+ prior_term_gradeables_number +'"><option value="">None</option>';
     $.each(prior_term_gradeables, function(sem,courses_gradeables){
         to_append += '<option value="'+ sem +'">'+ sem +'</option>';
     });
     to_append += '</select><select name="prev_course_'+ prior_term_gradeables_number +'"><option value="">None</option></select><select name="prev_gradeable_'+ prior_term_gradeables_number +'"><option value="">None</option></select>';
-    $('[name="prev_gradeable_div"]', form).append(to_append);
+    $('#prev_gradeable_div', form).append(to_append);
     $('[name="prior_term_gradeables_number"]', form).val(parseInt(prior_term_gradeables_number)+1);
     $("select", form).change(function(){
-        var select_element_name = $(this).attr("name");
+        const select_element_name = $(this).attr("name");
         PlagiarismConfigurationFormOptionChanged(prior_term_gradeables, select_element_name);
     });
 }
@@ -1225,7 +1225,7 @@ function displaySuccessMessage(message) {
  * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
  *
  * @param {string} message
- * @param {string} type
+ * @param {string} type either 'error' or 'success'
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
@@ -1589,7 +1589,7 @@ function resizeNoScrollTextareas() {
     // Make sure textareas resize correctly
     $('textarea.noscroll').each(function() {
         auto_grow(this);
-    })
+    });
 }
 
 $(document).ready(function() {
@@ -1622,6 +1622,35 @@ function enableKeyToClick(){
     key_to_click[i].addEventListener('keyup', keyToClickKeyup);
     key_to_click[i].addEventListener('keydown', keyToClickKeydown);
   }
+}
+
+function peerFeedbackUpload(grader_id, user_id, g_id, feedback){
+    $('#save_status').html('Saving Feedback...');
+    var url = buildCourseUrl(['gradeable', g_id, 'feedback' , 'set']);
+    let formData = new FormData();
+    formData.append('csrf_token', csrfToken);
+    formData.append('grader_id', grader_id);
+    formData.append('user_id', user_id);
+    formData.append('feedback', feedback);
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                $('#save_status').html('All Changes Saved');
+            } catch(err){
+                return;
+            }
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+            $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        }
+    })
 }
 
 /**
@@ -1705,4 +1734,14 @@ function flagUserImage(user_id, flag) {
             displayErrorMessage('Something went wrong!');
         }
     }
+}
+
+/**
+ * Get an array of all focusable elements currently in the dom.
+ *
+ * @returns {Element[]}
+ */
+function getFocusableElements() {
+    let focusable_elements = $(':focusable:tabbable');
+    return Array.from(focusable_elements);
 }

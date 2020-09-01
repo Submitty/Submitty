@@ -120,6 +120,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'queue_enabled' => true,
                 'queue_contact_info' => true,
                 'queue_message' => '',
+                'queue_announcement_message' => '',
+                'seek_message_enabled'           => false,
+                'seek_message_instructions'      => '',
                 'polls_enabled'                  => false,
                 'polls_pts_for_correct'          => 1.0,
                 'polls_pts_for_incorrect'        => 0.0
@@ -284,6 +287,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'queue_enabled' => true,
                     'queue_contact_info' => true,
                     'queue_message' => '',
+                    'queue_announcement_message' => '',
+                    'seek_message_enabled'           => false,
+                    'seek_message_instructions'      => '',
                     'polls_enabled'                  => false,
                     'polls_pts_for_correct'          => 1.0,
                     'polls_pts_for_incorrect'        => 0.0
@@ -315,6 +321,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled' => true,
             'queue_contact_info' => true,
             'queue_message' => '',
+            'queue_announcement_message' => '',
+            'seek_message_enabled'           => false,
+            'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
             'polls_pts_for_correct'          => 1.0,
             'polls_pts_for_incorrect'        => 0.0,
@@ -495,7 +504,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
                 'regrade_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_contact_info',
-                'queue_message', 'polls_enabled', 'polls_pts_for_correct', 'polls_pts_for_incorrect'
+                'queue_message', 'queue_announcement_message', 'polls_enabled', 'polls_pts_for_correct', 'polls_pts_for_incorrect', 'seek_message_enabled', 'seek_message_instructions'
             ],
         ];
         $return = [];

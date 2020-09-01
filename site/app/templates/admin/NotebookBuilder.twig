@@ -1,6 +1,49 @@
 <div class="content">
+    <script>
+        /**
+         * Escape any characters that may cause problems for JSON.parse()
+         * Double quotes are not included here as they were already escaped in PHP
+         */
+        const escape = str => {
+            return str
+                .replace(/[\\]/g, '\\\\')
+                .replace(/[\/]/g, '\\/')
+                .replace(/[\b]/g, '\\b')
+                .replace(/[\f]/g, '\\f')
+                .replace(/[\n]/g, '\\n')
+                .replace(/[\r]/g, '\\r')
+                .replace(/[\t]/g, '\\t');
+        };
+
+        let config_string = "{{ config_string|raw }}";
+        config_string = escape(config_string);
+        try {
+            config = JSON.parse(config_string);
+        }
+        catch (err) {
+            console.error(err);
+            displayErrorMessage('JSON parse failure!');
+        }
+
+        window.builder_data = {
+            g_id: '{{ gradeable.getId() }}',
+            config: config,
+            images: JSON.parse('{{ images|raw }}'),
+            codemirror_langauges: JSON.parse('{{ codemirror_languages|raw }}')
+        };
+
+        // Attach notebook_builder object to the window
+        window.addEventListener('DOMContentLoaded', () => {
+            const attachment_div = document.getElementById('notebook-builder');
+            attachment_div.innerHTML = '';
+            window.notebook_builder = new RootBuilder(attachment_div);
+        });
+    </script>
+
     <h2>{{ gradeable.getTitle() }} Notebook Builder</h2>
-    <div id="notebook-builder"></div>
+    <div id="notebook-builder">
+        <p>Loading...</p>
+    </div>
     <button onclick="javascript:document.getElementById('holder').innerHTML=JSON.stringify(notebook_builder.getJSON(), null, 2)">Show JSON</button>
     <pre id="holder"></pre>
 </div>

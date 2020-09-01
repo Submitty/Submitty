@@ -94,6 +94,18 @@ jobs:
       python: 3.7
       if: branch = master OR type = pull_request
 
+    - &01-js-lint
+      language: node
+      node_js: 12
+      install:
+        - pushd site
+        - npm ci
+        - popd
+      script:
+        - pushd site
+        - npm run lint
+        - popd
+
     - &02-php-unit
       stage: 02 unit test
       php: 7.2
@@ -202,6 +214,9 @@ jobs:
         - sudo add-apt-repository -y ppa:ondrej/php
         - sudo apt-get -qq update
         - sudo apt-get -y install php${PHP_VERSION}-fpm php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get install docker-ce docker-ce-cli
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
@@ -324,9 +339,12 @@ jobs:
         - mkdir ${HOME}/clang+llvm
         - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
         - export PATH=${HOME}/clang+llvm/bin:${PATH}
-        # Create symlink so that it's in expected location for whitelist
+        # Create symlink so that it's in expected location for safelist
         - sudo ln -s $(which clang) /usr/bin/clang
         - sudo ln -s $(which clang++) /usr/bin/clang++
+        - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        - sudo apt-get install docker-ce docker-ce-cli
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil

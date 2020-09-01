@@ -322,16 +322,6 @@ usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
-if [ ${VAGRANT} == 1 ]; then
-    # add these users so that they can write to .vagrant/logs folder
-    if [ ${WORKER} == 0 ]; then
-        usermod -a -G vagrant "${PHP_USER}"
-        usermod -a -G vagrant "${CGI_USER}"
-        usermod -a -G vagrant postgres # needed by preferred_name_logging
-    fi
-    usermod -a -G vagrant "${DAEMON_USER}"
-fi
-
 usermod -a -G docker "${DAEMON_USER}"
 
 #################################################################
@@ -517,7 +507,7 @@ EOF
     DISABLED_FUNCTIONS+="php_ini_loaded_file,readlink,symlink,link,set_file_buffer,proc_close,proc_terminate,"
     DISABLED_FUNCTIONS+="proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,putenv,get_current_user,"
     DISABLED_FUNCTIONS+="magic_quotes_runtime,set_magic_quotes_runtime,import_request_variables,ini_alter,"
-    DISABLED_FUNCTIONS+="stream_socket_client,stream_socket_server,stream_socket_accept,stream_socket_pair,"
+    DISABLED_FUNCTIONS+="stream_socket_server,stream_socket_accept,stream_socket_pair,"
     DISABLED_FUNCTIONS+="stream_get_transports,stream_wrapper_restore,mb_send_mail,openlog,syslog,closelog,pfsockopen,"
     DISABLED_FUNCTIONS+="posix_kill,apache_child_terminate,apache_get_modules,apache_get_version,apache_lookup_uri,"
     DISABLED_FUNCTIONS+="apache_reset_timeout,apache_response_headers,virtual,system,exec,shell_exec,passthru,"
@@ -538,6 +528,10 @@ mkdir -p ${SUBMITTY_DATA_DIR}
 
 #Set up database and copy down the tutorial repo if not in worker mode
 if [ ${WORKER} == 0 ]; then
+    # create the courses directory. This is needed for the first time we run
+    # the migrator in the INSTALL_SUBMITTY_HELPER.sh
+    mkdir -p ${SUBMITTY_DATA_DIR}/courses
+
     # create a list of valid userids and put them in /var/local/submitty/instructors
     # one way to create your list is by listing all of the userids in /home
     mkdir -p ${SUBMITTY_DATA_DIR}/instructors
@@ -691,17 +685,6 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-if [[ ${VAGRANT} == 1 ]]; then
-    DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-    VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
-
-    rm -rf ${SUBMITTY_DATA_DIR}/logs/
-    rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-
-    mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
-    ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty ${SUBMITTY_DATA_DIR}/logs
-fi
-
 echo Beginning Install Submitty Script
 bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
 
@@ -742,9 +725,6 @@ if [ ${WORKER} == 0 ]; then
     if [[ ${VAGRANT} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
         echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
-
-        DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-        VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then

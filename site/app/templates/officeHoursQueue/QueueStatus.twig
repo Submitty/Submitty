@@ -1,5 +1,4 @@
 {% if viewer.inQueue() == 0 %}
-  <br>
   <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
     <label for="name_box">Your Name:</label>
@@ -8,10 +7,10 @@
     <div class="form-group">
       <label for="queue_code">Queue Name:
       </label>
-      <select id="queue_code" class="form-control" name="code" required="required" onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
+      <select id="queue_code" class="form-control" name="code" required="required">
         <option value="">Queue Name</option>
-        {% for queue in viewer.getAllQueues() if queue['open'] == 'true' %}
-          <option value="{{queue['code']}}">{{viewer.removeUnderScores(queue['code'])}}</option>
+        {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
+          <option value="{{queue['code']}}">{{queue['code']}}</option>
         {% endfor %}
       </select>
     </div>
@@ -25,6 +24,12 @@
     {% endif %}
     <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
   </form>
+    <script>
+        $('#queue_code').change(function(){
+        document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';
+        });
+    </script>
+
 {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
   <div id="queue_status">
     <p>
@@ -37,7 +42,7 @@
     </p>
 
     <p>You are currently in:
-      <b>{{viewer.removeUnderScores(viewer.getCurrentQueueCode())}}</b>
+      <b>{{viewer.getCurrentQueueCode()}}</b>
     </p>
 
     <p>
@@ -73,6 +78,19 @@
       <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
+    </form>
+    <br>
+    <p>Use the pause button if you must step away from your computer for a few minutes.  This will preserve your position in the queue.</p>
+    <form method="post" action="{{base_url}}/togglePause">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <input type="hidden" name="pause_state" value="{{ viewer.isCurrentlyPaused()?'false':'true' }}"/>
+      <button id="pause_user" type="submit" class="btn btn-primary">
+        {% if viewer.isCurrentlyPaused() %}
+          Unpause position in queue
+        {% else %}
+          Pause position in queue
+        {% endif %}
+      </button>
     </form>
   </div>
 {% else %}

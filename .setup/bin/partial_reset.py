@@ -17,7 +17,6 @@ import shutil
 import json
 import subprocess
 
-import distro
 import yaml
 
 CURRENT_PATH = Path(__file__).resolve().parent
@@ -110,25 +109,6 @@ def main():
 
     shutil.rmtree('/var/local/submitty', True)
     Path(SUBMITTY_DATA_DIR, 'courses').mkdir(parents=True)
-
-    distro_name = distro.id()
-    distro_version = distro.lsb_release_attr('codename')
-
-    # Clean out the log files, but leave the folders intact
-    if Path(CURRENT_PATH, "..", "..", ".vagrant").is_dir():
-        repo_path = Path(
-            SUBMITTY_REPOSITORY,
-            '.vagrant',
-            distro_name,
-            distro_version,
-            'logs',
-            'submitty'
-        )
-        data_path = SUBMITTY_DATA_DIR / 'logs'
-        if repo_path.exists():
-            shutil.rmtree(str(repo_path))
-        repo_path.mkdir()
-        data_path.symlink_to(repo_path)
 
     with Path(SUBMITTY_INSTALL_DIR, 'config', 'database.json').open() as submitty_config:
         submitty_config_json = json.load(submitty_config)

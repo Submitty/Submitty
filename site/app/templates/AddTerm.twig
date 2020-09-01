@@ -1,0 +1,37 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}add-new-term{% endblock %}
+{% block title %}Add New Term{% endblock %}
+{% block form %}
+    <form method="post" action="{{ add_term_url }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="flex-col my-3">
+        <div class="row">
+            <div class="row col-md-6">
+                <label class="col-md-5" for="term-id">Term id:</label>
+                <input type="text" name="term_id" placeholder="s20" id="term-id" class="col-md-6" required/>
+            </div>
+            <div class="row col-md-6">
+                <label class="col-md-5" for="start-date">Start Date:</label>
+                <input type="date" name="start_date" id="start-date" class="col-md-6" required/>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="row col-md-6">
+                <label class="col-md-5" for="term-name">Term name:</label>
+                <input type="text" name="term_name" placeholder="Spring 2020" id="term-name" class="col-md-6" required/>
+            </div>
+            <div class="row col-md-6">
+                <label class="col-md-5" for="end-date">End Date</label>
+                <input type="date" name="end_date" id="end-date" class="col-md-6" required/>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
