@@ -58,6 +58,7 @@ class GradingStatus(Enum):
 
 
 def put_files(
+    config: submitty_config.Config,
     address: str,
     files: List[Tuple[PathLike, PathLike]]
 ):
@@ -84,7 +85,7 @@ def put_files(
 
         try:
             # TODO: Figure out a proper strategy for `my_name` param.
-            ssh = establish_ssh_connection('', user, host)
+            ssh = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -104,6 +105,7 @@ def put_files(
 
 
 def get_files(
+    config: submitty_config.Config,
     address: str,
     files: List[Tuple[PathLike, PathLike]]
 ):
@@ -127,7 +129,7 @@ def get_files(
 
         try:
             # TODO: Figure out a proper strategy for `my_name` param.
-            ssh = establish_ssh_connection('', user, host)
+            ssh = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -146,7 +148,13 @@ def get_files(
                 ssh.close()
 
 
-def delete_files(address: str, files: List[PathLike], *, ignore_not_found: bool = False):
+def delete_files(
+    config: submitty_config.Config,
+    address: str, 
+    files: List[PathLike], 
+    *,
+    ignore_not_found: bool = False
+):
     """Remove files from some place.
 
     Parameters
@@ -173,7 +181,7 @@ def delete_files(address: str, files: List[PathLike], *, ignore_not_found: bool 
 
         try:
             # TODO: Figure out a proper strategy for `my_name` param.
-            ssh = establish_ssh_connection('', user, host)
+            ssh = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
 
@@ -296,7 +304,7 @@ def update_worker_json(config, name, entry):
 
     success = False
     try:
-        put_files(address, [
+        put_files(config, address, [
             (tmp_json_path, foreign_json)
         ])
         success = True
@@ -425,7 +433,7 @@ def prepare_job(
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
-        put_files(which_machine, [
+        put_files(config, which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
             (todo_queue_file, todo_queue_file)
@@ -517,7 +525,7 @@ def unpack_job(
         # Try to pull in the finished files into temporary work files.
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
-        get_files(which_machine, [
+        get_files(config, which_machine, [
             (target_done_queue_file, local_done_queue_file),
             (target_results_zip, local_results_zip)
         ])
@@ -538,7 +546,7 @@ def unpack_job(
         print(f"ERROR: Could not retrieve the file from the foreign machine.\nERROR: {e}")
         status = GradingStatus.FAILURE
     else:
-        delete_files(which_machine, [
+        delete_files(config, which_machine, [
             target_done_queue_file,
             target_results_zip,
         ], ignore_not_found=True)
