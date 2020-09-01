@@ -55,7 +55,7 @@ class ElectronicGraderController extends AbstractController {
      * @param int $number_to_grade
      * @return Array $final_grading_info
      */
-    private function setRandomizedGraders(array $student_array, int $number_to_grade) {
+    public function setRandomizedGraders(array $student_array, int $number_to_grade) {
         $final_grading_info = [];
         $graded_array = $student_array;
         /*n_array_peers : An Array of arrays that holds information on to be graded peers
@@ -110,7 +110,7 @@ class ElectronicGraderController extends AbstractController {
      * @param Array $student_arraye
      * @return Array $final_grading_info
      */
-    private function setAllGradAllGrading($student_array) {
+    public function setAllGradAllGrading($student_array) {
         $final_grading_info = [];
         for ($grader = 0; $grader < count($student_array); ++$grader) {
             $peer_array = $student_array;
