@@ -88,6 +88,8 @@ function onGradeInquirySubmitClicked(button) {
           let submitter_id = form.children('#submitter_id').val();
           if (data.type === 'new_post') {
             let gc_id = form.children('#gc_id').val();
+            newPostRender(gc_id, data.post_id, data.new_post);
+            text_area.val("");
             window.socketClient.send({
               'type': data.type,
               'post_id': data.post_id,
@@ -95,9 +97,8 @@ function onGradeInquirySubmitClicked(button) {
               'gc_id': gc_id
             });
           }
-          else if(data.type === "first_post"){
-            //todo
-            window.socketClient.send({'type' : data.type, 'submitter_id' : submitter_id});
+          else if(data.type === "open_grade_inquiry"){
+            window.socketClient.send({'type' : "toggle_status", 'submitter_id' : submitter_id});
             window.location.reload();
           }
           else if (data.type === 'toggle_status') {
@@ -124,10 +125,6 @@ function initGradingInquirySocketClient() {
         break;
       case "toggle_status":
         gradeInquiryDiscussionHandler(msg.submitter_id);
-        break;
-      case "first_post":
-        //todo
-        window.location.reload();
         break;
       default:
         console.log("Undefined message recieved.");
@@ -168,10 +165,6 @@ function newPostRender(gc_id, post_id, new_post) {
   }
   else {
     let last_post = $('.grade-inquiry').children('.post_box').last();
-    if (last_post.length == 0) {
-      // if no posts
-      last_post = $('.grade-inquiry');
-    }
     $(new_post).insertAfter(last_post).hide().fadeIn('slow');
   }
 }

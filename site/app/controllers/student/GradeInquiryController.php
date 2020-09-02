@@ -47,23 +47,12 @@ class GradeInquiryController extends AbstractController {
         }
 
         try {
-            $regrade_post_id = $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
+            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-
-            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
-            $new_post = $this->core->getOutput()->renderTemplate(
-                'submission\Homework',
-                'renderSingleGradeInquiryPost',
-                $regrade_post,
-                $graded_gradeable
-            );
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
 
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse([
-                    "type" => "first_post",
-                    "post_id" => $regrade_post_id,
-                    "new_post" => $new_post
-                ])
+                JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
