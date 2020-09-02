@@ -153,8 +153,8 @@ def get_files(
 
 def delete_files(
     config: submitty_config.Config,
-    address: str, 
-    files: List[PathLike], 
+    address: str,
+    files: List[PathLike],
     *,
     ignore_not_found: bool = False
 ):
