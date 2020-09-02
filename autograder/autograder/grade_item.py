@@ -9,6 +9,46 @@ import traceback
 from . import autograding_utils, testcase
 from . execution_environments import jailed_sandbox
 
+def get_item_from_item_pool(complete_config_obj, item_name):
+    for item in complete_config_obj['item_pool']:
+        if item['item_name'] == item_name:
+            return item
+    return None
+
+
+def personalize_config(
+    complete_config_obj,
+    notebook_data,
+    config,
+    job_id,
+    is_batch_job,
+    which_untrusted,
+    item_name
+):
+
+    # Do nothing if there is not .submit.notebook or it doesn't contain 'item_pools_selected'
+    if notebook_data is None or notebook_data['item_pools_selected'] is None:
+        return complete_config_obj
+
+    # For all of the items this student was given, we want to add any associated testcases
+    # to the complete config's array of testcases.
+    for item_name in notebook_data['item_pools_selected']:
+        item = get_item_from_item_pool(complete_config_obj, item_name)
+
+        if item is None:
+            autograding_utils.log_message(
+                config.log_path,
+                job_id,
+                is_batch_job,
+                which_untrusted,
+                item_name,
+                message=f"ERROR: could not find {item_name} in item pool."
+            )
+            continue
+
+        complete_config_obj['testcases'] += item['testcases']
+
+    return complete_config_obj
 
 def grade_from_zip(
     config,
