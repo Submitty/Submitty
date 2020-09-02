@@ -84,7 +84,11 @@ def put_files(
         sftp = ssh = None
 
         try:
-            # TODO: Figure out a proper strategy for `my_name` param.
+            # NOTE: my_name is used pretty inconsistently across the file:
+            # - In one case it's set to user@host
+            # - In one case it's set to the name of the running thread
+            # - In one case it's set to None
+            # Setting it to an empty string shouldn't lose us any debugging information.
             ssh = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
@@ -128,7 +132,6 @@ def get_files(
         sftp = ssh = None
 
         try:
-            # TODO: Figure out a proper strategy for `my_name` param.
             ssh = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
@@ -180,7 +183,6 @@ def delete_files(
         sftp = ssh = None
 
         try:
-            # TODO: Figure out a proper strategy for `my_name` param.
             ssh = establish_ssh_connection(config, '', user, host)
         except Exception as e:
             raise RuntimeError(f"SSH to {address} failed") from e
