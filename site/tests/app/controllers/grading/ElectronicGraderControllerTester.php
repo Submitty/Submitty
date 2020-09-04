@@ -37,8 +37,8 @@ class ElectronicGraderControllerTester extends BaseUnitTest {
         $controller = new ElectronicGraderController($core);
         $response = $controller->setRandomizedGraders(['aphacker','pagaca','sauerd','student'], 1);
         $this->assertEquals(gettype($response), 'array');
-        for ($i = 0; $i < sizeof($response); ++$i) {
-            for ($j = 0; $i < sizeof($response[$i][1]); ++$j) {
+        for ($i = 0; $i < count($response); ++$i) {
+            for ($j = 0; $i < count($response[$i][1]); ++$j) {
                 $this->assertEquals(gettype($response[$i][1]), 'array');
             }
         }
@@ -59,10 +59,10 @@ class ElectronicGraderControllerTester extends BaseUnitTest {
         $controller = new ElectronicGraderController($core);
         $response = $controller->setAllGradAllGrading(['aphacker','pagaca','sauerd','student']);
         $this->assertEquals(gettype($response), 'array');
-        for ($i = 0; $i < sizeof($response); ++$i) {
-            for ($j = 0; $i < sizeof($response[$i][1]); ++$j) {
+        for ($i = 0; $i < count($response); ++$i) {
+            for ($j = 0; $i < count($response[$i][1]); ++$j) {
                 $this->assertEquals(gettype($response[$i][1]), 'array');
-                $this->assertEquals(sizeof($response[$i][1]), 3);
+                $this->assertEquals(count($response[$i][1]), 3);
             }
         }
     }
