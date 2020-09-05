@@ -2,6 +2,12 @@
 {% block popup_id %}randomize-button-warning{% endblock %}
 {% block title %}WARNING: Grading may be in progress!{% endblock %}
 {% block body %}
+    <style>
+        .randomize_cancel_btn{
+            float: left;
+        }
+    </style>
+    
     <p> Updating the sections for this gradeable will change the submissions assigned to each grader.<br />
         If grading has begun, this may interupt or redistribute grade submissions.<br /><br /><br />
         Are you sure you want to continue? <br /><br />
@@ -15,9 +21,3 @@
     {{ block('close_button') }}
     <a style="float: right;" class="btn btn-primary" href="{{ randomize_team_rotating_sections_url }}"> Randomly Re-Assign Teams to Rotating Sections </a>
 {% endblock %}
-
-<style>
-  .randomize_cancel_btn{
-    float: left;
-  }
-</style>
