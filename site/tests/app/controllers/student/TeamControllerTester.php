@@ -90,10 +90,10 @@ class TeamControllerTester extends BaseUnitTest {
     /** @dataProvider provideTestCleanInviteId */
     public function testCleanInviteId(string $raw, string $expectation) {
         $controller = new ReflectionObject(new TeamController($this->core));
-        $clean_invite_method = $controller->getMethod('cleanInviteId');
-        $clean_invite_method->setAccessible(true);
+        $clean_invite_id_method = $controller->getMethod('cleanInviteId');
+        $clean_invite_id_method->setAccessible(true);
 
-        $clean_invite_id = $clean_invite_method->invoke(null, $raw);
+        $clean_invite_id = $clean_invite_id_method->invoke(null, $raw);
         $this->assertEquals($clean_invite_id, $expectation);
     }
 

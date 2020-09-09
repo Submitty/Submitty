@@ -524,7 +524,7 @@ class TeamController extends AbstractController {
      * @param string $invite_id
      * @return string
      */
-    private static function cleanInviteId(string $invite_id) {
+    private static function cleanInviteId(string $invite_id): string {
         return trim(strtolower($invite_id));
     }
 }
