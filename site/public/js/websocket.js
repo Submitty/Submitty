@@ -29,7 +29,9 @@ class WebSocketClient {
         this.autoReconnectInterval = 5 * 1000;
         this.onopen = null;
         this.onmessage = null;
-        this.url = `${document.body.dataset.baseUrl.replace('http', 'ws')}ws/`;
+        let ws_url = document.body.dataset.baseUrl.replace('http', 'ws');
+        ws_url = ws_url.substring(0, ws_url.lastIndexOf(':'));
+        this.url = `${ws_url}:8443/ws/`;
     }
 
     open(page) {
