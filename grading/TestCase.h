@@ -43,7 +43,7 @@ public:
   // -------------------------------
   // ACCESSORS
 
-  int getID() const { return test_case_id; }
+  std::string getID() const { return test_case_id; }
   std::string getTitle() const;
   std::string getTestcaseLabel() const;
   std::string getDetails () const { return _json.value("details",""); }
@@ -136,7 +136,7 @@ private:
   // -------------------------------
   // REPRESENTATION
   std::string CONTAINER_NAME;
-  int test_case_id;
+  std::string test_case_id;
   nlohmann::json& _json;
 };
 

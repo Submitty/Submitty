@@ -800,10 +800,10 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &testcases, nlohmann::json &whole
   }
 }
 
-void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config){
+void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config, int& testcase_id){
 
   for (typename nlohmann::json::iterator itr = testcases.begin(); itr != testcases.end(); itr++){
-      InflateTestcase(*itr, whole_config);
+      InflateTestcase(*itr, whole_config, testcase_id);
   }
 }
 
@@ -815,9 +815,14 @@ bool validShowValue(const nlohmann::json& v) {
            v == "on_success"));
 }
 
-void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config) {
+void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config, int& testcase_id) {
   //move to load_json
   General_Helper(single_testcase);
+
+  if (single_testcase["testcase_id"].is_null()) {
+    single_testcase["testcase_id"] = "testcase_" + std::to_string(testcase_id);
+    testcase_id++;
+  }
 
   if (!single_testcase["timestamped_stdout"].is_boolean()){
     single_testcase["timestamped_stdout"] = whole_config["timestamped_stdout"];
@@ -897,7 +902,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   sstr >> answer;
 
   AddGlobalDefaults(answer);
-
+  int testcase_id = 0;
   /**
   * Validate/complete-ify the global testcases array.
   **/
@@ -912,7 +917,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   formatPreActions(*testcases, answer);
   FormatGraphicsActions(*testcases, answer);
   RewriteDeprecatedMyersDiff(*testcases, answer);
-  InflateTestcases(*testcases, answer);
+  InflateTestcases(*testcases, answer, testcase_id);
   ArchiveValidatedFiles(*testcases, answer);
   PreserveCompiledFiles(*testcases, answer);
 
@@ -932,7 +937,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
       formatPreActions(*item_testcases, answer);
       FormatGraphicsActions(*item_testcases, answer);
       RewriteDeprecatedMyersDiff(*item_testcases, answer);
-      InflateTestcases(*item_testcases, answer);
+      InflateTestcases(*item_testcases, answer, testcase_id);
       ArchiveValidatedFiles(*item_testcases, answer);
       PreserveCompiledFiles(*item_testcases, answer);
     }

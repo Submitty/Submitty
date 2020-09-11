@@ -433,11 +433,14 @@
   "definitions" : {
     "submission_limit" : {
       "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
-      "required" : ["max_submissions", "penalty", "points", "title", "type"],
+      "required" : ["max_submissions", "penalty", "points", "title", "type", "testcase_id"],
       "properties" : {
         "timestamped_stdout" : {
           "description" : "Add timestamps to student standard output files",
           "type" : "boolean"
+        },
+        "testcase_id" : {
+          "type" : "string"
         },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",
@@ -467,10 +470,13 @@
     "filecheck": {
       "description" : "A file existence check",
       "additionalProperties" : false,
-      "required" : ["type", "title", "actual_file"],
+      "required" : ["type", "title", "actual_file", "testcase_id"],
       "properties" : {
         "timestamped_stdout" : {
           "type" : "boolean"
+        },
+        "testcase_id" : {
+          "type" : "string"
         },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",
@@ -500,10 +506,14 @@
       "additionalProperties" : false,
       "required" : ["containers", "solution_containers", "dispatcher_actions",
                     "pre_commands", "single_port_per_container",
-                    "use_router", "title", "validation", "timestamped_stdout", "publish_actions"],
+                    "use_router", "title", "validation", "timestamped_stdout", "publish_actions",
+                    "testcase_id"],
       "properties" : {
         "timestamped_stdout" : {
           "type" : "boolean"
+        },
+        "testcase_id" : {
+          "type" : "string"
         },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",

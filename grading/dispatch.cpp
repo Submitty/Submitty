@@ -1064,9 +1064,9 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   std::string validator_error_filename = "validation_stderr.txt";
   std::string validator_log_filename    = "validation_logfile.txt";
   std::string validator_json_filename   = "validation_results.json";
-  std::string final_validator_log_filename    = "validation_logfile_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
-  std::string final_validator_error_filename    = "validation_stderr_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".txt";
-  std::string final_validator_json_filename   = "validation_results_" + std::to_string(tc.getID()) + "_" + std::to_string(autocheck_number) + ".json";
+  std::string final_validator_log_filename    = "validation_logfile_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_error_filename    = "validation_stderr_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".txt";
+  std::string final_validator_json_filename   = "validation_results_" + tc.getID() + "_" + std::to_string(autocheck_number) + ".json";
   std::string input_file_name           = "custom_validator_input.json";
 
 

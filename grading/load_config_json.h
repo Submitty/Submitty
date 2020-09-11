@@ -24,11 +24,11 @@ void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config);
 
 void RewriteDeprecatedMyersDiff(nlohmann::json &testcases, nlohmann::json &whole_config);
 
-void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config);
+void InflateTestcases(nlohmann::json &testcases, nlohmann::json &whole_config, int& testcase_id);
 
 bool validShowValue(const nlohmann::json& v);
 
-void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config);
+void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config, int& testcase_id);
 
 nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid);
 

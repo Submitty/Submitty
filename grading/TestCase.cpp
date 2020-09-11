@@ -234,14 +234,54 @@ TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_numb
   else                                             { return custom_dispatch(grader);                                    }
 }
 
+/*
+  Find the testcase within whole_config which has testcase_id == which_testcase_id and return it
+  Checks both the global testcase array and any testcases within an itempool.
+*/
+nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string which_testcase_id) {
+
+  // First, check the global testcase array
+  nlohmann::json::iterator testcases = whole_config.find("testcases");
+  if(testcases != whole_config.end()) {
+    for (nlohmann::json::iterator my_testcase = testcases->begin(); my_testcase != testcases->end(); my_testcase++) {
+      if(testcase["testcase_id"] == which_testcase_id) {
+        return *my_testcase;
+      }
+    }
+  }
+
+  // If we didn't find the testcase in the global array, it might be in the item_pool.
+  nlohmann::json::iterator itempool = whole_config.find("item_pool");
+  if(testcases != whole_config.end()) {
+    //Each item in the itempool has one or more testcases
+    for (nlohmann::json::iterator item = itempool->begin(); item != itempool->end(); item++) {
+      nlohmann::json::iterator itempool_testcases = item->find("testcases");
+      // Some items might have no testcases.
+      if(itempool_testcases != item->end()) {
+        // Once we've found an item with testcases, iterate across them to see if they have the id we're looking for
+        for(nlohmann::json::iterator itempool_testcase = itempool_testcases->begin(); itempool_testcase != itempool_testcases->end(); itempool_testcase++) {
+          if(itempool_testcase["testcase_id"] == which_testcase_id) {
+            return *itempool_testcase;
+          }
+        }
+      }
+    }
+  }
+
+  // If we could not find the testcase, something has gone wrong, so raise an error.
+  std::cout << "ERROR: could not find testcase_id " << which_testcase_id << std::endl; 
+  throw 1;
+}
+
+
 // =================================================================================
 // =================================================================================
 // CONSTRUCTOR
-
-TestCase::TestCase(nlohmann::json &whole_config, int which_testcase, std::string docker_name) :
-  _json((*whole_config.find("testcases"))[which_testcase]), CONTAINER_NAME(docker_name) {
-
-  test_case_id = which_testcase + 1;
+TestCase::TestCase(nlohmann::json &whole_config, std::string which_testcase, std::string docker_name) {
+  
+  this->_json = find_testcase_by_id(whole_config, which_testcase);
+  this->CONTAINER_NAME = docker_name;
+  this->test_case_id = which_testcase;
 }
 
 std::vector<std::string> TestCase::getCommands() const {
@@ -342,10 +382,8 @@ std::string TestCase::getTestcaseLabel() const {
 }
 
 std::string TestCase::getPrefix() const {
-  std::stringstream ss;
-  //TODO remove hard coded '/'
-  ss << "test" << std::setw(2) << std::setfill('0') << test_case_id << "/";
-  return ss.str();
+  //TODO: Remove hardcoded /
+  return test_case_id + "/";
 }
 
 
