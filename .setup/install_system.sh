@@ -485,6 +485,18 @@ EOF
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
+
+    #################################################################
+    # NGINX SETUP
+    #################
+    sudo apt-get install -qqy nginx
+    # remove default site which would cause server to mess up
+    rm /etc/nginx/sites*/default
+    cp ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+    chmod 644 /etc/nginx/sites-available/submitty.conf
+    ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+
+
     #################################################################
     # PHP SETUP
     #################
@@ -810,6 +822,7 @@ su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_US
 ###################
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
+    service nginx restart
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
