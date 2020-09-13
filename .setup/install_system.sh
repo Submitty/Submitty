@@ -429,6 +429,9 @@ if [ ${WORKER} == 0 ]; then
 
     a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
+    # Install nginx to serve websocket connections
+    sudo apt-get install -qqy nginx
+
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
     if [ ${VAGRANT} == 1 ]; then
@@ -489,7 +492,6 @@ EOF
     #################################################################
     # NGINX SETUP
     #################
-    sudo apt-get install -qqy nginx
     # remove default site which would cause server to mess up
     rm /etc/nginx/sites*/default
     cp ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
