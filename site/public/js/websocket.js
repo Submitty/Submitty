@@ -29,9 +29,11 @@ class WebSocketClient {
         this.autoReconnectInterval = 5 * 1000;
         this.onopen = null;
         this.onmessage = null;
-        let ws_url = document.body.dataset.baseUrl.replace('http', 'ws');
-        ws_url = ws_url.substring(0, ws_url.lastIndexOf(':'));
-        this.url = `${ws_url}:8443/ws/`;
+        // We do string replacement here so that http -> ws, https -> wss.
+        let my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
+        my_url.port = 8334;
+        my_url.pathname = "ws";
+        this.url = my_url.href;
     }
 
     open(page) {
