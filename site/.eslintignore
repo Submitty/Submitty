@@ -16,15 +16,7 @@ public/js/gradeable-notebook.js
 public/js/gradeable.js
 public/js/latedays.js
 public/js/menu.js
-public/js/notebook_builder/form-options-widget.js
-public/js/notebook_builder/image-widget.js
-public/js/notebook_builder/markdown-widget.js
-public/js/notebook_builder/multiple-choice-widget.js
-public/js/notebook_builder/notebook-builder-utils.js
-public/js/notebook_builder/notebook-builder.js
-public/js/notebook_builder/selector-widget.js
-public/js/notebook_builder/short-answer-widget.js
-public/js/notebook_builder/widget.js
+public/js/notebook_builder/*
 public/js/pdf/PDFAnnotate.js
 public/js/pdf/PDFAnnotateEmbedded.js
 public/js/pdf/PDFInitToolbar.js
@@ -41,5 +33,4 @@ public/js/ta-grading-rubric.js
 public/js/ta-grading-v2.js
 public/js/ta-grading.js
 public/js/user-profile.js
-public/js/resizable-panels.js
 public/js/userform.js

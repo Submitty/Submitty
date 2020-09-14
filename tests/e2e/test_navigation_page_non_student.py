@@ -28,11 +28,11 @@ class TestNavigationPageNonStudent(BaseTestCase):
                          .find_element(By.ID, 'closed-section')
                          .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("items_being_graded", elements[4].get_attribute('id'))
-        self.assertEqual(8, len(self.driver
+        self.assertEqual(9, len(self.driver
                          .find_element(By.ID, 'items_being_graded-section')
                          .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("graded", elements[5].get_attribute('id'))
-        self.assertEqual(9, len(self.driver
+        self.assertEqual(10, len(self.driver
                          .find_element(By.ID, 'graded-section')
                          .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual(4, len(self.driver
@@ -57,11 +57,11 @@ class TestNavigationPageNonStudent(BaseTestCase):
                                 .find_element(By.ID, 'closed-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("items_being_graded", elements[3].get_attribute('id'))
-        self.assertEqual(8, len(self.driver
+        self.assertEqual(9, len(self.driver
                                 .find_element(By.ID, 'items_being_graded-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
         self.assertEqual("graded", elements[4].get_attribute('id'))
-        self.assertEqual(9, len(self.driver
+        self.assertEqual(10, len(self.driver
                                 .find_element(By.ID, 'graded-section')
                                 .find_elements(By.CLASS_NAME, "gradeable-row")))
 
