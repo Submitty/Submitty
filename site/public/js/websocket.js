@@ -24,14 +24,14 @@
 
 class WebSocketClient {
     constructor() {
-        console.log("instantiating mock websocketclient");
+        console.log('instantiating mock websocketclient');
     }
 
     open(page) {
-        console.log("mock websocketclient: requested page open " + page);
+        console.log(`mock websocketclient: requested page open ${page}`);
     }
 
-    send(data) {
+    send() {
         console.log('Mock client asked to send data.');
     }
 }
