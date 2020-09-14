@@ -2,7 +2,7 @@
 
 namespace app\views;
 
-use app\models\Gradeable;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedTestcase;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Component;
