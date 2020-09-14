@@ -277,3 +277,7 @@
         display: contents !important;
     }
 }
+
+.randomize_cancel_btn{
+    float: left;
+}
