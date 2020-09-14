@@ -62,7 +62,7 @@ class TestAccessibility(BaseTestCase):
     urls_formatted = []
 
     baseline_path = ''
-
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_w3_validator(self):
         # Uncomment this to generate a new baseline for all pages on the website
         # Then run 'python3 -m unittest e2e.test_accessibility' from inside the tests folder
