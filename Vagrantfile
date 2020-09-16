@@ -55,6 +55,7 @@ Vagrant.configure(2) do |config|
     # safely transitioned to the new forwarded port
     ubuntu.vm.network 'private_network', ip: '192.168.56.111'
     ubuntu.vm.network 'forwarded_port', guest: 1501, host: 1501   # site
+    ubuntu.vm.network 'forwarded_port', guest: 8443, host: 8443   # Websockets
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432  # database
 
   end

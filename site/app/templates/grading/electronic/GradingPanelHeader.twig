@@ -4,12 +4,13 @@
     let regrade_info = {% if isRegradePanel %} true {% else %} false {% endif %};
     let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
     let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
-
     let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
+
     updateThePanelsElements({
         autograding_results: true,
         grading_rubric: true,
         submission_browser: true,
+        solution_ta_notes: true,
         student_info,
         regrade_info,
         discussion_browser,
@@ -58,6 +59,15 @@
             {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
+        <span class="grade-panel" id="solution_ta_notes_btn">
+            <button title="Show Solution and TA notes"
+                    class="invisible-btn key_to_click"
+                    tabindex="0"
+            >
+                <i class="fas fa-check"></i><span>Solutions/Notes</span>
+            </button>
+            {{ self.renderPanelPositionSelector('solution_ta_notes') }}
+        </span>
         {% if isPeerPanel %}
             <span class="grade-panel" id="peer_info_btn">
                 <button title="Show/Hide Peer Information (Press P)"
@@ -109,12 +119,20 @@
 </div>
 
 {% macro renderPanelPositionSelector(panelId) %}
-    <select class="panel-position-cont" id="{{ panelId }}_select" size="2">
-        <option class="panel-position-left" value="left">
-            Open as left panel
+    <select class="panel-position-cont" id="{{ panelId }}_select" size="4">
+        <option class="panel-position-left" value="leftTop">
+            Open as top left panel
         </option>
-        <option class="panel-position-right" value="right">
-            Open as right panel
+        <option class="panel-position-left" value="leftBottom">
+            Open as bottom left panel
+        </option>
+        <option class="panel-position-left" value="rightTop">
+            Open as top right panel
+        </option>
+        <option class="panel-position-right" value="rightBottom">
+            Open as bottom right panel
         </option>
     </select>
 {% endmacro %}
+
+{% include 'grading/electronic/PanelSelectorModal.twig' %}

@@ -33,7 +33,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback) {
         $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_selected");
     }
     peerFeedbackUpload(grader_id, user_id, g_id, feedback);
-    
+
 }
 function switch_feedback_modes() {
     if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
@@ -62,7 +62,9 @@ function switch_feedback_modes() {
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
+
         <button class = 'btn btn-default' id = "switch_feedback_button" onclick='switch_feedback_modes()'>Switch to Feedback Mode</button>
+
         {# /Overview #}
 
         {% if (peer_score >= peer_max) %}
@@ -87,7 +89,7 @@ function switch_feedback_modes() {
                         {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
                     {% else %}
                         {{ self.renderManyPeerResults(component) }}
-                    {% endif %}                
+                    {% endif %}
                 {% endfor %}
             </div>
             {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback)  }}
@@ -96,7 +98,7 @@ function switch_feedback_modes() {
 
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
-            {% for user in ordered_graders if overall_comments[user] is not empty %}
+            {% for user in ordered_graders|filter(user => overall_comments[user] is not empty) %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
                         Overall note from {{peer_aliases[user]}}:
@@ -241,7 +243,7 @@ function switch_feedback_modes() {
                 <table class="mobile-table" style="border-color:white;">
                      <thead>
                         <tr>
-                            {% for grader in ordered_graders if grader in component.peer_ids %}
+                            {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
                                 <th class="peer-table-header">
                                     {{ peer_aliases[grader] }}
                                 </th>
@@ -253,7 +255,7 @@ function switch_feedback_modes() {
                     <tbody>
                         {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                             <tr>
-                                {% for grader in ordered_graders if grader in component.peer_ids %}
+                                {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
                                     <td class="peer-table-data">
                                         {% if mark.earned[grader] %}
                                             <div class="col-no-gutters indicator">
@@ -291,7 +293,7 @@ function switch_feedback_modes() {
         </div>
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
-        
+
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
                 <table class="mobile-table" id="peer-feedback-table-{{grader}}">
                     <tbody>
@@ -356,7 +358,7 @@ function switch_feedback_modes() {
                     set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback)
                 }
             </script>
-        </div> 
+        </div>
         {% endfor %}
     </div>
 {%- endmacro -%}
