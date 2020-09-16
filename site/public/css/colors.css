@@ -132,7 +132,8 @@
     --background-blue: #f6fbfe;
     --main-body-white: #ffffff;
     --subheading-underscore-grey: #888888;
-
+    --subtle-grey-background: #cccccc;
+    
     /*dropdown buttons*/
     --hover-dropdown: #f5f5f5;
     --disabled-dropdown: #888888;
@@ -338,6 +339,7 @@
       --background-blue: #202225;
       --main-body-white: #ffffff;
       --subheading-underscore-grey: #888888;
+      --subtle-grey-background: #555555;
 
       /*dropdown buttons*/
       --hover-dropdown: #f5f5f5;
