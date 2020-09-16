@@ -102,7 +102,9 @@
         {{ parent() }}
     </form>
 {% endblock %}
+
+{% block close_click_action %}closeButton(){% endblock %}
 {% block buttons %}
-    <a onclick="closeButton()" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
+    {{ block('close_button') }}
     <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" />
 {% endblock %}

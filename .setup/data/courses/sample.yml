@@ -689,8 +689,8 @@ gradeables:
   eg_submission_open_date: 1971-01-01 23:59:59
   g_grade_due_date: 1974-01-01 23:59:59
   g_grade_released_date: 1974-01-01 23:59:59
-  eg_grade_inquiry_start_date: 1974-01-02 23:59:59
-  eg_grade_inquiry_due_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_start_date: 1974-01-08 23:59:59
+  eg_grade_inquiry_due_date: 1974-01-13 23:59:59
   g_grade_start_date: 1973-01-01 23:59:59
   g_ta_view_start_date: 1970-01-01 23:59:59
   g_title: Released Peer PDF Homework

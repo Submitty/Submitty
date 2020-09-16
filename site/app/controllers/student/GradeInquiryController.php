@@ -8,6 +8,7 @@ use app\models\Notification;
 use app\models\Email;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GradeInquiryController extends AbstractController {
@@ -109,10 +110,13 @@ class GradeInquiryController extends AbstractController {
         $grade_inquiry_id = $grade_inquiry->getId();
 
         try {
-            $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
+            $regrade_post_id = $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content, $gc_id);
+            $regrade_post = $this->core->getQueries()->getRegradePost($regrade_post_id);
+            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $regrade_post, $graded_gradeable);
+
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $regrade_post_id, 'new_post' => $new_post])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -125,6 +129,32 @@ class GradeInquiryController extends AbstractController {
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }
+    }
+
+    /**
+     * @param $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function getSingleGradeInquiryPost($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'];
+        $post_id = $_POST['post_id'];
+
+        $new_post = $this->core->getQueries()->getRegradePost($post_id);
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['submission', 'Homework'],
+                'renderSingleGradeInquiryPost',
+                $new_post,
+                $graded_gradeable
+            )
+        );
     }
 
     /**
@@ -183,11 +213,13 @@ class GradeInquiryController extends AbstractController {
             $grade_inquiry->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
             if ($content != "") {
-                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
+                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'toggle_status', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -200,6 +232,29 @@ class GradeInquiryController extends AbstractController {
                 JsonResponse::getErrorResponse($e->getMessage())
             );
         }
+    }
+
+    /**
+     * @param $gradeable_id
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
+     * @return MultiResponse
+     */
+    public function getGradeInquiryDiscussion($gradeable_id) {
+        $submitter_id = $_POST['submitter_id'];
+
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        return MultiResponse::webOnlyResponse(
+            new WebResponse(
+                ['submission', 'Homework'],
+                'showRegradeDiscussion',
+                $graded_gradeable,
+                true
+            )
+        );
     }
 
     /**

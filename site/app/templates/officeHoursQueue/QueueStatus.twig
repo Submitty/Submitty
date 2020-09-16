@@ -9,7 +9,7 @@
       </label>
       <select id="queue_code" class="form-control" name="code" required="required">
         <option value="">Queue Name</option>
-        {% for queue in viewer.getAllQueues() if queue['open'] == 'true' %}
+        {% for queue in viewer.getAllQueues()|filter(queue => queue['open'] == 'true') %}
           <option value="{{queue['code']}}">{{queue['code']}}</option>
         {% endfor %}
       </select>
