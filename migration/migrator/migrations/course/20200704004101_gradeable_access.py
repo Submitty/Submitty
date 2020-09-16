@@ -22,7 +22,8 @@ def up(config, database, semester, course):
             user_id character varying(255) REFERENCES users (user_id) ON DELETE CASCADE,
             team_id character varying(255) REFERENCES gradeable_teams (team_id),
             accessor_id character varying(255) REFERENCES users (user_id) ON DELETE CASCADE,
-            "timestamp" timestamp with time zone NOT NULL
+            "timestamp" timestamp with time zone NOT NULL,
+            CONSTRAINT access_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
         );
         """
     )
