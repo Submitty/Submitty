@@ -345,7 +345,7 @@
                             {# Indicates Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] == 4   %}
-                            {# Indicates Graded Peer Component #}   
+                            {# Indicates Graded Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
                         {% else %}
                             {# Indicates Non-Peer Component (Visible)#}
@@ -353,7 +353,7 @@
                         {% endif %}
                     {% endif %}
             {% endif %}
-            {# Peer View for Stoplights #} 
+            {# Peer View for Stoplights #}
             {% if core.getUser().getGroup() == 4 %}
                     {# If no submission has been made, non peer should not be visible to peer grader #}
                     {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
@@ -371,13 +371,13 @@
                             {# Indicates Submitted but Ungraded Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Non-Peer Component (Hidden) #}   
+                            {# Indicates Non-Peer Component (Hidden) #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] < 4   %}
-                            {# Indicates Non-Peer Component (Hidden) #} 
+                            {# Indicates Non-Peer Component (Hidden) #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hideHighlights"></i>
                         {% else %}
-                            {# Indicates Submitted and Graded Peer Component #} 
+                            {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
                         {% endif %}
                     {% endif %}
@@ -426,8 +426,8 @@
             {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() < 4 and graded_gradeable.isPeerGradingComplete() %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
-            
-            
+
+
             {% endif %}
         {% endif %}
         {% if graded_gradeable.hasActiveRegradeRequest() %}
@@ -607,7 +607,7 @@
         {% if not graded_gradeable.getGradeable().isTeamAssignment() %}
             {{ graded_gradeable.getSubmitter.getId() }}
         {% endif %}
-        
+
     </td>
 {% endmacro %}
 
@@ -656,7 +656,7 @@
                 <td class="viewed-red-x" title="">&#10008;</td>
             {% else %}
                 <td class="td-viewed-grade" id="team-check-marks" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
-                    {% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'hover_string' %}
+                    {% for user_id, time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]|filter((time, user_id) => user_id != 'hover_string') %}
 				        {% if time == null %}
                             <i class="viewed-white-check">&#x2714;</i>
                         {% else %}

@@ -37,19 +37,7 @@
                 </div>
                 {% if not grade_inquiries[component.id].posts is empty %}
                     {% for post in grade_inquiries[component.id].posts %}
-                        <div class='{{ post.is_staff ? "post_box important" : "post_box" }}'>
-                            <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
-                            <hr>
-                            <div style="float:left">
-                                {% if grade_inquiry_per_component_allowed and component.id == 0 %}
-                                    <p class="component-identifier-post"><b>{{ post.gc_title }}</b></p>
-                                {% endif %}
-                            </div>
-                            <div style="float:right">
-                                <b>{{ post.name }}</b> &nbsp;
-                                {{ post.date }}
-                            </div>
-                        </div>
+                        {% include "submission/regrade/Post.twig" with {"post": post} %}
                     {% endfor %}
                 {% elseif component.id == 0 %}
                     <p class="yellow-message no-post-warning" >No posts!</p>
@@ -120,6 +108,11 @@
             </div>
         {% endfor %}
     </div>
+
+    <script>
+        // Shorthand for $( document ).ready()
+        $(onReady());
+    </script>
 {% endif %}
 
 {% macro markdown_buttons() %}

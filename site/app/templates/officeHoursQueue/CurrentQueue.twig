@@ -19,10 +19,14 @@
 
           {% if entry['current_state'] == 'waiting' %}
             <td>
-              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
+              <form method="post" action="{{base_url}}/{{entry['queue_code']}}/startHelp" {% if entry['paused'] %}onsubmit="return confirm('Are you sure you want to start helping this student? This student is currently paused.');"{% endif %}>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                {% if viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
+                {% if entry['paused'] %}
+                  <button type="submit" class="btn btn-primary help_btn" title="Student paused">
+                    <i class="fas fa-pause"></i>
+                    Help</button>
+                {% elseif viewer.firstTimeInQueueThisWeek(entry['last_time_in_queue']) %}
                   <button type="submit" class="btn btn-primary help_btn" title="First time in this queue this week">
                     <i class="fas fa-star"></i>
                     Help</button>

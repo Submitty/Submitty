@@ -805,6 +805,7 @@ class Course(object):
                     add_to_group(self.code + "_tas_www", user.id)
         gradeable_table = Table("gradeable", self.metadata, autoload=True)
         electronic_table = Table("electronic_gradeable", self.metadata, autoload=True)
+        peer_assign = Table("peer_assign", self.metadata, autoload=True)
         reg_table = Table("grading_rotating", self.metadata, autoload=True)
         component_table = Table('gradeable_component', self.metadata, autoload=True)
         mark_table = Table('gradeable_component_mark', self.metadata, autoload=True)
@@ -815,7 +816,7 @@ class Course(object):
         electronic_gradeable_data = Table("electronic_gradeable_data", self.metadata, autoload=True)
         electronic_gradeable_version = Table("electronic_gradeable_version", self.metadata, autoload=True)
         for gradeable in self.gradeables:
-            gradeable.create(self.conn, gradeable_table, electronic_table, reg_table, component_table, mark_table)
+            gradeable.create(self.conn, gradeable_table, electronic_table, peer_assign, reg_table, component_table, mark_table)
             form = os.path.join(self.course_path, "config", "form", "form_{}.json".format(gradeable.id))
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
@@ -1475,7 +1476,7 @@ class Gradeable(object):
             if self.is_repository and 'eg_subdirectory' in gradeable:
                 self.subdirectory = gradeable['eg_subdirectory']
             if 'eg_peer_grading' in gradeable:
-                self.peer_grading = gradeable['eg_peer_grading'] is False
+                self.peer_grading = gradeable['eg_peer_grading']
             if 'eg_use_ta_grading' in gradeable:
                 self.use_ta_grading = gradeable['eg_use_ta_grading'] is True
             if 'eg_student_view' in gradeable:
@@ -1540,10 +1541,10 @@ class Gradeable(object):
                 component['gc_upper_clamp'] = 1
             if self.type != 2:
                 component['gc_is_text'] = False
-            i-=1;
+            i-=1
             self.components.append(Component(component, i+1))
 
-    def create(self, conn, gradeable_table, electronic_table, reg_table, component_table, mark_table):
+    def create(self, conn, gradeable_table, electronic_table, peer_assign, reg_table, component_table, mark_table):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
@@ -1563,6 +1564,15 @@ class Gradeable(object):
 
 
 
+        if self.peer_grading == True:
+            with open(os.path.join(SETUP_DATA_PATH, 'random', 'graders.txt')) as graders, \
+            open(os.path.join(SETUP_DATA_PATH, 'random', 'students.txt')) as students:
+                graders = graders.read().strip().split()
+                students = students.read().strip().split()
+                length=len(graders)
+                for i in range(length):
+                    conn.execute(peer_assign.insert(), g_id=self.id, grader_id=graders[i], user_id=students[i])
+            
         if self.type == 0:
             conn.execute(electronic_table.insert(), g_id=self.id,
                          eg_submission_open_date=self.submission_open_date,
@@ -1686,6 +1696,8 @@ class Component(object):
 
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
+        if 'gc_is_peer' in component:
+            self.is_peer = component['gc_is_peer']
         if 'gc_student_comment' in component:
             self.student_comment = component['gc_student_comment']
         if 'gc_is_text' in component:

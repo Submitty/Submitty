@@ -21,7 +21,6 @@
         var data = [trace1];
         return data;
     }
-
     function fillBuckets(range,increment,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
         let loop = Math.ceil(range/increment);
         let tracking = min;
@@ -61,22 +60,16 @@
         }
         return mode;
     }
-
-
     function fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min){
         let bucketSize = Math.floor(range / 10);
         if (bucketSize === 0) {
             bucketSize = range / 10;
         }
-
         return fillBuckets(range,bucketSize,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
     }
-
-
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
         var bucketInputTotal = document.getElementById("bucket-size-total");
         var bucketInputAuto = document.getElementById("bucket-size-auto");
-
         xBuckets = [];
         yValue=[];
         betterBuckets=new Map();
@@ -247,7 +240,6 @@
             {% set bTA = [] %}
             {% set tTA = [] %}
             {% set bAuto = [] %}
-
             {% set VerConf = 0 %}
             {% set noSub = 0 %}
             {% set noActive = 0 %}
@@ -268,9 +260,7 @@
                         {% endif %}
                     {% endif %}
                 {% else %}
-
                 {% endif %}
-
                 {% if not ov.getAutoGradedGradeable().hasSubmission() %}
                     {# if no submission and not in Null section add to count #}
                     {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
@@ -293,7 +283,6 @@
                             {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
                                 {% set VerConf = VerConf +1 %}
                             {% endif %}
-
                         {% elseif not ov.isTaGradingComplete() %}
                             {# if assignment incomplete and not in Null section add to count #}
                             {% set IncompGrading = IncompGrading +1 %}
@@ -302,7 +291,6 @@
                             {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
                                 {% set bTA = bTA|merge( [ ov.getTaGradedGradeable.getTotalScore()  ]) %}
                                 {% set tTA = tTA|merge( [ ov.getGradeable().getManualGradingPoints() ]) %}
-
                             {% endif %}
                         {% endif %}
                     {% endif %}
@@ -313,7 +301,6 @@
                     document.getElementById("btn-hist-tot").className+= " disabled-btn";
                     document.getElementById("btn-hist-tot").style.visibility = "hidden";
                 </script>
-
             {% else %}
                 <div id = "total-score-histogram" class = "page-content">
                 {# Setup for Histogram of Total Scores #}
@@ -321,9 +308,7 @@
                     <input style='width: auto' type='text' id='bucket-size-total' name='bucket-val' value="" aria-label="Enter bucket size" placeholder="Enter bucket size" />
                     <input name="sub-tot" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket" type="submit" value="Submit Bucket Size for Total" onclick="createNewBuckets(rangeT,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT)"/>
                 <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
-
                 <script>
-
                     var betterBuckets = new Map();
                     var buttonLayerHeight = 1.0;
                     var ct = 0;
@@ -333,13 +318,11 @@
                     var mode = 0;
                     var modeCount = 0;
                     var rangeT = 0;
-
                     var xValueT = [{{ bTA | join(',') }}];
                     xValueT.sort((a, b) => a - b);
                     var yValue = [];
                     var yValue2 = [];
                     var xBuckets = [];
-
                     if (xValueT.length > 0) {
                         minT = xValueT[0];
                         maxT = xValueT[xValueT.length-1];
@@ -352,13 +335,10 @@
                             median = xValueT[pivot];
                         }
                     }
-
                     mode = fillBucketsForRange(rangeT, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
-
                     if (maxT==0 && minT==50) {
                         minT=0;
                     }
-
                     var trace1 = {
                         x: xBuckets,
                         y: yValue,
@@ -377,9 +357,7 @@
                             }
                         }
                     };
-
                     var data = [trace1];
-
                     var layout = {
                         title: 'Students with Each Score',
                         xaxis: {
@@ -393,9 +371,7 @@
                             family: '"Source Sans Pro", sans-serif',
                         }
                     };
-
                     Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
-
                 </script>
                 <div id="mySmallDiv">
                     <script>
@@ -423,23 +399,16 @@
                 <hr>
             </div>
             {% endif %}
-
-
             {# Setup for Component Average Graphs#}
-
-
                 {% if component_averages|length == 0 %}
                     <script>
                         document.getElementById("btn-comp").className+= " disabled-btn";
                         document.getElementById("btn-comp").style.visibility = "hidden";
                     </script>
                 {% else %}
-
                 <div id="component-averages" class="page-content">
-
                     <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
                     <script>
-
                         var xValue = [];
                         var yValue = [];
                         var yValue2 = [];
@@ -448,8 +417,6 @@
                             yValue.push({{comp.getAverageScore()}});
                             yValue2.push({{comp.getMaxValue()}});
                         {% endfor %}
-
-
                         var trace1 = {
                             x: xValue,
                             y: yValue,
@@ -467,7 +434,6 @@
                                 }
                             }
                         };
-
                         var trace2 = {
                             x: xValue,
                             y: yValue2,
@@ -485,9 +451,7 @@
                                 }
                             }
                         };
-
                         var data = [trace2, trace1];
-
                         var layout = {
                             title: 'Manually Graded Component Averages',
                             barmode: 'overlay',
@@ -500,9 +464,7 @@
                             font: {
                                 family: '"Source Sans Pro", sans-serif',
                             }
-
                         };
-
                         Plotly.newPlot('myDiv2', data, layout, {displayModeBar: false,displaylogo: false});
                     </script>
                      <br/>
@@ -512,15 +474,12 @@
                 </div>
                 {% endif %}
             {# Graph Setup for Autograding #}
-
                 {% if autograded_average == null or autograded_average.getCount() == 0 or bAuto|length == 0 %}
                     <script>
                         document.getElementById("btn-hist-auto").className+= " disabled-btn";
                         document.getElementById("btn-hist-auto").style.visibility = "hidden";
                     </script>
-
                 {% else %}
-
                 <div id="autograding-score-histogram" class="page-content">
                     <br>
                     <input style='width: auto' type='text' id='bucket-size-auto' name='bucket-val' value="" placeholder="Enter bucket size" />
@@ -536,11 +495,9 @@
                         var mode = 0;
                         var modeCount = 0;
                         var rangeA = 0;
-
                         var xValue = [];
                         var yValue = [];
                         var xBuckets = [];
-
                         xValue = [{{ bAuto | join(',') }}]
                         xValue.sort((a, b) => a - b);
                         if (xValue.length > 0) {
@@ -554,17 +511,13 @@
                                 median = xValue[pivot];
                             }
                         }
-
                         if (maxA!=0 && minA!=50) {
                             rangeA = maxA-minA;
                         }
-
                         mode = fillBucketsForRange(rangeA,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
-
                         if (minA==50 && maxA==0) {
                             minA=0;
                         }
-
                         var trace1 = {
                             x: xBuckets,
                             y: yValue,
@@ -583,9 +536,7 @@
                                 }
                             }
                         };
-
                         var data = [trace1];
-
                         var layout = {
                             title: 'Students with Each Score',
                             barmode: 'overlay',
@@ -599,9 +550,7 @@
                                 family: '"Source Sans Pro", sans-serif',
                             }
                         };
-
                         Plotly.newPlot('myDiv3', data, layout, {displayModeBar: false,displaylogo: false});
-
                     </script>
                     <div id="mySmallDiv3">
                         <script>
@@ -611,7 +560,6 @@
                             {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeA);
                         </script>
                     </div>
-
                     <br />
                     Version Conflicts: {{ VerConf }}
                     <br />
@@ -630,212 +578,91 @@
                     <hr>
                 </div>
                 {% endif %}
-
-            {% if show_late == false %}
-                <div id="numerical-data" class="page-content">
-                    <div class = "row">
-                        <div class = "box col-md-6">
-                            {% if not peer %}
-                                <a class="btn btn-default" style="float: right"
-                                    onclick="changeLate()">
-                                    Include Late Submissions
-                                </a>
-                            {% endif %}
-
-                            {# LEFT CHUNK#}
-                            {% if warnings|length > 0 %}
-                                <ul>
-                                    {% for warning in warnings %}
-                                        <li style="color:red; margin-left:1em">{{ warning }}</li>
-                                    {% endfor %}
-                                </ul>
-                                <br/>
-                            {% endif %}
-                            {% if core.getUser().getGroup() < 4 %}
-                                {% if team_assignment %}
-                                    <br/>
-                                    <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
-                                    <br/>
-                                    <br/>
-                                    <b>Number of teams:</b> {{ total_submissions }}
-                                    <br/>
-                                    <br/>
-                                    <b>Teams who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
-                                {% else %}
-                                    <br/>
-                                    <b>Students who have submitted on time:</b>  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
-                                    <br/>
-                                    <br/>
-                                    <b>Current percentage of grading done:</b> {{ non_late_graded_total }} / {{ non_late_submitted_total }} ({{ non_late_graded_percentage }}%)
-                                {% endif %}
-                            
-                                <br/>
-                                <br/>
-                            {% endif %}
-                            {% if peer %}
-                                <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
-                            {% else %}
-                                <b>By Grading Sections:</b>
-                                <div style="margin-left: 20px">
-                                    {% for key, section in sections %}
-                                        Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
-                                    {% endfor %}
-                                </div>
-                                <br/>
-                                <b>Graders:</b>
-                                <div style="margin-left: 20px">
-                                    {% for key, section in sections %}
-                                        Section {{ key }}:
-                                        {% if section.valid_graders|length == 0 %}
-                                            Nobody
-                                        {% else %}
-                                            {{ section.valid_graders | join(", ") }}
-                                        {% endif %}
-                                        <br/>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            {% if ta_grades_released %}
-                                {% if team_assignment %}
-                                    <br/>
-                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-                                    <b>Number of students who have viewed their grade:</b>
-                                        {{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
-                                {% elseif not peer%}
-                                    <br/>
-                                    <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-                                {% endif %}
-                            {% endif %}
-
-                            {% if regrade_allowed and not peer %}
-                                <br/>
-                                <br/>
-                                <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
-                                {% if grade_inquiry_per_component_allowed %}
-                                    {% for component in component_averages %}
-                                        <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
-                                    {% endfor %}
-                                {% endif %}
-                            {% endif %}
-                            {# LEFT CHUNK #}
-                        </div>
-                        <div class = "box col-md-6">
-                            {# RIGHT CHUNK#}
-                            {% if not peer %}
-                                <br>
-                                <b>Statistics for Completely Graded Assignments: </b>
-                                <br/>
-                                <div style="margin-left: 20px">
-                                    {% if overall_average == null or overall_average.getCount() == 0 %}
-                                        No assignments have been completely graded yet.
-                                    {% else %}
-                                        Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
-                                        Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
-                                        Count: {{ overall_average.getCount() }} <br/>
-                                    {% endif %}
-                                </div>
-                                {% if autograding_non_extra_credit != 0 %}
-                                    {# Only show autograder if we have autograding points #}
-                                    <br/>
-                                    <b>Statistics for Autograding: </b>
-                                    <br/>
-                                    <div style="margin-left: 20px">
-                                        {% if autograded_average == null or autograded_average.getCount() == 0 %}
-                                            No assignments have been submitted yet.
-                                        {% else %}
-                                            Average: {{ autograded_average.getAverageScore() }} / {{ autograding_non_extra_credit }} ({{ autograded_percentage }}%)<br/>
-                                            Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
-                                            Count: {{ autograded_average.getCount() }} <br/>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                                <br/>
-                                <b>Statistics for Manually Graded Components: </b>
-                                <br/>
-                                <div style="margin-left: 20px">
-                                    {% if component_averages|length == 0 %}
-                                        No components have been graded yet.
-                                    {% else %}
-                                        {% for component in component_averages %}
-                                            {{ component.getTitle() }}:<br/>
-                                            <div style="margin-left: 40px">
-                                                Average:
-                                                {% if component.getMaxValue() > 0 %}
-                                                    {{ component.getAverageScore() }} / {{ component.getMaxValue() }} ({{ component_percentages[loop.index0] }}%)
-                                                {% else %}
-                                                    {{ component.getAverageScore() }}
-                                                {% endif %}
-                                                <br/>
-                                                Standard Deviation: {{ component.getStandardDeviation() }} <br/>
-                                                Count: {{ component.getCount() }} <br/>
-                                            </div>
-                                        {% endfor %}
-                                        <br/>
-                                        Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                            {# RIGHT CHUNK #}
-                        </div>
-
-
-                    </div>
-
-                </div>
-            {% else %}
-                <div id="numerical-data" class="page-content">
-                    <div class = "row">
-                        <div class = "box col-md-6">
-                            {% if not peer %}
-                                <a class="btn btn-default" style="float: right"
-                                    onclick="changeLate()">
+            <div id="numerical-data" class="page-content">
+                <div class = "row">
+                    <div class = "box col-md-6">
+                        {% if not peer %}
+                            <a class="btn btn-default" style="float: right"
+                                onclick="changeLate()">
+                                {% if show_late %}
                                     Exclude Late Submissions
-                                </a>
-                            {% endif %}
-                            {# LEFT CHUNK#}
-                            {% if warnings|length > 0 %}
-                                <ul>
-                                    {% for warning in warnings %}
-                                        <li style="color:red; margin-left:1em">{{ warning }}</li>
-                                    {% endfor %}
-                                </ul>
+                                {% else %}
+                                    Include Late Submissions
+                                {% endif %}
+                            </a>
+                        {% endif %}
+
+                        {# LEFT CHUNK#}
+                        {% if warnings|length > 0 %}
+                            <ul>
+                                {% for warning in warnings %}
+                                    <li style="color:red; margin-left:1em">{{ warning }}</li>
+                                {% endfor %}
+                            </ul>
+                            <br/>
+                        {% endif %}
+                        {% if core.getUser().getGroup() < 4 %}
+                            {% if team_assignment %}
                                 <br/>
-                            {% endif %}
-                            {% if core.getUser().getGroup() < 4 %}
-                                {% if team_assignment %}
-                                    <br/>
-                                    <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
-                                    <br/>
-                                    <br/>
-                                    <b>Number of teams:</b> {{ total_submissions }}
-                                    <br/>
-                                    <br/>
+                                <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
+                                <br/>
+                                <b>Students not on a team:</b> {{ no_team_total }}
+                                <br>
+                                <b>Number of teams:</b> {{ total_submissions }}
+                                <br/>
+                                <br/>
+                                {% if show_late %}
                                     <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                                 {% else %}
-                                    <br/>
-                                    <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                                    <br/>
-                                    <br/>
-                                    <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                                    <b>Teams who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
                                 {% endif %}
-                            
-                                <br/>
-                                <br/>
-                            {% endif %}
-                            {% if peer %}
-                                <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                             {% else %}
-                                <b>By Grading Sections:</b>
-                                <div style="margin-left: 20px">
-                                    {% for key, section in sections %}
-                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
-                                    {% endfor %}
-                                </div>
-                                <br/>
-                                <b>Graders:</b>
-                                <div style="margin-left: 20px">
-                                    {% for key, section in sections %}
+                                {% if peer and not team_assignment %}
+                                    <br/>
+                                    <b>Students who have submitted:</b>  {{ total_students_submitted }} / {{ total_submissions }} ({{ submitted_percentage_peer }}%)
+                                    <br/>
+                                    <br/>
+                                    <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
+                                {% else %}
+                                    <br/>
+                                    {% if show_late %}
+                                        <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                        <br/>
+                                        <br/>
+                                        <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
+                                    {% else %}
+                                        <b>Students who have submitted on time:</b>  {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
+                                        <br/>
+                                        <br/>
+                                        <b>Current percentage of TA grading done:</b> {{ non_late_graded_total }} / {{ non_late_submitted_total }} ({{ non_late_total_grading_percentage }}%)
+                                    {% endif %}
+                                {% endif %}
+                            {% endif %}
+                        
+                            <br/>
+                            <br/>
+                        {% endif %}
+                        {% if peer and not team_assignment %}
+                            <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})
+                            <br>
+                        {% endif %}
+                            <b>TA Grading By Sections:</b>
+                            <div style="margin-left: 20px">
+                                {% for key, section in sections %}
+                                    {% if key != "peer_stu_grad"%}
+                                        {% if show_late %}
+                                            Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                        {% else %}
+                                            Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}%)<br />
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <br/>
+                            <b>Graders:</b>
+                            <div style="margin-left: 20px">
+                                {% for key, section in sections %}
+                                    {% if key != "peer_stu_grad"%}
                                         Section {{ key }}:
                                         {% if section.valid_graders|length == 0 %}
                                             Nobody
@@ -843,102 +670,112 @@
                                             {{ section.valid_graders | join(", ") }}
                                         {% endif %}
                                         <br/>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            {% if ta_grades_released %}
-                                {% if team_assignment %}
-                                    <br/>
-                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        
+                        {% if ta_grades_released %}
+                            {% if team_assignment %}
+                                {% if peer %}
+                                    <br>
+                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ total_submissions }} ({{ viewed_percent }}%)
+                                    <br>
+                                    <b>Number of students who have viewed their grade:</b>{{ individual_viewed_grade }} / {{ total_submissions }} ({{ individual_viewed_percent }}%)
+                                {% else %}
+                                 <br/>
+                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ total_submissions }} ({{ viewed_percent }}%)
+                                    <br>
                                     <b>Number of students who have viewed their grade:</b>
                                         {{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
-                                {% elseif not peer%}
-                                    <br/>
-                                    <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                                 {% endif %}
+                            {% elseif not team_assignment %}
+                                <br/>
+                                <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% endif %}
-
-                            {% if regrade_allowed and not peer %}
-                                <br/>
-                                <br/>
-                                <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
-                                {% if grade_inquiry_per_component_allowed %}
-                                    {% for component in component_averages %}
-                                        <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
-                                    {% endfor %}
-                                {% endif %}
+                        {% endif %}
+                        {% if regrade_allowed and not peer %}
+                            <br/>
+                            <br/>
+                            <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
+                            {% if grade_inquiry_per_component_allowed %}
+                                {% for component in component_averages %}
+                                    <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                                {% endfor %}
                             {% endif %}
-                            {# LEFT CHUNK #}
-                        </div>
-                        <div class = "box col-md-6">
-                            {# RIGHT CHUNK#}
-                            {% if not peer %}
-                                <br>
-                                <b>Statistics for Completely Graded Assignments: </b>
-                                <br/>
-                                <div style="margin-left: 20px">
-                                    {% if overall_average == null or overall_average.getCount() == 0 %}
-                                        No assignments have been completely graded yet.
-                                    {% else %}
-                                        Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
-                                        Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
-                                        Count: {{ overall_average.getCount() }} <br/>
-                                    {% endif %}
-                                </div>
-                                {% if autograding_non_extra_credit != 0 %}
-                                    {# Only show autograder if we have autograding points #}
-                                    <br/>
-                                    <b>Statistics for Autograding: </b>
-                                    <br/>
-                                    <div style="margin-left: 20px">
-                                        {% if autograded_average == null or autograded_average.getCount() == 0 %}
-                                            No assignments have been submitted yet.
-                                        {% else %}
-                                            Average: {{ autograded_average.getAverageScore() }} / {{ autograding_non_extra_credit }} ({{ autograded_percentage }}%)<br/>
-                                            Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
-                                            Count: {{ autograded_average.getCount() }} <br/>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                                <br/>
-                                <b>Statistics for Manually Graded Components: </b>
-                                <br/>
-                                <div style="margin-left: 20px">
-                                    {% if component_averages|length == 0 %}
-                                        No components have been graded yet.
-                                    {% else %}
-                                        {% for component in component_averages %}
-                                            {{ component.getTitle() }}:<br/>
-                                            <div style="margin-left: 40px">
-                                                Average:
-                                                {% if component.getMaxValue() > 0 %}
-                                                    {{ component.getAverageScore() }} / {{ component.getMaxValue() }} ({{ component_percentages[loop.index0] }}%)
-                                                {% else %}
-                                                    {{ component.getAverageScore() }}
-                                                {% endif %}
-                                                <br/>
-                                                Standard Deviation: {{ component.getStandardDeviation() }} <br/>
-                                                Count: {{ component.getCount() }} <br/>
-                                            </div>
-                                        {% endfor %}
-                                        <br/>
-                                        Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                            {# RIGHT CHUNK #}
-                        </div>
-
-
+                        {% endif %}
+                        {# LEFT CHUNK #}
                     </div>
-
+                    <div class = "box col-md-6">
+                        {# RIGHT CHUNK#}
+                        {# Should Be visible if gradeable contains peer components, non-peer components or both #}
+                            <br>
+                            <b>Statistics for Completely Graded Assignments: </b>
+                            <br/>
+                            <div style="margin-left: 20px">
+                                {% if overall_average == null or overall_average.getCount() == 0 %}
+                                    No assignments have been completely graded yet.
+                                {% else %}
+                                    Average: {{ overall_average.getAverageScore() }} / {{ overall_total }} ({{ overall_percentage }}%)<br/>
+                                    Standard Deviation: {{ overall_average.getStandardDeviation() }} <br/>
+                                    Count: {{ overall_average.getCount() }} <br/>
+                                {% endif %}
+                            </div>
+                            {% if autograding_non_extra_credit != 0 %}
+                                {# Only show autograder if we have autograding points #}
+                                <br/>
+                                <b>Statistics for Autograding: </b>
+                                <br/>
+                                <div style="margin-left: 20px">
+                                    {% if autograded_average == null or autograded_average.getCount() == 0 %}
+                                        No assignments have been submitted yet.
+                                    {% else %}
+                                        Average: {{ autograded_average.getAverageScore() }} / {{ autograding_non_extra_credit }} ({{ autograded_percentage }}%)<br/>
+                                        Standard Deviation: {{ autograded_average.getStandardDeviation() }} <br/>
+                                        Count: {{ autograded_average.getCount() }} <br/>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            <br/>
+                            <b>Statistics for Manually Graded Components: </b>
+                            <br/>
+                            <div style="margin-left: 20px">
+                                {% if component_averages|length == 0 %}
+                                    No components have been graded yet.
+                                {% else %}
+                                    {% for component in component_averages %}
+                                        {{ component.getTitle() }}:<br/>
+                                        <div style="margin-left: 40px">
+                                            Average:
+                                            {% if component.getMaxValue() > 0 %}
+                                                {{ component.getAverageScore() }} / {{ component.getMaxValue() }} ({{ component_percentages[loop.index0] }}%)
+                                            {% else %}
+                                                {{ component.getAverageScore() }}
+                                            {% endif %}
+                                            <br/>
+                                            Standard Deviation: {{ component.getStandardDeviation() }} <br/>
+                                            Count: {{ component.getCount() }} <br/>
+                                        </div>
+                                    {% endfor %}
+                                    <br/>
+                                    Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
+                                {% endif %}
+                            </div>
+                        {# RIGHT CHUNK #}
+                    </div>
                 </div>
-            {% endif %}
-
+            </div>
         </div>
     {% else %}
-        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {# This needs to be updated after randomization works correctly for Teams #}
+        {% if team_assignment %}
+            {# Update this after Teams work fine with Randomized Peer Assignments <br>
+            <b>Total Teams assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+            #}
+        {% else %}
+            <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {% endif %}
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
@@ -951,7 +788,6 @@
                                 Download Zip of Assigned Teams
                             </a>
                         </summary>
-
                         <div>
                             <form class="dropdown">
                                 <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
@@ -969,7 +805,6 @@
                                 Download Zip of Assigned Students
                             </a>
                         </summary>
-
                         <div>
                             <form class="dropdown">
                                 <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
@@ -980,7 +815,6 @@
                         </div>
                     </details>
                 {% endif %}
-
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
                 <details class="btn btn-default" id="details_button">
@@ -1013,10 +847,8 @@
 </body>
 {# Tab Buttons #}
 <script>
-
     function changeLate() {
         var status = '{{ show_late }}';
-
         if (status) {
             document.cookie = "show_late=false;";
         }
@@ -1036,7 +868,6 @@
             tabcontent[i].style.display = "none";
         }
 
-
         // Get all elements with class="btn btn-primary" and remove the class "active"
         tablinks = document.getElementsByClassName("nav-bar");
         for (i = 0; i < tablinks.length; i++) {
@@ -1053,11 +884,9 @@
     if (defaultOpen) {
         defaultOpen.click();
     }
-
     function editZipDownload(download_zip_url, limited) {
         var results = document.getElementById("results_folder");
         var active = document.getElementById("active_version");
-
         if (results.checked == true && active.checked == true){
             download_option = "both";
         }
@@ -1070,7 +899,6 @@
         else {
             download_option = "all";
         }
-
         if (limited) {
             if (download_option == "all") {
                 $("#zip_link").attr("href", download_zip_url);
