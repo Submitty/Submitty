@@ -32,29 +32,6 @@ function getAvailableTimeZones() {
     return $('#time_zone_selector_label').data('available_time_zones').split(',')
 }
 
-/**
- * Populate the specific area drop down based on which general option was selected in the general option drop down.
- *
- * @param general_selection
- * @param selected_option Optional parameter to specify which specific option will be selected when the drop down
- * finishes populating.  If this parameter is omitted the default option will be a simple message prompting the user.
- */
-function populateSpecificTimeZoneDropDown(general_selection, selected_option = null) {
-    $('#time_zone_specific_drop_down').empty();
-
-    let specific_area_set = getSpecificTimeZoneOptions(general_selection);
-    console.log(specific_area_set);
-    $('#time_zone_specific_drop_down').append('<option value="null">Please select a specific area</option>');
-
-    specific_area_set.forEach(function(elem) {
-        $('#time_zone_specific_drop_down').append('<option value="'+elem+'">'+elem+'</option>');
-    });
-
-    if(selected_option !== null) {
-        $('[value="' + selected_option + '"]').prop('selected', true);
-    }
-}
-
 function updateUserPreferredNames () {
   const first_name_field = $("#user-firstname-change");
   const last_name_field = $("#user-lastname-change");
@@ -176,6 +153,7 @@ $(document).ready(function() {
                 // Update page elements if the data was successfully saved server-side
                 if (response.status === 'success') {
                     $('#user_utc_offset').text(response.data.utc_offset);
+                    $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);
                     displaySuccessMessage("Time-zone updated succesfully!");
                 }
                 else {
@@ -193,6 +171,5 @@ $(document).ready(function() {
 
     // Set time zone drop down boxes to the user's time zone (only after other JS has finished loading)
     let user_time_zone =  $('#time_zone_selector_label').data('user_time_zone');
-
     $('[value="' + user_time_zone + '"]').prop('selected', true);
 });

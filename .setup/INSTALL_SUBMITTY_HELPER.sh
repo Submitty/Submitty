@@ -393,7 +393,7 @@ chown  root:root  TestRunner.java
 # everyone can read this file
 chmod  444 TestRunner.java
 
-# compile the executable using the javac we use in the execute.cpp whitelist
+# compile the executable using the javac we use in the execute.cpp safelist
 /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
 # everyone can read the compiled file
@@ -734,6 +734,9 @@ if [ "${WORKER}" == 0 ]; then
         echo -n "restarting apache2..."
         systemctl restart apache2
         echo "done"
+        echo -n "restarting nginx..."
+        systemctl restart nginx
+        echo "done"
     fi
 fi
 
@@ -743,7 +746,7 @@ systemctl daemon-reload
 
 # restart the socket & jobs handler daemons
 for i in "${RESTART_DAEMONS[@]}"; do
-    systemctl start ${i}
+    systemctl restart ${i}
     set +e
     systemctl is-active --quiet ${i}
     is_active_after=$?

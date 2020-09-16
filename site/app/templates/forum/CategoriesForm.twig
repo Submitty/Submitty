@@ -7,6 +7,9 @@
 {% block form %}
     {{ parent() }}
 {% endblock %}
+
+{% block close_click_action %}$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');{% endblock %}
+{% block close_button_classes %}float-right{% endblock %}
 {% block buttons %}
-    <a onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="float-right btn btn-default close-button key_to_click" tabindex="0">Close</a>
+    {{ block('close_button') }}
 {% endblock %}

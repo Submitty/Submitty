@@ -1,9 +1,10 @@
 /* global buildCourseUrl, displaySuccessMessage, displayErrorMessage, csrfToken */
 /* exported updateSolutionTaNotes, showSolutionTextboxCont, cancelEditingSolution */
-function updateSolutionTaNotes(gradeable_id, component_id) {
+function updateSolutionTaNotes(gradeable_id, component_id, itempool_item) {
     const data = {
         solution_text: $(`#textbox-solution-${component_id}`).val().trim(),
         component_id,
+        itempool_item,
         csrf_token: csrfToken,
     };
     $.ajax({
