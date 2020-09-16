@@ -444,6 +444,7 @@ class ElectronicGraderController extends AbstractController {
         $my_grading = 0;
         $num_components = 0;
         $graded_components = [];
+        $late_components = [];
         $ta_graded_components = [];
         $graders = [];
         $average_scores = [];

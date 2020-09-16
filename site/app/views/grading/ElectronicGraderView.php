@@ -66,8 +66,11 @@ class ElectronicGraderView extends AbstractView {
         $team_percentage = 0;
         $total_students = 0;
         $graded_total = 0;
+        $non_late_graded_total = 0;
         $submitted_total = 0;
+        $non_late_submitted_total = 0;
         $submitted_percentage = 0;
+        $non_late_submitted_percentage = 0;
         $submitted_percentage_peer = 0;
         $peer_total = 0;
         $peer_graded = 0;
