@@ -6839,4 +6839,42 @@ AND gc_id IN (
         $this->submitty_db->query($query, [$user_id, $semester, $course]);
         return $this->submitty_db->getRowCount() > 0;
     }
+
+    /**
+     * Insert access attempt to a given gradeable by a user.
+     */
+    public function insertGradeableAccess(
+        string $g_id,
+        ?string $user_id,
+        ?string $team_id,
+        ?string $accessor_id
+    ): void {
+        $query = <<<SQL
+INSERT INTO gradeable_access (g_id, user_id, team_id, accessor_id, "timestamp")
+VALUES (?, ?, ?, ?, ?)
+SQL;
+        $this->course_db->query($query, [$g_id, $user_id, $team_id, $accessor_id, $this->core->getDateTimeNow()]);
+    }
+
+    public function getGradeableAccessUser(
+        string $g_id,
+        string $user_id
+    ): array {
+        $this->course_db->query(
+            'SELECT * FROM gradeable_access WHERE g_id=? AND user_id=? ORDER BY "timestamp"',
+            [$g_id, $user_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    public function getGradeableAccessTeam(
+        string $g_id,
+        string $team_id
+    ): array {
+        $this->course_db->query(
+            'SELECT * FROM gradeable_access WHERE g_id=? AND team_id=? ORDER BY "timestamp"',
+            [$g_id, $team_id]
+        );
+        return $this->course_db->rows();
+    }
 }

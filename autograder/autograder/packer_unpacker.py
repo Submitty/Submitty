@@ -303,18 +303,10 @@ def prepare_autograding_and_submission_zip(
     with open(os.path.join(tmp_submission, "queue_file.json"), 'w') as outfile:
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
-    user_assignment_access_json = os.path.join(
-        config.submitty['submitty_data_dir'], "courses", obj["semester"], obj["course"],
-        "submissions", obj["gradeable"], obj["who"], "user_assignment_access.json")
     user_assignment_settings_json = os.path.join(
         config.submitty['submitty_data_dir'], "courses", obj["semester"], obj["course"],
         "submissions", obj["gradeable"], obj["who"], "user_assignment_settings.json")
 
-    if os.path.exists(user_assignment_access_json):
-        shutil.copy(
-            user_assignment_access_json,
-            os.path.join(tmp_submission, "user_assignment_access.json")
-        )
     if os.path.exists(user_assignment_settings_json):
         shutil.copy(
             user_assignment_settings_json,

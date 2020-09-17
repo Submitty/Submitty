@@ -3,6 +3,7 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
@@ -127,40 +128,22 @@ class SubmissionController extends AbstractController {
             $_COOKIE['submitty_token'],
             "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
         );
-
-        $who_id = $this->core->getUser()->getId();
+        $user_id = $this->core->getUser()->getId();
+        $team_id = null;
         if ($gradeable->isTeamAssignment() && $graded_gradeable !== null) {
             $team = $graded_gradeable->getSubmitter()->getTeam();
             if ($team !== null) {
-                $who_id = $team->getId();
+                $user_id = null;
+                $team_id = $team->getId();
             }
         }
 
-        $gradeable_path = FileUtils::joinPaths(
-            $this->core->getConfig()->getCoursePath(),
-            "submissions",
-            $gradeable->getId()
+        $this->core->getQueries()->insertGradeableAccess(
+            $gradeable->getId(),
+            $user_id,
+            $team_id,
+            $this->core->getUser()->getId()
         );
-        $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
-        FileUtils::createDir($user_path, true);
-        $file_path = FileUtils::joinPaths($user_path, "user_assignment_access.json");
-
-        $fh = fopen($file_path, "a+");
-        flock($fh, LOCK_EX);
-        fseek($fh, 0);
-        $contents = fread($fh, max(filesize($file_path), 1));
-        $json = json_decode(((strlen($contents) > 0) ? $contents : '{}'), true);
-        if (!isset($json['page_load_history'])) {
-            $json['page_load_history'] = [];
-        }
-        $json['page_load_history'][] = [
-            'time' => $now->format('m-d-Y H:i:sO'),
-            'who' => $this->core->getUser()->getId()
-        ];
-        ftruncate($fh, 0);
-        fwrite($fh, FileUtils::encodeJson($json));
-        flock($fh, LOCK_UN);
-        fclose($fh);
 
         $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
         $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
@@ -1333,13 +1316,37 @@ class SubmissionController extends AbstractController {
             }
         }
 
+        if ($team_id !== "") {
+            $access = $this->core->getQueries()->getGradeableAccessTeam($gradeable->getId(), $team_id);
+        }
+        else {
+            $access = $this->core->getQueries()->getGradeableAccessUser($gradeable->getId(), $user_id);
+        }
+        FileUtils::writeJsonFile(
+            FileUtils::joinPaths($version_path, '.user_assignment_access.json'),
+            array_map(function ($row) {
+                // need to do this as postgres may return timezone as [+-]HH and python needs [+-]HHMM
+                $row['timestamp'] = DateUtils::parseDateTime(
+                    $row['timestamp'],
+                    $this->core->getConfig()->getTimezone()
+                )->format('Y-m-d H:i:sO');
+                return $row;
+            }, $access)
+        );
+
         $settings_file = FileUtils::joinPaths($user_path, "user_assignment_settings.json");
         if (!file_exists($settings_file)) {
-            $json = ["active_version" => $new_version,
-                          "history" => [["version" => $new_version,
-                                                   "time" => $current_time_string_tz,
-                                                   "who" => $original_user_id,
-                                                   "type" => "upload"]]];
+            $json = [
+                "active_version" => $new_version,
+                "history" => [
+                    [
+                        "version" => $new_version,
+                        "time" => $current_time_string_tz,
+                        "who" => $original_user_id,
+                        "type" => "upload"
+                    ]
+                ]
+            ];
         }
         else {
             $json = FileUtils::readJsonFile($settings_file);

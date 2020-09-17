@@ -26,7 +26,8 @@
 class WebSocketClient {
     constructor() {
         this.number = 0;
-        this.autoReconnectInterval = 5 * 1000;
+        // 10 seconds + a random number of seconds between 0 and 10
+        this.autoReconnectInterval = (10 + (Math.random() * 11)) * 1000;
         this.onopen = null;
         this.onmessage = null;
         // We do string replacement here so that http -> ws, https -> wss.
