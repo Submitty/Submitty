@@ -35,11 +35,26 @@ class WebSocketClient {
         my_url.port = 8443;
         my_url.pathname = 'ws';
         this.url = my_url.href;
+        this.heartbeat = null;
     }
 
     open(page) {
         console.log(`WebSocket: connecting to ${this.url}`);
         this.client = new WebSocket(this.url);
+
+        // Clear any old heartbeats that might exist
+        clearInterval(this.heartbeat);
+        // Send periodic heartbeat "pings" to the server to keep the connection alive.
+        this.heartbeat = setInterval(function(client) {
+            // Only attempt to send pings if the websocket is open and connected
+            if(client.readyState == WebSocket.OPEN) {
+                client.send("ping");
+            }
+        // The default nginx  timeout for a connection is 60 seconds. 50 should give
+        // us a good buffer.
+        }, 50000, this.client);
+
+
         this.client.onopen = () => {
             console.log('WebSocket: connected');
             if (this.onopen) {
@@ -55,7 +70,12 @@ class WebSocketClient {
             this.number++;
             if (this.onmessage) {
                 try {
-                    this.onmessage(JSON.parse(event.data));
+                    const data = event.data;
+                    // Before parsing the data, check to see if it is a heartbeat "pong"
+                    if (data == "pong") {
+                        return;
+                    }
+                    this.onmessage(JSON.parse(data));
                 }
                 catch (exc) {
                     console.error(`error on message: ${exc}`);
