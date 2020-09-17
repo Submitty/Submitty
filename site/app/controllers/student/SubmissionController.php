@@ -137,7 +137,7 @@ class SubmissionController extends AbstractController {
                 $team_id = $team->getId();
             }
         }
-
+        
         $this->core->getQueries()->insertGradeableAccess(
             $gradeable->getId(),
             $user_id,
@@ -199,7 +199,6 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for showing a message to a user before the gradeable is loaded.
-     * 
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_message")
      */
     public function loadMessage($gradeable_id) {
@@ -217,7 +216,8 @@ class SubmissionController extends AbstractController {
 
         if (!$gradeable->getAutogradingConfig()->hasLoadMessage()) {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
-        } else {
+        }
+        else {
             $this->core->getOutput()->enableMobileViewport();
             $this->core->getOutput()->renderTwigOutput('submission/homework/LoadMessagePage.twig', [
                 "gradeable_name" => $gradeable->getTitle(),

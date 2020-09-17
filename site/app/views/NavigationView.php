@@ -409,7 +409,8 @@ class NavigationView extends AbstractView {
 
         if ($gradeable->hasAutogradingConfig() && $gradeable->getAutogradingConfig()->hasLoadMessage()) {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'load_message']);
-        } else {
+        }
+        else {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
         }
         $progress = null;
@@ -422,8 +423,6 @@ class NavigationView extends AbstractView {
                 "disabled" => true,
                 "class" => "btn btn-default btn-nav"
             ]);
-        } else {
-
         }
 
         if ($graded_gradeable !== null) {

@@ -233,7 +233,7 @@ class AutogradingConfig extends AbstractModel {
 
     /**
      * Gets whether this config has a load message
-     * @return bool 
+     * @return bool
      */
     public function hasLoadMessage() {
         return $this->load_message_enabled;
@@ -241,7 +241,7 @@ class AutogradingConfig extends AbstractModel {
 
     /**
      * Returns the load message
-     * @return string 
+     * @return string
      */
     public function getLoadMessage() {
         return $this->load_message;
