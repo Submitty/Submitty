@@ -45,6 +45,9 @@
       "assignment_message" : {
         "type" : "string"
       },
+      "load_message" : {
+        "type" : "string"
+      },
       "required_capabilities" : {
         "type" : "string"
       },

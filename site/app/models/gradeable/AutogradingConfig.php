@@ -73,6 +73,11 @@ class AutogradingConfig extends AbstractModel {
     /** @prop @var bool */
     protected $notebook_gradeable = false;
 
+    /* Property if load message alert is enabled */
+    /** @pro @var bool If there is a message to show on Gradeable load */
+    private $load_message_enabled = false;
+    /** @prop @var string The message to show to the user before letting them go to the gradeable */
+    protected $load_message = '';
 
     /* Properties accumulated from the AutogradingTestcases */
 
@@ -101,6 +106,11 @@ class AutogradingConfig extends AbstractModel {
         }
         elseif (isset($details['gradeable_message'])) {
             $this->gradeable_message = $details['gradeable_message'] ?? '';
+        }
+
+        if (isset($details['load_message'])) {
+            $this->load_message_enabled = true;
+            $this->load_message = $details['load_message'] ?? '';
         }
 
         // These two items default to false if they don't exist in the gradeable config.json
@@ -219,6 +229,22 @@ class AutogradingConfig extends AbstractModel {
 
     public function updateTestCases($test_cases) {
         $this->parseTestCases($test_cases);
+    }
+
+    /**
+     * Gets whether this config has a load message
+     * @return bool 
+     */
+    public function hasLoadMessage() {
+        return $this->load_message_enabled;
+    }
+
+    /**
+     * Returns the load message
+     * @return string 
+     */
+    public function getLoadMessage() {
+        return $this->load_message;
     }
 
     /**

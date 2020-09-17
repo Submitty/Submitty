@@ -407,7 +407,11 @@ class NavigationView extends AbstractView {
 
         $points_percent = NAN;
 
-        $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        if ($gradeable->hasAutogradingConfig() && $gradeable->getAutogradingConfig()->hasLoadMessage()) {
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'load_message']);
+        } else {
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        }
         $progress = null;
         $disabled = false;
 
@@ -418,6 +422,8 @@ class NavigationView extends AbstractView {
                 "disabled" => true,
                 "class" => "btn btn-default btn-nav"
             ]);
+        } else {
+
         }
 
         if ($graded_gradeable !== null) {

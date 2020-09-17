@@ -366,6 +366,9 @@ int main(int argc, char *argv[]) {
   } else if (config_json.find("gradeable_message") != config_json.end()) {
     j["gradeable_message"] = config_json.value("gradeable_message", "");
   }
+  if (config_json.find("load_message") != config_json.end()) {
+    j["load_message"] = config_json.value("load_message", "");
+  }
   if (config_json.find("early_submission_incentive") != config_json.end()) {
     nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());
     nlohmann::json incentive;

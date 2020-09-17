@@ -66,32 +66,11 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
-     * @return array
-     */
-    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
-        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
-        if ($gradeable === null) {
-            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
-            return ['error' => true, 'message' => 'No gradeable with that id.'];
-        }
-
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+    private function verifyHomeworkPagePermissions($gradeable_id, &$gradeable, &$graded_gradeable) {
         if ($graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
             // FIXME    to nav with an error
         }
-
-        // Attempt to put the version number to be in bounds of the gradeable
-        $version = intval($gradeable_version ?? 0);
-        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
-            $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
-        }
-
-        $error = false;
-        $now = $this->core->getDateTimeNow();
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
@@ -113,98 +92,157 @@ class SubmissionController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'Must be on a team to access submission.'];
         }
-        else {
-            Logger::logAccess(
-                $this->core->getUser()->getId(),
-                $_COOKIE['submitty_token'],
-                "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
-            );
+        return ['error' => false];
+    }
 
-            $who_id = $this->core->getUser()->getId();
-            if ($gradeable->isTeamAssignment() && $graded_gradeable !== null) {
-                $team = $graded_gradeable->getSubmitter()->getTeam();
-                if ($team !== null) {
-                    $who_id = $team->getId();
-                }
-            }
+    /**
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
+     * @return array
+     */
+    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
+            return ['error' => true, 'message' => 'No gradeable with that id.'];
+        }
 
-            $gradeable_path = FileUtils::joinPaths(
-                $this->core->getConfig()->getCoursePath(),
-                "submissions",
-                $gradeable->getId()
-            );
-            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
-            FileUtils::createDir($user_path, true);
-            $file_path = FileUtils::joinPaths($user_path, "user_assignment_access.json");
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
+        if ($verify_permissions['error']) {
+            return $verify_permissions;
+        }
 
-            $fh = fopen($file_path, "a+");
-            flock($fh, LOCK_EX);
-            fseek($fh, 0);
-            $contents = fread($fh, max(filesize($file_path), 1));
-            $json = json_decode(((strlen($contents) > 0) ? $contents : '{}'), true);
-            if (!isset($json['page_load_history'])) {
-                $json['page_load_history'] = [];
-            }
-            $json['page_load_history'][] = [
-                'time' => $now->format('m-d-Y H:i:sO'),
-                'who' => $this->core->getUser()->getId()
-            ];
-            ftruncate($fh, 0);
-            fwrite($fh, FileUtils::encodeJson($json));
-            flock($fh, LOCK_UN);
-            fclose($fh);
+        // Attempt to put the version number to be in bounds of the gradeable
+        $version = intval($gradeable_version ?? 0);
+        if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
+            $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
+        }
 
-            $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
-            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
-            if (!$gradeable->hasAutogradingConfig()) {
-                $this->core->getOutput()->renderOutput(
-                    'Error',
-                    'unbuiltGradeable',
-                    $gradeable->getTitle()
-                );
-                $error = true;
-            }
-            else {
-                if (
-                    $graded_gradeable !== null
-                    && $gradeable->isTaGradeReleased()
-                    && $gradeable->isTaGrading()
-                    && $graded_gradeable->isTaGradingComplete()
-                ) {
-                    $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
-                    $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
-                    if ($graded_gradeable->getSubmitter()->isTeam()) {
-                        $this->core->getQueries()->updateTeamViewedTime($graded_gradeable->getSubmitter()->getId(), $this->core->getUser()->getId());
-                    }
-                }
+        $error = false;
+        $now = $this->core->getDateTimeNow();
 
-                // Only show hidden test cases if the display version is the graded version (and grades are released)
-                $show_hidden = false;
-                if ($graded_gradeable != null) {
-                    $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
-                    // can this user access grade inquiries for this graded_gradeable
-                    $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
-                }
+        Logger::logAccess(
+            $this->core->getUser()->getId(),
+            $_COOKIE['submitty_token'],
+            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:load_page:{$gradeable->getId()}"
+        );
 
-                // If we get here, then we can safely construct the old model w/o checks
-                $this->core->getOutput()->addInternalCss('forum.css');
-                $this->core->getOutput()->addInternalJs('forum.js');
-                $this->core->getOutput()->addInternalCss('grade-inquiry.css');
-                $this->core->getOutput()->addInternalJs('grade-inquiry.js');
-                $this->core->getOutput()->addInternalJs('websocket.js');
-                $this->core->getOutput()->enableMobileViewport();
-                $this->core->getOutput()->renderOutput(
-                    ['submission', 'Homework'],
-                    'showGradeable',
-                    $gradeable,
-                    $graded_gradeable,
-                    $version,
-                    $can_inquiry ?? false,
-                    $show_hidden
-                );
+        $who_id = $this->core->getUser()->getId();
+        if ($gradeable->isTeamAssignment() && $graded_gradeable !== null) {
+            $team = $graded_gradeable->getSubmitter()->getTeam();
+            if ($team !== null) {
+                $who_id = $team->getId();
             }
         }
+
+        $gradeable_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "submissions",
+            $gradeable->getId()
+        );
+        $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+        FileUtils::createDir($user_path, true);
+        $file_path = FileUtils::joinPaths($user_path, "user_assignment_access.json");
+
+        $fh = fopen($file_path, "a+");
+        flock($fh, LOCK_EX);
+        fseek($fh, 0);
+        $contents = fread($fh, max(filesize($file_path), 1));
+        $json = json_decode(((strlen($contents) > 0) ? $contents : '{}'), true);
+        if (!isset($json['page_load_history'])) {
+            $json['page_load_history'] = [];
+        }
+        $json['page_load_history'][] = [
+            'time' => $now->format('m-d-Y H:i:sO'),
+            'who' => $this->core->getUser()->getId()
+        ];
+        ftruncate($fh, 0);
+        fwrite($fh, FileUtils::encodeJson($json));
+        flock($fh, LOCK_UN);
+        fclose($fh);
+
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderOutput(
+                'Error',
+                'unbuiltGradeable',
+                $gradeable->getTitle()
+            );
+            $error = true;
+        }
+        else {
+            if (
+                $graded_gradeable !== null
+                && $gradeable->isTaGradeReleased()
+                && $gradeable->isTaGrading()
+                && $graded_gradeable->isTaGradingComplete()
+            ) {
+                $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
+                $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
+                if ($graded_gradeable->getSubmitter()->isTeam()) {
+                    $this->core->getQueries()->updateTeamViewedTime($graded_gradeable->getSubmitter()->getId(), $this->core->getUser()->getId());
+                }
+            }
+
+            // Only show hidden test cases if the display version is the graded version (and grades are released)
+            $show_hidden = false;
+            if ($graded_gradeable != null) {
+                $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                // can this user access grade inquiries for this graded_gradeable
+                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+            }
+
+            // If we get here, then we can safely construct the old model w/o checks
+            $this->core->getOutput()->addInternalCss('forum.css');
+            $this->core->getOutput()->addInternalJs('forum.js');
+            $this->core->getOutput()->addInternalCss('grade-inquiry.css');
+            $this->core->getOutput()->addInternalJs('grade-inquiry.js');
+            $this->core->getOutput()->addInternalJs('websocket.js');
+            $this->core->getOutput()->enableMobileViewport();
+            $this->core->getOutput()->renderOutput(
+                ['submission', 'Homework'],
+                'showGradeable',
+                $gradeable,
+                $graded_gradeable,
+                $version,
+                $can_inquiry ?? false,
+                $show_hidden
+            );
+        }
         return ['id' => $gradeable_id, 'error' => $error];
+    }
+
+    /**
+     * Function for showing a message to a user before the gradeable is loaded.
+     * 
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_message")
+     */
+    public function loadMessage($gradeable_id) {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
+            return ['error' => true, 'message' => 'No gradeable with that id.'];
+        }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
+        $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
+        if ($verify_permissions['error']) {
+            return $verify_permissions;
+        }
+
+        if (!$gradeable->getAutogradingConfig()->hasLoadMessage()) {
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
+        } else {
+            $this->core->getOutput()->enableMobileViewport();
+            $this->core->getOutput()->renderTwigOutput('submission/homework/LoadMessagePage.twig', [
+                "gradeable_name" => $gradeable->getTitle(),
+                "load_message" => $gradeable->getAutogradingConfig()->getLoadMessage(),
+                "button_back" => $this->core->buildCourseUrl([]),
+                "button_forward" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId()])
+            ]);
+        }
     }
 
     /**

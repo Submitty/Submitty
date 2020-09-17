@@ -1,0 +1,12 @@
+<div class="content gradeable_message">
+    <header id="gradeable-info">
+        <h1>
+            Message for: {{ gradeable_name }}
+        </h1>
+    </header>
+    <span>{{ load_message | markdown }}</span>
+    </div>
+    <div class="content">
+    <a type="button" id="continue" href="{{ button_forward }}"class="btn btn-danger btn-lg" style="float: right">Continue</a>
+    <a type="button" id="back" href="{{ button_back }}" class="btn btn-primary btn-lg">Return to gradeables</a>
+</div>
