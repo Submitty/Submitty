@@ -27,12 +27,12 @@ class TestStats(BaseTestCase):
         numerical_data_text = self.driver.find_element_by_id("numerical-data").text
         if full_access:
             self.assertTrue("Students who have submitted: 73 / 101 (72.3%)" in numerical_data_text)
-            #self.assertTrue("Current percentage of TA grading done: 73 / 73 (100.0%)" in numerical_data_text)
+            self.assertTrue("Current percentage of TA grading done: 73 / 73 (100.0%)" in numerical_data_text)
             self.assertTrue("Section 1: 12 / 12 (100.0%)" in numerical_data_text)
             self.assertTrue("Number of students who have viewed their grade: 50 / 73 (68.5%)" in numerical_data_text)
         else:
             self.assertTrue("Students who have submitted: 13 / 20 (65%)" in numerical_data_text)
-            #self.assertTrue("Current percentage of TA grading done: 13 / 13 (100.0%)" in numerical_data_text)
+            self.assertTrue("Current percentage of TA grading done: 13 / 13 (100.0%)" in numerical_data_text)
             self.assertTrue("Section 4: 8 / 8 (100.0%)" in numerical_data_text)
             self.assertTrue("Number of students who have viewed their grade: 8 / 13 (61.5%)" in numerical_data_text)            
         self.log_out()
@@ -44,12 +44,12 @@ class TestStats(BaseTestCase):
         if full_access:
             self.assertTrue("Students on a team: 101/101 (100%)" in numerical_data_text)
             self.assertTrue("Number of teams: 36" in numerical_data_text)
-            #self.assertTrue("Teams who have submitted: 30 / 36 (83.3%)" in numerical_data_text)
+            self.assertTrue("Teams who have submitted: 30 / 36 (83.3%)" in numerical_data_text)
             self.assertTrue("Section 1: 1.5 / 3 (50.0%)" in numerical_data_text)
         else:
             self.assertTrue("Students on a team: 20/20 (100%)" in numerical_data_text)
             self.assertTrue("Number of teams: 8" in numerical_data_text)
-            #self.assertTrue("Teams who have submitted: 6 / 8 (75%)" in numerical_data_text)
+            self.assertTrue("Teams who have submitted: 6 / 8 (75%)" in numerical_data_text)
             self.assertTrue("Section 4: 0 / 3 (0.0%)" in numerical_data_text)
         self.log_out()
     @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
