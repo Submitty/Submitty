@@ -33,7 +33,6 @@
                                               $(document).on(
                                                 'keydown',
                                                 function(event) {
-                                                  console.log($("#{{ block('popup_id') }}").is(":visible"))
                                                     if (event.key == "Escape" && $("#{{ block('popup_id') }}").is(":visible")) {
                                                       {{ block('close_click_action') }}
                                                     }

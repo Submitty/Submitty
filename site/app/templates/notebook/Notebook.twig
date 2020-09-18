@@ -71,6 +71,10 @@
                         config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
                     }
 
+                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                        config_{{ num_codeboxes }}.lineWrapping = true;
+                    }
+
                     if ({{ cell.rows }} > 0) {
                         var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
                         editor_{{ num_codeboxes }}.setSize(null, rowsToPixels({{ cell.rows }}));
