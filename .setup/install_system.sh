@@ -700,7 +700,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 echo Beginning Install Submitty Script
-bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
 
 # (re)start the submitty grading scheduler daemon

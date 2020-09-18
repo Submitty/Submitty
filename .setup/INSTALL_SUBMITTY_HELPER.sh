@@ -60,6 +60,7 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean"
     echo -e "   ./INSTALL_SUBMITTY.sh clean test"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test"
@@ -726,7 +727,7 @@ fi
 
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
-    if [[ "$#" == 0 || ("$#" -ge 1 && $1 != "skip_web_restart") ]]; then
+    if [[ "$#" == 0 || ("$#" == 1 && $1 != "skip_web_restart") || ("$#" -ge 2  && ($1 != "skip_web_restart" && $2 != "skip_web_restart")) ]]; then
         PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
         echo -n "restarting php${PHP_VERSION}-fpm..."
         systemctl restart php${PHP_VERSION}-fpm
