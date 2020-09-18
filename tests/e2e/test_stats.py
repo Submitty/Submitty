@@ -13,11 +13,11 @@ class TestStats(BaseTestCase):
         numerical_data_text = self.driver.find_element_by_id("numerical-data").text
         if full_access:
             self.assertTrue("Students who have submitted: 68 / 101 (67.3%)" in numerical_data_text)
-            self.assertTrue("Current percentage of grading done: 43.25 / 68 (63.6%)" in numerical_data_text)
+            self.assertTrue("Current percentage of TA grading done: 43.25 / 68 (63.6%)" in numerical_data_text)
             self.assertTrue("Section 1: 4 / 9 (44.4%)" in numerical_data_text)
         else:
             self.assertTrue("Students who have submitted: 13 / 20 (65%)" in numerical_data_text)
-            self.assertTrue("Current percentage of grading done: 8 / 13 (61.5%)" in numerical_data_text)
+            self.assertTrue("Current percentage of TA grading done: 8 / 13 (61.5%)" in numerical_data_text)
             self.assertTrue("Section 4: 6 / 6 (100.0%)" in numerical_data_text)
         self.log_out()
     def individual_released_stats_test_helper(self, user_id, full_access):
@@ -27,12 +27,12 @@ class TestStats(BaseTestCase):
         numerical_data_text = self.driver.find_element_by_id("numerical-data").text
         if full_access:
             self.assertTrue("Students who have submitted: 73 / 101 (72.3%)" in numerical_data_text)
-            self.assertTrue("Current percentage of grading done: 73 / 73 (100.0%)" in numerical_data_text)
+            self.assertTrue("Current percentage of TA grading done: 73 / 73 (100.0%)" in numerical_data_text)
             self.assertTrue("Section 1: 12 / 12 (100.0%)" in numerical_data_text)
             self.assertTrue("Number of students who have viewed their grade: 50 / 73 (68.5%)" in numerical_data_text)
         else:
             self.assertTrue("Students who have submitted: 13 / 20 (65%)" in numerical_data_text)
-            self.assertTrue("Current percentage of grading done: 13 / 13 (100.0%)" in numerical_data_text)
+            self.assertTrue("Current percentage of TA grading done: 13 / 13 (100.0%)" in numerical_data_text)
             self.assertTrue("Section 4: 8 / 8 (100.0%)" in numerical_data_text)
             self.assertTrue("Number of students who have viewed their grade: 8 / 13 (61.5%)" in numerical_data_text)            
         self.log_out()
