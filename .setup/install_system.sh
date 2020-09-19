@@ -430,7 +430,7 @@ if [ ${WORKER} == 0 ]; then
     a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
     # Install nginx to serve websocket connections
-    sudo apt-get install -qqy nginx
+    sudo apt-get install -qqy nginx-full
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -700,7 +700,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 echo Beginning Install Submitty Script
-bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
 
 # (re)start the submitty grading scheduler daemon
