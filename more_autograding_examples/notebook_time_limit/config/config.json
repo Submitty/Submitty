@@ -19,7 +19,7 @@ Here's a short list of instructions:  \n\
         * Leaving the page does not stop the timer.\n\
         * If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.",
         "first_time_only" : true
-    }
+    },
     "notebook" : [
         {
             "type": "markdown",

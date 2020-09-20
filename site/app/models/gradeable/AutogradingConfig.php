@@ -80,6 +80,7 @@ class AutogradingConfig extends AbstractModel {
     protected $load_gradeable_message = '';
     /** @prop @var @bool If the message should only be shown to the user if they haven't opened the gradeable yet */
     protected $load_gradeable_message_first_time_only = false;
+
     /* Properties accumulated from the AutogradingTestcases */
 
     /** @prop @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
@@ -239,14 +240,6 @@ class AutogradingConfig extends AbstractModel {
      */
     public function shouldLoadGradeableMessage($gradeable_id, $user_id) {
         return $this->load_gradeable_message_enabled && (!$this->load_gradeable_message_first_time_only || count($this->core->getQueries()->getGradeableAccessUser($gradeable_id, $user_id)) === 0);
-    }
-
-    /**
-     * Gets whether this config has a load message
-     * @return bool
-     */
-    public function hasLoadGradeableMessage() {
-        return $this->load_gradeable_message_enabled;
     }
 
     /**
