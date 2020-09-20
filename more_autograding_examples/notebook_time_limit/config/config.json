@@ -14,9 +14,12 @@ Here's a short list of instructions:  \n\
         "submission_to_validation" : [ "*.txt", "*.png", ".user_assignment_access.json" ],
         "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
     },
-    "load_message" : "After clicking continue, the quiz will start and you will have 10 minutes to complete the quiz.\n\
-* Leaving the page does not stop the timer.\n\
-* If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.",
+    "load_gradeable_message" : {
+        "message" : "After clicking continue, the quiz will start and you will have 10 minutes to complete the quiz.\n\
+        * Leaving the page does not stop the timer.\n\
+        * If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.",
+        "first_time_only" : true
+    }
     "notebook" : [
         {
             "type": "markdown",

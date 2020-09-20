@@ -199,9 +199,9 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for showing a message to a user before the gradeable is loaded.
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_message")
+     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")
      */
-    public function loadMessage($gradeable_id) {
+    public function loadGradeableMessage($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -214,14 +214,14 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if (!$gradeable->getAutogradingConfig()->hasLoadMessage()) {
+        if (!$gradeable->getAutogradingConfig()->shouldLoadGradeableMessage($gradeable->getId(), $this->core->getUser()->getId())) {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
         }
         else {
             $this->core->getOutput()->enableMobileViewport();
             $this->core->getOutput()->renderTwigOutput('submission/homework/LoadMessagePage.twig', [
                 "gradeable_name" => $gradeable->getTitle(),
-                "load_message" => $gradeable->getAutogradingConfig()->getLoadMessage(),
+                "load_gradeable_message" => $gradeable->getAutogradingConfig()->getLoadGradeableMessage(),
                 "button_back" => $this->core->buildCourseUrl([]),
                 "button_forward" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId()])
             ]);

@@ -74,11 +74,12 @@ class AutogradingConfig extends AbstractModel {
     protected $notebook_gradeable = false;
 
     /* Property if load message alert is enabled */
-    /** @pro @var bool If there is a message to show on Gradeable load */
-    private $load_message_enabled = false;
+    /** @prop @var bool If there is a message to show on Gradeable load */
+    private $load_gradeable_message_enabled = false;
     /** @prop @var string The message to show to the user before letting them go to the gradeable */
-    protected $load_message = '';
-
+    protected $load_gradeable_message = '';
+    /** @prop @var @bool If the message should only be shown to the user if they haven't opened the gradeable yet */
+    protected $load_gradeable_message_first_time_only = false;
     /* Properties accumulated from the AutogradingTestcases */
 
     /** @prop @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
@@ -108,9 +109,10 @@ class AutogradingConfig extends AbstractModel {
             $this->gradeable_message = $details['gradeable_message'] ?? '';
         }
 
-        if (isset($details['load_message'])) {
-            $this->load_message_enabled = true;
-            $this->load_message = $details['load_message'] ?? '';
+        if (isset($details['load_gradeable_message'])) {
+            $this->load_gradeable_message_enabled = true;
+            $this->load_gradeable_message = $details['load_gradeable_message']['message'] ?? '';
+            $this->load_gradeable_message_first_time_only = $details['load_gradeable_message']['first_time_only'] ?? false;
         }
 
         // These two items default to false if they don't exist in the gradeable config.json
@@ -232,19 +234,27 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
+     * Gets whether a load message should be loaded
+     * @return bool
+     */
+    public function shouldLoadGradeableMessage($gradeable_id, $user_id) {
+        return $this->load_gradeable_message_enabled && (!$this->load_gradeable_message_first_time_only || count($this->core->getQueries()->getGradeableAccessUser($gradeable_id, $user_id)) === 0);
+    }
+
+    /**
      * Gets whether this config has a load message
      * @return bool
      */
-    public function hasLoadMessage() {
-        return $this->load_message_enabled;
+    public function hasLoadGradeableMessage() {
+        return $this->load_gradeable_message_enabled;
     }
 
     /**
      * Returns the load message
      * @return string
      */
-    public function getLoadMessage() {
-        return $this->load_message;
+    public function getLoadGradeableMessage() {
+        return $this->load_gradeable_message;
     }
 
     /**
