@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from urllib.parse import urlparse
 
 from selenium import webdriver
-#from websocket import create_connection
+from websocket import create_connection
 
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
