@@ -1285,10 +1285,14 @@ class ElectronicGraderController extends AbstractController {
         $graded = 0;
         $total = 0;
         $total_submitted = 0;
+        $non_late_total_submitted = 0;
+        $non_late_graded = 0;
         if ($peer) {
             $section_key = 'registration_section';
             $total = $gradeable->getPeerGradeSet();
             $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
+            $non_late_total_submitted = $total_submitted;
+            $non_late_graded = $graded;
         }
         elseif ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
@@ -1303,11 +1307,15 @@ class ElectronicGraderController extends AbstractController {
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $team));
                 $total = array_sum($this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
                 $total_submitted = array_sum($this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section'));
+                $non_late_total_submitted = $total_submitted - array_sum($gradeable->getBadSubmissionsByGradingSection('registration_section'));
+                $non_late_graded = $graded - array_sum($gradeable->getBadGradedComponents('registration_section'));
             }
             else {
                 $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'registration_section', $team));
                 $total = array_sum($this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section'));
                 $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, 'registration_section'));
+                $non_late_total_submitted = $total_submitted - array_sum($gradeable->getBadSubmissionsByGradingSection('registration_section'));
+                $non_late_graded = $graded - array_sum($gradeable->getBadGradedComponents('registration_section'));
             }
         }
         else {
@@ -1325,7 +1333,9 @@ class ElectronicGraderController extends AbstractController {
             else {
                 $total_submitted = array_sum($this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable->getId(), $sections, 'rotating_section'));
             }
+            $non_late_total_submitted = $total_submitted - array_sum($gradeable->getBadSubmissionsByGradingSection('rotating_section'));
             $graded = array_sum($this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, 'rotating_section', $team));
+            $non_late_graded = $graded - array_sum($gradeable->getBadGradedComponents('rotating_section'));
         }
         //multiplies users and the number of components a gradeable has together
         if ($team) {
@@ -1339,6 +1349,10 @@ class ElectronicGraderController extends AbstractController {
         }
         else {
             $progress = round(($graded / $total_submitted) * 100, 1);
+
+            if (array_key_exists('show_late', $_COOKIE) && $_COOKIE['show_late'] == 'false') {
+                $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
+            }
         }
 
 
