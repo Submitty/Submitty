@@ -168,13 +168,13 @@ class TeamController extends AbstractController {
         $invite_id = self::cleanInviteId($_POST['invite_id']);
         $invited_user = $this->core->getQueries()->getUserById($invite_id);
 
-        if (empty($invited_user)) {
+        if ($invited_user === null) {
             // If a student with this id does not exist in the course...
             $this->core->addErrorMessage("User {$invite_id} does not exist");
             $this->core->redirect($return_url);
         }
 
-        if (empty($invited_user->getRegistrationSection())) {
+        if ($invited_user->getRegistrationSection() === null) {
             // If a student with this id is in the null section...
             // (make this look the same as a non-existant student so as not to
             // reveal information about dropped students)
@@ -520,7 +520,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * Get cleaned invite RCSID
+     * Get clean user_id invite
      * @param string $invite_id
      * @return string
      */
