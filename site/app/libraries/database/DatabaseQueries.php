@@ -1545,7 +1545,7 @@ ORDER BY gc_order
             $user_or_team_id = "team_id";
         }
         $this->course_db->query("
-SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
+SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) AS row_count FROM(
    SELECT * FROM (
       SELECT (egd.autograding_non_hidden_non_extra_credit + egd.autograding_non_hidden_extra_credit + egd.autograding_hidden_non_extra_credit + egd.autograding_hidden_extra_credit) AS score
       FROM electronic_gradeable_data AS egd
@@ -1560,7 +1560,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
    )g
 ) as individual;
           ", [$g_id]);
-        return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
+        return ($this->course_db->getRowCount() > 0 && $this->course_db->rows()[0]['row_count'] > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
     public function getScoresForGradeable($g_id, $section_key, $is_team) {
         $u_or_t = "u";
