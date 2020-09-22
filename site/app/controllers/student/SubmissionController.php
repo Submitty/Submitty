@@ -15,6 +15,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\UserSpecificNotebook;
 use app\models\notebook\SubmissionCodeBox;
@@ -67,7 +68,7 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    private function verifyHomeworkPagePermissions($gradeable_id, &$gradeable, &$graded_gradeable) {
+    private function verifyHomeworkPagePermissions($gradeable_id, Gradeable $gradeable, $graded_gradeable) {
         if ($graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
             // FIXME    to nav with an error
@@ -214,8 +215,8 @@ class SubmissionController extends AbstractController {
             return $verify_permissions;
         }
 
-        if (!$gradeable->getAutogradingConfig()->shouldLoadGradeableMessage($gradeable->getId(), $this->core->getUser()->getId())) {
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
+        if (!$gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($gradeable_id, $this->core->getUser()->getId())) {
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }
         else {
             $this->core->getOutput()->enableMobileViewport();
@@ -223,7 +224,7 @@ class SubmissionController extends AbstractController {
                 "gradeable_name" => $gradeable->getTitle(),
                 "load_gradeable_message" => $gradeable->getAutogradingConfig()->getLoadGradeableMessage(),
                 "button_back" => $this->core->buildCourseUrl([]),
-                "button_forward" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId()])
+                "button_forward" => $this->core->buildCourseUrl(['gradeable', $gradeable_id])
             ]);
         }
     }
