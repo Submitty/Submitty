@@ -222,6 +222,30 @@ class Logger {
         static::logMessage('ta_grading', $log_message);
     }
 
+
+    /**
+     * This logs the activity of a queue when it is
+     * 1. Opened
+     * 2. Closed
+     * 3. Emptied
+     * 4. Created
+     * Timestamp | Course Semester | Course Name | Queue Name | Action | User Agent
+     *
+     * where action is either OPENED, CLOSED, EMPTIED, CREATED
+     *
+     * @param $course_semester the current semester
+     * @param $course the course name
+     * @param $queue_name the name of the queue
+     * @param $queue_action the action performed
+     */
+    public static function logQueueActivity($course_semester, $course, $queue_name, $queue_action) {
+        $log_message[] = $course_semester;
+        $log_message[] = $course;
+        $log_message[] = $queue_name;
+        $log_message[] = $queue_action;
+        static::logMessage('office_hours_queue', $log_message);
+    }
+
     private static function logMessage($folder, $log_message) {
         $filename = static::getFilename();
         array_unshift($log_message, static::getTimestamp());

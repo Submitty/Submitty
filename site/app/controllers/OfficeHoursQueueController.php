@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
 use app\libraries\socket\Client;
+use app\libraries\Logger;
 use WebSocket;
 
 /**
@@ -79,6 +80,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         if ($this->core->getQueries()->openQueue($queue_code, $token)) {
             $this->core->addSuccessMessage("New queue added");
+            Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
         }
         else {
             $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue name");
@@ -324,6 +326,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "EMPTIED");
         $this->core->getQueries()->emptyQueue($queue_code);
         $this->core->addSuccessMessage("Queue emptied");
         $this->sendSocketMessage(['type' => 'full_update']);
@@ -350,7 +353,7 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-
+        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, $_POST['queue_state'] === "1" ? 'CLOSED' : 'OPENED');
         $this->core->getQueries()->toggleQueue($queue_code, $_POST['queue_state']);
         $this->core->addSuccessMessage(($_POST['queue_state'] === "1" ? 'Closed' : 'Opened') . ' queue: "' . $queue_code . '"');
         $this->sendSocketMessage(['type' => 'toggle_queue']);
