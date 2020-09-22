@@ -119,11 +119,6 @@
 
 .gradeable-li
 {
-
-}
-
-.gradeable-li-row
-{
     display: flex;
     flex-direction: row;
     margin: 3px;
