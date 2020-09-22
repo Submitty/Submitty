@@ -122,38 +122,40 @@
                                     <div style="margin-top:10px">
                                         <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                             {% for gradeable in gradeables %}
-                                                <li><hr /></li>
+                                                {# <li></li> #}
                                                 <li class="gradeable-li">
-                                                    <input type="text"
-                                                           aria-label="{{gradeable["title"]}} max score"
-                                                           value="{{ gradeable["max_score"] }}"
-                                                           id="maxscore-{{ gradeable["id"] }}"
-                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           style="margin-right: 10px;"
-                                                           onblur="ClampPoints(this);">
-                                                    <div class="gradeable-li-right-of-input">
-                                                        <div class="gradeable-li-info">
-                                                            <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
-                                                            {{ gradeable["title"] }}
-                                                            <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
-                                                        </div>
-                                                        <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
-                                                            {# Generate input boxes for each per-gradeable curve input #}
-                                                            {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}
+                                                    <hr />
+                                                    <div class="gradeable-li-row">
+                                                        <input type="text"
+                                                            aria-label="{{gradeable["title"]}} max score"
+                                                            value="{{ gradeable["max_score"] }}"
+                                                            id="maxscore-{{ gradeable["id"] }}"
+                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                            style="margin-right: 10px;"
+                                                            onblur="ClampPoints(this);">
+                                                        <div class="gradeable-li-right-of-input">
+                                                            <div class="gradeable-li-info">
+                                                                <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
+                                                                {{ gradeable["title"] }}
+                                                                <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
+                                                            </div>
+                                                            <div class="gradeable-li-curve" id="gradeable-curve-div-{{ gradeable['id'] }}">
+                                                                {# Generate input boxes for each per-gradeable curve input #}
+                                                                {% set curve_points = ['A-', 'B-', 'C-', 'D'] %}
 
-                                                            {% if per_gradeable_curves[bucket][gradeable['id']] is defined %}
-                                                                {% set curve_point_value = per_gradeable_curves[bucket][gradeable['id']] %}
-                                                            {% else %}
-                                                                {% set curve_point_value = ['', '', '', ''] %}
-                                                            {% endif %}
+                                                                {% if per_gradeable_curves[bucket][gradeable['id']] is defined %}
+                                                                    {% set curve_point_value = per_gradeable_curves[bucket][gradeable['id']] %}
+                                                                {% else %}
+                                                                    {% set curve_point_value = ['', '', '', ''] %}
+                                                                {% endif %}
 
-                                                            {% for i in range(0, 3) %}
-                                                                {% set html_id = 'per-gradeable-curve-' ~ gradeable['id'] ~ '-' ~ benchmarks_with_input_fields[i] %}
+                                                                {% for i in range(0, 3) %}
+                                                                    {% set html_id = 'per-gradeable-curve-' ~ gradeable['id'] ~ '-' ~ benchmarks_with_input_fields[i] %}
 
-                                                                <label for="{{ html_id }}" class="{{ benchmarks_with_input_fields[i] }}">{{ curve_points[i] }} :</label>
-                                                                <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input {{ benchmarks_with_input_fields[i] }}" data-benchmark="{{ benchmarks_with_input_fields[i] }}" value="{{ curve_point_value[i] }}">
-                                                            {% endfor %}
-                                                            <i class="far fa-question-circle fa-rb" title="You may apply a curve on a per gradeable basis.
+                                                                    <label for="{{ html_id }}" class="{{ benchmarks_with_input_fields[i] }}">{{ curve_points[i] }} :</label>
+                                                                    <input type="text" id="{{ html_id }}" class="per-gradeable-curve-input {{ benchmarks_with_input_fields[i] }}" data-benchmark="{{ benchmarks_with_input_fields[i] }}" value="{{ curve_point_value[i] }}">
+                                                                {% endfor %}
+                                                                <i class="far fa-question-circle fa-rb" title="You may apply a curve on a per gradeable basis.
 
 These values should be entered in points, not percentages.
 
@@ -163,6 +165,7 @@ the minimum percent needed to earn an A- on this gradeable
 to 50%, you would enter 10 in the A- box.
 
 To remove a curve simply blank all boxes."></i>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </li>
