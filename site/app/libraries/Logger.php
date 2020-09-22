@@ -233,10 +233,10 @@ class Logger {
      *
      * where action is either OPENED, CLOSED, EMPTIED, CREATED
      *
-     * @param $course_semester the current semester
-     * @param $course the course name
-     * @param $queue_name the name of the queue
-     * @param $queue_action the action performed
+     * @param string $course_semester The current semester
+     * @param string $course The course name
+     * @param string $queue_name The name of the queue
+     * @param string $queue_action The action performed
      */
     public static function logQueueActivity($course_semester, $course, $queue_name, $queue_action) {
         $log_message[] = $course_semester;
