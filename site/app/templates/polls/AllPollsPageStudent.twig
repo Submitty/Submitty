@@ -23,7 +23,7 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                             <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             {% if poll.isOpen() %}
-                                {% if poll.getUserResponse(user_id) == null %}
+                                {% if poll.getUserResponse(user_id) is same as(null) %}
                                     <button type="submit" class="btn btn-success"> Answer
                                 {% else %}
                                     <button type="submit" class="btn btn-success"> Edit Answer
@@ -57,7 +57,7 @@
             {% for poll in older_polls %}
                 <tr>
                     <td> {{ poll.getName() }} </td>
-                    <td> {{ poll.getUserResponse(user_id) == null ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                    <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                     <td>
                         <form method="post" action="{{ base_url }}/viewPoll">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

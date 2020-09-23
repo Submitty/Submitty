@@ -11,13 +11,13 @@
             </legend>
             <label class="radio" for="answer-no-response">
                 {% if poll.isOpen() %}
-                    {% if poll.getUserResponse(user_id) == null %}
+                    {% if poll.getUserResponse(user_id) is same as(null) %}
                         <input type="radio" value="-1" name="answer" id="answer-no-response" checked/>
                     {% else %}
                         <input type="radio" value="-1" name="answer" id="answer-no-response"/>
                     {% endif %}
                 {% else %}
-                    {% if poll.getUserResponse(user_id) == null %}
+                    {% if poll.getUserResponse(user_id) is same as(null) %}
                         <input type="radio" value="-1" name="answer" id="answer-no-response" checked disabled/>
                     {% else %}
                         <input type="radio" value="-1" name="answer" id="answer-no-response" disabled/>
