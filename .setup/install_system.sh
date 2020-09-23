@@ -236,7 +236,7 @@ fi
 if [ ${VAGRANT} == 1 ]; then
     # We only might build analysis tools from source while using vagrant
     echo "Installing stack (haskell)"
-    curl -sSL https://get.haskellstack.org/ | sh
+    curl -sSL https://get.haskellstack.org/ | sh -s - -f
 fi
 
 #################################################################
@@ -308,8 +308,6 @@ if [ ${WORKER} == 0 ]; then
 
     #add cgi user to docker group in order to use the Docker python sdk
     usermod -a -G "docker" ${CGI_USER}
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${PHP_USER}/.profile
-    echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${CGI_USER}/.profile
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
@@ -443,8 +441,8 @@ if [ ${WORKER} == 0 ]; then
         fi
 
         # remove default sites which would cause server to mess up
-        rm /etc/apache2/sites*/000-default.conf
-        rm /etc/apache2/sites*/default-ssl.conf
+        rm /etc/apache2/sites*/000-default.conf || true
+        rm /etc/apache2/sites*/default-ssl.conf || true
 
         cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
@@ -493,10 +491,10 @@ EOF
     # NGINX SETUP
     #################
     # remove default site which would cause server to mess up
-    rm /etc/nginx/sites*/default
+    rm /etc/nginx/sites*/default || true
     cp ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
     chmod 644 /etc/nginx/sites-available/submitty.conf
-    ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+    ln -sf /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
 
 
     #################################################################
@@ -573,7 +571,9 @@ if [ ${WORKER} == 0 ]; then
 
         # Set the listen address to be global so that we can access the guest DB from the host
         sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+        service postgresql start
         service postgresql restart
+        pg_lsclusters | cat
     fi
 fi
 

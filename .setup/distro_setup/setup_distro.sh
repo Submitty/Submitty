@@ -62,12 +62,12 @@ fi
 if [ ${VAGRANT} == 1 ]; then
     # Ubuntu/Debian share this stuff, CentOS does not
     if [ -d /etc/update-motd.d ]; then
-        chmod -x /etc/update-motd.d/*
-        chmod +x /etc/update-motd.d/00-header
+        chmod a-x /etc/update-motd.d/*
     fi
     if [ -f /usr/share/landscape/landscape-sysinfo.wrapper ]; then
         chmod -x /usr/share/landscape/landscape-sysinfo.wrapper
     fi
+
 
     # ${x^^} gives capitalized string
     DISTRO_LINE=$(printf "##  RUNNING: %-44s ##" "${DISTRO^^} ${VERSION^^}")
@@ -75,6 +75,7 @@ if [ ${VAGRANT} == 1 ]; then
     CGI_LINE=$(printf "##    %-51s ##" "${SUBMISSION_URL}/cgi-bin (cgi-bin scripts)")
     GIT_LINE=$(printf "##    %-51s ##" "${SUBMISSION_URL}/git (git)")
     DATABASE_LINE=$(printf "##    %-51s ##" "localhost:${DATABASE_PORT}")
+  
     # Set our cool MOTD to help people get started
     echo -e "
  _______  __   __  _______  __   __  ___   _______  _______  __   __
@@ -118,5 +119,4 @@ ${DATABASE_LINE}
 ##  Happy developing!                                     ##
 ############################################################
 " > /etc/motd
-    chmod 644 /etc/motd
 fi
