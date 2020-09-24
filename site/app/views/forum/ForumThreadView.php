@@ -64,7 +64,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;float:right;top:3px;margin-right:102px;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]
@@ -674,6 +674,27 @@ class ForumThreadView extends AbstractView {
         ]);
     }
 
+    public function sizeTitle($titleDisplay, $title, $titleLength, $length = 40){
+      $titleDisplay = substr($titleDisplay, 0, ($titleLength < $length) ? $titleLength : strrpos(substr($titleDisplay, 0, $length), " "));
+
+      if ($titleLength > $length) {
+          //Fix ... appearing
+          if (empty($titleDisplay)) {
+              $titleDisplay .= substr($title, 0, $length-10);
+          }
+          $titleDisplay .= "...";
+      }
+      return $titleDisplay;
+    }
+
+    public function sizeContent($sizeOfContent, $first_post_content, $length = 80){
+        $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < $length) ? $sizeOfContent : strrpos(substr($first_post_content, 0, $length), " "));
+        if ($sizeOfContent > $length) {
+            $contentDisplay .= "...";
+        }
+        return $contentDisplay;
+    }
+
     public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $is_full_page = false) {
         $used_active = false; //used for the first one if there is not thread_id set
         $current_user = $this->core->getUser()->getId();
@@ -742,21 +763,16 @@ class ForumThreadView extends AbstractView {
             }
 
             $sizeOfContent = strlen($first_post_content);
-            $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < 80) ? $sizeOfContent : strrpos(substr($first_post_content, 0, 80), " "));
             $titleLength = strlen($thread['title']);
 
-            $titleDisplay = substr($titleDisplay, 0, ($titleLength < 40) ? $titleLength : strrpos(substr($titleDisplay, 0, 40), " "));
+            if ($is_full_page) {
+                $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength, 140);
+                $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content, 500);
+            } else {
+                $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength);
+                $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content);
+            }
 
-            if (strlen($first_post["content"]) > 80) {
-                $contentDisplay .= "...";
-            }
-            if (strlen($thread["title"]) > 40) {
-                //Fix ... appearing
-                if (empty($titleDisplay)) {
-                    $titleDisplay .= substr($thread['title'], 0, 30);
-                }
-                $titleDisplay .= "...";
-            }
             $titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;
 
             $link = $this->core->buildCourseUrl(['forum', 'threads', $thread['id']]);
@@ -830,9 +846,9 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
-                    "title" =>  "(" . $thread['id'] . ") " . $thread['title'],
-                    "deleted" => $first_post['deleted'],
-                    "content" => $first_post_content
+                    //"title" =>  "(" . $thread['id'] . ") " . $thread['title'],
+                    "deleted" => $first_post['deleted']//,
+                    //"content" => $first_post_content
                 ]);
             }
 //            var_dump($first_post);
@@ -1153,7 +1169,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;top:3px;float:right;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]
@@ -1208,7 +1224,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;float:right;top:3px;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]
@@ -1255,7 +1271,7 @@ class ForumThreadView extends AbstractView {
                 "required_rank" => 4,
                 "display_text" => 'Back to Threads',
                 "style" => 'position:relative;float:right;top:3px;',
-                "link" => [true, $this->core->buildCourseUrl(['forum', 'threads'])],
+                "link" => [true, $this->core->buildCourseUrl(['forum'])],
                 "optional_class" => '',
                 "title" => 'Back to threads',
                 "onclick" => [false]

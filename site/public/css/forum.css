@@ -608,6 +608,7 @@
 .thread_box .flex-row,
 .thread-box-full .flex-row {
     align-items: stretch;
+    justify-content: flex-end;
 }
 
 .content .thread_box_link {

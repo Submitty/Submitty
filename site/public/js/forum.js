@@ -1538,14 +1538,14 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 switch(json['data']['type']){
                     case "thread":
                       window.socketClient.send({'type': "delete_thread", 'thread_id': thread_id});
-                      new_url = buildCourseUrl(['forum', 'threads']);
+                      new_url = buildCourseUrl(['forum']);
                       break;
                     case "post":
                       window.socketClient.send({'type': "delete_post", 'thread_id': thread_id, 'post_id': post_id});
                       new_url = buildCourseUrl(['forum', 'threads', thread_id]);
                       break;
                     default:
-                        new_url = buildCourseUrl(['forum', 'threads']);
+                        new_url = buildCourseUrl(['forum']);
                         break;
                 }
                 window.location.replace(new_url);
