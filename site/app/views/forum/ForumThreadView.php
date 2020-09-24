@@ -674,20 +674,20 @@ class ForumThreadView extends AbstractView {
         ]);
     }
 
-    public function sizeTitle($titleDisplay, $title, $titleLength, $length = 40){
-      $titleDisplay = substr($titleDisplay, 0, ($titleLength < $length) ? $titleLength : strrpos(substr($titleDisplay, 0, $length), " "));
+    public function sizeTitle($titleDisplay, $title, $titleLength, $length = 40) {
+        $titleDisplay = substr($titleDisplay, 0, ($titleLength < $length) ? $titleLength : strrpos(substr($titleDisplay, 0, $length), " "));
 
-      if ($titleLength > $length) {
-          //Fix ... appearing
-          if (empty($titleDisplay)) {
-              $titleDisplay .= substr($title, 0, $length-10);
-          }
-          $titleDisplay .= "...";
-      }
-      return $titleDisplay;
+        if ($titleLength > $length) {
+            //Fix ... appearing
+            if (empty($titleDisplay)) {
+                $titleDisplay .= substr($title, 0, $length - 10);
+            }
+            $titleDisplay .= "...";
+        }
+        return $titleDisplay;
     }
 
-    public function sizeContent($sizeOfContent, $first_post_content, $length = 80){
+    public function sizeContent($sizeOfContent, $first_post_content, $length = 80) {
         $contentDisplay = substr($first_post_content, 0, ($sizeOfContent < $length) ? $sizeOfContent : strrpos(substr($first_post_content, 0, $length), " "));
         if ($sizeOfContent > $length) {
             $contentDisplay .= "...";
@@ -768,7 +768,8 @@ class ForumThreadView extends AbstractView {
             if ($is_full_page) {
                 $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength, 140);
                 $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content, 500);
-            } else {
+            }
+            else {
                 $titleDisplay = $this->sizeTitle($titleDisplay, $thread['title'], $titleLength);
                 $contentDisplay = $this->sizeContent($sizeOfContent, $first_post_content);
             }
