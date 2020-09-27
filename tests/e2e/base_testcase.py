@@ -6,6 +6,7 @@ import unittest
 import json
 
 from urllib.parse import urlencode
+from urllib.parse import urlparse
 
 from selenium import webdriver
 from websocket import create_connection
@@ -224,7 +225,15 @@ class BaseTestCase(unittest.TestCase):
 
     def enable_websockets(self):
         submitty_session_cookie = self.driver.get_cookie('submitty_session')
-        self.ws = create_connection(self.test_url.replace('http', 'ws') + '/ws', cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'], header={"User-Agent": "python-socket-client"})
+        address = self.test_url.replace('http', 'ws') + '/ws'
+        parsed = urlparse(address)
+        netloc = parsed.netloc
+        if ':' in netloc:
+            netloc = netloc.split(':', 1)[0]
+        netloc += ':8443'
+        address = parsed._replace(netloc=netloc).geturl()
+
+        self.ws = create_connection(address, cookie = submitty_session_cookie['name'] +'='+ submitty_session_cookie['value'], header={"User-Agent": "python-socket-client"})
         new_connection_msg = json.dumps({'type': 'new_connection', 'page': self.semester + '-sample-' + self.socket_page})
         self.ws.send(new_connection_msg)
 
