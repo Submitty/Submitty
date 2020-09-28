@@ -1,4 +1,13 @@
 {
+
+    "load_gradeable_message" : {
+        "message" : "# This gradeable is TIMED  \n\
+After clicking continue, the quiz will start and you will have 10 minutes to complete the quiz.\n\
+        * Leaving the page does not stop the timer.\n\
+        * If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.",
+        "first_time_only" : false //true
+    },
+
     "assignment_message" : "#Welcome to a Timed Notebook Gradeable  \n\
   \n\
 Here's a short list of instructions:  \n\
@@ -14,12 +23,13 @@ Here's a short list of instructions:  \n\
         "submission_to_validation" : [ "*.txt", "*.png", ".user_assignment_access.json" ],
         "work_to_details" : [ "*.txt", "*.png", "test*/*.txt", "test*/*_diff.json" ]
     },
-    "load_gradeable_message" : {
-        "message" : "After clicking continue, the quiz will start and you will have 10 minutes to complete the quiz.\n\
-        * Leaving the page does not stop the timer.\n\
-        * If you submit your answers more than 10 minutes after your first page access, you will lose 1 point per minute over the limit.",
-        "first_time_only" : true
+
+    "grading_parameters" : {
+        "AUTO_POINTS" : 30,        // normal max positive points
+        "EXTRA_CEDIT_POINTS" : 0,  // additional extra credit
+        "PENALTY_POINTS" : -10     // lower clamp
     },
+
     "notebook" : [
         {
             "type": "markdown",
