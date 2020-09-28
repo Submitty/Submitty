@@ -45,8 +45,8 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     submission_time = results['submission_time']
 
     if 'automatic_grading_total' in results.keys():
-        automatic_grading_total = results["automatic_grading_total"]
-        # nonhidden_automatic_grading_total = results["nonhidden_automatic_grading_total"]
+        # automatic_grading_total = results["automatic_grading_total"]
+        nonhidden_automatic_grading_total = results["nonhidden_automatic_grading_total"]
 
         # hidden_diff    = automatic_grading_total - hidden_ec - hidden_non_ec
         nonhidden_diff = nonhidden_automatic_grading_total - non_hidden_ec - non_hidden_non_ec
@@ -216,7 +216,8 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             if 'automatic_grading_total' in result_json:
                 result_details['automatic_grading_total'] = result_json['automatic_grading_total']
             if 'nonhidden_automatic_grading_total' in result_json:
-                result_details['nonhidden_automatic_grading_total'] = result_json['nonhidden_automatic_grading_total']
+                result_details['nonhidden_automatic_grading_total'] =
+                    result_json['nonhidden_automatic_grading_total']
 
     if os.path.isfile(os.path.join(result_dir, "history.json")):
         with open(os.path.join(result_dir, "history.json")) as result_file:
