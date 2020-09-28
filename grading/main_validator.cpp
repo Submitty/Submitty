@@ -304,6 +304,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
                        int &automated_points_possible,
                        int &nonhidden_automated_points_awarded,
                        int &nonhidden_automated_points_possible,
+                       int &max_penalty_possible,
                        nlohmann::json &all_testcases,
                        std::ofstream& gradefile,
                        const std::string& username) {
@@ -382,6 +383,9 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
         nonhidden_automated_points_possible += possible_points;
       }
     }
+    if (possible_points < 0) {
+      max_penalty_possible += possible_points;
+    }
 
     // EXPORT TO results.json and grade.txt
     WriteToResultsJSON(
@@ -420,7 +424,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int automated_points_possible = 0;
   int nonhidden_automated_points_awarded = 0;
   int nonhidden_automated_points_possible = 0;
-
+  int max_penalty_possible = 0;
+  
   std::stringstream testcase_json;
   nlohmann::json all_testcases;
 
@@ -441,6 +446,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
                       automated_points_possible,
                       nonhidden_automated_points_awarded,
                       nonhidden_automated_points_possible,
+                      max_penalty_possible,
                       all_testcases,
                       gradefile,
                       rcsid);
@@ -450,7 +456,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",automated_points_possible);
   assert (AUTO_POINTS == automated_points_possible);
   int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",0);
-  int PENALTY_POINTS = grading_parameters.value("PENALTY_POINTS",0);
+  int PENALTY_POINTS = grading_parameters.value("PENALTY_POINTS",max_penalty_possible);
 
   // clamp total to zero (no negative total!)
   automated_points_awarded = std::max(PENALTY_POINTS,automated_points_awarded);

@@ -46,13 +46,13 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 
     if 'automatic_grading_total' in results.keys():
         automatic_grading_total = results["automatic_grading_total"]
-        nonhidden_automatic_grading_total = results["nonhidden_automatic_grading_total"]
+        # nonhidden_automatic_grading_total = results["nonhidden_automatic_grading_total"]
 
-        #hidden_diff    = automatic_grading_total - hidden_ec - hidden_non_ec
+        # hidden_diff    = automatic_grading_total - hidden_ec - hidden_non_ec
         nonhidden_diff = nonhidden_automatic_grading_total - non_hidden_ec - non_hidden_non_ec
 
         non_hidden_non_ec += nonhidden_diff
-        #hidden_non_ec += hidden_diff
+        # hidden_non_ec += hidden_diff
 
     db_name = f"submitty_{semester}_{course}"
 
