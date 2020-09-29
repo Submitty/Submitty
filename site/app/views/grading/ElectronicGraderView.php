@@ -457,7 +457,16 @@ HTML;
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
+            // NOTE/REDESIGN FIXME: We might have autograding that is
+            // penalty only.  The available positive autograding
+            // points might be zero.  Testing for autograding > 1 is
+            // ignoring the submission limit test case... but this is
+            // also imperfect.  We want to render the column if any
+            // student has received the penalty.  But if no one has
+            // received the penalty maybe we omit it?  (expensive?/confusing?)
+            // See also note in ElectronicGradeController.php
+            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+                //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Manual Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
@@ -491,7 +500,9 @@ HTML;
                 $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first", "sort_type" => "first"];
                 $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
+            // NOTE/REDESIGN FIXME: Same note as above.
+            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+                //if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
                 if ($gradeable->isTaGrading()) {
                     $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
