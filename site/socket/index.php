@@ -8,7 +8,7 @@ use Ratchet\WebSocket\WsServer;
 use app\libraries\Core;
 use app\libraries\socket\Server;
 
-require_once(__DIR__.'/../vendor/autoload.php');
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 $core = new Core();
 

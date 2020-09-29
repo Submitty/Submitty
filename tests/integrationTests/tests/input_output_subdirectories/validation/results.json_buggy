@@ -1,5 +1,7 @@
 {
-    "testcases": [
+     "automatic_grading_total": 7,
+     "nonhidden_automatic_grading_total": 7,
+     "testcases": [
         {
             "points_awarded": 3,
             "test_name": "Test 1 Compilation"
