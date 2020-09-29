@@ -219,9 +219,7 @@
             {% elseif column.function == "section" %}
                 {{ self.render_column_section(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, context, section, graded_gradeable, index, info.team_edit_onclick, column) }}
-            {% elseif column.function == "team_lock" %}
-                {{ self.render_column_team_lock(self, context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
+                {{ self.render_column_team_edit(self, context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 {{ self.render_column_team_id(self, context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "team_members" %}
@@ -271,9 +269,7 @@
             {% elseif column.function == "section" %}
                 {{ self.render_column_section(self, context, section, null, index, null, column) }}
             {% elseif column.function == "team_edit" %}
-                {{ self.render_column_team_edit(self, context, section, null, index, new_team_onclick, column) }}
-            {% elseif column.function == "team_lock" %}
-                {{ self.render_column_team_lock(self, context, section, graded_gradeable, index, info.team_edit_onclick, column, info.edited_past_lock_date) }}
+                {{ self.render_column_team_edit(self, context, section, null, index, new_team_onclick, column, info.edited_past_lock_date) }}
             {% elseif column.function == "team_id" %}
                 <td></td>
             {% elseif column.function == "team_members" %}
@@ -512,16 +508,12 @@
 {% endmacro %}
 
 {# Edit Team #}
-{% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column) %}
+{% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column, edited_past_lock_date) %}
     <td>
+        {% if edited_past_lock_date %}
+            <div aria-label="Edited Past Lock Date"><i class="fas fa-lock" style="color:red;"></i></div>
+        {% endif %}
         <a onclick="{{ team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
-    </td>
-{% endmacro %}
-
-{# Edited Past Lock Date #}
-{% macro render_column_team_lock(self, context, section, graded_gradeable, index, team_edit_onclick, column, edited_past_lock_date) %}
-    <td>
-        <a aria-label="Edited Past Lock Date"><i class="fas fa-lock" style="{{ edited_past_lock_date ? 'color:red;' : '' }}"></i></a>
     </td>
 {% endmacro %}
 
