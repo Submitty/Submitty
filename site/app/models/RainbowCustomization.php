@@ -124,90 +124,55 @@ class RainbowCustomization extends AbstractModel {
         }
 
         // Reorder buckets
+        $this->reorderBuckets();
+
+        //XXX: Assuming that the contents of these buckets will be lowercase
+        $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
+    }
+
+    /**
+     * Reorder each gradeable bucket in $this->customization_data to match JSON (or grade release date as a fallback) ordering
+     */
+    private function reorderBuckets(): void {
         $json_buckets_gradeables = [];
+
+        // First, fetch JSON and associate ids with buckets
         if (!is_null($this->RCJSON)) {
             $json_buckets = $this->RCJSON->getGradeables();
             foreach ($json_buckets as $json_bucket) {
                 if (property_exists($json_bucket, 'type') && property_exists($json_bucket, 'ids')) {
                     $json_buckets_gradeables[$json_bucket->type] = $json_bucket->ids;
-                    // echo 'adding type ' . htmlspecialchars($json_bucket->type) . ' to buckets';
                 }
             }
         }
 
+        // Reorder individual buckets
         $temp_customization_data = [];
         foreach ($this->customization_data as $bucket => $gradeables) {
             $json_bucket_ids = array_key_exists($bucket, $json_buckets_gradeables) ? $json_buckets_gradeables[$bucket] : [];
-            $temp_customization_data[$bucket] = $this->reorderBucket($this->customization_data[$bucket], $json_bucket_ids);
+            $temp_customization_data[$bucket] = $this->reorderBucket($gradeables, $json_bucket_ids);
         }
         $this->customization_data = $temp_customization_data;
-
-        //XXX: Assuming that the contents of these buckets will be lowercase
-        $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
-
-        // DEBUGGING
-        // if (array_key_exists("homework", $this->customization_data)) {
-        //     $json_used_buckets = [];
-        //     if(!is_null($this->RCJSON)) {
-        //         $json_buckets = $this->RCJSON->getGradeables();
-        //         foreach ($json_buckets as $json_bucket) {
-        //             if(property_exists($json_bucket, 'type') && property_exists($json_bucket, 'ids')) {
-        //                 $json_used_buckets[$json_bucket->type] = $json_bucket->ids;
-        //                 echo 'adding type ' . htmlspecialchars($json_bucket->type) . ' to buckets';
-        //             }
-        //         }
-        //     }
-        //     $json_bucket_ids = array_key_exists("homework", $json_used_buckets) ? $json_used_buckets['homework'] : [];
-        //     $output = $this->reorderBucket($this->customization_data["homework"], $json_bucket_ids);
-        // }
     }
 
+    /**
+     * Returns $bucket_gradeables reordered to match order in $json_bucket_ids.
+     * If a gradeable is not present in $json_bucket_ids, it will be added to the end of the array in order of grade release date.
+     * 
+     * @param array $bucket_gradeables A gradeable bucket from $this->customization_data
+     * @param array $json_bucket_ids An "ids" array from a $this->RCSJSON bucket
+     * @return array
+     */
     private function reorderBucket(array $bucket_gradeables, array $json_bucket_ids): array {
-        // echo '<div id="debug_output" style="width: 800px; display: block;">';
-
-        // $gradeables_queue = $gradeables;
         $new_gradeables = [];
-        // echo '<div style="white-space: pre-wrap;">';
-        // print_r($bucket_gradeables);
-        // echo "</div>";
 
-        // echo "<br />";
-        // echo "<p>JSON:</p>";
-        // echo "<br />";
-
-        // echo '<div style="white-space: pre-wrap;">';
-        if (!is_null($this->RCJSON)) {
-            // print_r($this->RCJSON->getGradeables());
-        }
-        // echo "</div>";
-
-        
-        // echo "<br />";
-        // echo "<p>gradeables_by_id:</p>";
-        // echo "<br />";
-
+        // First, associate gradeables with their IDs
         $gradeables_by_id = array_reduce($bucket_gradeables, function($accumulator, $gradeable) {
             $accumulator[$gradeable['id']] = $gradeable;
-            // echo '<div style="white-space: pre-wrap;">';
-            // print_r($gradeable);
-            // echo "</div>";
-
             return $accumulator;
         }, []);
 
-        // echo '<div style="white-space: pre-wrap;">';
-        // print_r($gradeables_by_id);
-        // echo "</div>";
-
-        // if (!is_null($this->RCJSON) && property_exists($this->RCJSON->getGradeables(), $bucket_name) && property_exists($this->RCJSON->getGradeables()[$bucket_name], 'ids')) {
-        //     $ids = $this->RCJSON->getGradeables()[$bucket_name]->ids;
-        //     foreach ($ids as $json_gradeable) {
-
-        //     }
-        // }
-
-
-        
+        // Then, add gradeables to $new_gradeables based on JSON ordering
         if (!is_null($json_bucket_ids)) {
             foreach ($json_bucket_ids as $json_gradeable) {
                 if (property_exists($json_gradeable, 'id')) {
@@ -220,45 +185,15 @@ class RainbowCustomization extends AbstractModel {
             }
         }
         
-
-        // echo "<br />";
-        // echo "<p>new gradeables_by_id:</p>";
-        // echo "<br />";
-
-        // echo '<div style="white-space: pre-wrap;">';
-        // print_r($gradeables_by_id);
-        // echo "</div>";
-
-        // echo '<div style="white-space: pre-wrap;">';
-        // print_r($new_gradeables);
-        // echo "</div>";
-
-        // echo "<br />";
-        // echo "<p>gradeables_by_date:</p>";
-        // echo "<br />";
-
-        // $num_gradeables_counted = 0;
-        // $num_unordered_gradeables = 
-        // $gradeables_by_date = array_reduce($gradeables_by_id, function($accumulator, $gradeable) {
-        //     $num_gradeables_counted = count($accumulator);
-        //     if (array_key_exists('grade_release_date', $gradeable)) {
-        //         $accumulator[$gradeable['grade_release_date'] . $num_gradeables_counted] = $gradeable;
-        //     } else {
-        //         $accumulator['END_OF_TIME' . $num_gradeables_counted] = $gradeable;
-        //     }
-        //     $num_gradeables_counted++;
-            // echo '<div style="white-space: pre-wrap;">';
-            // print_r($gradeable);
-            // echo "</div>";
-
-        //     return $accumulator;
-        // }, []);
-        
+        // Finally, add any remaining gradeables to $new_gradeables based on date ordering.
         $num_unordered_gradeables = count($gradeables_by_id);
         $gradeables_by_date = [];
         foreach ($gradeables_by_id as $gradeable) {
             $num_gradeables_counted = count($gradeables_by_date);
+            
+            // Ensure strings are sorted properly
             $gradeable_count_string = str_repeat('0', strlen(strval($num_unordered_gradeables)) - strlen(strval($num_gradeables_counted))) . $num_gradeables_counted;
+            
             if (array_key_exists('grade_release_date', $gradeable)) {
                 $gradeables_by_date[$gradeable['grade_release_date'] . '_' . $gradeable_count_string] = $gradeable;
             } else {
@@ -266,36 +201,9 @@ class RainbowCustomization extends AbstractModel {
             }
         }
         ksort($gradeables_by_date);
-
-        // echo '<div style="white-space: pre-wrap;">';
-        // print_r($gradeables_by_date);
-        // echo "</div>";
-
         foreach ($gradeables_by_date as $gradeable) {
             $new_gradeables[] = $gradeable;
         }
-
-        // echo '<div style="white-space: pre-wrap;">';
-        // print_r($new_gradeables);
-        // echo "</div>";
-
-
-
-
-        // if (!is_null($this->RCJSON) && property_exists($this->RCJSON->getGradeables(), $bucket_name) && property_exists($this->RCJSON->getGradeables()[$bucket_name], 'ids')) {
-        //     $ids = $this->RCJSON->getGradeables()[$bucket_name]->ids;
-        //     $id_map = [];
-        //     foreach ($ids as $json_gradeable) {
-        //         $id = $json_gradeable->id;
-        //         $id_map[$id] = count($id_map);
-        //     }
-
-        // } else {
-
-        // }
-
-        // echo "</div>";
-
 
         return $new_gradeables;
     }
