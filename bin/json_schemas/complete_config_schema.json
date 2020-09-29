@@ -45,6 +45,16 @@
       "assignment_message" : {
         "type" : "string"
       },
+      "load_gradeable_message" : {
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "first_time_only" : {
+            "type" : "boolean"
+          }
+        }
+      },
       "required_capabilities" : {
         "type" : "string"
       },

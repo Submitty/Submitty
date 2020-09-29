@@ -1,12 +1,15 @@
 #gradeable-info {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
 }
 
 #gradeable-info > * {
     margin: 0;
+}
+
+#gradeable-info-due-dates {
+    text-align: right;
 }
 
 #submission-form > * {
