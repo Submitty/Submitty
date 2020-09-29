@@ -508,9 +508,32 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
+     */
+    public function showQueueStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            $this->core->addErrorMessage("Office hours queue disabled");
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
+        }
+
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStats',
+            $viewer->getQueueDataOverall(),
+            $viewer->getQueueDataToday(),
+            $viewer->getQueueDataByWeekDayThisWeek(),
+            $viewer->getQueueDataByWeekDay(),
+            $viewer->getQueueDataByQueue(),
+            $viewer->getQueueDataByWeekNumber()
+        );
+    }
+
+
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods={"GET"})
-     * @return MultiResponse
      */
     public function showNewAnnouncement() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
@@ -527,6 +550,23 @@ class OfficeHoursQueueController extends AbstractController {
                 'renderNewAnnouncement',
                 new OfficeHoursQueueModel($this->core)
             )
+        );
+    }
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function showQueueStudentStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
+        }
+
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStudentStats',
+            $viewer->getQueueDataStudent()
         );
     }
 
