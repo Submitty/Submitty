@@ -576,17 +576,15 @@ HTML;
             if ($gradeable->isTeamAssignment()) {
                 $reg_section = ($row->getSubmitter()->getRegistrationSection() === null) ? "NULL" : $row->getSubmitter()->getRegistrationSection();
                 $rot_section = ($row->getSubmitter()->getRotatingSection() === null) ? "NULL" : $row->getSubmitter()->getRotatingSection();
-                $user_assignment_setting = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
+                $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
                 $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
                 $pending_members = json_encode($row->getSubmitter()->getTeam()->getInvitations());
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
+                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()},'{$lock_date}');";
                 $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
-                // var_dump($team_history);
-                // var_dump($last_edit_date);
                 $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
-                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()},'{$lock_date}');";
-                $info["edited_past_lock_date"] = ($edited_past_lock_date) ? true : false;
+                $info["edited_past_lock_date"] = $edited_past_lock_date;
             }
 
             //List of graded components

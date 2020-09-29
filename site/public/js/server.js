@@ -684,9 +684,6 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     past_lock_date = true;
                     style_string += "background-color:var(--alert-invalid-entry-pink);";
                 }
-                console.log("lock_date: " + lock_date);
-                // console.log("curr_json_entry.time: " + curr_json_entry.time);
-                // console.log("past_lock_date: " + past_lock_date);
                 if(curr_json_entry.action == "admin_create" && curr_json_entry.first_user != undefined) {
                     team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' created team on: " /><br />');
                     team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
