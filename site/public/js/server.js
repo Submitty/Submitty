@@ -600,7 +600,7 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members, lock_date) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -674,28 +674,45 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             team_history_title_div.append('Team History: ');
             team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_left" readonly="readonly" value="Team formed on: " /><br />');
             team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
-            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
-            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
+            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;margin-bottom:3mm;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
+            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;margin-bottom:3mm;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
+            let past_lock_date = false;
+            let style_string = "width:100%;";
             for (var j = 0; j <=team_history_len-1; j++) {
-                if(user_assignment_setting_json.team_history[j].action == "admin_create"){
-                    for (var i = 0; i < members.length; i++) {
-                        if(user_assignment_setting_json.team_history[j].first_user == members[i] || user_assignment_setting_json.team_history[j].added_user == members[i]){
-                            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
-                        }
-                    }
+                let curr_json_entry = user_assignment_setting_json.team_history[j];
+                if (!past_lock_date && curr_json_entry.time > lock_date) {
+                    past_lock_date = true;
+                    style_string += "background-color:var(--alert-invalid-entry-pink);";
                 }
-                if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
-                    for (var i = 0; i < members.length; i++) {
-                        if(user_assignment_setting_json.team_history[j].added_user == members[i]){
-                            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
-                        }
-                    }
+                console.log("lock_date: " + lock_date);
+                // console.log("curr_json_entry.time: " + curr_json_entry.time);
+                // console.log("past_lock_date: " + past_lock_date);
+                if(curr_json_entry.action == "admin_create" && curr_json_entry.first_user != undefined) {
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' created team on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' added '+ curr_json_entry.first_user +' on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                } else if(curr_json_entry.action == "admin_create" || curr_json_entry.action == "admin_add_user"){
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.admin_user + ' added '+ curr_json_entry.added_user +' on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                } else if (user_assignment_setting_json.team_history[j].action == "create") {
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_left" readonly="readonly" value="'+ curr_json_entry.user + ' created team on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'" name="user_id_' +i+ '_right" readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                } else if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.admin_user + ' removed '+ curr_json_entry.removed_user +' on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
-                if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
-                    team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
-                    team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                else if (user_assignment_setting_json.team_history[j].action == "leave") {
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.user + ' left on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                }
+                else if (user_assignment_setting_json.team_history[j].action == "send_invitation") {
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'" readonly="readonly" value="'+ curr_json_entry.sent_by_user + ' invited '+ curr_json_entry.sent_to_user +' on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                }
+                else if (user_assignment_setting_json.team_history[j].action == "accept_invitation") {
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.user + ' accepted invite on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
             }
         }
