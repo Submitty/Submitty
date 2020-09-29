@@ -1259,7 +1259,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
-    public function ajaxGetBuildLogs($gradeable_id) {
+    public function getBuildLogs(string $gradeable_id): JsonResponse {
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
@@ -1267,13 +1267,13 @@ class AdminGradeableController extends AbstractController {
         $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
         $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
 
-        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
+        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output,$make_output]);
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
-    public function getBuildStatusOfGradeable($gradeable_id) {
+    public function getBuildStatusOfGradeable(string $gradeable_id): void {
         $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
@@ -1288,6 +1288,18 @@ class AdminGradeableController extends AbstractController {
         else {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
             $status = $gradeable->hasAutogradingConfig();
+
+            // Check for schema validation errors and return a different status if needed.
+            if ($status) {
+                $logs = $this->getBuildLogs($gradeable_id);
+
+                $needle = 'The submitty configuration validator detected the above error in your config.';
+                $haystack = $logs->json['data'][0];
+
+                if (strpos($haystack, $needle) !== false) {
+                    $status = 'warnings';
+                }
+            }
         }
         clearstatcache();
         $this->core->getOutput()->renderJsonSuccess($status);
