@@ -294,6 +294,9 @@ function ajaxCheckBuildStatus() {
                 $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
+            else if (response['data'] == 'warnings') {
+                $('#rebuild-status').html('Gradeable built with warnings');
+            }
             else if (response['data'] == true) {
                 $('#rebuild-status').html('Gradeable build complete');
             }

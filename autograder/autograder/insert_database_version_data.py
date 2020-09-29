@@ -30,6 +30,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 
     testcases = get_testcases(config, semester, course, gradeable_id)
     results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
+
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
     for i in range(len(testcases)):
@@ -42,6 +43,16 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         else:
             non_hidden_non_ec += results['testcases'][i]['points']
     submission_time = results['submission_time']
+
+    if 'automatic_grading_total' in results.keys():
+        # automatic_grading_total = results["automatic_grading_total"]
+        nonhidden_automatic_grading_total = results["nonhidden_automatic_grading_total"]
+
+        # hidden_diff    = automatic_grading_total - hidden_ec - hidden_non_ec
+        nonhidden_diff = nonhidden_automatic_grading_total - non_hidden_ec - non_hidden_non_ec
+
+        non_hidden_non_ec += nonhidden_diff
+        # hidden_non_ec += hidden_diff
 
     db_name = f"submitty_{semester}_{course}"
 
@@ -192,6 +203,7 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
     :param version:
     :return:
     """
+
     result_details = {'testcases': [], 'submission_time': None}
     result_dir = os.path.join(data_dir, "courses", semester, course, "results", g_id, who_id,
                               str(version))
@@ -201,6 +213,11 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             if 'testcases' in result_json and result_json['testcases'] is not None:
                 for testcase in result_json['testcases']:
                     result_details['testcases'].append({'points': testcase['points_awarded']})
+            if 'automatic_grading_total' in result_json:
+                result_details['automatic_grading_total'] = result_json['automatic_grading_total']
+            if 'nonhidden_automatic_grading_total' in result_json:
+                result_details['nonhidden_automatic_grading_total'] = \
+                   result_json['nonhidden_automatic_grading_total']
 
     if os.path.isfile(os.path.join(result_dir, "history.json")):
         with open(os.path.join(result_dir, "history.json")) as result_file:
