@@ -186,6 +186,7 @@ jobs:
             - libapache2-mod-authnz-external
             - libapache2-mod-authz-unixgroup
             - libapache2-mod-wsgi-py3
+            - nginx
             - build-essential
             - automake
             - cmake
@@ -279,6 +280,12 @@ jobs:
         - cat /etc/apache2/sites-available/submitty.conf
         - sudo apache2ctl -t
         - sudo service apache2 restart
+        - sudo rm -rf /etc/nginx/sites-available/*
+        - sudo rm -rf /etc/nginx/sites-enabled/*
+        - sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+        - sudo chmod 644 /etc/nginx/sites-available/submitty.conf
+        - sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+        - sudo service nginx restart
       script:
         - echo "Authentication Method => $(sudo jq -r ".authentication_method" /usr/local/submitty/config/database.json)"
         - TEST_URL="http://localhost" python3 -m unittest discover -v --start-directory tests
