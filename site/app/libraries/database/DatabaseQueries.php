@@ -2965,7 +2965,6 @@ ORDER BY {$section_key}",
 
         return $return;
     }
-
     public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key) {
         $return = [];
         $params = [$g_id];
