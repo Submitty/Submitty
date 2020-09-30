@@ -711,6 +711,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.user + ' accepted invite on: " /><br />');
                     team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
+                else if (user_assignment_setting_json.team_history[j].action == "cancel_invitation") {
+                    team_history_div_left.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="'+ curr_json_entry.canceled_by_user + ' uninvited '+ curr_json_entry.canceled_user +' on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
+                }
             }
         }
     }
