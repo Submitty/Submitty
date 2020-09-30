@@ -536,13 +536,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
         }
-        
-        if ($gradeable->isTeamAssignment()) {
-            $num_cancelled = $this->core->getQueries()->getCancelledTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
-        }
-        else {
-            $num_cancelled = $this->core->getQueries()->getCancelledSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
-        }
+
         if (count($sections) > 0) {
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
@@ -668,7 +662,7 @@ class ElectronicGraderController extends AbstractController {
                     }
                     if (isset($graded_components[$key])) {
                         // Clamp to total components if unsubmitted assigment is graded for whatever reason
-                        $sections[$key]['graded_components'] = $graded_components[$key] - $num_cancelled[$key];
+                        $sections[$key]['graded_components'] = $graded_components[$key];
                         $sections[$key]['ta_graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
                     }
                     if (isset($graders[$key])) {
