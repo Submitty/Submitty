@@ -234,6 +234,29 @@ div.btn-container {
     float: right;
 }
 
+#zip_link_limited {
+    text-decoration:none;
+    color:white;
+    padding:10px;
+    padding-left:0px;
+}
+
+#zip_link_full {
+    text-decoration:none;
+    color:black;
+    padding:10px;
+    padding-left:0px;
+}
+
+#details_button {
+    padding-right:0px;
+}
+
+form.dropdown {
+    text-align:left;
+    padding-top:8px;
+}
+
 .notebook-builder-info {
     margin-top: 30px;
     margin-bottom: 30px;
@@ -242,4 +265,13 @@ div.btn-container {
 .notebook-builder-info div {
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+.select-label-itempool {
+    padding-left: 0;
+}
+
+select[name="component-itempool"] {
+    margin-bottom: 15px;
+    padding-right: 0;
 }

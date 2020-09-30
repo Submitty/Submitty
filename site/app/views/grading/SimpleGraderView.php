@@ -75,6 +75,7 @@ class SimpleGraderView extends AbstractView {
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->addInternalJs('simple-grading.js');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
@@ -93,7 +94,8 @@ class SimpleGraderView extends AbstractView {
             "component_ids" => $component_ids,
             "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
             "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']),
-            "gradeable_url" => $gradeable->getInstructionsUrl()
+            "gradeable_url" => $gradeable->getInstructionsUrl(),
+            "user_id" => $this->core->getUser()->getId()
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [

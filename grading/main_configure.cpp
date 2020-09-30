@@ -178,6 +178,7 @@ nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann:
       }
       else if(type == "item"){
         std::string item_label = in_notebook_cell.value("item_label", "");
+        nlohmann::json user_item_map = in_notebook_cell.value("user_item_map", nlohmann::json::object());
 
         // Update the complete_config if we had a blank label
         complete[i]["item_label"] = "";
@@ -220,9 +221,22 @@ nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann:
                       << (item_label.empty() ? "[no label]" : item_label) << std::endl;
           }*/
         }
+        // Check if the indices mapped to users are in 'from_pool' array range
+        for (auto i=user_item_map.begin(); i!=user_item_map.end(); i++) {
+           int item_index = i.value();
+           if(item_index < 0 || item_index >= in_notebook_cell_from_pool.size()) {
+               std::cout << "ERROR: user (" << i.key() <<") mapped with index \"" << item_index;
+               std::cout << "\" which is out of 'from_pool' array range: 0 to " << user_item_map.size() << std::endl;
+               throw -1;
+           }
+        }
 
         // Write the empty string if no label provided, otherwise pass forward item_label
         out_notebook_cell["item_label"] = item_label;
+        
+        // Write the empty object if no 'mapping' provided, otherwise pass forward user_item_map
+        out_notebook_cell["user_item_map"] = user_item_map;
+                
         // Pass forward other items
         out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
         if(in_notebook_cell.find("points") != in_notebook_cell.end()){
@@ -352,6 +366,13 @@ int main(int argc, char *argv[]) {
   } else if (config_json.find("gradeable_message") != config_json.end()) {
     j["gradeable_message"] = config_json.value("gradeable_message", "");
   }
+  if (config_json.find("load_gradeable_message") != config_json.end()) {
+    nlohmann::json load_gradeable_message = config_json.value("load_gradeable_message", nlohmann::json::object());
+    nlohmann::json load_gradeable_message_prop;
+    load_gradeable_message_prop["message"] = load_gradeable_message.value("message", "");
+    load_gradeable_message_prop["first_time_only"] = load_gradeable_message.value("first_time_only", false);
+    j["load_gradeable_message"] = load_gradeable_message_prop;
+  }
   if (config_json.find("early_submission_incentive") != config_json.end()) {
     nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());
     nlohmann::json incentive;
@@ -392,6 +413,7 @@ int main(int argc, char *argv[]) {
   if(config_json.find("item_pool") != config_json.end()){
     int i = 0;
     for(nlohmann::json::iterator itr = config_json["item_pool"].begin(); itr != config_json["item_pool"].end(); itr++, i++) {
+      j["item_pool"][i]["item_name"] = (*itr)["item_name"];
       j["item_pool"][i]["notebook"] = validate_notebook((*itr)["notebook"], config_json);
     }
   }

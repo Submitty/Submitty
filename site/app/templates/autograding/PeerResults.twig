@@ -4,6 +4,7 @@
 
 <script>
 {# When the user clicks on a peer tab in peer feedback mode, hide all other peer feedback panels, set all other tabs to unselected, set the clicked peer tab to selected and show the corresponding peer feedback panel #}
+
 function open_peer_feedback_tab(user, ordered_graders) {
     $('.page-content').hide();
     $('#peer-feedback-'+user).show();
@@ -32,7 +33,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback) {
         $('#peer_feedback_'+ feedback +'_'+grader_id).addClass("peer_feedback_negative_selected");
     }
     peerFeedbackUpload(grader_id, user_id, g_id, feedback);
-    
+
 }
 function switch_feedback_modes() {
     if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
@@ -61,9 +62,9 @@ function switch_feedback_modes() {
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
-        
+
         <button class = 'btn btn-default' id = "switch_feedback_button" onclick='switch_feedback_modes()'>Switch to Feedback Mode</button>
-        
+
         {# /Overview #}
 
         {% if (peer_score >= peer_max) %}
@@ -88,16 +89,16 @@ function switch_feedback_modes() {
                         {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
                     {% else %}
                         {{ self.renderManyPeerResults(component) }}
-                    {% endif %}                
+                    {% endif %}
                 {% endfor %}
             </div>
             {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, overall_comments, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback)  }}
             {# /Peer Component boxes #}
         {% endif %}
-        
+
         {# Overview #}
         <div id="comments_wrapper" class="no-border-box" style="padding: 10px; word-break: break-word;">
-            {% for user in ordered_graders if overall_comments[user] is not empty %}
+            {% for user in ordered_graders|filter(user => overall_comments[user] is not empty) %}
                 <div class="overall-comment-box">
                     <p class="overall-comment-author">
                         Overall note from {{peer_aliases[user]}}:
@@ -106,73 +107,9 @@ function switch_feedback_modes() {
                         <span class='gradeable_comment'>{{ overall_comments[user] | nl2br }}</span>
                     </p>
                 </div>
-   
+
             {% endfor %}
         </div>
-        
-        {% if uploaded_pdfs|length >= 1 %}
-            <div class = "no-border-box">
-    
-                <div class="row">
-                    <div class="no-border-box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
-                        {% for file in files %}
-                            {% if loop.index != uploaded_pdfs|length %}
-                                <div style="margin-bottom: 2em">
-                                    {{ file.relative_name }}
-                                </div>
-                            {% else %}
-                                {{ file.relative_name }}
-                            {% endif %}
-
-                        {% endfor %}
-                    </div>
-                    <div class="no-border-box col-sm-5" style="float: center; padding: 20px; width: 40%; word-break: break-word; display: inline-block">
-                        {% for file in files %}
-                            <p style="text-align:center; vertical-align: middle;">
-                                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')" style="margin-right:20px;">View Popup <i class="fas fa-window-restore"></i></a>
-                                    {# download icon if student can download files #}
-                                    {% if can_download %}
-                                        <button class = 'btn btn-default' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download the file"> Download
-                                            <i class="fas fa-download" title="Download the file"></i></button>
-                                    {% endif %}
-                            </p>
-                            {% if loop.index != files|length %}
-                                <br />
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    <div class="no-border-box col-sm-3" style="float: center; padding: 40px; width: 30%; word-break: break-word; display: inline-block">
-                        
-                        {% if can_download %}
-                            <p style="text-align:center; vertical-align: middle;">    
-                                Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")' aria-label="Download zip of all files" > Download Zip
-                                    <i class="fas fa-download" title="Download zip of all files"></i></button>
-                            </p>
-                        {% endif %}
-                        
-                        {% for file in uploaded_pdfs %}
-                            {% if file.name in annotated_file_names %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 1.28em">
-                                        <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                                            <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
-                                    </div>
-                                {% else %}
-                                    <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
-                                {% endif %}
-                            {% else %}
-                                {% if loop.index != uploaded_pdfs|length %}
-                                    <div style="margin-bottom: 3.4em"></div>
-                                {% endif %}
-                            {% endif %}
-
-                        {% endfor %}
-                    </div>
-                </div>
-
-            </div>
-        {% endif %}
     {# /Total auto + manual #}
     </div>
 {% endif %}
@@ -242,7 +179,7 @@ function switch_feedback_modes() {
                 <table class="mobile-table" style="border-color:white;">
                      <thead>
                         <tr>
-                            {% for grader in ordered_graders if grader in component.peer_ids %}
+                            {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
                                 <th class="peer-table-header">
                                     {{ peer_aliases[grader] }}
                                 </th>
@@ -254,7 +191,7 @@ function switch_feedback_modes() {
                     <tbody>
                         {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                             <tr>
-                                {% for grader in ordered_graders if grader in component.peer_ids %}
+                                {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
                                     <td class="peer-table-data">
                                         {% if mark.earned[grader] %}
                                             <div class="col-no-gutters indicator">
@@ -292,7 +229,7 @@ function switch_feedback_modes() {
         </div>
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
-        
+
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
                 <table class="mobile-table" id="peer-feedback-table-{{grader}}">
                     <tbody>
@@ -326,9 +263,9 @@ function switch_feedback_modes() {
                         </p>
                     </div>
                 {% endif %}
-            
+
             {% for file in uploaded_pdfs %}
-                {% if file.name in annotated_file_names and grader in file.graders%}
+                {% if file.encoded_name in annotated_file_names and grader in file.graders%}
                     </br>
                     <p>
                         {{file.name}} :
@@ -357,7 +294,7 @@ function switch_feedback_modes() {
                     set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback)
                 }
             </script>
-        </div> 
+        </div>
         {% endfor %}
     </div>
 {%- endmacro -%}

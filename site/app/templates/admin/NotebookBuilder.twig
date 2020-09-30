@@ -28,13 +28,21 @@
         window.builder_data = {
             g_id: '{{ gradeable.getId() }}',
             config: config,
-            images: JSON.parse('{{ images|raw }}')
+            images: JSON.parse('{{ images|raw }}'),
+            codemirror_langauges: JSON.parse('{{ codemirror_languages|raw }}')
         };
+
+        // Attach notebook_builder object to the window
+        window.addEventListener('DOMContentLoaded', () => {
+            const attachment_div = document.getElementById('notebook-builder');
+            attachment_div.innerHTML = '';
+            window.notebook_builder = new RootBuilder(attachment_div);
+        });
     </script>
 
     <h2>{{ gradeable.getTitle() }} Notebook Builder</h2>
     <div id="notebook-builder">
-        <div id="reorderable-widgets"></div>
+        <p>Loading...</p>
     </div>
     <button onclick="javascript:document.getElementById('holder').innerHTML=JSON.stringify(notebook_builder.getJSON(), null, 2)">Show JSON</button>
     <pre id="holder"></pre>

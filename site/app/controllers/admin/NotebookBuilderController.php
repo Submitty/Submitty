@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\CodeMirrorUtils;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -66,21 +67,13 @@ class NotebookBuilderController extends AbstractController {
 
         $config_string = Utils::escapeDoubleQuotes($config_string);
 
-        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder-utils.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/selector-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/form-options-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/markdown-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/multiple-choice-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/short-answer-widget.js');
-        $this->core->getOutput()->addInternalJs('notebook_builder/image-widget.js');
-        $this->core->getOutput()->addInternalCss('notebook-builder.css');
+        $this->loadDependencies();
 
         $this->core->getOutput()->renderTwigOutput('admin/NotebookBuilder.twig', [
             'gradeable' => $gradeable,
             'config_string' => $config_string,
-            'images' => $images
+            'images' => $images,
+            'codemirror_languages' => json_encode(CodeMirrorUtils::MIME_TYPE_MAP)
         ]);
     }
 
@@ -121,6 +114,32 @@ class NotebookBuilderController extends AbstractController {
         }
 
         return JsonResponse::getErrorResponse('Invalid operation.');
+    }
+
+    /**
+     * Helper function which handles loading all the js / css dependencies notebook builder needs
+     */
+    private function loadDependencies(): void {
+        // Builders
+        $this->core->getOutput()->addInternalJs('notebook_builder/builders/abstract-builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/builders/root-builder.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/builders/itempool-builder.js');
+
+        // Widgets
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/selector-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/form-options-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/markdown-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/multiple-choice-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/short-answer-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/image-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/itempool-widget.js');
+        $this->core->getOutput()->addInternalJs('notebook_builder/widgets/item-widget.js');
+
+        // Others
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
+        $this->core->getOutput()->addInternalJs('notebook_builder/notebook-builder-utils.js');
+        $this->core->getOutput()->addInternalCss('notebook-builder.css');
     }
 
     /**

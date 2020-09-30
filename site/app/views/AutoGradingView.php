@@ -279,6 +279,26 @@ class AutoGradingView extends AbstractView {
         }
         return ''; // ?
     }
+    
+    /**
+     * @param string $file_path
+     * @return string
+     */
+    private function convertToAnonPath($file_path) {
+        $file_path_parts = explode("/", $file_path);
+        $anon_path = "";
+        for ($index = 1; $index < count($file_path_parts); $index++) {
+            if ($index == 9) {
+                $user_id = $file_path_parts[$index];
+                $anon_id = $this->core->getQueries()->getAnonId($user_id)[$user_id];
+                $anon_path = $anon_path . "/" . $anon_id;
+            }
+            else {
+                $anon_path = $anon_path . "/" . $file_path_parts[$index];
+            }
+        }
+        return $anon_path;
+    }
 
     /**
      * @param TaGradedGradeable $ta_graded_gradeable
@@ -363,11 +383,15 @@ class AutoGradingView extends AbstractView {
         $uploaded_pdfs = [];
         foreach ($uploaded_files['submissions'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
         foreach ($uploaded_files['checkout'] as $file) {
             if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
+                $file["encoded_name"] = md5($this->convertToAnonPath($file['path']));
+                $file['anon_path'] = $this->convertToAnonPath($file['path']);
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -396,29 +420,21 @@ class AutoGradingView extends AbstractView {
         $annotated_pdf_paths = [];
         $annotated_file_names = [];
         $annotation_paths = [];
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
-                            $annotated_file_names[] = $pdf_id;
-                            if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-                                $target_file = scandir($annotation_path)[2];
-                                $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
-                            }
-                            if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
-                                $target_file = scandir($pdfs_path)[2];
-                                $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
-                                $annotated_pdf_paths[$pdf_id] = $pdf_path;
-                            }
-                        }
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \FilesystemIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                $pdf_id = explode("_", $file_info->getFilename())[0];
+                if (file_get_contents($file_info->getPathname()) !== "") {
+                    $annotated_file_names[] = $pdf_id;
+                    $pdf_id = $pdf_id . '.pdf';
+                    if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                        $target_file = scandir($annotation_path)[2];
+                        $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                    }
+                    if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                        $target_file = scandir($pdfs_path)[2];
+                        $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                        $annotated_pdf_paths[$pdf_id] = $pdf_path;
                     }
                 }
             }
@@ -447,12 +463,15 @@ class AutoGradingView extends AbstractView {
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'overall_comments' => $overall_comments,
             'ta_components' => $ta_component_data,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
+            'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate(),
+            'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'ta_score' => $ta_grading_earned,
             'ta_max' => $ta_max,
             'active_same_as_graded' => $active_same_as_graded,
+            'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
+            'is_grade_inquiry_ended' => $gradeable->isGradeInquiryEnded(),
             'regrade_available' => $regrade_available,
             'regrade_message' => $this->core->getConfig()->getRegradeMessage(),
             'num_decimals' => $num_decimals,
@@ -573,7 +592,7 @@ class AutoGradingView extends AbstractView {
             // Effectively sorts peers by $num_peers.
             array_push($ordered_graders, $grader_id);
         }
-        
+
         $id = $this->core->getUser()->getId();
 
         $uploaded_pdfs = [];
@@ -625,21 +644,26 @@ class AutoGradingView extends AbstractView {
         }
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
+        $pdfs_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotated_pdfs', $gradeable->getId(), $id, $active_version);
+        $annotated_pdf_paths = [];
         $annotated_file_names = [];
-        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
-            $first_file = scandir($annotation_path)[2];
-            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if (is_file($annotation_path)) {
-                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
-                foreach ($dir_iter as $fileinfo) {
-                    if (!$fileinfo->isDot()) {
-                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
-                        $pdf_info = explode('_', $no_extension);
-                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
-                        if (file_get_contents($fileinfo->getPathname()) != "") {
-                            $pdf_id = $pdf_id . '.pdf';
-                            $annotated_file_names[] = $pdf_id;
-                        }
+        $annotation_paths = [];
+        if (is_dir($annotation_path)) {
+            $dir_iter = new \FilesystemIterator($annotation_path);
+            foreach ($dir_iter as $file_info) {
+                $file_contents = file_get_contents($file_info->getPathname());
+                $annotation_decoded = json_decode($file_contents, true);
+                if ($annotation_decoded != null) {
+                    $pdf_id = $annotation_decoded["file_path"];
+                    $annotated_file_names[] = $pdf_id;
+                    if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
+                        $target_file = scandir($annotation_path)[2];
+                        $annotation_paths[$pdf_id] = FileUtils::joinPaths($annotation_path, $target_file);
+                    }
+                    if (is_dir($pdfs_path) && count(scandir($pdfs_path)) > 2) {
+                        $target_file = scandir($pdfs_path)[2];
+                        $pdf_path = FileUtils::joinPaths($pdfs_path, $target_file);
+                        $annotated_pdf_paths[$pdf_id] = $pdf_path;
                     }
                 }
             }
@@ -658,10 +682,12 @@ class AutoGradingView extends AbstractView {
                 $overall_comments[$user_id] = $comment;
             }
         }
-        
+
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
+
         $gradeable_id = $gradeable->getId();
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
             'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -671,7 +697,6 @@ class AutoGradingView extends AbstractView {
             'peer_components' => $peer_component_data,
             'peer_aliases' => $peer_aliases,
             'ordered_graders' => $ordered_graders,
-            'regrade_date' => $gradeable->getRegradeRequestDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
             'grading_complete' => $grading_complete,
             'peer_score' => $peer_grading_earned,

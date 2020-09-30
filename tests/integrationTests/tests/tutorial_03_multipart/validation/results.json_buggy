@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 1,
+    "nonhidden_automatic_grading_total": 1,
     "testcases": [
         {
             "autochecks": [

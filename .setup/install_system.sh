@@ -429,6 +429,9 @@ if [ ${WORKER} == 0 ]; then
 
     a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
+    # Install nginx to serve websocket connections
+    sudo apt-get install -qqy nginx-full
+
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
     if [ ${VAGRANT} == 1 ]; then
@@ -485,6 +488,17 @@ EOF
     cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
     chmod 0640 /etc/apache2/suexec/www-data
 
+
+    #################################################################
+    # NGINX SETUP
+    #################
+    # remove default site which would cause server to mess up
+    rm /etc/nginx/sites*/default
+    cp ${SUBMITTY_REPOSITORY}/.setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+    chmod 644 /etc/nginx/sites-available/submitty.conf
+    ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+
+
     #################################################################
     # PHP SETUP
     #################
@@ -507,7 +521,7 @@ EOF
     DISABLED_FUNCTIONS+="php_ini_loaded_file,readlink,symlink,link,set_file_buffer,proc_close,proc_terminate,"
     DISABLED_FUNCTIONS+="proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,putenv,get_current_user,"
     DISABLED_FUNCTIONS+="magic_quotes_runtime,set_magic_quotes_runtime,import_request_variables,ini_alter,"
-    DISABLED_FUNCTIONS+="stream_socket_client,stream_socket_server,stream_socket_accept,stream_socket_pair,"
+    DISABLED_FUNCTIONS+="stream_socket_server,stream_socket_accept,stream_socket_pair,"
     DISABLED_FUNCTIONS+="stream_get_transports,stream_wrapper_restore,mb_send_mail,openlog,syslog,closelog,pfsockopen,"
     DISABLED_FUNCTIONS+="posix_kill,apache_child_terminate,apache_get_modules,apache_get_version,apache_lookup_uri,"
     DISABLED_FUNCTIONS+="apache_reset_timeout,apache_response_headers,virtual,system,exec,shell_exec,passthru,"
@@ -686,7 +700,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 echo Beginning Install Submitty Script
-bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean
+bash ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh clean skip_web_restart
 
 
 # (re)start the submitty grading scheduler daemon
@@ -725,9 +739,6 @@ if [ ${WORKER} == 0 ]; then
     if [[ ${VAGRANT} == 1 ]]; then
         # Disable OPCache for development purposes as we don't care about the efficiency as much
         echo "opcache.enable=0" >> /etc/php/${PHP_VERSION}/fpm/conf.d/10-opcache.ini
-
-        DISTRO=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-        VERSION=$(lsb_release -sc | tr '[:upper:]' '[:lower:]')
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
@@ -813,6 +824,7 @@ su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_US
 ###################
 if [ ${WORKER} == 0 ]; then
     service apache2 restart
+    service nginx restart
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
