@@ -192,11 +192,13 @@ class RainbowCustomization extends AbstractModel {
             $num_gradeables_counted = count($gradeables_by_date);
             
             // Ensure strings are sorted properly
-            $gradeable_count_string = str_repeat('0', strlen(strval($num_unordered_gradeables)) - strlen(strval($num_gradeables_counted))) . $num_gradeables_counted;
+            $gradeable_count_string = str_repeat('0',
+                strlen(strval($num_unordered_gradeables)) - strlen(strval($num_gradeables_counted))) . $num_gradeables_counted;
             
             if (array_key_exists('grade_release_date', $gradeable)) {
                 $gradeables_by_date[$gradeable['grade_release_date'] . '_' . $gradeable_count_string] = $gradeable;
-            } else {
+            }
+            else {
                 $gradeables_by_date['END_OF_TIME_' . $gradeable_count_string] = $gradeable;
             }
         }
