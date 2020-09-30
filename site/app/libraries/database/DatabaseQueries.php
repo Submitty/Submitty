@@ -1296,7 +1296,47 @@ INNER JOIN electronic_gradeable_version
 ON
 users.user_id = electronic_gradeable_version.user_id
 AND users." . $section_key . " IS NOT NULL
-AND electronic_gradeable_version.active_version>0
+AND electronic_gradeable_version.active_version>-1
+AND electronic_gradeable_version.g_id=?
+{$where}
+GROUP BY {$section_key}
+ORDER BY {$orderby}",
+            $params
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+    
+    public function getCancelledSubmittedUserCountByGradingSections($g_id, $sections, $section_key) {
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
+            $params = array_merge($params, $sections_keys);
+        }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
+        $this->course_db->query(
+            "
+SELECT count(*) as cnt, {$section_key}
+FROM users
+INNER JOIN electronic_gradeable_version
+ON
+users.user_id = electronic_gradeable_version.user_id
+AND users." . $section_key . " IS NOT NULL
+AND electronic_gradeable_version.active_version=0
 AND electronic_gradeable_version.g_id=?
 {$where}
 GROUP BY {$section_key}
@@ -1335,7 +1375,7 @@ ORDER BY {$orderby}",
             INNER JOIN electronic_gradeable_version
                     ON gradeable_teams.team_id = electronic_gradeable_version.team_id
                    AND gradeable_teams.{$section_key} IS NOT NULL
-                   AND electronic_gradeable_version.active_version>0
+                   AND electronic_gradeable_version.active_version>-1
                    AND electronic_gradeable_version.g_id=?
             {$where}
             GROUP BY {$section_key}
@@ -2952,6 +2992,39 @@ ON
 gradeable_teams.team_id = electronic_gradeable_version.team_id
 AND gradeable_teams." . $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
+AND electronic_gradeable_version.g_id=?
+{$where}
+GROUP BY {$section_key}
+ORDER BY {$section_key}",
+            $params
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+    public function getCancelledTeamCountByGradingSections($g_id, $sections, $section_key) {
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
+            $params = array_merge($params, $sections_keys);
+        }
+        $this->course_db->query(
+            "
+SELECT count(*) as cnt, {$section_key}
+FROM gradeable_teams
+INNER JOIN electronic_gradeable_version
+ON
+gradeable_teams.team_id = electronic_gradeable_version.team_id
+AND gradeable_teams." . $section_key . " IS NOT NULL
+AND electronic_gradeable_version.active_version=0
 AND electronic_gradeable_version.g_id=?
 {$where}
 GROUP BY {$section_key}
