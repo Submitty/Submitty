@@ -17,5 +17,5 @@ export HAMCREST_VERSION=1.3
 export JACOCO_VERSION=0.8.0
 
 # DR. MEMORY
-export DRMEMORY_TAG=release_2.0.1
-export DRMEMORY_VERSION=2.0.1-2
+export DRMEMORY_TAG=release_2.3.0
+export DRMEMORY_VERSION=2.3.0-1
