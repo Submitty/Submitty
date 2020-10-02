@@ -15,6 +15,8 @@ extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
 void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
+  std::vector<std::string> all_testcase_ids = gatherAllTestcaseIds(whole_config);
+
   if (whole_config["autograding"].find("submission_to_compilation") == whole_config["autograding"].end()) {
     whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cpp");
     whole_config["autograding"]["submission_to_compilation"].push_back("**/*.cxx");
@@ -36,8 +38,10 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 
   if (whole_config["autograding"].find("compilation_to_validation") == whole_config["autograding"].end()) {
-    whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDOUT*.txt");
-    whole_config["autograding"]["compilation_to_validation"].push_back("test*/STDERR*.txt");
+    for(int i = 0; i < all_testcase_ids.size(); i++) {
+      whole_config["autograding"]["compilation_to_validation"].push_back(all_testcase_ids[i] + "/STDOUT*.txt");
+      whole_config["autograding"]["compilation_to_validation"].push_back(all_testcase_ids[i] + "/STDERR*.txt");
+    }
   }
 
   if (whole_config["autograding"].find("submission_to_validation") == whole_config["autograding"].end()) {
@@ -47,12 +51,13 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 
   if (whole_config["autograding"].find("work_to_details") == whole_config["autograding"].end()) {
-    whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
-    whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
+    for(int i = 0; i < all_testcase_ids.size(); i++) {
+      whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/*.txt");
+      whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/*_diff.json");
+      whole_config["autograding"]["work_to_details"].push_back(all_testcase_ids[i] + "/input_*.txt");
+    }
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
-    //todo check up on how this works.
-    whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
     // archive the timestamped dispatcher actions
     whole_config["autograding"]["work_to_details"].push_back("**/dispatched_actions.txt");
   }
@@ -66,11 +71,6 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 * Add global booleans and configuration options to the configuration
 **/
 void AddGlobalDefaults(nlohmann::json &whole_config) {
-
-  /*************************************************
-  * Add Global File Copy Commands
-  **************************************************/
-  AddAutogradingConfiguration(whole_config);
 
   /*************************************************
   * Add Global Booleans
@@ -130,6 +130,7 @@ void PreserveCompiledFiles(nlohmann::json& testcases, nlohmann::json &whole_conf
        my_testcase != testcases.end(); my_testcase++,which_testcase++) {
 
     std::string testcase_type = my_testcase->value("type","Execution");
+    std::string test_id = (*my_testcase)["testcase_id"];
     //Skip non compilation tests
     if(testcase_type != "Compilation"){
       continue;
@@ -138,9 +139,7 @@ void PreserveCompiledFiles(nlohmann::json& testcases, nlohmann::json &whole_conf
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
     // Add all executables to compilation_to_runner and compilation_to_validation
     for(std::vector<std::string>::iterator exe = executable_names.begin(); exe != executable_names.end(); exe++){
-      std::stringstream ss;
-      ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << *exe;
-      std::string executable_name = ss.str();
+      std::string executable_name = test_id + "/" + *exe;
 
       if(whole_config["autograding"]["compilation_to_runner"].find("executable_name") == whole_config["autograding"]["compilation_to_runner"].end()){
         whole_config["autograding"]["compilation_to_runner"].push_back(executable_name);
@@ -163,7 +162,7 @@ void ArchiveValidatedFiles(nlohmann::json &testcases, nlohmann::json &whole_conf
   for (nlohmann::json::iterator my_testcase = testcases.begin();
        my_testcase != testcases.end(); my_testcase++,which_testcase++) {
 
-
+    std::string test_id = (*my_testcase)["testcase_id"];
     nlohmann::json::iterator validators = my_testcase->find("validation");
     if (validators == my_testcase->end()) { /* no autochecks */ continue; }
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
@@ -188,9 +187,7 @@ void ArchiveValidatedFiles(nlohmann::json &testcases, nlohmann::json &whole_conf
         if (skip) { continue; }
 
         // THEN add each actual file to the list of files to archive
-        std::stringstream ss;
-        ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << actual_file;
-        actual_file = ss.str();
+        actual_file = test_id + "/" + actual_file;
         whole_config["autograding"]["work_to_details"].push_back(actual_file);
       }
     }
@@ -693,8 +690,9 @@ void formatPreActions(nlohmann::json &testcases, nlohmann::json &whole_config) {
 
       assert(testcase.length() == 6);
 
-      std::string prefix = testcase.substr(0,4);
-      assert(prefix == "test");
+      // TODO: This was removed due to testcase_ids.
+      // std::string prefix = testcase.substr(0,4);
+      // assert(prefix == "test");
 
       std::string number = testcase.substr(4,6);
       int remainder = std::stoi( number );
@@ -818,11 +816,10 @@ bool validShowValue(const nlohmann::json& v) {
 void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_config, int& testcase_id) {
   //move to load_json
   General_Helper(single_testcase);
-
-  if (single_testcase["testcase_id"].is_null()) {
-    single_testcase["testcase_id"] = "testcase_" + std::to_string(testcase_id);
-    testcase_id++;
-  }
+  // For now we overwrite this field.
+  // DO NOT MERGE UNTIL THIS COMMENT IS REMOVED
+  single_testcase["testcase_id"] = "TMP_TESTCASE_ID" + std::to_string(testcase_id);
+  testcase_id++;
 
   if (!single_testcase["timestamped_stdout"].is_boolean()){
     single_testcase["timestamped_stdout"] = whole_config["timestamped_stdout"];
@@ -917,9 +914,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   formatPreActions(*testcases, answer);
   FormatGraphicsActions(*testcases, answer);
   RewriteDeprecatedMyersDiff(*testcases, answer);
+  std::cout << "Inflating testcases" << std::endl;
   InflateTestcases(*testcases, answer, testcase_id);
-  ArchiveValidatedFiles(*testcases, answer);
-  PreserveCompiledFiles(*testcases, answer);
 
   /**
   * Validate/complete-ify the testcases in each item in the item_pool.
@@ -927,10 +923,10 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   nlohmann::json::iterator item_pool = answer.find("item_pool");
   if(item_pool != answer.end()) {
     for(nlohmann::json::iterator item = answer["item_pool"].begin(); item != answer["item_pool"].end(); item++) {
-      nlohmann::json::iterator item_testcases = (*item).find("testcases");
-      if(item_testcases == (*item).end()) {
+      nlohmann::json::iterator item_testcases = item->find("testcases");
+      if(item_testcases == item->end()) {
         (*item)["testcases"] = nlohmann::json::array();
-        item_testcases = (*item).find("testcases");
+        item_testcases = item->find("testcases");
       }
       AddDockerConfiguration(*item_testcases, answer);
       FormatDispatcherActions(*item_testcases, answer);
@@ -938,8 +934,6 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
       FormatGraphicsActions(*item_testcases, answer);
       RewriteDeprecatedMyersDiff(*item_testcases, answer);
       InflateTestcases(*item_testcases, answer, testcase_id);
-      ArchiveValidatedFiles(*item_testcases, answer);
-      PreserveCompiledFiles(*item_testcases, answer);
     }
   }
 
@@ -947,6 +941,23 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   AddSubmissionLimitTestCase(answer);
   if (rcsid != "") {
     CustomizeAutoGrading(rcsid,answer);
+  }
+
+  /*************************************************
+  * Add Global File Copy Commands
+  * This step must come last, as it requires all
+  * testcase ids to be in place.
+  **************************************************/
+  AddAutogradingConfiguration(answer);
+  // Archive validated and compiled files (must be done after AddAutogradingConfiguration)
+  ArchiveValidatedFiles(*testcases, answer);
+  PreserveCompiledFiles(*testcases, answer);
+  if(item_pool != answer.end()) {
+    for(nlohmann::json::iterator item = answer["item_pool"].begin(); item != answer["item_pool"].end(); item++) {
+      nlohmann::json::iterator item_testcases = item->find("testcases");
+      ArchiveValidatedFiles(*item_testcases, answer);
+      PreserveCompiledFiles(*item_testcases, answer);
+    }
   }
   return answer;
 }
@@ -1280,13 +1291,15 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
   bool has_limit_test = false;
 
   // count total points and search for submission limit testcase
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
+  nlohmann::json::iterator testcases = config_json.find("testcases");
+  assert (testcases != config_json.end());
+  for (nlohmann::json::iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
     //This input to testcase is only necessary if the testcase needs to retrieve its 'commands'
     std::string container_name = "";
-    TestCase my_testcase(config_json,i,container_name);
-    int points = (*tc)[i].value("points",0);
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    TestCase my_testcase(*tc, testcase_id, container_name);
+    int points = tc->value("points", 0);
     if (points > 0) {
       total_points += points;
     }
@@ -1301,6 +1314,7 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
     limit_test["type"] = "FileCheck";
     limit_test["title"] = "Submission Limit";
     limit_test["max_submissions"] = MAX_NUM_SUBMISSIONS;
+    limit_test["testcase_id"] = "submission_limit_test";
     if (total_points > 0) {
       limit_test["points"] = -5;
       limit_test["penalty"] = -0.1;
@@ -1310,10 +1324,6 @@ void AddSubmissionLimitTestCase(nlohmann::json &config_json) {
     }
     config_json["testcases"].push_back(limit_test);
   }
-
-
-  // FIXME:  ugly...  need to reset the id...
-  //TestCase::reset_next_test_case_id();
 }
 
 void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
@@ -1407,4 +1417,29 @@ void VerifyGraderDeductions(nlohmann::json &json_graders) {
   if (sum < 0.99) {
     std::cout << "ERROR! DEDUCTION SUM < 1.0: " << sum << std::endl;
   }
+}
+
+std::vector<std::string> gatherAllTestcaseIds(const nlohmann::json& complete_config){
+  std::vector<std::string> testcase_names;
+  nlohmann::json::const_iterator testcases = complete_config.find("testcases");
+  assert (testcases != complete_config.end());
+  for (nlohmann::json::const_iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    testcase_names.push_back(testcase_id);
+  }
+
+  nlohmann::json::const_iterator item_pool = complete_config.find("item_pool");
+  if (item_pool != complete_config.end()){
+    for(nlohmann::json::const_iterator item_itr = item_pool->begin(); item_itr != item_pool->end(); item_itr++) {
+      nlohmann::json item_testcases = item_itr->value("testcases", nlohmann::json::array());
+      for(nlohmann::json::iterator it_itr = item_testcases.begin(); it_itr != item_testcases.end(); it_itr++) {
+        std::string testcase_id = it_itr->value("testcase_id", "");
+        assert(testcase_id != "");
+        testcase_names.push_back(testcase_id);
+      }
+    }
+  }
+
+  return testcase_names;
 }

@@ -70,4 +70,6 @@ void validate_integer(nlohmann::json& action, std::string field, bool populate_d
 
 void validate_gif_or_screenshot_name(std::string filename);
 
+std::vector<std::string> gatherAllTestcaseIds(const nlohmann::json& complete_config);
+
 #endif

@@ -28,6 +28,7 @@
 void CustomizeAutoGrading(const std::string& username, nlohmann::json& j);
 std::vector<std::string> stringOrArrayOfStrings(nlohmann::json j, const std::string what);
 std::vector<nlohmann::json> mapOrArrayOfMaps(nlohmann::json j, const std::string what);
+nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string which_testcase_id);
 
 // =================================================================================
 // =================================================================================
@@ -38,7 +39,7 @@ public:
 
   // -------------------------------
   // CONSTRUCTOR
-  TestCase (nlohmann::json &whole_config, int which_testcase, std::string container_name);
+  TestCase(nlohmann::json my_json, std::string which_testcase, std::string container_name);
 
   // -------------------------------
   // ACCESSORS
@@ -74,7 +75,7 @@ public:
     }
     return false;
   }
-  
+
   bool isSubmissionLimit() const { return (isFileCheck() && _json.find("max_submissions") != _json.end()); }
   int getMaxSubmissions() const { assert (isSubmissionLimit()); return _json.value("max_submissions",20); }
   float getPenalty() const { assert (isSubmissionLimit()); return _json.value("penalty",-0.1); }
@@ -137,7 +138,7 @@ private:
   // REPRESENTATION
   std::string CONTAINER_NAME;
   std::string test_case_id;
-  nlohmann::json& _json;
+  nlohmann::json _json;
 };
 
 

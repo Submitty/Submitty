@@ -187,6 +187,13 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
     copy_contents_into(job_id, custom_validation_code_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
 
+    # Copy the .submit.notebook to tmp_work for validation
+    submit_notebook_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+    if os.path.exists(submit_notebook_path):
+        shutil.copy(
+            submit_notebook_path,
+            os.path.join(tmp_work, '.submit.notebook')
+        )
 
 
     # Copy the validation script into this directory.

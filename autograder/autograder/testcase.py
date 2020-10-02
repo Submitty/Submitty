@@ -17,7 +17,7 @@ class Testcase():
         self.testcase_id = testcase_id
         self.queue_obj = queue_obj
         self.untrusted_user = untrusted_user
-        self.testcase_directory = testcase_id # DO NOT COMMIT
+        self.testcase_directory = testcase_id
         self.type = testcase_info.get('type', 'Execution')
         self.machine = socket.gethostname()
         self.testcase_dependencies = previous_testcases.copy()
@@ -57,14 +57,14 @@ class Testcase():
             )
 
         # Determine whether or not this testcase has an input generation phase.
-        gen_cmds = complete_config_obj["testcases"][number-1].get('input_generation_commands', None)
+        gen_cmds = testcase_info.get('input_generation_commands', None)
         if gen_cmds is not None:
             self.has_input_generator_commands = len(gen_cmds) > 0
         else:
             self.has_input_generator_commands = False
 
         # Determine whether or not this testcase has an output generation phase.
-        solution_containers = complete_config_obj["testcases"][number-1].get(
+        solution_containers = testcase_info.get(
             'solution_containers',
             None
         )
@@ -112,7 +112,7 @@ class Testcase():
                 self.queue_obj["who"],
                 str(self.queue_obj["version"]),
                 self.submission_string,
-                '--testcase', str(self.testcase_id)
+                str(self.testcase_id)
             ]
             arguments += display_line
 
@@ -145,7 +145,7 @@ class Testcase():
                 self.queue_obj['who'],
                 str(self.queue_obj['version']),
                 self.submission_string,
-                '--testcase', str(self.testcase_id)
+                str(self.testcase_id)
             ]
 
             try:
@@ -183,7 +183,7 @@ class Testcase():
                 self.queue_obj['who'],
                 str(self.queue_obj['version']),
                 self.submission_string,
-                '--testcase', str(self.testcase_id),
+                str(self.testcase_id),
                 '--generation_type', str('input')
             ]
 
@@ -237,7 +237,7 @@ class Testcase():
                     self.queue_obj["who"],
                     str(self.queue_obj["version"]),
                     self.submission_string,
-                    '--testcase', str(self.testcase_id),
+                    str(self.testcase_id),
                     '--generation_type', str('output')
                 ]
             elif self.queue_obj['generate_output']:
@@ -246,7 +246,7 @@ class Testcase():
                     'Generating Output',
                     '0',
                     '',
-                    '--testcase', str(self.testcase_id),
+                    str(self.testcase_id),
                     '--generation_type', str('output')
                 ]
 

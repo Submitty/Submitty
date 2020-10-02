@@ -26,21 +26,22 @@
 // =====================================================================
 // =====================================================================
 
-int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime);
+int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime, const bool generate_all_output);
 
 int main(int argc, char *argv[]) {
-
   std::string hw_id;
   std::string rcsid;
   int subnum;
   std::string time_of_submission;
+  bool generate_all_output = false;
 
 
   TCLAP::CmdLine cmd("Submitty's assignment validation program.", ' ', "0.9");
   TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
-  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submission as made", true, "", "string" , cmd);
+  TCLAP::SwitchArg generate_output_argument("g", "generate_all_output", "Run global and all itempool testcases", cmd, false);
 
   //parse arguments.
   try {
@@ -49,6 +50,7 @@ int main(int argc, char *argv[]) {
     rcsid = student_id_argument.getValue();
     subnum = submission_number_argument.getValue();
     time_of_submission = submission_time_argument.getValue();
+    generate_all_output = generate_output_argument.getValue();
 
     std::cout << "hw_id " << hw_id << std::endl;
     std::cout << "rcsid " << rcsid << std::endl;
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  int rc = validateTestCases(hw_id,rcsid,subnum,time_of_submission);
+  int rc = validateTestCases(hw_id,rcsid,subnum,time_of_submission,generate_all_output);
   if (rc > 0) {
     std::cerr << "Validator terminated" << std::endl;
     return 1;
@@ -270,9 +272,9 @@ void WriteToResultsJSON(const TestCase &my_testcase,
 }
 
 
-void WriteToGradefile(int which_testcase,const TestCase &my_testcase,std::ofstream& gradefile,int testcase_pts) {
+void WriteToGradefile(const TestCase &my_testcase,std::ofstream& gradefile,int testcase_pts) {
     gradefile << "Testcase"
-              << std::setw(3) << std::right << which_testcase+1 << ": "
+              << std::setw(3) << std::right << my_testcase.getID() << ": "
               << std::setw(50) << std::left << my_testcase.getTitle() << " ";
     if (my_testcase.getExtraCredit()) {
       if (testcase_pts > 0) {
@@ -298,7 +300,7 @@ void WriteToGradefile(int which_testcase,const TestCase &my_testcase,std::ofstre
 }
 
 
-void ValidateATestCase(nlohmann::json config_json, int which_testcase,
+void ValidateATestCase(nlohmann::json config_json, const TestCase my_testcase,
                        int subnum, const std::string &hw_id,
                        int &automated_points_awarded,
                        int &automated_points_possible,
@@ -309,8 +311,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
                        const std::string& username) {
     //This input to the testcase constructor does nothing unless we attempt to access the 'commands' object.
     std::string container_name = "";
-    TestCase my_testcase(config_json,which_testcase,container_name);
-    std::string title = "Test " + std::to_string(which_testcase+1) + " " + my_testcase.getTitle();
+    std::string title = my_testcase.getTitle();
     int possible_points = my_testcase.getPoints();
     bool allow_partial_credit = my_testcase.allowPartialCredit();
     std::cout << title << " - points: " << possible_points << std::endl;
@@ -393,13 +394,106 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
     testcase_message,
     testcase_pts,
     all_testcases);
+    WriteToGradefile(my_testcase,gradefile,testcase_pts);
+}
 
-    WriteToGradefile(which_testcase,my_testcase,gradefile,testcase_pts);
+/**
+* Get all testcase objects associated with an assignment.
+*/
+std::vector<TestCase> getAllTestcases(nlohmann::json config_json) {
+  std::vector<TestCase> testcase_array;
+  nlohmann::json::const_iterator testcases = config_json.find("testcases");
+  assert (testcases != config_json.end());
+  for (nlohmann::json::const_iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    nlohmann::json testcase_config = *tc;
+    TestCase my_testcase(testcase_config, testcase_id, "");
+    testcase_array.push_back(my_testcase);
+  }
+
+  nlohmann::json::const_iterator item_pool = config_json.find("item_pool");
+  if (item_pool != config_json.end()){
+    for(nlohmann::json::const_iterator item_itr = item_pool->begin(); item_itr != item_pool->end(); item_itr++) {
+      nlohmann::json item_testcases = item_itr->value("testcases", nlohmann::json::array());
+      for(nlohmann::json::const_iterator it_itr = item_testcases.begin(); it_itr != item_testcases.end(); it_itr++) {
+        std::string testcase_id = it_itr->value("testcase_id", "");
+        assert(testcase_id != "");
+        nlohmann::json testcase_config = *it_itr;
+        TestCase my_testcase(testcase_config, testcase_id, "");
+        testcase_array.push_back(my_testcase);
+      }
+    }
+  }
+
+  return testcase_array;
+}
+
+nlohmann::json getItemWithName(std::string item_name, const nlohmann::json& config_json) {
+
+    nlohmann::json::const_iterator itempool = config_json.find("item_pool");
+    for (nlohmann::json::const_iterator item = itempool->begin(); item != itempool->end(); item++) {
+        if((*item)["item_name"] == item_name) {
+          return *item;
+        }
+    }
+    throw "ERROR: Could not find an item with item_name " + item_name;
+}
+
+
+/**
+* Get all global testcase objects for an assignment + all testcases specified in .submit.notebook
+*/
+std::vector<TestCase> getTestcasesForSubmission(const nlohmann::json& config_json) {
+
+  std::vector<TestCase> testcase_array;
+  nlohmann::json::const_iterator testcases = config_json.find("testcases");
+  assert (testcases != config_json.end());
+  for (nlohmann::json::const_iterator tc = testcases->begin(); tc != testcases->end(); tc++) {
+    std::string testcase_id = tc->value("testcase_id", "");
+    assert(testcase_id != "");
+    nlohmann::json testcase_config = *tc;
+    TestCase my_testcase(testcase_config, testcase_id, "");
+    testcase_array.push_back(my_testcase);
+  }
+
+  std::ifstream ifs(".submit.notebook");
+  if(ifs.is_open()) {
+    nlohmann::json notebook_data = nlohmann::json::parse(ifs);
+    nlohmann::json notebook_testcase_ids = notebook_data.value("item_pools_selected", nlohmann::json::array());
+    nlohmann::json::const_iterator itempool = config_json.find("item_pool");
+
+    for (nlohmann::json::const_iterator item = notebook_testcase_ids.begin(); item != notebook_testcase_ids.end(); item++) {
+      nlohmann::json item_config;
+      assert(item->is_string());
+      std::string item_name = *item;
+
+      try {
+        item_config = getItemWithName(item_name, config_json);
+      } catch(char* c) {
+        std::cout << c << std::endl;
+        continue;
+      }
+
+      nlohmann::json::const_iterator item_testcases = item_config.find("testcases");
+
+      if(item_testcases == item_config.end()) {
+        continue;
+      }
+
+      for(nlohmann::json::const_iterator item_testcase = item_testcases->begin(); item_testcase != item_testcases->end(); item_testcase++) {
+        TestCase my_testcase(*item_testcase, (*item_testcase)["testcase_id"], "");
+        testcase_array.push_back(my_testcase);
+      }
+    }
+  }
+
+  return testcase_array;
 }
 
 
 /* Runs through each test case, pulls in the correct files, validates, and outputs the results */
-int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime) {
+int validateTestCases(const std::string &hw_id, const std::string &rcsid, int subnum, const std::string &subtime, const bool generate_all_output) {
 
   ///////////////////////////////////////////////////////////////////////////////
   //
@@ -410,8 +504,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   ///////////////////////////////////////////////////////////////////////////////
 
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
+  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
   // PREPARE GRADE.TXT FILE
   std::string grade_path = "grade.txt";
   std::ofstream gradefile(grade_path.c_str());
@@ -430,12 +524,17 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
 
   // =======================================
-  // LOOP OVER ALL TEST CASES
-  nlohmann::json::iterator tc = config_json.find("testcases");
-  assert (tc != config_json.end());
-  for (unsigned int i = 0; i < tc->size(); i++) {
+  // Loop over all global testcases
+  std::vector<TestCase> testcases;
+  if (generate_all_output) {
+    testcases = getAllTestcases(config_json);
+  } else {
+    testcases = getTestcasesForSubmission(config_json);
+  }
+
+  for (std::vector<TestCase>::iterator tc = testcases.begin(); tc != testcases.end(); tc++) {
     std::cout << "------------------------------------------\n";
-    ValidateATestCase(config_json, i,
+    ValidateATestCase(config_json, *tc,
                       subnum,hw_id,
                       automated_points_awarded,
                       automated_points_possible,

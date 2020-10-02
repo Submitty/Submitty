@@ -244,7 +244,7 @@ nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string whi
   nlohmann::json::iterator testcases = whole_config.find("testcases");
   if(testcases != whole_config.end()) {
     for (nlohmann::json::iterator my_testcase = testcases->begin(); my_testcase != testcases->end(); my_testcase++) {
-      if(testcase["testcase_id"] == which_testcase_id) {
+      if(my_testcase->value("testcase_id", "") == which_testcase_id) {
         return *my_testcase;
       }
     }
@@ -260,7 +260,7 @@ nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string whi
       if(itempool_testcases != item->end()) {
         // Once we've found an item with testcases, iterate across them to see if they have the id we're looking for
         for(nlohmann::json::iterator itempool_testcase = itempool_testcases->begin(); itempool_testcase != itempool_testcases->end(); itempool_testcase++) {
-          if(itempool_testcase["testcase_id"] == which_testcase_id) {
+          if((*itempool_testcase)["testcase_id"] == which_testcase_id) {
             return *itempool_testcase;
           }
         }
@@ -269,19 +269,15 @@ nlohmann::json find_testcase_by_id(nlohmann::json &whole_config, std::string whi
   }
 
   // If we could not find the testcase, something has gone wrong, so raise an error.
-  std::cout << "ERROR: could not find testcase_id " << which_testcase_id << std::endl; 
-  throw 1;
+  throw "ERROR: could not find testcase_id " + which_testcase_id;
 }
 
 
 // =================================================================================
 // =================================================================================
 // CONSTRUCTOR
-TestCase::TestCase(nlohmann::json &whole_config, std::string which_testcase, std::string docker_name) {
-  
-  this->_json = find_testcase_by_id(whole_config, which_testcase);
-  this->CONTAINER_NAME = docker_name;
-  this->test_case_id = which_testcase;
+TestCase::TestCase(nlohmann::json my_json, std::string test_case_id, std::string container_name) :
+  _json(my_json), test_case_id(test_case_id), CONTAINER_NAME(container_name){
 }
 
 std::vector<std::string> TestCase::getCommands() const {

@@ -65,25 +65,20 @@ def get_testcases_for_user(
     testcase_objs = []
     testcase_specs = complete_config_obj['testcases']
 
-    # Now that we've dealt with standard/global testcases, deal with any notebook items.
-    if notebook_data is not None and notebook_data['item_pools_selected'] is not None:
-        # For all of the items this student was given, we want to add any associated testcases
-        # to the complete config's array of testcases.
-        for notebook_item in notebook_data['item_pools_selected']:
-            item_obj = get_item_from_item_pool(complete_config_obj, notebook_item)
-
-            if item_obj is None:
-                autograding_utils.log_message(
-                    config.log_path,
-                    queue_obj["job_id"],
-                    queue_obj["regrade"],
-                    which_untrusted,
-                    item_name,
-                    message=f"ERROR: could not find {notebook_item} in item pool."
-                )
-                continue
-
-            testcase_specs += item_obj['testcases']
+    # Gather the testcase specifications for all itempool testcases
+    for notebook_item in notebook_data:
+        item_dict = get_item_from_item_pool(complete_config_obj, notebook_item)
+        if item_dict is None:
+            autograding_utils.log_message(
+                config.log_path,
+                queue_obj["job_id"],
+                queue_obj["regrade"],
+                which_untrusted,
+                item_name,
+                message=f"ERROR: could not find {notebook_item} in item pool."
+            )
+            continue
+        testcase_specs += item_dict['testcases']
 
     # Construct the testcase objects
     for t in testcase_specs:
@@ -106,6 +101,15 @@ def get_testcases_for_user(
         )
         testcase_objs.append(tmp_test)
 
+    for o in testcase_objs:
+        autograding_utils.log_message(
+                config.log_path,
+                queue_obj["job_id"],
+                queue_obj["regrade"],
+                which_untrusted,
+                item_name,
+                message=f'Found {o.testcase_id}'
+            )
     return testcase_objs
 
 
@@ -180,21 +184,23 @@ def generate_output(testcases, config, which_untrusted, seperator, log_file):
 
 
 def run_validation(
-    testcases, 
-    config, 
-    which_untrusted, 
-    seperator, 
-    queue_obj, 
-    tmp_work, 
-    is_vcs, 
-    complete_config_obj, 
-    working_directory, 
-    submission_string, 
-    log_file
+    testcases,
+    config,
+    which_untrusted,
+    seperator,
+    queue_obj,
+    tmp_work,
+    is_vcs,
+    complete_config_obj,
+    working_directory,
+    submission_string,
+    log_file,
+    tmp_logs,
+    generate_all_output
 ):
     # VALIDATE STUDENT OUTPUT
-    print(f"{seperator}VALIDATION STARTS", file=overall_log)
-    overall_log.flush()
+    print(f"{seperator}VALIDATION STARTS", file=log_file)
+    log_file.flush()
 
     # Create a jailed sandbox to run validation inside of.
     validation_environment = jailed_sandbox.JailedSandbox(
@@ -230,6 +236,8 @@ def run_validation(
             str(queue_obj["version"]),
             submission_string
         ]
+        if generate_all_output:
+            arguments.append('--generate_all_output')
         success = validation_environment.execute(
             which_untrusted,
             'my_validator.out',
@@ -242,8 +250,14 @@ def run_validation(
             print(socket.gethostname(), which_untrusted, "VALIDATOR OK")
         else:
             print(socket.gethostname(), which_untrusted, "VALIDATOR FAILURE")
-    subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-    overall_log.flush()
+    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    log_file.flush()
+
+    # Remove the temporary .submit.notebook from tmp_work (not to be confused
+    # with the copy tmp_submission/submission/.submit.notebook)
+    submit_notebook_path = os.path.join(tmp_work, '.submit.notebook')
+    if os.path.exists(submit_notebook_path):
+        os.remove(submit_notebook_path)
 
     os.chdir(working_directory)
     autograding_utils.untrusted_grant_rwx_access(
@@ -256,15 +270,14 @@ def run_validation(
 
 
 def archive(
-    testcases, 
-    config, 
-    working_directory, 
-    queue_obj, 
-    which_untrusted, 
-    complete_config_obj, 
-    gradeable_config_obj, 
-    queue_obj, 
-    seperator, 
+    testcases,
+    config,
+    working_directory,
+    queue_obj,
+    which_untrusted,
+    complete_config_obj,
+    gradeable_config_obj,
+    seperator,
     log_file
 ):
     # ARCHIVE STUDENT RESULTS
@@ -371,19 +384,18 @@ def grade_from_zip(
 
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
             os.chdir(tmp_work)
-            
+
             generate_output(testcases, config, which_untrusted, seperator, overall_log)
 
             archive(
-                testcases, 
-                config, 
-                working_directory, 
-                queue_obj, 
-                which_untrusted, 
-                complete_config_obj, 
-                gradeable_config_obj, 
-                queue_obj, 
-                seperator, 
+                testcases,
+                config,
+                working_directory,
+                queue_obj,
+                which_untrusted,
+                complete_config_obj,
+                gradeable_config_obj,
+                seperator,
                 overall_log
             )
     else:
@@ -411,6 +423,25 @@ def grade_from_zip(
             ""
         )
 
+        notebook_data_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+        if os.path.exists(notebook_data_path):
+            with open(notebook_data_path, 'r') as infile:
+                notebook_data = json.load(infile).get('item_pools_selected', [])
+            print(json.dumps(notebook_data))
+        else:
+            print('no notebook data found.')
+            autograding_utils.log_message(
+                config.log_path,
+                job_id,
+                is_batch_job,
+                which_untrusted,
+                item_name,
+                "wait:",
+                waittime,
+                "NO NOTEBOOK DATA FOR SUBMISSION"
+            )
+            notebook_data = []
+
         # Load all testcases.
         testcases = get_testcases_for_user(
             complete_config_obj,
@@ -430,28 +461,29 @@ def grade_from_zip(
             run_execution(testcases, config, which_untrusted, seperator, overall_log)
             generate_output(testcases, config, which_untrusted, seperator, overall_log)
             run_validation(
-                testcases, 
-                config, 
-                which_untrusted, 
-                seperator, 
-                queue_obj, 
-                tmp_work, 
-                is_vcs, 
-                complete_config_obj, 
-                working_directory, 
-                submission_string, 
-                overall_log
+                testcases,
+                config,
+                which_untrusted,
+                seperator,
+                queue_obj,
+                tmp_work,
+                is_vcs,
+                complete_config_obj,
+                working_directory,
+                submission_string,
+                overall_log,
+                tmp_logs,
+                False
             )
             archive(
-                testcases, 
-                config, 
-                working_directory, 
-                queue_obj, 
-                which_untrusted, 
-                complete_config_obj, 
-                gradeable_config_obj, 
-                queue_obj, 
-                seperator, 
+                testcases,
+                config,
+                working_directory,
+                queue_obj,
+                which_untrusted,
+                complete_config_obj,
+                gradeable_config_obj,
+                seperator,
                 overall_log
             )
 

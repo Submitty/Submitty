@@ -233,10 +233,10 @@ nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann:
 
         // Write the empty string if no label provided, otherwise pass forward item_label
         out_notebook_cell["item_label"] = item_label;
-        
+
         // Write the empty object if no 'mapping' provided, otherwise pass forward user_item_map
         out_notebook_cell["user_item_map"] = user_item_map;
-                
+
         // Pass forward other items
         out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
         if(in_notebook_cell.find("points") != in_notebook_cell.end()){
@@ -274,14 +274,13 @@ int main(int argc, char *argv[]) {
 
   int visible = 0;
   std::cout << "config.json.size " << config_json.size() << std::endl;
-  nlohmann::json::iterator tc = config_json.find("testcases");
+  nlohmann::json::iterator testcases = config_json.find("testcases");
 
-  assert (tc != config_json.end());
+  assert (testcases != config_json.end());
 
   int max_submissions = MAX_NUM_SUBMISSIONS;
 
   nlohmann::json all;
-  int which_testcase = 0;
 
   int total_time = 0;
   //The base max time per testcase.
@@ -294,18 +293,20 @@ int main(int argc, char *argv[]) {
     base_time = rl->value("RLIMIT_CPU", base_time);
   }
   std::cerr << "BASE TIME " << base_time << std::endl;
-
-  for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,which_testcase++) {
+  for (typename nlohmann::json::iterator itr = testcases->begin(); itr != testcases->end(); itr++) {
     int points = itr->value("points",0);
     bool extra_credit = itr->value("extra_credit",false);
     bool hidden = itr->value("hidden",false);
+    std::string test_id = itr->value("testcase_id","");
 
+    assert(test_id != "");
     //Add this textcases worst case time to the total worst case time.
     int cpu_time = base_time;
     nlohmann::json::iterator rl = itr->find("resource_limits");
     if (rl != itr->end()){
       cpu_time = rl->value("RLIMIT_CPU", base_time);
     }
+
     cpu_time += leeway;
     total_time += cpu_time;
 
@@ -319,11 +320,13 @@ int main(int argc, char *argv[]) {
     }
     //container name only matters if we try to get the commands for this testcase.
     std::string container_name = "";
-    TestCase tc(config_json,which_testcase,container_name);
-    if (tc.isSubmissionLimit()) {
-      max_submissions = tc.getMaxSubmissions();
+    nlohmann::json my_testcase_json = *itr;
+    TestCase my_testcase(my_testcase_json, test_id, container_name);
+    if (my_testcase.isSubmissionLimit()) {
+      max_submissions = my_testcase.getMaxSubmissions();
     }
-    all.push_back(printTestCase(tc));
+
+    all.push_back(printTestCase(my_testcase));
   }
   std::cout << "processed " << all.size() << " test cases" << std::endl;
   j["num_testcases"] = all.size();
@@ -349,6 +352,7 @@ int main(int argc, char *argv[]) {
         << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
+
   if (total_nonec + TA_POINTS != TOTAL_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total."
         << end_red_text << "\n" << std::endl;
