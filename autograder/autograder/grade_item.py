@@ -101,15 +101,6 @@ def get_testcases_for_user(
         )
         testcase_objs.append(tmp_test)
 
-    for o in testcase_objs:
-        autograding_utils.log_message(
-                config.log_path,
-                queue_obj["job_id"],
-                queue_obj["regrade"],
-                which_untrusted,
-                item_name,
-                message=f'Found {o.testcase_id}'
-            )
     return testcase_objs
 
 
@@ -427,19 +418,7 @@ def grade_from_zip(
         if os.path.exists(notebook_data_path):
             with open(notebook_data_path, 'r') as infile:
                 notebook_data = json.load(infile).get('item_pools_selected', [])
-            print(json.dumps(notebook_data))
         else:
-            print('no notebook data found.')
-            autograding_utils.log_message(
-                config.log_path,
-                job_id,
-                is_batch_job,
-                which_untrusted,
-                item_name,
-                "wait:",
-                waittime,
-                "NO NOTEBOOK DATA FOR SUBMISSION"
-            )
             notebook_data = []
 
         # Load all testcases.
