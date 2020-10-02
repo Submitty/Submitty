@@ -1217,13 +1217,19 @@ def history_short_circuit_helper(
 ) -> dict:
     """Figure out parameter values for just_write_grade_history."""
     user_path = os.path.join(
-        course_path, 'submissions', queue_obj['gradeable'], queue_obj['who']
+        course_path,
+        'submissions',
+        queue_obj['gradeable'],
+        queue_obj['who'],
+        str(queue_obj['version'])
     )
     submit_timestamp_path = os.path.join(
-        user_path, str(queue_obj['version']), '.submit.timestamp'
+        user_path,
+        '.submit.timestamp'
     )
     user_assignment_access_path = os.path.join(
-        user_path, 'user_assignment_access.json'
+        user_path,
+        '.user_assignment_access.json'
     )
 
     gradeable_deadline = gradeable_config_obj['date_due']
@@ -1239,8 +1245,7 @@ def history_short_circuit_helper(
     if os.path.exists(user_assignment_access_path):
         with open(user_assignment_access_path) as fd:
             obj = json.load(fd, object_pairs_hook=collections.OrderedDict)
-        first_access = obj['page_load_history'][0]['time']
-        first_access = dateutils.normalize_submitty_date(first_access)
+        first_access = obj[0]['timestamp']
         first_access_dt = dateutils.read_submitty_date(first_access)
         access_duration = int((submit_timestamp - first_access_dt).total_seconds())
 

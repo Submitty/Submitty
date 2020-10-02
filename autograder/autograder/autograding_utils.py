@@ -338,11 +338,11 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
         with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
             submission_string = submission_time_file.read().rstrip()
         # grab the first access to the gradeable page (if it exists)
-        user_assignment_access_filename = os.path.join(tmp_submission, "user_assignment_access.json")
+        user_assignment_access_filename = os.path.join(tmp_submission, ".user_assignment_access.json")
         if os.path.exists(user_assignment_access_filename):
             with open(user_assignment_access_filename, 'r') as access_file:
-                obj = json.load(access_file, object_pairs_hook=collections.OrderedDict)
-                first_access_string = obj["page_load_history"][0]["time"]
+                obj = json.load(access_file)
+                first_access_string = obj[0]["timestamp"]
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
@@ -379,15 +379,6 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
 
 
         gradeable_deadline_string = gradeable_config_obj["date_due"]
-
-        # FIXME: The access date string is currently misformatted
-        #    mm-dd-yyyy, but we want yyyy-mm-dd.  Also it is missing
-        #    the common name timezone string, e.g., "America/NewYork".
-        #    We should standardize this logging eventually, but
-        #    keeping it as is because we are mid-semester with this
-        #    new feature and I don't want to break things.
-        first_access_string = dateutils.normalize_submitty_date(first_access_string)
-
         submission_datetime = dateutils.read_submitty_date(submission_string)
         gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
         gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)

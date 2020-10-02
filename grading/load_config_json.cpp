@@ -48,6 +48,7 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
     whole_config["autograding"]["submission_to_validation"].push_back("input_*.txt");
     whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
+    whole_config["autograding"]["submission_to_validation"].push_back(".user_assigment_access.json");
   }
 
   if (whole_config["autograding"].find("work_to_details") == whole_config["autograding"].end()) {
