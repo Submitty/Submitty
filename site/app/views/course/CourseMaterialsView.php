@@ -211,8 +211,6 @@ class CourseMaterialsView extends AbstractView {
             return;
         }
 
-        var_dump($priorities);
-
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
