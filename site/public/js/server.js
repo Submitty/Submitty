@@ -716,6 +716,11 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
             }
+            if (past_lock_date) {
+                $('#admin-team-history-bottom').append('*History items highlighted in red were performed after team lock date.');
+            } else {
+                $('#admin-team-history-bottom').empty();
+            }
         }
     }
 

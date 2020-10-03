@@ -511,9 +511,9 @@
 {% macro render_column_team_edit(self, context, section, graded_gradeable, index, team_edit_onclick, column, edited_past_lock_date) %}
     <td>
         <div>
-            <a onclick="{{ team_edit_onclick }}" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
+            <a onclick="{{ team_edit_onclick }}" title="Edit Team" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
             {% if edited_past_lock_date %}
-                <div style="display:inline-block;" aria-label="Edited Past Lock Date"><i class="fas fa-lock" style="color:red;"></i></div>
+                <div style="display:inline-block;" title="Edited Past Lock Date" aria-label="Edited Past Lock Date"><i class="fas fa-exclamation" style="color:red;"></i></div>
             {% endif %}
         </div>
     </td>
