@@ -1,7 +1,8 @@
 {
     "grading_parameters" : {
         "AUTO_POINTS" : 14,
-        "EXTRA_CREDIT_POINTS" : 4
+        "EXTRA_CREDIT_POINTS" : 4,
+        "PENALTY_POINTS" : 0  // lower clamp to zero points
     },
 
     "assignment_message" : "You are allowed 3 no penalty submissions.  You will lose 1 point for each 2 submissions beyond these non-penalty submissions.  The maximum penalty is -5 points.",

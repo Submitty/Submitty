@@ -432,6 +432,8 @@ class HomeworkView extends AbstractView {
             'gradeable_url' => $gradeable->getInstructionsUrl(),
             'due_date' => $gradeable->getSubmissionDueDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
+            'server_time_zone_string' => $this->core->getConfig()->getTimezone()->getName(),
+            'user_time_zone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),

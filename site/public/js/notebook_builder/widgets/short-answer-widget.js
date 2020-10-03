@@ -54,7 +54,7 @@ class ShortAnswerWidget extends Widget {
     }
 
     /**
-     * Attach event handlers to appropriate elements and handle loading textarea / codemirror boxes.
+     * Attach event handlers to appropriate elements and handle loading codemirror boxes.
      *
      * @param {HTMLDivElement} interactive_area
      */
@@ -80,7 +80,8 @@ class ShortAnswerWidget extends Widget {
 
             const codebox_config = {
                 value: this.state.initial_value ? this.state.initial_value : '',
-                theme: 'eclipse'
+                theme: 'eclipse',
+                lineWrapping: answer_type_selector.value === 'Default' && this.state.rows
             };
 
             if (answer_type_selector.value !== 'Default') {

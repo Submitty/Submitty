@@ -90,6 +90,10 @@
     margin-right: 15px;
 }
 
+.short-answer-widget .initial-value-div {
+    max-width: 1000px;
+}
+
 .short-answer-widget .initial-value-msg {
     margin-bottom: 10px;
 }
@@ -97,11 +101,6 @@
 .short-answer-widget hr {
     width: 90%;
     align-self: center;
-}
-
-.short-answer-widget .initial-value-div textarea {
-    width: 100%;
-    min-height: 75px;
 }
 
 .short-answer-widget i {
