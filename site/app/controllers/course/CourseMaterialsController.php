@@ -261,14 +261,16 @@ class CourseMaterialsController extends AbstractController {
         $json = FileUtils::readJsonFile($fp);
         $files_to_modify = is_dir($requested_path) ? FileUtils::getAllFiles($requested_path, [], true) : [['path' => $requested_path]];
 
+        $file_path_release_datetime = "";
+        $external_link = "";
         foreach ($files_to_modify as $file) {
             $file_path = $file['path'];
             $file_path_release_datetime = empty($release_time) ? $json[$file_path]['release_datetime'] : $release_time;
             $external_link = isset($json[$file_path]['external_link']) ? $json[$file_path]['external_link'] : false;
 
-            $json[$file_path] =  ['release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
-        }
-        $json[$requested_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'sort_priority' => $sort_priority];
+            $json[$file_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
+            }
+        $json[$requested_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link, 'sort_priority' => $sort_priority];
 
         FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
@@ -309,7 +311,7 @@ class CourseMaterialsController extends AbstractController {
             $hide_from_students = $_POST['hide_from_students'];
         }
 
-        $sort_priority = 99.0;
+        $sort_priority = 0;
         if (isset($_POST['sort_priority'])) {
             $sort_priority = $_POST['sort_priority'];
         }

@@ -156,6 +156,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
+        $sort_default = 0;
 
         //Compound the priorities of directories inside of folders to preserve order
         foreach ($course_materials_array as $key => &$material) {
@@ -167,12 +168,12 @@ class CourseMaterialsView extends AbstractView {
                 $priorities[$material] = 0;
             }
             $path = FileUtils::joinPaths($expected_path, $material);
-            $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : 99.0;
+            $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
 
             foreach ($dirs as $dir) {
                 $curr_path = $curr_path . $dir;
                 $path = FileUtils::joinPaths($expected_path, $curr_path);
-                    $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : 99.0;
+                    $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
                 if (!in_array($curr_path, $course_materials_array)) {
                     array_push($course_materials_array, $curr_path);
                     array_push($folders, $curr_path);
@@ -198,7 +199,7 @@ class CourseMaterialsView extends AbstractView {
         //Restore the priorities for each file/folder
         foreach ($priorities as $key => &$priority) {
             $path = FileUtils::joinPaths($expected_path, $key);
-            $priorities[$key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : 99.0;
+            $priorities[$key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
         }
         
         $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
@@ -209,6 +210,8 @@ class CourseMaterialsView extends AbstractView {
             $this->core->redirect($this->core->buildCourseUrl());
             return;
         }
+
+        var_dump($priorities);
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
