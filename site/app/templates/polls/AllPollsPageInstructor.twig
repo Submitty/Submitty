@@ -55,15 +55,13 @@
                             </td>
                         {% endif %}
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <form method="get" action="{{base_url}}/editPoll">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
                             </form>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <form method="get" action="{{base_url}}/viewResults">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </form>
@@ -131,15 +129,13 @@
                             </td>
                         {% endif %}
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <form method="get" action="{{base_url}}/editPoll">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
                             </form>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <form method="get" action="{{base_url}}/viewResults">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </form>
@@ -194,15 +190,13 @@
                             </form>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/editPoll">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <form method="get" action="{{base_url}}/editPoll">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">Edit Poll</button>
                             </form>
                         </td>
                         <td>
-                            <form method="post" action="{{base_url}}/viewResults">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                            <form method="get" action="{{base_url}}/viewResults">
                                 <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                                 <button type="submit" class="btn btn-primary">View Results</button>
                             </form>

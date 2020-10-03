@@ -19,8 +19,7 @@
                     <td> {{ poll.getName() }} </td>
                     <td> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                     <td>
-                        <form method="post" action="{{ base_url }}/viewPoll">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                        <form method="get" action="{{ base_url }}/viewPoll">
                             <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             {% if poll.isOpen() %}
                                 {% if poll.getUserResponse(user_id) is same as(null) %}
@@ -59,8 +58,7 @@
                     <td> {{ poll.getName() }} </td>
                     <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
                     <td>
-                        <form method="post" action="{{ base_url }}/viewPoll">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                        <form method="get" action="{{ base_url }}/viewPoll">
                             <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
                             <button type="submit" class="btn btn-primary"> View Poll
                             </button>
