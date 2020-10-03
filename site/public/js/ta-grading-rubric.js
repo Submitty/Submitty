@@ -123,9 +123,11 @@ function ajaxGetGradeableRubric(gradeable_id) {
  * @param {number} default_value
  * @param {number} max_value
  * @param {number} upper_clamp
+ * @param {boolean} is_itempool_linked
+ * @param {string} itempool_option
  * @returns {Promise}
  */
-function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp) {
+function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp, is_itempool_linked, itempool_option) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",
@@ -142,6 +144,8 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
                 'default': default_value,
                 'max_value': max_value,
                 'upper_clamp': upper_clamp,
+                'is_itempool_linked': is_itempool_linked,
+                'itempool_option': itempool_option === "null" ? undefined : itempool_option,
                 'peer': false
             },
             success: function (response) {
@@ -938,6 +942,33 @@ function getOverallCommentJQuery() {
 }
 
 /**
+ * Returns whether the current is of type notebook
+ * @return {string}
+ */
+function isItempoolAvailable() {
+  return $('#gradeable_rubric.electronic_file').attr('data-itempool-available');
+}
+
+/**
+ * Returns the itempool options
+ * @return array|string
+ */
+function getItempoolOptions(parsed = false) {
+  if (parsed) {
+    try {
+      return isItempoolAvailable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')) : [];
+    }
+    catch (e) {
+      displayErrorMessage('Something went wrong retrieving itempool options');
+      return [];
+    }
+  }
+  else {
+    return $('#gradeable_rubric.electronic_file').attr('data-itempool-options');
+  }
+}
+
+/**
  * Shows the 'in progress' indicator for a component
  * @param {int} component_id
  * @param {boolean} show
@@ -1105,6 +1136,8 @@ function getComponentFromDOM(component_id) {
             max_value: maxValue,
             upper_clamp: maxValue + extraCreditPoints,
             marks: getMarkListFromDOM(component_id),
+            is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
+            itempool_option: domElement.find('select[name="component-itempool"]').val(),
             peer: (domElement.attr('data-peer') === 'true')
         };
     }
@@ -1119,6 +1152,8 @@ function getComponentFromDOM(component_id) {
         max_value: parseFloat(domElement.attr('data-max_value')),
         upper_clamp: parseFloat(domElement.attr('data-upper_clamp')),
         marks: getMarkListFromDOM(component_id),
+        is_itempool_linked: domElement.find(`#yes-link-item-pool-${component_id}`).is(':checked'),
+        itempool_option: domElement.find('select[name="component-itempool"]').val(),
         peer: (domElement.attr('data-peer') === 'true')
     };
 }
@@ -1734,7 +1769,7 @@ function onDeleteComponent(me) {
             alert('Failed to delete component! ' + err.message);
         })
         .then(function () {
-            return reloadInstructorEditRubric(getGradeableId());
+          return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
         })
         .catch(function (err) {
             alert('Failed to reload rubric! ' + err.message);
@@ -1754,7 +1789,7 @@ function onAddComponent(peer) {
             return closeAllComponents(true);
         })
         .then(function () {
-            return reloadInstructorEditRubric(getGradeableId());
+          return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
         })
         .then(function () {
             return openComponent(getComponentIdByOrder(getComponentCount() - 1));
@@ -2217,7 +2252,7 @@ function setPdfPageAssignment(page) {
         })
         .then(function () {
             // Reload the gradeable to refresh all the component's display
-            return reloadInstructorEditRubric(getGradeableId());
+          return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
         });
 }
 
@@ -2307,15 +2342,17 @@ function reloadPeerRubric(gradeable_id, anon_id) {
 /**
  * Call this once on page load to load the rubric instructor editing
  * @param {string} gradeable_id
+ * @param {bool} itempool_available
+ * @param {array} itempool_options
  * @return {Promise}
  */
-function reloadInstructorEditRubric(gradeable_id) {
+function reloadInstructorEditRubric(gradeable_id, itempool_available, itempool_options) {
     return ajaxGetGradeableRubric(gradeable_id)
         .catch(function (err) {
             alert('Could not fetch gradeable rubric: ' + err.message);
         })
         .then(function (gradeable) {
-            return renderInstructorEditGradeable(gradeable);
+            return renderInstructorEditGradeable(gradeable, itempool_available, itempool_options);
         })
         .then(function (elements) {
             setRubricDOMElements(elements);
@@ -2517,7 +2554,7 @@ function openComponentInstructorEdit(component_id) {
 
             // Render the component in instructor edit mode
             //  and 'true' to show the mark list
-            return injectInstructorEditComponent(component, true);
+            return injectInstructorEditComponent(component, true, true);
         });
 }
 
@@ -2619,7 +2656,7 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
                 // Save the component title and comments
                 return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
                     component.student_comment, component.page, component.lower_clamp,
-                    component.default, component.max_value, component.upper_clamp);
+                    component.default, component.max_value, component.upper_clamp, component.is_itempool_linked, component.itempool_option);
             });
     }
     return sequence
@@ -3105,16 +3142,21 @@ function refreshRubricTotalBox() {
  * Renders the provided component object for instructor edit mode
  * @param {Object} component
  * @param {boolean} showMarkList Whether the mark list should be visible
+ * @param {boolean} loadItempoolOptions whether to load the itempool options or not
  * @return {Promise}
  */
-function injectInstructorEditComponent(component, showMarkList) {
-    return renderEditComponent(component, getPointPrecision(), showMarkList)
-        .then(function (elements) {
-            setComponentContents(component.id, elements);
-        })
-        .then(function () {
-            return refreshRubricTotalBox();
-        });
+function injectInstructorEditComponent(component, showMarkList, loadItempoolOptions = false) {
+  return renderEditComponent(component, getPointPrecision(), showMarkList)
+    .then(function (elements) {
+      setComponentContents(component.id, elements);
+    })
+    .then(function () {
+      return refreshRubricTotalBox();
+    }).then(function() {
+      if (isItempoolAvailable() && loadItempoolOptions) {
+        addItempoolOptions(component.id);
+      }
+    });
 }
 
 /**
@@ -3190,4 +3232,18 @@ function injectRubricTotalBox(scores) {
         .then(function(elements) {
             setRubricTotalBoxContents(elements);
         });
+}
+
+function addItempoolOptions(componentId) {
+  // create option elements for the itempool options
+  let itempools = getItempoolOptions(true);
+  let select_ele = $(`#component-itempool-select-${componentId}`);
+  let selected_value = select_ele.attr('data-selected') ? select_ele.attr('data-selected') : "null";
+  const itempool_options = ['<option value="null">NONE</option>'];
+
+  for (let key in itempools) {
+    itempool_options.push(`<option value='${key}'>${key} (${itempools[key].join(', ')})</option>`)
+  }
+  select_ele.html(itempool_options);
+  select_ele.val(selected_value).change();
 }

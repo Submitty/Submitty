@@ -55,6 +55,19 @@ function updatePdfPageSettings() {
         });
 }
 
+function onItemPoolOptionChange(componentId) {
+  let linkItemPool = $(`#yes-link-item-pool-${componentId}`);
+  // Provide a select option for item-pool items on the rubric components
+
+  if (linkItemPool.is(':checked')) {
+    $(`#component-itempool-${componentId}-cont`).removeClass('hide');
+  }
+  else {
+    // make all the rubric components available to each student
+    $(`#component-itempool-${componentId}-cont`).addClass('hide');
+  }
+}
+
 function onPrecisionChange() {
     ajaxUpdateGradeableProperty(getGradeableId(), {
         'precision': $('#point_precision_id').val(),
@@ -66,7 +79,7 @@ function onPrecisionChange() {
 
         closeAllComponents(true)
             .then(function () {
-                return reloadInstructorEditRubric(getGradeableId());
+                return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
             })
             .catch(function (err) {
                 alert('Failed to reload the gradeable rubric! ' + err.message);
@@ -280,6 +293,9 @@ function ajaxCheckBuildStatus() {
                 $('#rebuild-log-button').css('display','none');
                 $('.config_search_error').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
+            }
+            else if (response['data'] == 'warnings') {
+                $('#rebuild-status').html('Gradeable built with warnings');
             }
             else if (response['data'] == true) {
                 $('#rebuild-status').html('Gradeable build complete');

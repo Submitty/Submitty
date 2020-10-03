@@ -1,0 +1,122 @@
+{% import _self as self %}
+{# This is the control shown/hidden #}
+<div class="popup-form hide" id="panels-selector-modal">
+    {# This lets us center the window #}
+    <div class="popup-box">
+        {# Actual displayed window #}
+        <div class="popup-window panels-selector-window">
+            <div class="form-title">
+                <h1>Panel Selector</h1>
+            </div>
+            <div class="layouts-cont">
+                <div class="layout-option" id="layout-option-1">
+                    <div class="layout-option-title">
+                        <h2>Single panel option</h2>
+                    </div>
+                    <hr/>
+                    <div class="layout-option-cont">
+                        <div class="layout-option-item">
+                            <canvas id="single-panel"></canvas>
+                            <div class="flex-col">
+                                <span>single panel</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(1, false)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layout-option" id="layout-option-2">
+                    <div class="layout-option-title">
+                        <h2>Two panel options</h2>
+                    </div>
+                    <hr/>
+                    <div class="layout-option-cont">
+                        <div class="layout-option-item">
+                            <canvas id="equal-height"></canvas>
+                            <div class="flex-col">
+                                <span>side-by-side</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(2, false)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                        <div class="layout-option-item">
+                            <canvas id="tall-left"></canvas>
+                            <div class="flex-col">
+                                <span>side-by-side, taller left</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(2, true)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layout-option" id="layout-option-3">
+                    <div class="layout-option-title">
+                        <h2>Three panel options</h2>
+                    </div>
+                    <hr/>
+                    <div class="layout-option-cont">
+                        <div class="layout-option-item">
+                            <canvas id="equal-two-in-left"></canvas>
+                            <div class="flex-col">
+                                <span>two on left, one on right</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(3, false)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                        <div class="layout-option-item">
+                            <canvas id="tall-left-two-in-left"></canvas>
+                            <div class="flex-col">
+                                <span>two on left, one on right, taller left</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(3, true)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                        <div class="layout-option-item">
+                            <canvas id="equal-two-in-right"></canvas>
+                            <div class="flex-col">
+                                <span>one on left, two on right</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(3, false, true)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                        <div class="layout-option-item">
+                            <canvas id="tall-left-two-in-right"></canvas>
+                            <div class="flex-col">
+                                <span>one on left, two on right, taller left</span>
+                                <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        onclick="changePanelsLayout(3, true, true)"
+                                >Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {# Cancel Button #}
+                <div class="form-buttons">
+                    <div class="form-button-container">
+                        <a onclick="togglePanelSelectorModal(false)" class="btn btn-default close-button key_to_click" tabindex="0">Close</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
