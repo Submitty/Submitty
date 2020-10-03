@@ -7,6 +7,7 @@ use app\controllers\student\TeamController;
 use app\models\gradeable\Gradeable;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use ReflectionObject;
 
 class TeamControllerTester extends BaseUnitTest {
 
@@ -84,5 +85,23 @@ class TeamControllerTester extends BaseUnitTest {
         }
 
         return $gradeable;
+    }
+
+    /** @dataProvider provideTestCleanInviteId */
+    public function testCleanInviteId(string $raw, string $expectation) {
+        $controller = new ReflectionObject(new TeamController($this->core));
+        $clean_invite_id_method = $controller->getMethod('cleanInviteId');
+        $clean_invite_id_method->setAccessible(true);
+
+        $clean_invite_id = $clean_invite_id_method->invoke(null, $raw);
+        $this->assertEquals($clean_invite_id, $expectation);
+    }
+
+    public function provideTestCleanInviteId(): array {
+        return [
+            'assert removes whitespace' => ['      rcsid    ', 'rcsid'],
+            'assert converts all chars to lowercase' => ['      RcSiD    ', 'rcsid'],
+            'assert keeps numbers' => ['rcsid1', 'rcsid1'],
+        ];
     }
 }
