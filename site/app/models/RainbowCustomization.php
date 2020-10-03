@@ -158,7 +158,6 @@ class RainbowCustomization extends AbstractModel {
     /**
      * Returns $bucket_gradeables reordered to match order in $json_bucket_ids.
      * If a gradeable is not present in $json_bucket_ids, it will be added to the end of the array in order of grade release date.
-     * 
      * @param array $bucket_gradeables A gradeable bucket from $this->customization_data
      * @param array $json_bucket_ids An "ids" array from a $this->RCSJSON bucket
      * @return array
@@ -167,7 +166,7 @@ class RainbowCustomization extends AbstractModel {
         $new_gradeables = [];
 
         // First, associate gradeables with their IDs
-        $gradeables_by_id = array_reduce($bucket_gradeables, function($accumulator, $gradeable) {
+        $gradeables_by_id = array_reduce($bucket_gradeables, function ($accumulator, $gradeable) {
             $accumulator[$gradeable['id']] = $gradeable;
             return $accumulator;
         }, []);
@@ -192,8 +191,10 @@ class RainbowCustomization extends AbstractModel {
             $num_gradeables_counted = count($gradeables_by_date);
             
             // Ensure strings are sorted properly
-            $gradeable_count_string = str_repeat('0',
-                strlen(strval($num_unordered_gradeables)) - strlen(strval($num_gradeables_counted))) . $num_gradeables_counted;
+            $gradeable_count_string = str_repeat(
+                '0',
+                strlen(strval($num_unordered_gradeables)) - strlen(strval($num_gradeables_counted))
+            ) . $num_gradeables_counted;
             
             if (array_key_exists('grade_release_date', $gradeable)) {
                 $gradeables_by_date[$gradeable['grade_release_date'] . '_' . $gradeable_count_string] = $gradeable;
