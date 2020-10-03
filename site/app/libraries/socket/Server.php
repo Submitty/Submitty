@@ -214,15 +214,20 @@ class Server implements MessageComponentInterface {
         $msg = json_decode($msgString, true);
 
         if ($msg["type"] === "new_connection") {
-            if (!array_key_exists($msg['page'], $this->clients)) {
-                $this->clients[$msg['page']] = new \SplObjectStorage();
-            }
-            $this->clients[$msg['page']]->attach($from);
-            $this->setSocketClientPage($msg['page'], $from);
+            if (isset($msg['page'])) {
+                if (!array_key_exists($msg['page'], $this->clients)) {
+                    $this->clients[$msg['page']] = new \SplObjectStorage();
+                }
+                $this->clients[$msg['page']]->attach($from);
+                $this->setSocketClientPage($msg['page'], $from);
 
-            if ($this->core->getConfig()->isDebug()) {
-                $course_page = explode('-', $this->getSocketClientPage($from));
-                echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - course: '" . $course_page[0] . "' - page: '" . $course_page[1] . "'\n";
+                if ($this->core->getConfig()->isDebug()) {
+                    $course_page = explode('-', $this->getSocketClientPage($from));
+                    echo "New connection --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2] . "'\n";
+                }
+            }
+            else {
+                $from->close();
             }
         }
         elseif (isset($msg['user_id'])) {

@@ -116,7 +116,7 @@ chown  root:root  TestRunner.java
 # everyone can read this file
 chmod  444 TestRunner.java
 
-# compile the executable using the javac we use in the execute.cpp whitelist
+# compile the executable using the javac we use in the execute.cpp safelist
 /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
 # everyone can read the compiled file

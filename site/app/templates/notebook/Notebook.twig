@@ -5,7 +5,7 @@
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}">
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}">
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
@@ -69,6 +69,10 @@
                     if ('{{ cell.programming_language }}') {
                         config_{{ num_codeboxes }}.lineNumbers = true;
                         config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    }
+
+                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                        config_{{ num_codeboxes }}.lineWrapping = true;
                     }
 
                     if ({{ cell.rows }} > 0) {

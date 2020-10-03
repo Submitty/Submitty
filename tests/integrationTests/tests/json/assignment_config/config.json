@@ -4,7 +4,7 @@
         "AUTO_POINTS" : 10
     },
 
-    "whitelist_executables" : [ "a.out" ],
+    "safelist_executables" : [ "a.out" ],
 
     "testcases" : [
         {

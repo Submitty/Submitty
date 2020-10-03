@@ -1,0 +1,157 @@
+<div class="content">
+  <h1>
+    Office Hours/Lab Queue Statistics
+  </h1>
+
+  <a id="view-queue" class="btn btn-primary filter_btn" href="{{base_url}}">
+    Back to Queue
+  </a>
+
+  {% if access_full_grading %}
+    <a id="view-stats" class="btn btn-default filter_btn" href="{{base_url}}/student_stats">
+      View Student Specific Stats
+    </a>
+    <br>
+    <br>
+  {% endif %}
+
+  <h2>Overall Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in overall_data[0] %}
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in overall_data %}
+        <tr>
+          {% for key, item in queue %}
+            <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>Today's Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in today_data[0] %}
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in today_data %}
+        <tr>
+          {% for key, item in queue %}
+            <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>This Week's Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in week_day_this_week_data[0] %}
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in week_day_this_week_data %}
+        <tr>
+          {% for key, item in queue %}
+            {% if key == "dow" %}
+              <td>{{viewer.dayNumToDay(item)}}</td>
+            {% else %}
+              <td>{{item}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Week Day Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in week_day_data[0] %}
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in week_day_data %}
+        <tr>
+          {% for key, item in queue %}
+            {% if key == "dow" %}
+              <td>{{viewer.dayNumToDay(item)}}</td>
+            {% else %}
+              <td>{{item}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Queue Data:</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in queue_data[0] %}
+          <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for queue in queue_data %}
+        <tr>
+          {% for key, item in queue %}
+            <td>{{item}}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <br>
+  <h2>Week specific Data: (Week starts on Monday)</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        {% for key, item in week_number_data[0] %}
+          {% if key == "yearnum" %}
+          {% else %}
+            <th style="padding:.4rem">{{viewer.statNiceName(key)}}</th>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for weekdata in week_number_data %}
+        <tr>
+          {% for key, item in weekdata %}
+            {% if key == "yearnum" %}
+            {% elseif key == "weeknum" %}
+              <td>{{viewer.weekNumToDate(item, weekdata["yearnum"])}}</td>
+            {% else %}
+              <td>{{item}}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
