@@ -1071,16 +1071,24 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path,cmTime, sections) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections) {
     var submit_url = buildCourseUrl(['course_materials', 'upload']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
+    var priority = parseFloat(sortPriority);
+
+    if (priority < 0 || isNaN(priority)) {
+        alert('Floating point priority must be a number greater than 0.');
+        return;
+    }
 
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
+    formData.append('sort_priority',priority);
+
     if(sections !== null){
         formData.append('sections', sections);
     }
@@ -1167,7 +1175,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
-                console.log(data);
             }
         },
         error: function(data) {
@@ -1180,14 +1187,22 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime, sortPriority) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
+    var priority = parseFloat(sortPriority);
+
+    if (priority < 0 || isNaN(priority)) {
+        alert('Floating point priority must be a number greater than 0.');
+        return;
+    }
+
     formData.append('csrf_token', csrf_token);
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
+    formData.append('sort_priority',priority);
 
     if(sectionsEdit !== null){
         formData.append('sections', sectionsEdit);
