@@ -66,7 +66,7 @@ class PollController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['polls']))
             );
         }
-    if ($this->core->getUser()->accessAdmin()) {
+        if ($this->core->getUser()->accessAdmin()) {
             return MultiResponse::webOnlyResponse(
                 new WebResponse(
                     'Poll',
