@@ -17,256 +17,26 @@
 
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
-  j["title"] = "Test " + test.getID() + " " + test.getTitle();
-  j["testcase_label"] = test.getTestcaseLabel();
-  j["details"] = test.getDetails();
-  j["points"] = test.getPoints();
-  j["extra_credit"] = test.getExtraCredit();
-  j["hidden"] = test.getHidden();
-  j["view_testcase_message"] = test.viewTestcaseMessage();
-
   j["publish_actions"] = test.publishActions();
   j["dispatcher_actions"] = test.getDispatcherActions();
   j["actions"] = test.getGraphicsActions();
-
-  // THESE ELEMENTS ARE DEPRECATED / NEED TO BE REPLACED
-  j["view_file_results"] = true;
-  j["view_test_points"] = true;
-  j["view_file"] = "";
   return j;
 }
 
-nlohmann::json validate_notebook(const nlohmann::json& notebook, const nlohmann::json& config_json) {
-    // Setup "notebook" items inside the 'j' json item that will be passed forward
-    nlohmann::json complete = nlohmann::json::array();
-    nlohmann::json::const_iterator itempool_definitions = config_json.find("item_pool");
-    int i = 0;
-    for (nlohmann::json::const_iterator itr = notebook.begin(); itr != notebook.end(); itr++, i++){
-      const nlohmann::json in_notebook_cell = (*itr);
-      nlohmann::json out_notebook_cell;
-
-      // Get type field
-      std::string type = in_notebook_cell.value("type", "");
-      assert(type != "");
-      out_notebook_cell["type"] = type;
-
-      // Get testcase_ref if it exists
-      std::string testcase_ref = in_notebook_cell.value("testcase_ref", "");
-      if(testcase_ref != ""){
-        out_notebook_cell["testcase_ref"] = testcase_ref;
-      }
-
-      // Handle each specific note book cell type
-      // Handle markdown data
-      if(type == "markdown"){
-          // Get markdown items
-          std::string markdown_string = in_notebook_cell.value("markdown_string", "");
-          std::string markdown_file = in_notebook_cell.value("markdown_file", "");
-
-          // Assert only one was passed in
-          assert(
-                  (markdown_string != "" && markdown_file == "") ||
-                  (markdown_string == "" && markdown_file != "")
-                  );
-
-          // Pass forward the item that was passed in
-          if(markdown_string != ""){
-              out_notebook_cell["markdown_string"] = markdown_string;
-          }
-          else{
-              out_notebook_cell["markdown_file"] = markdown_file;
-          }
-      }
-      // Handle image data
-      else if(type == "image"){
-          // Get req image items
-          std::string image = in_notebook_cell.value("image", "");
-
-          // Assert req fields were not empty
-          assert(image != "");
-
-          // Get optional image items
-          int height = in_notebook_cell.value("height", 0);
-          int width = in_notebook_cell.value("width", 0);
-          std::string alt_text = in_notebook_cell.value("alt_text", "Instructor provided image");
-
-          // Pass forward populated items
-          out_notebook_cell["image"] = image;
-          out_notebook_cell["alt_text"] = alt_text;
-
-          if(height > 0){
-              out_notebook_cell["height"] = height;
-          }
-
-          if(width > 0){
-              out_notebook_cell["width"] = width;
-          }
-      }
-      // Handle file_submission
-      else if(type == "file_submission"){
-          // required field
-          std::string directory = in_notebook_cell.value("directory","");
-          assert (directory != "");
-
-          // optional field
-          std::string label = in_notebook_cell.value("label","");
-
-          // Pass forward populated items
-          out_notebook_cell["directory"] = directory;
-          out_notebook_cell["label"] = label;
-      }
-      // Handle short_answer data
-      else if(type == "short_answer"){
-          // Get req short_answer items
-          std::string filename = in_notebook_cell.value("filename", "");
-
-          // Assert req fields were not empty
-          assert(filename != "");
-
-          // Get optional short_answer items
-          std::string initial_value = in_notebook_cell.value("initial_value", "");
-          std::string programming_language = in_notebook_cell.value("programming_language", "");
-          int rows = in_notebook_cell.value("rows", 0);
-
-          // Pass forward populated items
-          out_notebook_cell["filename"] = filename;
-          out_notebook_cell["initial_value"] = initial_value;
-          out_notebook_cell["rows"] = rows;
-
-          if(programming_language != ""){
-              out_notebook_cell["programming_language"] = programming_language;
-          }
-      }
-      // Handle multiple choice data
-      else if(type == "multiple_choice"){
-          // Get req multiple choice items
-          std::string filename = in_notebook_cell.value("filename", "");
-
-          // Assert filename was present
-          assert(filename != "");
-
-          // Get choices
-          nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
-
-          int num_of_choices = 0;
-          for (auto it = choices.begin(); it != choices.end(); ++it){
-              // Reassign the value of this iteration to choice
-              nlohmann::json choice = it.value();
-
-              // Get value and description
-              std::string value = choice.value("value", "");
-              std::string description = choice.value("description", "");
-
-              // Assert choice value and description were in fact present
-              assert(value != "");
-              assert(description != "");
-
-              num_of_choices++;
-          }
-
-          // Assert choices was not empty
-          assert(num_of_choices > 0);
-
-          bool allow_multiple = in_notebook_cell.value("allow_multiple", false);
-          bool randomize_order = in_notebook_cell.value("randomize_order", false);
-
-          // Pass forward items
-          out_notebook_cell["filename"] = filename;
-          out_notebook_cell["choices"] = choices;
-          out_notebook_cell["allow_multiple"] = allow_multiple;
-          out_notebook_cell["randomize_order"] = randomize_order;
-      }
-      else if(type == "item"){
-        std::string item_label = in_notebook_cell.value("item_label", "");
-        nlohmann::json user_item_map = in_notebook_cell.value("user_item_map", nlohmann::json::object());
-
-        // Update the complete_config if we had a blank label
-        complete[i]["item_label"] = "";
-
-        if(itempool_definitions == config_json.end()){
-          std::cout << "ERROR: Found an \"item\" cell but no global item_pool was defined!" << std::endl;
-          throw -1;
-        }
-        //Search through the global item_pool to find if the items in this itempool exist
-        if(in_notebook_cell.find("from_pool") == in_notebook_cell.end()){
-          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label)
-                    << " does not have a from_pool" << std::endl;
-          throw -1;
-        }
-        nlohmann::json in_notebook_cell_from_pool = in_notebook_cell.value("from_pool", nlohmann::json::array());
-        //std::cout << "Checking for " << in_notebook_cell_item_pool.size() << " items among a global set of "
-        //          << itempool_definitions->size() << " items" << std::endl;
-
-        if(in_notebook_cell_from_pool.size() == 0){
-          std::cout << "ERROR: item with label " << (item_label.empty() ? "\"[no label]\"" : item_label)
-                    << " has an empty from_pool, requires at least one item!" << std::endl;
-          throw -1;
-        }
-
-        for(int j=0; j<in_notebook_cell_from_pool.size(); j++){
-          bool found_global_itempool_item = false;
-          for(int k=0; k<itempool_definitions->size(); k++) {
-            if ((*itempool_definitions)[k]["item_name"] == in_notebook_cell_from_pool[j]) {
-              found_global_itempool_item = true;
-              break;
-            }
-          }
-          if(!found_global_itempool_item){
-            std::cout << "ERROR: item with label \"" << (item_label.empty() ? "[no label]" : item_label);
-            std::cout << "\" requested undefined item: " << in_notebook_cell_from_pool[j] << std::endl;
-            throw -1;
-          }
-          /*else{
-            std::cout << "Found global itempool item " << in_notebook_cell_from_pool[j] << " for item with label: "
-                      << (item_label.empty() ? "[no label]" : item_label) << std::endl;
-          }*/
-        }
-        // Check if the indices mapped to users are in 'from_pool' array range
-        for (auto i=user_item_map.begin(); i!=user_item_map.end(); i++) {
-           int item_index = i.value();
-           if(item_index < 0 || item_index >= in_notebook_cell_from_pool.size()) {
-               std::cout << "ERROR: user (" << i.key() <<") mapped with index \"" << item_index;
-               std::cout << "\" which is out of 'from_pool' array range: 0 to " << user_item_map.size() << std::endl;
-               throw -1;
-           }
-        }
-
-        // Write the empty string if no label provided, otherwise pass forward item_label
-        out_notebook_cell["item_label"] = item_label;
-
-        // Write the empty object if no 'mapping' provided, otherwise pass forward user_item_map
-        out_notebook_cell["user_item_map"] = user_item_map;
-
-        // Pass forward other items
-        out_notebook_cell["from_pool"] = in_notebook_cell["from_pool"];
-        if(in_notebook_cell.find("points") != in_notebook_cell.end()){
-          out_notebook_cell["points"] = in_notebook_cell["points"];
-        }
-      }
-      // Else unknown type was passed in throw exception
-      else{
-        std::cout << "An unknown notebook cell type was detected in the supplied config.json file: '" << type << "'. Build failed." << std::endl;
-        throw -1;
-      }
-
-      // Add this newly validated notebook cell to the one being sent forward
-      assert(type != "item" || out_notebook_cell.find("item_label") != out_notebook_cell.end());
-      complete.push_back(out_notebook_cell);
-    }
-    return complete;
-}
-
 int main(int argc, char *argv[]) {
-
-  // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON("");  // don't know the username yet
-
-  nlohmann::json j;
 
   if (argc != 2) {
     std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
     return 0;
   }
+
+  // LOAD HW CONFIGURATION JSON
+  nlohmann::json config_json = LoadAndProcessConfigJSON("");  // don't know the username yet
+
+  nlohmann::json j;
+  j["id"] = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
+
+  
 
   std::cout << "FILENAME " << argv[0] << std::endl;
   int total_nonec = 0;
@@ -331,6 +101,7 @@ int main(int argc, char *argv[]) {
   std::cout << "processed " << all.size() << " test cases" << std::endl;
   j["num_testcases"] = all.size();
   j["testcases"] = all;
+  // TODO: For random item pools, compute the average max possible wait time (across pools).
   j["max_possible_grading_time"] = total_time;
   std::string start_red_text = "\033[1;31m";
   std::string end_red_text   = "\033[0m";
@@ -360,80 +131,9 @@ int main(int argc, char *argv[]) {
   }
 
 
-  std::string id = getAssignmentIdFromCurrentDirectory(std::string(argv[0]));
-  //std::vector<std::string> part_names = PART_NAMES;
+  
 
-
-  j["id"] = id;
-  if (config_json.find("assignment_message") != config_json.end()) {
-    j["gradeable_message"] = config_json.value("assignment_message","");
-  } else if (config_json.find("gradeable_message") != config_json.end()) {
-    j["gradeable_message"] = config_json.value("gradeable_message", "");
-  }
-  if (config_json.find("load_gradeable_message") != config_json.end()) {
-    nlohmann::json load_gradeable_message = config_json.value("load_gradeable_message", nlohmann::json::object());
-    nlohmann::json load_gradeable_message_prop;
-    load_gradeable_message_prop["message"] = load_gradeable_message.value("message", "");
-    load_gradeable_message_prop["first_time_only"] = load_gradeable_message.value("first_time_only", false);
-    j["load_gradeable_message"] = load_gradeable_message_prop;
-  }
-  if (config_json.find("early_submission_incentive") != config_json.end()) {
-    nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());
-    nlohmann::json incentive;
-    incentive["message"] = early_submission_incentive.value("message","");
-    incentive["minimum_days_early"] = early_submission_incentive.value("minimum_days_early",0);
-    incentive["minimum_points"] = early_submission_incentive.value("minimum_points",0);
-    incentive["test_cases"] = early_submission_incentive.value("test_cases",std::vector<int>());
-    j["early_submission_incentive"] = incentive;
-  }
   j["max_submissions"] = max_submissions;
-  j["max_submission_size"] = config_json.value("max_submission_size",MAX_SUBMISSION_SIZE);
-
-  j["required_capabilities"] = config_json.value("required_capabilities","default");
-  nlohmann::json::iterator parts = config_json.find("part_names");
-  if (parts != config_json.end()) {
-    j["part_names"] =  nlohmann::json::array();
-    for (int i = 0; i < parts->size(); i++) {
-      j["part_names"].push_back((*parts)[i]);
-    }
-  }
-
-  // Configure defaults for hide_submitted_files
-  j["hide_submitted_files"] = config_json.value("hide_submitted_files", false);
-
-  // Configure defaults for hide_version_and_test_details
-  j["hide_version_and_test_details"] = config_json.value("hide_version_and_test_details", false);
-
-    /******************************************
-
-    Validate and inflate notebook data
-
-    ******************************************/
-
-  if (config_json.find("notebook") != config_json.end()){
-    j["notebook"] = validate_notebook(config_json["notebook"], config_json);
-  }
-
-  if(config_json.find("item_pool") != config_json.end()){
-    int i = 0;
-    for(nlohmann::json::iterator itr = config_json["item_pool"].begin(); itr != config_json["item_pool"].end(); itr++, i++) {
-      j["item_pool"][i]["item_name"] = (*itr)["item_name"];
-      j["item_pool"][i]["notebook"] = validate_notebook((*itr)["notebook"], config_json);
-    }
-  }
-
-  // By default, we have one drop zone without a part label / sub
-  // directory.
-
-  // But, if there are input fields, but there are no explicit parts
-  // (drag & drop zones / "bucket"s for file upload), set part_names
-  // to an empty array (no zones for file drag & drop).
-  nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
-  if (parts == config_json.end() &&
-      in_notebook_cells != config_json.end()) {
-    j["part_names"] =  nlohmann::json::array();
-  }
-
   j["auto_pts"] = AUTO_POINTS;
   j["points_visible"] = visible;
   j["ta_pts"] = TA_POINTS;

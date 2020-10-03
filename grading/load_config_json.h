@@ -72,4 +72,8 @@ void validate_gif_or_screenshot_name(std::string filename);
 
 std::vector<std::string> gatherAllTestcaseIds(const nlohmann::json& complete_config);
 
+void ValidateNotebooks(nlohmann::json& config_json);
+
+nlohmann::json ValidateANotebook(const nlohmann::json& notebook, const nlohmann::json& config_json);
+
 #endif
