@@ -269,7 +269,7 @@ class CourseMaterialsController extends AbstractController {
             $external_link = isset($json[$file_path]['external_link']) ? $json[$file_path]['external_link'] : false;
 
             $json[$file_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link];
-            }
+        }
         $json[$requested_path] =  ['release_datetime' => $file_path_release_datetime, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'external_link' => $external_link, 'sort_priority' => $sort_priority];
 
         FileUtils::writeJsonFile($fp, $json);
