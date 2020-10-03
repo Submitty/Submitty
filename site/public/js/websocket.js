@@ -40,7 +40,6 @@ class WebSocketClient {
     open(page) {
         console.log(`WebSocket: connecting to ${this.url}`);
         this.client = new WebSocket(this.url);
-
         this.client.onopen = () => {
             console.log('WebSocket: connected');
             if (this.onopen) {
@@ -55,7 +54,7 @@ class WebSocketClient {
         this.client.onmessage = (event) => {
             this.number++;
             if (this.onmessage) {
-                try {   
+                try {
                     this.onmessage(JSON.parse(event.data));
                 }
                 catch (exc) {
