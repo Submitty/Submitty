@@ -1334,13 +1334,13 @@ div.full_height {
 }
 
 #admin-team-history-left {
-    width:28%;
+    width:35%;
     display: inline-block;
     margin-right: 10px;
 }
 
 #admin-team-history-right {
-    width:62%;
+    width:55%;
     display: inline-block;
 }
 
