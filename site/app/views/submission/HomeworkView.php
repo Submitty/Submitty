@@ -432,6 +432,8 @@ class HomeworkView extends AbstractView {
             'gradeable_url' => $gradeable->getInstructionsUrl(),
             'due_date' => $gradeable->getSubmissionDueDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
+            'server_time_zone_string' => $this->core->getConfig()->getTimezone()->getName(),
+            'user_time_zone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'one_part_only' => $gradeable->getAutogradingConfig()->getOnePartOnly(),
             'is_vcs' => $gradeable->isVcs(),
@@ -1119,13 +1121,15 @@ class HomeworkView extends AbstractView {
                     $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
+                    $post_id = $post['id'];
                     $posts[] = [
                         'is_staff' => $is_staff,
                         'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),
                         'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,
-                        'gc_title' => $gc_title
+                        'gc_title' => $gc_title,
+                        'id' => $post_id
                     ];
                 }
 
@@ -1147,15 +1151,14 @@ class HomeworkView extends AbstractView {
                 }
                 $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
             }
-        }
-        // sort by most recent posts
-        if (!empty($grade_inquiries_twig_array)) {
-            usort($grade_inquiries_twig_array[0]['posts'], function ($a, $b) {
-                return strtotime($a['date']) - strtotime($b['date']);
+            // sort "all" tab posts chronologically
+            usort($grade_inquiries_twig_array[0]['posts'], function ($post1, $post2) {
+                if ($post1['date_sort'] == $post2['date_sort']) {
+                    return 0;
+                }
+                return ($post1['date_sort'] < $post2['date_sort']) ? -1 : 1;
             });
         }
-
-
 
         // construct components array for tabs
         $components_twig_array = [];
@@ -1186,6 +1189,44 @@ class HomeworkView extends AbstractView {
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'gradeable_components' => $components_twig_array,
             "csrf_token" => $this->core->getCsrfToken()
+        ]);
+    }
+
+    /**
+     * @param array $post
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderSingleGradeInquiryPost(array $post, GradedGradeable $graded_gradeable): string {
+        $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
+
+        $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+        $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+        $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
+        $content = $post['content'];
+        $post_id = $post['id'];
+
+        $gc_id = $post['gc_id'];
+        $gc_title = '';
+        if (!is_null($gc_id)) {
+            $gradeable_component = $graded_gradeable->getGradeable()->getComponent($gc_id);
+            $gc_title = $gradeable_component->getTitle();
+        }
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Post.twig', [
+            'post' => [
+                'is_staff' => $is_staff,
+                'date' => DateUtils::convertTimeStamp($this->core->getUser(), $date->format('c'), $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')),
+                'date_sort' => $date,
+                'name' => $name,
+                'content' => $content,
+                'gc_title' => $gc_title,
+                'id' => $post_id
+            ],
+            'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
+            'component' => [
+                'id' => 0
+            ]
         ]);
     }
 }

@@ -290,7 +290,7 @@ class ReportController extends AbstractController {
                     // This user had no results, so generate results
                     $ggs = $this->mergeGradedGradeables($all_gradeables, $u, [], $team_graded_gradeables);
                     $late_days = new LateDays($this->core, $u, $ggs, $all_late_days[$u->getId()] ?? []);
-                    $results[$current_user->getId()] = $per_user_callback($u, $ggs, $late_days);
+                    $results[$u->getId()] = $per_user_callback($u, $ggs, $late_days, $all_polls);
                 }
             }
         }

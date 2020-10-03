@@ -266,3 +266,12 @@ form.dropdown {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+.select-label-itempool {
+    padding-left: 0;
+}
+
+select[name="component-itempool"] {
+    margin-bottom: 15px;
+    padding-right: 0;
+}
