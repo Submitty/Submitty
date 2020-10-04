@@ -12,9 +12,17 @@ from autograder import config
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Path any auxiliary test files (e.g. autograding configs)
-TEST_DATA_DIR = os.path.join(SCRIPT_DIR, 'data')
+TEST_DATA_SRC_DIR = os.path.join(SCRIPT_DIR, 'data')
+
+# Where to dump intermediate test files
+# The GIT_CHECKOUT folder is guaranteed to be within the Submitty install dir.
+WORKING_DIR = os.path.abspath(
+    os.path.join('..', '..', '..', 'test_suite', 'unitTests', 'autograder')
+)
+# Path to place our temporary data files
+TEST_DATA_DIR = os.path.join(WORKING_DIR, 'data')
 # Equivalent to install dir
-TEST_ENVIRONMENT = os.path.join(SCRIPT_DIR, 'test_environment')
+TEST_ENVIRONMENT = os.path.join(WORKING_DIR, 'test_environment')
 
 # Holds all system config files (equivalent to /usr/local/submitty/config)
 CONFIG_DIR = os.path.join(TEST_ENVIRONMENT, 'config')
@@ -40,10 +48,10 @@ class TestAutogradingShipper(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
-        global TEST_ENVIRONMENT
+        global WORKING_DIR
         # Remove the test environment.
         with contextlib.suppress(FileNotFoundError):
-            shutil.rmtree(TEST_ENVIRONMENT)
+            shutil.rmtree(WORKING_DIR)
 
     @classmethod
     def setUpClass(cls):
@@ -57,6 +65,12 @@ class TestAutogradingShipper(unittest.TestCase):
         # Remove the test environment if it is left over from a previous run.
         with contextlib.suppress(FileNotFoundError):
             shutil.rmtree(TEST_ENVIRONMENT)
+
+        # Make the working directory
+        os.makedirs(WORKING_DIR, exist_ok=True)
+
+        # Copy test data into the dir
+        shutil.copytree(TEST_DATA_SRC_DIR, TEST_DATA_DIR)
 
         # All testing will take place within the TEST_ENVIRONMENT directory
         os.mkdir(TEST_ENVIRONMENT)
