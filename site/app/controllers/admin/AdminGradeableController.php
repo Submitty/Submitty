@@ -184,6 +184,29 @@ class AdminGradeableController extends AbstractController {
             }
         }
 
+        // Get the list of itempool questions in this gradeable which are multi-valued (and hence randomized)
+        $itempool_options = [];
+        // read config file
+
+        if ($gradeable->hasAutogradingConfig()) {
+            $gradeable_config = $gradeable->getAutogradingConfig();
+            $notebook_config = $gradeable_config->getNotebookConfig();
+
+
+            // loop through the notebook key, and find from_pool key in each object (or question)
+            foreach ($notebook_config as $key => $item) {
+                // store those question which are having count(from_pool array) > 1
+                if (isset($item['from_pool']) && count($item['from_pool']) > 1) {
+                    $item_id = !empty($item['item_label']) ? $item["item_label"] : "item";
+                    if (!isset($itempool_options[$item_id])) {
+                        $itempool_options[$item_id] = $item['from_pool'];
+                    }
+                    else {
+                        $itempool_options[$item_id . '_' . $key] = $item['from_pool'];
+                    }
+                }
+            }
+        }
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -199,6 +222,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -222,6 +246,8 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'is_pdf_page' => $gradeable->isPdfUpload(),
             'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
+            'itempool_available' => isset($gradeable_config) && $gradeable_config->isNotebookGradeable() && count($itempool_options),
+            'itempool_options' => json_encode($itempool_options),
             'num_numeric' => $gradeable->getNumNumeric(),
             'num_text' => $gradeable->getNumText(),
             'type_string' => $type_string,
@@ -354,7 +380,9 @@ class AdminGradeableController extends AbstractController {
             'text' => false,
             'peer' => false,
             'order' => -1,
-            'page' => Component::PDF_PAGE_NONE
+            'page' => Component::PDF_PAGE_NONE,
+            'is_itempool_linked' => false,
+            'itempool' => ""
         ]);
     }
 
@@ -1231,7 +1259,7 @@ class AdminGradeableController extends AbstractController {
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
-    public function ajaxGetBuildLogs($gradeable_id) {
+    public function getBuildLogs(string $gradeable_id): JsonResponse {
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
         $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
@@ -1239,13 +1267,13 @@ class AdminGradeableController extends AbstractController {
         $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
         $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
 
-        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
+        return JsonResponse::getSuccessResponse([$build_script_output,$cmake_output,$make_output]);
     }
 
     /**
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
-    public function getBuildStatusOfGradeable($gradeable_id) {
+    public function getBuildStatusOfGradeable(string $gradeable_id): void {
         $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
@@ -1260,6 +1288,18 @@ class AdminGradeableController extends AbstractController {
         else {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
             $status = $gradeable->hasAutogradingConfig();
+
+            // Check for schema validation errors and return a different status if needed.
+            if ($status) {
+                $logs = $this->getBuildLogs($gradeable_id);
+
+                $needle = 'The submitty configuration validator detected the above error in your config.';
+                $haystack = $logs->json['data'][0];
+
+                if (strpos($haystack, $needle) !== false) {
+                    $status = 'warnings';
+                }
+            }
         }
         clearstatcache();
         $this->core->getOutput()->renderJsonSuccess($status);

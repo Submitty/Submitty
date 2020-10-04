@@ -17,6 +17,7 @@ import time
 import psutil
 import json
 import datetime
+from collections import OrderedDict
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
@@ -132,7 +133,8 @@ def print_header(OPEN_AUTOGRADING_WORKERS_JSON, capability_queue_counts,
     print(' '*pad_machines, end="")
     print("{:2}".format("|"), end="")
     for cap in capability_queue_counts:
-        print("{:9}".format(cap.lower()), end="")
+        cap_tmp = cap.lower()[0:8]
+        print("{:9}".format(cap_tmp), end="")
     print(' '*pad_capabilities, end="")
     print("{:1}".format("|"), end="")
     print()
@@ -325,6 +327,8 @@ def main():
             for c in m["capabilities"]:
                 capability_queue_counts[c] = 0
 
+        sorted_capability_queue_counts = OrderedDict(sorted(capability_queue_counts.items()))
+
         machine_stale_job = {}
         for machine in OPEN_AUTOGRADING_WORKERS_JSON:
             machine_stale_job[machine] = False
@@ -339,7 +343,7 @@ def main():
         # collect all the jobs that are still in the queue
         for full_path_file in Path(GRADING_QUEUE).glob("*"):
             update_queue_counts(full_path_file, False, epoch_time, queue_counts,
-                                capability_queue_counts, machine_grading_counts,
+                                sorted_capability_queue_counts, machine_grading_counts,
                                 machine_stale_job)
 
         # collect all the jobs that are in the worker directories
@@ -364,12 +368,12 @@ def main():
                     print(f"WARNING -- {grading_file} wasn't in all_files list {e}")
                     pass
                 update_queue_counts(grading_file, True, epoch_time, queue_counts,
-                                    capability_queue_counts, machine_grading_counts,
+                                    sorted_capability_queue_counts, machine_grading_counts,
                                     machine_stale_job)
 
             for not_yet_started in all_files:
                 update_queue_counts(not_yet_started, False, epoch_time, queue_counts,
-                                    capability_queue_counts, machine_grading_counts,
+                                    sorted_capability_queue_counts, machine_grading_counts,
                                     machine_stale_job)
 
         done = print_status(epoch_time,
@@ -377,7 +381,7 @@ def main():
                             OPEN_AUTOGRADING_WORKERS_JSON,
                             machine_stale_job,
                             machine_grading_counts,
-                            capability_queue_counts)
+                            sorted_capability_queue_counts)
 
         # quit when the queues are empty
         if done and not args.continuous:

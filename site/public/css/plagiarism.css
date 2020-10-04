@@ -81,7 +81,7 @@ input[type="text"], select {
     left: 0;
 }
 
-.fa-plus-square {
+.plag-data-group .fa-plus-square {
     margin-right: 10px;
 }
 
@@ -89,7 +89,27 @@ input[type="text"], select {
 .plagiarism-result-cont {
     display: flex;
     flex-direction: column;
-    padding: 30px 15px;
+    height: 100%;
+    padding: 20px;
+    margin: 0 20px 0 0;
+}
+
+main#main.full-screen-mode {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin:0;
+    z-index: 10;
+    height: 100vh;
+    width:100vw;
+}
+
+main#main.full-screen-mode .plagiarism-result-cont {
+    margin:0;
+}
+
+.full-screen-btn {
+    margin-left: 10px;
 }
 
 .plag-flex {
@@ -113,7 +133,7 @@ input[type="text"], select {
 
 .code-cont {
     position:relative;
-    height:70vh;
+    height: inherit;
     overflow-y:hidden;
 }
 
@@ -124,12 +144,44 @@ input[type="text"], select {
 }
 
 .code-cont .sub-item {
-    flex: 1;
     line-height:1.5em;
     overflow:auto;
     padding:5px;
     border: 2px solid #555;
     background:white;
+    min-width: 100px;
+}
+
+.left-sub-item {
+    width: 49%;
+}
+
+.right-sub-item {
+    flex: 1 1 0%;
+}
+
+.plag-drag-bar {
+    height: 100%;
+    width: 20px;
+    position: relative;
+    cursor: col-resize;
+}
+
+.plag-drag-bar:after {
+    content: "";
+    width: 10px;
+    height: 25%;
+    max-height: 120px;
+    border-radius: 10px;
+    background: var(--submitty-logo-blue);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.plag-drag-bar:hover:after {
+    filter: blur(5px);
 }
 
 @media (max-width: 660px) {

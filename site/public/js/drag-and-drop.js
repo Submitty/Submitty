@@ -564,7 +564,7 @@ function displayPreviousSubmissionOptions(callback){
     var current_btn = 4;
     if(form.css('display') !== 'none'){
         document.addEventListener("keydown", e => {
-            if(e.keyCode == 9){
+            if(e.code === "Tab"){
                 //on tab update the focus, cycle through the radio buttons and then
                 //the close/submit buttons and then back to the radio buttons
                 $('input[name=instructor-submit]').css({"outline": "none"});
@@ -589,11 +589,11 @@ function displayPreviousSubmissionOptions(callback){
                 }
                 current_btn = (current_btn == 4) ? 0 : current_btn + 1;
             }
-            else if(e.keyCode === 27){
+            else if(e.code === "Escape"){
                 //close the modal box on escape
                 closer_btn.click();
             }
-            else if(e.keyCode === 13){
+            else if(e.code === "Enter"){
                 //on enter update whatever the user is focussing on
                 //uncheck everything and then recheck the desired button to make sure it actually updates
                 if(current_btn === 1){
@@ -941,10 +941,8 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         $(".loading-bar-wrapper").fadeIn(100);
     }
 
-    var short_answer_object    = gatherInputAnswersByType("short_answer");
     var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
     var codebox_object         = gatherInputAnswersByType("codebox");
-    formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
     formData.append('codebox_answers'        , JSON.stringify(codebox_object));
 
@@ -1222,4 +1220,14 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, requested_pat
             window.location.href = buildCourseUrl(['course_materials']);
         }
     });
+}
+
+
+function initializeDropZone(id){
+    var dropzone = document.getElementById(id);
+    dropzone.addEventListener("click", clicked_on_box, false);
+    dropzone.addEventListener("dragenter", draghandle, false);
+    dropzone.addEventListener("dragover", draghandle, false);
+    dropzone.addEventListener("dragleave", draghandle, false);
+    dropzone.addEventListener("drop", drop, false);
 }

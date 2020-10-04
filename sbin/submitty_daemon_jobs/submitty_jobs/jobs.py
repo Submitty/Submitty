@@ -15,7 +15,7 @@ from . import bulk_qr_split
 from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
-
+from . import VERIFIED_ADMIN_USER
 
 class AbstractJob(ABC):
     """
@@ -354,3 +354,5 @@ class CreateCourse(AbstractJob):
         with log_file_path.open("w") as output_file:
             subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
             subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
+            if VERIFIED_ADMIN_USER != "":
+                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)

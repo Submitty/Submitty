@@ -67,11 +67,11 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   std::set<std::string> categories;
   
-  // grep ' :' grading/system_call_categories.cpp | grep WHITELIST | cut -f 6 -d ' '
+  // grep ' :' grading/system_call_categories.cpp | grep SAFELIST | cut -f 6 -d ' '
   // grep ' :' grading/system_call_categories.cpp | grep RESTRICTED | cut -f 6 -d ' '
   // grep ' :' grading/system_call_categories.cpp | grep FORBIDDEN | cut -f 6 -d ' ' 
 
-  std::set<std::string> whitelist_categories = {
+  std::set<std::string> safelist_categories = {
     "PROCESS_CONTROL",
     "PROCESS_CONTROL_MEMORY",
     "PROCESS_CONTROL_WAITING",
@@ -113,9 +113,9 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   // ---------------------------------------------------------------
   // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
-  const nlohmann::json &config_whitelist = whole_config.value("allow_system_calls",nlohmann::json());
-  for (nlohmann::json::const_iterator cwitr = config_whitelist.begin();
-       cwitr != config_whitelist.end(); cwitr++) {
+  const nlohmann::json &config_safelist = whole_config.value("allow_system_calls",nlohmann::json());
+  for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
+       cwitr != config_safelist.end(); cwitr++) {
     std::string my_category = *cwitr;
     if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
       my_category = my_category.substr(27,my_category.size()-27);

@@ -1,15 +1,11 @@
-
-
-{% macro renderNotebook(notebook, testcase_messages, image_data, numberUtils, student_id, gradeable_id, highest_version, max_file_uploads, old_files) %}
 <div class="notebook">
 
     {# Render content #}
-    {% set num_short_answer = 0 %}
     {% set num_codeboxes = 0 %}
     {% set num_multiple_choice = 0 %}
     {% set num_file_submissions = 0 %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}">
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}">
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
@@ -42,64 +38,63 @@
             {# Handle if cell is short_answer #}
             {% elseif cell.type == "short_answer" %}
 
-                {# If programming language not defined render regular text boxes #}
-                {% if cell.programming_language is not defined %}
+                <div>
+                    {% if cell.label %}
+                        {{ cell.label | markdown }}
+                    {% else %}
+                        {% set write_your = cell.programming_language != '' ? cell.programming_language : 'answer' %}
+                        Write your {{ write_your }} below:
+                    {% endif %}
+                </div>
 
-                    {{ _self.render_short_answer(cell, num_short_answer, highest_version, testcase_messages) }}
-                    {% set num_short_answer = num_short_answer + 1 %}
+                {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
-                {# Else render a codebox #}
-                {% else %}
-                        <div>
-                            {% if cell.label %}
-                                {{ cell.label | markdown }}
-                            {% else %}
-                                Write your {{ cell.programming_language | title }} below.  Press TAB to indent. Press ESC to advance from answer area.
-                            {% endif %}
-                        </div>
+                <div id="codebox_{{ num_codeboxes }}"
+                     name="codebox_{{ num_codeboxes }}"
+                     autocapitalization="off"
+                     spellcheck="false"
+                     data-initial_value="{{ cell.initial_value }}"
+                     data-recent_submission="{{ cell.recent_submission }}"
+                     onkeyup="handle_input_keypress();">
+                </div>
 
-                        <div id="codebox_{{ num_codeboxes }}"
-                             name="codebox_{{ num_codeboxes }}"
-                             autocapitalization="off"
-                             spellcheck="false"
-                             class="codebox"
-                             data-initial_value="{{ cell.initial_value }}"
-                             data-recent_submission="{{ cell.recent_submission }}"
-                             onkeyup="handle_input_keypress();">
-                        </div>
+                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
+                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
-                        <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
-                        <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+                <script>
+                    const config_{{ num_codeboxes }} = {};
 
-                        <script>
-                            var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
-                                {
-                                    "mode": "{{- cell.codemirror_mode | escape('js') -}}",
-                                    lineNumbers: true,
-                                    "theme": "eclipse"
-                                }
-                            );
+                    config_{{ num_codeboxes }}.theme = 'eclipse';
 
-                            makeCodeMirrorAccessible(editor_{{ num_codeboxes }});
+                    if ('{{ cell.programming_language }}') {
+                        config_{{ num_codeboxes }}.lineNumbers = true;
+                        config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                    }
 
-                            {% if cell.rows is defined and cell.rows > 0 %}
-                                const height_{{ num_codeboxes }} = rowsToPixels({{ cell.rows }});
-                                editor_{{ num_codeboxes }}.setSize(null, height_{{ num_codeboxes }});
-                            {% endif %}
+                    if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                        config_{{ num_codeboxes }}.lineWrapping = true;
+                    }
 
-                            {# Populate codebox and set state of buttons initially #}
-                            {% if highest_version == 0 %}
-                                setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
-                            {% else %}
-                                setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
-                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                            {% endif %}
-                        </script>
-                    {% set num_codeboxes = num_codeboxes + 1 %}
-                {% endif %}
+                    if ({{ cell.rows }} > 0) {
+                        var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
+                        editor_{{ num_codeboxes }}.setSize(null, rowsToPixels({{ cell.rows }}));
+                    }
+                    else {
+                        var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }});
+                    }
+
+                    {# Populate codebox and set state of buttons initially #}
+                    {% if highest_version == 0 %}
+                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                    {% else %}
+                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                    {% endif %}
+                </script>
+                {% set num_codeboxes = num_codeboxes + 1 %}
 
             {# Handle if cell is multiple choice #}
             {% elseif cell.type == "multiple_choice" %}
@@ -202,6 +197,8 @@
 
     {% endfor %}
 
+
+
 </div>
 
 <script>
@@ -226,6 +223,32 @@
 
 
     $(function(){
+
+        {% if is_grader_view | default(null) %}
+            //disable inputs if we're viewing from the grader's view
+            let nb = document.getElementsByClassName("notebook")[0];
+            let tgts = nb.querySelectorAll('input');
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('button');
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('textarea');
+            for(let x of tgts){
+                x.disabled = true;
+            }
+
+            tgts = nb.querySelectorAll('.CodeMirror');
+            for(let x of tgts){
+                x.CodeMirror.refresh();
+            }
+
+        {% endif %}
+
         createArray({{ num_file_submissions }});
 
         {% for file in old_files %}
@@ -243,108 +266,18 @@
     });
 </script>
 
-{% endmacro %}
-
 
 {% macro render_testcase_messages(cell, testcase_messages) %}
 
     {# If testcase_ref is set then attempt to display associated messages #}
     {% if cell.testcase_ref is defined %}
-
         {% if testcase_messages[cell.testcase_ref] is defined %}
-
             {% for msg in testcase_messages[cell.testcase_ref] %}
                 <p class="feedback-msg-{{ msg.type }}">{{ msg.message }}</p>
             {% endfor %}
-
         {% endif %}
-
     {% endif %}
 
-{% endmacro %}
-
-
-{% macro render_short_answer(short_answer, index, version, testcase_messages) %}
-    <p class="short-answer">
-        {% if short_answer.rows == 0 %}
-            <label>
-                <div>
-                    {% if short_answer.label %}
-                        {{ short_answer.label | markdown }}
-                    {% else %}
-                        Write your answer below:
-                    {% endif %}
-                </div>
-
-                {{ _self.render_testcase_messages(short_answer, testcase_messages) }}
-
-                <input
-                    type="text"
-                    name="short_answer_{{ index }}"
-                    autocapitalization="off"
-                    spellcheck="false"
-                    id="short_answer_{{ index }}"
-                    class="sa-box"
-                    data-initial_value="{{ short_answer.initial_value }}"
-                    data-recent_submission="{{ short_answer.recent_submission }}"
-                    {% if short_answer.recent_submission|length  %}
-                        value="{{ short_answer.recent_submission }}"
-                    {% else %}
-                        value="{{ short_answer.initial_value }}"
-                    {% endif %}
-                    onkeyup="handle_input_keypress();"
-                />
-            </label>
-        {% else %}
-            <label>
-                <div>
-                    {% if short_answer.label %}
-                        {{ short_answer.label | markdown }}
-                    {% else %}
-                        Write your answer below.
-                    {% endif %}
-                    Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
-                </div>
-
-                {{ _self.render_testcase_messages(short_answer, testcase_messages) }}
-
-                {# Single line to prevent whitespace from being captured #}
-                <textarea
-                    rows="{{ short_answer.rows }}"
-                    cols="50"
-                    name="short_answer_{{ index }}"
-                    id="short_answer_{{ index }}"
-                    class="sa-box"
-                    data-initial_value="{{ short_answer.initial_value }}"
-                    data-recent_submission="{{ short_answer.recent_submission }}"
-                    onkeyup="handle_input_keypress()"
-                >{% if short_answer.recent_submission|length  %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
-            </label>
-            {#
-                Allow tab in the larger text boxes (normally tab moves to the next textbox)
-                http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
-
-                q.v. function enableTabsInTextArea(jQuerySelector) in server.js
-            #}
-            <script>
-                enableTabsInTextArea('#short_answer_{{ index }}');
-            </script>
-        {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa-clear-reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
-        <script>
-
-            // Setup init state of buttons
-            {% if version == 0 %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
-                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
-            {% else %}
-                document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
-                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
-            {% endif %}
-
-        </script>
-    </p>
 {% endmacro %}
 
 {# File submission for notebooks #}

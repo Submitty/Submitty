@@ -306,7 +306,9 @@ CREATE TABLE public.gradeable_component (
     gc_is_text boolean NOT NULL,
     gc_is_peer boolean NOT NULL,
     gc_order integer NOT NULL,
-    gc_page integer NOT NULL
+    gc_page integer NOT NULL,
+    gc_is_itempool_linked boolean DEFAULT false NOT NULL,
+    gc_itempool character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -470,6 +472,20 @@ CREATE TABLE public.gradeable_teams (
     rotating_section integer
 );
 
+
+--
+-- Name: gradeable_access; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_access (
+    id SERIAL NOT NULL PRIMARY KEY,
+    g_id character varying(255) NOT NULL ,
+    user_id character varying(255),
+    team_id character varying(255),
+    accessor_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT access_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+);
 
 --
 -- Name: grading_registration; Type: TABLE; Schema: public; Owner: -
@@ -877,7 +893,8 @@ CREATE TABLE public.sections_rotating (
 
 CREATE TABLE public.seeking_team (
     g_id character varying(255) NOT NULL,
-    user_id character varying NOT NULL
+    user_id character varying NOT NULL,
+    message character varying
 );
 
 
@@ -890,6 +907,20 @@ CREATE TABLE public.sessions (
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
     session_expires timestamp(6) with time zone NOT NULL
+);
+
+
+--
+-- Name: solution_ta_notes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.solution_ta_notes (
+    g_id character varying(255) NOT NULL,
+    component_id integer NOT NULL,
+    solution_notes text NOT NULL,
+    author character varying NOT NULL,
+    edited_at timestamp with time zone NOT NULL,
+    itempool_item character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -2043,6 +2074,22 @@ ALTER TABLE ONLY public.sessions
 
 
 --
+-- Name: solution_ta_notes solution_ta_notes_author_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_author_fk FOREIGN KEY (author) REFERENCES public.users(user_id);
+
+
+--
+-- Name: solution_ta_notes solution_ta_notes_g_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.solution_ta_notes
+    ADD CONSTRAINT solution_ta_notes_g_id_fk FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
+
+
+--
 -- Name: student_favorites student_favorites_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2120,6 +2167,33 @@ ALTER TABLE ONLY public.viewed_responses
 
 ALTER TABLE ONLY public.viewed_responses
     ADD CONSTRAINT viewed_responses_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: gradeable_access gradeable_access_fk0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk0 FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_access gradeable_access_fk1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk1 FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+--
+-- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk2 FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id);
+
+--
+-- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+ALTER TABLE ONLY public.gradeable_access
+    ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
 
 
 --
