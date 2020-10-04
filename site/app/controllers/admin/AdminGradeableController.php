@@ -26,6 +26,7 @@ class AdminGradeableController extends AbstractController {
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            var_dump($gradeable);
             $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
         }
         catch (\InvalidArgumentException $e) {

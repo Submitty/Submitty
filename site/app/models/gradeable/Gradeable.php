@@ -821,6 +821,14 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if this gradeable has a due date or not for electronic gradeables
+     * @return bool
+     */
+    public function hasReleaseDate() {
+        return $this->grade_released_date != null;
+    }
+
+    /**
      * Gets the rotating section grader assignment
      * @return array An array (indexed by user id) of arrays of section ids
      */

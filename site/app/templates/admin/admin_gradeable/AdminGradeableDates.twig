@@ -46,8 +46,18 @@
         <br />
     </div>
 
-    <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
-    <label for="date_released">Grades Released Date (grades will be visible to students)</label>
+    <div>
+        <fieldset>
+            <legend>Will this assignment have a release date?</legend>
+            <input id="has_release_date_yes" name="has_release_date" value="true" type="radio" {{ gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_yes">Yes</label>
+            <input id="has_release_date_no" name="has_release_date" value="false" type="radio" {{ not gradeable.hasReleaseDate() ? 'checked' : '' }}/><label for="has_release_date_no">No</label>
+        </fieldset>
+    </div>
+
+    <div id="release_date_container" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
+        <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
+        <label for="date_released">Grades Released Date (grades will be visible to students)</label>
+    </div>
 
     <br />
 
@@ -129,6 +139,15 @@
             else {
                 cont.show();
                 cont1.show();
+            }
+        });
+        $('input[name=has_release_date]').change(function() {
+            let cont = $('#release_date_container');
+            if($('#has_release_date_no').is(':checked')) {
+                cont.hide();
+            }
+            else {
+                cont.show();
             }
         });
         flatpickr(".date_picker", {
