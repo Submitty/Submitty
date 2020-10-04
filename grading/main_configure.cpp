@@ -23,6 +23,8 @@ nlohmann::json printTestCase(TestCase test) {
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
   j["hidden"] = test.getHidden();
+  j["release_hidden_details"] = test.getReleaseHiddenDetails();
+  assert(!(j["release_hidden_details"] && !j["hidden"]));
   j["view_testcase_message"] = test.viewTestcaseMessage();
 
   j["publish_actions"] = test.publishActions();

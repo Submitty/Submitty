@@ -16,6 +16,7 @@ use app\models\AbstractModel;
  * @method getPoints()
  * @method isExtraCredit()
  * @method isHidden()
+ * @method isReleaseHiddenDetails()
  * @method getDispatcherActions()
  * @method getGraphicsActions()
  * @method isPublishActions()
@@ -35,6 +36,8 @@ class AutogradingTestcase extends AbstractModel {
     protected $extra_credit = false;
     /** @prop @var bool If this testcase is hidden */
     protected $hidden = false;
+    /** @prop @var bool If testcase details should be released when grades are released for a hidden testcase */
+    protected $release_hidden_details = false;
     /** @prop @var bool If the user should see the message from a GradedAutogradingTestCase */
     protected $view_testcase_message = true;
     /** @prop @var string */
@@ -62,6 +65,7 @@ class AutogradingTestcase extends AbstractModel {
         $this->points = intval($testcase['points'] ?? 0);
         $this->extra_credit = ($testcase['extra_credit'] ?? false) === true;
         $this->hidden = ($testcase['hidden'] ?? false) === true;
+        $this->release_hidden_details = ($testcase['release_hidden_details'] ?? false) === true;
         $this->view_testcase_message = ($testcase['view_testcase_message'] ?? true) === true;
         $this->testcase_label = $testcase['testcase_label'] ?? '';
         $this->publish_actions = $testcase['publish_actions'] ?? false;
