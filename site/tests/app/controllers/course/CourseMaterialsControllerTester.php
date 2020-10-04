@@ -208,7 +208,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
                 'release_datetime' => $new_date,
                 'hide_from_students' => null,
                 'external_link' => false,
-                'sort_priority' => 0
             ]
         ];
 
@@ -234,7 +233,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             'release_datetime' => $new_date,
             'hide_from_students' => null,
             'external_link' => false,
-            'sort_priority' => 0
         ];
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
