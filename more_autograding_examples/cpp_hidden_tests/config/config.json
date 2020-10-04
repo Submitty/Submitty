@@ -1,6 +1,6 @@
 {
     "grading_parameters" : {
-        "AUTO_POINTS" : 16,
+        "AUTO_POINTS" : 14,
         "EXTRA_CREDIT_POINTS" : 4,
         "PENALTY_POINTS" : 0  // lower clamp to zero points
     },
@@ -51,20 +51,6 @@
             "title" : "Frame Size 10",
             "command" : "./a.out 10",
             "points" : 2,
-            "validation" : [
-                {
-                    "method" : "diff",
-                    "actual_file" : "STDOUT.txt",
-                    "expected_file" : "frame_10.txt"
-                }
-            ]
-        },
-        {
-            "title" : "Frame Size 11",
-            "command" : "./a.out 11",
-            "points" : 2,
-            "hidden" : true,
-            "release_hidden_details" : true,
             "validation" : [
                 {
                     "method" : "diff",
