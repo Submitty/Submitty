@@ -548,6 +548,9 @@
                 {%- if loop.index != 1 -%}, {% endif -%}
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}
+                {%- if member.hasMultipleTeamInvites(graded_gradeable.getGradeableId()) -%}
+                    <div style="display:inline-block;" title="Multiple Pending Invites" aria-label="Multiple Pending Invites">(<i class="fas fa-exclamation-triangle" style="color:grey;"></i>)</div>
+                {%- endif -%}
             {%- endfor -%}
         {% endif %}
     </div>

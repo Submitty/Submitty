@@ -2763,6 +2763,17 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+    *
+    */
+    public function getUserMultipleTeamInvites($g_id,$user_id) {
+        $this->course_db->query(
+            "SELECT gtm.*, tm.* FROM gradeable_teams gtm INNER JOIN teams tm 
+                ON gtm.team_id = tm.team_id
+                WHERE gtm.g_id = ? AND tm.user_id = ?", [$g_id,$user_id]);
+        return count($this->course_db->rows()) > 1;
+    }
+
+    /**
      * Return an array of Team objects for all teams on given gradeable
      *
      * @param  string $g_id

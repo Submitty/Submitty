@@ -578,9 +578,16 @@ HTML;
                 $rot_section = ($row->getSubmitter()->getRotatingSection() === null) ? "NULL" : $row->getSubmitter()->getRotatingSection();
                 $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
                 $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
-                $pending_members = json_encode($row->getSubmitter()->getTeam()->getInvitations());
+                $pending_members = $row->getSubmitter()->getTeam()->getInvitations();
+                $pending_members_json = json_encode($pending_members);
+                $multiple_invites = [];
+                foreach($pending_members as $pending_member_id) {
+                    $pending_member = $this->core->getQueries()->getUserById($pending_member_id);
+                    $multiple_invites[] = $pending_member->hasMultipleTeamInvites($gradeable->getId());
+                }
+                $multiple_invites_json = json_encode($multiple_invites);
                 $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()},'{$lock_date}');";
+                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}');";
                 $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
                 $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
                 $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
@@ -685,7 +692,7 @@ HTML;
             $reg_section = $teamless_user->getRegistrationSection() ?? 'NULL';
             $rot_section = $teamless_user->getRotatingSection() ?? 'NULL';
             $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
-            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [],{$gradeable->getTeamSizeMax()},'{$lock_date}');";
+            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [], [], {$gradeable->getTeamSizeMax()},'{$lock_date}');";
 
             //-----------------------------------------------------------------
             // Now insert this student into the list of sections
@@ -719,7 +726,7 @@ HTML;
             $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
 
             $empty_team_info[] = [
-                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()},'{$lock_date}');"
+                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [], [], {$gradeable->getTeamSizeMax()},'{$lock_date}');"
             ];
         }
 

@@ -523,4 +523,11 @@ class User extends AbstractModel {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
         return $team !== null;
     }
+
+    /**
+    * Checks if the user has invites to multiple teams for the given assignment
+    */
+    public function hasMultipleTeamInvites(string $gradeable_id) : bool {
+        return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
+    }
 }

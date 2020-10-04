@@ -600,7 +600,8 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members, lock_date) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, 
+    pending_members, multiple_invite_members, max_members, lock_date) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -630,6 +631,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     team_history_div_right.empty();
     members_div.append('Team Member IDs:<br />');
     var student_full = JSON.parse($('#student_full_id').val());
+    let exists_multiple_invite_member = false;
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
@@ -657,8 +659,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
-            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
-                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
+            if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
+                name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
+                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+','+ pending_members[i-members.length] +');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
@@ -668,7 +672,6 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             });
             $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
-
         if (user_assignment_setting_json != false) {
             var team_history_len=user_assignment_setting_json.team_history.length;
             team_history_title_div.append('Team History: ');
@@ -754,6 +757,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
+    if (exists_multiple_invite_member) members_div.append('<div id="multiple_invites_warning" style="color:red;font-size:small;margin-top:3px;width:75%">\
+        *Pending members highlighted in red have invites to multiple teams.');
 }
 
 function removeTeamMemberInput(i) {
@@ -766,7 +771,7 @@ function removeTeamMemberInput(i) {
     });
 }
 
-function approveTeamMemberInput(old, i) {
+function approveTeamMemberInput(old, i, user_id_to_add) {
     var form = $("#admin-team-form");
     $("#approve_member_"+i).remove();
     $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
@@ -779,6 +784,7 @@ function approveTeamMemberInput(old, i) {
 
 function addTeamMemberInput(old, i) {
     old.remove()
+    $('#multiple_invites_warning').remove();
     var form = $("#admin-team-form");
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
