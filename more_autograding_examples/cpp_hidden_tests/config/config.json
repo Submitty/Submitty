@@ -72,20 +72,6 @@
                 }
             ]
         },
-        {
-            "title" : "Frame Size 15",
-            "command" : "./a.out 15",
-            "points" : 2,
-            "hidden" : true,
-            "release_hidden_details" : true,
-            "validation" : [
-                {
-                    "method" : "diff",
-                    "actual_file" : "STDOUT.txt",
-                    "expected_file" : "frame_15.txt"
-                }
-            ]
-        },
 
         // ------------------------------------
         // ERROR CHECKING: FRAME SIZE
