@@ -801,7 +801,8 @@ class NavigationView extends AbstractView {
                     "class" => "btn btn-primary btn-nav btn-nav-open",
                     "name" => "quick-link-btn"
                 ]);
-            } else {
+            }
+            else {
                 $button = new Button($this->core, [
                     "subtitle" => "RELEASE GRADES NOW",
                     "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
