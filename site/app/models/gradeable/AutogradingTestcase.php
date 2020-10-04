@@ -63,10 +63,10 @@ class AutogradingTestcase extends AbstractModel {
         $this->name = Utils::prepareHtmlString($testcase['title'] ?? '');
         $this->details = $testcase['details'] ?? '';
         $this->points = intval($testcase['points'] ?? 0);
-        $this->extra_credit = ($testcase['extra_credit'] ?? false) === true;
-        $this->hidden = ($testcase['hidden'] ?? false) === true;
-        $this->release_hidden_details = ($testcase['release_hidden_details'] ?? false) === true;
-        $this->view_testcase_message = ($testcase['view_testcase_message'] ?? true) === true;
+        $this->extra_credit = $testcase['extra_credit'] ?? false;
+        $this->hidden = $testcase['hidden'] ?? false;
+        $this->release_hidden_details = $testcase['release_hidden_details'] ?? false;
+        $this->view_testcase_message = $testcase['view_testcase_message'] ?? true;
         $this->testcase_label = $testcase['testcase_label'] ?? '';
         $this->publish_actions = $testcase['publish_actions'] ?? false;
         $this->dispatcher_actions = $testcase['dispatcher_actions'] ?? [];
