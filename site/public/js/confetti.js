@@ -13,8 +13,7 @@ function addConfetti(){
 		}
 	});
 	window.addEventListener("keypress", function(e){
-		key = window.event ? window.event.keyCode : e.keyCode;
-		if(key === 13 && canvas.style.display != "none"){
+		if(e.code === "Enter" && canvas.style.display != "none"){
 			canvas.style.display = "none";
 			return;
 		}

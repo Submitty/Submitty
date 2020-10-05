@@ -20,7 +20,20 @@
             {% endif %}
         </h1>
         {% if has_due_date %}
-            <h2>Due: {{ due_date|date(date_time_format) }}</h2>
+            {% set diff_time_zone = server_time_zone_string != user_time_zone_string %}
+
+            <div id="gradeable-info-due-dates">
+                <h2>
+                    Due: {{ due_date|date(date_time_format) }}
+                    {% if diff_time_zone %}
+                        <i>(Local Time)</i>
+                    {% endif %}
+                </h2>
+
+                {% if diff_time_zone %}
+                    <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
+                {% endif %}
+            </div>
         {% endif %}
         <div class="loading-bar-wrapper">
             <span>Upload progress: <span id="loading-bar-percentage"></span></span>

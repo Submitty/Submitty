@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 4,
+    "nonhidden_automatic_grading_total": 4,
     "testcases": [
         {
             "points_awarded": 2,
@@ -55,14 +57,14 @@
         {
             "autochecks": [
                 {
-                    "actual_file": "test06/STDERR.txt",
-                    "description": "STDERR.txt",
-                    "difference_file": "test06/1_diff.json",
-                    "expected_file": "test_output/testassignment/error_nonpositive.txt"
+                    "actual_file": "test06/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test06/0_diff.json",
+                    "expected_file": "test_output/testassignment/frame_15.txt"
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 6 Error Checking: Frame Size 0"
+            "test_name": "Test 6 Frame Size 15"
         },
         {
             "autochecks": [
@@ -74,7 +76,7 @@
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 7 Error Checking: Frame Size Negative"
+            "test_name": "Test 7 Error Checking: Frame Size 0"
         },
         {
             "autochecks": [
@@ -82,20 +84,32 @@
                     "actual_file": "test08/STDERR.txt",
                     "description": "STDERR.txt",
                     "difference_file": "test08/1_diff.json",
-                    "expected_file": "test_output/testassignment/error_arguments.txt"
-                },
-                {
-                    "actual_file": "test08/execute_logfile.txt",
-                    "description": "Execution Logfile"
+                    "expected_file": "test_output/testassignment/error_nonpositive.txt"
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 8 Error Checking: No Arguments"
+            "test_name": "Test 8 Error Checking: Frame Size Negative"
         },
         {
             "autochecks": [
                 {
-                    "actual_file": "test09/STDOUT.txt",
+                    "actual_file": "test09/STDERR.txt",
+                    "description": "STDERR.txt",
+                    "difference_file": "test09/1_diff.json",
+                    "expected_file": "test_output/testassignment/error_arguments.txt"
+                },
+                {
+                    "actual_file": "test09/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "points_awarded": 0,
+            "test_name": "Test 9 Error Checking: No Arguments"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test10/STDOUT.txt",
                     "description": "STDOUT.txt",
                     "messages": [
                         {
@@ -105,18 +119,18 @@
                     ]
                 },
                 {
-                    "actual_file": "test09/STDERR.txt",
+                    "actual_file": "test10/STDERR.txt",
                     "description": "STDERR.txt",
-                    "difference_file": "test09/1_diff.json",
+                    "difference_file": "test10/1_diff.json",
                     "expected_file": "test_output/testassignment/error_arguments.txt"
                 }
             ],
             "points_awarded": 0,
-            "test_name": "Test 9 Error Checking: Too Many Arguments"
+            "test_name": "Test 10 Error Checking: Too Many Arguments"
         },
         {
             "points_awarded": 0,
-            "test_name": "Test 10 Submission Limit",
+            "test_name": "Test 11 Submission Limit",
             "view_testcase": false
         }
     ]
