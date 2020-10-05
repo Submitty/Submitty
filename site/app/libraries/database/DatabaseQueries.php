@@ -1467,7 +1467,7 @@ INNER JOIN (
 GROUP BY {$u_or_t}.{$section_key}
 ORDER BY {$u_or_t}.{$section_key}",
             $params
-);
+        );
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
