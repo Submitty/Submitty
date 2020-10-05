@@ -1931,15 +1931,19 @@ function autosaveKeyFor(replyBox) {
 
 function saveReplyBoxToLocal(replyBox) {
     const inputBox = $(replyBox).find("textarea.thread_post_content");
-    if (autosaveEnabled && inputBox.val()) {
-        const anonCheckbox = $(replyBox).find("input.thread-anon-checkbox");
-        const post = inputBox.val();
-        const isAnonymous = anonCheckbox.prop("checked");
-        localStorage.setItem(autosaveKeyFor(replyBox), JSON.stringify({
-            timestamp: Date.now(),
-            post,
-            isAnonymous
-        }));
+    if (autosaveEnabled) {
+        if (inputBox.val()) {
+            const anonCheckbox = $(replyBox).find("input.thread-anon-checkbox");
+            const post = inputBox.val();
+            const isAnonymous = anonCheckbox.prop("checked");
+            localStorage.setItem(autosaveKeyFor(replyBox), JSON.stringify({
+                timestamp: Date.now(),
+                post,
+                isAnonymous
+            }));
+        } else {
+            localStorage.removeItem(autosaveKeyFor(replyBox));
+        }
     }
 }
 

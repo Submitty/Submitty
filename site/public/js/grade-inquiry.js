@@ -97,6 +97,10 @@ function onGradeInquirySubmitClicked(button) {
               'gc_id': gc_id
             });
           }
+          else if(data.type === "open_grade_inquiry"){
+            window.socketClient.send({'type' : "toggle_status", 'submitter_id' : submitter_id});
+            window.location.reload();
+          }
           else if (data.type === 'toggle_status') {
             newDiscussionRender(data.new_discussion);
             window.socketClient.send({'type': data.type, 'submitter_id': submitter_id});

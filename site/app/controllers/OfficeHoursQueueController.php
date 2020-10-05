@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueModel;
 use app\libraries\routers\AccessControl;
 use app\libraries\socket\Client;
+use app\libraries\Logger;
 use WebSocket;
 
 /**
@@ -79,6 +80,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         if ($this->core->getQueries()->openQueue($queue_code, $token)) {
             $this->core->addSuccessMessage("New queue added");
+            Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
         }
         else {
             $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue name");
@@ -324,6 +326,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, "EMPTIED");
         $this->core->getQueries()->emptyQueue($queue_code);
         $this->core->addSuccessMessage("Queue emptied");
         $this->sendSocketMessage(['type' => 'full_update']);
@@ -350,7 +353,7 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-
+        Logger::logQueueActivity($this->core->getConfig()->getSemester(), $this->core->getDisplayedCourseName(), $queue_code, $_POST['queue_state'] === "1" ? 'CLOSED' : 'OPENED');
         $this->core->getQueries()->toggleQueue($queue_code, $_POST['queue_state']);
         $this->core->addSuccessMessage(($_POST['queue_state'] === "1" ? 'Closed' : 'Opened') . ' queue: "' . $queue_code . '"');
         $this->sendSocketMessage(['type' => 'toggle_queue']);
@@ -508,9 +511,32 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
+
+    /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
+     */
+    public function showQueueStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            $this->core->addErrorMessage("Office hours queue disabled");
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
+        }
+
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStats',
+            $viewer->getQueueDataOverall(),
+            $viewer->getQueueDataToday(),
+            $viewer->getQueueDataByWeekDayThisWeek(),
+            $viewer->getQueueDataByWeekDay(),
+            $viewer->getQueueDataByQueue(),
+            $viewer->getQueueDataByWeekNumber()
+        );
+    }
+
+
     /**
      * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods={"GET"})
-     * @return MultiResponse
      */
     public function showNewAnnouncement() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
@@ -531,12 +557,29 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
+     * @Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods={"GET"})
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    public function showQueueStudentStats() {
+        if (!$this->core->getConfig()->isQueueEnabled()) {
+            return new RedirectResponse($this->core->buildCourseUrl(['home']));
+        }
+
+        $viewer = new OfficeHoursQueueModel($this->core);
+        return new WebResponse(
+            'OfficeHoursQueue',
+            'showQueueStudentStats',
+            $viewer->getQueueDataStudent()
+        );
+    }
+
+    /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array $msg_array
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getCourse() . "-office_hours_queue";
+        $msg_array['page'] = $this->core->getConfig()->getSemester() . '-' . $this->core->getConfig()->getCourse() . "-office_hours_queue";
         try {
             $client = new Client($this->core);
             $client->send($msg_array);
