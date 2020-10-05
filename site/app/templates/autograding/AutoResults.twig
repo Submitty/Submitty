@@ -50,7 +50,7 @@
         {% if not incomplete_autograding %}
             {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
                 {% set can_view = (not testcase.hidden or show_hidden) %}
-                {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
+                {% set can_view_details = (not testcase.hidden or ((show_hidden_details or testcase.release_hidden_details) and show_hidden)) %}
 
                 <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
                     <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"

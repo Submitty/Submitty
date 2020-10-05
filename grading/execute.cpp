@@ -90,7 +90,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
     { "clang++",                 "/usr/bin/clang++" },
-    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin/drmemory" },
+    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
     { "valgrind",                "/usr/bin/valgrind" },
 
     // for Computer Organization
@@ -132,6 +132,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "expect",                  "/usr/bin/expect" },
     { "sleep",                   "/bin/sleep" },
 
+    // for Distributed Systems
+    { "script",                  "/usr/bin/script" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
@@ -239,7 +241,7 @@ std::string validate_program(const std::string &program, const nlohmann::json &w
       return full_path_executable;
     }
 
-    std::string message = "ERROR: This system program '" + program + "' is not on the allowed whitelist.\n"
+    std::string message = "ERROR: This system program '" + program + "' is not on the allowed safelist.\n"
       + "  Contact the Submitty administrators for permission to use this program.";
     std::cout << message << std::endl;
     std::cerr << message << std::endl;
@@ -593,6 +595,10 @@ void parse_command_line(const std::string &cmd,
   my_program = my_stdin = my_stdout = my_stderr = "";
 
   std::vector<std::string> tokens = break_into_tokens(cmd);
+
+  for (int i = 0; i < tokens.size(); i++) {
+    std::cout << "TOKEN " << std::setw(3) << i << " IS '" << tokens[i] << "'" << std::endl;
+  }
 
   int which = 0;
   while (which < tokens.size()) {

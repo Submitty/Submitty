@@ -1,5 +1,7 @@
 {
-"testcases": [
+    "automatic_grading_total": 0,
+    "nonhidden_automatic_grading_total": 0,
+    "testcases": [
 		{
 			"test_name": "Test 1 Lab 1 Checkpoint 1",
 			"autochecks": [
