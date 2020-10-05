@@ -407,7 +407,12 @@ class NavigationView extends AbstractView {
 
         $points_percent = NAN;
 
-        $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        if ($gradeable->hasAutogradingConfig() && $gradeable->getAutogradingConfig()->hasLoadGradeableMessageEnabled($gradeable->getId(), $this->core->getUser()->getId())) {
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'load_gradeable_message']);
+        }
+        else {
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        }
         $progress = null;
         $disabled = false;
 
@@ -788,13 +793,24 @@ class NavigationView extends AbstractView {
             }
         }
         elseif ($list_section === GradeableList::CLOSED) {
-            $button = new Button($this->core, [
-                "subtitle" => "OPEN TO GRADING NOW",
-                "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
-                    . http_build_query(['action' => 'open_grading_now']),
-                "class" => "btn btn-primary btn-nav btn-nav-open",
-                "name" => "quick-link-btn"
-            ]);
+            if ($gradeable->isTaGrading()) {
+                $button = new Button($this->core, [
+                    "subtitle" => "OPEN TO GRADING NOW",
+                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                        . http_build_query(['action' => 'open_grading_now']),
+                    "class" => "btn btn-primary btn-nav btn-nav-open",
+                    "name" => "quick-link-btn"
+                ]);
+            }
+            else {
+                $button = new Button($this->core, [
+                    "subtitle" => "RELEASE GRADES NOW",
+                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                        . http_build_query(['action' => 'release_grades_now']),
+                    "class" => "btn btn-primary btn-nav btn-nav-open",
+                    "name" => "quick-link-btn"
+                ]);
+            }
         }
         elseif ($list_section === GradeableList::OPEN) {
             $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'

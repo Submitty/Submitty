@@ -10,7 +10,10 @@
     {% endfor %}
     </ul>
 {% endblock %}
+{% block close_button_id %}id="team-extension-cancel"{% endblock %}
+{% block close_click_action %}javascript:confirmExtension(0){% endblock %}
+{% block close_button_text %}No{% endblock %}
 {% block buttons %}
-    <a id="team-extension-cancel" class="btn btn-default" href="javascript:confirmExtension(0)">No</a>
+    {{ block('close_button') }}
     <a class="btn btn-primary" href="javascript:confirmExtension(1)">Yes</a>
 {% endblock %}

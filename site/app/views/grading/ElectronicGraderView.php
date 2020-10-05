@@ -457,7 +457,16 @@ HTML;
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
+            // NOTE/REDESIGN FIXME: We might have autograding that is
+            // penalty only.  The available positive autograding
+            // points might be zero.  Testing for autograding > 1 is
+            // ignoring the submission limit test case... but this is
+            // also imperfect.  We want to render the column if any
+            // student has received the penalty.  But if no one has
+            // received the penalty maybe we omit it?  (expensive?/confusing?)
+            // See also note in ElectronicGradeController.php
+            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+                //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 $columns[]     = ["width" => "20%", "title" => "Manual Grading",          "function" => "grading_peer"];
                 $columns[]     = ["width" => "15%", "title" => "Total",            "function" => "total_peer"];
@@ -491,7 +500,9 @@ HTML;
                 $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first", "sort_type" => "first"];
                 $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
+            // NOTE/REDESIGN FIXME: Same note as above.
+            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+                //if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
                 if ($gradeable->isTaGrading()) {
                     $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
@@ -568,7 +579,12 @@ HTML;
                 $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
                 $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
                 $pending_members = json_encode($row->getSubmitter()->getTeam()->getInvitations());
-                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()});";
+                $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
+                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()},'{$lock_date}');";
+                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
+                $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
+                $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
+                $info["edited_past_lock_date"] = $edited_past_lock_date;
             }
 
             //List of graded components
@@ -668,7 +684,8 @@ HTML;
             //Team edit button, specifically the onclick event.
             $reg_section = $teamless_user->getRegistrationSection() ?? 'NULL';
             $rot_section = $teamless_user->getRotatingSection() ?? 'NULL';
-            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [],{$gradeable->getTeamSizeMax()});";
+            $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
+            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [],{$gradeable->getTeamSizeMax()},'{$lock_date}');";
 
             //-----------------------------------------------------------------
             // Now insert this student into the list of sections
@@ -699,9 +716,10 @@ HTML;
             $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
+            $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
 
             $empty_team_info[] = [
-                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
+                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()},'{$lock_date}');"
             ];
         }
 
@@ -795,7 +813,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, $solution_ta_notes, $showNewInterface) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $rollbackSubmission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $showNewInterface) {
 
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $isPeerPanel = false;
@@ -828,7 +846,7 @@ HTML;
         $return = "";
         $is_notebook = $gradeable->getAutogradingConfig()->isNotebookGradeable();
         if ($showNewInterface) {
-            $this->core->getOutput()->addInternalJs("drag-and-resize-two-panels.js");
+            $this->core->getOutput()->addInternalJs("resizable-panels.js");
 
             $return .= <<<HTML
         		<div class="content" id="electronic-gradeable-container">
@@ -872,7 +890,7 @@ HTML;
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSubmissionPanel', $graded_gradeable, $display_version, $showNewInterface);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $showNewInterface);
-        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $showNewInterface);
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map, $showNewInterface);
 
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version, $showNewInterface);
@@ -931,7 +949,7 @@ HTML;
                 $graded_gradeable->getSubmitter()->getId()
             );
         }
-    
+
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
         if ($isStudentInfoPanel) {
@@ -1344,6 +1362,7 @@ HTML;
 
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
+            $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
         }
         else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');
@@ -1372,14 +1391,16 @@ HTML;
     /**
      * @param Gradeable $gradeable
      * @param array $solution_array
+     * @param array $submitter_itempool_map
      * @param bool $showNewInterface
      * @return string
      */
-    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $showNewInterface) {
+    public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map, $showNewInterface) {
         if (!$showNewInterface) {
             return '';
         }
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
+
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
@@ -1388,16 +1409,16 @@ HTML;
                 'id' => $id,
                 'title' => $value->getTitle(),
                 'is_first_edit' => !isset($solution_array[$id]),
-                'author' => isset($solution_array[$id]) ? $solution_array[$id][0]['author'] : '',
-                'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id][0]['solution_notes'] : '',
+                'author' => isset($solution_array[$id]) ? $solution_array[$id]['author'] : '',
+                'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
                 'edited_at' => isset($solution_array[$id])
                     ? DateUtils::convertTimeStamp(
                         $this->core->getUser(),
-                        $solution_array[$id][0]['edited_at'],
+                        $solution_array[$id]['edited_at'],
                         $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
                     ) : null,
-                'max_points' => $value->getUpperClamp(),
-                'min_points' => $value->getLowerClamp(),
+                'is_itempool_linked' => $value->getIsItempoolLinked(),
+                'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
             ];
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
@@ -1434,6 +1455,7 @@ HTML;
 
         if ($showNewInterface) {
             $this->core->getOutput()->addInternalJs('ta-grading-v2.js');
+            $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
         }
         else {
             $this->core->getOutput()->addInternalJs('ta-grading.js');

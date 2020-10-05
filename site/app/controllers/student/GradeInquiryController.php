@@ -15,7 +15,6 @@ class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
-     * @return MultiResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
@@ -26,7 +25,7 @@ class GradeInquiryController extends AbstractController {
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
-            return null;
+            return JsonResponse::getFailResponse("Could not find gradeable associated with " . $gradeable_id);
         }
 
         if (!$gradeable->isRegradeOpen()) {
@@ -37,7 +36,7 @@ class GradeInquiryController extends AbstractController {
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
         if ($graded_gradeable === false) {
-            return null;
+            return JsonResponse::getFailResponse("No graded gradeable found for submitter");
         }
 
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
@@ -50,8 +49,10 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showRegradeDiscussion', $graded_gradeable, $can_inquiry);
+
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse()
+                JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
