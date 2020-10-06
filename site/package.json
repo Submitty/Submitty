@@ -28,7 +28,7 @@
     "twig": "1.15.2"
   },
   "devDependencies": {
-    "eslint": "^7.6.0"
+    "eslint": "^7.10.0"
   },
   "scripts": {
     "lint": "eslint \"public/js/**/*.js\"",
