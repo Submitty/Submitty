@@ -14,6 +14,20 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class NotebookBuilderController extends AbstractController {
 
+    /** @var string The username of the linux user who should own notebook builder files */
+    private $expected_owner;
+
+    /** @var string The groupname of the linux group who should own notebook builder files */
+    private $expected_group;
+
+    public function __construct(\app\libraries\Core $core)
+    {
+        parent::__construct($core);
+
+        $this->expected_owner = $this->core->getConfig()->getPhpUser();
+        $this->expected_group = $this->core->getConfig()->getCourse() . '_tas_www';
+    }
+
     /**
      * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
@@ -43,7 +57,7 @@ class NotebookBuilderController extends AbstractController {
             $config_dir = $autograding_config_controller->createConfigDirectory();
 
             // Verify new directory was created
-            $permission_failures = FileUtils::checkForPermissionErrors($config_dir, 'submitty_php', $this->core->getConfig()->getCourse() . '_tas_www');
+            $permission_failures = FileUtils::checkForPermissionErrors($config_dir, $this->expected_owner, $this->expected_group);
             if ($permission_failures) {
                 foreach ($permission_failures as $failure) {
                     $this->core->addErrorMessage($failure);
@@ -58,7 +72,7 @@ class NotebookBuilderController extends AbstractController {
             file_put_contents($json_path, '{"notebook": [], "testcases": []}');
 
             // Verify default json was created
-            $permission_failures = FileUtils::checkForPermissionErrors($json_path, 'submitty_php', $this->core->getConfig()->getCourse() . '_tas_www');
+            $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->expected_owner, $this->expected_group);
             if ($permission_failures) {
                 foreach ($permission_failures as $failure) {
                     $this->core->addErrorMessage($failure);
@@ -116,7 +130,7 @@ class NotebookBuilderController extends AbstractController {
         $this->updateGroupPermission($json_path);
 
         // Check for permission failures
-        $permission_failures = FileUtils::checkForPermissionErrors($json_path, 'submitty_php', $this->core->getConfig()->getCourse() . '_tas_www');
+        $permission_failures = FileUtils::checkForPermissionErrors($json_path, $this->expected_owner, $this->expected_group);
         if ($permission_failures) {
             return JsonResponse::getErrorResponse('An error occurred saving the modified config.json.', $permission_failures);
         }
@@ -181,12 +195,24 @@ class NotebookBuilderController extends AbstractController {
         $directory_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), $_POST['directory']);
         FileUtils::createDir($directory_path);
 
+        // Check for permission failures on subdirectory which will hold uploaded file
+        $permission_failures = FileUtils::checkForPermissionErrors($directory_path, $this->expected_owner, $this->expected_group);
+        if ($permission_failures) {
+            return JsonResponse::getErrorResponse('Failure creating sub-directory.', $permission_failures);
+        }
+
         // Move uploaded file
         $full_path = FileUtils::joinPaths($directory_path, $_FILES['file']['name']);
-        $move_res = move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
-        $permission_res = $this->updateGroupPermission($full_path);
+        move_uploaded_file($_FILES['file']['tmp_name'], $full_path);
+        $this->updateGroupPermission($full_path);
 
-        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('Failure uploading file.');
+        // Check for permission failures on uploaded file
+        $permission_failures = FileUtils::checkForPermissionErrors($full_path, $this->expected_owner, $this->expected_group);
+        if ($permission_failures) {
+            return JsonResponse::getErrorResponse('Failure uploading file.', $permission_failures);
+        }
+
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
@@ -219,8 +245,7 @@ class NotebookBuilderController extends AbstractController {
      * @return bool True if operation was successful, false otherwise.
      */
     private function updateGroupPermission(string $path): bool {
-        $group = $this->core->getConfig()->getCourse() . '_tas_www';
-        return chgrp($path, $group);
+        return chgrp($path, $this->expected_group);
     }
 
     /**
