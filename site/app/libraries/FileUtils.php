@@ -610,4 +610,64 @@ class FileUtils {
 
         return $ret;
     }
+
+    /**
+     * Given an absolute path check a file or directory for permission problems.  If any problems are detected return
+     * an array of error strings describing the problems.
+     *
+     * Use this function to check that:
+     * - File or directory at $path exists
+     * - File or directory at $path has the correct owner (optional)
+     * - File or directory at $path has the correct group (optional)
+     * - File or directory at $path is readable
+     * - File or directory at $path is writable
+     *
+     * @param string $path Absolute path to file or directory
+     * @param string|null $expected_owner Expected owner name of the file, or null to omit this check
+     * @param string|null $expected_group Expected group name owner of the file, or null to omit this check
+     * @return array Empty array if no errors were detected or an error containing one or more error message strings if
+     *               errors were detected.
+     */
+    public static function checkForPermissionErrors(string $path, ?string $expected_owner, ?string $expected_group): array {
+        $results = [];
+
+        // Check exists
+        $exists = file_exists($path);
+        if (!$exists) {
+            $results[] = "'${path}' does not exist.";
+            return $results;
+        }
+
+        // Check owner
+        if ($expected_owner) {
+            $owner_id = fileowner($path);
+            $owner_name = posix_getpwuid($owner_id)['name'];
+            if ($owner_name !== $expected_owner) {
+                $results[] = "Expected '${path}' to have owner '${expected_owner}' but instead got '${owner_name}'.";
+            }
+        }
+
+        // Check group
+        if ($expected_group) {
+            $group_id = filegroup($path);
+            $group_name = posix_getgrgid($group_id)['name'];
+            if ($group_name !== $expected_group) {
+                $results[] = "Expected '${path}' to have group '${expected_group}' but instead got '${group_name}'.";
+            }
+        }
+
+        // Check is readable
+        $readable = is_readable($path);
+        if (!$readable) {
+            $results[] = "'${path}' is not readable.";
+        }
+
+        // Check is writable
+        $writable = is_writable($path);
+        if (!$writable) {
+            $results[] = "'${path}' is not writable.";
+        }
+
+        return $results;
+    }
 }

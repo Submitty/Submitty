@@ -30,23 +30,45 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($this->core->buildUrl());
         }
 
-        // If mode is new then generate a new config directory and place a default config.json inside of it
-        // Redirect to same page but with mode now set to 'edit'
-        if ($mode === 'new') {
-            $autograding_config_controller = new AutogradingConfigController($this->core);
-            $config_dir = $autograding_config_controller->createConfigDirectory();
-            $gradeable->setAutogradingConfigPath($config_dir);
-            $this->core->getQueries()->updateGradeable($gradeable);
-            $json_path = FileUtils::joinPaths($config_dir, 'config.json');
-            file_put_contents($json_path, '{"notebook": [], "testcases": []}');
-            return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
-        }
-
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
 
         if (!$gradeable->isUsingUploadedConfig()) {
             $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
             return new RedirectResponse($failure_url);
+        }
+
+        // If mode is new then generate a new config directory and place a default config.json inside of it
+        if ($mode === 'new') {
+            $autograding_config_controller = new AutogradingConfigController($this->core);
+            $config_dir = $autograding_config_controller->createConfigDirectory();
+
+            // Verify new directory was created
+            $permission_failures = FileUtils::checkForPermissionErrors($config_dir, 'submitty_php', $this->core->getConfig()->getCourse() . '_tas_www');
+            if ($permission_failures) {
+                foreach ($permission_failures as $failure) {
+                    $this->core->addErrorMessage($failure);
+                }
+
+                return new RedirectResponse($failure_url);
+            }
+
+            $gradeable->setAutogradingConfigPath($config_dir);
+            $this->core->getQueries()->updateGradeable($gradeable);
+            $json_path = FileUtils::joinPaths($config_dir, 'config.json');
+            file_put_contents($json_path, '{"notebook": [], "testcases": []}');
+
+            // Verify default json was created
+            $permission_failures = FileUtils::checkForPermissionErrors($json_path, 'submitty_php', $this->core->getConfig()->getCourse() . '_tas_www');
+            if ($permission_failures) {
+                foreach ($permission_failures as $failure) {
+                    $this->core->addErrorMessage($failure);
+                }
+
+                return new RedirectResponse($failure_url);
+            }
+
+            // Redirect to same page but with mode now set to 'edit'
+            return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
         }
 
         $images = json_encode($this->getFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
@@ -90,12 +112,18 @@ class NotebookBuilderController extends AbstractController {
 
         // Overwrite existing configuration with newly uploaded one
         $json_path = FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'config.json');
-        $move_res = move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
-        $permission_res = $this->updateGroupPermission($json_path);
+        move_uploaded_file($_FILES['config_upload']['tmp_name'], $json_path);
+        $this->updateGroupPermission($json_path);
+
+        // Check for permission failures
+        $permission_failures = FileUtils::checkForPermissionErrors($json_path, 'submitty_php', $this->core->getConfig()->getCourse() . '_tas_www');
+        if ($permission_failures) {
+            return JsonResponse::getErrorResponse('An error occurred saving the modified config.json.', $permission_failures);
+        }
 
         $this->rebuildGradeable($gradeable);
 
-        return $move_res && $permission_res ? JsonResponse::getSuccessResponse() : JsonResponse::getErrorResponse('An error occurred saving the modified config.json.');
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
