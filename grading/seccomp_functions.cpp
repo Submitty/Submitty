@@ -10,6 +10,13 @@
 #include <cassert>
 
 // COMPILATION NOTE: Must pass -lseccomp to build
+#ifndef __NR_rseq
+# ifdef __x86_64__
+#  define __NR_rseq 334
+# else
+#  define __NR_rseq 386
+# endif
+#endif
 #include <seccomp.h>
 #include <set>
 #include <string>

@@ -418,6 +418,7 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(sigpending);
     ALLOW_SYSCALL(sigreturn);
     ALLOW_SYSCALL(sigsuspend);
+    ALLOW_SYSCALL(rseq);
   }
 
   // RESTRICTED : COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION
