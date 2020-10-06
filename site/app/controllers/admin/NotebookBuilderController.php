@@ -20,8 +20,7 @@ class NotebookBuilderController extends AbstractController {
     /** @var string The groupname of the linux group who should own notebook builder files */
     private $expected_group;
 
-    public function __construct(\app\libraries\Core $core)
-    {
+    public function __construct(\app\libraries\Core $core) {
         parent::__construct($core);
 
         $this->expected_owner = $this->core->getConfig()->getPhpUser();
