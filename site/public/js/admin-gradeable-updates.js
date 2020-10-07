@@ -131,6 +131,7 @@ $(document).ready(function () {
         let data = {'csrf_token': csrfToken};
         data[this.name] = $(this).val();
         let addDataToRequest = function (i, val) {
+            //console.log(i, val);
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
             }
@@ -145,6 +146,7 @@ $(document).ready(function () {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
+        //console.log(data);
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             function (response_data) {
                 // Clear errors by setting new values
@@ -386,6 +388,7 @@ function setRandomGraders(gradeable_id,p_values,successCallback,errorCallback,al
     });
 }
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
+    console.log(p_values);
     if('peer_graders_list' in p_values && $('#peer_graders_list').length){
         $('#save_status').html('Saving Changes');
         var csvFile = $('#peer_graders_list').prop('files')[0];  

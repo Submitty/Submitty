@@ -26,7 +26,7 @@ class AdminGradeableController extends AbstractController {
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            var_dump($gradeable);
+            // var_dump($gradeable);
             $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
         }
         catch (\InvalidArgumentException $e) {
@@ -1050,6 +1050,16 @@ class AdminGradeableController extends AbstractController {
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
+
+                
+                if ($date_property == "has_due_date") {
+                    //var_dump("due_date");
+                    //unset($details["submission_due_date"]);
+                }
+                if ($date_property == "submission_due_date") {
+                    //var_dump("due_date");
+                    //$this->core->redirect($this->core->buildNewCourseUrl());
+                }
 
                 if ($dates[$date_property] > DateUtils::MAX_TIME) {
                     $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
