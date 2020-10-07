@@ -48,7 +48,6 @@ class TestAutogradingShipper(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ Tear down the mock environment for these testcases. """
-        global WORKING_DIR
         # Remove the test environment.
         with contextlib.suppress(FileNotFoundError):
             shutil.rmtree(WORKING_DIR)
@@ -59,8 +58,7 @@ class TestAutogradingShipper(unittest.TestCase):
         Sets up a mock environment roughly equivalent to the production server.
         As more features are needed, they should be added here
         """
-        global TEST_ENVIRONMENT, CONFIG_DIR, SUBMITTY_DATA_DIR, TODO_DIR, DONE_DIR, TO_BE_GRADED,\
-               GRADING, LOG_PATH, STACK_TRACES, AUTOGRADING_LOGS, CONFIG
+        global CONFIG
 
         # Remove the test environment if it is left over from a previous run.
         with contextlib.suppress(FileNotFoundError):
@@ -133,8 +131,6 @@ class TestAutogradingShipper(unittest.TestCase):
 
     def test_can_short_circuit_max_submission(self):
         """ We should be able to short circuit if the only testcase is max_submission """
-        global TEST_DATA_DIR
-
         with open(os.path.join(TEST_DATA_DIR, 'complete_config_upload_only.json')) as infile:
             autograding_config = json.load(infile)
         self.assertTrue(shipper.can_short_circuit(autograding_config))
@@ -144,7 +140,6 @@ class TestAutogradingShipper(unittest.TestCase):
         """
         If there is only one testcase, but it is non-file submission, we cannot short circuit.
         """
-        global TEST_DATA_DIR
         with open(os.path.join(TEST_DATA_DIR, 'complete_config_cpp_cats.json')) as infile:
             tmp_config = json.load(infile)
         # Create a config that is a copy of cpp cats but with only one testcase.
@@ -157,7 +152,6 @@ class TestAutogradingShipper(unittest.TestCase):
 
     def test_cannot_short_circuit_many_testcases(self):
         """ We cannot short circuit if there are multiple testcases. """
-        global TEST_DATA_DIR
         with open(os.path.join(TEST_DATA_DIR, 'complete_config_cpp_cats.json')) as infile:
             autograding_config = json.load(infile)
         self.assertFalse(shipper.can_short_circuit(autograding_config))
