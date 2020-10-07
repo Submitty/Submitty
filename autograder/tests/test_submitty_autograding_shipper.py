@@ -1,12 +1,10 @@
 import os
 import json
 import shutil
-import sys
 import unittest
 import contextlib
 import copy
 
-import autograder
 import submitty_autograding_shipper as shipper
 from autograder import config
 
@@ -88,12 +86,12 @@ class TestAutogradingShipper(unittest.TestCase):
 
         # Create the configuration json files
         submitty_json = {
-            'submitty_data_dir' : SUBMITTY_DATA_DIR,
-            'submitty_install_dir' : TEST_ENVIRONMENT,
-            'autograding_log_path' : AUTOGRADING_LOGS,
-            'site_log_path' : LOG_PATH,
-            'submission_url' : '/fake/url/for/submission/',
-            'vcs_url' : '/fake/url/for/vcs/submission/'
+            'submitty_data_dir': SUBMITTY_DATA_DIR,
+            'submitty_install_dir': TEST_ENVIRONMENT,
+            'autograding_log_path': AUTOGRADING_LOGS,
+            'site_log_path': LOG_PATH,
+            'submission_url': '/fake/url/for/submission/',
+            'vcs_url': '/fake/url/for/vcs/submission/'
         }
         users_json = {
             # Pretend that we are the daemon user.
@@ -103,9 +101,9 @@ class TestAutogradingShipper(unittest.TestCase):
         # When we test that script, a mock database may be needed, and these
         # values will have to be updated.
         database_json = {
-            'database_user' : 'foo',
-            'database_host' : 'bar',
-            'database_password' : 'password'
+            'database_user': 'foo',
+            'database_host': 'bar',
+            'database_password': 'password'
         }
 
         for filename, json_file in [
@@ -120,21 +118,18 @@ class TestAutogradingShipper(unittest.TestCase):
         CONFIG = config.Config.path_constructor(CONFIG_DIR)
         shipper.instantiate_global_variables(CONFIG)
 
-
     def test_can_short_no_testcases(self):
         """ We should be able to short circuit configs with no testcases  """
         autograding_config = {
-            "testcases" : []
+            "testcases": []
         }
         self.assertTrue(shipper.can_short_circuit(autograding_config))
-
 
     def test_can_short_circuit_max_submission(self):
         """ We should be able to short circuit if the only testcase is max_submission """
         with open(os.path.join(TEST_DATA_DIR, 'complete_config_upload_only.json')) as infile:
             autograding_config = json.load(infile)
         self.assertTrue(shipper.can_short_circuit(autograding_config))
-
 
     def test_cannot_short_circuit_single_non_file_submission_testcase(self):
         """
@@ -148,7 +143,6 @@ class TestAutogradingShipper(unittest.TestCase):
         autograding_config['testcases'].append(tmp_config['testcases'][0])
 
         self.assertFalse(shipper.can_short_circuit(autograding_config))
-
 
     def test_cannot_short_circuit_many_testcases(self):
         """ We cannot short circuit if there are multiple testcases. """
