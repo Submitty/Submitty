@@ -1052,6 +1052,12 @@ CREATE TABLE public.viewed_responses (
     "timestamp" timestamp with time zone NOT NULL
 );
 
+CREATE TABLE public.electronic_gradeable_hidden_files (
+    g_id character varying(255) NOT NULL,
+    file_wildcard character varying(255) NOT NULL,
+    lowest_access_group INTEGER NOT NULL DEFAULT 3,
+);
+
 
 --
 -- Name: categories_list category_id; Type: DEFAULT; Schema: public; Owner: -
@@ -2193,9 +2199,14 @@ ALTER TABLE ONLY public.gradeable_access
 --
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+--
+-- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+ALTER TABLE ONLY public.electronic_gradeable_hidden_files
+    ADD CONSTRAINT electronic_gradeable_hidden_files_pk PRIMARY KEY (g_id, file_wildcard);
 
-
-
+ALTER TABLE ONLY public.electronic_gradeable_hidden_files
+    ADD CONSTRAINT electronic_gradeable_hidden_files_fk FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id) ON DELETE CASCADE;
 --
 -- PostgreSQL database dump complete
 --

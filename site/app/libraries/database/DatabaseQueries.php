@@ -1673,6 +1673,27 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
+    
+    public function insertOmittedFiles($gradeable_id, $file_name, $lowest_allowed){
+        $params = [$gradeable_id];
+        $this->course_db->query(
+            "
+            INSERT INTO electronic_gradeable_hidden_files
+            VALUES ($gradeable_id, $file_name, $lowest_allowed)
+            ",
+            $params
+        );
+    }
+    
+    public function deleteOmittedFiles($gradeable_id){
+        $params = [$gradeable_id, $file_name, $lowest_allowed];
+        $this->course_db->query(
+            "
+            DELETE FROM table_name WHERE g_id = $gradeable_id;
+            ",
+            $params
+        );
+    }
 
     public function getNumUsersWhoViewedGradeBySections($gradeable, $sections) {
         $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
