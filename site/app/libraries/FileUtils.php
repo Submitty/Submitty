@@ -625,7 +625,7 @@ class FileUtils {
      * @param string $path Absolute path to file or directory
      * @param string|null $expected_owner Expected owner name of the file, or null to omit this check
      * @param string|null $expected_group Expected group name owner of the file, or null to omit this check
-     * @return array Empty array if no errors were detected or an error containing one or more error message strings if
+     * @return array Empty array if no errors were detected or an array containing one or more error message strings if
      *               errors were detected.
      */
     public static function checkForPermissionErrors(string $path, ?string $expected_owner, ?string $expected_group): array {
