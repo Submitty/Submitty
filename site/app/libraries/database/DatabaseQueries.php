@@ -1560,7 +1560,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
    )g
 ) as individual;
           ", [$g_id]);
-        return $this->course_db->getRowCount() > 0 ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
+        return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
     public function getScoresForGradeable($g_id, $section_key, $is_team) {
         $u_or_t = "u";
