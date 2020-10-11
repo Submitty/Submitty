@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
+use DateTime;
 
 class OfficeHoursQueueModel extends AbstractModel {
 
@@ -26,7 +27,37 @@ class OfficeHoursQueueModel extends AbstractModel {
     private $current_queue;
     private $full_history;
     private $current_queue_state;
+/*<<<<<<< HEAD */
     private $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
+/*=======
+    private $colors = ['#c98ee4','#9fcc55','#ea79a1','#4ed78e','#ef7568','#38b3eb','#e09965','#8499e3','#83cc88','#d9ab39','#4ddcc0','#b9c673','#658bfb','#76cc6c','#dc8b3d','#c9bf5d','#5499f0','#9a89f0','#e57fcf','#c0c246'];*/
+    private $days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ];
+    private $niceNames = [
+      'dow' => 'Day',
+      'queue_interactions' => 'Total Interactions',
+      'number_distinct_students' => 'Distinct Students',
+      'avg_help_time' => 'Avg Help Time',
+      'min_help_time' => 'Min Help Time',
+      'max_help_time' => 'Max Help Time',
+      'avg_wait_time' => 'Avg Wait Time',
+      'min_wait_time' => 'Min Wait Time',
+      'max_wait_time' => 'Max Wait Time',
+      'help_count' => 'Helps',
+      'not_helped_count' => 'Unhelped Students',
+      'queue_code' => 'Queue',
+      'weeknum' => 'Week',
+      'number_names_used' => 'Unique Names',
+    ];
+
+>>>>>>> master
 
     /**
      * OfficeHoursQueueModel constructor.
@@ -238,5 +269,51 @@ class OfficeHoursQueueModel extends AbstractModel {
             $time_in = $this->core->getDateTimeNow();
         }
         return $this->core->getQueries()->getNumberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);
+    }
+
+    public function getAllQueuesEver() {
+        return $this->core->getQueries()->getAllQueuesEver();
+    }
+
+    public function getQueueDataStudent() {
+        return $this->core->getQueries()->getQueueDataStudent();
+    }
+
+    public function getQueueDataOverall() {
+        return $this->core->getQueries()->getQueueDataOverall();
+    }
+
+    public function getQueueDataToday() {
+        return $this->core->getQueries()->getQueueDataToday();
+    }
+
+    public function getQueueDataByQueue() {
+        return $this->core->getQueries()->getQueueDataByQueue();
+    }
+
+    public function getQueueDataByWeekDay() {
+        return $this->core->getQueries()->getQueueDataByWeekDay();
+    }
+
+    public function getQueueDataByWeekDayThisWeek() {
+        return $this->core->getQueries()->getQueueDataByWeekDayThisWeek();
+    }
+
+    public function dayNumToDay($daynum): string {
+        return $this->days[$daynum];
+    }
+
+    public function getQueueDataByWeekNumber() {
+        return $this->core->getQueries()->getQueueDataByWeekNumber();
+    }
+
+    public function weekNumToDate($weeknum, $yearnum): string {
+        $week_start = new DateTime();
+        $week_start->setISODate($yearnum, $weeknum);
+        return $week_start->format('Y-M-d');
+    }
+
+    public function statNiceName($name): string {
+        return $this->niceNames[$name] ?? $name;
     }
 }

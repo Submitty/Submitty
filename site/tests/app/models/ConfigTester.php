@@ -120,6 +120,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'queue_enabled' => true,
                 'queue_contact_info' => true,
                 'queue_message' => '',
+                //'queue_contact_info_requirement' => '',
                 'queue_announcement_message' => '',
                 'seek_message_enabled'           => false,
                 'seek_message_instructions'      => '',
