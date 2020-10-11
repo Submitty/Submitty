@@ -340,24 +340,23 @@ class OfficeHoursQueueController extends AbstractController {
     public function toggleQueue($queue_code) {
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            return MultiResponse::JsonOnlyResponse(
+                JsonResponse::getSuccessResponse('Ok.')
             );
         }
         if (!isset($_POST['queue_state'])) {//Must be set as isset because empty(0) will return false even though 0 is a value
             $this->core->addErrorMessage("Missing queue state");
+
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-
         $this->core->getQueries()->toggleQueue($queue_code, $_POST['queue_state']);
         $this->core->addSuccessMessage(($_POST['queue_state'] === "1" ? 'Closed' : 'Opened') . ' queue: "' . $queue_code . '"');
         $this->sendSocketMessage(['type' => 'toggle_queue']);
-
-        return MultiResponse::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-        );
+         return MultiResponse::RedirectOnlyResponse(
+             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+         );
     }
 
     /**
