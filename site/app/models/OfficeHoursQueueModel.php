@@ -57,7 +57,7 @@ class OfficeHoursQueueModel extends AbstractModel {
       'number_names_used' => 'Unique Names',
     ];
 
->>>>>>> master
+//>>>>>>> master
 
     /**
      * OfficeHoursQueueModel constructor.
