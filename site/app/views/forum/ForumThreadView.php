@@ -671,6 +671,7 @@ class ForumThreadView extends AbstractView {
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
             "current_user" => $this->core->getUser()->getId(),
             "user_group" => $this->core->getUser()->getGroup(),
+            "thread_exists" => $thread_exists
         ]);
     }
 
