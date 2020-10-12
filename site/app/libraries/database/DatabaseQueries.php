@@ -1675,24 +1675,44 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
     
     public function insertOmittedFiles($gradeable_id, $file_name, $lowest_allowed){
-        $params = [$gradeable_id];
+        $params = [$gradeable_id, $file_name, $lowest_allowed];
         $this->course_db->query(
             "
-            INSERT INTO electronic_gradeable_hidden_files
-            VALUES ($gradeable_id, $file_name, $lowest_allowed)
+            INSERT INTO electronic_gradeable_hidden_files (g_id, file_wildcard, lowest_access_group)
+            VALUES (?, ?, ?)
             ",
             $params
         );
     }
     
     public function deleteOmittedFiles($gradeable_id){
-        $params = [$gradeable_id, $file_name, $lowest_allowed];
+        $params = [$gradeable_id];
         $this->course_db->query(
             "
-            DELETE FROM table_name WHERE g_id = $gradeable_id;
+            DELETE FROM electronic_gradeable_hidden_files WHERE g_id = ?;
             ",
             $params
         );
+    }
+    
+    public function getOmmitedFiles($gradeable_id){
+        $params = [$gradeable_id];
+        $this->course_db->query(
+            "
+            SELECT file_wildcard FROM electronic_gradeable_hidden_files WHERE g_id = ?;
+            ",
+            $params
+        );
+        $hidden_files = "";
+        foreach ($this->course_db->rows() as $row) {
+            if($hidden_files !== ""){
+                $hidden_files = $hidden_files . ":" . $row["file_wildcard"];
+            }
+            else{
+                $hidden_files = $row["file_wildcard"];
+            }
+        }
+        return ($hidden_files);
     }
 
     public function getNumUsersWhoViewedGradeBySections($gradeable, $sections) {

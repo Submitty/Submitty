@@ -1180,23 +1180,34 @@ HTML;
      * @return string by reference
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $showNewInterface) {
-        $add_files = function (&$files, $new_files, $start_dir_name) {
+        $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
             $files[$start_dir_name] = [];
+            $hidden_files = $this->core->getQueries()->getOmmitedFiles($graded_gradeable->getGradeableId());
             if ($new_files) {
                 foreach ($new_files as $file) {
-                    if ($start_dir_name == "submissions") {
-                        $file["path"] = $this->setAnonPath($file["path"]);
-                    }
-                    $path = explode('/', $file['relative_name']);
-                    array_pop($path);
-                    $working_dir = &$files[$start_dir_name];
-                    foreach ($path as $dir) {
-                        if (!isset($working_dir[$dir])) {
-                            $working_dir[$dir] = [];
+                    $skipping = false;
+                    if($this->core->getUser()->getGroup() == User::GROUP_STUDENT){
+                        foreach (explode(':',$hidden_files) as $hidden_file) {
+                            if(fnmatch($hidden_file, $file["name"])){
+                                $skipping = true;
+                            }
                         }
-                        $working_dir = &$working_dir[$dir];
                     }
-                    $working_dir[$file['name']] = $file['path'];
+                    if(!$skipping){
+                        if ($start_dir_name == "submissions") {
+                            $file["path"] = $this->setAnonPath($file["path"]);
+                        }
+                        $path = explode('/', $file['relative_name']);
+                        array_pop($path);
+                        $working_dir = &$files[$start_dir_name];
+                        foreach ($path as $dir) {
+                            if (!isset($working_dir[$dir])) {
+                                $working_dir[$dir] = [];
+                            }
+                            $working_dir = &$working_dir[$dir];
+                        }
+                        $working_dir[$file['name']] = $file['path'];
+                    }
                 }
             }
         };
@@ -1214,10 +1225,10 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
-            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
-            $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
-            $add_files($results, $display_version_instance->getResultsFiles(), 'results');
-            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
+            $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
+            $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
+            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
         }
         $student_grader = false;
         if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
