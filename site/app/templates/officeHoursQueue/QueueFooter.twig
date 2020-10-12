@@ -235,21 +235,24 @@
       });
   }
 
-  function toggleQueue(index, code){
+  function toggleQueue(index, code, row_class){
       console.log($(`#toggle_queue_${index}`)[0].checked)
       $.post( `{{base_url}}/${code}/toggle`, {
           csrf_token: '{{ csrf_token }}',
           queue_code: code,
           queue_state: $(`#toggle_queue_${index}`)[0].checked ? 0:1
       });
-      var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
-      if (filter_choices[code]) {
-          //document.getElementById('queue_filter_' + code).parentElement.classList.remove("fully-transparent");
-          $(this).parent().css({backgroundColor: 'red'});
+
+      //console.log(row_class);
+
+      if ($(`#toggle_queue_${index}`)[0].checked) {
+          $("tr." + row_class).removeClass("bg-transparent");
       }
       else {
-          document.getElementById('queue_filter_' + code).parentElement.classList.add("fully-transparent");
+          $("tr." + row_class).addClass("bg-transparent");
       }
+
+
 
   }
 
