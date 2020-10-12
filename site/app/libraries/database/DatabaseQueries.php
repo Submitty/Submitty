@@ -1674,7 +1674,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     
-    public function insertOmittedFiles($gradeable_id, $file_name, $lowest_allowed){
+    public function insertOmittedFiles($gradeable_id, $file_name, $lowest_allowed) {
         $params = [$gradeable_id, $file_name, $lowest_allowed];
         $this->course_db->query(
             "
@@ -1685,7 +1685,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         );
     }
     
-    public function deleteOmittedFiles($gradeable_id){
+    public function deleteOmittedFiles($gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query(
             "
@@ -1695,7 +1695,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         );
     }
     
-    public function getOmmitedFiles($gradeable_id){
+    public function getOmmitedFiles($gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query(
             "
@@ -1705,10 +1705,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         );
         $hidden_files = "";
         foreach ($this->course_db->rows() as $row) {
-            if($hidden_files !== ""){
+            if ($hidden_files !== "") {
                 $hidden_files = $hidden_files . "," . $row["file_wildcard"];
             }
-            else{
+            else {
                 $hidden_files = $row["file_wildcard"];
             }
         }
