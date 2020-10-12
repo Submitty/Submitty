@@ -1706,7 +1706,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $hidden_files = "";
         foreach ($this->course_db->rows() as $row) {
             if($hidden_files !== ""){
-                $hidden_files = $hidden_files . ":" . $row["file_wildcard"];
+                $hidden_files = $hidden_files . "," . $row["file_wildcard"];
             }
             else{
                 $hidden_files = $row["file_wildcard"];

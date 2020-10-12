@@ -1187,7 +1187,7 @@ HTML;
                 foreach ($new_files as $file) {
                     $skipping = false;
                     if($this->core->getUser()->getGroup() == User::GROUP_STUDENT){
-                        foreach (explode(':',$hidden_files) as $hidden_file) {
+                        foreach (explode(',',$hidden_files) as $hidden_file) {
                             if(fnmatch($hidden_file, $file["name"])){
                                 $skipping = true;
                             }

@@ -1132,7 +1132,7 @@ class AdminGradeableController extends AbstractController {
         }
         if(isset($details["files_to_omit"])){
             $this->core->getQueries()->deleteOmittedFiles($gradeable->getId());
-            foreach (explode(':', $details["files_to_omit"]) as $file_name) {
+            foreach (explode(',', $details["files_to_omit"]) as $file_name) {
                 $this->core->getQueries()->insertOmittedFiles($gradeable->getId(), $file_name, 4);
             }
         }
