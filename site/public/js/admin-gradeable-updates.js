@@ -483,7 +483,6 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     }
         
     else{
-        console.log(p_values)
         let container = $('#container-rubric');
         if (container.length === 0) {
             alert("UPDATES DISABLED: no 'container-rubric' element!");
