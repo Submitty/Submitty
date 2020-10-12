@@ -30,7 +30,7 @@
   </form>
   <br>
   <span class="option-title">Filter visible queues</span>
-  <table class="table" style="width:100%;">
+  <table class="table table-striped" style="width:100%;">
     <thead>
       <tr>
         {# <th scope="col">Show/Hide</th> #}
@@ -42,7 +42,7 @@
     </thead>
     <tbody>
       {% for queue in viewer.getAllQueues() %}
-          <tr   class="row_color_{{viewer.getIndexFromCode(queue['code'])}}" {# style="background: {{ viewer.getColorFromCode(queue['code']) }};" #} >
+          <tr  {# class="row_color_{{viewer.getIndexFromCode(queue['code'])}}"#} >
           {#
           {% if queue['open'] != 0 %}
             <tr   class="row_color_{{viewer.getIndexFromCode(queue['code'])}}">
@@ -62,7 +62,7 @@
               <b>Access Code:</b>{{queue['token']}}</td>
             </label>
           <td>
-              <input type="checkbox" id="toggle_queue_{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}', 'row_color_{{viewer.getIndexFromCode(queue['code'])}}')" {% if queue['open'] %} checked {% endif %} />
+              <input type="checkbox" id="toggle_queue_{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
               {#
               {% if queue['open'] == 0 %}
                   <input type="checkbox" onchange="toggleQueue({{queue['code']}}, {{queue['open']}})"></input>

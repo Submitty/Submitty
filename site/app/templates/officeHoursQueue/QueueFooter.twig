@@ -235,25 +235,13 @@
       });
   }
 
-  function toggleQueue(index, code, row_class){
+  function toggleQueue(index, code){
       console.log($(`#toggle_queue_${index}`)[0].checked)
       $.post( `{{base_url}}/${code}/toggle`, {
           csrf_token: '{{ csrf_token }}',
           queue_code: code,
           queue_state: $(`#toggle_queue_${index}`)[0].checked ? 0:1
       });
-
-      //console.log(row_class);
-
-      if ($(`#toggle_queue_${index}`)[0].checked) {
-          $("tr." + row_class).removeClass("bg-transparent");
-      }
-      else {
-          $("tr." + row_class).addClass("bg-transparent");
-      }
-
-
-
   }
 
 </script>

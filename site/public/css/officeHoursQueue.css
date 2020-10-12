@@ -90,7 +90,7 @@ th{
     color:white;
 }
 
-.bg-transparent {
-    background:transparent!important;
+.filter-buttons:hover, .filter-buttons:focus{
+    opacity: 0.8;
+    filter: alpha(opacity=80);
 }
-

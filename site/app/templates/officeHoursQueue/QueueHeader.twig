@@ -26,7 +26,7 @@
         {% for queue in viewer.getAllQueues() %}
             {% if queue['open'] != 0 %}
 
-                <label tabindex="0" class="btn"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }}; color: inherit; {# color: {{ viewer.getColorFromCode(queue['code']) }}; #}">{{queue['code']}}
+                <label tabindex="0" class="btn filter-buttons"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }}; color: inherit; {# color: {{ viewer.getColorFromCode(queue['code']) }}; #}">{{queue['code']}}
                     <input
                             type="checkbox"
                             title="Toggle filter for: {{queue['code']|upper}}"
