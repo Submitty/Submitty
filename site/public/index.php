@@ -127,6 +127,13 @@ else {
     $response = WebRouter::getWebResponse($request, $core);
 }
 
+if ($request->isXmlHttpRequest() && ($response instanceof ResponseInterface)) {
+    //If its an Ajax based request, we can only send a JSON payload back
+    //webrouter will only return multiresponse right now if a ResponseInterface is returned
+    $response = $response->convertToJsonResponse();
+}
+
+
 if ($response instanceof ResponseInterface) {
     $response->render($core);
 }

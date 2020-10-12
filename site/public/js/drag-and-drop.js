@@ -988,6 +988,9 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
                     if (data['message'] == "You do not have access to that page.") {
                         window.location.href = return_url;
                     }
+                    else if(typeof data['code'] !== undefined && data['code'] === 302){
+                        window.location.href = data['data'];
+                    }
                     else {
                         alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
                     }
