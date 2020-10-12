@@ -74,7 +74,7 @@ th{
 
     text-align: left;
 }
-
+/*
 * > .fa-hover-show,
 *:hover > .fa-hover-hidden,
 *:focus > .fa-hover-hidden {
@@ -83,7 +83,7 @@ th{
 *:focus > .fa-hover-show,
 *:hover > .fa-hover-show {
     display: inline-block;
-}
+}*/
 
 .fully-transparent {
     background:transparent!important;

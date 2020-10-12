@@ -35,12 +35,6 @@
                             class="page_loading queue_filter"
                             style="display: none;"
                             onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
-{#                    {% if changeColor(queue['code']) %}
-                        style="background-color: {{ viewer.getColorFromCode(queue['code']) }};"
-                    {% else %}
-                        style="background-color: #FFFFFF;" #}
-
-
                 </label>
             {% endif %}
         {% endfor %}
@@ -48,7 +42,7 @@
         {% for queue in viewer.getAllQueues() %}
             {% if queue['open'] == 0 %}
 
-                <label tabindex="0" class="btn"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }}; color: inherit;;">{{queue['code']}}
+                <label tabindex="0" class="btn"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }}; color: inherit;">{{queue['code']}}
                     <input
                             type="checkbox"
                             title="Toggle filter for: {{queue['code']|upper}}"
@@ -61,43 +55,6 @@
                 </label>
             {% endif %}
         {% endfor %}
-
-
-
-            {# <a class="btn" data-color="{{viewer.getColor({{viewer.getIndexFromCode(queue['code'])}})}}"   style=" border-color: {{viewer.getColor({{viewer.getIndexFromCode(queue['code'])}})}};   background-color: #FFFFFF; color: {{viewer.getColor({{viewer.getIndexFromCode(queue['code'])}})}};">{{queue['code']}}</a> #}
-
-{#             {% if queue['open'] == 0 %}
-                <label tabindex="0" class="btn"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; color: {{ viewer.getColorFromCode(queue['code']) }}; text-align: left !important; white-space: unset !important;">{{queue['code']}}
-                    <input
-                            type="checkbox"
-                            title="Toggle filter for: {{queue['code']|upper}}"
-                            aria-label="Toggle filter for: {{queue['code']|upper}}"
-                            id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
-                            class="page_loading queue_filter"
-                            style="display: none;"
-                            onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
-                </label>
-            {% else %}
-                <label tabindex="0" class="btn"  style=" border-color: {{ viewer.getColorFromCode(queue['code']) }};   background-color: {{ viewer.getColorFromCode(queue['code']) }}; color:#FFFFFF;">{{queue['code']}}
-                    <input
-                            type="checkbox"
-                            title="Toggle filter for: {{queue['code']|upper}}"
-                            aria-label="Toggle filter for: {{queue['code']|upper}}"
-                            id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
-                            class="page_loading queue_filter"
-                            style="display: none;"
-                            name="test"
-                            autocomplete="off"
-                            onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
-
-
-
-                </label>
-            {% endif %} #}
-
-
-
-
     {% endif %}
     <br>
   </p>

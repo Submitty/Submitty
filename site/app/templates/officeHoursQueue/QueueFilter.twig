@@ -42,9 +42,11 @@
     </thead>
     <tbody>
       {% for queue in viewer.getAllQueues() %}
+          <tr   class="row_color_{{viewer.getIndexFromCode(queue['code'])}}">
+          {#
           {% if queue['open'] != 0 %}
             <tr   class="row_color_{{viewer.getIndexFromCode(queue['code'])}}">
-          {% endif %}
+          {% endif %} #}
           {# <td>
             <input
               type="checkbox"
@@ -60,11 +62,13 @@
               <b>Access Code:</b>{{queue['token']}}</td>
             </label>
           <td>
+              <input type="checkbox" id="toggle_queue_{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
+              {#
               {% if queue['open'] == 0 %}
                   <input type="checkbox" onchange="toggleQueue({{queue['code']}}, {{queue['open']}})"></input>
               {% else %}
                   <input type="checkbox" onchange="toggleQueue({{queue['code']}}, {{queue['open']}})" checked></input>
-              {% endif %}
+              {% endif %} #}
               {#
             <form method="post" onsubmit='return false' action="{{base_url}}/{{queue['code']}}/toggle">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
