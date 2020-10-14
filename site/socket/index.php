@@ -21,14 +21,15 @@ $core->loadCourseDatabase();
 $core->getOutput()->loadTwig();
 $core->getOutput()->setInternalResources();
 
+$ws_server = new WsServer(new Server($core));
+
 $server = IoServer::factory(
-    new HttpServer(
-        new WsServer(
-            new Server($core)
-        )
-    ),
+    new HttpServer($ws_server),
     41983,
     '127.0.0.1'
 );
+
+//send messages every 30 seconds to keep active connections alive
+$ws_server->enableKeepAlive($server->loop);
 
 $server->run();
