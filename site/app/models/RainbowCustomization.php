@@ -123,8 +123,92 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
+        // Reorder buckets
+        $this->reorderBuckets();
+
         //XXX: Assuming that the contents of these buckets will be lowercase
         $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
+    }
+
+    /**
+     * Reorder each gradeable bucket in $this->customization_data to match JSON (or grade release date as a fallback) ordering
+     */
+    private function reorderBuckets(): void {
+        $json_buckets_gradeables = [];
+
+        // First, fetch JSON and associate ids with buckets
+        if (!is_null($this->RCJSON)) {
+            $json_buckets = $this->RCJSON->getGradeables();
+            foreach ($json_buckets as $json_bucket) {
+                if (property_exists($json_bucket, 'type') && property_exists($json_bucket, 'ids')) {
+                    $json_buckets_gradeables[$json_bucket->type] = $json_bucket->ids;
+                }
+            }
+        }
+
+        // Reorder individual buckets
+        $temp_customization_data = [];
+        foreach ($this->customization_data as $bucket => $gradeables) {
+            $json_bucket_ids = array_key_exists($bucket, $json_buckets_gradeables) ? $json_buckets_gradeables[$bucket] : [];
+            $temp_customization_data[$bucket] = $this->reorderBucket($gradeables, $json_bucket_ids);
+        }
+        $this->customization_data = $temp_customization_data;
+    }
+
+    /**
+     * Returns $bucket_gradeables reordered to match order in $json_bucket_ids.
+     * If a gradeable is not present in $json_bucket_ids, it will be added to the end of the array in order of grade release date.
+     * @param array $bucket_gradeables A gradeable bucket from $this->customization_data
+     * @param array $json_bucket_ids An "ids" array from a $this->RCSJSON bucket
+     * @return array
+     */
+    private function reorderBucket(array $bucket_gradeables, array $json_bucket_ids): array {
+        $new_gradeables = [];
+
+        // First, associate gradeables with their IDs
+        $gradeables_by_id = array_reduce($bucket_gradeables, function ($accumulator, $gradeable) {
+            $accumulator[$gradeable['id']] = $gradeable;
+            return $accumulator;
+        }, []);
+
+        // Then, add gradeables to $new_gradeables based on JSON ordering
+        if (!is_null($json_bucket_ids)) {
+            foreach ($json_bucket_ids as $json_gradeable) {
+                if (property_exists($json_gradeable, 'id')) {
+                    $id = $json_gradeable->id;
+                    if (array_key_exists($id, $gradeables_by_id)) {
+                        $new_gradeables[] = $gradeables_by_id[$id];
+                        unset($gradeables_by_id[$id]);
+                    }
+                }
+            }
+        }
+        
+        // Finally, add any remaining gradeables to $new_gradeables based on date ordering.
+        $num_unordered_gradeables = count($gradeables_by_id);
+        $gradeables_by_date = [];
+        foreach ($gradeables_by_id as $gradeable) {
+            $num_gradeables_counted = count($gradeables_by_date);
+            
+            // Ensure strings are sorted properly
+            $gradeable_count_string = str_repeat(
+                '0',
+                strlen(strval($num_unordered_gradeables)) - strlen(strval($num_gradeables_counted))
+            ) . $num_gradeables_counted;
+            
+            if (array_key_exists('grade_release_date', $gradeable)) {
+                $gradeables_by_date[$gradeable['grade_release_date'] . '_' . $gradeable_count_string] = $gradeable;
+            }
+            else {
+                $gradeables_by_date['END_OF_TIME_' . $gradeable_count_string] = $gradeable;
+            }
+        }
+        ksort($gradeables_by_date);
+        foreach ($gradeables_by_date as $gradeable) {
+            $new_gradeables[] = $gradeable;
+        }
+
+        return $new_gradeables;
     }
 
     /**

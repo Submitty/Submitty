@@ -1236,9 +1236,14 @@ def history_short_circuit_helper(
     if os.path.exists(user_assignment_access_path):
         with open(user_assignment_access_path) as fd:
             obj = json.load(fd, object_pairs_hook=collections.OrderedDict)
-        first_access = obj[0]['timestamp']
-        first_access_dt = dateutils.read_submitty_date(first_access)
-        access_duration = int((submit_timestamp - first_access_dt).total_seconds())
+        if len(obj) == 0:
+            # this can happen if the student never clicks on the page and the
+            # instructor makes a submission for the student
+            pass
+        else:
+            first_access = obj[0]['timestamp']
+            first_access_dt = dateutils.read_submitty_date(first_access)
+            access_duration = int((submit_timestamp - first_access_dt).total_seconds())
 
     return {
         'gradeable_deadline': gradeable_deadline,

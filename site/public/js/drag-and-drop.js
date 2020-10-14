@@ -564,7 +564,7 @@ function displayPreviousSubmissionOptions(callback){
     var current_btn = 4;
     if(form.css('display') !== 'none'){
         document.addEventListener("keydown", e => {
-            if(e.keyCode == 9){
+            if(e.code === "Tab"){
                 //on tab update the focus, cycle through the radio buttons and then
                 //the close/submit buttons and then back to the radio buttons
                 $('input[name=instructor-submit]').css({"outline": "none"});
@@ -589,11 +589,11 @@ function displayPreviousSubmissionOptions(callback){
                 }
                 current_btn = (current_btn == 4) ? 0 : current_btn + 1;
             }
-            else if(e.keyCode === 27){
+            else if(e.code === "Escape"){
                 //close the modal box on escape
                 closer_btn.click();
             }
-            else if(e.keyCode === 13){
+            else if(e.code === "Enter"){
                 //on enter update whatever the user is focussing on
                 //uncheck everything and then recheck the desired button to make sure it actually updates
                 if(current_btn === 1){

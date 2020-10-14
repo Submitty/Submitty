@@ -165,14 +165,16 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $invite_id = $_POST['invite_id'];
-        if ($this->core->getQueries()->getUserByID($invite_id) === null) {
+        $invite_id = self::cleanInviteId($_POST['invite_id']);
+        $invited_user = $this->core->getQueries()->getUserById($invite_id);
+
+        if ($invited_user === null) {
             // If a student with this id does not exist in the course...
             $this->core->addErrorMessage("User {$invite_id} does not exist");
             $this->core->redirect($return_url);
         }
 
-        if ($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null) {
+        if ($invited_user->getRegistrationSection() === null) {
             // If a student with this id is in the null section...
             // (make this look the same as a non-existant student so as not to
             // reveal information about dropped students)
@@ -515,5 +517,14 @@ class TeamController extends AbstractController {
         $lock = $date->format('Y-m-d H:i:s') > $gradeable->getTeamLockDate()->format('Y-m-d H:i:s');
         $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
         $this->core->getOutput()->renderOutput(['submission', 'Team'], 'showTeamPage', $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock);
+    }
+
+    /**
+     * Get clean user_id invite
+     * @param string $invite_id
+     * @return string
+     */
+    private static function cleanInviteId(string $invite_id): string {
+        return trim(strtolower($invite_id));
     }
 }
