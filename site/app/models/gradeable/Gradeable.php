@@ -80,7 +80,6 @@ use app\controllers\admin\AdminGradeableController;
  * @method string  getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
- * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
  */
 class Gradeable extends AbstractModel {
@@ -748,11 +747,11 @@ class Gradeable extends AbstractModel {
      * @throws ValidationException With all messages for each invalid property
      */
     public function setDates(array $dates) {
-        // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
-        $dates = $this->parseDates($dates);
-
         // Asserts that this date information is valid
         $this->assertDates($dates);
+
+        // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
+        $dates = $this->parseDates($dates);
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
@@ -817,7 +816,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function hasDueDate() {
-        return $this->has_due_date;
+        return $this->submission_due_date != null;
     }
 
     /**
@@ -826,6 +825,26 @@ class Gradeable extends AbstractModel {
      */
     public function hasReleaseDate() {
         return $this->grade_released_date != null;
+    }
+
+    /**
+     * Sets the submission due date to null or keeps it the same
+     * @param bool $val is true if we keep the date the same
+     */
+    public function setHasDueDate($val) {
+        if (!$val) {
+            $this->submission_due_date = null;
+        }
+    }
+
+    /**
+     * Sets the release date to null or keeps it the same
+     * @param bool $val is true if we keep the date the same
+     */
+    public function setHasReleaseDate($val) {
+        if (!$val) {
+            $this->grade_released_date = null;
+        }
     }
 
     /**

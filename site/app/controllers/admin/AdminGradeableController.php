@@ -1034,7 +1034,13 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date'
+            'has_due_date',
+            'has_release_date'
+        ];
+
+        $toggle_dates = [
+            'has_due_date' => 'submission_due_date',
+            'has_release_date' => 'grade_released_date'
         ];
 
         $discussion_ids = 'discussion_thread_id';
@@ -1044,6 +1050,7 @@ class AdminGradeableController extends AbstractController {
             'grader_assignment_method'
         ];
 
+        // $this->core->redirect("google.com");
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;
@@ -1052,13 +1059,25 @@ class AdminGradeableController extends AbstractController {
                 $dates[$date_property] = $details[$date_property];
 
                 
-                if ($date_property == "has_due_date") {
+                if ($date_property == "has_release_date") {
+                    //$errors["haha"] = "has release date.";
+                    //$this->core->redirect($this->core->buildNewCourseUrl());
+                    // if ($details[$date_property] == false) {
+                    //     //unset($details["submission_due_date"]);
+                    //     $dates["grade_released_date"] = "GONE";
+                    //     unset($details["grade_released_date"]);
+                    // }
                     //var_dump("due_date");
                     //unset($details["submission_due_date"]);
                 }
-                if ($date_property == "submission_due_date") {
+                if ($date_property == 'submission_due_date' && isset($details['has_due_date'])) {
+                    // if ($details['has_due_date'] == 'false') {
+                    //     $dates[$date_property] = "booty";
+                    // }
+                    // unset($details[$date_property]);
+                    //$errors[$date_property] = "has submission_due_date date.";
                     //var_dump("due_date");
-                    //$this->core->redirect($this->core->buildNewCourseUrl());
+                    //$this->core->redirect("google.com");
                 }
 
                 if ($dates[$date_property] > DateUtils::MAX_TIME) {
@@ -1076,6 +1095,10 @@ class AdminGradeableController extends AbstractController {
             // Convert boolean values into booleans
             if (in_array($prop, $boolean_properties)) {
                 $post_val = $post_val === 'true';
+
+                if (!$post_val && isset($toggle_dates[$prop])) {
+                    //unset($dates[$toggle_dates[$prop]]);
+                }
             }
 
             if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
