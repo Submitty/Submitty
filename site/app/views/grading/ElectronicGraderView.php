@@ -581,7 +581,7 @@ HTML;
                 $pending_members = $row->getSubmitter()->getTeam()->getInvitations();
                 $pending_members_json = json_encode($pending_members);
                 $multiple_invites = [];
-                foreach($pending_members as $pending_member_id) {
+                foreach ($pending_members as $pending_member_id) {
                     $pending_member = $this->core->getQueries()->getUserById($pending_member_id);
                     $multiple_invites[] = $pending_member->hasMultipleTeamInvites($gradeable->getId());
                 }

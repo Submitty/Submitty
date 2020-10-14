@@ -2763,13 +2763,22 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-    *
-    */
-    public function getUserMultipleTeamInvites($g_id,$user_id) {
+     * Returns the number of pending team invites the given user has for the given gradeable
+     *
+     * @param string $user_id
+     * @param string $g_id
+     * @return integer
+     */
+    public function getUserMultipleTeamInvites($g_id, $user_id) {
         $this->course_db->query(
-            "SELECT gtm.*, tm.* FROM gradeable_teams gtm INNER JOIN teams tm 
-                ON gtm.team_id = tm.team_id
-                WHERE gtm.g_id = ? AND tm.user_id = ?", [$g_id,$user_id]);
+            "
+            SELECT gtm.*, tm.*
+            FROM gradeable_teams gtm
+            INNER JOIN teams tm 
+            ON gtm.team_id = tm.team_id
+            WHERE gtm.g_id = ? AND tm.user_id = ?",
+            [$g_id,$user_id]
+        );
         return count($this->course_db->rows()) > 1;
     }
 

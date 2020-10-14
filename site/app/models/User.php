@@ -525,9 +525,9 @@ class User extends AbstractModel {
     }
 
     /**
-    * Checks if the user has invites to multiple teams for the given assignment
-    */
-    public function hasMultipleTeamInvites(string $gradeable_id) : bool {
+     * Checks if the user has invites to multiple teams for the given assignment
+     */
+    public function hasMultipleTeamInvites(string $gradeable_id): bool {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
     }
 }
