@@ -629,6 +629,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     team_history_div_left.empty();
     var team_history_div_right = $("#admin-team-history-right");
     team_history_div_right.empty();
+    var team_history_div_bottom = $('#admin-team-history-bottom');
+    team_history_div_bottom.empty();
     members_div.append('Team Member IDs:<br />');
     var student_full = JSON.parse($('#student_full_id').val());
     let exists_multiple_invite_member = false;
@@ -662,7 +664,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
             members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
                 name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
-                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+','+ pending_members[i-members.length] +');" \
+                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
@@ -719,9 +721,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
             }
-            $('#admin-team-history-bottom').empty();
             if (past_lock_date) {
-                $('#admin-team-history-bottom').append('*History items highlighted in red were performed after team lock date.');
+                team_history_div_bottom.append('*History items highlighted in red were performed after team lock date.');
             }
         }
     }
@@ -771,11 +772,13 @@ function removeTeamMemberInput(i) {
     });
 }
 
-function approveTeamMemberInput(old, i, user_id_to_add) {
+function approveTeamMemberInput(old, i) {
     var form = $("#admin-team-form");
     $("#approve_member_"+i).remove();
     $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
     $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
+    let user_id = ($('[name="user_id_'+i+'"]', form).val()).substring(9);
+    $('[name="user_id_'+i+'"]', form).attr("value", user_id);
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
