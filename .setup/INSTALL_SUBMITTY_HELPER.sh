@@ -229,6 +229,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/preferred_names
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
 fi
 # ------------------------------------------------------------------------
 
@@ -268,6 +269,7 @@ if [ "${WORKER}" == 0 ]; then
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
     chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/office_hours_queue
 
     # php needs to be able to read containers config
     chown ${PHP_USER}:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/autograding_containers.json

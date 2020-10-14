@@ -1020,7 +1020,7 @@ function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        pos = seq.charCodeAt(pos) === e.code ? pos + 1 : 0;
         if (pos === seq.length) {
             setInterval(function() { $("*").addClass("rainbow"); }, 100);
             $(document.body).off('keyup', colorEvent);
@@ -1297,7 +1297,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
+        else if (!t.shiftKey && t.code === "Tab") { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1628,7 +1628,7 @@ $(document).ready(function() {
 });
 
 function keyToClickKeydown(event){
-  if (event.keyCode === 13) {//ENTER key
+  if (event.code === "Enter") {
     event.preventDefault();
     event.stopPropagation();
     $(event.target).click();
@@ -1636,7 +1636,7 @@ function keyToClickKeydown(event){
 }
 
 function keyToClickKeyup(event){
-  if (event.keyCode === 32) { //SPACE key
+  if (event.code === "Space") {
     event.preventDefault();
     event.stopPropagation();
     $(event.target).click();

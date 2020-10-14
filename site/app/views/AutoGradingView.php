@@ -48,6 +48,7 @@ class AutoGradingView extends AbstractView {
             return [
                 'name' => $testcase_config->getName(),
                 'hidden' => $testcase_config->isHidden(),
+                'release_hidden_details' => $testcase_config->isReleaseHiddenDetails(),
                 'details' => $testcase_config->getDetails(),
                 'has_points' => $testcase_config->getPoints() !== 0,
                 'extra_credit' => $testcase_config->isExtraCredit(),
