@@ -2763,11 +2763,11 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
-     * Returns the number of pending team invites the given user has for the given gradeable
+     * Returns a boolean for whether the given user has multiple pending team invites for the given gradeable
      *
      * @param string $user_id
      * @param string $g_id
-     * @return integer
+     * @return bool
      */
     public function getUserMultipleTeamInvites($g_id, $user_id) {
         $this->course_db->query(
