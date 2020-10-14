@@ -21,7 +21,6 @@
   function updateQueueFilter(queue_code) {
     var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
     filters[queue_code] = document.getElementById('queue_filter_' + queue_code).checked;
-    console.log(document.getElementById('queue_filter_' + queue_code));
     localStorage.setItem('office_hour_queue_filters', JSON.stringify(filters));
     filterQueues();
   }
@@ -242,6 +241,10 @@
           queue_code: code,
           queue_state: $(`#toggle_queue_${index}`)[0].checked ? 0:1
       });
+  }
+
+  function refreshPage(){
+      window.location.reload();
   }
 
 </script>

@@ -63,28 +63,6 @@ th{
   padding: .75rem;
 }
 
-/* id = "contact_info" */
-#contact_info {
-
-    width: 645px;
-
-}
-
-#queue_name_and_code {
-
-    text-align: left;
-}
-/*
-* > .fa-hover-show,
-*:hover > .fa-hover-hidden,
-*:focus > .fa-hover-hidden {
-    display: none;
-}
-*:focus > .fa-hover-show,
-*:hover > .fa-hover-show {
-    display: inline-block;
-}*/
-
 .fully-transparent {
     background:transparent!important;
     color:white;

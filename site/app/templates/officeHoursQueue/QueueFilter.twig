@@ -33,54 +33,20 @@
   <table class="table table-striped" style="width:100%;">
     <thead>
       <tr>
-        {# <th scope="col">Show/Hide</th> #}
-        <th id="queue_name_and_code" scope="col">Queue Name/Access Code</th>
-        <th scope="col">Open/Close</th>
+        <th style="text-align: left;" scope="col">Queue Name/Access Code</th>
+        <th scope="col">Open?</th>
         <th scope="col">Empty</th>
         <th scope="col">Delete</th>
       </tr>
     </thead>
     <tbody>
       {% for queue in viewer.getAllQueues() %}
-          <tr  {# class="row_color_{{viewer.getIndexFromCode(queue['code'])}}"#} >
-          {#
-          {% if queue['open'] != 0 %}
-            <tr   class="row_color_{{viewer.getIndexFromCode(queue['code'])}}">
-          {% endif %} #}
-          {# <td>
-            <input
-              type="checkbox"
-              title="Toggle filter for: {{queue['code']|upper}}"
-              aria-label="Toggle filter for: {{queue['code']|upper}}"
-              id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
-              class="page_loading queue_filter"
-              onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
-          </td> #}
+          <tr>
           <td style="text-align: left;">
-            <label for="queue_filter_{{viewer.cleanForId(queue['code'])}}">
               <b>Name:</b>{{queue['code']}}<br>
               <b>Access Code:</b>{{queue['token']}}</td>
-            </label>
           <td>
               <input type="checkbox" id="toggle_queue_{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
-              {#
-              {% if queue['open'] == 0 %}
-                  <input type="checkbox" onchange="toggleQueue({{queue['code']}}, {{queue['open']}})"></input>
-              {% else %}
-                  <input type="checkbox" onchange="toggleQueue({{queue['code']}}, {{queue['open']}})" checked></input>
-              {% endif %} #}
-              {#
-            <form method="post" onsubmit='return false' action="{{base_url}}/{{queue['code']}}/toggle">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-              <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-              <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
-
-              {% if queue['open'] == 0 %}
-                  <button title="Open Queue" type="submit"  class="btn btn-primary filter_settings_btn open_queue_btn"><i class="fa fa-door-open fa-hover-show"></i><i class="fa fa-door-closed fa-hover-hidden"></i></button>
-              {% else %}
-                 <button title="Close Queue"  type="submit" class="btn btn-primary filter_settings_btn close_queue_btn"><i class="fa fa-door-open fa-hover-hidden"></i><i class="fa fa-door-closed fa-hover-show"></i></button>
-              {% endif %}
-            </form> #}
           </td>
           <td>
             <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
@@ -89,7 +55,6 @@
               <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn">Empty</button>
             </form>
           </td>
-
           <td>
             <form method="post" action="{{base_url}}/{{queue['code']}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -97,8 +62,6 @@
               <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn">Delete</button>
             </form>
           </td>
-
-
         </tr>
       {% endfor %}
     </tbody>
@@ -110,5 +73,6 @@
   </div>
 {% endblock %}
 {% block buttons %}
-  {{ block('close_button') }}
+    <button type="button" class="btn btn-primary" onClick="refreshPage()">Close</button>
 {% endblock %}
+

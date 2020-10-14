@@ -38,6 +38,8 @@
                 </label>
             {% endif %}
         {% endfor %}
+        <br>
+        <br>
         Closed Queues:
         {% for queue in viewer.getAllQueues() %}
             {% if queue['open'] == 0 %}

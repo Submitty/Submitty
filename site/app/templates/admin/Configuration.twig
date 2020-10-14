@@ -74,16 +74,6 @@
         <textarea class="config-row" name="queue_message" id="queue-message">{{ fields['queue_message'] }}</textarea>
 
 
-        {#
-        <label for="queue-contact-info-requirement" class="config-row">
-            <span class="option-title">Office Hours Queue Contact Info Requirement</span>
-            <br>
-        </label>
-        <input class="config-row" type="text" name="queue_contact_info_requirement" id="queue-contact-info-requirement" value="{{ fields['queue_contact_info_requirement'] }}" />
-        #}
-
-
-
         {% if feature_flag_enabled('polls') %}
             <h2>Online Polls</h2>
             <hr>

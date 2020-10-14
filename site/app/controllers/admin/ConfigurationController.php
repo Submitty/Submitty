@@ -55,7 +55,6 @@ class ConfigurationController extends AbstractController {
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_contact_info'             => $this->core->getConfig()->getQueueContactInfo(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
-            //'queue_contact_info_requirement' => $this->core->getConfig()->getQueueContactInfoRequirement(),
             'seek_message_enabled'           => $this->core->getConfig()->isSeekMessageEnabled(),
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),

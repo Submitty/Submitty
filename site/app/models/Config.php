@@ -73,7 +73,6 @@ use app\libraries\FileUtils;
  * @method void setSubmittyPath(string $submitty_path)
  * @method void setDebug(bool $debug)
  * @method string getQueueMessage()
- * @method string getQueueContactInfoRequirement()
  * @method string getSeekMessageInstructions()
  * @method string getQueueAnnouncementMessage()
  * @method string getSubmittyInstallPath()
@@ -253,8 +252,6 @@ class Config extends AbstractModel {
     protected $queue_contact_info;
     /** @prop @var string */
     protected $queue_message;
-    /** @prop @var string */
-    //protected $queue_contact_info_requirement;
     /** @prop @var string */
     protected $seek_message_instructions;
     /** @prop @var string */
@@ -463,7 +460,7 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'regrade_enabled', 'seating_only_for_instructor',
-            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', /*'queue_contact_info_requirement',*/ 'polls_enabled', 'polls_pts_for_correct', 'polls_pts_for_incorrect', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'regrade_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_contact_info', 'queue_message', 'polls_enabled', 'polls_pts_for_correct', 'polls_pts_for_incorrect', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 

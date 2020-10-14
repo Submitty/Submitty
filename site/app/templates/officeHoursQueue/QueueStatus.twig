@@ -19,7 +19,7 @@
     <br>
     {% if viewer.isContactInfoEnabled() %}
       <label for="contact_info">My Contact Information (follow instructor directions):</label>
-      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on" required="required"> {# CONTACT INFO BUTTON #}
+      <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on" required="required">
       <br>
     {% endif %}
     <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>

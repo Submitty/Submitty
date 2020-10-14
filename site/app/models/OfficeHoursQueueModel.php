@@ -27,10 +27,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     private $current_queue;
     private $full_history;
     private $current_queue_state;
-/*<<<<<<< HEAD */
     private $colors = ['#c3a2d2','#99b270','#cd98aa','#6bb88f','#c8938d','#6b9fb8','#c39e83','#98a3cd','#8ac78e','#b39b61','#6eb9aa','#b4be79','#94a2cc','#80be79','#b48b64','#b9b26e','#83a0c3','#ada5d4','#e57fcf','#c0c246'];
-/*=======
-    private $colors = ['#c98ee4','#9fcc55','#ea79a1','#4ed78e','#ef7568','#38b3eb','#e09965','#8499e3','#83cc88','#d9ab39','#4ddcc0','#b9c673','#658bfb','#76cc6c','#dc8b3d','#c9bf5d','#5499f0','#9a89f0','#e57fcf','#c0c246'];*/
+
     private $days = [
         'Sunday',
         'Monday',
@@ -57,7 +55,6 @@ class OfficeHoursQueueModel extends AbstractModel {
       'number_names_used' => 'Unique Names',
     ];
 
-//>>>>>>> master
 
     /**
      * OfficeHoursQueueModel constructor.
@@ -224,16 +221,9 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->colors[$index];
     }
 
-
-
-
-
-
     public function getColorFromCode($code) {
         return $this->colors[$this->getIndexFromCode($code)];
     }
-
-
 
     public function isContactInfoEnabled() {
         return $this->core->getConfig()->getQueueContactInfo();

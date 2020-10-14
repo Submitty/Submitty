@@ -25,7 +25,6 @@
         "queue_enabled": false,
         "queue_contact_info": false,
         "queue_message": "",
-        //"queue_contact_info_requirement": "",//edited this
         "queue_announcement_message": "",
         "polls_enabled": false,
         "polls_pts_for_correct": 1.0,
