@@ -1674,7 +1674,15 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     
-    public function insertOmittedFiles($gradeable_id, $file_name, $lowest_allowed) {
+    /**
+     * Inserts a set of ommitted file wildcards for a gradeable
+     *
+     * @param  string $gradeable_id
+     * @param  string $file_name
+     * @param  int $lowest_allowed
+     */
+    
+    public function insertOmittedFiles(string $gradeable_id, string $file_name, int $lowest_allowed) {
         $params = [$gradeable_id, $file_name, $lowest_allowed];
         $this->course_db->query(
             "
@@ -1685,7 +1693,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         );
     }
     
-    public function deleteOmittedFiles($gradeable_id) {
+    /**
+     * Delete all ommitted file wildcards for a gradeable
+     *
+     * @param  string $gradeable_id
+     */
+    
+    public function deleteOmittedFiles(string $gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query(
             "
@@ -1695,7 +1709,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         );
     }
     
-    public function getOmmitedFiles($gradeable_id) {
+    /**
+     * Get all ommitted file wildcards for a gradeable
+     *
+     * @param  string $gradeable_id
+     */
+    
+    public function getOmmitedFiles(string $gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query(
             "
