@@ -1,22 +1,28 @@
 <script>
     window.onload = function() {
         const xPoints = [];
+        const xPointsIndexes = [];
         const yPoints = [];
         let string;
         {% for answer, number in results %}
             string = "{{ poll.getResponseString(answer) }}";
             xPoints.push(string);
+            xPointsIndexes.push({{ answer }});
             yPoints.push({{ number }});
         {% endfor %}
         const data = [
           {
-            x: xPoints,
             y: yPoints,
             type: 'bar'
           }
         ];
         const layout = {
-          title: "{{ poll.getName() }}"
+          title: "{{ poll.getName() }}",
+          xaxis: {
+            tickmode: "array",
+            ticktext: xPoints,
+            tickvals: xPointsIndexes
+          }
         }
         Plotly.newPlot("chartContainer", data, layout);
     }
