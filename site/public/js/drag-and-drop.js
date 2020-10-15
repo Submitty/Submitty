@@ -975,6 +975,9 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             }
             return myXhr;
         },
+        headers : {
+            Accept: "text/json"
+        },
         contentType: false,
         type: 'POST',
         success: function(data) {
