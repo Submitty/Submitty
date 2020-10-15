@@ -6,6 +6,7 @@ use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
+use app\libraries\response\MultiResponse;
 use app\libraries\response\ResponseInterface;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -126,6 +127,12 @@ if ($is_api) {
 else {
     $response = WebRouter::getWebResponse($request, $core);
 }
+
+if ($request->isXmlHttpRequest() && ($response instanceof MultiResponse)) {
+    //If its an Ajax based request, we can only send a JSON payload back
+    $response = $response->convertToJsonResponse();
+}
+
 
 if ($response instanceof ResponseInterface) {
     $response->render($core);
