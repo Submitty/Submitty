@@ -1130,9 +1130,9 @@ class AdminGradeableController extends AbstractController {
                 $updated_properties[] = 'rebuild_queued';
             }
         }
-        if (isset($details["files_to_omit"])) {
+        if (isset($details["files-to-omit"])) {
             $this->core->getQueries()->deleteOmittedFiles($gradeable->getId());
-            foreach (explode(',', $details["files_to_omit"]) as $file_name) {
+            foreach (explode(',', $details["files-to-omit"]) as $file_name) {
                 $this->core->getQueries()->insertOmittedFiles($gradeable->getId(), $file_name, 4);
             }
         }

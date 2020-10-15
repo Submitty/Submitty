@@ -2006,9 +2006,7 @@ class Gradeable extends AbstractModel {
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
     }
     public function setFilesToOmit() {
-
     }
     public function getFilesToOmit() {
-
     }
 }
