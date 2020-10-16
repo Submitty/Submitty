@@ -126,7 +126,7 @@ if ($is_api) {
 }
 else {
     $response = WebRouter::getWebResponse($request, $core);
-    $request_json = isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] === "text/json";
+    $request_json = isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] === "application/json";
 
     if ($request->isXmlHttpRequest() && ($response instanceof MultiResponse) && $request_json) {
         //convert to JSON if an ajax request asks for it
