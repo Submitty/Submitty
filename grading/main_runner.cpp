@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
   }
 
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
+  nlohmann::json config_json = LoadAndCustomizeConfigJson(rcsid);
 
   // nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());
   // int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",0);

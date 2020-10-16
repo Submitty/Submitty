@@ -509,7 +509,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
 
   // LOAD HW CONFIGURATION JSON
 
-  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
+  nlohmann::json config_json = LoadAndCustomizeConfigJson(rcsid);
   // PREPARE GRADE.TXT FILE
   std::string grade_path = "grade.txt";
   std::ofstream gradefile(grade_path.c_str());
@@ -519,7 +519,7 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
   int nonhidden_automated_points_awarded = 0;
   int nonhidden_automated_points_possible = 0;
   int max_penalty_possible = 0;
-  
+
   std::stringstream testcase_json;
   nlohmann::json all_testcases;
 

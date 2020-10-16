@@ -10,6 +10,7 @@
 #include "TestCase.h"
 #include "load_config_json.h"
 #include "execute.h"
+#include "default_config.h"
 
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 
@@ -148,6 +149,84 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
   whole_config["hide_version_and_test_details"] = whole_config.value("hide_version_and_test_details", false);
 }
 
+void ComputeGlobalValues(nlohmann::json &whole_config, std::string assignment_directory) {
+
+  whole_config["id"] = getAssignmentIdFromCurrentDirectory(std::string(assignment_directory));
+  int total_nonec = 0;
+  int total_ec = 0;
+
+  int visible = 0;
+  nlohmann::json::iterator testcases = whole_config.find("testcases");
+
+  assert (testcases != whole_config.end());
+
+  int max_submissions = MAX_NUM_SUBMISSIONS;
+  int total_time = 0;
+
+  nlohmann::json::iterator rl = whole_config.find("resource_limits");
+
+  for (typename nlohmann::json::iterator itr = testcases->begin(); itr != testcases->end(); itr++) {
+    int points = itr->value("points",0);
+    bool extra_credit = itr->value("extra_credit",false);
+    bool hidden = itr->value("hidden",false);
+    std::string test_id = itr->value("testcase_id","");
+    assert(test_id != "");
+
+    if (points > 0) {
+      if (!extra_credit)
+        total_nonec += points;
+      else
+        total_ec += points;
+      if (!hidden)
+        visible += points;
+    }
+    //container name only matters if we try to get the commands for this testcase.
+    std::string container_name = "";
+    nlohmann::json my_testcase_json = *itr;
+    TestCase my_testcase(my_testcase_json, test_id, container_name);
+    if (my_testcase.isSubmissionLimit()) {
+      max_submissions = my_testcase.getMaxSubmissions();
+    }
+  }
+  // DEPRECATED: Because of the addition of itempool grading, this should be computed in the shipper.
+  whole_config["max_possible_grading_time"] = 0;
+
+  //TODO: This will break down for itempool grading.
+  nlohmann::json grading_parameters = whole_config.value("grading_parameters",nlohmann::json::object());
+  int AUTO_POINTS         = grading_parameters.value("AUTO_POINTS",total_nonec);
+  int EXTRA_CREDIT_POINTS = grading_parameters.value("EXTRA_CREDIT_POINTS",total_ec);
+  int TA_POINTS           = grading_parameters.value("TA_POINTS",0);
+  int TOTAL_POINTS        = grading_parameters.value("TOTAL_POINTS",AUTO_POINTS+TA_POINTS);
+
+  std::string start_red_text = "\033[1;31m";
+  std::string end_red_text   = "\033[0m";
+  if (total_nonec != AUTO_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points do not match testcases." << total_nonec
+        << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
+    throw "ERROR: Automated Points do not match testcases";
+  }
+
+  if (total_ec != EXTRA_CREDIT_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec
+        << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
+    throw "ERROR: Extra Credit Points do not match testcases.";
+  }
+
+  if (total_nonec + TA_POINTS != TOTAL_POINTS) {
+    std::cout << "\n" << start_red_text << "ERROR: Automated Points and TA Points do not match total."
+        << end_red_text << "\n" << std::endl;
+    throw "ERROR: Automated Points and TA Points do not match total.";
+  }
+
+
+
+
+  whole_config["max_submissions"] = max_submissions;
+  whole_config["auto_pts"] = AUTO_POINTS;
+  whole_config["points_visible"] = visible;
+  whole_config["ta_pts"] = TA_POINTS;
+  whole_config["total_pts"] = TOTAL_POINTS;
+}
 
 // This function ensures that any file explicitly tagged as an
 // executable in a compilation step is validated and copied
@@ -874,7 +953,7 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
   single_testcase["hidden"] = single_testcase.value("hidden", false);
   single_testcase["view_testcase_message"] = single_testcase.value("view_testcase_message",true);
   single_testcase["publish_actions"] = single_testcase.value("publish_actions", false);
-  
+
 
   nlohmann::json::iterator itr = single_testcase.find("validation");
   if (itr != single_testcase.end()) {
@@ -930,11 +1009,19 @@ void InflateTestcase(nlohmann::json &single_testcase, nlohmann::json &whole_conf
 
 // =====================================================================
 // =====================================================================
+nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id) {
+    nlohmann::json config_json;
+    std::stringstream sstr(GLOBAL_config_json_string);
+    sstr >> config_json;
 
-nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
-  nlohmann::json answer;
-  std::stringstream sstr(GLOBAL_config_json_string);
-  sstr >> answer;
+    if (student_id != "") {
+      CustomizeAutoGrading(student_id, config_json);
+    }
+    return config_json;
+}
+
+
+nlohmann::json FillInConfigDefaults(std::string assignment_directory) {
 
   AddGlobalDefaults(answer);
   int testcase_id = 0;
@@ -976,12 +1063,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   }
 
   ValidateNotebooks(answer);
-
-
   AddSubmissionLimitTestCase(answer);
-  if (rcsid != "") {
-    CustomizeAutoGrading(rcsid,answer);
-  }
 
   /*************************************************
   * Add Global File Copy Commands
@@ -999,6 +1081,9 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
       PreserveCompiledFiles(*item_testcases, answer);
     }
   }
+
+  ComputeGlobalValues(answer, assignment_directory);
+
   return answer;
 }
 

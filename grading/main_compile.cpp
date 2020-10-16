@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
 
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
+  nlohmann::json config_json = LoadAndCustomizeConfigJson(rcsid);
 
   std::cout << "MAIN COMPILE" << std::endl;
   std::vector<nlohmann::json> actions;
