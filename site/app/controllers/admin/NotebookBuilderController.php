@@ -84,9 +84,18 @@ class NotebookBuilderController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
         }
 
-        $images = json_encode($this->getFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
-
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
+
+        $permission_failures = $this->checkPermissions($gradeable->getAutogradingConfigPath());
+        if ($permission_failures) {
+            foreach ($permission_failures as $failure) {
+                $this->core->addErrorMessage($failure);
+            }
+
+            return new RedirectResponse($failure_url);
+        }
+
+        $images = json_encode($this->getFiles(FileUtils::joinPaths($gradeable->getAutogradingConfigPath(), 'test_input')));
 
         $json_contents = file_get_contents($json_path);
         $config_string = Utils::stripComments($json_contents);
@@ -276,5 +285,26 @@ class NotebookBuilderController extends AbstractController {
         }
 
         return $result;
+    }
+
+    /**
+     * Recursively check that all files and sub-directories in the given $autograding_dir are correctly setup and
+     * usable by notebook builder.
+     *
+     * @param string $autograding_dir Absolute path to the autograding directory.
+     * @return array An array of error messages, or an empty array of no errors were detected.
+     */
+    private function checkPermissions(string $autograding_dir): array {
+        $errors = [];
+        $files = [];
+
+        $files[] = $autograding_dir;
+
+        FileUtils::getDirContents($autograding_dir, $files);
+        foreach ($files as $file) {
+            $errors = array_merge($errors, FileUtils::checkForPermissionErrors($file, $this->expected_owner, $this->expected_group));
+        }
+
+        return $errors;
     }
 }

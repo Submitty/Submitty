@@ -670,4 +670,30 @@ class FileUtils {
 
         return $results;
     }
+
+    /**
+     * Recursively traverse a directory structure starting at $dir.  The passed in $results array will be populated
+     * with the absolute path to each file or sub-directory.
+     *
+     * NOTE: Sub-directories are treated like files, and thus will be included as their own entries in the array.
+     *
+     * Credit:
+     * https://stackoverflow.com/questions/24783862/list-all-the-files-and-folders-in-a-directory-with-php-recursive-function
+     *
+     * @param string $dir The starting directory (not included in results)
+     * @param array $results An array passed by reference which will be populated
+     */
+    public static function getDirContents(string $dir, &$results = array()): void {
+        $files = scandir($dir);
+
+        foreach ($files as $key => $value) {
+            $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
+            if (!is_dir($path)) {
+                $results[] = $path;
+            } else if ($value != "." && $value != "..") {
+                self::getDirContents($path, $results);
+                $results[] = $path;
+            }
+        }
+    }
 }
