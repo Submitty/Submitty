@@ -1311,6 +1311,71 @@ ORDER BY {$orderby}",
         return $return;
     }
 
+    /**
+     * Gets the number of bad (late) user submissions associated with this gradeable.
+     *
+     * @param  int $g_id gradeable id we are looking up
+     * @param  array $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are basing grading sections off of
+     * @return int[] with a key representing a section and value representing the number of bad submissions
+     */
+    public function getBadUserSubmissionsByGradingSection($g_id, $sections, $section_key) {
+        //getBadTeamSubmissionsByGradingSection
+        //getBadGradedComponentsCountByGradingSections
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
+            $params = array_merge($params, $sections_keys);
+        }
+        if ($section_key === 'registration_section') {
+            $orderby = "SUBSTRING({$section_key}, '^[^0-9]*'), COALESCE(SUBSTRING({$section_key}, '[0-9]+')::INT, -1), SUBSTRING({$section_key}, '[^0-9]*$')";
+        }
+        else {
+            $orderby = $section_key;
+        }
+        $this->course_db->query(
+            "
+            SELECT count(*) as cnt, {$section_key}
+            FROM users
+            INNER JOIN electronic_gradeable_version
+            ON
+            users.user_id = electronic_gradeable_version.user_id
+            AND users." . $section_key . " IS NOT NULL
+            AND electronic_gradeable_version.active_version>0
+            AND electronic_gradeable_version.g_id=?
+            INNER JOIN electronic_gradeable
+            ON 
+            electronic_gradeable.g_id=electronic_gradeable_version.g_id
+            AND electronic_gradeable.eg_submission_due_date IS NOT NULL
+            INNER JOIN electronic_gradeable_data
+            ON 
+            electronic_gradeable_data.user_id = users.user_id
+            AND electronic_gradeable_data.g_id=electronic_gradeable.g_id
+            AND electronic_gradeable_data.g_version=electronic_gradeable_version.active_version
+            AND greatest(0, ceil((extract(EPOCH FROM(coalesce(electronic_gradeable_data.submission_time, electronic_gradeable.eg_submission_due_date) - electronic_gradeable.eg_submission_due_date)) - (300*60))/86400):: integer) > 0
+            {$where}
+            GROUP BY {$section_key}
+            ORDER BY {$orderby}",
+            $params
+        );
+        //electronic_gradeable.eg_submission_due_date - electronic_gradeable_data.submission_time > '1 SECOND'
+        //var_dump($this->course_db->rows());
+        foreach ($sections as $val) {
+            $return[$val] = 0;
+        }
+        
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+
     public function getTotalSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
         $return = [];
         $params = [$g_id];
@@ -1467,6 +1532,78 @@ GROUP BY {$u_or_t}.{$section_key}
 ORDER BY {$u_or_t}.{$section_key}",
             $params
         );
+        foreach ($this->course_db->rows() as $row) {
+            if ($row[$section_key] === null) {
+                $row[$section_key] = "NULL";
+            }
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+        return $return;
+    }
+
+    /**
+     * Gets the number of bad (late) graded components associated with this gradeable.
+     *
+     * @param  int $g_id gradeable id we are looking up
+     * @param  array $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are basing grading sections off of
+     * @param  boolean $is_team true if the gradeable is a team assignment
+     * @return int[] with a key representing a section and value representing the number of bad submissions
+     */
+    public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
+        //getBadTeamSubmissionsByGradingSection
+        //getBadUserSubmissionsByGradingSection
+         $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        $return = [];
+        $params = [$g_id,$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            $where = "WHERE {$section_key} IN " . $this->createParamaterList(count($sections));
+            $params = array_merge($params, $sections);
+        }
+        $this->course_db->query(
+            "
+            SELECT {$u_or_t}.{$section_key}, count({$u_or_t}.*) as cnt
+            FROM {$users_or_teams} AS {$u_or_t}
+            INNER JOIN (
+              SELECT *, gd.g_id FROM gradeable_data AS gd
+              LEFT JOIN (
+              gradeable_component_data AS gcd
+              INNER JOIN gradeable_component AS gc ON gc.gc_id = gcd.gc_id AND gc.gc_is_peer = {$this->course_db->convertBoolean(false)}
+              )AS gcd ON gcd.gd_id = gd.gd_id WHERE gcd.g_id=?
+            ) AS gd ON {$u_or_t}.{$user_or_team_id} = gd.gd_{$user_or_team_id}
+            INNER JOIN electronic_gradeable_version AS egv
+            ON
+            {$u_or_t}.{$user_or_team_id} = egv.{$user_or_team_id}
+            AND egv.active_version>0
+            AND egv.g_id=?
+            INNER JOIN electronic_gradeable AS eg
+            ON 
+            eg.g_id=egv.g_id
+            AND eg.eg_submission_due_date IS NOT NULL
+            INNER JOIN electronic_gradeable_data AS egd
+            ON 
+            egd.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+            AND egd.g_id=eg.g_id
+            AND egv.active_version=egd.g_version
+            AND greatest(0, ceil((extract(EPOCH FROM(coalesce(egd.submission_time, eg.eg_submission_due_date) - eg.eg_submission_due_date)) - (300*60))/86400):: integer) > 0
+            {$where}
+            GROUP BY {$u_or_t}.{$section_key}
+            ORDER BY {$u_or_t}.{$section_key}",
+            $params
+        );
+
+        foreach ($sections as $val) {
+            $return[$val] = 0;
+        }
+
         foreach ($this->course_db->rows() as $row) {
             if ($row[$section_key] === null) {
                 $row[$section_key] = "NULL";
@@ -2965,6 +3102,65 @@ ORDER BY {$section_key}",
 
         return $return;
     }
+
+    /**
+     * Gets the number of bad (late) team submissions associated with this gradeable.
+     *
+     * @param  int $g_id gradeable id we are looking up
+     * @param  array $sections an array holding sections of the given gradeable
+     * @param  string $section_key key we are basing grading sections off of
+     * @return int[] with a key representing a section and value representing the number of bad submissions
+     */
+    public function getBadTeamSubmissionsByGradingSection($g_id, $sections, $section_key) {
+        //getBadUserSubmissionsByGradingSection
+        //getBadGradedComponentsCountByGradingSections
+        $return = [];
+        $params = [$g_id];
+        $where = "";
+        if (count($sections) > 0) {
+            // Expand out where clause
+            $sections_keys = array_values($sections);
+            $placeholders = $this->createParamaterList(count($sections_keys));
+            $where = "WHERE {$section_key} IN {$placeholders}";
+            $params = array_merge($params, $sections_keys);
+        }
+        $this->course_db->query(
+            "
+            SELECT count(*) as cnt, {$section_key}
+            FROM gradeable_teams
+            INNER JOIN electronic_gradeable_version
+            ON
+            gradeable_teams.team_id = electronic_gradeable_version.team_id
+            AND gradeable_teams." . $section_key . " IS NOT NULL
+            AND electronic_gradeable_version.active_version>0
+            AND electronic_gradeable_version.g_id=?
+            INNER JOIN electronic_gradeable
+            ON 
+            electronic_gradeable.g_id=electronic_gradeable_version.g_id
+            AND electronic_gradeable.eg_submission_due_date IS NOT NULL
+            INNER JOIN electronic_gradeable_data
+            ON 
+            electronic_gradeable_data.team_id = gradeable_teams.team_id
+            AND electronic_gradeable_data.g_id=electronic_gradeable.g_id
+            AND electronic_gradeable_data.g_version=electronic_gradeable_version.active_version
+            AND greatest(0, ceil((extract(EPOCH FROM(coalesce(electronic_gradeable_data.submission_time, electronic_gradeable.eg_submission_due_date) - electronic_gradeable.eg_submission_due_date)) - (300*60))/86400):: integer) > 0
+            {$where}
+            GROUP BY {$section_key}
+            ORDER BY {$section_key}",
+            $params
+        );
+
+        foreach ($sections as $val) {
+            $return[$val] = 0;
+        }
+
+        foreach ($this->course_db->rows() as $row) {
+            $return[$row[$section_key]] = intval($row['cnt']);
+        }
+
+        return $return;
+    }
+
     public function getUsersWithoutTeamByGradingSections($g_id, $sections, $section_key) {
         $return = [];
         $params = [$g_id];
@@ -5923,8 +6119,6 @@ AND gc_id IN (
 
 
 /////////////////END Office Hours Queue queries//////////////////////////////////
-
-
 
     /**
      * Gets all GradedGradeable's associated with each Gradeable.  If
