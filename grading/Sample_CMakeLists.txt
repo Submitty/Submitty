@@ -51,7 +51,7 @@ else (ASSIGNMENT_INSTALLATION)
   # the name of the test is the name of the parent directory
   get_filename_component(which_test ${which_test_dir} NAME)
   message("WHICH TEST: ${which_test}")
-  
+
   include_directories(${which_test_dir}/assignment_config)
 
   set (my_config_json ${which_test_dir}/assignment_config/config.json)
@@ -69,7 +69,7 @@ endif(ASSIGNMENT_INSTALLATION)
 
 
 ###################################################################################
-# OPTIONAL INSTRUCTOR CUSTOMIZATION 
+# OPTIONAL INSTRUCTOR CUSTOMIZATION
 #
 # If extra .cpp files are needed for grading/validation, add a file
 #  named "instructor_CMakeLists.txt" and in that file list the .cpp
@@ -96,7 +96,7 @@ find_program(CPP_PATH cpp HINTS ${cc_dir} DOC "path to C preprocessor")
 # Rather than passing -P to avoid the line markers, which also
 # collapses blank lines, we pass nothing to preserve line number parity
 # and remove the # lines.
-execute_process(COMMAND ${CPP_PATH} ${my_config_json} OUTPUT_VARIABLE 
+execute_process(COMMAND ${CPP_PATH} ${my_config_json} OUTPUT_VARIABLE
   json_generated RESULT_VARIABLE cpp_res ERROR_VARIABLE cpp_err)
 if (cpp_res OR cpp_err)
   message(FATAL_ERROR "Failed to run ${CPP_PATH} on ${my_config_json}")
@@ -118,10 +118,10 @@ endif ()
 
 
 # Then embed the config.json within a generated .cpp source file
-string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" json_generated "${json_generated}")
+string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" my_hw_config_file "${my_hw_config_file}")
 set(cpp_header "const char *GLOBAL_config_json_string = \"")
 set(cpp_footer "\";\n")
-file(WRITE json_generated.cpp "${cpp_header}${json_generated}${cpp_footer}")
+file(WRITE json_generated.cpp "${cpp_header}${my_hw_config_file}${cpp_footer}")
 set_source_files_properties(json_generated.cpp PROPERTIES GENERATED true)
 
 
@@ -130,25 +130,25 @@ set_source_files_properties(json_generated.cpp PROPERTIES GENERATED true)
 
 # build this as a library, so we only have to compile it once
 add_library(custom_functions
-  ${GRADINGCODE}/grading/seccomp_functions.cpp  
+  ${GRADINGCODE}/grading/seccomp_functions.cpp
   json_generated.cpp
-  ${custom_files}  
+  ${custom_files}
 )
 
 add_executable(configure.out
-  ${GRADINGCODE}/grading/main_configure.cpp 
+  ${GRADINGCODE}/grading/main_configure.cpp
 )
 
 add_executable(compile.out
-  ${GRADINGCODE}/grading/main_compile.cpp 
+  ${GRADINGCODE}/grading/main_compile.cpp
 )
 
 add_executable(run.out
-  ${GRADINGCODE}/grading/main_runner.cpp 
+  ${GRADINGCODE}/grading/main_runner.cpp
 )
 
 add_executable(validate.out
-  ${GRADINGCODE}/grading/main_validator.cpp 
+  ${GRADINGCODE}/grading/main_validator.cpp
 )
 
 

@@ -147,6 +147,25 @@ void AddGlobalDefaults(nlohmann::json &whole_config) {
 
   // Configure defaults for hide_version_and_test_details
   whole_config["hide_version_and_test_details"] = whole_config.value("hide_version_and_test_details", false);
+
+  // By default, we have one drop zone without a part label / sub
+  // directory.
+  nlohmann::json::iterator parts = whole_config.find("part_names");
+  if (parts != whole_config.end()) {
+    whole_config["part_names"] =  nlohmann::json::array();
+    for (int i = 0; i < parts->size(); i++) {
+      whole_config["part_names"].push_back((*parts)[i]);
+    }
+  }
+
+  // But, if there are input fields, but there are no explicit parts
+  // (drag & drop zones / "bucket"s for file upload), set part_names
+  // to an empty array (no zones for file drag & drop).
+
+  nlohmann::json::iterator in_notebook_cells = whole_config.find("notebook");
+  if (parts == whole_config.end() && in_notebook_cells != whole_config.end()) {
+    whole_config["part_names"] =  nlohmann::json::array();
+  }
 }
 
 void ComputeGlobalValues(nlohmann::json &whole_config, std::string assignment_directory) {
@@ -1021,70 +1040,70 @@ nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id) {
 }
 
 
-nlohmann::json FillInConfigDefaults(std::string assignment_directory) {
+nlohmann::json FillInConfigDefaults(nlohmann::json& config_json, const std::string& assignment_directory) {
 
-  AddGlobalDefaults(answer);
+  AddGlobalDefaults(config_json);
   int testcase_id = 0;
   /**
   * Validate/complete-ify the global testcases array.
   **/
-  nlohmann::json::iterator testcases = answer.find("testcases");
-  if(testcases == answer.end()) {
-    answer["testcases"] = nlohmann::json::array();
-    testcases = answer.find("testcases");
+  nlohmann::json::iterator testcases = config_json.find("testcases");
+  if(testcases == config_json.end()) {
+    config_json["testcases"] = nlohmann::json::array();
+    testcases = config_json.find("testcases");
   }
 
-  AddDockerConfiguration(*testcases, answer);
-  FormatDispatcherActions(*testcases, answer);
-  formatPreActions(*testcases, answer);
-  FormatGraphicsActions(*testcases, answer);
-  RewriteDeprecatedMyersDiff(*testcases, answer);
+  AddDockerConfiguration(*testcases, config_json);
+  FormatDispatcherActions(*testcases, config_json);
+  formatPreActions(*testcases, config_json);
+  FormatGraphicsActions(*testcases, config_json);
+  RewriteDeprecatedMyersDiff(*testcases, config_json);
   std::cout << "Inflating testcases" << std::endl;
-  InflateTestcases(*testcases, answer, testcase_id);
+  InflateTestcases(*testcases, config_json, testcase_id);
 
   /**
   * Validate/complete-ify the testcases in each item in the item_pool.
   **/
-  nlohmann::json::iterator item_pool = answer.find("item_pool");
-  if(item_pool != answer.end()) {
-    for(nlohmann::json::iterator item = answer["item_pool"].begin(); item != answer["item_pool"].end(); item++) {
+  nlohmann::json::iterator item_pool = config_json.find("item_pool");
+  if(item_pool != config_json.end()) {
+    for(nlohmann::json::iterator item = config_json["item_pool"].begin(); item != config_json["item_pool"].end(); item++) {
       nlohmann::json::iterator item_testcases = item->find("testcases");
       if(item_testcases == item->end()) {
         (*item)["testcases"] = nlohmann::json::array();
         item_testcases = item->find("testcases");
       }
-      AddDockerConfiguration(*item_testcases, answer);
-      FormatDispatcherActions(*item_testcases, answer);
-      formatPreActions(*item_testcases, answer);
-      FormatGraphicsActions(*item_testcases, answer);
-      RewriteDeprecatedMyersDiff(*item_testcases, answer);
-      InflateTestcases(*item_testcases, answer, testcase_id);
+      AddDockerConfiguration(*item_testcases, config_json);
+      FormatDispatcherActions(*item_testcases, config_json);
+      formatPreActions(*item_testcases, config_json);
+      FormatGraphicsActions(*item_testcases, config_json);
+      RewriteDeprecatedMyersDiff(*item_testcases, config_json);
+      InflateTestcases(*item_testcases, config_json, testcase_id);
     }
   }
 
-  ValidateNotebooks(answer);
-  AddSubmissionLimitTestCase(answer);
+  ValidateNotebooks(config_json);
+  AddSubmissionLimitTestCase(config_json);
 
   /*************************************************
   * Add Global File Copy Commands
   * This step must come last, as it requires all
   * testcase ids to be in place.
   **************************************************/
-  AddAutogradingConfiguration(answer);
+  AddAutogradingConfiguration(config_json);
   // Archive validated and compiled files (must be done after AddAutogradingConfiguration)
-  ArchiveValidatedFiles(*testcases, answer);
-  PreserveCompiledFiles(*testcases, answer);
-  if(item_pool != answer.end()) {
-    for(nlohmann::json::iterator item = answer["item_pool"].begin(); item != answer["item_pool"].end(); item++) {
+  ArchiveValidatedFiles(*testcases, config_json);
+  PreserveCompiledFiles(*testcases, config_json);
+  if(item_pool != config_json.end()) {
+    for(nlohmann::json::iterator item = config_json["item_pool"].begin(); item != config_json["item_pool"].end(); item++) {
       nlohmann::json::iterator item_testcases = item->find("testcases");
-      ArchiveValidatedFiles(*item_testcases, answer);
-      PreserveCompiledFiles(*item_testcases, answer);
+      ArchiveValidatedFiles(*item_testcases, config_json);
+      PreserveCompiledFiles(*item_testcases, config_json);
     }
   }
 
-  ComputeGlobalValues(answer, assignment_directory);
+  ComputeGlobalValues(config_json, assignment_directory);
 
-  return answer;
+  return config_json;
 }
 
 /**
@@ -1571,26 +1590,15 @@ std::vector<std::string> gatherAllTestcaseIds(const nlohmann::json& complete_con
 
 void ValidateNotebooks(nlohmann::json& config_json) {
   if (config_json.find("notebook") != config_json.end()){
-    config_json["notebook"] = validate_notebook(config_json["notebook"], config_json);
+    config_json["notebook"] = ValidateANotebook(config_json["notebook"], config_json);
   }
 
   if(config_json.find("item_pool") != config_json.end()){
     int i = 0;
     for(nlohmann::json::iterator itr = config_json["item_pool"].begin(); itr != config_json["item_pool"].end(); itr++, i++) {
       config_json["item_pool"][i]["item_name"] = (*itr)["item_name"];
-      config_json["item_pool"][i]["notebook"] = validate_notebook((*itr)["notebook"], config_json);
+      config_json["item_pool"][i]["notebook"] = ValidateANotebook((*itr)["notebook"], config_json);
     }
-  }
-
-  // By default, we have one drop zone without a part label / sub
-  // directory.
-
-  // But, if there are input fields, but there are no explicit parts
-  // (drag & drop zones / "bucket"s for file upload), set part_names
-  // to an empty array (no zones for file drag & drop).
-  nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
-  if (parts == config_json.end() && in_notebook_cells != config_json.end()) {
-    config_json["part_names"] =  nlohmann::json::array();
   }
 }
 

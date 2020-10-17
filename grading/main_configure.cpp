@@ -2,7 +2,6 @@
 #include <fstream>
 
 #include "execute.h"
-#include "TestCase.h"
 #include "default_config.h"
 
 /*
@@ -17,29 +16,40 @@
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 2) {
-    std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
+  if (argc != 3) {
+    std::cout << "USAGE: " << argv[0] << " [input file] [output_file]" << std::endl;
     return 0;
   }
   std::cout << "FILENAME " << argv[0] << std::endl;
 
+  std::string input_file = argv[1];
+  std::string output_file = argv[2];
+
+  std::ifstream ifs(argv[1]);
+  nlohmann::json instructor_json;
+  if (ifs.is_open()) {
+    instructor_json = nlohmann::json::parse(ifs);
+  }
+
   // LOAD HW CONFIGURATION JSON
-  nlohmann::json config_json = FillInConfigDefaults(argv[0]);  // don't know the username yet
+  nlohmann::json output_json = FillInConfigDefaults(instructor_json, output_file);  // don't know the username yet
 
   // =================================================================================
   // EXPORT THE JSON FILE
 
   std::ofstream init;
-  init.open(argv[1], std::ios::out);
+  init.open(output_file, std::ios::out);
+  std::string start_red_text = "\033[1;31m";
+  std::string end_red_text   = "\033[0m";
   if (!init.is_open()) {
     std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting"
         << end_red_text << "\n" << std::endl;
     return 0;
   }
-  init << j.dump(4) << std::endl;
+  init << output_json.dump(4) << std::endl;
   // -----------------------------------------------------------------------
   // Also, write out the config file with automatic defaults (for debugging)
-  std::string complete_config_file = argv[1];
+  std::string complete_config_file = output_file;
   int b_pos = complete_config_file.find("/build/build_");
   // If we are not in the test suite
   if (b_pos != std::string::npos) {
@@ -49,7 +59,7 @@ int main(int argc, char *argv[]) {
     system (mkdir_command.c_str());
     std::ofstream complete_config;
     complete_config.open(complete_config_file, std::ios::out);
-    complete_config << config_json.dump(4) << std::endl;
+    complete_config << output_json.dump(4) << std::endl;
   }
   // If we are in the test suite
   else{
@@ -59,7 +69,7 @@ int main(int argc, char *argv[]) {
         "/assignment_config/complete_config.json";
       std::ofstream complete_config;
       complete_config.open(complete_config_file, std::ios::out);
-      complete_config << config_json.dump(4) << std::endl;
+      complete_config << output_json.dump(4) << std::endl;
     }
 
   }
