@@ -683,14 +683,15 @@ class FileUtils {
      * @param string $dir The starting directory (not included in results)
      * @param array $results An array passed by reference which will be populated
      */
-    public static function getDirContents(string $dir, &$results = array()): void {
+    public static function getDirContents(string $dir, &$results = []): void {
         $files = scandir($dir);
 
         foreach ($files as $key => $value) {
             $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
             if (!is_dir($path)) {
                 $results[] = $path;
-            } else if ($value != "." && $value != "..") {
+            }
+            elseif ($value != "." && $value != "..") {
                 self::getDirContents($path, $results);
                 $results[] = $path;
             }
