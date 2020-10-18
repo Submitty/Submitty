@@ -2010,8 +2010,10 @@ class Gradeable extends AbstractModel {
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
     }
-    public function setHiddenFiles() {
-        $this->hidden_files = $this->core->getQueries()->getOmmitedFiles($this->getId());
+    public function setHiddenFiles($files) {
         $this->modified = true;
+        foreach (explode(',', $files) as $file_name) {
+            $this->hidden_files[$file_name] = 3;
+        }
     }
 }
