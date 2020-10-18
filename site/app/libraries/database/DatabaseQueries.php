@@ -1677,7 +1677,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     /**
      * Inserts a set of ommitted file wildcards for a gradeable
      *
-     * @param  Gradeable $gradeable_id
+     * @param  Gradeable $gradeable
      * @param  string $file_name
      * @param  int $lowest_allowed
      */
