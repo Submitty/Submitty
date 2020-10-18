@@ -1188,7 +1188,7 @@ HTML;
                 foreach ($new_files as $file) {
                     $skipping = false;
                     foreach ($hidden_files as $file_regex => $lowest_access_group) {
-                        if (fnmatch($file_regex, $file["name"]) and $this->core->getUser()->getGroup() > $lowest_access_group) {
+                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > $lowest_access_group) {
                             $skipping = true;
                         }
                     }

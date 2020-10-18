@@ -1726,7 +1726,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         );
         $return;
         foreach ($this->course_db->rows() as $row) {
-           $return[$row["file_wildcard"]] = $row["lowest_access_group"];
+            $return[$row["file_wildcard"]] = $row["lowest_access_group"];
         }
         return $return;
     }
