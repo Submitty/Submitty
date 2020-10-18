@@ -267,7 +267,7 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $this->core->getQueries()->getOmmitedFiles($gradeable->getId())
+            'hidden_files' => implode(",",array_keys($gradeable->getHiddenFiles()))
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1130,11 +1130,12 @@ class AdminGradeableController extends AbstractController {
                 $updated_properties[] = 'rebuild_queued';
             }
         }
-        if (isset($details["files_to_omit"])) {
+        if (isset($details["hidden_files"])) {
             $this->core->getQueries()->deleteOmittedFiles($gradeable->getId());
-            foreach (explode(',', $details["files_to_omit"]) as $file_name) {
-                $this->core->getQueries()->insertOmittedFiles($gradeable->getId(), $file_name, 4);
+            foreach (explode(',', $details["hidden_files"]) as $file_name) {
+                $this->core->getQueries()->insertOmittedFiles($gradeable, $file_name, 3);
             }
+            $gradeable->setHiddenFiles($details["hidden_files"]);
         }
 
         // Be strict.  Only apply database changes if there were no errors

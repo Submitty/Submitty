@@ -82,6 +82,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
+ * @method object[] getHiddenFiles()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -213,8 +214,8 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-
-
+    /** @var array are a list of hidden files and the lowest_access_group that can see those files */
+    protected $hidden_files = [];
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -235,6 +236,10 @@ class Gradeable extends AbstractModel {
         $this->setTaInstructions($details['ta_instructions']);
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
+        }
+        
+        if (array_key_exists('hidden_files', $details)) {
+            $this->setHiddenFiles($details['hidden_files']);
         }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -2005,8 +2010,8 @@ class Gradeable extends AbstractModel {
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
     }
-    public function setFilesToOmit() {
-    }
-    public function getFilesToOmit() {
+    public function setHiddenFiles() {
+        $this->hidden_files = $this->core->getQueries()->getOmmitedFiles($this->getId());
+        $this->modified = true;
     }
 }
