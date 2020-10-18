@@ -2015,5 +2015,6 @@ class Gradeable extends AbstractModel {
         foreach (explode(',', $files) as $file_name) {
             $this->hidden_files[$file_name] = 3;
         }
+        $this->hidden_files = $this->core->getQueries()->getOmmitedFiles($this->id);
     }
 }

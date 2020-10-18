@@ -1182,8 +1182,8 @@ HTML;
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $showNewInterface) {
         $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
             $files[$start_dir_name] = [];
-            #$hidden_files = $this->core->getQueries()->getOmmitedFiles($graded_gradeable->getGradeable()->getId());
-            $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
+            $hidden_files = $this->core->getQueries()->getOmmitedFiles($graded_gradeable->getGradeable()->getId());
+            #$hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;

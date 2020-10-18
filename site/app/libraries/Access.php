@@ -765,7 +765,7 @@ class Access {
                     else {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
-                    $hidden_files = $args["gradeable"]->getHiddenFiles();
+                    $hidden_files = $this->core->getQueries()->getOmmitedFiles($args["gradeable"]->getId());
                     foreach ($hidden_files as $file_regex => $lowest_access_group) {
                         if (fnmatch($file_regex, $subpart_values[count($subpart_values)-1]) and $this->core->getUser()->getGroup() > $lowest_access_group) {
                             return false;
