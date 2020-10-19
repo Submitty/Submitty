@@ -1055,7 +1055,7 @@ CREATE TABLE public.viewed_responses (
 CREATE TABLE public.electronic_gradeable_hidden_files (
     g_id character varying(255) NOT NULL,
     file_wildcard character varying(255) NOT NULL,
-    lowest_access_group INTEGER NOT NULL DEFAULT 3,
+    lowest_access_group INTEGER NOT NULL DEFAULT 3
 );
 
 
