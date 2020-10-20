@@ -122,8 +122,7 @@
                                     <div style="margin-top:10px">
                                         <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                             {% for gradeable in gradeables %}
-                                                <li><hr /></li>
-                                                <li class="gradeable-li">
+                                                <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                     <input type="text"
                                                            aria-label="{{gradeable["title"]}} max score"
                                                            value="{{ gradeable["max_score"] }}"
