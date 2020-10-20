@@ -82,21 +82,17 @@ def copy_files(
         Address of the destination. May be either `localhost` for copying files locally, or some
         `username@hostname` format for copying files to some remote location via SFTP.
     files : list of tuple of paths
-        List of (local, remote) paths.
+        List of (source, destination) paths.
     direction : CopyDirection
-        Which direction each (local, remote) entry in `files` should be moved in. If set to `PUSH`,
-        then the local file is copied *to* the remote. If set to `PULL`, then the local file is
-        copied *from* the remote.
+        If `address` is a remote address, which way files should move. If `PUSH`, then the source
+        file is on localhost and it should be pushed to the destination file in the remote address;
+        if `PULL` then the source file is on the remote machine and it should be pulled to the
+        source file on the local machine.
     """
     if address == 'localhost':
-        if direction == CopyDirection.PULL:
-            for dest, src in files:
-                if src != dest:
-                    shutil.copy(src, dest)
-        else:
-            for src, dest in files:
-                if src != dest:
-                    shutil.copy(src, dest)
+        for src, dest in files:
+            if src != dest:
+                shutil.copy(src, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -117,11 +113,12 @@ def copy_files(
             raise RuntimeError(f"SFTP to {address} failed") from e
 
         try:
-            for local, remote in files:
-                if direction == CopyDirection.PULL:
-                    sftp.get(remote, local)
-                else:
+            if direction == CopyDirection.PUSH:
+                for local, remote in files:
                     sftp.put(local, remote)
+            else:
+                for remote, local in files:
+                    sftp.get(remote, local)
         finally:
             if sftp is not None:
                 sftp.close()
