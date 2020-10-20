@@ -57,12 +57,21 @@ class GradingStatus(Enum):
     FAILURE = 3
 
 
-def put_files(
+class CopyDirection(Enum):
+    """
+    Determines which direction files should be copied in ``copy_files``.
+    """
+    PUSH = 1
+    PULL = 2
+
+
+def copy_files(
     config: submitty_config.Config,
     address: str,
-    files: List[Tuple[PathLike, PathLike]]
+    files: List[Tuple[PathLike, PathLike]],
+    direction: CopyDirection,
 ):
-    """Put files into some place, both locally and remotely.
+    """Copy files between two directories.
 
     Note that this function does *not* handle exceptions, so potential exceptions should be handled
     by the caller.
@@ -73,12 +82,21 @@ def put_files(
         Address of the destination. May be either `localhost` for copying files locally, or some
         `username@hostname` format for copying files to some remote location via SFTP.
     files : list of tuple of paths
-        List of source and destination file paths.
+        List of (local, remote) paths.
+    direction : CopyDirection
+        Which direction each (local, remote) entry in `files` should be moved in. If set to `PUSH`,
+        then the local file is copied *to* the remote. If set to `PULL`, then the local file is
+        copied *from* the remote.
     """
     if address == 'localhost':
-        for src, dest in files:
-            if src != dest:
-                shutil.copy(src, dest)
+        if direction == CopyDirection.PULL:
+            for dest, src in files:
+                if src != dest:
+                    shutil.copy(src, dest)
+        else:
+            for src, dest in files:
+                if src != dest:
+                    shutil.copy(src, dest)
     else:
         user, host = address.split('@')
         sftp = ssh = None
@@ -100,50 +118,10 @@ def put_files(
 
         try:
             for local, remote in files:
-                sftp.put(local, remote)
-        finally:
-            if sftp is not None:
-                sftp.close()
-            if ssh is not None:
-                ssh.close()
-
-
-def get_files(
-    config: submitty_config.Config,
-    address: str,
-    files: List[Tuple[PathLike, PathLike]]
-):
-    """Get files from some place, both locally and remotely.
-
-    Parameters
-    ----------
-    address : str
-        Address of the destination. May be either `localhost` for copying files locally, or some
-        `username@hostname` format for copying files from some remote location via SFTP.
-    files : list of tuple of paths
-        List of source and destination file paths.
-    """
-    if address == 'localhost':
-        for src, dest in files:
-            if src != dest:
-                shutil.copy(src, dest)
-    else:
-        user, host = address.split('@')
-        sftp = ssh = None
-
-        try:
-            ssh = establish_ssh_connection(config, '', user, host)
-        except Exception as e:
-            raise RuntimeError(f"SSH to {address} failed") from e
-
-        try:
-            sftp = ssh.open_sftp()
-        except Exception as e:
-            raise RuntimeError(f"SFTP to {address} failed") from e
-
-        try:
-            for remote, local in files:
-                sftp.get(remote, local)
+                if direction == CopyDirection.PULL:
+                    sftp.get(remote, local)
+                else:
+                    sftp.put(local, remote)
         finally:
             if sftp is not None:
                 sftp.close()
@@ -298,7 +276,7 @@ def update_worker_json(config, name, entry):
     with open(tmp_json_path, 'w') as outfile:
         json.dump(autograding_worker_to_ship, outfile, sort_keys=True, indent=4)
 
-    # Set the address for the put_files call.
+    # Set the address for the copy_files call.
     if host == "localhost":
         address = host
     else:
@@ -306,9 +284,9 @@ def update_worker_json(config, name, entry):
 
     success = False
     try:
-        put_files(config, address, [
+        copy_files(config, address, [
             (tmp_json_path, foreign_json)
-        ])
+        ], CopyDirection.PUSH)
         success = True
     except Exception as e:
         autograding_utils.log_stack_trace(
@@ -435,11 +413,11 @@ def prepare_job(
         json.dump(queue_obj, outfile, sort_keys=True, indent=4)
 
     try:
-        put_files(config, which_machine, [
+        copy_files(config, which_machine, [
             (autograding_zip_tmp, autograding_zip),
             (submission_zip_tmp, submission_zip),
             (todo_queue_file, todo_queue_file)
-        ])
+        ], CopyDirection.PUSH)
     except Exception as e:
         autograding_utils.log_stack_trace(
             config.error_path, job_id=JOB_ID,
@@ -527,10 +505,10 @@ def unpack_job(
         # Try to pull in the finished files into temporary work files.
         fd1, local_done_queue_file = tempfile.mkstemp()
         fd2, local_results_zip = tempfile.mkstemp()
-        get_files(config, which_machine, [
+        copy_files(config, which_machine, [
             (target_done_queue_file, local_done_queue_file),
             (target_results_zip, local_results_zip)
-        ])
+        ], CopyDirection.PULL)
     except (socket.timeout, TimeoutError, FileNotFoundError):
         # These are expected error cases, so we clean up on our end and return a `WAITING` status.
         status = GradingStatus.WAITING
