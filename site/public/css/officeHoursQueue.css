@@ -63,6 +63,10 @@ th{
   padding: .75rem;
 }
 
+#contact_info {
+    width: 620px;
+}
+
 .fully-transparent {
     background:transparent!important;
     color:white;
