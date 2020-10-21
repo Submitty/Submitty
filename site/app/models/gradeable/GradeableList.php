@@ -78,7 +78,7 @@ class GradeableList extends AbstractModel {
         $submitter = new Submitter($core, $this->core->getUser());
         foreach ($this->gradeables as $gradeable) {
             /** @var Gradeable $gradeable */
-            if ($gradeable->getGradeReleasedDate() <= $this->now) {
+            if ($gradeable->hasReleaseDate() && $gradeable->getGradeReleasedDate() <= $this->now) {
                 $this->graded_gradeables[$gradeable->getId()] = $gradeable;
             }
             elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {

@@ -597,15 +597,7 @@ class Gradeable extends AbstractModel {
         // A message to set if the date is null, which happens when: the provided date is null,
         //  or the parsing failed.  In either case, this is an appropriate message
         $invalid_format_message = 'Invalid date-time value!';
-
-        // If the dates are null, then their format is invalid
         $errors = [];
-        // foreach ($date_properties as $property) {
-        //     $date = $date_values[$property] = $date_values[$property] ?? null;
-        //     if ($date === null) {
-        //         $errors[$property] = $invalid_format_message;
-        //     }
-        // }
 
         // Now, check if they are in increasing order
         $prev_property = null;
@@ -836,26 +828,6 @@ class Gradeable extends AbstractModel {
     public function hasReleaseDate() {
         return $this->grade_released_date != null;
     }
-
-    // /**
-    //  * Sets the submission due date to null or keeps it the same
-    //  * @param bool $val is true if we keep the date the same
-    //  */
-    // public function setHasDueDate($val) {
-    //     if (!$val) {
-    //         $this->submission_due_date = null;
-    //     }
-    // }
-
-    // /**
-    //  * Sets the release date to null or keeps it the same
-    //  * @param bool $val is true if we keep the date the same
-    //  */
-    // public function setHasReleaseDate($val) {
-    //     if (!$val) {
-    //         $this->grade_released_date = null;
-    //     }
-    // }
 
     /**
      * Gets the rotating section grader assignment
