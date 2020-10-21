@@ -222,7 +222,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -267,7 +266,7 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => implode(",", array_keys($gradeable->getHiddenFiles()))
+            'hidden_files' => $gradeable->getHiddenFiles()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -913,7 +912,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grading' => false,
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
-                'hidden_files' => []
+                'hidden_files' => ""
             ]);
         }
         else {
@@ -929,7 +928,7 @@ class AdminGradeableController extends AbstractController {
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true,
                 'has_due_date' => false,
-                'hidden_files' => []
+                'hidden_files' => ""
             ]);
         }
 
@@ -1138,7 +1137,6 @@ class AdminGradeableController extends AbstractController {
             throw new ValidationException('', $errors);
         }
         $this->core->getQueries()->updateGradeable($gradeable);
-
         // Only return updated properties if the changes were applied
         return $updated_properties;
     }

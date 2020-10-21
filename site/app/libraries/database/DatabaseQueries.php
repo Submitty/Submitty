@@ -4311,7 +4311,8 @@ AND gc_id IN (
                   eg_has_due_date AS has_due_date,
                   eg_late_days AS late_days,
                   eg_allow_late_submission AS late_submission_allowed,
-                  eg_precision AS precision
+                  eg_precision AS precision,
+                  eg_hidden_files as hidden_files
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
               LEFT JOIN (
@@ -4978,7 +4979,8 @@ AND gc_id IN (
                 $gradeable->isRegradeAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 $gradeable->getDiscussionThreadId(),
-                $gradeable->isDiscussionBased()
+                $gradeable->isDiscussionBased(),
+                $gradeable->getHiddenFiles()
             ];
             $this->course_db->query(
                 "
@@ -5007,9 +5009,10 @@ AND gc_id IN (
                   eg_regrade_allowed,
                   eg_grade_inquiry_per_component_allowed,
                   eg_thread_ids,
-                  eg_has_discussion
+                  eg_has_discussion,
+                  eg_hidden_files
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
         }

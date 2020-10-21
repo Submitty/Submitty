@@ -81,9 +81,9 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
- * @method void setHiddenFiles($hidden_files)
  * @method object[] getPeerGradingPairs()
- * @method void setHiddenFiles()
+ * @method string getHiddenFiles()
+ * @method void setHiddenFiles($hidden_files)
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -216,7 +216,7 @@ class Gradeable extends AbstractModel {
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
     /** @var array are a list of hidden files and the lowest_access_group that can see those files */
-    protected $hidden_files = [];
+    protected $hidden_files = "";
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -238,11 +238,6 @@ class Gradeable extends AbstractModel {
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
-        
-        if (array_key_exists('hidden_files', $details)) {
-            $this->setHiddenFiles($details['hidden_files']);
-        }
-
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
@@ -262,6 +257,7 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            $this->setHiddenFiles($details['hidden_files']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
@@ -2010,5 +2006,9 @@ class Gradeable extends AbstractModel {
         );
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
+    }
+    public function setHiddenFiles($string){
+        $this->hidden_files = $string;
+        $this->modified = true;
     }
 }
