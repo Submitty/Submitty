@@ -4927,7 +4927,8 @@ AND gc_id IN (
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
-            DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
+            $gradeable->getGradeReleasedDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
             $gradeable->getGradeLockedDate() !== null ?
                 DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
             $gradeable->getMinGradingGroup(),
@@ -4956,7 +4957,8 @@ AND gc_id IN (
             $params = [
                 $gradeable->getId(),
                 DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+                $gradeable->getSubmissionDueDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                 $gradeable->isVcs(),
                 $gradeable->getVcsSubdirectory(),
                 $gradeable->getVcsHostType(),
@@ -5074,7 +5076,8 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
-                DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()),
+                $gradeable->getGradeReleasedDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
                 $gradeable->getGradeLockedDate() !== null ?
                     DateUtils::dateTimeToString($gradeable->getGradeLockedDate()) : null,
                 $gradeable->getMinGradingGroup(),
@@ -5102,7 +5105,8 @@ AND gc_id IN (
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 $params = [
                     DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                    DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+                    $gradeable->getSubmissionDueDate() !== null ?
+                    DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
                     $gradeable->isVcs(),
                     $gradeable->getVcsSubdirectory(),
                     $gradeable->getVcsHostType(),

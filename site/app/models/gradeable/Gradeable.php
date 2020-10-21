@@ -80,6 +80,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method string  getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
+ * @method void setHasDueDate($has_due_date)
  * @method object[] getPeerGradingPairs()
  */
 class Gradeable extends AbstractModel {
@@ -599,12 +600,12 @@ class Gradeable extends AbstractModel {
 
         // If the dates are null, then their format is invalid
         $errors = [];
-        foreach ($date_properties as $property) {
-            $date = $date_values[$property] = $date_values[$property] ?? null;
-            if ($date === null) {
-                $errors[$property] = $invalid_format_message;
-            }
-        }
+        // foreach ($date_properties as $property) {
+        //     $date = $date_values[$property] = $date_values[$property] ?? null;
+        //     if ($date === null) {
+        //         $errors[$property] = $invalid_format_message;
+        //     }
+        // }
 
         // Now, check if they are in increasing order
         $prev_property = null;
@@ -695,26 +696,30 @@ class Gradeable extends AbstractModel {
         //  into the second parameter.
         $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
+            $prev_date = null;
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
-                if ($i === 0) {
+                if ($prev_date === null) {
+                    $prev_date = $date_values[$property];
                     continue;
                 }
-
-                // Don't coerce a date on the black list
-                if (in_array($property, $black_list)) {
-                    continue;
-                }
-
-                // Get a value for the date to compare against
-                $prev_date = $date_values[$date_properties[$i - 1]];
 
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
 
+                // Don't coerce a date on the black list
+                if (in_array($property, $black_list) || $date == null) {
+                    continue;
+                }
+
                 // Coerce the date if it is out of bounds
-                if ($date === null || $compare($date, $prev_date)) {
+                if ($compare($date, $prev_date)) {
                     $date_values[$property] = $prev_date;
+                }
+
+                // Get a value for the date to compare against next
+                if ($date !== null) {
+                    $prev_date = $date;
                 }
             }
             return $date_values;
@@ -747,11 +752,11 @@ class Gradeable extends AbstractModel {
      * @throws ValidationException With all messages for each invalid property
      */
     public function setDates(array $dates) {
-        // Asserts that this date information is valid
-        $this->assertDates($dates);
-
         // Wrangle the input so we have a fully populated array of \DateTime's (or nulls)
         $dates = $this->parseDates($dates);
+
+        // Asserts that this date information is valid
+        $this->assertDates($dates);
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
@@ -805,7 +810,12 @@ class Gradeable extends AbstractModel {
         $date_strings = [];
         $now = $this->core->getDateTimeNow();
         foreach (self::date_properties as $property) {
-            $date_strings[$property] = DateUtils::dateTimeToString($this->$property ?? $now, $add_utc_offset);
+            if ($this->$property == null) {
+                $date_strings[$property] = null;
+            }
+            else {
+                $date_strings[$property] = DateUtils::dateTimeToString($this->$property, $add_utc_offset);
+            }
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
@@ -827,25 +837,25 @@ class Gradeable extends AbstractModel {
         return $this->grade_released_date != null;
     }
 
-    /**
-     * Sets the submission due date to null or keeps it the same
-     * @param bool $val is true if we keep the date the same
-     */
-    public function setHasDueDate($val) {
-        if (!$val) {
-            $this->submission_due_date = null;
-        }
-    }
+    // /**
+    //  * Sets the submission due date to null or keeps it the same
+    //  * @param bool $val is true if we keep the date the same
+    //  */
+    // public function setHasDueDate($val) {
+    //     if (!$val) {
+    //         $this->submission_due_date = null;
+    //     }
+    // }
 
-    /**
-     * Sets the release date to null or keeps it the same
-     * @param bool $val is true if we keep the date the same
-     */
-    public function setHasReleaseDate($val) {
-        if (!$val) {
-            $this->grade_released_date = null;
-        }
-    }
+    // /**
+    //  * Sets the release date to null or keeps it the same
+    //  * @param bool $val is true if we keep the date the same
+    //  */
+    // public function setHasReleaseDate($val) {
+    //     if (!$val) {
+    //         $this->grade_released_date = null;
+    //     }
+    // }
 
     /**
      * Gets the rotating section grader assignment

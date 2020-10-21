@@ -1012,6 +1012,7 @@ class AdminGradeableController extends AbstractController {
 
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
+        $haha = [];
 
         // If the post array is 0, that means that the name of the element was blank
         if (count($details) === 0) {
@@ -1050,35 +1051,12 @@ class AdminGradeableController extends AbstractController {
             'grader_assignment_method'
         ];
 
-        // $this->core->redirect("google.com");
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
         $date_set = false;
         foreach (array_merge(Gradeable::date_properties, ['late_days']) as $date_property) {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
-
-                
-                if ($date_property == "has_release_date") {
-                    //$errors["haha"] = "has release date.";
-                    //$this->core->redirect($this->core->buildNewCourseUrl());
-                    // if ($details[$date_property] == false) {
-                    //     //unset($details["submission_due_date"]);
-                    //     $dates["grade_released_date"] = "GONE";
-                    //     unset($details["grade_released_date"]);
-                    // }
-                    //var_dump("due_date");
-                    //unset($details["submission_due_date"]);
-                }
-                if ($date_property == 'submission_due_date' && isset($details['has_due_date'])) {
-                    // if ($details['has_due_date'] == 'false') {
-                    //     $dates[$date_property] = "booty";
-                    // }
-                    // unset($details[$date_property]);
-                    //$errors[$date_property] = "has submission_due_date date.";
-                    //var_dump("due_date");
-                    //$this->core->redirect("google.com");
-                }
 
                 if ($dates[$date_property] > DateUtils::MAX_TIME) {
                     $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
@@ -1096,8 +1074,12 @@ class AdminGradeableController extends AbstractController {
             if (in_array($prop, $boolean_properties)) {
                 $post_val = $post_val === 'true';
 
-                if (!$post_val && isset($toggle_dates[$prop])) {
-                    //unset($dates[$toggle_dates[$prop]]);
+                //Check boolean properties that disable dates
+                if (isset($toggle_dates[$prop])) {
+                    if (!$post_val) {
+                        unset($dates[$toggle_dates[$prop]]);
+                    }
+                    continue;
                 }
             }
 
