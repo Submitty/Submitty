@@ -257,7 +257,9 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((bool) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
-            $this->setHiddenFiles($details['hidden_files']);
+            if (array_key_exists('hidden_files', $details)) {
+                $this->setHiddenFiles($details['hidden_files']);
+            }
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
