@@ -1673,63 +1673,6 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
-    
-    /**
-     * Inserts a set of ommitted file wildcards for a gradeable
-     *
-     * @param  Gradeable $gradeable
-     * @param  string $file_name
-     * @param  int $lowest_allowed
-     */
-    
-    public function insertOmittedFiles(Gradeable $gradeable, string $file_name, int $lowest_allowed) {
-        $params = [$gradeable->getId(), $file_name, $lowest_allowed];
-        $this->course_db->query(
-            "
-            INSERT INTO electronic_gradeable_hidden_files (g_id, file_wildcard, lowest_access_group)
-            VALUES (?, ?, ?)
-            ",
-            $params
-        );
-    }
-    
-    /**
-     * Delete all ommitted file wildcards for a gradeable
-     *
-     * @param  string $gradeable_id
-     */
-    
-    public function deleteOmittedFiles(string $gradeable_id) {
-        $params = [$gradeable_id];
-        $this->course_db->query(
-            "
-            DELETE FROM electronic_gradeable_hidden_files WHERE g_id = ?;
-            ",
-            $params
-        );
-    }
-    
-    /**
-     * Get all ommitted file wildcards for a gradeable
-     *
-     * @param  string $gradeable_id
-     */
-    
-    public function getOmmitedFiles(string $gradeable_id) {
-        $params = [$gradeable_id];
-        $return = [];
-        $this->course_db->query(
-            "
-            SELECT file_wildcard, lowest_access_group FROM electronic_gradeable_hidden_files WHERE g_id = ?;
-            ",
-            $params
-        );
-        $return;
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row["file_wildcard"]] = $row["lowest_access_group"];
-        }
-        return $return;
-    }
 
     public function getNumUsersWhoViewedGradeBySections($gradeable, $sections) {
         $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
@@ -5182,6 +5125,7 @@ AND gc_id IN (
                     $gradeable->isGradeInquiryPerComponentAllowed(),
                     $gradeable->getDiscussionThreadId(),
                     $gradeable->isDiscussionBased(),
+                    $gradeable->getHiddenFiles(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -5210,7 +5154,8 @@ AND gc_id IN (
                       eg_regrade_allowed=?,
                       eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
-                      eg_has_discussion=?
+                      eg_has_discussion=?,
+                      eg_hidden_files=?
                     WHERE g_id=?",
                     $params
                 );

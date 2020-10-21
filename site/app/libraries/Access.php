@@ -747,6 +747,7 @@ class Access {
 
         //To array of [type, value]
         $subparts = array_combine($subpart_types, $subpart_values);
+
         //So we can extract parameters from the path
         foreach ($subpart_types as $type) {
             $value = $subparts[$type];
@@ -765,9 +766,9 @@ class Access {
                     else {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
-                    $hidden_files = $this->core->getQueries()->getOmmitedFiles($args["gradeable"]->getId());
-                    foreach ($hidden_files as $file_regex => $lowest_access_group) {
-                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > $lowest_access_group) {
+                    $hidden_files = $args["gradeable"]->getHiddenFiles();
+                    foreach ($hidden_files as $file_regex) {
+                        if (fnmatch($file_regex, $subpart_values[count($subpart_values) - 1]) && $this->core->getUser()->getGroup() > 3) {
                             return false;
                         }
                     }

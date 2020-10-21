@@ -81,8 +81,9 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
+ * @method void setHiddenFiles($hidden_files)
  * @method object[] getPeerGradingPairs()
- * @method object[] getHiddenFiles()
+ * @method void setHiddenFiles()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -2009,12 +2010,5 @@ class Gradeable extends AbstractModel {
         );
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
-    }
-    public function setHiddenFiles($files) {
-        $this->modified = true;
-        foreach (explode(',', $files) as $file_name) {
-            $this->hidden_files[$file_name] = 3;
-        }
-        $this->hidden_files = $this->core->getQueries()->getOmmitedFiles($this->id);
     }
 }

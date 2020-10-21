@@ -198,6 +198,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_thread_ids json DEFAULT '{}'::json NOT NULL,
     eg_has_discussion boolean DEFAULT false NOT NULL,
     eg_grade_inquiry_start_date timestamp(6) with time zone NOT NULL,
+    eg_hidden_files character varying(1024),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_regrade_allowed_true CHECK (((eg_regrade_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
@@ -1050,12 +1051,6 @@ CREATE TABLE public.viewed_responses (
     thread_id integer NOT NULL,
     user_id character varying NOT NULL,
     "timestamp" timestamp with time zone NOT NULL
-);
-
-CREATE TABLE public.electronic_gradeable_hidden_files (
-    g_id character varying(255) NOT NULL,
-    file_wildcard character varying(255) NOT NULL,
-    lowest_access_group INTEGER NOT NULL DEFAULT 3
 );
 
 
@@ -2199,14 +2194,6 @@ ALTER TABLE ONLY public.gradeable_access
 --
 ALTER TABLE ONLY public.gradeable_access
     ADD CONSTRAINT gradeable_access_fk3 FOREIGN KEY (accessor_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
---
--- Name: gradeable_access gradeable_access_fk2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-ALTER TABLE ONLY public.electronic_gradeable_hidden_files
-    ADD CONSTRAINT electronic_gradeable_hidden_files_pk PRIMARY KEY (g_id, file_wildcard);
-
-ALTER TABLE ONLY public.electronic_gradeable_hidden_files
-    ADD CONSTRAINT electronic_gradeable_hidden_files_fk FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id) ON DELETE CASCADE;
 --
 -- PostgreSQL database dump complete
 --

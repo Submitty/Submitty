@@ -1182,13 +1182,12 @@ HTML;
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version, bool $showNewInterface) {
         $add_files = function (&$files, $new_files, $start_dir_name, $graded_gradeable) {
             $files[$start_dir_name] = [];
-            $hidden_files = $this->core->getQueries()->getOmmitedFiles($graded_gradeable->getGradeable()->getId());
-            #$hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
+            $hidden_files = $graded_gradeable->getGradeable()->getHiddenFiles();
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;
-                    foreach ($hidden_files as $file_regex => $lowest_access_group) {
-                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > $lowest_access_group) {
+                    foreach ($hidden_files as $file_regex) {
+                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
                             $skipping = true;
                         }
                     }
