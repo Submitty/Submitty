@@ -62,3 +62,8 @@ th{
   background: var(--standard-light-gray);
   padding: .75rem;
 }
+
+#contact_info {
+    width: 620px;
+}
+

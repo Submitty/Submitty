@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c3705c3f4eafacff158dcecf2c1bc7f7",
+    "content-hash": "1d2ff0c01381e9ee70981f01ddf42eb2",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2268,16 +2268,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.4.11",
+            "version": "v4.4.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "e103381a4c2f0731c14589041852bf979e97c7af"
+                "reference": "006b2d06672b8650998f328fc603eb6f3feb979f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/e103381a4c2f0731c14589041852bf979e97c7af",
-                "reference": "e103381a4c2f0731c14589041852bf979e97c7af",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/006b2d06672b8650998f328fc603eb6f3feb979f",
+                "reference": "006b2d06672b8650998f328fc603eb6f3feb979f",
                 "shasum": ""
             },
             "require": {
@@ -2354,7 +2354,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-07-05T09:39:30+00:00"
+            "time": "2020-10-01T16:25:17+00:00"
         },
         {
             "name": "textalk/websocket",
@@ -3187,16 +3187,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.35",
+            "version": "0.12.49",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "5230eb31d546e4df7aa725894d17436cb8afd5df"
+                "reference": "9a6136c2b39d5214da78de37128d5fe08e5d5b05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5230eb31d546e4df7aa725894d17436cb8afd5df",
-                "reference": "5230eb31d546e4df7aa725894d17436cb8afd5df",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9a6136c2b39d5214da78de37128d5fe08e5d5b05",
+                "reference": "9a6136c2b39d5214da78de37128d5fe08e5d5b05",
                 "shasum": ""
             },
             "require": {
@@ -3239,7 +3239,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-08-04T09:48:39+00:00"
+            "time": "2020-10-12T14:10:44+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -3491,6 +3491,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2019-09-17T06:23:10+00:00"
         },
         {
