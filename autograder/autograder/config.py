@@ -59,7 +59,7 @@ class Config:
 
 
 def get_data(config_path, filename):
-    myfile = Path(config_path, filename + '.json')
+    myfile = Path(config_path, f'{filename}.json')
     if os.path.isfile(myfile):
         with myfile.open('r') as open_file:
             return json.load(open_file)
