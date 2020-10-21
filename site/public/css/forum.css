@@ -205,7 +205,6 @@
 .post-email-toggle, .post-user-info{
     margin-right: 2px;
     display: inline-block;
-    color: black;
 }
 
 .delete-post-button, .edit-post-button{
@@ -215,10 +214,6 @@
 
 .delete-post-button{
     bottom: 1px;
-}
-
-.edit-post-button{
-    color: black;
 }
 
 .last-edit{

@@ -669,6 +669,7 @@ class ForumThreadView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
             "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+            "edit_url" => $this->core->buildCourseUrl(['forum']),
             "current_user" => $this->core->getUser()->getId(),
             "user_group" => $this->core->getUser()->getGroup(),
             "thread_exists" => $thread_exists

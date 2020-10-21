@@ -15,7 +15,7 @@
 			let deleteActive = typeof del[0] !== typeof undefined && del[0].hasAttribute('class') && del.attr('class').includes('active');
 			let deleteMerge  = merge[0].hasAttribute('class')  && merge.attr('class').includes('active');
 
-			if('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) {
+			if(('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) || {{is_full_threads_page}}) {
 				$('#dropdownLabel').removeClass("active");
 			}
 			else {

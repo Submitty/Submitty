@@ -44,15 +44,15 @@
                 </span>
             </div>
             {% if is_full_page %}
-                <div class="flex-row action-btns-cont">
-                    <span>
-                        {% if (user_group <= 3 or thread.author_info.user_id == current_user) and thread.thread_resolve_state == -1 %}
-                            <span class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click"
-                               onClick="return false; changeThreadStatus({{ thread.thread_id }});"
-                               title="Mark thread as resolved"
-                            >Mark as resolved</span>
-                        {% endif %}
-                    </span>
+                <span>
+                    {% if (user_group <= 3 or thread.author_info.user_id == current_user) and thread.thread_resolve_state == -1 %}
+                        <span class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click"
+                           onClick="return false; changeThreadStatus({{ thread.thread_id }});"
+                           title="Mark thread as resolved"
+                        >Mark as resolved</span>
+                    {% endif %}
+                </span>
+                <div class="post-action-container">
                     <span>
                         {% if user_group <= 2 and thread.author_info.user_id != current_user %}
                             <span class="post-email-toggle key_to_click"
