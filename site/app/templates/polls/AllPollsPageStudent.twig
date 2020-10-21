@@ -2,11 +2,11 @@
     <h1> Polls </h1>
     <br/> <br/>
 
-    <div class="dropdown_wrapper">
-        <div class="dropdown_bar">
+    <div class="dropdown-wrapper">
+        <div class="dropdown-bar">
             <h2> Today's Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown_arrow down"></i>
+                <i class="dropdown-arrow down"></i>
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
@@ -33,7 +33,7 @@
                                     {% if poll.getUserResponse(user_id) is same as(null) %}
                                         <button type="submit" class="btn btn-success"> Answer
                                     {% else %}
-                                        <button type="submit" class="btn btn-success"> Edit Answer
+                                        <button type="submit" class="btn btn-primary"> Edit Answer
                                     {% endif %}
                                     </button>
                                 {% elseif poll.isEnded() %}
@@ -50,11 +50,11 @@
         <hr>
     </div>
 
-    <div class="dropdown_wrapper">
-        <div class="dropdown_bar">
+    <div class="dropdown-wrapper">
+        <div class="dropdown-bar">
             <h2> Older Polls </h2>
              <div class="dropdown-btn">
-                <i class="dropdown_arrow down"></i>
+                <i class="dropdown-arrow down"></i>
             </div>
         </div>
         <table class="table table-striped" style="width:100%;">
