@@ -215,7 +215,7 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @prop @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-    /** @var array are a list of hidden files and the lowest_access_group that can see those files */
+    /** @prop @var string are a list of hidden files and the lowest_access_group that can see those files */
     protected $hidden_files = "";
     /**
      * Gradeable constructor.
@@ -2006,9 +2006,5 @@ class Gradeable extends AbstractModel {
         );
 
         return !(strpos($this->getAutogradingConfigPath(), $config_upload_path) === false);
-    }
-    public function setHiddenFiles($string){
-        $this->hidden_files = $string;
-        $this->modified = true;
     }
 }
