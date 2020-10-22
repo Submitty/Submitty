@@ -48,10 +48,10 @@ class LateDays extends AbstractModel {
             if ($gg1->getGradeable()->hasDueDate() && $gg2->getGradeable()->hasDueDate()) {
                 $time_diff = $gg1->getGradeable()->getSubmissionDueDate()->getTimestamp() - $gg2->getGradeable()->getSubmissionDueDate()->getTimestamp();
             }
-            else if ($gg2->getGradeable()->hasDueDate()) {
+            elseif ($gg2->getGradeable()->hasDueDate()) {
                 $time_diff = -1;
             }
-            else if ($gg1->getGradeable()->hasDueDate()) {
+            elseif ($gg1->getGradeable()->hasDueDate()) {
                 $time_diff = 1;
             }
             if ($time_diff === 0) {
@@ -233,10 +233,10 @@ class LateDays extends AbstractModel {
             if ($e1['timestamp'] !== null && $e1['timestamp'] !== null) {
                 $diff = $e1['timestamp']->getTimestamp() - $e2['timestamp']->getTimestamp();
             }
-            else if ($e2['timestamp'] !== null) {
+            elseif ($e2['timestamp'] !== null) {
                 $time_diff = -1;
             }
-            else if ($e1['timestamp'] !== null) {
+            elseif ($e1['timestamp'] !== null) {
                 $time_diff = 1;
             }
             return $diff;

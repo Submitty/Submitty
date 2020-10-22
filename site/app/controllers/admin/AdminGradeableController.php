@@ -1196,7 +1196,7 @@ class AdminGradeableController extends AbstractController {
         $jsonProperties = [
             'gradeable_id' => $gradeable->getId(),
             'config_path' => $gradeable->getAutogradingConfigPath(),
-            'date_due' => DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+            'date_due' => $gradeable->hasDueDate() ? DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()) : null,
             'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
         ];

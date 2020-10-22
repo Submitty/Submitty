@@ -1967,7 +1967,7 @@ class Gradeable extends AbstractModel {
      * @return int
      */
     public function getWouldBeDaysLate() {
-        return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
+        return max(0, $this->hasDueDate() ? DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null) : 0);
     }
 
     /**
