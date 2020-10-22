@@ -98,21 +98,21 @@
 {% endmacro %}
 
 {% macro day_or_days(count) -%}
-    {%- spaceless %}
+    {%- apply spaceless %}
         {% if count == 1 %}
             day
         {% else %}
             days
         {% endif %}
-    {% endspaceless -%}
+    {% endapply -%}
 {%- endmacro %}
 
 {% macro submit_or_resubmit(version) -%}
-    {%- spaceless %}
+    {%- apply spaceless %}
         {% if version == 0 %}
             submit
         {% else %}
             re-submit
         {% endif %}
-    {% endspaceless -%}
+    {% endapply -%}
 {%- endmacro %}

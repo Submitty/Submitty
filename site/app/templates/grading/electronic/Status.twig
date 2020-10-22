@@ -111,7 +111,7 @@
                 var dataAuto = tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputAuto.value='';
-                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
                 +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
                 '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
                 {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
@@ -649,53 +649,75 @@
                                 <br/>
                                 <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
                                 <br/>
-                                <br/>
+                                <b>Students not on a team:</b> {{ no_team_total }}
+                                <br>
                                 <b>Number of teams:</b> {{ total_submissions }}
                                 <br/>
                                 <br/>
                                 <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                             {% else %}
-                                <br/>
-                                <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                                <br/>
-                                <br/>
-                                <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                                {% if peer and not team_assignment %}
+                                    <br/>
+                                    <b>Students who have submitted:</b>  {{ total_students_submitted }} / {{ total_submissions }} ({{ submitted_percentage_peer }}%)
+                                    <br/>
+                                    <br/>
+                                    <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
+                                {% else %}
+                                    <br/>
+                                    <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                    <br/>
+                                    <br/>
+                                    <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
+                                {% endif %}
                             {% endif %}
                         
                             <br/>
                             <br/>
                         {% endif %}
-                        {% if peer %}
-                            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
-                        {% else %}
-                            <b>By Grading Sections:</b>
+                        {% if peer and not team_assignment %}
+                            <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})
+                            <br>
+                        {% endif %}
+                            <b>TA Grading By Sections:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
-                                    Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                    {% if key != "peer_stu_grad"%}
+                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                             <br/>
                             <b>Graders:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
-                                    Section {{ key }}:
-                                    {% if section.valid_graders|length == 0 %}
-                                        Nobody
-                                    {% else %}
-                                        {{ section.valid_graders | join(", ") }}
+                                    {% if key != "peer_stu_grad"%}
+                                        Section {{ key }}:
+                                        {% if section.valid_graders|length == 0 %}
+                                            Nobody
+                                        {% else %}
+                                            {{ section.valid_graders | join(", ") }}
+                                        {% endif %}
+                                        <br/>
                                     {% endif %}
-                                    <br/>
                                 {% endfor %}
                             </div>
-                        {% endif %}
+                        
 
                         {% if ta_grades_released %}
                             {% if team_assignment %}
-                                <br/>
-                                <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-								<b>Number of students who have viewed their grade:</b>
-									{{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
-                            {% elseif not peer%}
+                                {% if peer %}
+                                    <br>
+                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ total_submissions }} ({{ viewed_percent }}%)
+                                    <br>
+                                    <b>Number of students who have viewed their grade:</b>{{ individual_viewed_grade }} / {{ total_submissions }} ({{ individual_viewed_percent }}%)
+                                {% else %}
+                                 <br/>
+                                    <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ total_submissions }} ({{ viewed_percent }}%)
+                                    <br>
+                                    <b>Number of students who have viewed their grade:</b>
+                                        {{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
+                                {% endif %}
+                            {% elseif not team_assignment %}
                                 <br/>
                                 <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% endif %}
@@ -715,7 +737,7 @@
                     </div>
                     <div class = "box col-md-6">
                         {# RIGHT CHUNK#}
-                        {% if not peer %}
+                        {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                             <br>
                             <b>Statistics for Completely Graded Assignments: </b>
                             <br/>
@@ -768,7 +790,6 @@
                                     Overall Average: {{ component_overall_score }} / {{ component_overall_max }} ({{ component_overall_percentage }}%)
                                 {% endif %}
                             </div>
-                        {% endif %}
                         {# RIGHT CHUNK #}
                     </div>
 
@@ -778,7 +799,16 @@
             </div>
         </div>
     {% else %}
-        <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {# This needs to be updated after randomization works correctly for Teams #}
+        {% if team_assignment %}
+            {# Update this after Teams work fine with Randomized Peer Assignments <br>
+            <b>Total Teams assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+            #}
+        {% else %}
+            <b>Total peers assigned to grade:</b> {{ peer_total }} </b> <br>
+            <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
+        {% endif %}
     {% endif %}
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}

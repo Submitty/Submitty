@@ -23,6 +23,8 @@ nlohmann::json printTestCase(TestCase test) {
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
   j["hidden"] = test.getHidden();
+  j["release_hidden_details"] = test.getReleaseHiddenDetails();
+  assert(!(j["release_hidden_details"] && !j["hidden"]));
   j["view_testcase_message"] = test.viewTestcaseMessage();
 
   j["publish_actions"] = test.publishActions();
@@ -365,6 +367,13 @@ int main(int argc, char *argv[]) {
     j["gradeable_message"] = config_json.value("assignment_message","");
   } else if (config_json.find("gradeable_message") != config_json.end()) {
     j["gradeable_message"] = config_json.value("gradeable_message", "");
+  }
+  if (config_json.find("load_gradeable_message") != config_json.end()) {
+    nlohmann::json load_gradeable_message = config_json.value("load_gradeable_message", nlohmann::json::object());
+    nlohmann::json load_gradeable_message_prop;
+    load_gradeable_message_prop["message"] = load_gradeable_message.value("message", "");
+    load_gradeable_message_prop["first_time_only"] = load_gradeable_message.value("first_time_only", false);
+    j["load_gradeable_message"] = load_gradeable_message_prop;
   }
   if (config_json.find("early_submission_incentive") != config_json.end()) {
     nlohmann::json early_submission_incentive = config_json.value("early_submission_incentive",nlohmann::json::object());

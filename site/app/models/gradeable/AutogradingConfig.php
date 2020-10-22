@@ -73,6 +73,13 @@ class AutogradingConfig extends AbstractModel {
     /** @prop @var bool */
     protected $notebook_gradeable = false;
 
+    /* Property if load message alert is enabled */
+    /** @prop @var bool If there is a message to show on Gradeable load */
+    private $load_gradeable_message_enabled = false;
+    /** @prop @var string The message to show to the user before letting them go to the gradeable */
+    protected $load_gradeable_message = '';
+    /** @prop @var bool If the message should only be shown to the user if they haven't opened the gradeable yet */
+    protected $load_gradeable_message_first_time_only = false;
 
     /* Properties accumulated from the AutogradingTestcases */
 
@@ -101,6 +108,12 @@ class AutogradingConfig extends AbstractModel {
         }
         elseif (isset($details['gradeable_message'])) {
             $this->gradeable_message = $details['gradeable_message'] ?? '';
+        }
+
+        if (isset($details['load_gradeable_message'])) {
+            $this->load_gradeable_message_enabled = true;
+            $this->load_gradeable_message = $details['load_gradeable_message']['message'] ?? '';
+            $this->load_gradeable_message_first_time_only = $details['load_gradeable_message']['first_time_only'] ?? false;
         }
 
         // These two items default to false if they don't exist in the gradeable config.json
@@ -219,6 +232,22 @@ class AutogradingConfig extends AbstractModel {
 
     public function updateTestCases($test_cases) {
         $this->parseTestCases($test_cases);
+    }
+
+    /**
+     * Gets whether a load message should be loaded
+     * @return bool
+     */
+    public function hasLoadGradeableMessageEnabled($gradeable_id, $user_id): bool {
+        return $this->load_gradeable_message_enabled && (!$this->load_gradeable_message_first_time_only || count($this->core->getQueries()->getGradeableAccessUser($gradeable_id, $user_id)) === 0);
+    }
+
+    /**
+     * Returns the load message
+     * @return string
+     */
+    public function getLoadGradeableMessage(): string {
+        return $this->load_gradeable_message;
     }
 
     /**

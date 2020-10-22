@@ -26,10 +26,15 @@
 class WebSocketClient {
     constructor() {
         this.number = 0;
-        this.autoReconnectInterval = 5 * 1000;
+        // 10 seconds + a random number of seconds between 0 and 10
+        this.autoReconnectInterval = (10 + (Math.random() * 11)) * 1000;
         this.onopen = null;
         this.onmessage = null;
-        this.url = `${document.body.dataset.baseUrl.replace('http', 'ws')}ws/`;
+        // We do string replacement here so that http -> ws, https -> wss.
+        const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
+        my_url.port = 8443;
+        my_url.pathname = 'ws';
+        this.url = my_url.href;
     }
 
     open(page) {
@@ -40,8 +45,10 @@ class WebSocketClient {
             if (this.onopen) {
                 this.onopen();
             }
-            const course = window.courseUrl.split('/').pop();
-            this.client.send(JSON.stringify({'type': 'new_connection', 'page': `${course}-${page}`}));
+            const term_course_arr = document.body.dataset.courseUrl.split('/');
+            const course = term_course_arr.pop();
+            const term = term_course_arr.pop();
+            this.client.send(JSON.stringify({'type': 'new_connection', 'page': `${term}-${course}-${page}`}));
         };
 
         this.client.onmessage = (event) => {

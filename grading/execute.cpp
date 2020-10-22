@@ -90,12 +90,13 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
     { "clang++",                 "/usr/bin/clang++" },
-    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin/drmemory" },
+    { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
     { "valgrind",                "/usr/bin/valgrind" },
 
     // for Computer Organization
     { "spim",                    "/usr/bin/spim" },
     { "clang",                   "/usr/bin/clang" },
+    { "gdb",                     "/usr/bin/gdb" },
 
     // for Principles of Software
     { "java",                    "/usr/bin/java" },
@@ -132,13 +133,15 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "expect",                  "/usr/bin/expect" },
     { "sleep",                   "/bin/sleep" },
 
+    // for Distributed Systems
+    { "script",                  "/usr/bin/script" },
 
     // for LLVM / Compiler class
     { "lex",                     "/usr/bin/lex" },
     { "flex",                    "/usr/bin/flex" },
     { "yacc",                    "/usr/bin/yacc" },
     { "bison",                   "/usr/bin/bison" },
-    
+
     // for graphics/window interaction
     { "scrot",                   "/usr/bin/scrot"}, //screenshot utility
     { "xdotool",                 "/usr/bin/xdotool"}, //keyboard/mouse input
@@ -147,7 +150,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
     // for Debugging
     { "strace",                  "/usr/bin/strace" },
-    
+
     //Matlab
     { "matlab",                  "/usr/local/bin/matlab" }
 
@@ -239,7 +242,7 @@ std::string validate_program(const std::string &program, const nlohmann::json &w
       return full_path_executable;
     }
 
-    std::string message = "ERROR: This system program '" + program + "' is not on the allowed whitelist.\n"
+    std::string message = "ERROR: This system program '" + program + "' is not on the allowed safelist.\n"
       + "  Contact the Submitty administrators for permission to use this program.";
     std::cout << message << std::endl;
     std::cerr << message << std::endl;
@@ -584,7 +587,7 @@ void parse_command_line(const std::string &cmd,
       std::string &my_stdin,
       std::string &my_stdout,
       std::string &my_stderr,
-      std::ofstream &logfile, 
+      std::ofstream &logfile,
       const nlohmann::json &whole_config) {
 
   std::cout << "PARSE COMMAND LINE " << cmd << std::endl;
@@ -593,6 +596,10 @@ void parse_command_line(const std::string &cmd,
   my_program = my_stdin = my_stdout = my_stderr = "";
 
   std::vector<std::string> tokens = break_into_tokens(cmd);
+
+  for (int i = 0; i < tokens.size(); i++) {
+    std::cout << "TOKEN " << std::setw(3) << i << " IS '" << tokens[i] << "'" << std::endl;
+  }
 
   int which = 0;
   while (which < tokens.size()) {
@@ -753,9 +760,9 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
   // default message (may be overwritten with more specific message below)
   std::stringstream ss;
-  ss << "ERROR: Child terminated with signal " << what_signal; 
+  ss << "ERROR: Child terminated with signal " << what_signal;
   std::string message = ss.str();
-  
+
   // reference: http://man7.org/linux/man-pages/man7/signal.7.html
   if        (what_signal == SIGHUP    /*  1        Term  Hangup detected on controlling terminal or death of controlling process   */) {
   } else if (what_signal == SIGINT    /*  2        Term  Interrupt from keyboard  */) {
@@ -800,7 +807,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
   // output message to behind-the-scenes logfile (stdout), and to execute logfile (available to students)
   std::cout << message << std::endl;
   logfile   << message << "\nProgram Terminated " << std::endl;
-      
+
 }
 #endif
 
@@ -821,15 +828,15 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 // This function only returns on failure to exec
 int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config,
-                      std::string program_name, const nlohmann::json &test_case_limits, 
+                      std::string program_name, const nlohmann::json &test_case_limits,
                       const nlohmann::json &assignment_limits, const bool timestamped_stdout) {
 
   /*************************************************
-  * 
+  *
   * COMMAND LINE PARSING
   *
   **************************************************/
-  
+
   // the default umask is 0027, so we need edit so that we can make
   // these files 'other read', so that we can read them when we switch
   // users
@@ -903,7 +910,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
 
   /*************************************************
-  * 
+  *
   * APPLY RLIMITS / SET PROCESS GROUP
   *
   **************************************************/
@@ -916,7 +923,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   assert(pgrp == 0);
 
   /*************************************************
-  * 
+  *
   * REDIRECT STDIN/OUT/ERR
   *
   **************************************************/
@@ -951,10 +958,10 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
       // If we are the child
       if(pid == 0){
         close(my_pipe[WRITE_END]);
-        timestamp_stdout( my_stdout, my_pipe[READ_END]);      
+        timestamp_stdout( my_stdout, my_pipe[READ_END]);
       }
     }
-    
+
 
   }
   if (my_stderr != "") {
@@ -965,15 +972,15 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stderrfd, stderrfd);
   }
 
-  
 
-  
 
-  
+
+
+
 
 
   /*************************************************
-  * 
+  *
   * SET UP THE PATH
   *
   **************************************************/
@@ -1015,14 +1022,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // Haskell compiler needs a home environment variable (but it can be anything)
   setenv("HOME","/tmp",1);
 
-  
+
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
   // std::cout << "going to install syscall filter for " << my_program << std::endl;
   //}
 
   /*************************************************
-  * 
+  *
   * APPLY SECCOMP
   *
   **************************************************/
@@ -1036,7 +1043,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
 
   /*************************************************
-  * 
+  *
   * RUN (execv) THE STUDENT CODE
   *
   **************************************************/
@@ -1051,7 +1058,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
   // TO AVOID CREATING EXTRA LAYERS OF PROCESSES, USE EXEC RATHER THAN SYSTEM OR THE SHELL
   int child_result =  execv ( my_program.c_str(), my_char_args );
-  
+
 
   // if exec does not fail, we'll never get here
 
@@ -1083,7 +1090,7 @@ std::string output_of_system_command(const char* cmd) {
 
 int resident_set_size(int childPID) {
   // get all of the processes owned by the current user (untrustedXX)
-  std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd | grep untrusted"); 
+  std::string command = std::string("ps xw o user:15,pid:10,rss:10,cmd | grep untrusted");
 
   // for debugging, print this output to the log
   //std::cout << "system ( '" + command + "' )" << std::endl;
@@ -1234,7 +1241,7 @@ int execute(const std::string &cmd,
       const std::string display_variable2,
       const bool timestamped_stdout) {
 
-  
+
   std::string display_variable = display_variable2;
   if (display_variable == "NO_DISPLAY_SET") {
     display_variable = ":1";
@@ -1242,7 +1249,7 @@ int execute(const std::string &cmd,
 
 
   std::set<std::string> invalid_windows;
-  bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
+  bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later)
 
   int num_dispatched_actions = dispatcher_actions.size();
 
@@ -1251,7 +1258,7 @@ int execute(const std::string &cmd,
   std::queue<std::string> input_queue;
 
   //check if there are any actions present which require a window.
-  if(actions.size() > 0){ 
+  if(actions.size() > 0){
     std::cout << "Received " << actions.size() << " actions" << std::endl; //useful debug line.
 
     for(std::vector<nlohmann::json>::const_iterator it = actions.begin(); it != actions.end(); ++it){
@@ -1339,9 +1346,9 @@ int execute(const std::string &cmd,
       int status;
       pid_t wpid = 0;
       float next_checkpoint = 0;
-      std::string windowName; 
+      std::string windowName;
       int rss_memory = 0;
-      int actions_taken = 0;   
+      int actions_taken = 0;
       do {
           //dispatcher actions
           if(!input_queue.empty()){
@@ -1420,37 +1427,37 @@ int execute(const std::string &cmd,
             }
           }
            //If we had a window but it no longer exists (crashed/shut)
-          else if(window_mode && windowName != "" && !windowExists(windowName)){ 
+          else if(window_mode && windowName != "" && !windowExists(windowName)){
             windowName = "";  //reset it's name to nothing so we can begin searching again.
             std::cout << "The students window shut midrun." << std::endl;
           }
           // sleep 1/10 of a second
           wpid = waitpid(childPID, &status, WNOHANG);
-          
+
           //if the student process is alive.
           if (wpid == 0){
             // monitor time & memory usage
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
-              if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, windowName, 
-                  childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
+              if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){
+                takeAction(actions, actions_taken, windowName,
+                  childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory,
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
-              else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, windowName, 
-                  childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
+              else if(!window_mode && actions_taken < actions.size()){
+                takeAction(actions, actions_taken, windowName,
+                  childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory,
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //if we are out of actions or there were none, delay 1/10th second.
-              else{ 
-                delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
+              else{
+                delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
                                     rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
               }
             }
-         }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions). 
-            delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
+         }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions).
+            delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
                                 rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
             //this wpid is necessary to make sure allowed_to_die is up to date.
          }
@@ -1549,12 +1556,12 @@ bool time_ok(float elapsed, float seconds_to_run, std::ostream &logfile){
 /**
 * Delays for a number of microseconds, checking the student's memory and time consumption at intervals.
 */
-bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint, 
+bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &elapsed, float& next_checkpoint,
                 float seconds_to_run, int& rss_memory, int allowed_rss_memory, int& memory_kill, int& time_kill,
                 std::ostream &logfile){
   float time_left = sleep_time_in_microseconds;
   while(time_left > 0){
-    if(time_left > 100000){ //while we have more than 1/10th second left. 
+    if(time_left > 100000){ //while we have more than 1/10th second left.
       time_left -= 100000; //decrease the amount of time left by 1/10th of a second.
       usleep(100000); //sleep for 1/10th of a second
       elapsed += .1; //and increment time elapsed by 1/10th second.
@@ -1583,7 +1590,7 @@ bool delay_and_mem_check(float sleep_time_in_microseconds, int childPID, float &
       TerminateProcess(elapsed,childPID); //kill it.
       std::cout << "Killing child process " << childPID << " for using " << rss_memory << " kb RAM.  (limit is " << allowed_rss_memory << " kb)" << std::endl;
       return true;
-    } 
+    }
   }
   return false;
 }
