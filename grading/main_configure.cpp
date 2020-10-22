@@ -3,6 +3,7 @@
 
 #include "execute.h"
 #include "default_config.h"
+#include "load_config_json.h"
 
 /*
 
@@ -25,10 +26,10 @@ int main(int argc, char *argv[]) {
   std::string input_file = argv[1];
   std::string output_file = argv[2];
 
-  std::ifstream ifs(argv[1]);
+  std::ifstream ifs(input_file);
   nlohmann::json instructor_json;
   if (ifs.is_open()) {
-    instructor_json = nlohmann::json::parse(ifs);
+    ifs >> instructor_json;
   }
 
   // LOAD HW CONFIGURATION JSON

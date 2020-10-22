@@ -176,7 +176,7 @@ include_directories(${GRADINGCODE}/grading)
 SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
 
 add_custom_target(config_tgt ALL DEPENDS ${my_hw_config_file})
-add_custom_command(OUTPUT ${my_hw_config_file} DEPENDS configure.out COMMAND ${my_bin}/configure.out ${my_hw_config_file})
+add_custom_command(OUTPUT ${my_hw_config_file} DEPENDS configure.out COMMAND ${my_bin}/configure.out ${my_config_json_no_comments} ${my_hw_config_file})
 
 ###################################################################################
 

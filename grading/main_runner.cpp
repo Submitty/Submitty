@@ -8,6 +8,7 @@
 #include "default_config.h"
 #include "execute.h"
 #include "TestCase.h"
+#include "load_config_json.h"
 
 
 #include <limits>

@@ -266,6 +266,7 @@ def archive(
     working_directory,
     queue_obj,
     which_untrusted,
+    item_name,
     complete_config_obj,
     gradeable_config_obj,
     seperator,
@@ -294,7 +295,21 @@ def archive(
             False
         )
     except Exception:
-        traceback.print_exc()
+        print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"overall.txt"))
+        log_message(
+            queue_obj['job_id'],
+            queue_obj["regrade"],
+            which_untrusted,
+            item_name,
+            message="ERROR: could not archive the results of grading. See stack trace for more info."
+        )
+        log_stack_trace(
+            queue_obj['job_id'],
+            queue_obj["regrade"],
+            which_untrusted,
+            item_name,
+            trace=traceback.format_exc()
+        )
     subprocess.call(['ls', '-lR', '.'], stdout=log_file)
 
 
@@ -384,6 +399,7 @@ def grade_from_zip(
                 working_directory,
                 queue_obj,
                 which_untrusted,
+                item_name,
                 complete_config_obj,
                 gradeable_config_obj,
                 seperator,
@@ -460,6 +476,7 @@ def grade_from_zip(
                 working_directory,
                 queue_obj,
                 which_untrusted,
+                item_name,
                 complete_config_obj,
                 gradeable_config_obj,
                 seperator,

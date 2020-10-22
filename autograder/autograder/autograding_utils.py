@@ -353,18 +353,10 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
         os.chown(history_file, int(config.submitty_users['daemon_uid']),ta_group_id)
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
-
+    grade_result = ""
     if "generate_output" not in queue_obj:
         try:
             shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
-        except:
-            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
-            log_message(log_path, job_id, is_batch_job, which_untrusted, item_name, message="ERROR: grade.txt does not exist")
-            log_stack_trace(stack_trace_log_path, job_id, is_batch_job, which_untrusted, item_name, trace=traceback.format_exc())
-
-        grade_result = ""
-        try:
             with open(os.path.join(tmp_work,"grade.txt")) as f:
                 lines = f.readlines()
                 for line in lines:
@@ -373,10 +365,23 @@ def archive_autograding_results(config, working_directory, job_id, which_untrust
                         grade_result = line
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-                print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
-                log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
-                log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
-
+                f.write(f"\n\nERROR: Grading incomplete -- Could not process {os.path.join(tmp_work,'grade.txt')}")
+            log_message(
+                log_path,
+                job_id,
+                is_batch_job,
+                which_untrusted,
+                item_name,
+                message="ERROR: could not process grade.txt. See stack trace entry for more details."
+            )
+            log_stack_trace(
+                stack_trace_log_path,
+                job_id,
+                is_batch_job,
+                which_untrusted,
+                item_name,
+                trace=traceback.format_exc()
+            )
 
         gradeable_deadline_string = gradeable_config_obj["date_due"]
         submission_datetime = dateutils.read_submitty_date(submission_string)

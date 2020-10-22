@@ -10,7 +10,6 @@
 #include "TestCase.h"
 #include "load_config_json.h"
 #include "execute.h"
-#include "default_config.h"
 
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 

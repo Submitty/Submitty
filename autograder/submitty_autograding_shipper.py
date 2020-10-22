@@ -1272,7 +1272,7 @@ def try_short_circuit(config: dict, queue_file: str) -> bool:
     JSON file, zip up the results, and use the standard
     unpack_grading_results_zip function to place the results where they are
     expected. If something goes wrong during this process, then this function
-    will return False, signalling to the caller that this job should be graded
+    will return False, signaling to the caller that this job should be graded
     normally.
     """
     with open(queue_file) as fd:

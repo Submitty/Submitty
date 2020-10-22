@@ -12,6 +12,7 @@
 #include "TestCase.h"
 #include "execute.h"
 #include "default_config.h"
+#include "load_config_json.h"
 
 #define DIR_PATH_MAX 1000
 

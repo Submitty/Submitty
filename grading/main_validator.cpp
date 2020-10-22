@@ -20,6 +20,7 @@
 
 #include "TestCase.h"
 #include "default_config.h"
+#include "load_config_json.h"
 #include "execute.h"
 #include "json.hpp"
 
