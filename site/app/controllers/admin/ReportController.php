@@ -379,7 +379,7 @@ class ReportController extends AbstractController {
             'id' => $g->getId(),
             'name' => $g->getTitle(),
             'gradeable_type' => GradeableType::typeToString($g->getType()),
-            'grade_released_date' => $g->getGradeReleasedDate()->format('Y-m-d H:i:s O'),
+            'grade_released_date' => $g->hasReleaseDate() ? $g->getGradeReleasedDate()->format('Y-m-d H:i:s O') : 'null',
         ];
 
         // Add team members to output

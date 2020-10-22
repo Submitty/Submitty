@@ -100,7 +100,7 @@ class RainbowCustomization extends AbstractModel {
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
                 "max_score" => $max_score,
-                "grade_release_date" => DateUtils::dateTimeToString($gradeable->getGradeReleasedDate())
+                "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null
             ];
         }
 
