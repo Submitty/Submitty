@@ -20,7 +20,6 @@ class TestNavigationPageNonStudent(BaseTestCase):
                              .find_element(By.ID, section_name + '-section')
                              .find_elements(By.CLASS_NAME, "gradeable-row")), msg=section_name)
 
-    #e2e.test_navigation_page_non_student.TestNavigationPageNonStudent.test_instructor
     def test_instructor(self):
         self.log_in(user_id="instructor", user_name="Quinn")
         self.click_class('sample')
@@ -37,8 +36,9 @@ class TestNavigationPageNonStudent(BaseTestCase):
                          .find_elements(By.CLASS_NAME, 'course-button')))
 
         gradeable_id = "future_no_tas_homework"
-        element = self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//a[contains(@href,'quick_link?action=open_ta_now')]")
+        
         self.validate_navigation_page_sections(sections)
+        element = self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//a[contains(@href,'quick_link?action=open_ta_now')]")
         self.assertEqual("OPEN TO TAS NOW", element.find_element_by_class_name("subtitle").text)
         element.click()
         sections["future"] -= 1
@@ -72,7 +72,6 @@ class TestNavigationPageNonStudent(BaseTestCase):
         self.driver.find_element(By.XPATH, "//div[@id='"+gradeable_id+"']//a[contains(@href,'gradeable/"+gradeable_id+"/update')]").click()
         self.driver.find_element(By.XPATH, "//form[@id='gradeable-form']//div[@class='tab-bar-wrapper']//a[contains(text(), 'Dates')]").click()
         wait = WebDriverWait(self.driver, self.WAIT_TIME)
-        import time
         element = self.driver.find_element(By.ID, "date_released")
         element.send_keys(Keys.CONTROL, "a")
         wait.until(lambda d: 'active' in element.get_attribute('class'))
