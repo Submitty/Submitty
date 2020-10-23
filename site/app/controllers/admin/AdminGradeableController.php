@@ -26,7 +26,6 @@ class AdminGradeableController extends AbstractController {
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            // var_dump($gradeable);
             $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
         }
         catch (\InvalidArgumentException $e) {
@@ -1012,7 +1011,6 @@ class AdminGradeableController extends AbstractController {
 
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
-        $haha = [];
 
         // If the post array is 0, that means that the name of the element was blank
         if (count($details) === 0) {
