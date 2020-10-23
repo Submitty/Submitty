@@ -2769,7 +2769,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * @param string $g_id
      * @return bool
      */
-    public function getUserMultipleTeamInvites($g_id, $user_id) {
+    public function getUserMultipleTeamInvites(string $g_id, string $user_id) : bool {
         $this->course_db->query(
             "
             SELECT gtm.*, tm.*

@@ -662,7 +662,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
             if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
-            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
                 name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
                 <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
@@ -758,8 +758,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
-    if (exists_multiple_invite_member) members_div.append('<div id="multiple_invites_warning" style="color:red;font-size:small;margin-top:3px;width:75%">\
+    if (exists_multiple_invite_member) {
+        members_div.append('<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:75%">\
         *Pending members highlighted in red have invites to multiple teams.');
+    }
 }
 
 function removeTeamMemberInput(i) {
@@ -787,7 +789,7 @@ function approveTeamMemberInput(old, i) {
 
 function addTeamMemberInput(old, i) {
     old.remove()
-    $('#multiple_invites_warning').remove();
+    $('#multiple-invites-warning').remove();
     var form = $("#admin-team-form");
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");

@@ -513,7 +513,7 @@
         <div>
             <a onclick="{{ team_edit_onclick }}" title="Edit Team" aria-label="Edit Team" class="key_to_click" tabindex="0"><i class="fas fa-pencil-alt"></i></a>
             {% if edited_past_lock_date %}
-                <div style="display:inline-block;" title="Edited Past Lock Date" aria-label="Edited Past Lock Date"><i class="fas fa-exclamation" style="color:red;"></i></div>
+                <div style="display:inline-block;" title="Edited Past Lock Date" aria-label="Edited Past Lock Date"><i class="fas fa-exclamation red-message"></i></div>
             {% endif %}
         </div>
     </td>
@@ -541,7 +541,7 @@
                 {{ member.getDisplayedLastName() -}}
             {%- endfor -%}
         {% endif %}
-    <div style="font-style: italic; display: inline; color: grey;">
+    <div style="font-style: italic; display: inline; color: var(--standard-medium-dark-gray);">
         {% if graded_gradeable.getGradeable().isTeamAssignment() %}
             {%- for member in graded_gradeable.getSubmitter().getTeam().getInvitedUsers() -%}
                 {%- if loop.index == 1 -%}Pending: {% endif -%}
@@ -549,7 +549,7 @@
                 {{- member.getDisplayedFirstName() }}
                 {{ member.getDisplayedLastName() -}}
                 {%- if member.hasMultipleTeamInvites(graded_gradeable.getGradeableId()) -%}
-                    <div style="display:inline-block;" title="Multiple Pending Invites" aria-label="Multiple Pending Invites">(<i class="fas fa-exclamation-triangle" style="color:grey;"></i>)</div>
+                    <div style="display:inline-block;" title="Multiple Pending Invites" aria-label="Multiple Pending Invites">(<i class="fas fa-exclamation-triangle" style="color: var(--standard-medium-dark-gray);"></i>)</div>
                 {%- endif -%}
             {%- endfor -%}
         {% endif %}
