@@ -1531,12 +1531,13 @@ GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_gra
 ORDER BY gc_order
         ", [$g_id, $g_id, $g_id, $g_id]);
         foreach ($this->course_db->rows() as $row) {
-            $return[] = new SimpleStat($this->core, $row);
+            $info = ['g_id' => $g_id, 'section_key' => $section_key, 'team' => $is_team];
+            $return[] = new SimpleStat($this->core, array_merge($row, $info));
         }
         return $return;
     }
 
-    public function getAverageGraderScores($g_id, $section_key, $is_team) {
+    public function getAverageGraderScores($g_id, $gc_id, $section_key, $is_team) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -1547,15 +1548,15 @@ ORDER BY gc_order
         }
         $return = [];
         $this->course_db->query("
-SELECT gcd_grader_id, comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
-  SELECT gcd_grader_id, gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
+SELECT gcd_grader_id, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
+  SELECT gcd_grader_id, gc_order,
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
   ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
-    SELECT gcd_grader_id, gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+    SELECT gcd_grader_id, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
     CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
     FROM gradeable_component_data AS gcd
-    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=? AND gcd.gc_id=gc.gc_id
     LEFT JOIN(
       SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
       FROM gradeable_component_mark_data AS gcmd
@@ -1581,35 +1582,15 @@ SELECT gcd_grader_id, comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, 
     WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
   )AS parts_of_comp
 )AS comp
-LEFT JOIN (
-    SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
-    FROM regrade_requests AS rr
-    WHERE rr.g_id=? AND rr.status=-1
-    GROUP BY rr.gc_id
-) AS rr ON rr.gc_id=comp.gc_id
-GROUP BY comp.gc_id, gc_title, gcd_grader_id, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
+GROUP BY gcd_grader_id, gc_order
 ORDER BY gc_order
-        ", [$g_id, $g_id, $g_id, $g_id]);
+        ", [$gc_id, $g_id, $g_id, $g_id]);
 
-        var_dump($this->course_db->rows());
         foreach ($this->course_db->rows() as $row) {
-            if (!isset($return[$row['gc_id']])) {
-                $return[$row['gc_id']] = $row;
-                $return[$row['gc_id']]['graders'] = [];
-            }
-            else {
-                $return[$row['gc_id']]['avg_comp_score'] = $return[$row['gc_id']]['avg_comp_score'] * $return[$row['gc_id']]['count'] + $row['avg_comp_score'] * $row['count'];
-                $return[$row['gc_id']]['count'] += $row['count'];
-                $return[$row['gc_id']]['avg_comp_score'] /= $return[$row['gc_id']]['count'];
-            }
-            // $count = isset($return['count']) ? $return['count'] : 0;
-            // $stdev = isset($return['std_dev']) ? $return['std_dev'] : 0;
-            // $return[$row['gc_id']] = array_merge($return[$row['gc_id']], $row);
-
             // add grader average
-            $return[$row['gc_id']]['graders'] = array_merge($return[$row['gc_id']]['graders'], [$row['gcd_grader_id'] => ['avg' => $row['avg_comp_score'], 'count' => $row['count']]]);
+            $return = array_merge($return, [$row['gcd_grader_id'] => ['avg' => $row['avg_comp_score'], 'count' => $row['count'], 'std_dev' => $row['std_dev']]]);
         }
-        var_dump($return);
+        //var_dump($return);
         return $return;
     }
 

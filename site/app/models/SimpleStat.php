@@ -15,7 +15,7 @@ use app\libraries\Core;
  * @method int getCount()
  * @method int getActiveGradeInquiryCount()
  * @method bool getIsPeer()
- * @method bool setGraderInfo($grader_info)
+ * @method string[] getGraderInfo()
 
  */
 class SimpleStat extends AbstractModel {
@@ -52,6 +52,7 @@ class SimpleStat extends AbstractModel {
             $this->is_peer = $details['gc_is_peer'];
             $this->count = $details['count'];
             $this->active_grade_inquiry_count = $details['active_grade_inquiry_count'];
+            $this->grader_info = $this->core->getQueries()->getAverageGraderScores($details['g_id'], $details['gc_id'], $details['section_key'], $details['team']);
         }
         else {
             $this->component = false;
