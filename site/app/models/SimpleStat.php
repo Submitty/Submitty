@@ -15,6 +15,7 @@ use app\libraries\Core;
  * @method int getCount()
  * @method int getActiveGradeInquiryCount()
  * @method bool getIsPeer()
+ * @method bool setGraderInfo($grader_info)
 
  */
 class SimpleStat extends AbstractModel {
@@ -36,6 +37,8 @@ class SimpleStat extends AbstractModel {
     protected $active_grade_inquiry_count = 0;
     /** @prop @var bool Does this component use peer grading*/
     protected $is_peer = null;
+    /** @prop @var array Grader information for these stats*/
+    protected $grader_info = null;
 
     public function __construct(Core $core, $details = []) {
         parent::__construct($core);

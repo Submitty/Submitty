@@ -1535,6 +1535,84 @@ ORDER BY gc_order
         }
         return $return;
     }
+
+    public function getAverageGraderScores($g_id, $section_key, $is_team) {
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
+        if ($is_team) {
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
+        }
+        $return = [];
+        $this->course_db->query("
+SELECT gcd_grader_id, comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
+  SELECT gcd_grader_id, gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
+  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+    SELECT gcd_grader_id, gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
+    FROM gradeable_component_data AS gcd
+    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+    LEFT JOIN(
+      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
+      FROM gradeable_component_mark_data AS gcmd
+      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+      GROUP BY gcmd.gc_id, gcmd.gd_id
+      )AS marks
+    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+    LEFT JOIN(
+      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
+      FROM gradeable_data AS gd
+      WHERE gd.g_id=?
+    ) AS gd ON gcd.gd_id=gd.gd_id
+    INNER JOIN(
+      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
+      FROM {$users_or_teams} AS {$u_or_t}
+      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+    INNER JOIN(
+      SELECT egv.{$user_or_team_id}, egv.active_version
+      FROM electronic_gradeable_version AS egv
+      WHERE egv.g_id=? AND egv.active_version>0
+    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+    WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
+  )AS parts_of_comp
+)AS comp
+LEFT JOIN (
+    SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
+    FROM regrade_requests AS rr
+    WHERE rr.g_id=? AND rr.status=-1
+    GROUP BY rr.gc_id
+) AS rr ON rr.gc_id=comp.gc_id
+GROUP BY comp.gc_id, gc_title, gcd_grader_id, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
+ORDER BY gc_order
+        ", [$g_id, $g_id, $g_id, $g_id]);
+
+        var_dump($this->course_db->rows());
+        foreach ($this->course_db->rows() as $row) {
+            if (!isset($return[$row['gc_id']])) {
+                $return[$row['gc_id']] = $row;
+                $return[$row['gc_id']]['graders'] = [];
+            }
+            else {
+                $return[$row['gc_id']]['avg_comp_score'] = $return[$row['gc_id']]['avg_comp_score'] * $return[$row['gc_id']]['count'] + $row['avg_comp_score'] * $row['count'];
+                $return[$row['gc_id']]['count'] += $row['count'];
+                $return[$row['gc_id']]['avg_comp_score'] /= $return[$row['gc_id']]['count'];
+            }
+            // $count = isset($return['count']) ? $return['count'] : 0;
+            // $stdev = isset($return['std_dev']) ? $return['std_dev'] : 0;
+            // $return[$row['gc_id']] = array_merge($return[$row['gc_id']], $row);
+
+            // add grader average
+            $return[$row['gc_id']]['graders'] = array_merge($return[$row['gc_id']]['graders'], [$row['gcd_grader_id'] => ['avg' => $row['avg_comp_score'], 'count' => $row['count']]]);
+        }
+        var_dump($return);
+        return $return;
+    }
+
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
         $u_or_t = "u";
         $users_or_teams = "users";

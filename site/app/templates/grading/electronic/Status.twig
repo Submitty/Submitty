@@ -784,6 +784,10 @@
                                             <br/>
                                             Standard Deviation: {{ component.getStandardDeviation() }} <br/>
                                             Count: {{ component.getCount() }} <br/>
+                                            {#Graders: 
+                                            {% for grader in component.getGraders() %} 
+                                            {{ grader }} ({{ component.getGraderAvg(grader) }}) <br/>
+                                            #}
                                         </div>
                                     {% endfor %}
                                     <br/>
