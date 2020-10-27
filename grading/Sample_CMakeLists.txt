@@ -118,10 +118,10 @@ endif ()
 
 
 # Then embed the config.json within a generated .cpp source file
-string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" my_hw_config_file "${my_hw_config_file}")
+string(REGEX REPLACE "([\"\\\n])" "\\\\\\1" json_generated "${json_generated}")
 set(cpp_header "const char *GLOBAL_config_json_string = \"")
 set(cpp_footer "\";\n")
-file(WRITE json_generated.cpp "${cpp_header}${my_hw_config_file}${cpp_footer}")
+file(WRITE json_generated.cpp "${cpp_header}${json_generated}${cpp_footer}")
 set_source_files_properties(json_generated.cpp PROPERTIES GENERATED true)
 
 
@@ -176,8 +176,7 @@ include_directories(${GRADINGCODE}/grading)
 SET(EXECUTABLE_OUTPUT_PATH ${my_bin})
 
 add_custom_target(config_tgt ALL DEPENDS ${my_hw_config_file})
-add_custom_command(OUTPUT ${my_hw_config_file} DEPENDS configure.out COMMAND ${my_bin}/configure.out ${my_config_json_no_comments} ${my_hw_config_file})
+add_custom_command(OUTPUT ${my_hw_config_file} DEPENDS configure.out COMMAND ${my_bin}/configure.out ${my_hw_config_file})
 
 ###################################################################################
-
 

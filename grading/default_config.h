@@ -2,8 +2,9 @@
 #define __DEFAULT_CONFIG_H__
 
 #include "json.hpp"
-// #include "load_config_json.h"
-#include "TestCase.h"
+#include <limits>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 extern const char *GLOBAL_config_json_string;  // defined in json_generated.cpp
 

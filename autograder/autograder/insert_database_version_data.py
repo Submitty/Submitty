@@ -32,8 +32,10 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     results = get_result_details(data_dir, semester, course, gradeable_id, who_id, version)
 
     if len(testcases) != len(results['testcases']):
-        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
+        print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}, aborting")
+        raise Exception(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}, aborting")
     for i in range(len(testcases)):
+        print(json.dumps(results['testcases'][i]))
         if testcases[i]['hidden'] and testcases[i]['extra_credit']:
             hidden_ec += results['testcases'][i]['points']
         elif testcases[i]['hidden']:
@@ -183,8 +185,8 @@ def get_testcases(config, semester, course, g_id):
             build_json = json.load(build_file)
             if 'testcases' in build_json and build_json['testcases'] is not None:
                 for testcase in build_json['testcases']:
-                    testcases.append({'hidden': testcase['hidden'],
-                                      'extra_credit': testcase['extra_credit'],
+                    testcases.append({'hidden': testcase.get('hidden', False),
+                                      'extra_credit': testcase.get('extra_credit', False),
                                       'points': testcase['points']})
     return testcases
 

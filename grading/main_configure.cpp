@@ -1,9 +1,13 @@
 #include <iostream>
 #include <fstream>
 
-#include "execute.h"
 #include "default_config.h"
 #include "load_config_json.h"
+
+// When we compile main_configure, this is the empty string, otherwise, it is
+// defined in json_generated.cpp
+const char *GLOBAL_config_json_string = "";
+
 
 /*
 

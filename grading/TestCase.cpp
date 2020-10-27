@@ -1,12 +1,6 @@
 #include <unistd.h>
 #include <set>
 #include <sys/stat.h>
-#include "TestCase.h"
-#include "dispatch.h"
-#include "myersDiff.h"
-#include "tokenSearch.h"
-#include "execute.h"
-
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -18,6 +12,11 @@
 #include <unistd.h>
 #include <iostream>
 
+#include "TestCase.h"
+#include "dispatch.h"
+#include "myersDiff.h"
+#include "tokenSearch.h"
+#include "execute.h"
 
 // Set mode bits on shared memory
 #define SHM_MODE (SHM_W | SHM_R | IPC_CREAT)
