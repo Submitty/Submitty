@@ -1,7 +1,5 @@
 {% if viewer.getQueueMessage() | length > 0 %}
-  <div class="content gradeable_message">
-    <p>{{viewer.getQueueMessage() | markdown}}</p>
-  </div>
+  <div class="content gradeable_message markdown">{{viewer.getQueueMessage() | markdown}}</div>
 {% endif %}
 
 <div class="content">
