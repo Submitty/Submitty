@@ -1545,6 +1545,12 @@ class Gradeable(object):
             i-=1
             self.components.append(Component(component, i+1))
 
+    def roll(array, offset):
+        new_arr=[]
+        new_arr=[0 for i in range(len(array))]
+        for x in range(len(array)):
+            new_arr[x] = array[(x+offset)%(len(array)-1)]
+        return new_arr
     def create(self, conn, gradeable_table, electronic_table, peer_assign, reg_table, component_table, mark_table):
         conn.execute(gradeable_table.insert(), g_id=self.id, g_title=self.title,
                      g_instructions_url=self.instructions_url,
@@ -1581,7 +1587,7 @@ class Gradeable(object):
                     offset_array.append(random_offset)
                     temp_offset.remove(random_offset)
                 for i in range(len(offset_array)+1):
-                    temp_arr = numpy.roll(students,offset_array[i])
+                    temp_arr = roll(students,offset_array[i])
                     n_array_peers.append([temp_arr])
                 for i in range(len(n_array_peers[0])+1):
                     temp = []
