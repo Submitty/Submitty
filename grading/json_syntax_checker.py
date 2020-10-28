@@ -17,8 +17,6 @@ if __name__ == "__main__":
     with open(args.file, "r") as input_file:
         j_string = input_file.read()
 
-    print(j_string)
-
     # Remove cpp # markers
     j_string = re.sub("(^|\n)#[^\n]*(?=\n)", "", j_string)
 

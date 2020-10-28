@@ -113,7 +113,7 @@ function build_homework {
     assignment=$4
 
     course_dir=$SUBMITTY_DATA_DIR/courses/$semester/$course
-
+    GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
 
     # check that the user executing this script is in the course group
     course_group=`stat -c "%G" $course_dir`
@@ -166,7 +166,8 @@ function build_homework {
     fi
 
     # Remove cpp markers and run the complete config json through a python json syntax checker.
-    python3 ${GRADINGCODE}/grading/json_syntax_checker.py
+    python3 ${GRADINGCODE}/json_syntax_checker.py complete_config.json
+    ls -la
     py_res=$?
     if (( $cpp_res != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
@@ -175,9 +176,6 @@ function build_homework {
     fi
 
     # Create the complete/build config using main_configure
-
-    #/usr/bin/clang++ -pthread -g -std=c++11 ${GRADINGCODE}/main_configure.cpp ${GRADINGCODE}/execute.cpp ${GRADINGCODE}/load_config_json.cpp ${GRADINGCODE}/TestCase.cpp ${GRADINGCODE}/error_message.cpp ${GRADINGCODE}/window_utils.cpp ${GRADINGCODE}/load_config_json.cpp ${GRADINGCODE}/dispatch.cpp ${GRADINGCODE}/tokenSearch.cpp ${GRADINGCODE}/tokens.cpp ${GRADINGCODE}/clean.cpp
-
     g++ ${GRADINGCODE}/main_configure.cpp ${GRADINGCODE}/load_config_json.cpp ${GRADINGCODE}/execute.cpp \
         ${GRADINGCODE}/TestCase.cpp ${GRADINGCODE}/error_message.cpp ${GRADINGCODE}/window_utils.cpp \
         ${GRADINGCODE}/dispatch.cpp ${GRADINGCODE}/change.cpp ${GRADINGCODE}/difference.cpp \
@@ -186,7 +184,17 @@ function build_homework {
         ${GRADINGCODE}/empty_custom_function.cpp -pthread -g -std=c++11 -lseccomp -o configure.out
 
 
-    configure.out complete_config.json complete_config.json
+    ./configure.out complete_config.json ${course_dir}/config/build/build_${assignment}.json
+    configure_res=$?
+
+    if (( $configure_res != 0 )); then
+        echo -e "\nFailed to create a complete_config.json"
+        popd > /dev/null
+        exit 1
+    fi
+
+    # Remove the intermediate config
+    rm complete_config.json
 
 
     # build the configuration, compilation, runner, and validation executables
@@ -206,7 +214,7 @@ function build_homework {
 
     # build (in parallel, 8 threads)
     # quit (don't continue on to build other homeworks) if there is a compile error
-    make VERBOSE=1 -j 8
+    make -j 8
 
     # capture exit code of make
     make_res=$?
