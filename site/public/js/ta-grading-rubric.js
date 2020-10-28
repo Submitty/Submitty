@@ -1012,11 +1012,11 @@ function setupSortableComponents() {
 
 /**
  * Key press handler for jquery sortable elements
- * @param e
+ * @param {KeyboardEvent} e
  */
 function keyPressHandler(e) {
     // Enable ctrl-a to select all
-    if (e.keyCode === 65 && e.ctrlKey) {
+    if (e.code === "KeyA" && e.ctrlKey) {
         e.target.select()
     }
 }

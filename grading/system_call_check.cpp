@@ -151,7 +151,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
   // verify that we have all of the linux system calls (32 & 64 bit)
   //std::cout << "all_system_calls.size() " <<  all_system_calls.size() << std::endl;
-  assert (all_system_calls.size() == 393);
+  assert (all_system_calls.size() == 394);
 }
 
 

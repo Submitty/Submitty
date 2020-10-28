@@ -10,6 +10,13 @@
 #include <cassert>
 
 // COMPILATION NOTE: Must pass -lseccomp to build
+#ifndef __NR_rseq
+# ifdef __x86_64__
+#  define __NR_rseq 334
+# else
+#  define __NR_rseq 386
+# endif
+#endif
 #include <seccomp.h>
 #include <set>
 #include <string>
@@ -66,10 +73,10 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // We could use raw seccomp-bpf instead.
 
   std::set<std::string> categories;
-  
+
   // grep ' :' grading/system_call_categories.cpp | grep SAFELIST | cut -f 6 -d ' '
   // grep ' :' grading/system_call_categories.cpp | grep RESTRICTED | cut -f 6 -d ' '
-  // grep ' :' grading/system_call_categories.cpp | grep FORBIDDEN | cut -f 6 -d ' ' 
+  // grep ' :' grading/system_call_categories.cpp | grep FORBIDDEN | cut -f 6 -d ' '
 
   std::set<std::string> safelist_categories = {
     "PROCESS_CONTROL",
@@ -142,8 +149,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   else if (my_program == "/usr/bin/strace") {
     categories = restricted_categories;
-  } 
-  
+  }
+
   // ---------------------------------------------------------------
   // SUBMITTY ANALYSIS TOOLS
   else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count") {
@@ -156,7 +163,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   }
 
   // ---------------------------------------------------------------
-  // PYTHON 
+  // PYTHON
   else if (my_program.find("/usr/bin/python") != std::string::npos) {
     categories = restricted_categories; //TODO: fix
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
@@ -164,11 +171,11 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("FILE_MANAGEMENT_RARE");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
   }
-  
+
   // ---------------------------------------------------------------
   // C/C++ COMPILATION
   else if (my_program == "/usr/bin/g++" ||
-           my_program == "/usr/bin/gcc" || 
+           my_program == "/usr/bin/gcc" ||
            my_program.find("/usr/bin/clang") != std::string::npos) {
     categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
     categories.insert("FILE_MANAGEMENT_PERMISSIONS");
@@ -236,7 +243,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("UNKNOWN");
     categories.insert("UNKNOWN_MODULE");
   }
-  
+
   // ---------------------------------------------------------------
   // SWI PROLOG
   else if (my_program == "/usr/bin/swipl") {
@@ -261,7 +268,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // ---------------------------------------------------------------
   // C++ Memory Debugging
   // FIXME: update with the actual dr memory install location?
-  else if (my_program.find("drmemory") != std::string::npos || 
+  else if (my_program.find("drmemory") != std::string::npos ||
            my_program.find("valgrind") != std::string::npos) {
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
@@ -276,7 +283,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
     categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
     categories.insert("TGKILL");
-  } 
+  }
 
   // ---------------------------------------------------------------
   // IMAGE COMPARISON
@@ -318,6 +325,15 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   else if(my_program == "/usr/bin/scrot"){
     categories = restricted_categories; //TODO: fix
   }
+  // else if(my_program == "/usr/bin/gdb") {
+  //   categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+  //   categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+  //   categories.insert("FILE_MANAGEMENT_RARE");
+  //   categories.insert("PROCESS_CONTROL_ADVANCED");
+  //   categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+  //   categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+  //   categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+  // }
 
   else {
     categories = restricted_categories; //TODO: fix
@@ -329,12 +345,12 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   for_each(categories.begin(),categories.end(),
            [restricted_categories](const std::string &s){
              assert (restricted_categories.find(s) != restricted_categories.end()); });
-  
+
   allow_system_calls(sc,categories);
 
   if (seccomp_load(sc) < 0)
-    return 1; // failure                                                                                   
-  
+    return 1; // failure
+
   /* This does not remove the filter */
   seccomp_release(sc);
 
