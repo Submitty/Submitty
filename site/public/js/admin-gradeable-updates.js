@@ -130,7 +130,7 @@ $(document).ready(function () {
 
         let data = {'csrf_token': csrfToken};
         if (this.name == 'hidden_files') {
-            data[this.name] = $(this).val().replace(", ", ",");
+            data[this.name] = $(this).val().replace(/\s*,\s*/, ",");
         }
         else {
             data[this.name] = $(this).val();
