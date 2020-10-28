@@ -39,7 +39,7 @@ l
         {% set any_earned = peer_grade_earned is defined or ta_grading_earned is defined or auto_grading_earned is defined %}
         {% if any_earned %}
             {% if peer_grade_earned is defined %}
-                {% set total_earned = total_score|default(0) %}
+                {% set total_earned = ta_grading_earned|default(0) + auto_grading_earned|default(0) + peer_grade_earned %}
                 {% if peer_grade_earned == 0%}
                     {% set max_total = peer_total|default(0) + ta_grading_total|default(0) + auto_grading_total|default(0) %}
                 {% else %}
