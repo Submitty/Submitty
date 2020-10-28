@@ -21,7 +21,6 @@ from shutil import copyfile
 import glob
 import grp
 import hashlib
-import numpy
 import json
 import os
 import pwd
@@ -1090,7 +1089,7 @@ class Course(object):
             gradeable_teams_table.c['team_id'] == unique_team_id)
             res = self.conn.execute(team_in_other_gradeable)
             num = res.rowcount
-            while num is not 0:
+            while num != 0:
                 ucounter+=1
                 unique_team_id=str(ucounter).zfill(5)+"_"+user.get_detail(self.code, "id")
                 team_in_other_gradeable = select([gradeable_teams_table]).where(
@@ -1454,7 +1453,7 @@ class Gradeable(object):
             self.title = self.id.replace("_", " ").title()
 
         if 'g_grader_assignment_method' in gradeable:
-            self.grade_by_registration = gradeable['g_grader_assignment_method'] is 1
+            self.grade_by_registration = gradeable['g_grader_assignment_method'] == 1
             self.grader_assignment_method = gradeable['g_grader_assignment_method']
 
         if 'grading_rotating' in gradeable:
