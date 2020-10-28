@@ -129,7 +129,12 @@ $(document).ready(function () {
         }
 
         let data = {'csrf_token': csrfToken};
-        data[this.name] = $(this).val();
+        if (this.name == 'hidden_files') {
+            data[this.name] = $(this).val().replace(", ", ",");
+        }
+        else {
+            data[this.name] = $(this).val();
+        }
         let addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
