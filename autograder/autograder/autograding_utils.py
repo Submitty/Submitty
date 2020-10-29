@@ -19,6 +19,81 @@ import shutil
 import codecs
 import glob
 
+from typing import Optional
+
+
+class Logger:
+    """Specialized logger class that accumulates stack traces."""
+
+    def __init__(
+            self, *,
+            log_dir: str,
+            stack_trace_dir: str,
+            # This used to be "UNKNOWN", but "NOT SET" better describes the circumstances.
+            job_id: str = "NOT SET",
+    ):
+        self.log_dir = log_dir
+        self.stack_trace_dir = stack_trace_dir
+        self.accumulated_traces = []
+
+    def _log_filename(self) -> str:
+        """Get the name of the file that should be logged into.
+        
+        Currently, this is in the format YYYYMMDD.txt.
+        """
+        now = dateutils.get_current_time()
+        return f'{datetime.strftime(now, "%Y%m%d")}.txt'
+
+    @property
+    def log_path(self) -> str:
+        """Get the full path to the regular logging file."""
+        return os.path.join(self.log_dir, self._log_filename())
+
+    @property
+    def stack_trace_path(self) -> str:
+        """Get the full path to the stack trace logging file."""
+        return os.path.join(self.stack_trace_dir, self._log_filename())
+
+    def log_message(
+            self, message: str, *,
+            is_batch: bool = False,
+            which_untrusted: str = "",
+            jobname: str = "",
+            timelabel: str = "",
+            elapsed_time: Optional[int] = None
+    ):
+        """Log a message to this logger's configured log directory."""
+        now = dateutils.get_current_time()
+        easy_to_read_date = dateutils.write_submitty_date(now, True)
+        batch_string = "BATCH" if is_batch else ""
+        if elapsed_time is None:
+            elapsed_time = -1
+        elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
+        time_unit = "" if elapsed_time < 0 else "sec"
+        parts = (easy_to_read_date, f"{self.job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
+                f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
+
+    def log_stack_trace(
+            self, trace: str, *,
+            is_batch: bool = False,
+            which_untrusted: str = ''
+    ):
+        """Log a stack trace to this logger's configured stack trace directory."""
+        self.accumulated_traces.append(trace)
+        # Always run this since this could be deleted without us knowing
+        os.makedirs(self.stack_trace_dir, exist_ok=True)
+
+        now = dateutils.get_current_time()
+        easy_to_read_date = dateutils.write_submitty_date(now, True)
+        batch_string = "BATCH" if is_batch else ""
+        # There's several fields that simply aren't used anywhere. Just keeping the empty fields in
+        # for the sake of format continuity, but we might want to consider changing this up so it
+        # makes more sense.
+        parts = (easy_to_read_date, f"{self.job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
+                f"{'':75s}", f"{'':6s} {'':>9s} {'':>3s}\n", trace)
+        write_to_log(self.stack_trace_path, parts)
+
+
 def just_write_grade_history(json_file,assignment_deadline,submission_time,seconds_late,
                              first_access_time,access_duration,queue_time,batch_regrade,grading_began,
                              wait_time,grading_finished,grade_time,autograde_total,
