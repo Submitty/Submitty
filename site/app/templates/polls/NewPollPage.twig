@@ -40,10 +40,10 @@
             <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
             <br/> <br/>
 
-            <span id="empty-name-error" class="red-message">Please make sure poll name is filled in.<br/></span>
-            <span id="empty-question-error" class="red-message" hidden>Please make sure question is filled in.<br/></span>
-            <span id="empty-date-error" class="red-message" hidden>Please make sure release date is filled in.<br/></span>
-            <span id="response-count-error" class="red-message" hidden>Please make sure to add at least one response option.<br/></span>
+            <span id="empty-name-error" class="red-message polls-submit-error">Please make sure poll name is filled in.<br/></span>
+            <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+            <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
+            <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
             <button type="submit" id="new-poll-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
@@ -203,6 +203,29 @@
         $("#response-count").val("" + count)
     }
 
+    function submitErrorChecks() {
+        if ($("#poll-name").val().length == 0) {
+            $("#new-poll-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-name-error").show();
+        } else if ($("#poll-question").val().length == 0) {
+            $("#new-poll-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-question-error").show();
+        } else if ($("#poll-date").val().length == 0) {
+            $("#new-poll-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#empty-date-error").show()
+        } else if (parseInt($("#response-count").val()) == 0) {
+            $("#new-poll-submit").prop("disabled", true);
+            $(".polls-submit-error").hide();
+            $("#response-count-error").show();
+        } else {
+            $("#new-poll-submit").prop("disabled", false);
+            $(".polls-submit-error").hide();
+        }
+    }
+
     $(document).ready(function() {
         $(".up-btn").on("click", function() {
             let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"))
@@ -250,38 +273,7 @@
             count -= 1
             $("#response-count").val("" + count)
         })
-        $("#new-poll-form").on("change click", function() {
-            if ($("#poll-name").val().length == 0) {
-                $("#new-poll-submit").prop("disabled", true);
-                $("#empty-question-error").hide();
-                $("#empty-date-error").hide();
-                $("#response-count-error").hide();
-                $("#empty-name-error").show();
-            } else if ($("#poll-question").val().length == 0) {
-                $("#new-poll-submit").prop("disabled", true);
-                $("#empty-name-error").hide();
-                $("#empty-date-error").hide();
-                $("#response-count-error").hide();
-                $("#empty-question-error").show();
-            } else if ($("#poll-date").val().length == 0) {
-                $("#new-poll-submit").prop("disabled", true);
-                $("#empty-question-error").hide();
-                $("#empty-name-error").hide();
-                $("#response-count-error").hide();
-                $("#empty-date-error").show()
-            } else if (parseInt($("#response-count").val()) == 0) {
-                $("#empty-question-error").hide();
-                $("#empty-name-error").hide();
-                $("#empty-date-error").hide();
-                $("#response-count-error").show();
-            } else {
-                $("#new-poll-submit").prop("disabled", false);
-                $("#empty-name-error").hide();
-                $("#empty-question-error").hide();
-                $("#empty-question-error").hide();
-                $("#response-count-error").hide();
-            }
-        })
+        $("#new-poll-form").on("change click", submitErrorChecks);
     });
 
 </script>
