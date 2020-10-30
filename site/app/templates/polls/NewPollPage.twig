@@ -44,12 +44,12 @@
             <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
             <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
             <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
-            <button type="submit" id="new-poll-submit" class="btn btn-primary" disabled>Add Poll</button>
+            <button type="submit" id="poll-form-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
         <h1> Edit Poll </h1>
 
-        <form method="post" action="{{base_url}}/editPoll/submitEdits">
+        <form id="edit-poll-form" method="post" action="{{base_url}}/editPoll/submitEdits">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
             <input type="hidden" name="response_count" id="response-count" value="{{ poll.getResponses()|length }}"/>
@@ -106,7 +106,11 @@
             <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
             <br/> <br/>
 
-            <button type="submit" class="btn btn-primary">Submit Changes</button>
+            <span id="empty-name-error" class="red-message polls-submit-error" hidden>Please make sure poll name is filled in.<br/></span>
+            <span id="empty-question-error" class="red-message polls-submit-error" hidden>Please make sure question is filled in.<br/></span>
+            <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
+            <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
+            <button type="submit" id="poll-form-submit" class="btn btn-primary">Submit Changes</button>
         </form>
     {% endif %}
 </div>
@@ -205,23 +209,23 @@
 
     function submitErrorChecks() {
         if ($("#poll-name").val().length == 0) {
-            $("#new-poll-submit").prop("disabled", true);
+            $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-name-error").show();
         } else if ($("#poll-question").val().length == 0) {
-            $("#new-poll-submit").prop("disabled", true);
+            $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-question-error").show();
         } else if ($("#poll-date").val().length == 0) {
-            $("#new-poll-submit").prop("disabled", true);
+            $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#empty-date-error").show()
         } else if (parseInt($("#response-count").val()) == 0) {
-            $("#new-poll-submit").prop("disabled", true);
+            $("#poll-form-submit").prop("disabled", true);
             $(".polls-submit-error").hide();
             $("#response-count-error").show();
         } else {
-            $("#new-poll-submit").prop("disabled", false);
+            $("#poll-form-submit").prop("disabled", false);
             $(".polls-submit-error").hide();
         }
     }
@@ -274,6 +278,7 @@
             $("#response-count").val("" + count)
         })
         $("#new-poll-form").on("change click", submitErrorChecks);
+        $("#edit-poll-form").on("change click", submitErrorChecks);
     });
 
 </script>
