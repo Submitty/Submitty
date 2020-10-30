@@ -2,7 +2,7 @@
     {% if not poll is defined %}
         <h1> Add a New Poll </h1>
 
-        <form method="post" action="{{base_url}}/newPoll">
+        <form id="new-poll-form" method="post" action="{{base_url}}/newPoll">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="response_count" id="response-count" value="0"/>
 
@@ -40,9 +40,11 @@
             <button type="button" class="btn btn-primary" onclick="removeResponse()">-</button>
             <br/> <br/>
 
-
-
-            <button type="submit" class="btn btn-primary">Add Poll</button>
+            <span id="empty-name-error" class="red-message">Please make sure poll name is filled in.<br/></span>
+            <span id="empty-question-error" class="red-message" hidden>Please make sure question is filled in.<br/></span>
+            <span id="empty-date-error" class="red-message" hidden>Please make sure release date is filled in.<br/></span>
+            <span id="response-count-error" class="red-message" hidden>Please make sure to add at least one response option.<br/></span>
+            <button type="submit" id="new-poll-submit" class="btn btn-primary" disabled>Add Poll</button>
         </form>
     {% else %}
         <h1> Edit Poll </h1>
@@ -247,6 +249,38 @@
             $(this).parent().remove()
             count -= 1
             $("#response-count").val("" + count)
+        })
+        $("#new-poll-form").on("change click", function() {
+            if ($("#poll-name").val().length == 0) {
+                $("#new-poll-submit").prop("disabled", true);
+                $("#empty-question-error").hide();
+                $("#empty-date-error").hide();
+                $("#response-count-error").hide();
+                $("#empty-name-error").show();
+            } else if ($("#poll-question").val().length == 0) {
+                $("#new-poll-submit").prop("disabled", true);
+                $("#empty-name-error").hide();
+                $("#empty-date-error").hide();
+                $("#response-count-error").hide();
+                $("#empty-question-error").show();
+            } else if ($("#poll-date").val().length == 0) {
+                $("#new-poll-submit").prop("disabled", true);
+                $("#empty-question-error").hide();
+                $("#empty-name-error").hide();
+                $("#response-count-error").hide();
+                $("#empty-date-error").show()
+            } else if (parseInt($("#response-count").val()) == 0) {
+                $("#empty-question-error").hide();
+                $("#empty-name-error").hide();
+                $("#empty-date-error").hide();
+                $("#response-count-error").show();
+            } else {
+                $("#new-poll-submit").prop("disabled", false);
+                $("#empty-name-error").hide();
+                $("#empty-question-error").hide();
+                $("#empty-question-error").hide();
+                $("#response-count-error").hide();
+            }
         })
     });
 
