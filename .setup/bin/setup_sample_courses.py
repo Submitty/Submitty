@@ -1585,12 +1585,12 @@ class Gradeable(object):
                     for x in range(len(students)):
                         temp_arr[x] = students[(x+offset_array[i])%(len(students)-1)]
                     n_array_peers.append([temp_arr])
-                for i in range(len(n_array_peers[0])+1):
+                for i in range(len(n_array_peers[0])):
                     temp = []
-                    for j in range(1, len(n_array_peers)+1):
+                    for j in range(1, len(n_array_peers)):
                         temp.append(n_array_peers[j][i])
                     final_grading_info.append([n_array_peers[0][i],temp])    
-                for i in range(len(final_grading_info)+1):
+                for i in range(len(final_grading_info)):
                     for j in range(len(final_grading_info[0][1])):
                         conn.execute(peer_assign.insert(), g_id=self.id, grader_id=final_grading_info[i][0], user_id=final_grading_info[i][1][j])
             
