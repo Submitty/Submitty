@@ -65,7 +65,14 @@ def do_the_grading():
   if os.path.exists(my_access_file):
     with open(my_access_file) as access_file:
       access = json.load(access_file)
-      first_access_timestamp_string = access[0]["timestamp"]
+      if len(access) == 0:
+        # this can happen if the student never clicks on the page and the
+        # instructor makes a submission for the student
+        return_result(score=0,
+                      message="ERROR!  empty access file for this student",
+                      status='failure')
+      else:
+        first_access_timestamp_string = access[0]["timestamp"]
   else:
     return_result(score=0,
                   message="ERROR!  access file does not exist",
