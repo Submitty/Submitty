@@ -4,6 +4,38 @@
   "type": "object",
   "required" : ["autograding", "autograding_method", "container_options", "testcases", "timestamped_stdout", "publish_actions"],
   "properties" : {
+      "total_pts" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "int"
+      },
+      "id" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "string"
+      },
+      "ta_pts" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "int"
+      },
+      "max_submissions" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "string"
+      },
+      "gradeable_message" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "string"
+      },
+      "auto_pts" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "int"
+      },
+      "points_visible" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "int"
+      },
+      "max_possible_grading_time" : {
+        "description" : "INTERNAL: ADDED BY MAIN_CONFIGURE",
+        "type": "int"
+      },
       "timestamped_stdout" : {
         "description" : "Timestamp student standard output files",
         "type" : "boolean"

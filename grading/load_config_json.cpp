@@ -1031,8 +1031,6 @@ nlohmann::json LoadAndCustomizeConfigJson(const std::string &student_id) {
     nlohmann::json config_json;
     std::stringstream sstr(GLOBAL_config_json_string);
 
-    std::cout << GLOBAL_config_json_string << std::endl;
-
     sstr >> config_json;
 
     if (student_id != "") {
