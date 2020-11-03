@@ -1467,6 +1467,8 @@ class Gradeable(object):
             self.submission_open_date = dateutils.parse_datetime(gradeable['eg_submission_open_date'])
             self.submission_due_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
             self.team_lock_date = dateutils.parse_datetime(gradeable['eg_submission_due_date'])
+            if self.team_lock_date is None:
+                self.team_lock_date = self.grade_due_date
             self.grade_inquiry_start_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_start_date'])
             self.grade_inquiry_due_date = dateutils.parse_datetime(gradeable['eg_grade_inquiry_due_date'])
             self.student_view = True
@@ -1505,9 +1507,9 @@ class Gradeable(object):
                 else:
                     self.config_path = None
             assert self.ta_view_date < self.submission_open_date
-            assert self.submission_open_date < self.submission_due_date
-            assert self.submission_due_date < self.grade_start_date
-            assert self.grade_released_date <= self.grade_inquiry_start_date
+            assert self.submission_due_date is None or self.submission_open_date < self.submission_due_date
+            assert self.submission_due_date is None or self.submission_due_date < self.grade_start_date
+            assert self.grade_released_date is None or self.grade_released_date <= self.grade_inquiry_start_date
             assert self.grade_inquiry_start_date < self.grade_inquiry_due_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
@@ -1525,7 +1527,7 @@ class Gradeable(object):
                                                 "for {}".format(self.sample_path))
         assert self.ta_view_date < self.grade_start_date
         assert self.grade_start_date < self.grade_due_date
-        assert self.grade_due_date <= self.grade_released_date
+        assert self.grade_released_date is None or self.grade_due_date <= self.grade_released_date
 
         self.components = []
         for i in range(len(gradeable['components'])):
