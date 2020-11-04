@@ -1,0 +1,85 @@
+{# Setup for Component Average Graphs#}
+
+{% if component_averages|length == 0 %}
+    <script>
+        document.getElementById("btn-comp").className+= " disabled-btn";
+        document.getElementById("btn-comp").style.visibility = "hidden";
+    </script>
+{% else %}
+
+<div id="component-averages" class="page-content">
+
+    <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <script>
+
+        var xValue = [];
+        var yValue = [];
+        var yValue2 = [];
+        {% for comp in component_averages %}
+            xValue.push('{{comp.getTitle()|escape("js")}}');
+            yValue.push({{comp.getAverageScore()}});
+            yValue2.push({{comp.getMaxValue()}});
+        {% endfor %}
+
+
+        var trace1 = {
+            x: xValue,
+            y: yValue,
+            name: 'Average Scores',
+            type: 'bar',
+            text: yValue,
+            textposition: 'auto',
+            hoverinfo: 'none',
+            marker: {
+                color: 'rgb(48,99,152)',
+                opacity: 1.0,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 1.5
+                }
+            }
+        };
+
+        var trace2 = {
+            x: xValue,
+            y: yValue2,
+            name: 'Full Scores',
+            type: 'bar',
+            text: yValue2,
+            textposition: 'auto',
+            hoverinfo: 'none',
+            marker: {
+                color: 'rgb(246,251,252)',
+                opacity: 1.0,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 1.5
+                }
+            }
+        };
+
+        var data = [trace2, trace1];
+
+        var layout = {
+            title: 'Manually Graded Component Averages',
+            barmode: 'overlay',
+            xaxis: {
+                title: 'Components'
+            },
+            yaxis:{
+                title: 'Scores'
+            },
+            font: {
+                family: '"Source Sans Pro", sans-serif',
+            }
+
+        };
+
+        Plotly.newPlot('myDiv2', data, layout, {displayModeBar: false,displaylogo: false});
+    </script>
+     <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>
+{% endif %}
