@@ -1,12 +1,5 @@
 {# Setup for Component Average Graphs#}
 
-{% if component_averages|length == 0 %}
-    <script>
-        document.getElementById("btn-comp").className+= " disabled-btn";
-        document.getElementById("btn-comp").style.visibility = "hidden";
-    </script>
-{% else %}
-
 <div id="component-averages" class="page-content">
 
     <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
@@ -82,4 +75,3 @@
     Double-click on the chart to zoom out
     <hr>
 </div>
-{% endif %}

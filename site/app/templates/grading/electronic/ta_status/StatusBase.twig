@@ -122,7 +122,7 @@
         return  mode;
     }
 </script>
-<body onload="document.getElementById('defaultOpen').click();">
+<body>
 
 {% set double_blind = false %}
 {% set single_blind = false %}
@@ -230,203 +230,37 @@
     {# /Top Button #}
 </div>
 
-<div class = "content">
+<div id="container-rubric" class = "content">
     {% if graded_percentage == -1 %}
         <div class="sub">
             No Grading To Be Done! :)
         </div>
     {% elseif core.getUser().getGroup() < 4 %}
-        <div class = "tab">
-            <div class =tab-bar-wrapper">
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  onclick="openStat(this, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-auto" onclick="openStat(this, 'autograding-score-histogram'), this.blur()">Autograding Histogram</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-comp" onclick="openStat(this, 'component-averages'), this.blur()">Manual Grading Component Averages</a>
-                <a class="nav-bar normal-btn key_to_click" tabindex="0"  id="btn-hist-tot" onclick="openStat(this, 'total-score-histogram'), this.blur()">Overall Histogram</a>
-            </div>
-            {% set bTA = [] %}
-            {% set tTA = [] %}
-            {% set bAuto = [] %}
-
-            {% set VerConf = 0 %}
-            {% set noSub = 0 %}
-            {% set noActive = 0 %}
-            {% set GradeInq = 0 %}
-            {% set IncompGrading = 0 %}
-            {% set cancelledSub = 0 %}
-            {# Iterate through all the Scores #}
-            {% for ov in overall_scores %}
-                {# If Autograded, add the points to the array of autograded scores#}
-                {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
-                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                        {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
-                            {% if ov.getAutoGradedGradeable().getTotalPoints() >=0 or ov.getAutoGradedGradeable().getTotalPoints() <0 %}
-                                {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
-                            {% else %}
-                                {% set cancelledSub = cancelledSub+1 %}
-                            {% endif %}
-                        {% endif %}
-                    {% endif %}
-                {% else %}
-
-                {% endif %}
-
-                {% if not ov.getAutoGradedGradeable().hasSubmission() %}
-                    {# if no submission and not in Null section add to count #}
-                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                        {% set noSub = noSub +1 %}
-                    {% endif %}
-                {% elseif ov.getAutoGradedGradeable().getActiveVersion() == 0 %}
-                    {# if no active version and not in Null section add to count #}
-                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                        {% set noActive = noActive + 1 %}
-                    {% endif %}
-                {% elseif ov.getGradeable().isTaGrading() %}
-                    {% if ov.getOrCreateTaGradedGradeable().anyGrades() %}
-                        {# if grade inquiry and not in Null section add to count #}
-                        {% if ov.hasActiveRegradeRequest() %}
-                            {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                {% set noActive = noActive+1 %}
-                            {% endif %}
-                        {% elseif ov.getTaGradedGradeable().hasVersionConflict() %}
-                            {# if version conflict and not in Null section add to count #}
-                            {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                {% set VerConf = VerConf +1 %}
-                            {% endif %}
-
-                        {% elseif not ov.isTaGradingComplete() %}
-                            {# if assignment incomplete and not in Null section add to count #}
-                            {% set IncompGrading = IncompGrading +1 %}
-                        {% elseif ov.isTaGradingComplete() %}
-                            {# otherwise add the overall grade to array and total score possible to array (possible future use) #}
-                            {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                                {% set bTA = bTA|merge( [ ov.getTaGradedGradeable.getTotalScore()  ]) %}
-                                {% set tTA = tTA|merge( [ ov.getGradeable().getManualGradingPoints() ]) %}
-
-                            {% endif %}
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-            {% if (overall_average == null or overall_average.getCount() == 0) and component_averages|length == 0%}
-                <script>
-                    document.getElementById("btn-hist-tot").className+= " disabled-btn";
-                    document.getElementById("btn-hist-tot").style.visibility = "hidden";
-                </script>
-
-            {% else %}
-                <div id = "total-score-histogram" class = "page-content">
-                {# Setup for Histogram of Total Scores #}
-                    <br>
-                    <input style='width: auto' type='text' id='bucket-size-total' name='bucket-val' value="" aria-label="Enter bucket size" placeholder="Enter bucket size" />
-                    <input name="sub-tot" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket" type="submit" value="Submit Bucket Size for Total" onclick="createNewBuckets(rangeT,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT)"/>
-                <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
-
-                <script>
-
-                    var betterBuckets = new Map();
-                    var buttonLayerHeight = 1.0;
-                    var ct = 0;
-                    var maxT = 0;
-                    var minT = {{ overall_total }} + 50;
-                    var median = 0;
-                    var mode = 0;
-                    var modeCount = 0;
-                    var rangeT = 0;
-
-                    var xValueT = [{{ bTA | join(',') }}];
-                    xValueT.sort((a, b) => a - b);
-                    var yValue = [];
-                    var yValue2 = [];
-                    var xBuckets = [];
-
-                    if (xValueT.length > 0) {
-                        minT = xValueT[0];
-                        maxT = xValueT[xValueT.length-1];
-                        rangeT = maxT - minT;
-                        let pivot = Math.floor((xValueT.length - 1) / 2);
-                        if (xValueT.length % 2 === 0) {
-                            median = (xValueT[pivot] + xValueT[pivot+1]) / 2;
-                        }
-                        else {
-                            median = xValueT[pivot];
-                        }
-                    }
-
-                    mode = fillBucketsForRange(rangeT, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
-
-                    if (maxT==0 && minT==50) {
-                        minT=0;
-                    }
-
-                    var trace1 = {
-                        x: xBuckets,
-                        y: yValue,
-                        mode: 'markers',
-                        name: 'Students with Each Score',
-                        type: 'bar',
-                        text: yValue,
-                        textposition: 'auto',
-                        hoverinfo: 'none',
-                        marker: {
-                            color: 'rgb(48,99,152)',
-                            opacity: 1.0,
-                            line: {
-                                color: 'rbg(170,170,170)',
-                                width: 1.5
-                            }
-                        }
-                    };
-
-                    var data = [trace1];
-
-                    var layout = {
-                        title: 'Students with Each Score',
-                        xaxis: {
-                            title: 'Scores'
-                        },
-                        yaxis:{
-                            title: 'Number of Students'
-                        },
-                        barmode: 'overlay',
-                        font: {
-                            family: '"Source Sans Pro", sans-serif',
-                        }
-                    };
-
-                    Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
-
-                </script>
-                <div id="mySmallDiv">
-                    <script>
-                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
-                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
-                    </script>
-                </div>
-                <br />
-                Version Conflicts: {{ VerConf }}
-                <br />
-                No Submissions: {{ noSub }}
-                <br />
-                No Active Versions: {{ noActive }}
-                <br />
-                Grade Inquiries: {{ GradeInq }}
-                <br />
-                Incomplete Grading: {{ IncompGrading }}
-                <br />
-                Cancelled Submissions: {{ cancelledSub }}
-                <br/>
-                <br/>
-                Double-click on the chart to zoom out
-                <hr>
-            </div>
+        <form id="gradeable-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
+        <div class="tab-bar-wrapper">
+            <a class="nav-bar key_to_click" id="page_0_nav" onclick="onChangeNavTab(0);">Data</a>
+            <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Manual Grading Component Averages</a>
+            <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Autograding Histogram</a>
+            <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Overall Histogram</a>
+        </div>
+        <br/>
+        <div class="modal-body">
+            <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
+            
+            {% if component_averages|length != 0 %}
+                <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusAverages.twig')   }}</div>
             {% endif %}
 
-            {# Tabs Here #}
+            {% if autograded_average != null and autograded_average.getCount() != 0 and bAuto|length != 0 %}
+                <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusAutogradingHistogram.twig')  }}</div>
+            {% endif %}
 
-            
+            {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
+                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/StatusOverallHistogram.twig')  }}</div>
+            {% endif %}
         </div>
+        <br/>
+        </form>
     {% else %}
         {# This needs to be updated after randomization works correctly for Teams #}
         {% if team_assignment %}
@@ -439,39 +273,113 @@
             <b>Current percentage of student grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})</b>
         {% endif %}
     {% endif %}
-    {# Footer here #}  
+    <div style="margin-top: 20px;">
+        {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
+            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+                {%  if team_assignment %}
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Teams
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
+                {% else %}
+                    <details class="btn btn-primary" id="details_button">
+                        <summary float="left">
+                            <a id="zip_link_limited"  
+                                href="{{ download_zip_url }}">
+                                Download Zip of Assigned Students
+                            </a>
+                        </summary>
+
+                        <div>
+                            <form class="dropdown">
+                                <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="results_folder"> Include Results Folder</label><br>
+                                <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', true )">
+                                <label for="active_version"> Only Current Active Version</label><br>
+                            </form>
+                        </div>
+                    </details>
+                {% endif %}
+
+            {% endif %}
+            {% if core.getUser().accessFullGrading() and submitted_total %}
+                <details class="btn btn-default" id="details_button">
+                    <summary float="left">
+                        <a id="zip_link_full"
+                            href="{{ download_zip_url }}?type=all">
+                            Download Zip of All Students
+                        </a>
+                    </summary>
+                   
+                    <div>
+                        <form class="dropdown">
+                            <input type="checkbox" id="results_folder" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="results_folder"> Include Results Folder</label><br>
+                            <input type="checkbox" id="active_version" onclick="editZipDownload( '{{ download_zip_url }}', false )">
+                            <label for="active_version"> Only Current Active Version</label><br>
+                        </form>
+                    </div>
+                </details>
+            {% endif %}
+            {% if core.getUser().accessFullGrading() %}
+                <a class="btn btn-default"
+                   href="{{ bulk_stats_url }}"style="float: right">
+                    Bulk Upload Forensics
+                </a>
+            {% endif %}
+        {% endif %}
+    </div> 
 </div>
 </body>
 {# Tab Buttons #}
 <script>
+    let adminGradeableNavTab = 0;
 
-    function openStat(evt, statName) {
-        // Declare all variables
-        var i, tabcontent, tablinks;
-
-        // Get all elements with class="tabcontent" and hide them
-        tabcontent = document.getElementsByClassName("page-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
+    function onChangeNavTab(tab) {
+        if (tab > 3 || tab < 0) {
+            alert('Invalid Navigation');
+            return;
         }
 
+        // change the url so if the user refreshes the page, they stay on the same tab
+        window.history.replaceState("", "", buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'status']) + `?nav_tab=${tab}`);
+        adminGradeableNavTab = tab;
 
-        // Get all elements with class="btn btn-primary" and remove the class "active"
-        tablinks = document.getElementsByClassName("nav-bar");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active-btn", "");
+        //$('.page-content').hide();
+        
+        for (var i =0 ; i<4 ;i++) {
+            $('#page_' + i + '_nav').removeClass('active-btn');
+            $('#page_' + i + '_content').hide();
         }
-
-        // Show the current tab, and add an "active" class to the button that opened the tab
-        document.getElementById(statName).style.display = "block";
-        evt.className += " active-btn";
-
+        $('#page_' + tab + '_nav').addClass('active-btn');
+        $('#page_' + tab + '_content').show();
     }
-    // Get the element with id="defaultOpen" and click on it
-    let defaultOpen = document.getElementById('defaultOpen');
-    if (defaultOpen) {
-        defaultOpen.click();
-    }
+
+    $(document).ready(function() {
+        // Disable any nav-bar buttons with no content
+        $('.nav-bar').each(function () {
+            if ($('#page_' + this.id.split('_')[1] + '_content').length == 0) {
+                $('#page_' + this.id.split('_')[1] + '_nav').addClass("disabled-btn");
+            }
+            $(this).addClass("normal-btn");
+        });
+
+        // Click on tab 0
+        onChangeNavTab(adminGradeableNavTab);
+    });
 
     function editZipDownload(download_zip_url, limited) {
         var results = document.getElementById("results_folder");

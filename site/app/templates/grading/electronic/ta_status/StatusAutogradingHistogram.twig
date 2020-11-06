@@ -1,13 +1,5 @@
 {# Graph Setup for Autograding #}
 
-{% if autograded_average == null or autograded_average.getCount() == 0 or bAuto|length == 0 %}
-    <script>
-        document.getElementById("btn-hist-auto").className+= " disabled-btn";
-        document.getElementById("btn-hist-auto").style.visibility = "hidden";
-    </script>
-    
-{% else %}
-
 <div id="autograding-score-histogram" class="page-content">
     <br>
     <input style='width: auto' type='text' id='bucket-size-auto' name='bucket-val' value="" placeholder="Enter bucket size" />
@@ -116,4 +108,3 @@
     Double-click on the chart to zoom out
     <hr>
 </div>
-{% endif %}
