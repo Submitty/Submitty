@@ -281,7 +281,7 @@ jobs:
         - sudo apache2ctl -t
         - sudo service apache2 restart
         - sudo mkdir /etc/systemd/system/nginx.service.d
-        - sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" > /etc/systemd/system/nginx.service.d/override.conf
+        - sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
         - sudo systemctl daemon-reload
         - sudo rm -rf /etc/nginx/sites-available/*
         - sudo rm -rf /etc/nginx/sites-enabled/*
