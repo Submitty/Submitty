@@ -48,7 +48,7 @@ class Config:
         )
 
     @classmethod
-    def path_constructor(cls, config_path):
+    def path_constructor(cls, config_path, job_id):
         """
         Construct a config using the path to a folder containing a valid submitty.json,
         database.json, and submitty_users.json.
@@ -65,7 +65,7 @@ class Config:
         log_path = submitty['autograding_log_path']
         error_path = os.path.join(submitty['site_log_path'], 'autograding_stack_traces')
 
-        return cls(submitty, database, submitty_users, log_path, error_path)
+        return cls(submitty, database, submitty_users, log_path, error_path, job_id)
 
     def load_workers_json(self, config_path):
         """

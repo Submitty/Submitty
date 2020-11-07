@@ -60,7 +60,8 @@ class Logger:
             which_untrusted: str = "",
             jobname: str = "",
             timelabel: str = "",
-            elapsed_time: Optional[int] = None
+            elapsed_time: Optional[int] = None,
+            job_id: Optional[str] = None
     ):
         """Log a message to this logger's configured log directory."""
         now = dateutils.get_current_time()
@@ -70,14 +71,16 @@ class Logger:
             elapsed_time = -1
         elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
         time_unit = "" if elapsed_time < 0 else "sec"
-        parts = (easy_to_read_date, f"{self.job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
+        job_id = job_id or self.job_id
+        parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
                 f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
         write_to_log(self.log_path, ' | '.join((str(x) for x in parts)))
 
     def log_stack_trace(
             self, trace: str, *,
             is_batch: bool = False,
-            which_untrusted: str = ''
+            which_untrusted: str = '',
+            job_id: Optional[str] = None
     ):
         """Log a stack trace to this logger's configured stack trace directory."""
         self.accumulated_traces.append(trace)
@@ -87,9 +90,10 @@ class Logger:
         now = dateutils.get_current_time()
         easy_to_read_date = dateutils.write_submitty_date(now, True)
         batch_string = "BATCH" if is_batch else ""
+        job_id = job_id or self.job_id
         header = ' | '.join(
             easy_to_read_date,
-            f"{self.job_id:>6s}",
+            f"{job_id:>6s}",
             f"{batch_string:>5s}",
             f"{which_untrusted:>11s}"
         )
@@ -370,8 +374,19 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     lock_down_folder_permissions(tmp_submission)
 
 
-def archive_autograding_results(config, working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
-                                gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
+def archive_autograding_results(
+        config,
+        working_directory: os.PathLike,
+        job_id: str,
+        which_untrusted: str,
+        is_batch_job: bool,
+        complete_config_obj: dict,
+        gradeable_config_obj: dict,
+        queue_obj: dict,
+        log_path: os.PathLike,
+        stack_trace_log_path: os.PathLike,
+        is_test_environment: bool
+):
     """ After grading is finished, archive the results. """
 
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
