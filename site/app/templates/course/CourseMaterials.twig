@@ -66,7 +66,10 @@
     {% set this_hide_from_students = hide_from_students[path] %}
     {% set this_external_link = external_link[path] %}
 
-    {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
+    {% set greater_than_student = userGroup < 4 %}
+    {% set visible_to_student = this_hide_from_students == 'off' and (this_file_section is null or user_section in this_file_section) %}
+
+    {% if greater_than_student or visible_to_student %}
     <div class="file-container">
         <div class="file-viewer">
 
