@@ -89,10 +89,10 @@
         <div class="dropdown-bar">
             <h2> Old Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow right"></i>
+                <i class="dropdown-arrow down"></i>
             </div>
         </div>
-        <table id="older-table" class="table table-striped" style="width:100%; display: none;">
+        <table id="older-table" class="table table-striped" style="width:100%;">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
@@ -170,10 +170,10 @@
         <div class="dropdown-bar">
             <h2> Future Polls </h2>
             <div class="dropdown-btn">
-                <i class="dropdown-arrow right"></i>
+                <i class="dropdown-arrow down"></i>
             </div>
         </div>
-        <table id="future-table" class="table table-striped" style="width:100%; display: none;">
+        <table id="future-table" class="table table-striped" style="width:100%;">
             <col style="width: 20%">
             <col style="width: 20%">
             <col style="width: 20%">
@@ -182,7 +182,6 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">Toggle</th>
                     <th scope="col">Edit</th>
                     <th scope="col">View Results</th>
                     <th scope="col">Delete</th>
@@ -192,13 +191,6 @@
                 {% for poll in future_polls %}
                     <tr>
                         <td> {{ poll.getName() }} </td>
-                        <td>
-                            <form method="post" action="{{ base_url }}/setOpen">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                <button type="submit" class="btn btn-primary">Open Poll</button>
-                            </form>
-                        </td>
                         <td>
                             <form method="post" action="{{base_url}}/editPoll">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
