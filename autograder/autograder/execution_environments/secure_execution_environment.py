@@ -83,14 +83,13 @@ class SecureExecutionEnvironment():
             if command == 'cp':
                 try:
                     autograding_utils.pre_command_copy_file(
+                        self.config,
                         source_testcase,
                         source_directory,
                         target_directory,
                         destination,
                         self.job_id,
                         self.tmp_logs,
-                        self.log_path,
-                        self.stack_trace_log_path
                     )
                 except Exception:
                     self.log_message(
@@ -247,9 +246,7 @@ class SecureExecutionEnvironment():
             self.job_id,
             test_input_path,
             directory,
-            self.tmp_logs,
-            self.log_path,
-            self.stack_trace_log_path
+            self.tmp_logs
         )
 
         if os.path.exists(self.random_input_directory):

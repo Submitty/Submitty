@@ -156,41 +156,6 @@ def just_write_grade_history(json_file,assignment_deadline,submission_time,secon
 #
 # ==================================================================================
 
-def log_message(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname="", timelabel="", elapsed_time=-1,
-                message=""):
-    """ Given a log directory, create or append a message to a dated log file in that directory. """
-
-    now = dateutils.get_current_time()
-    datefile = datetime.strftime(now, "%Y%m%d")+".txt"
-    autograding_log_file = os.path.join(log_path, datefile)
-    easy_to_read_date = dateutils.write_submitty_date(now, True)
-    batch_string = "BATCH" if is_batch else ""
-    if elapsed_time == "":
-        elapsed_time = -1
-    elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
-    time_unit = "" if elapsed_time < 0 else "sec"
-    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
-             f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
-    write_to_log(autograding_log_file, parts)
-
-
-def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname="", timelabel="", elapsed_time=-1, trace=""):
-    """ Given a log directory, create or append a stack trace to a dated log file in that directory. """
-
-    now = dateutils.get_current_time()
-    datefile = "{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
-    os.makedirs(log_path, exist_ok=True)
-    autograding_log_file = os.path.join(log_path, datefile)
-    easy_to_read_date = dateutils.write_submitty_date(now, True)
-    batch_string = "BATCH" if is_batch else ""
-    if elapsed_time == "":
-        elapsed_time = -1
-    elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
-    time_unit = "" if elapsed_time < 0 else "sec"
-    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
-             f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}\n", trace)
-    write_to_log(autograding_log_file, parts)
-
 
 def log_container_meta(log_path, event="", name="", container="", time=0):
     """ Given a log file, create or append container meta data to a log file. """
@@ -199,7 +164,7 @@ def log_container_meta(log_path, event="", name="", container="", time=0):
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     time_unit = "sec"
     parts = (easy_to_read_date, name, container, event, f"{time:.3f}", time_unit)
-    write_to_log(log_path, parts)
+    write_to_log(log_path, ' | '.join(parts)())
 
 
 def write_to_log(log_path, message):
@@ -305,7 +270,7 @@ def lock_down_folder_permissions(top_dir):
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
 
 
-def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment, log_path, stack_trace_log_path, SUBMITTY_INSTALL_DIR):
+def prepare_directory_for_autograding(config, working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
     """
     Given a working directory, set up that directory for autograding by creating the required subdirectories
     and configuring permissions.
@@ -315,7 +280,9 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     if os.path.exists(working_directory):
         # Make certain we can remove old instances of the working directory.
         if not is_test_environment:
-            untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, user_id_of_runner, working_directory)
+            untrusted_grant_rwx_access(
+                config.submitty['submitty_install_dir'], user_id_of_runner, working_directory
+            )
         add_all_permissions(working_directory)
         shutil.rmtree(working_directory,ignore_errors=True)
 
@@ -366,7 +333,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     # copy output files
     test_input_path = os.path.join(tmp_autograding, 'test_input')
     # Copy test input files into tmp_work_test_input.
-    copy_contents_into(job_id, test_input_path, tmp_work_test_input, tmp_logs, log_path, stack_trace_log_path)
+    copy_contents_into(job_id, test_input_path, tmp_work_test_input, tmp_logs)
 
     # Lock down permissions on the unzipped folders/test input folder to stop untrusted users from gaining access.
     lock_down_folder_permissions(tmp_work_test_input)
@@ -383,8 +350,6 @@ def archive_autograding_results(
         complete_config_obj: dict,
         gradeable_config_obj: dict,
         queue_obj: dict,
-        log_path: os.PathLike,
-        stack_trace_log_path: os.PathLike,
         is_test_environment: bool
 ):
     """ After grading is finished, archive the results. """
@@ -446,8 +411,20 @@ def archive_autograding_results(
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
                 print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
-            log_message(log_path, job_id, is_batch_job, which_untrusted, item_name, message="ERROR: grade.txt does not exist")
-            log_stack_trace(stack_trace_log_path, job_id, is_batch_job, which_untrusted, item_name, trace=traceback.format_exc())
+            config.logger.log_message(
+                "ERROR: grade.txt does not exist",
+                job_id=job_id,
+                is_batch=is_batch_job,
+                which_untrusted=which_untrusted,
+                jobname=item_name
+            )
+            config.logger.log_stack_trace(
+                traceback.format_exc(),
+                job_id=job_id,
+                is_batch=is_batch_job,
+                which_untrusted=which_untrusted,
+                jobname=item_name,
+            )
 
         grade_result = ""
         try:
@@ -460,8 +437,20 @@ def archive_autograding_results(
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
                 print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
-                log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
-                log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+                config.logger.log_message(
+                    "ERROR: grade.txt does not exist",
+                    job_id=job_id,
+                    is_batch=is_batch_job,
+                    which_untrusted=which_untrusted,
+                    jobname=item_name
+                )
+                config.logger.log_stack_trace(
+                    traceback.format_exc(),
+                    job_id=job_id,
+                    is_batch=is_batch_job,
+                    which_untrusted=which_untrusted,
+                    jobname=item_name,
+                )
 
 
         gradeable_deadline_string = gradeable_config_obj["date_due"]
@@ -504,8 +493,20 @@ def archive_autograding_results(
         except:
             with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
                 print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
-                log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
-                log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+                config.logger.log_message(
+                    "ERROR: results.json read/write error",
+                    job_id=job_id,
+                    is_batch=is_batch_job,
+                    which_untrusted=which_untrusted,
+                    jobname=item_name,
+                )
+                config.logger.log_stack_trace(
+                    traceback.format_exc(),
+                    job_id=job_id,
+                    is_batch=is_batch_job,
+                    which_untrusted=which_untrusted,
+                    jobname=item_name,
+                )
 
         # Rescue custom validator files
         custom_validator_output_directory = os.path.join(tmp_results, "custom_validator_output")
@@ -531,7 +532,15 @@ def archive_autograding_results(
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
             f.write("FINISHED GRADING!\n")
 
-        log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
+        config.logger.log_message(
+            grade_result,
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted=which_untrusted,
+            jobname=item_name,
+            timelabel="grade:",
+            elapsed_time=gradingtime
+        )
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
@@ -614,18 +623,25 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 # it will create directories as needed
 # it's ok if the target directory or subdirectories already exist
 # it will overwrite files with the same name if they exist
-def copy_contents_into(job_id,source,target,tmp_logs, log_path, stack_trace_log_path):
+def copy_contents_into(config, job_id, source, target, tmp_logs):
     if not os.path.isdir(target):
-        log_message(log_path, job_id, message="ERROR: Could not copy contents. The target directory does not exist " + target)
-        raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
+        config.logger.log_message(
+            "ERROR: Could not copy contents. The target directory does not exist: " + target,
+            job_id=job_id
+        )
+        raise RuntimeError("ERROR: the target directory does not exist: '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
             if os.path.isdir(os.path.join(source,item)):
                 if os.path.isdir(os.path.join(target,item)):
                     # recurse
-                    copy_contents_into(job_id,os.path.join(source,item),os.path.join(target,item),tmp_logs, log_path, stack_trace_log_path)
+                    copy_contents_into(job_id,os.path.join(source,item),os.path.join(target,item),tmp_logs)
                 elif os.path.isfile(os.path.join(target,item)):
-                    log_message(log_path, job_id,message="ERROR: the target subpath is a file not a directory '" + os.path.join(target,item) + "'")
+                    config.logger.log_message(
+                        "ERROR: the target subpath is a file not a directory "
+                        f"'{os.path.join(target,item)}'",
+                        job_id=job_id,
+                    )
                     raise RuntimeError("ERROR: the target subpath is a file not a directory '", os.path.join(target,item), "'")
                 else:
                     # copy entire subtree
@@ -639,7 +655,7 @@ def copy_contents_into(job_id,source,target,tmp_logs, log_path, stack_trace_log_
                 try:
                     shutil.copy(os.path.join(source,item),target)
                 except:
-                    grade_items_logging.log_stack_trace(stack_trace_log_path, job_id=job_id,trace=traceback.format_exc())
+                    config.logger.log_stack_trace(traceback.format_exc(), job_id=job_id)
                     return
     else:
         print(f'{source} is not a directory')
@@ -703,7 +719,7 @@ def unzip_this_file(zipfilename,path):
 # ==================================================================================
 
 
-def pre_command_copy_file(source_testcase, source_directory, destination_testcase, destination, job_id, tmp_logs, log_path, stack_trace_log_path):
+def pre_command_copy_file(config, source_testcase, source_directory, destination_testcase, destination, job_id, tmp_logs):
     """ Handles the cp pre_command. """
 
     source_testcase = os.path.join(str(os.getcwd()), source_testcase)
@@ -724,7 +740,7 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
     # target.
     if os.path.isdir(source):
         # We must copy from directory to directory
-        copy_contents_into(job_id, source, target, tmp_logs, log_path, stack_trace_log_path)
+        copy_contents_into(config, job_id, source, target, tmp_logs)
 
     # Separate ** and * for simplicity.
     elif not '**' in source:
@@ -740,7 +756,10 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
                 shutil.copy(file, target)
             except Exception as e:
                 traceback.print_exc()
-                log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
+                config.logger.log_message(
+                    f"Pre Command could not perform copy: {file} -> {target}",
+                    job_id=job_id
+                )
     else:
         # Everything after the first **.
         source_base = source[:source.find('**')]
@@ -764,4 +783,7 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
                 shutil.copy(file_source, file_target)
             except Exception as e:
                 traceback.print_exc()
-                log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file_source, file_target))
+                config.logger.log_message(
+                    f"Pre Command could not perform copy: {file_source} -> {file_target}",
+                    job_id=job_id
+                )

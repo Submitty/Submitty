@@ -25,14 +25,12 @@ def grade_from_zip(
 
     # Removes the working directory if it exists, creates subdirectories and unzips files.
     autograding_utils.prepare_directory_for_autograding(
+        config,
         working_directory,
         which_untrusted,
         autograding_zip_file,
         submission_zip_file,
         False,
-        config.log_path,
-        config.error_path,
-        install_dir
     )
 
     # Now that the files are unzipped, we no longer need them.
