@@ -47,10 +47,10 @@
                             </td>
                         {% elseif poll.isEnded() %}
                             <td>
-                                <form method="post" action="{{ base_url }}/setOpen">
+                                <form method="post" action="{{ base_url }}/setClosed">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                     <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <button type="submit" class="btn btn-primary">Reopen Poll</button>
+                                    <button type="submit" class="btn btn-primary">Close Poll</button>
                                 </form>
                             </td>
                         {% endif %}
