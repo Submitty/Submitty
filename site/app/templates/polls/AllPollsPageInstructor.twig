@@ -113,20 +113,26 @@
                         <td> {{ poll.getName() }} </td>
                         {% if poll.isOpen() %}
                             <td>
-                                <form method="post" action="{{ base_url }}/setOpen">
+                                <form method="post" action="{{ base_url }}/setEnded">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                     <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <input type="hidden" name="open" value="FALSE"/>
-                                    <button type="submit" class="btn btn-primary">Close Poll</button>
+                                    <button type="submit" class="btn btn-primary">End Poll</button>
                                 </form>
                             </td>
-                        {% else %}
+                        {% elseif poll.isClosed() %}
                             <td>
                                 <form method="post" action="{{ base_url }}/setOpen">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                     <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                                    <input type="hidden" name="open" value="TRUE"/>
                                     <button type="submit" class="btn btn-primary">Open Poll</button>
+                                </form>
+                            </td>
+                        {% elseif poll.isEnded() %}
+                            <td>
+                                <form method="post" action="{{ base_url }}/setClosed">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                    <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                    <button type="submit" class="btn btn-primary">Close Poll</button>
                                 </form>
                             </td>
                         {% endif %}
