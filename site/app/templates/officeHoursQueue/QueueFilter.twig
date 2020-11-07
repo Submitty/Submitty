@@ -5,8 +5,8 @@
   <span class="option-title">Open new queue</span>
   <form method="post" id="open_new_queue" action="{{base_url}}" style="height:auto;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-    <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required">
-    <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required">
+    <input type="text" id="new_queue_code" name="code" placeholder="New Queue Name" aria-label="New Queue Name" required="required" maxlength="2048">
+    <input type="text" id="new_queue_token" name="token" placeholder="Access Code" aria-label="Access Code" required="required" maxlength="2048">
     <a id="new_queue_rand_token" onclick="genRandCode('new_queue_token')" onkeypress="genRandCode('new_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
       <i class="fas fa-sync"></i>
     </a>
@@ -46,7 +46,7 @@
               <b>Name:</b>{{queue['code']}}<br>
               <b>Access Code:</b>{{queue['token']}}</td>
           <td>
-              <input type="checkbox" id="toggle_queue_{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
+              <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
           </td>
           <td>
             <form method="post" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
@@ -73,6 +73,14 @@
   </div>
 {% endblock %}
 {% block buttons %}
-    <button type="button" class="btn btn-primary" onClick="refreshPage()">Close</button>
+    <button type="button" class="btn btn-primary" onclick="window.location.reload()">Close</button>
+    <script>
+        $(document).keyup(function(e) {
+            if (e.keyCode == 27 && $("#{{ block('popup_id') }}").is(":visible")) {
+
+                window.location.reload();
+            }
+        });
+    </script>
 {% endblock %}
 

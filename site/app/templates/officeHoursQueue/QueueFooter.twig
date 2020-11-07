@@ -235,16 +235,11 @@
   }
 
   function toggleQueue(index, code){
-      console.log($(`#toggle_queue_${index}`)[0].checked)
       $.post( `{{base_url}}/${code}/toggle`, {
           csrf_token: '{{ csrf_token }}',
           queue_code: code,
-          queue_state: $(`#toggle_queue_${index}`)[0].checked ? 0:1
+          queue_state: $(`#toggle-queue-${index}`)[0].checked ? 0:1
       });
-  }
-
-  function refreshPage(){
-      window.location.reload();
   }
 
 </script>
