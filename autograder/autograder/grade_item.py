@@ -66,15 +66,14 @@ def grade_from_zip(
             "generated_output",
             queue_obj["gradeable"]
         )
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            is_batch_job,
-            which_untrusted,
-            item_name,
-            "wait:",
-            waittime,
-            "Generating Output"
+        config.logger.log_message(
+            "Generating Output",
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted=which_untrusted,
+            jobname=item_name,
+            timelabel="wait:",
+            elapsed_time=waittime
         )
 
         with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
@@ -156,22 +155,17 @@ def grade_from_zip(
                     False
                 )
             except Exception:
-                autograding_utils.log_stack_trace(
-                    config.error_path,
-                    job_id,
-                    trace=traceback.format_exc()
-                )
+                config.logger.log_stack_trace(traceback.format_exc(), job_id=job_id)
             subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            is_batch_job,
-            which_untrusted,
-            item_name,
-            "wait:",
-            waittime,
-            "Completed Generation"
+        config.logger.log_message(
+            "Completed Generation",
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted=which_untrusted,
+            jobname=item_name,
+            timelabel="wait:",
+            elapsed_time=waittime,
         )
 
     else:
@@ -188,15 +182,14 @@ def grade_from_zip(
             str(queue_obj["version"])
         )
 
-        autograding_utils.log_message(
-            config.log_path,
-            job_id,
-            is_batch_job,
-            which_untrusted,
-            item_name,
-            "wait:",
-            waittime,
-            ""
+        config.logger.log_message(
+            "",
+            job_id=job_id,
+            is_batch=is_batch_job,
+            which_untrusted=which_untrusted,
+            jobname=item_name,
+            timelabel="wait:",
+            elapsed_time=waittime,
         )
 
         with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
