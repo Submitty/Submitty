@@ -234,7 +234,7 @@ def cleanup_old_jobs(config: submitty_config.Config):
 
 if __name__ == "__main__":
     config_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
-    config = submitty_config.Config.path_constructor(config_dir)
+    config = submitty_config.Config.path_constructor(config_dir, JOB_ID)
 
     cleanup_old_jobs(config)
     print('cleaned up old jobs')
@@ -245,6 +245,5 @@ if __name__ == "__main__":
             'autograding_TODO',
             'autograding_worker.json'
         ),
-        job_id=JOB_ID
     )
     launch_workers(config, my_name, my_stats)

@@ -35,6 +35,7 @@ class Logger:
         self.log_dir = log_dir
         self.stack_trace_dir = stack_trace_dir
         self.accumulated_traces = []
+        self.job_id = job_id
 
     def _log_filename(self) -> str:
         """Get the name of the file that should be logged into.
