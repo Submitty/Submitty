@@ -1,73 +1,90 @@
 <div class="content">
     <h1> Polls </h1>
     <br/> <br/>
-    <h2> Today's Polls </h2>
-    <table class="table table-striped" style="width:100%;">
-            <col style="width: 33%">
-            <col style="width: 33%">
-            <col style="width: 33%">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Your Answer</th>
-                <th scope="col">View Poll</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for poll in todays_polls %}
+
+    <div class="dropdown-wrapper">
+        <div class="dropdown-bar">
+            <h2> Today's Polls </h2>
+            <div class="dropdown-btn">
+                <i class="dropdown-arrow down"></i>
+            </div>
+        </div>
+        <table class="table table-striped" style="width:100%;">
+                <col style="width: 33%">
+                <col style="width: 33%">
+                <col style="width: 33%">
+            <thead>
                 <tr>
-                    <td> {{ poll.getName() }} </td>
-                    <td> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
-                    <td>
-                        <form method="post" action="{{ base_url }}/viewPoll">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                            {% if poll.isOpen() %}
-                                {% if poll.getUserResponse(user_id) is same as(null) %}
-                                    <button type="submit" class="btn btn-success"> Answer
+                    <th scope="col">Name</th>
+                    <th scope="col">Your Answer</th>
+                    <th scope="col">View Poll</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for poll in todays_polls %}
+                    <tr>
+                        <td> {{ poll.getName() }} </td>
+                        <td> {{ poll.getUserResponse(user_id) is same as(null)? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td>
+                            <form method="post" action="{{ base_url }}/viewPoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                {% if poll.isOpen() %}
+                                    {% if poll.getUserResponse(user_id) is same as(null) %}
+                                        <button type="submit" class="btn btn-success"> Answer
+                                    {% else %}
+                                        <button type="submit" class="btn btn-primary"> Edit Answer
+                                    {% endif %}
+                                    </button>
+                                {% elseif poll.isEnded() %}
+                                    <button type="submit" class="btn btn-primary"> View Poll
                                 {% else %}
-                                    <button type="submit" class="btn btn-success"> Edit Answer
+                                    Closed
                                 {% endif %}
-                                </button>
-                            {% elseif poll.isEnded() %}
-                                <button type="submit" class="btn btn-primary"> View Poll
-                            {% else %}
-                                Closed
-                            {% endif %}
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <hr>
-    <h2> Older Polls </h2>
-    <table class="table table-striped" style="width:100%;">
-        <col style="width: 33%">
-        <col style="width: 33%">
-        <col style="width: 33%">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Your Answer</th>
-                <th scope="col">View Poll</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for poll in older_polls %}
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+    </div>
+
+    <div class="dropdown-wrapper">
+        <div class="dropdown-bar">
+            <h2> Older Polls </h2>
+             <div class="dropdown-btn">
+                <i class="dropdown-arrow down"></i>
+            </div>
+        </div>
+        <table class="table table-striped" style="width:100%;">
+            <col style="width: 33%">
+            <col style="width: 33%">
+            <col style="width: 33%">
+            <thead>
                 <tr>
-                    <td> {{ poll.getName() }} </td>
-                    <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
-                    <td>
-                        <form method="post" action="{{ base_url }}/viewPoll">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                            <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
-                            <button type="submit" class="btn btn-primary"> View Poll
-                            </button>
-                        </form>
-                    </td>
+                    <th scope="col">Name</th>
+                    <th scope="col">Your Answer</th>
+                    <th scope="col">View Poll</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for poll in older_polls %}
+                    <tr>
+                        <td> {{ poll.getName() }} </td>
+                        <td> {{ poll.getUserResponse(user_id) is same as(null) ? "No Response" : poll.getResponseString(poll.getUserResponse(user_id)) | markdown}} </td>
+                        <td>
+                            <form method="post" action="{{ base_url }}/viewPoll">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                <input type="hidden" name="poll_id" value="{{ poll.getID() }}"/>
+                                <button type="submit" class="btn btn-primary"> View Poll
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </div>
