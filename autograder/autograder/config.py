@@ -3,6 +3,8 @@ import os
 import json
 from pathlib import Path
 
+from .autograding_utils import Logger
+
 DEFAULT_DATABASE_DRIVER = 'psql'
 
 
@@ -14,7 +16,15 @@ class Config:
     with the matching name accessible at Config.<name> (e.g. Config.database).
     """
 
-    def __init__(self, submitty, database, submitty_users, log_path, error_path):
+    def __init__(
+            self,
+            submitty: dict,
+            database: dict,
+            submitty_users: dict,
+            log_path: os.PathLike,
+            error_path: os.PathLike,
+            job_id: str = "NO JOB"
+    ):
         """
         dictionary objects rather than by reading json files.
         Useful in a test environment
@@ -24,12 +34,18 @@ class Config:
         :param submitty_users: dict containing contents of a valid submitty_users
         :param log_path: str or Path to log output to.
         :param stack_trace_path: str or Path to log stack traces to
+        :param job_id: ID of the Job, for logging purposes.
         """
         self.submitty = submitty
         self.database = database
         self.submitty_users = submitty_users
         self.log_path = log_path
         self.error_path = error_path
+        self.logger = Logger(
+            log_dir=self.log_path,
+            stack_trace_dir=self.error_path,
+            job_id=job_id
+        )
 
     @classmethod
     def path_constructor(cls, config_path):

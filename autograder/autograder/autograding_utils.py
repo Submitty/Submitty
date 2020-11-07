@@ -29,8 +29,8 @@ class Logger:
             self, *,
             log_dir: str,
             stack_trace_dir: str,
-            # This used to be "UNKNOWN", but "NOT SET" better describes the circumstances.
-            job_id: str = "NOT SET",
+            # This used to be "UNKNOWN", but "NO JOB" better describes the circumstances.
+            job_id: str = "NO JOB",
     ):
         self.log_dir = log_dir
         self.stack_trace_dir = stack_trace_dir
