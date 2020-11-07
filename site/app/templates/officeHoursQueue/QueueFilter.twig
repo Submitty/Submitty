@@ -76,7 +76,7 @@
     <button type="button" class="btn btn-primary" onclick="window.location.reload()">Close</button>
     <script>
         $(document).keyup(function(e) {
-            if (e.keyCode == 27 && $("#{{ block('popup_id') }}").is(":visible")) {
+            if (e.key == "Escape" && $("#{{ block('popup_id') }}").is(":visible")) {
 
                 window.location.reload();
             }
