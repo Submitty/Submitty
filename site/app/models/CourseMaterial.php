@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\exceptions\FileNotFoundException;
+use app\exceptions\MalformedDataException;
 use app\libraries\Core;
 
 class CourseMaterial extends AbstractModel {
@@ -35,7 +36,12 @@ class CourseMaterial extends AbstractModel {
         }
         else {
             $current_time = new \DateTime('now');
-            $release_time = \DateTime::createFromFormat('Y-m-d H:i:s', $meta_data->$path_to_file->release_datetime);
+            $release_time = new \DateTime($meta_data->$path_to_file->release_datetime);
+
+            // Ensure release time obtained from file was parsed correctly into a DateTime object
+            if ($release_time === false) {
+                throw new MalformedDataException("An error occurred parsing the file's release time data.");
+            }
 
             // If current time is greater than release time return true, else return false
             return $current_time > $release_time;

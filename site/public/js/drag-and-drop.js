@@ -564,7 +564,7 @@ function displayPreviousSubmissionOptions(callback){
     var current_btn = 4;
     if(form.css('display') !== 'none'){
         document.addEventListener("keydown", e => {
-            if(e.keyCode == 9){
+            if(e.code === "Tab"){
                 //on tab update the focus, cycle through the radio buttons and then
                 //the close/submit buttons and then back to the radio buttons
                 $('input[name=instructor-submit]').css({"outline": "none"});
@@ -589,11 +589,11 @@ function displayPreviousSubmissionOptions(callback){
                 }
                 current_btn = (current_btn == 4) ? 0 : current_btn + 1;
             }
-            else if(e.keyCode === 27){
+            else if(e.code === "Escape"){
                 //close the modal box on escape
                 closer_btn.click();
             }
-            else if(e.keyCode === 13){
+            else if(e.code === "Enter"){
                 //on enter update whatever the user is focussing on
                 //uncheck everything and then recheck the desired button to make sure it actually updates
                 if(current_btn === 1){
@@ -975,6 +975,9 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
             }
             return myXhr;
         },
+        headers : {
+            Accept: "application/json"
+        },
         contentType: false,
         type: 'POST',
         success: function(data) {
@@ -987,6 +990,9 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
                 else {
                     if (data['message'] == "You do not have access to that page.") {
                         window.location.href = return_url;
+                    }
+                    else if(typeof data['code'] !== undefined && data['code'] === 302){
+                        window.location.href = data['data'];
                     }
                     else {
                         alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);

@@ -600,7 +600,8 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members, lock_date) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, 
+    pending_members, multiple_invite_members, max_members, lock_date) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -628,8 +629,11 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     team_history_div_left.empty();
     var team_history_div_right = $("#admin-team-history-right");
     team_history_div_right.empty();
+    var team_history_div_bottom = $('#admin-team-history-bottom');
+    team_history_div_bottom.empty();
     members_div.append('Team Member IDs:<br />');
     var student_full = JSON.parse($('#student_full_id').val());
+    let exists_multiple_invite_member = false;
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val("");
@@ -657,7 +661,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
-            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
+            if (multiple_invite_members[i-members.length]) exists_multiple_invite_member = true;
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color: var(--standard-medium-dark-gray);'+ (multiple_invite_members[i-members.length] ? " background-color:var(--alert-invalid-entry-pink);" : "") + '" \
+                name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
                 <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
@@ -668,7 +674,6 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             });
             $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
-
         if (user_assignment_setting_json != false) {
             var team_history_len=user_assignment_setting_json.team_history.length;
             team_history_title_div.append('Team History: ');
@@ -716,9 +721,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                     team_history_div_right.append('<input class="readonly" type="text" style="'+style_string+'"  readonly="readonly" value="' + curr_json_entry.time + '" /><br />');
                 }
             }
-            $('#admin-team-history-bottom').empty();
             if (past_lock_date) {
-                $('#admin-team-history-bottom').append('*History items highlighted in red were performed after team lock date.');
+                team_history_div_bottom.append('*History items highlighted in red were performed after team lock date.');
             }
         }
     }
@@ -754,6 +758,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
+    if (exists_multiple_invite_member) {
+        members_div.append('<div id="multiple-invites-warning" class="red-message" style="margin-top:3px;width:75%">\
+        *Pending members highlighted in red have invites to multiple teams.');
+    }
 }
 
 function removeTeamMemberInput(i) {
@@ -771,6 +779,8 @@ function approveTeamMemberInput(old, i) {
     $("#approve_member_"+i).remove();
     $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
     $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
+    let user_id = ($('[name="user_id_'+i+'"]', form).val()).substring(9);
+    $('[name="user_id_'+i+'"]', form).attr("value", user_id);
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
@@ -779,6 +789,7 @@ function approveTeamMemberInput(old, i) {
 
 function addTeamMemberInput(old, i) {
     old.remove()
+    $('#multiple-invites-warning').remove();
     var form = $("#admin-team-form");
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
@@ -1011,7 +1022,7 @@ function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
     $(document.body).keyup(function colorEvent(e) {
-        pos = seq.charCodeAt(pos) === e.keyCode ? pos + 1 : 0;
+        pos = seq.charCodeAt(pos) === e.code ? pos + 1 : 0;
         if (pos === seq.length) {
             setInterval(function() { $("*").addClass("rainbow"); }, 100);
             $(document.body).off('keyup', colorEvent);
@@ -1288,7 +1299,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-        else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
+        else if (!t.shiftKey && t.code === "Tab") { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1619,7 +1630,7 @@ $(document).ready(function() {
 });
 
 function keyToClickKeydown(event){
-  if (event.keyCode === 13) {//ENTER key
+  if (event.code === "Enter") {
     event.preventDefault();
     event.stopPropagation();
     $(event.target).click();
@@ -1627,7 +1638,7 @@ function keyToClickKeydown(event){
 }
 
 function keyToClickKeyup(event){
-  if (event.keyCode === 32) { //SPACE key
+  if (event.code === "Space") {
     event.preventDefault();
     event.stopPropagation();
     $(event.target).click();
