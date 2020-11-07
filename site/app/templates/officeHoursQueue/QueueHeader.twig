@@ -20,6 +20,43 @@
         Managing the Office Hours Queue
         <i style="font-style:normal;" class="fa-question-circle"></i>
       </a>
+        <br>
+        <br>
+        Open Queues:
+        {% for queue in viewer.getAllQueues() %}
+            {% if queue['open'] != 0 %}
+
+                <label tabindex="0" class="btn filter-buttons"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }}; color: inherit;">{{queue['code']}}
+                    <input
+                            type="checkbox"
+                            title="Toggle filter for: {{queue['code']|upper}}"
+                            aria-label="Toggle filter for: {{queue['code']|upper}}"
+                            id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
+                            class="page_loading queue_filter"
+                            style="display: none;"
+                            onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
+                </label>
+            {% endif %}
+        {% endfor %}
+        <br>
+        <br>
+        Closed Queues:
+        {% for queue in viewer.getAllQueues() %}
+            {% if queue['open'] == 0 %}
+
+                <label tabindex="0" class="btn"  style="word-wrap: break-word; border-color: {{ viewer.getColorFromCode(queue['code']) }}; background: {{ viewer.getColorFromCode(queue['code']) }}; color: inherit;">{{queue['code']}}
+                    <input
+                            type="checkbox"
+                            title="Toggle filter for: {{queue['code']|upper}}"
+                            aria-label="Toggle filter for: {{queue['code']|upper}}"
+                            id="queue_filter_{{viewer.cleanForId(queue['code'])}}"
+                            class="page_loading queue_filter"
+                            style="display: none;"
+                            onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
+
+                </label>
+            {% endif %}
+        {% endfor %}
     {% endif %}
     <br>
     <br>
