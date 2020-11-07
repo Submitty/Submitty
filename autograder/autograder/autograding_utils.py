@@ -72,6 +72,7 @@ class Logger:
         time_unit = "" if elapsed_time < 0 else "sec"
         parts = (easy_to_read_date, f"{self.job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
                 f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
+        write_to_log(self.log_path, ' | '.join((str(x) for x in parts)))
 
     def log_stack_trace(
             self, trace: str, *,
@@ -86,12 +87,14 @@ class Logger:
         now = dateutils.get_current_time()
         easy_to_read_date = dateutils.write_submitty_date(now, True)
         batch_string = "BATCH" if is_batch else ""
-        # There's several fields that simply aren't used anywhere. Just keeping the empty fields in
-        # for the sake of format continuity, but we might want to consider changing this up so it
-        # makes more sense.
-        parts = (easy_to_read_date, f"{self.job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}",
-                f"{'':75s}", f"{'':6s} {'':>9s} {'':>3s}\n", trace)
-        write_to_log(self.stack_trace_path, parts)
+        header = ' | '.join(
+            easy_to_read_date,
+            f"{self.job_id:>6s}",
+            f"{batch_string:>5s}",
+            f"{which_untrusted:>11s}"
+        )
+        message = f"{header}\n{trace}\n"
+        write_to_log(self.stack_trace_path, message)
 
 
 def just_write_grade_history(json_file,assignment_deadline,submission_time,seconds_late,
@@ -200,7 +203,7 @@ def write_to_log(log_path, message):
     with open(log_path, 'a+') as log_file:
         try:
             fcntl.flock(log_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            print(' | '.join((str(x) for x in message)), file=log_file)
+            print(message, file=log_file)
             fcntl.flock(log_file, fcntl.LOCK_UN)
         except:
             print("Could not gain a lock on the log file.")
