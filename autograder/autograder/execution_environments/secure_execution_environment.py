@@ -68,6 +68,8 @@ class SecureExecutionEnvironment():
         if is_test_environment is False:
             self.SUBMITTY_INSTALL_DIR = config.submitty['submitty_install_dir']
 
+        self.logger = config.logger
+
     def _run_pre_commands(self, target_directory):
         """
         Run pre commands for a given directory. Currently only cp is supported.
@@ -473,8 +475,7 @@ class SecureExecutionEnvironment():
 
     def log_message(self, message):
         """ A useful wrapper for the atuograding_utils.log_message function. """
-        autograding_utils.log_message(
-            self.log_path,
+        self.logger.log_message(
             job_id=self.job_id,
             is_batch=self.is_batch,
             which_untrusted=self.untrusted_user,
@@ -483,8 +484,7 @@ class SecureExecutionEnvironment():
 
     def log_stack_trace(self, trace):
         """ A useful wrapper for the atuograding_utils.log_message function. """
-        autograding_utils.log_stack_trace(
-            self.stack_trace_log_path,
+        self.logger.log_stack_trace(
             job_id=self.job_id,
             is_batch=self.is_batch,
             which_untrusted=self.untrusted_user,
