@@ -247,6 +247,7 @@
         <div class="modal-body">
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
             
+            // Only create div if we can create the stats
             {% if component_averages|length != 0 %}
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusAverages.twig')   }}</div>
             {% endif %}
@@ -344,7 +345,7 @@
     </div> 
 </div>
 </body>
-{# Tab Buttons #}
+
 <script>
     let adminGradeableNavTab = 0;
 
