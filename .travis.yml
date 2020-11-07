@@ -280,6 +280,9 @@ jobs:
         - cat /etc/apache2/sites-available/submitty.conf
         - sudo apache2ctl -t
         - sudo service apache2 restart
+        - sudo mkdir /etc/systemd/system/nginx.service.d
+        - sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
+        - sudo systemctl daemon-reload
         - sudo rm -rf /etc/nginx/sites-available/*
         - sudo rm -rf /etc/nginx/sites-enabled/*
         - sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
