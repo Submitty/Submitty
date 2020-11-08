@@ -33,6 +33,12 @@
         $("#queue_filter_" + current_queues[i]).prop("checked", true);
         filter_choices[current_queues[i]] = true;
       }
+      if (filter_choices[current_queues[i]]) {
+          document.getElementById('queue_filter_' + current_queues[i]).parentElement.classList.remove("fully-transparent");
+      }
+      else {
+          document.getElementById('queue_filter_' + current_queues[i]).parentElement.classList.add("fully-transparent");
+      }
     }
     localStorage.setItem('office_hour_queue_filters', JSON.stringify(filter_choices));
 
@@ -225,6 +231,14 @@
               $('#announcement').replaceWith(newAnnouncement);
           }
           else $(newAnnouncement).insertAfter($('h1').next());
+      });
+  }
+
+  function toggleQueue(index, code){
+      $.post( `{{base_url}}/${code}/toggle`, {
+          csrf_token: '{{ csrf_token }}',
+          queue_code: code,
+          queue_state: $(`#toggle-queue-${index}`)[0].checked ? 0:1
       });
   }
 
