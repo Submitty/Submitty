@@ -14,7 +14,7 @@ use Ds\Set;
 /**
  * Class Output
  *
- * We us this class to act as a wrapper around Twig as well as to hold our output
+ * We use this class to act as a wrapper around Twig as well as to hold our output
  * as we build it before final output either when we output at the end of the calling
  * class or if the application has thrown an uncaught exception
  */
@@ -145,7 +145,7 @@ HTML;
         $this->addInternalCss('bootstrap.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
-
+        $this->addInternalCss('markdown.css');
 
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
