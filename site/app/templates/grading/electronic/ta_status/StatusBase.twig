@@ -247,12 +247,12 @@
         <div class="modal-body">
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
             
-            {% Only create div if we can create the stats %}
+            {# Only create div if we can create the stats #}
             {% if component_averages|length != 0 %}
-                <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusAverages.twig')   }}</div>
+                <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
-            {% if autograded_average != null and autograded_average.getCount() != 0 and bAuto|length != 0 %}
+            {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
                 <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/StatusAutogradingHistogram.twig')  }}</div>
             {% endif %}
 

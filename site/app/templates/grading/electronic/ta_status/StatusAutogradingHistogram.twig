@@ -20,7 +20,7 @@
         var yValue = [];
         var xBuckets = [];
 
-        xValue = [{{ bAuto | join(',') }}]
+        xValue = [{{ histograms['bAuto'] | join(',') }}]
         xValue.sort((a, b) => a - b);
         if (xValue.length > 0) {
             minA = xValue[0];
@@ -92,17 +92,17 @@
     </div>
 
     <br />
-    Version Conflicts: {{ VerConf }}
+    Version Conflicts: {{ histograms['VerConf'] }}
     <br />
-    No Submissions: {{ noSub }}
+    No Submissions: {{ histograms['noSub'] }}
     <br />
-    No Active Versions: {{ noActive }}
+    No Active Versions: {{ histograms['noActive'] }}
     <br />
-    Grade Inquiries: {{ GradeInq }}
+    Grade Inquiries: {{ histograms['GradeInq'] }}
     <br />
-    Incomplete Grading: {{ IncompGrading }}
+    Incomplete Grading: {{ histograms['IncompGrading'] }}
     <br />
-    Cancelled Submissions: {{ cancelledSub }}
+    Cancelled Submissions: {{ histograms['cancelledSub'] }}
     <br/>
     <br/>
     Double-click on the chart to zoom out

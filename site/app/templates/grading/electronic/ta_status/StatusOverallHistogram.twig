@@ -1,77 +1,13 @@
-{% set bTA = [] %}
-{% set tTA = [] %}
-{% set bAuto = [] %}
+{# Setup for Histogram of Total Scores #}
+<div id = "total-score-histogram" class = "page-content">
 
-{% set VerConf = 0 %}
-{% set noSub = 0 %}
-{% set noActive = 0 %}
-{% set GradeInq = 0 %}
-{% set IncompGrading = 0 %}
-{% set cancelledSub = 0 %}
-{# Iterate through all the Scores #}
-{% for ov in overall_scores %}
-    {# If Autograded, add the points to the array of autograded scores#}
-    {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
-        {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-            {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
-                {% if ov.getAutoGradedGradeable().getTotalPoints() >=0 or ov.getAutoGradedGradeable().getTotalPoints() <0 %}
-                    {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
-                {% else %}
-                    {% set cancelledSub = cancelledSub+1 %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% else %}
+    <br>
+    <input style='width: auto' type='text' id='bucket-size-total' name='bucket-val' value="" aria-label="Enter bucket size" placeholder="Enter bucket size" />
+    <input name="sub-tot" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket" type="submit" value="Submit Bucket Size for Total" onclick="createNewBuckets(rangeT,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT)"/>
 
-    {% endif %}
-
-    {% if not ov.getAutoGradedGradeable().hasSubmission() %}
-        {# if no submission and not in Null section add to count #}
-        {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-            {% set noSub = noSub +1 %}
-        {% endif %}
-    {% elseif ov.getAutoGradedGradeable().getActiveVersion() == 0 %}
-        {# if no active version and not in Null section add to count #}
-        {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-            {% set noActive = noActive + 1 %}
-        {% endif %}
-    {% elseif ov.getGradeable().isTaGrading() %}
-        {% if ov.getOrCreateTaGradedGradeable().anyGrades() %}
-            {# if grade inquiry and not in Null section add to count #}
-            {% if ov.hasActiveRegradeRequest() %}
-                {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                    {% set noActive = noActive+1 %}
-                {% endif %}
-            {% elseif ov.getTaGradedGradeable().hasVersionConflict() %}
-                {# if version conflict and not in Null section add to count #}
-                {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                    {% set VerConf = VerConf +1 %}
-                {% endif %}
-
-            {% elseif not ov.isTaGradingComplete() %}
-                {# if assignment incomplete and not in Null section add to count #}
-                {% set IncompGrading = IncompGrading +1 %}
-            {% elseif ov.isTaGradingComplete() %}
-                {# otherwise add the overall grade to array and total score possible to array (possible future use) #}
-                {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
-                    {% set bTA = bTA|merge( [ ov.getTaGradedGradeable.getTotalScore()  ]) %}
-                    {% set tTA = tTA|merge( [ ov.getGradeable().getManualGradingPoints() ]) %}
-
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% endif %}
-{% endfor %}
-
-    <div id = "total-score-histogram" class = "page-content">
-    {# Setup for Histogram of Total Scores #}
-        <br>
-        <input style='width: auto' type='text' id='bucket-size-total' name='bucket-val' value="" aria-label="Enter bucket size" placeholder="Enter bucket size" />
-        <input name="sub-tot" class="btn btn-primary key_to_click" tabindex="0" id="submit_bucket" type="submit" value="Submit Bucket Size for Total" onclick="createNewBuckets(rangeT,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT)"/>
     <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
 
     <script>
-
         var betterBuckets = new Map();
         var buttonLayerHeight = 1.0;
         var ct = 0;
@@ -82,7 +18,7 @@
         var modeCount = 0;
         var rangeT = 0;
 
-        var xValueT = [{{ bTA | join(',') }}];
+        var xValueT = [{{ histograms['bTA'] | join(',') }}];
         xValueT.sort((a, b) => a - b);
         var yValue = [];
         var yValue2 = [];
@@ -142,9 +78,9 @@
             }
         };
 
-        Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
-
+            Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
     </script>
+        
     <div id="mySmallDiv">
         <script>
             document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
@@ -154,17 +90,17 @@
         </script>
     </div>
     <br />
-    Version Conflicts: {{ VerConf }}
+    Version Conflicts: {{ histograms['VerConf'] }}
     <br />
-    No Submissions: {{ noSub }}
+    No Submissions: {{ histograms['noSub'] }}
     <br />
-    No Active Versions: {{ noActive }}
+    No Active Versions: {{ histograms['noActive'] }}
     <br />
-    Grade Inquiries: {{ GradeInq }}
+    Grade Inquiries: {{ histograms['GradeInq'] }}
     <br />
-    Incomplete Grading: {{ IncompGrading }}
+    Incomplete Grading: {{ histograms['IncompGrading'] }}
     <br />
-    Cancelled Submissions: {{ cancelledSub }}
+    Cancelled Submissions: {{ histograms['cancelledSub'] }}
     <br/>
     <br/>
     Double-click on the chart to zoom out
