@@ -25,7 +25,7 @@
     "pdfjs-dist": "2.2.228",
     "plotly.js-dist": "1.56.0",
     "shortcut-buttons-flatpickr": "0.3.1",
-    "twig": "1.15.2"
+    "twig": "1.15.3"
   },
   "devDependencies": {
     "eslint": "^7.11.0"
