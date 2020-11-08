@@ -359,13 +359,12 @@ def grade_from_zip(
 
             # Copy sensitive expected output files into tmp_work.
             autograding_utils.setup_for_validation(
+                config,
                 working_directory,
                 complete_config_obj,
                 is_vcs,
                 testcases,
                 job_id,
-                config.log_path,
-                config.error_path
             )
 
             with open(os.path.join(tmp_logs, "validator_log.txt"), 'w') as logfile:

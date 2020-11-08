@@ -92,12 +92,12 @@ class Logger:
         easy_to_read_date = dateutils.write_submitty_date(now, True)
         batch_string = "BATCH" if is_batch else ""
         job_id = job_id or self.job_id
-        header = ' | '.join(
+        header = ' | '.join((
             easy_to_read_date,
             f"{job_id:>6s}",
             f"{batch_string:>5s}",
             f"{which_untrusted:>11s}"
-        )
+        ))
         message = f"{header}\n{trace}\n"
         write_to_log(self.stack_trace_path, message)
 
@@ -185,7 +185,7 @@ def write_to_log(log_path, message):
 #
 # ==================================================================================
 
-def setup_for_validation(working_directory, complete_config, is_vcs, testcases, job_id, log_path, stack_trace_log_path):
+def setup_for_validation(config, working_directory, complete_config, is_vcs, testcases, job_id):
     """ Prepare a directory for validation by copying in and permissioning the required files. """
 
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
@@ -223,17 +223,17 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
 
     # Copy expected files into the tmp_work_test_output path
     test_output_path = os.path.join(tmp_autograding, 'test_output')
-    copy_contents_into(job_id, test_output_path, tmp_work_test_output, tmp_logs, log_path, stack_trace_log_path)
+    copy_contents_into(config, job_id, test_output_path, tmp_work_test_output, tmp_logs)
     generated_output_path = os.path.join(tmp_autograding, 'generated_output')
-    copy_contents_into(job_id, generated_output_path, tmp_work_generated_output, tmp_logs, log_path, stack_trace_log_path)
+    copy_contents_into(config, job_id, generated_output_path, tmp_work_generated_output, tmp_logs)
 
     # Copy in instructor solution code.
     instructor_solution = os.path.join(tmp_autograding, 'instructor_solution')
-    copy_contents_into(job_id, instructor_solution, tmp_work_instructor_solution, tmp_logs, log_path, stack_trace_log_path)
+    copy_contents_into(config, job_id, instructor_solution, tmp_work_instructor_solution, tmp_logs)
 
     # Copy any instructor custom validation code into the tmp work directory
     custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
-    copy_contents_into(job_id, custom_validation_code_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
+    copy_contents_into(config, job_id, custom_validation_code_path, tmp_work, tmp_logs)
 
 
 
