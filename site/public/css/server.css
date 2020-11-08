@@ -351,10 +351,6 @@ td>a.active-sort {
     color: var(--always-default-white);
 }
 
-.content.gradeable_message p:not(:last-child){
-    padding-bottom: 20px;
-}
-
 .content.overridden_message {
     background-color: var(--important-post);
     color: black;
