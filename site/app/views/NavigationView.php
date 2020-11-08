@@ -812,7 +812,7 @@ class NavigationView extends AbstractView {
                 ]);
             }
         }
-        elseif ($list_section === GradeableList::OPEN) {
+        elseif ($list_section === GradeableList::OPEN && $gradeable->hasDueDate()) {
             $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                 . http_build_query(['action' => 'close_submissions']);
 
