@@ -163,9 +163,8 @@ class CourseMaterialsView extends AbstractView {
             $dirs = explode('/', $material);
             array_pop($dirs);
             $curr_path = "";
-
             if (!isset($priorities[$material])) {
-                $priorities[$material] = 0;
+                $priorities[$material] = 0.0;
             }
             $path = FileUtils::joinPaths($expected_path, $material);
             $priorities[$material] += isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
@@ -192,15 +191,22 @@ class CourseMaterialsView extends AbstractView {
                     return 1;
                 }
             }
-            return $priorities[$a] - $priorities[$b];
+            elseif ($priorities[$a] < $priorities[$b]) {
+                return -1;
+            }
+            else {
+                return 1;
+            }
         };
         uasort($course_materials_array, $sort_priotity);
 
+        $restored = [];
         //Restore the priorities for each file/folder
         foreach ($priorities as $key => &$priority) {
             $path = FileUtils::joinPaths($expected_path, $key);
-            $priorities[$key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
+            $restored["/course_materials/" . $key] = isset($json[$path]['sort_priority']) ? $json[$path]['sort_priority'] : $sort_default;
         }
+        $priorities = $restored;
         
         $add_files($this->core, $submissions, $file_release_dates, $expected_path, $json, $course_materials_array, $folders, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $external_link);
         //Check if user has permissions to access page (not instructor when no course materials available)
