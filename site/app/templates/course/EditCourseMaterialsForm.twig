@@ -46,6 +46,12 @@
             <input id="edit-picker" class="edit-picker" type="text" size="26"/>
         </label>
         <label>
+            <span>
+                <strong>Sorting rank (lower value = higher position):</strong>
+            </span>
+            <input id="edit-sort" value="Check" type="text" size="26"/>
+        </label>
+        <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
             Hide from students (Note: If checked, students will not be able to see course materials, but can still access them via the URL)
         </label>
@@ -55,6 +61,7 @@
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
                 let cmTime = document.getElementById("edit-picker").value;
+                let sort = document.getElementById("edit-sort").value;
                 let requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
                 let hideFromStudents = 'off';
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
@@ -71,7 +78,7 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime, sort);
         };
 
         flatpickr('.edit-picker', {
