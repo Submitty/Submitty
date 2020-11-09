@@ -1,4 +1,4 @@
-name: Linting and Static Analysis
+name: Submitty CI-1
 
 #run php lint, phpstan, eslint, and pylint on any push or a PR to master
 on:
@@ -66,7 +66,10 @@ jobs:
                     ${{ runner.os }}-php-
 
           - name: Install php dependencies
-            run: composer install --prefer-dist --dev
+          #TODO cache image magic later
+            run: |
+              composer install --prefer-dist --dev
+              sudo apt-get install -y php-imagick 
 
           - name: Run php unit tests
             run : php vendor/bin/phpunit --configuration tests/phpunit.xml
