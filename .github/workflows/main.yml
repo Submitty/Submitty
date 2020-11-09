@@ -24,7 +24,7 @@ jobs:
             - run: npm install
             - name: Run eslint
               run: npm run lint
-    php:
+    php-static:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -45,6 +45,81 @@ jobs:
               run: composer install --prefer-dist --dev
 
             - name: Run php linting and static analysis
-              run : | 
+              run : |
                   php vendor/bin/phpcs --standard=tests/ruleset.xml
                   php vendor/bin/phpstan analyze app
+    php-unit:
+      runs-on: ubuntu-latest
+      defaults:
+          run:
+              working-directory: site
+      steps:
+         #TODO figure out how to share steps between composer installs instead of copying and pasting
+          - uses: actions/checkout@v2
+          - name: Cache Composer
+            id: composer-cache
+            uses: actions/cache@v2
+            with:
+                path: vendor
+                key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                restore-keys: |
+                    ${{ runner.os }}-php-
+
+          - name: Install php dependencies
+            run: composer install --prefer-dist --dev
+
+          - name: Run php unit tests
+            run : php vendor/bin/phpunit --configuration tests/phpunit.xml
+
+    python-lint:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Cache Pip
+          uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: |
+                ${{ runner.os }}-pip-
+        - name: Install python libraries
+          run : |
+            python3 -m pip install --upgrade pip
+            python3 -m pip install flake8 flake8-bugbear
+        - name: Run python linting
+          run : flake8
+
+      python-lint:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v2
+          - name: Cache Pip
+            uses: actions/cache@v2
+            with:
+              path: ~/.cache/pip
+              key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+              restore-keys: |
+                  ${{ runner.os }}-pip-
+          - name: Install python libraries
+            run : |
+              python3 -m pip install --upgrade pip
+              python3 -m pip install SQLAlchemy jsonschema
+          - name: Run migrator python unit tests
+            run : |
+              pushd migrations
+              python3 -m unittest discover
+              popd
+          - name: Run autograding python unit tests
+            run : |
+              pushd autograding
+              python3 -m unittest discover
+              popd
+          - name: Run python_submitty_utils python unit tests
+            run : |
+              pushd python_submitty_utils
+              python3 -m unittest discover
+              popd
+
+
+
+
