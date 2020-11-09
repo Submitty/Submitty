@@ -25,7 +25,7 @@ class MiscController extends AbstractController {
     public function getServerTime(): JsonResponse {
         return JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core));
     }
-    
+
     /**
      * Given a path that may or may not contain the anon_id instead of the user_id return the path containing the user_id
      */
@@ -242,8 +242,9 @@ class MiscController extends AbstractController {
 
         $anon_id = $user_id;
         if ($is_anon === "true") {
-            $user_id = $this->core->getQueries()->getUserFromAnon($user_id)[$user_id];
+            $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         }
+
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
@@ -251,7 +252,11 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, $gradeable->isTeamAssignment());
+
+        if ($gradeable->isTeamAssignment()) {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, null, $user_id);
+        }
 
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
@@ -377,7 +382,7 @@ class MiscController extends AbstractController {
                 $this->core->redirect($this->core->buildCourseUrl());
             }
         }
-        
+
         $temp_dir = "/tmp";
         //makes a random zip file name on the server
         $temp_name = uniqid($this->core->getUser()->getId(), true);
@@ -449,7 +454,7 @@ class MiscController extends AbstractController {
                     }
                     else {
                         $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable]);
-                        
+
                         foreach ($graded_gradeables as $gg) { //get each graded gradeable
                             $user = $gg->getSubmitter()->getId();
                             $version = $gg->getAutoGradedGradeable()->getActiveVersion();
@@ -538,7 +543,7 @@ class MiscController extends AbstractController {
                                     // Get real and relative path for current file
                                     $filePath = $file_in_folder->getRealPath();
                                     $relativePath = substr($filePath, strlen($temp_path) + 1);
-                                    
+
                                     // Add current file to archive
                                     $zip_stream->addFileFromPath($file . "/" . $relativePath, $filePath);
                                 }

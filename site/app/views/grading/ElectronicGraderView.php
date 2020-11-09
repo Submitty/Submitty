@@ -465,7 +465,16 @@ HTML;
             if ($gradeable->isTaGrading()) {
                 $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
+            // NOTE/REDESIGN FIXME: We might have autograding that is
+            // penalty only.  The available positive autograding
+            // points might be zero.  Testing for autograding > 1 is
+            // ignoring the submission limit test case... but this is
+            // also imperfect.  We want to render the column if any
+            // student has received the penalty.  But if no one has
+            // received the penalty maybe we omit it?  (expensive?/confusing?)
+            // See also note in ElectronicGradeController.php
+            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+                //if ($gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "15%", "title" => "Autograding",      "function" => "autograding_peer"];
                 if ($gradeable->isTeamAssignment() || $gradeable->getPeerBlind() !== Gradeable::DOUBLE_BLIND_GRADING) {
                     $columns[]     = ["width" => "20%", "title" => "Grading",          "function" => "grading"];
@@ -514,7 +523,9 @@ HTML;
                     $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
                 }
             }
-            if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
+            // NOTE/REDESIGN FIXME: Same note as above.
+            if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+                //if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
                 if ($gradeable->isTaGrading()) {
                     $columns[]     = ["width" => "8%",  "title" => "Graded Questions", "function" => "graded_questions"];
@@ -600,8 +611,20 @@ HTML;
                 $rot_section = ($row->getSubmitter()->getRotatingSection() === null) ? "NULL" : $row->getSubmitter()->getRotatingSection();
                 $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
                 $members = json_encode($row->getSubmitter()->getTeam()->getMembers());
-                $pending_members = json_encode($row->getSubmitter()->getTeam()->getInvitations());
-                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members},{$gradeable->getTeamSizeMax()});";
+                $pending_members = $row->getSubmitter()->getTeam()->getInvitations();
+                $pending_members_json = json_encode($pending_members);
+                $multiple_invites = [];
+                foreach ($pending_members as $pending_member_id) {
+                    $pending_member = $this->core->getQueries()->getUserById($pending_member_id);
+                    $multiple_invites[] = $pending_member->hasMultipleTeamInvites($gradeable->getId());
+                }
+                $multiple_invites_json = json_encode($multiple_invites);
+                $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
+                $info["team_edit_onclick"] = "adminTeamForm(false, '{$row->getSubmitter()->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, {$members}, {$pending_members_json}, {$multiple_invites_json}, {$gradeable->getTeamSizeMax()},'{$lock_date}');";
+                $team_history = ($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable))["team_history"];
+                $last_edit_date = ($team_history == null || count($team_history) == 0) ? null : $team_history[count($team_history) - 1]["time"];
+                $edited_past_lock_date = ($last_edit_date == null) ? false : (DateUtils::calculateDayDiff($last_edit_date, $gradeable->getTeamLockDate()) < 0);
+                $info["edited_past_lock_date"] = $edited_past_lock_date;
             }
 
             //List of graded components
@@ -701,7 +724,8 @@ HTML;
             //Team edit button, specifically the onclick event.
             $reg_section = $teamless_user->getRegistrationSection() ?? 'NULL';
             $rot_section = $teamless_user->getRotatingSection() ?? 'NULL';
-            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [],{$gradeable->getTeamSizeMax()});";
+            $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
+            $info['new_team_onclick'] = "adminTeamForm(true, '{$teamless_user->getId()}', '{$reg_section}', '{$rot_section}', [], [], [], [], {$gradeable->getTeamSizeMax()},'{$lock_date}');";
 
             //-----------------------------------------------------------------
             // Now insert this student into the list of sections
@@ -732,9 +756,10 @@ HTML;
             $user_assignment_setting_json = json_encode($row->getSubmitter()->getTeam()->getAssignmentSettings($gradeable));
             $reg_section = ($team->getRegistrationSection() === null) ? "NULL" : $team->getRegistrationSection();
             $rot_section = ($team->getRotatingSection() === null) ? "NULL" : $team->getRotatingSection();
+            $lock_date = DateUtils::dateTimeToString($gradeable->getTeamLockDate(), false);
 
             $empty_team_info[] = [
-                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
+                "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [], [], {$gradeable->getTeamSizeMax()},'{$lock_date}');"
             ];
         }
 
@@ -1500,7 +1525,7 @@ HTML;
                 "display_version" => $display_version
             ]);
     }
-    
+
     /**
      * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable

@@ -150,10 +150,10 @@ class Gradeable extends AbstractModel {
      * that contains filename, file path, and the file size.
      */
     private $split_pdf_files = null;
-    
+
     /** @prop @var array */
     protected $peer_grading_pairs = [];
-    
+
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
     /** @prop @var string The overall ta instructions for grading (numeric-text/checkpoint only) */
@@ -577,7 +577,7 @@ class Gradeable extends AbstractModel {
             $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         }
     }
-    
+
     public function setPeerFeedback($grader_id, $student_id, $feedback) {
         $bad_input = [];
         if ($this->core->getQueries()->getUserById($grader_id) === null) {
@@ -597,7 +597,7 @@ class Gradeable extends AbstractModel {
             $this->core->getQueries()->insertPeerGradingFeedback($grader_id, $student_id, $this->getId(), $feedback);
         }
     }
-    
+
     public function getPeerFeedback($grader_id, $anon_id) {
         $user_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id);
         $feedback = $this->core->getQueries()->getPeerFeedbackInstance($this->getId(), $grader_id, $user_id);
@@ -1658,7 +1658,7 @@ class Gradeable extends AbstractModel {
         }
         return $total;
     }
-    
+
     public function isPeerGrading() {
         foreach ($this->getComponents() as $component) {
             if ($component->isPeer()) {

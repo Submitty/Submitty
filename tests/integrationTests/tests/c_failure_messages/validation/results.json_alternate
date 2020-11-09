@@ -1,4 +1,6 @@
 {
+    "automatic_grading_total": 28,
+    "nonhidden_automatic_grading_total": 28,
     "testcases": [
         {
             "points_awarded": 5,

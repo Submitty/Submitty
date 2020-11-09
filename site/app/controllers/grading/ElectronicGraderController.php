@@ -292,7 +292,7 @@ class ElectronicGraderController extends AbstractController {
         if ($graded_gradeable === false) {
             return;
         }
- 
+
         // get the requested version
         $version_instance = $this->tryGetVersion($graded_gradeable->getAutoGradedGradeable(), $version);
         if ($version_instance === false) {
@@ -1598,7 +1598,16 @@ class ElectronicGraderController extends AbstractController {
         $gradeable = $graded_gradeable->getGradeable();
 
         // If there is autograding, also send that information TODO: this should be restricted to non-peer
-        if ($gradeable->getAutogradingConfig()->anyPoints()) {
+        if (count($gradeable->getAutogradingConfig()->getTestCases()) > 1) {
+            // NOTE/REDESIGN FIXME: We might have autograding that is
+            // penalty only.  The available positive autograding
+            // points might be zero.  Testing for autograding > 1 is
+            // ignoring the submission limit test case... but this is
+            // also imperfect.  We want to render the column if any
+            // student has received the penalty.  But if no one has
+            // received the penalty maybe we omit it?  (expensive?/confusing?)
+            // See also note in ElectronicGraderView.php
+            // if ($gradeable->getAutogradingConfig()->anyPoints()) {
             $response_data['auto_grading_total'] = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
 
             // Furthermore, if the user has a grade, send that information

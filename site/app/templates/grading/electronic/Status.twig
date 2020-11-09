@@ -111,7 +111,7 @@
                 var dataAuto = tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputAuto.value='';
-                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                document.getElementById("mySmallDiv3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
                 +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
                 '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
                 {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
